@@ -5,25 +5,27 @@
 (function(){
   "use strict";
   var BASE = document.currentScript.src.replace(/player\.js.*$/, "");
+  var ROOT = BASE.replace(/assets\/$/, "");
+  /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
   var SONGS = [
-    {f:"all-i-need.mp3",    n:"ALL I NEED",      hue:210},
-    {f:"bounceee.mp3",      n:"BOUNCEEE",        hue:285},
-    {f:"callin-on-u.mp3",   n:"CALLIN ON U",     hue:200},
-    {f:"freestyle-sept9.mp3",n:"FREESTYLE SEPT9",hue:150},
-    {f:"head.mp3",          n:"HEAD",            hue:120},
-    {f:"lonely22.mp3",      n:"LONELY22",        hue:230},
-    {f:"maintenant.mp3",    n:"MAINTENANT",      hue:40},
-    {f:"mix-100.mp3",       n:"MIX 100",         hue:20},
-    {f:"nananannn.mp3",     n:"NANANANNN",       hue:300},
-    {f:"obsess.mp3",        n:"OBSESS",          hue:320},
-    {f:"real-to-me.mp3",    n:"REAL TO ME",      hue:190},
-    {f:"ride-it.mp3",       n:"RIDE IT",         hue:265},
-    {f:"right-middle.mp3",  n:"RIGHT MIDDLE",    hue:175},
-    {f:"silouhette.mp3",    n:"SILOUHETTE",      hue:250},
-    {f:"strippin-down.mp3", n:"STRIPPIN DOWN",   hue:340},
-    {f:"to-our-pain.mp3",   n:"TO OUR PAIN",     hue:0},
-    {f:"write-a-song.mp3",  n:"WRITE A SONG",    hue:45},
-    {f:"yo-body.mp3",       n:"YO BODY",         hue:75}
+    {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210},
+    {f:"bounceee.mp3",      r:"bounceee3.mp3",      n:"BOUNCEEE",        hue:285},
+    {f:"callin-on-u.mp3",   r:"callin on u .mp3",   n:"CALLIN ON U",     hue:200},
+    {f:"freestyle-sept9.mp3",r:"freestylesept9.mp3",n:"FREESTYLE SEPT9", hue:150},
+    {f:"head.mp3",          r:"head .mp3",          n:"HEAD",            hue:120},
+    {f:"lonely22.mp3",      r:"lonely22.mp3",       n:"LONELY22",        hue:230},
+    {f:"maintenant.mp3",    r:"maintenant.mp3",     n:"MAINTENANT",      hue:40},
+    {f:"mix-100.mp3",       r:"mix 100.mp3",        n:"MIX 100",         hue:20},
+    {f:"nananannn.mp3",     r:"nananannn.mp3",      n:"NANANANNN",       hue:300},
+    {f:"obsess.mp3",        r:"obsess.mp3",         n:"OBSESS",          hue:320},
+    {f:"real-to-me.mp3",    r:"real to me .mp3",    n:"REAL TO ME",      hue:190},
+    {f:"ride-it.mp3",       r:"riddeit2.mp3",       n:"RIDE IT",         hue:265},
+    {f:"right-middle.mp3",  r:"right middle.mp3",   n:"RIGHT MIDDLE",    hue:175},
+    {f:"silouhette.mp3",    r:"silouhette.mp3",     n:"SILOUHETTE",      hue:250},
+    {f:"strippin-down.mp3", r:"strippin down.mp3",  n:"STRIPPIN DOWN",   hue:340},
+    {f:"to-our-pain.mp3",   r:"to our pain .mp3",   n:"TO OUR PAIN",     hue:0},
+    {f:"write-a-song.mp3",  r:"write a song v1.mp3",n:"WRITE A SONG",    hue:45},
+    {f:"yo-body.mp3",       r:"yo body .mp3",       n:"YO BODY",         hue:75}
   ];
 
   /* ---------- styles ---------- */
@@ -121,13 +123,29 @@
 
   function load(i, time){
     cur = ((i % SONGS.length) + SONGS.length) % SONGS.length;
-    audio.src = BASE + "audio/songs/" + SONGS[cur].f;
+    var s = SONGS[cur];
+    // try the tidy folder first; if missing, fall back to the file at site root
+    var cands = [BASE + "audio/songs/" + s.f, ROOT + encodeURI(s.r)];
+    var ci = 0;
+    audio.onerror = function(){
+      ci++;
+      if(ci < cands.length){
+        var wasPlaying = wantAuto;
+        audio.src = cands[ci];
+        if(time) audio.currentTime = time;
+        if(wasPlaying) audio.play().catch(function(){});
+      }
+    };
+    var wantAuto = false;
+    load._arm = function(){ wantAuto = true; };
+    audio.src = cands[0];
     if(time) { audio.currentTime = time; }
-    $("rp-title").textContent = SONGS[cur].n;
+    $("rp-title").textContent = s.n;
     markRows();
   }
   function play(i, time){
     if(i !== cur) load(i, time);
+    if(load._arm) load._arm();
     initGraph();
     if(actx && actx.state === "suspended") actx.resume();
     // pause any other audio on the page (music engine etc.)
