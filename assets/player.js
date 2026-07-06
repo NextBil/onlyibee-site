@@ -92,6 +92,7 @@
     +'    <button id="rp-prev">◀◀</button>'
     +'    <button id="rp-play" class="main">►</button>'
     +'    <button id="rp-next">▶▶</button>'
+    +'    <button id="rp-lyr" title="lyrics engine">✎</button>'
     +'  </div>'
     +'</div>'
     +'<div id="rp-list"></div>';
@@ -217,6 +218,7 @@
   };
   $("rp-prev").onclick = function(){ if(cur>=0) play(cur-1); else play(SONGS.length-1); };
   $("rp-next").onclick = function(){ play(cur+1); };
+  $("rp-lyr").onclick = function(){ location.href = ROOT + "lyrics/"; };
   audio.addEventListener("ended", function(){ play(cur+1); });
   audio.addEventListener("loadedmetadata", function(){ $("rp-tot").textContent = fmt(audio.duration); });
   audio.addEventListener("timeupdate", function(){
@@ -329,7 +331,16 @@
       $("rp-title").textContent = SONGS[i].n;
       markRows(); save();
     },
-    setPending: function(t){ if(needLoad){ pendingTime = t || 0; } }
+    setPending: function(t){ if(needLoad){ pendingTime = t || 0; } },
+    current: function(){ return cur; },
+    count: SONGS.length,
+    song: function(i){ return SONGS[i == null ? cur : i]; },
+    control: {
+      play: function(i){ play(i == null ? (cur < 0 ? 0 : cur) : i); },
+      pause: function(){ pause(); },
+      next: function(){ play(cur < 0 ? 0 : cur + 1); },
+      prev: function(){ play(cur < 0 ? SONGS.length - 1 : cur - 1); }
+    }
   };
 
   /* ---------- restore across pages ---------- */
