@@ -229,6 +229,16 @@
   }
   @keyframes pbflow{to{transform:translateX(100%)}}
   .pb-times{display:flex;justify-content:space-between;color:var(--dim);font-size:15px;margin-top:-3px}
+  #pbmini{
+    position:absolute;right:12px;bottom:12px;z-index:9;display:none;
+    width:46px;height:46px;border:2px solid var(--acid);background:rgba(0,0,0,.85);
+    color:var(--acid);font-size:24px;cursor:pointer;
+    align-items:center;justify-content:center;
+    box-shadow:0 0 14px rgba(182,255,0,.35);
+    animation:minipulse 1.2s ease-in-out infinite;
+  }
+  #pbmini.show{display:flex}
+  @keyframes minipulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 
   /* ---------- Cartridges (projects) ---------- */
   .projlogo{width:min(300px,70%);filter:invert(1);display:block;margin:6px 0 20px}
@@ -367,11 +377,13 @@
             <div class="pb-ctrl">
               <button id="pbplay" class="main">❚❚</button>
               <button id="pbstop">■</button>
+              <button id="pblyr" title="lyrics engine">✎</button>
             </div>
           </div>
           <div id="pbseek"><div id="pbfill"></div></div>
           <div class="pb-times"><span id="pbcur">0:00</span><span id="pbtot">--:--</span></div>
         </div>
+        <div id="pbmini" title="now playing — tap to open">♪</div>
 
         <audio id="audio" preload="metadata"></audio>
       </div>
@@ -1066,6 +1078,25 @@
       if(pblist.classList.contains("open")){pblist.classList.remove("open");return;}
       if(buildPbList()){updEngback();pblist.classList.add("open");blip(300,.04);}
     });
+    $("#pblyr").addEventListener("click",function(){location.href="lyrics/";});
+
+    /* click outside the player → hide it (music keeps playing), ♪ chip reopens */
+    var pbmini=$("#pbmini"),skipTap=false;
+    root.addEventListener("pointerdown",function(e){
+      if(pblist.classList.contains("open")&&!pblist.contains(e.target)&&!pbar.contains(e.target)){
+        pblist.classList.remove("open");skipTap=true;return;
+      }
+      if(pbar.classList.contains("show")&&!pbar.contains(e.target)&&!engBack.contains(e.target)&&e.target!==pbmini){
+        pbar.classList.remove("show");pbmini.classList.add("show");
+        updEngback();skipTap=true;
+      }
+    },true);
+    pbmini.addEventListener("click",function(){
+      pbmini.classList.remove("show");
+      pbar.classList.add("show");
+      setTimeout(updEngback,0);
+      blip(320,.04);
+    });
     function fmt(s){if(!isFinite(s))return"--:--";var m=Math.floor(s/60),ss=Math.floor(s%60);return m+":"+(ss<10?"0":"")+ss;}
     function playTrack(pl){
       initGraph();
@@ -1092,6 +1123,7 @@
       audio.play().then(function(){pbplay.textContent="❚❚";}).catch(function(){});
       SAV.plays[pl.t.id]=playsOf(pl.t)+1;save();
       pbar.classList.add("show");
+      $("#pbmini").classList.remove("show");
       setTimeout(updEngback,0);
       pbtitle.textContent=pl.t.name;
       var gg=galaxyOf(pl.t.g);
@@ -1115,6 +1147,7 @@
       playing=null;
       pbar.classList.remove("show");
       pblist.classList.remove("open");
+      $("#pbmini").classList.remove("show");
       updEngback();
       $("#nowplaying").textContent="IDLE — NO SIGNAL";
     }
@@ -1183,6 +1216,8 @@
       if(dragP){dragP.x=p.x;dragP.y=p.y;}
     });
     function release(e){
+      if(skipTap){skipTap=false;down=null;if(dragP){dragP.dragging=false;dragP=null;}
+        try{canvas.releasePointerCapture(e.pointerId);}catch(err){}return;}
       if(!down)return;
       var p=xy(e);
       var tap=down.moved<8;
@@ -1288,6 +1323,6 @@
   });
 })();
 </script>
-<script src="assets/player.js?v=5"></script>
+<script src="assets/player.js?v=6"></script>
 </body>
 </html>
