@@ -31,6 +31,12 @@
   /* ---------- styles ---------- */
   var css = ""
   +"#nf{position:fixed;inset:0;pointer-events:none;z-index:8990;border:2px solid transparent;transition:border-color .3s}"
+  +".nfc{position:fixed;pointer-events:none;z-index:8991;opacity:var(--ga,0);"
+  +"width:calc(110px + var(--beat,0)*260px);height:calc(110px + var(--beat,0)*260px)}"
+  +".nfc.c1{top:0;left:0;background:radial-gradient(circle at 0 0,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
+  +".nfc.c2{top:0;right:0;background:radial-gradient(circle at 100% 0,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
+  +".nfc.c3{bottom:0;left:0;background:radial-gradient(circle at 0 100%,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
+  +".nfc.c4{bottom:0;right:0;background:radial-gradient(circle at 100% 100%,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
   +"#radiochip{position:fixed;right:14px;bottom:60px;z-index:8995;font-family:'Press Start 2P',monospace;"
   +"font-size:9px;background:#000;color:#b6ff00;border:1px solid #2a2a2a;padding:10px 12px;cursor:pointer;user-select:none}"
   +"#radiochip:hover{border-color:#b6ff00}"
@@ -69,6 +75,9 @@
 
   /* ---------- DOM ---------- */
   var nf = document.createElement("div"); nf.id = "nf"; document.body.appendChild(nf);
+  ["c1","c2","c3","c4"].forEach(function(c){
+    var d = document.createElement("div"); d.className = "nfc "+c; document.body.appendChild(d);
+  });
   var chip = document.createElement("div"); chip.id = "radiochip"; chip.className = "idle";
   chip.innerHTML = '<span class="eq"><i></i><i></i><i></i></span>RADIO';
   document.body.appendChild(chip);
@@ -124,8 +133,8 @@
   function load(i, time){
     cur = ((i % SONGS.length) + SONGS.length) % SONGS.length;
     var s = SONGS[cur];
-    // try the tidy folder first; if missing, fall back to the file at site root
-    var cands = [BASE + "audio/songs/" + s.f, ROOT + encodeURI(s.r)];
+    // try: tidy folder → tidy name at site root → original name at site root
+    var cands = [BASE + "audio/songs/" + s.f, ROOT + s.f, ROOT + encodeURI(s.r)];
     var ci = 0;
     audio.onerror = function(){
       ci++;
@@ -243,16 +252,20 @@
     }
     var hue = cur >= 0 ? SONGS[cur].hue : 75;
     var a = Math.min(1, 0.08 + beat*0.85 + level*0.25);
+    var root = document.documentElement.style;
     if(playing || beat > 0.02){
       nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.9).toFixed(3)+")";
       nf.style.boxShadow =
-        "inset 0 0 "+(14+beat*46)+"px hsla("+hue+",95%,55%,"+(a*0.55).toFixed(3)+"),"
-        +"inset 0 0 4px hsla("+hue+",95%,70%,"+(a*0.8).toFixed(3)+")";
-      document.documentElement.style.setProperty("--beat", beat.toFixed(3));
-      document.documentElement.style.setProperty("--songhue", hue);
+        "inset 0 0 "+(16+beat*70)+"px hsla("+hue+",95%,55%,"+(a*0.7).toFixed(3)+"),"
+        +"inset 0 0 5px hsla("+hue+",95%,70%,"+(a*0.9).toFixed(3)+")";
+      root.setProperty("--beat", beat.toFixed(3));
+      root.setProperty("--songhue", hue);
+      root.setProperty("--ga", Math.min(1, 0.12 + beat*1.1).toFixed(3));
     } else {
       nf.style.borderColor = "transparent";
       nf.style.boxShadow = "none";
+      root.setProperty("--ga", "0");
+      root.setProperty("--beat", "0");
     }
   }
   loop();
