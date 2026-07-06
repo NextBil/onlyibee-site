@@ -139,16 +139,18 @@
     audio.onerror = function(){
       ci++;
       if(ci < cands.length){
-        var wasPlaying = wantAuto;
         audio.src = cands[ci];
-        if(time) audio.currentTime = time;
-        if(wasPlaying) audio.play().catch(function(){});
+        try{ if(time) audio.currentTime = time; }catch(e){}
+        if(wantAuto) audio.play().then(function(){
+          $("rp-play").textContent = "❚❚";
+          chip.classList.remove("idle");
+        }).catch(function(){});
       }
     };
     var wantAuto = false;
     load._arm = function(){ wantAuto = true; };
     audio.src = cands[0];
-    if(time) { audio.currentTime = time; }
+    try{ if(time) { audio.currentTime = time; } }catch(e){}
     $("rp-title").textContent = s.n;
     markRows();
   }
@@ -166,11 +168,44 @@
       chip.classList.remove("idle");
       var np = document.getElementById("nowplaying");
       if(np) np.textContent = "RADIO ▶ " + SONGS[cur].n + " — ONLY IBEE";
+      setSession();
       save();
     }).catch(function(){ $("rp-play").textContent = "►"; });
   }
+
+  /* ---------- background playback: OS media session ---------- */
+  function setSession(){
+    if(!("mediaSession" in navigator) || cur < 0) return;
+    try{
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: SONGS[cur].n,
+        artist: "ONLY IBEE",
+        album: "RARE SOUL SESSIONS",
+        artwork: [{src: ROOT + "assets/img/follow-me.jpg", sizes: "512x512", type: "image/jpeg"}]
+      });
+      navigator.mediaSession.setActionHandler("play", function(){ play(cur); });
+      navigator.mediaSession.setActionHandler("pause", function(){ pause(); });
+      navigator.mediaSession.setActionHandler("previoustrack", function(){ play(cur-1); });
+      navigator.mediaSession.setActionHandler("nexttrack", function(){ play(cur+1); });
+      navigator.mediaSession.setActionHandler("seekto", function(d){
+        if(d.seekTime != null && audio.duration){ try{ audio.currentTime = d.seekTime; }catch(e){} }
+      });
+      navigator.mediaSession.playbackState = "playing";
+    }catch(e){}
+  }
+  /* keep the audio graph alive when the tab comes back / screen unlocks */
+  function wake(){
+    if(actx && actx.state === "suspended" && !audio.paused){
+      actx.resume().catch(function(){});
+    }
+  }
+  document.addEventListener("visibilitychange", wake);
+  window.addEventListener("focus", wake);
+  window.addEventListener("pageshow", wake);
   function pause(){
-    audio.pause(); $("rp-play").textContent = "►"; chip.classList.add("idle"); save();
+    audio.pause(); $("rp-play").textContent = "►"; chip.classList.add("idle");
+    try{ if("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused"; }catch(e){}
+    save();
   }
 
   $("rp-play").onclick = function(){
@@ -218,6 +253,12 @@
   function togglePanel(){ panel.classList.toggle("open"); }
   chip.onclick = togglePanel;
   $("rp-close").onclick = function(){ panel.classList.remove("open"); };
+  /* click anywhere outside the box closes it — music keeps playing */
+  document.addEventListener("pointerdown", function(e){
+    if(!panel.classList.contains("open")) return;
+    if(panel.contains(e.target) || chip.contains(e.target)) return;
+    panel.classList.remove("open");
+  });
 
   /* ---------- analyser → neon frame ---------- */
   var actx = null, analyser = null, freq = null;
