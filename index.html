@@ -87,7 +87,9 @@
   }
   .scrtitle{
     font-family:var(--px);font-size:clamp(14px,3vw,22px);margin-bottom:6px;color:var(--ink);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   }
+  .scrtitle .mico{width:44px;height:44px}
   .scrsub{color:var(--dim);margin-bottom:26px;font-size:20px}
   .acid{color:var(--acid)} .red{color:var(--red)}
 
@@ -103,6 +105,28 @@
   #menu li.sel .cur{visibility:visible;animation:blink 1s steps(1) infinite}
   #menu li .tag{margin-left:auto;font-size:9px;color:var(--dim)}
   #menu li.sel .tag{color:var(--red)}
+  @keyframes mpulse{0%,100%{color:var(--dim)}50%{color:var(--acid);text-shadow:0 0 14px rgba(182,255,0,.8)}}
+  #menu li.playingnow{animation:mpulse 1s ease-in-out infinite}
+  #menu li.playingnow .tag{color:var(--acid)}
+  .mico{width:38px;height:38px;perspective:300px;flex:none}
+  .mico .sp{
+    display:block;width:100%;height:100%;transform-style:preserve-3d;
+    animation:mspin 5.5s linear infinite;
+  }
+  #menu li:nth-child(2) .sp,#menu li:nth-child(2) .o3{animation-duration:6.5s}
+  #menu li:nth-child(3) .sp{animation-duration:4.8s}
+  #menu li:nth-child(4) .sp{animation-duration:7.2s}
+  #menu li:nth-child(5) .sp,#menu li:nth-child(5) .o3{animation-duration:5s}
+  #menu li:nth-child(6) .sp,#menu li:nth-child(6) .o3{animation-duration:6s}
+  @keyframes mspin{from{transform:rotateY(0deg) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
+  .mico .o3{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;animation:mspin 5.5s linear infinite}
+  .mico .o3 img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;backface-visibility:visible}
+  #menu li.sel .mico .o3 img{filter:drop-shadow(0 0 8px rgba(182,255,0,.6))}
+  .mico img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))}
+  .mico img.inv{filter:invert(1) drop-shadow(0 0 8px rgba(182,255,0,.3))}
+  .mico img.disc{border-radius:50%;border:2px solid #2a2a2a}
+  #menu li.sel .mico img{filter:drop-shadow(0 0 10px rgba(182,255,0,.55))}
+  #menu li.sel .mico img.inv{filter:invert(1) drop-shadow(0 0 10px rgba(182,255,0,.55))}
   .hint{margin-top:34px;color:var(--dim);font-size:17px}
   .hint kbd{
     font-family:var(--px);font-size:9px;border:1px solid var(--border);
@@ -304,12 +328,12 @@
       <div class="scrtitle">MAIN MENU</div>
       <div class="scrsub">select a cartridge_</div>
       <ul id="menulist">
-        <li data-go="music"><span class="cur">▶</span>MUSIC ENGINE<span class="tag">UNIVERSE.SYS</span></li>
-        <li data-go="utopie"><span class="cur">▶</span>UTOPIE™<span class="tag">PROJECT 01</span></li>
-        <li data-go="lazone"><span class="cur">▶</span>LA ZONE<span class="tag">PROJECT 02</span></li>
-        <li data-go="ics"><span class="cur">▶</span>ICS<span class="tag">PROJECT 03</span></li>
-        <li data-go="shop"><span class="cur">▶</span>SHOP<span class="tag">LIVE</span></li>
-        <li data-go="about"><span class="cur">▶</span>ABOUT<span class="tag">README</span></li>
+        <li data-go="music"><span class="cur">▶</span><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.4' fill='%23141414'/%3E%3Ccircle cx='8' cy='8' r='6.1' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='4.7' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='3.4' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='2.5' fill='%23b6ff00'/%3E%3Ccircle cx='8' cy='8' r='.8' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.4' fill='%23141414'/%3E%3Ccircle cx='8' cy='8' r='6.1' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='4.7' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='3.4' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='2.5' fill='%23b6ff00'/%3E%3Ccircle cx='8' cy='8' r='.8' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.4' fill='%23141414'/%3E%3Ccircle cx='8' cy='8' r='6.1' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='4.7' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='3.4' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='2.5' fill='%23b6ff00'/%3E%3Ccircle cx='8' cy='8' r='.8' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.4' fill='%23141414'/%3E%3Ccircle cx='8' cy='8' r='6.1' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='4.7' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='3.4' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='2.5' fill='%23b6ff00'/%3E%3Ccircle cx='8' cy='8' r='.8' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.4' fill='%23141414'/%3E%3Ccircle cx='8' cy='8' r='6.1' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='4.7' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='3.4' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='2.5' fill='%23b6ff00'/%3E%3Ccircle cx='8' cy='8' r='.8' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.4' fill='%23141414'/%3E%3Ccircle cx='8' cy='8' r='6.1' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='4.7' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='3.4' fill='none' stroke='%232c2c2c' stroke-width='.6'/%3E%3Ccircle cx='8' cy='8' r='2.5' fill='%23b6ff00'/%3E%3Ccircle cx='8' cy='8' r='.8' fill='%23070707'/%3E%3C/svg%3E" alt="vinyl" style="transform:translateZ(3.2px)"></span></span>MUSIC ENGINE<span class="tag">UNIVERSE.SYS</span></li>
+        <li data-go="utopie"><span class="cur">▶</span><span class="mico"><span class="sp"><img class="inv" src="assets/img/utopie-logo.png" alt=""></span></span>UTOPIE™<span class="tag">PROJECT 01</span></li>
+        <li data-go="lazone"><span class="cur">▶</span><span class="mico"><span class="sp"><img class="inv" src="assets/img/lazone-logo.png" alt=""></span></span>LA ZONE<span class="tag">PROJECT 02</span></li>
+        <li data-go="ics"><span class="cur">▶</span><span class="mico"><span class="sp"><img src="assets/chess/pon.png" alt=""></span></span>ICS<span class="tag">PROJECT 03</span></li>
+        <li data-go="shop"><span class="cur">▶</span><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="tee" style="transform:translateZ(3.2px)"></span></span>SHOP<span class="tag">LIVE</span></li>
+        <li data-go="about"><span class="cur">▶</span><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="cartridge" style="transform:translateZ(3.2px)"></span></span>ABOUT<span class="tag">README</span></li>
       </ul>
       <div class="hint"><kbd>↑</kbd><kbd>↓</kbd> navigate &nbsp;<kbd>ENTER</kbd> select &nbsp;<kbd>ESC</kbd> back — or just tap.<br>
       <span style="opacity:.55">some things on this console are hidden_</span></div>
@@ -356,7 +380,7 @@
     <!-- UTOPIE -->
     <section class="screen" id="utopie">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle">UTOPIE<span class="red">™</span></div>
+      <div class="scrtitle"><span class="mico"><span class="sp"><img class="inv" src="assets/img/utopie-logo.png" alt=""></span></span>UTOPIE<span class="red">™</span></div>
       <div class="scrsub">project 01 // clothing</div>
       <img class="projlogo" src="assets/img/utopie-logo.png" alt="UTOPIE logo">
       <div class="prose">
@@ -370,7 +394,7 @@
     <!-- LA ZONE -->
     <section class="screen" id="lazone">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle">LA ZONE</div>
+      <div class="scrtitle"><span class="mico"><span class="sp"><img class="inv" src="assets/img/lazone-logo.png" alt=""></span></span>LA ZONE</div>
       <div class="scrsub">project 02</div>
       <img class="projlogo" src="assets/img/lazone-logo.png" alt="LA ZONE logo">
       <div class="prose">
@@ -384,7 +408,7 @@
     <!-- ICS -->
     <section class="screen" id="ics">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle">ICS<span class="red">.MONSTER</span></div>
+      <div class="scrtitle"><span class="mico"><span class="sp"><img src="assets/chess/pon.png" alt=""></span></span>ICS<span class="red">.MONSTER</span></div>
       <div class="scrsub">project 03 // characters</div>
       <div class="prose">
         <p>Scan the monster on your clothes and join the party. Every ICS piece carries a character — Mimi, Swordy, Goli, NanNan, Abla and the rest of the crew.</p>
@@ -399,7 +423,7 @@
     <!-- SHOP -->
     <section class="screen" id="shop">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle">INVENTORY<span class="acid">.EXE</span></div>
+      <div class="scrtitle"><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="tee" style="transform:translateZ(3.2px)"></span></span>INVENTORY<span class="acid">.EXE</span></div>
       <div class="scrsub">from paris to wherever you are — shipping's on us_ each item is unique, made only once</div>
       <div class="rarity-legend">
         <span class="rl r-c">■ COMMON</span><span class="rl r-sr">■ SUPER RARE</span><span class="rl r-sdr">■ SUPER DUPER RARE</span><span class="rl r-leg">■ LEGENDARY</span>
@@ -411,7 +435,7 @@
     <!-- ABOUT -->
     <section class="screen" id="about">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle">ABOUT<span class="acid">.TXT</span></div>
+      <div class="scrtitle"><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="cartridge" style="transform:translateZ(3.2px)"></span></span>ABOUT<span class="acid">.TXT</span></div>
       <div class="scrsub">readme_</div>
       <div class="prose">
         <p>ONLY IBEE — a creative dude. Born in Ivory Coast, grew up in Paris. Still mind-blown by just being alive and conscious — seriously, whaaat?</p>
@@ -621,7 +645,8 @@
     var MAX_PLAYS=10;
 
     /* ---------- state ---------- */
-    var view="galaxy",curG=null,planets=[],playing=null,gridMode=false;
+    var view="galaxy",curG=null,planets=[],playing=null,gridMode=false,ghost=null,lastGhostId=null;
+    function slugOf(t){return t.file.split("/").pop();}
     var stars=null,galaxyGeo=null;
     var audioLevel=0,audioBeat=0,emaLow=0;
     var analyser=null,actx=null,freq=null;
@@ -651,11 +676,12 @@
     function drawSpace(w,h){
       ensureStars(w,h);
       var now=performance.now();
-      var energy=playing?Math.min(1,0.2+audioBeat*0.9+audioLevel*0.3):0.28;
-      var hue=playing?playing.t.hue:75;
+      var pf=playing||ghost;
+      var energy=pf?Math.min(1,0.2+audioBeat*0.9+audioLevel*0.3):0.28;
+      var hue=pf?pf.t.hue:75;
       // nebula glow behind performer
-      if(playing){
-        var g=ctx.createRadialGradient(playing.x,playing.y,0,playing.x,playing.y,220+audioBeat*80);
+      if(pf){
+        var g=ctx.createRadialGradient(pf.x,pf.y,0,pf.x,pf.y,220+audioBeat*80);
         g.addColorStop(0,"hsla("+hue+",90%,55%,"+(0.05+audioBeat*0.16).toFixed(3)+")");
         g.addColorStop(1,"hsla("+hue+",90%,45%,0)");
         ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
@@ -779,14 +805,15 @@
     }
     engBack.addEventListener("click",exitToGalaxies);
 
-    function assignOrbits(){
-      if(!playing)return;
-      var others=planets.filter(function(p){return p!==playing});
+    function assignOrbits(pp){
+      pp=pp||playing;
+      if(!pp)return;
+      var others=planets.filter(function(p){return p!==pp});
       var maxR=Math.min(root.clientWidth,root.clientHeight)*0.4;
       others.forEach(function(p,i){
         var t=others.length>1?i/(others.length-1):0;
         p.orbR=70+t*(maxR-70);
-        p.orbA=Math.atan2(p.y-playing.y,p.x-playing.x);
+        p.orbA=Math.atan2(p.y-pp.y,p.x-pp.x);
       });
     }
 
@@ -800,11 +827,12 @@
       return {x:mx+cw*(c+0.5),y:mtop+ch*(r+0.5)};
     }
     function stepPlanet(pl,dt,bounds,idx,total){
+      var pf=playing||ghost;
       var step=Math.min(3,dt/16);
       pl.phase+=dt*0.002;
       pl.drift+=dt*0.0009;
-      pl.spin+=0.015+audioBeat*(playing===pl?0.14:0.05);
-      pl.perfScale+=((playing===pl?1.45:1)-pl.perfScale)*Math.min(1,0.05*step);
+      pl.spin+=0.015+audioBeat*(pf===pl?0.14:0.05);
+      pl.perfScale+=((pf===pl?1.45:1)-pl.perfScale)*Math.min(1,0.05*step);
       if(pl.dragging)return;
 
       // GRID MODE — records line up like files in a folder
@@ -817,18 +845,18 @@
       }
 
       // performer floats to center
-      if(playing===pl){
+      if(pf===pl){
         var cx=bounds.w*0.5,cy=bounds.h*0.44;
         pl.x+=(cx-pl.x)*Math.min(1,0.05*step)+Math.sin(pl.drift*0.7)*0.35*step;
         pl.y+=(cy-pl.y)*Math.min(1,0.05*step)+Math.cos(pl.drift*0.6)*0.35*step;
         return;
       }
       // others orbit the performer (only if it's in this galaxy)
-      if(playing&&curG&&playing.t.g===curG.id){
+      if(pf&&curG&&pf.t.g===curG.id){
         pl.orbA+=pl.orbDir*pl.orbSpeed*step*(1+audioBeat*1.6);
         var rr=pl.orbR*(1+audioBeat*0.12);
-        var tx=playing.x+Math.cos(pl.orbA)*rr;
-        var ty=playing.y+Math.sin(pl.orbA)*rr;
+        var tx=pf.x+Math.cos(pl.orbA)*rr;
+        var ty=pf.y+Math.sin(pl.orbA)*rr;
         pl.x+=(tx-pl.x)*Math.min(1,0.09*step);
         pl.y+=(ty-pl.y)*Math.min(1,0.09*step);
         pl.x=Math.max(26,Math.min(bounds.w-26,pl.x));
@@ -876,7 +904,7 @@
     function drawPlanet(pl){
       var t=pl.t,locked=!!t.locked;
       var hue=t.hue,r=pl.bell*sizeOf(pl)*pl.perfScale;
-      var performing=(playing===pl);
+      var performing=((playing||ghost)===pl);
       var glow=locked?4:(14+playsOf(t)*2);
       if(performing)glow*=2+audioLevel*3+audioBeat*2;
       ctx.save();
@@ -987,6 +1015,8 @@
       }else{
         audioLevel*=0.92;audioBeat*=0.9;
       }
+      var R2=window.IBEERADIO;
+      if(!playing&&ghost&&R2&&R2.playing()){audioBeat=R2.beat();audioLevel=R2.level();}
     }
     var pbar=$("#pbar"),pbtitle=$("#pbtitle"),pbsub=$("#pbsub"),pbcover=$("#pbcover");
     var pbplay=$("#pbplay"),pbfill=$("#pbfill"),pbcur=$("#pbcur"),pbtot=$("#pbtot");
@@ -1041,6 +1071,15 @@
       initGraph();
       if(actx&&actx.state==="suspended")actx.resume();
       playing=pl;
+      // hand off from radio: same song keeps its position, radio UI follows
+      var RB=window.IBEERADIO,resumeT=0;
+      if(RB){
+        var ri=RB.indexBySlug(slugOf(pl.t));
+        if(ri>=0){
+          if(RB.playing()&&RB.slug()===slugOf(pl.t))resumeT=RB.audio.currentTime||0;
+          RB.adopt(ri,resumeT);
+        }
+      }
       // try main path first, fall back to alternate location automatically
       var cands=[pl.t.file].concat(pl.t.alt?[pl.t.alt]:[]);var ci=0;
       audio.onerror=function(){
@@ -1049,6 +1088,7 @@
       };
       audio.src=encodeURI(cands[0]);
       try{audio.currentTime=0;}catch(e){}
+      if(resumeT){audio.addEventListener("loadedmetadata",function hh(){try{audio.currentTime=resumeT;}catch(e){}audio.removeEventListener("loadedmetadata",hh);});}
       audio.play().then(function(){pbplay.textContent="❚❚";}).catch(function(){});
       SAV.plays[pl.t.id]=playsOf(pl.t)+1;save();
       pbar.classList.add("show");
@@ -1058,6 +1098,7 @@
       pbsub.textContent="ONLY IBEE · "+(gg?gg.name:"");
       if(pl.t.cover)pbcover.src=pl.t.cover;
       $("#nowplaying").textContent="▶ "+pl.t.name+" — ONLY IBEE";
+      try{if("mediaSession" in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:pl.t.name,artist:"ONLY IBEE",album:galaxyOf(pl.t.g)?galaxyOf(pl.t.g).name:"THE UNIVERSE",artwork:[{src:"assets/img/follow-me.jpg",sizes:"512x512",type:"image/jpeg"}]});navigator.mediaSession.setActionHandler("play",function(){audio.play();pbplay.textContent="❚❚";});navigator.mediaSession.setActionHandler("pause",function(){audio.pause();pbplay.textContent="►";});}}catch(e){}
       assignOrbits();
       var n=playsOf(pl.t);
       if(n<MAX_PLAYS)toast("▶ "+pl.t.name+" · planet grew "+n+"/"+MAX_PLAYS);
@@ -1088,7 +1129,16 @@
     audio.addEventListener("timeupdate",function(){
       pbcur.textContent=fmt(audio.currentTime);
       if(audio.duration)pbfill.style.width=(audio.currentTime/audio.duration*100)+"%";
+      var RS=window.IBEERADIO;
+      if(RS&&playing&&RS.slug()===slugOf(playing.t))RS.setPending(audio.currentTime);
     });
+    (function(){
+      var li=document.querySelector('#menulist li[data-go="music"]');
+      if(!li)return;
+      audio.addEventListener("play",function(){li.classList.add("playingnow");});
+      audio.addEventListener("pause",function(){li.classList.remove("playingnow");});
+      audio.addEventListener("ended",function(){li.classList.remove("playingnow");});
+    })();
     $("#pbseek").addEventListener("click",function(e){
       var r=this.getBoundingClientRect();
       if(audio.duration)audio.currentTime=(e.clientX-r.left)/r.width*audio.duration;
@@ -1204,11 +1254,20 @@
       if(canvas.width!==Math.floor(w*devicePixelRatio))resize();
       ctx.clearRect(0,0,w,h);
       drawSpace(w,h);
+      // radio → universe: if the radio is playing one of these songs, its planet performs
+      ghost=null;
+      var RR=window.IBEERADIO;
+      if(!playing&&view==="system"&&RR&&RR.playing()){
+        var rs=RR.slug();
+        for(var gi2=0;gi2<planets.length;gi2++){if(slugOf(planets[gi2].t)===rs){ghost=planets[gi2];break;}}
+      }
+      var gkey=ghost?ghost.t.id:null;
+      if(gkey!==lastGhostId){lastGhostId=gkey;if(ghost)assignOrbits(ghost);}
       if(view==="galaxy"){drawGalaxies(w,h);}
       else{
         var bounds={w:w,h:h};
         planets.forEach(function(p,i){stepPlanet(p,dt,bounds,i,planets.length)});
-        if(!playing&&!gridMode)resolveCollisions();
+        if(!playing&&!ghost&&!gridMode)resolveCollisions();
         planets.forEach(function(p){drawPlanet(p)});
       }
     }
@@ -1229,6 +1288,6 @@
   });
 })();
 </script>
-<script src="assets/player.js?v=3"></script>
+<script src="assets/player.js?v=5"></script>
 </body>
 </html>
