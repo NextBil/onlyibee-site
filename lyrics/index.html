@@ -107,6 +107,22 @@ main{
 }
 .chipbtn.now{color:#000;background:hsl(var(--hue),95%,55%);border-color:hsl(var(--hue),95%,55%)}
 .note{color:var(--dim);font-size:16px;text-align:center;margin-top:4px}
+
+/* ---------- reduced / background mode ---------- */
+body.mini #ctrl,body.mini #storycard{display:none}
+body.mini main{padding-bottom:30px;display:flex;flex-direction:column;justify-content:center;min-height:calc(100dvh - 60px)}
+body.mini #stream{max-height:56vh}
+body.mini .line.active{font-size:clamp(30px,6vw,44px)}
+#restore{
+  position:fixed;right:14px;bottom:14px;z-index:70;display:none;
+  width:48px;height:48px;border:2px solid hsl(var(--hue),95%,55%);
+  background:rgba(0,0,0,.85);color:hsl(var(--hue),95%,68%);
+  font-size:20px;cursor:pointer;align-items:center;justify-content:center;
+  box-shadow:0 0 14px hsla(var(--hue),95%,55%,.4);
+  animation:rpulse 1.4s ease-in-out infinite;
+}
+body.mini #restore{display:flex}
+@keyframes rpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 </style>
 </head>
 <body>
@@ -130,6 +146,7 @@ main{
   </div>
 </main>
 
+<div id="restore" title="bring the engine back">▲</div>
 <div id="ctrl">
   <div class="inner">
     <div id="seek"><div id="fill"></div></div>
@@ -138,6 +155,7 @@ main{
       <button id="bprev">◀◀</button>
       <button id="bplay" class="main">►</button>
       <button id="bnext">▶▶</button>
+      <button id="bmini" title="reduce — lyrics float in the background" style="width:auto;padding-left:12px;padding-right:12px">▼ BG</button>
     </div>
     <div id="strip"></div>
     <div class="note">official words arriving transmission by transmission — tap a line to jump_</div>
@@ -255,6 +273,8 @@ main{
   };
   $("bnext").onclick=function(){R.control.next();};
   $("bprev").onclick=function(){R.control.prev();};
+  $("bmini").onclick=function(){document.body.classList.add("mini");};
+  $("restore").onclick=function(){document.body.classList.remove("mini");};
   var seek=$("seek"),scrub=false;
   function sk(e){
     var r=seek.getBoundingClientRect();
