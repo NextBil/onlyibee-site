@@ -1,1 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UTOPIE™ — ONLY IBEE</title>
+<meta name="description" content="UTOPIE — dreams and ideas that go beyond money. Pure passion, proving that art is real.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--border:#2a2a2a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;overflow-x:hidden;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);
+  font-family:var(--px);font-size:10px;position:relative;z-index:50;
+}
+header a{color:var(--acid);text-decoration:none}
+header a .r{color:var(--red)}
+header span{color:var(--dim);font-size:8px}
+main{max-width:980px;margin:0 auto;padding:30px 18px 80px;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
 
+/* ---------- hero ---------- */
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:40px}
+.stage{perspective:700px;width:200px;height:200px;margin-bottom:6px}
+.spin3d{
+  width:100%;height:100%;transform-style:preserve-3d;
+  animation:spin 7s linear infinite;
+}
+@keyframes spin{from{transform:rotateY(0deg) rotateX(6deg)}to{transform:rotateY(360deg) rotateX(6deg)}}
+.spin3d img{width:100%;height:100%;object-fit:contain;filter:invert(1) drop-shadow(0 0 22px rgba(182,255,0,.45))}
+.float{animation:bob 3.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.pedlight{
+  width:150px;height:26px;border-radius:50%;margin:-6px auto 22px;
+  background:radial-gradient(ellipse,rgba(182,255,0,.4),transparent 70%);
+  animation:pulse 3.2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.75);opacity:.45}}
+h1{font-family:var(--px);font-size:clamp(22px,6vw,38px);letter-spacing:3px}
+h1 .r{color:var(--red)}
+.tag{color:var(--dim);font-size:21px;margin-top:8px;letter-spacing:2px}
+
+/* ---------- manifesto ---------- */
+.manif{
+  max-width:640px;margin:0 auto 50px;text-align:center;
+  font-size:23px;line-height:1.6;color:#c9c9c9;
+}
+.manif p{margin-bottom:18px}
+.manif .big{
+  font-family:var(--px);font-size:clamp(11px,2.6vw,15px);line-height:2.1;
+  color:var(--ink);margin:26px 0;
+}
+.manif .acid{color:var(--acid)} .manif .r{color:var(--red)}
+
+/* ---------- item vault ---------- */
+.vh{font-family:var(--px);font-size:clamp(12px,3vw,18px);margin-bottom:6px;text-align:center}
+.vsub{color:var(--dim);text-align:center;margin-bottom:30px;font-size:19px}
+.vault{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
+.slot{
+  border:2px solid var(--border);background:var(--panel);
+  padding:22px 14px 16px;text-align:center;position:relative;overflow:hidden;
+}
+.slot::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 30%,rgba(182,255,0,.05),transparent 60%);
+}
+.slot .stage{width:130px;height:130px;margin:0 auto;perspective:520px}
+.slot .spin3d{animation-duration:5.2s}
+.slot:nth-child(2) .spin3d{animation-duration:6.4s}
+.slot:nth-child(3) .spin3d{animation-duration:4.6s}
+.slot:nth-child(4) .spin3d{animation-duration:7s}
+.slot .spin3d img{filter:drop-shadow(0 6px 12px rgba(0,0,0,.6))}
+.slot .spin3d img.inv{filter:invert(1) drop-shadow(0 0 14px rgba(182,255,0,.35))}
+.slot .pedlight{width:100px;height:18px;margin:-2px auto 14px}
+.slot .nm{font-family:var(--px);font-size:9px;line-height:1.8}
+.slot .ds{color:var(--dim);font-size:17px;margin-top:6px;line-height:1.5}
+.slot.locked .spin3d img{filter:brightness(0) drop-shadow(0 0 10px rgba(255,43,43,.25));opacity:.85}
+.slot.locked .pedlight{background:radial-gradient(ellipse,rgba(255,43,43,.3),transparent 70%)}
+.slot.locked .nm{color:var(--dim)}
+.slot .lock{
+  position:absolute;top:10px;right:10px;font-family:var(--px);font-size:7px;
+  color:var(--red);border:1px solid var(--red);padding:4px 6px;background:rgba(0,0,0,.8);
+}
+.slot .qm{
+  position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--px);font-size:30px;color:var(--red);
+  text-shadow:0 0 14px rgba(255,43,43,.6);animation:blink 1.2s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:.25}}
+
+/* ---------- footer actions ---------- */
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:46px}
+.btn{
+  font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;
+  background:var(--acid);color:#000;
+}
+.btn.alt{background:transparent;color:var(--acid);border:1px solid var(--acid)}
+.btn:active{transform:translateY(2px)}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <a href="../">ONLY<span class="r">IBEE</span> OS</a>
+  <span>UTOPIE.SYS</span>
+</header>
+
+<main>
+  <!-- hero -->
+  <div class="hero">
+    <div class="stage float"><div class="spin3d"><img src="../assets/img/utopie-logo.png" alt="UTOPIE"></div></div>
+    <div class="pedlight"></div>
+    <h1>UTOPIE<span class="r">™</span></h1>
+    <div class="tag">project 01 // a world, not a brand_</div>
+  </div>
+
+  <!-- manifesto -->
+  <div class="manif">
+    <div class="big">DREAMS AND IDEAS<br>THAT GO <span class="acid">BEYOND MONEY</span></div>
+    <p>UTOPIE stems from pure passion. Nothing here exists to be sold first — it exists because it had to. Every piece is painted, pressed, stitched and tagged by hand, made only once, then sent from Paris to wherever you are.</p>
+    <p>It's proof — a working proof — <span class="acid">that art is real.</span> That you can build a world out of drawings, characters, music and clothes, and people will step inside it.</p>
+    <p>Scan the monster on your garment and this world opens. Some doors are already unlocked. Most are still sealed_</p>
+  </div>
+
+  <!-- item vault -->
+  <div class="vh">THE VAULT OF OBJECTS</div>
+  <div class="vsub">artifacts of the world — collect them as they unlock_</div>
+  <div class="vault">
+
+    <div class="slot">
+      <div class="stage"><div class="spin3d"><img class="inv" src="../assets/img/utopie-logo.png" alt="UTOPIE mark"></div></div>
+      <div class="pedlight"></div>
+      <div class="nm">THE UMBRELLA</div>
+      <div class="ds">the UTOPIE mark — shelter for ideas that don't fit anywhere else</div>
+    </div>
+
+    <div class="slot">
+      <div class="stage"><div class="spin3d"><img src="../assets/chess/king.png" alt="The King"></div></div>
+      <div class="pedlight"></div>
+      <div class="nm">THE KING</div>
+      <div class="ds">first piece of ICS — Ibee's Chess Set. <a href="../chess/" style="color:var(--acid)">play it →</a></div>
+    </div>
+
+    <div class="slot">
+      <div class="stage"><div class="spin3d"><img class="inv" src="../assets/img/lazone-logo.png" alt="LA ZONE"></div></div>
+      <div class="pedlight"></div>
+      <div class="nm">LA ZONE</div>
+      <div class="ds">the mental space — imagined in Paris, alive in Toronto</div>
+    </div>
+
+    <div class="slot">
+      <div class="stage"><div class="spin3d"><img src="../assets/chess/pon.png" alt="Goli"></div></div>
+      <div class="pedlight"></div>
+      <div class="nm">GOLI THE PON</div>
+      <div class="ds">the red monster — scan him on your clothes to join the party</div>
+    </div>
+
+    <div class="slot locked">
+      <span class="lock">UNLOCK SOON</span>
+      <div class="stage"><div class="spin3d"><img src="../assets/chess/queen.png" alt="???"></div></div>
+      <span class="qm">?</span>
+      <div class="pedlight"></div>
+      <div class="nm">DROP 01</div>
+      <div class="ds">the next collection — paris fall 2025_</div>
+    </div>
+
+    <div class="slot locked">
+      <span class="lock">UNLOCK SOON</span>
+      <div class="stage"><div class="spin3d"><img src="../assets/chess/knight1.png" alt="???"></div></div>
+      <span class="qm">?</span>
+      <div class="pedlight"></div>
+      <div class="nm">UTOPIE COMICS</div>
+      <div class="ds">exclusive cartoon episodes behind the red monster tag_</div>
+    </div>
+
+    <div class="slot locked">
+      <span class="lock">UNLOCK SOON</span>
+      <div class="stage"><div class="spin3d"><img src="../assets/chess/bishop2.png" alt="???"></div></div>
+      <span class="qm">?</span>
+      <div class="pedlight"></div>
+      <div class="nm">???</div>
+      <div class="ds">a signal not yet transmitted_</div>
+    </div>
+
+    <div class="slot locked">
+      <span class="lock">UNLOCK SOON</span>
+      <div class="stage"><div class="spin3d"><img src="../assets/chess/rook2.png" alt="???"></div></div>
+      <span class="qm">?</span>
+      <div class="pedlight"></div>
+      <div class="nm">???</div>
+      <div class="ds">keep scanning. keep listening_</div>
+    </div>
+
+  </div>
+
+  <div class="actions">
+    <a class="btn" href="../?tag=UTOPIE">▶ ENTER THE CONSOLE</a>
+    <a class="btn alt" href="../chess/">♟ ICS CHESS</a>
+  </div>
+</main>
+
+<footer>© ONLYIBEE — UTOPIE™ · HUMAN-MADE · EACH PIECE UNIQUE</footer>
+<script src="../assets/player.js?v=3"></script>
+</body>
+</html>
