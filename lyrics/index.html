@@ -128,7 +128,7 @@ body.mini #restore{display:flex}
 <body>
 <canvas id="glyphs"></canvas>
 <header>
-  <a href="../">ONLY<span class="r">IBEE</span> OS</a>
+  <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
   <span>LYRICS.ENGINE</span>
 </header>
 
@@ -152,6 +152,7 @@ body.mini #restore{display:flex}
     <div id="seek"><div id="fill"></div></div>
     <div id="times"><span id="tcur">0:00</span><span id="ttot">--:--</span></div>
     <div id="btns">
+      <button id="bhome" title="back to the menu — no reboot" style="width:auto;padding-left:12px;padding-right:12px">⌂</button>
       <button id="bprev">◀◀</button>
       <button id="bplay" class="main">►</button>
       <button id="bnext">▶▶</button>
@@ -162,7 +163,7 @@ body.mini #restore{display:flex}
   </div>
 </div>
 
-<script src="../assets/player.js?v=6"></script>
+<script src="../assets/player.js?v=7"></script>
 <script>
 (function(){
   "use strict";
@@ -275,6 +276,7 @@ body.mini #restore{display:flex}
   $("bprev").onclick=function(){R.control.prev();};
   $("bmini").onclick=function(){document.body.classList.add("mini");};
   $("restore").onclick=function(){document.body.classList.remove("mini");};
+  $("bhome").onclick=function(){location.href="../#menu";};
   var seek=$("seek"),scrub=false;
   function sk(e){
     var r=seek.getBoundingClientRect();
