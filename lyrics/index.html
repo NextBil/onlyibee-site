@@ -1,1 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LYRICS ENGINE — ONLY IBEE</title>
+<meta name="description" content="The Lyrics Engine — words, meaning and creative process behind Only Ibee's songs.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--border:#2a2a2a;--hue:190;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;overflow-x:hidden;display:flex;flex-direction:column;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+#glyphs{position:fixed;inset:0;z-index:0;pointer-events:none}
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);
+  font-family:var(--px);font-size:10px;position:relative;z-index:50;
+}
+header a{color:var(--acid);text-decoration:none}
+header a .r{color:var(--red)}
+header span{color:var(--dim);font-size:8px}
+main{
+  flex:1;width:100%;max-width:860px;margin:0 auto;position:relative;z-index:2;
+  padding:26px 18px 120px;animation:crtin .3s ease-out;
+}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
 
+/* ---------- now playing ---------- */
+.np{text-align:center;margin-bottom:26px}
+#songname{
+  font-family:var(--px);font-size:clamp(18px,5.4vw,32px);letter-spacing:2px;
+  color:hsl(var(--hue),95%,68%);
+  text-shadow:0 0 22px hsla(var(--hue),95%,55%,.6);
+  transform:scale(calc(1 + var(--beat,0)*0.06));
+  transition:color .4s;
+}
+#songmood{color:var(--dim);font-size:20px;margin-top:10px;letter-spacing:2px}
+
+/* ---------- lyric stream ---------- */
+#stream{
+  min-height:270px;max-height:44vh;overflow-y:auto;text-align:center;
+  padding:10px 6px;margin-bottom:22px;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 14%,#000 84%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 14%,#000 84%,transparent);
+}
+#stream::-webkit-scrollbar{display:none}
+.line{
+  font-size:24px;line-height:1.5;margin:16px 0;color:var(--dim);opacity:.4;
+  transition:all .35s ease;cursor:pointer;
+}
+.line:hover{opacity:.8}
+.line.past{opacity:.2}
+.line.active{
+  opacity:1;font-size:30px;color:hsl(var(--hue),95%,72%);
+  text-shadow:0 0 18px hsla(var(--hue),95%,55%,.55);
+  transform:scale(calc(1 + var(--beat,0)*0.05));
+}
+.line .st{font-family:var(--px);font-size:10px;letter-spacing:2px}
+
+/* ---------- story ---------- */
+#storycard{
+  border:2px solid var(--border);background:rgba(14,14,14,.9);padding:16px 18px;margin-bottom:22px;
+}
+#storycard .h{
+  font-family:var(--px);font-size:9px;color:hsl(var(--hue),95%,68%);
+  margin-bottom:10px;letter-spacing:1px;
+}
+#story{color:#c9c9c9;font-size:21px;line-height:1.55}
+#story .dim{color:var(--dim)}
+
+/* ---------- controls ---------- */
+#ctrl{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:rgba(0,0,0,.92);border-top:2px solid var(--border);
+  padding:10px 14px 12px;
+}
+#ctrl .inner{max-width:860px;margin:0 auto}
+#seek{position:relative;height:14px;border:1px solid var(--border);padding:2px;cursor:pointer;touch-action:none}
+#fill{height:100%;width:0%;background:hsl(var(--hue),95%,55%)}
+#times{display:flex;justify-content:space-between;color:var(--dim);font-size:14px;margin:2px 0 8px}
+#btns{display:flex;gap:8px;justify-content:center}
+#btns button{
+  font-family:var(--px);font-size:11px;padding:11px 0;width:74px;
+  background:var(--panel);color:var(--ink);border:1px solid var(--border);cursor:pointer;
+}
+#btns button:hover{border-color:hsl(var(--hue),95%,60%);color:hsl(var(--hue),95%,68%)}
+#btns button.main{background:hsl(var(--hue),95%,55%);color:#000;border-color:hsl(var(--hue),95%,55%)}
+/* song strip */
+#strip{
+  display:flex;gap:8px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:none;
+}
+#strip::-webkit-scrollbar{display:none}
+.chipbtn{
+  font-family:var(--px);font-size:8px;padding:8px 10px;white-space:nowrap;flex:none;
+  background:#0e0e0e;color:var(--dim);border:1px solid var(--border);cursor:pointer;
+}
+.chipbtn.now{color:#000;background:hsl(var(--hue),95%,55%);border-color:hsl(var(--hue),95%,55%)}
+.note{color:var(--dim);font-size:16px;text-align:center;margin-top:4px}
+</style>
+</head>
+<body>
+<canvas id="glyphs"></canvas>
+<header>
+  <a href="../">ONLY<span class="r">IBEE</span> OS</a>
+  <span>LYRICS.ENGINE</span>
+</header>
+
+<main>
+  <div class="np">
+    <div id="songname">LYRICS ENGINE</div>
+    <div id="songmood">press play — the words follow the music_</div>
+  </div>
+
+  <div id="stream"></div>
+
+  <div id="storycard">
+    <div class="h">// MEANING &amp; PROCESS_</div>
+    <div id="story">Pick a signal below. Every song carries its story — where it came from, what it means, how it was made.</div>
+  </div>
+</main>
+
+<div id="ctrl">
+  <div class="inner">
+    <div id="seek"><div id="fill"></div></div>
+    <div id="times"><span id="tcur">0:00</span><span id="ttot">--:--</span></div>
+    <div id="btns">
+      <button id="bprev">◀◀</button>
+      <button id="bplay" class="main">►</button>
+      <button id="bnext">▶▶</button>
+    </div>
+    <div id="strip"></div>
+    <div class="note">official words arriving transmission by transmission — tap a line to jump_</div>
+  </div>
+</div>
+
+<script src="../assets/player.js?v=6"></script>
+<script>
+(function(){
+  "use strict";
+  var R=window.IBEERADIO;
+  if(!R){document.getElementById("story").textContent="ENGINE OFFLINE — reload the page_";return;}
+
+  /* ---------- per-song lore: mood + meaning + process ---------- */
+  var LORE={
+    "all-i-need.mp3":{mood:"tender / warm",story:"A warm, tender R&B cut from the Rare Soul sessions. One of those songs where the melody arrived before the words — recorded in a single late-night take, chasing the feeling of needing only one thing."},
+    "bounceee.mp3":{mood:"bouncy / hype",story:"Trap-soul bounce, all groove. Built from the drums up — the beat was jumping so hard the vocals just had to ride it. Zero overthinking, pure movement."},
+    "callin-on-u.mp3":{mood:"yearning / smooth",story:"Smooth, yearning late-night R&B. The kind of call you make at 2am when pride finally loses. The longest session of the batch — every ad-lib earned its place."},
+    "freestyle-sept9.mp3":{mood:"loose / raw",story:"A loose, raw lofi freestyle — dated like a diary page: September 9th. Nothing was written. Press record, speak, keep whatever was true."},
+    "head.mp3":{mood:"??? / unclassified",story:"Story transmission incoming_ — this one keeps its secrets for now."},
+    "lonely22.mp3":{mood:"lonely / blue",story:"Blue neo-soul for late nights. 22 like the hour, 22 like the age it feels. Written alone, kept alone, released to make the alone feel shared."},
+    "maintenant.mp3":{mood:"urgent / bright",story:"A short, bright afro-soul burst — 'maintenant' means NOW. A minute of urgency: stop waiting, it's already happening."},
+    "mix-100.mp3":{mood:"groovy / warm",story:"Warm funk, deep in the pocket. Mix number 100 — the one that finally felt right after ninety-nine tries. Proof that stubbornness is a production skill."},
+    "nananannn.mp3":{mood:"hazy / hypnotic",story:"Hazy, hypnotic trap-soul. When words weren't enough, 'na na na' said it better. The longest trip of the sessions — let it loop."},
+    "obsess.mp3":{mood:"??? / unclassified",story:"Story transmission incoming_ — decoding the obsession takes time."},
+    "real-to-me.mp3":{mood:"sincere / tender",story:"Sincere, tender neo-soul. A promise recorded so it couldn't be unsaid: whatever it looks like from outside — it was real to me."},
+    "ride-it.mp3":{mood:"riding / cool",story:"Cool, riding trap-soul groove. Windows down music. The beat drives, the voice just holds the wheel."},
+    "right-middle.mp3":{mood:"smooth / balanced",story:"Smooth, balanced R&B — right in the middle of everything: not sad, not happy, exactly where life actually happens."},
+    "silouhette.mp3":{mood:"moody / nocturnal",story:"The nocturnal centerpiece of the sessions. A silhouette is what stays when the details go dark — this one was mixed at night, for the night."},
+    "strippin-down.mp3":{mood:"intimate / slow",story:"Intimate, slow-burn R&B. Stripping down means the sound too: fewer layers every verse until only the truth is left in the booth."},
+    "to-our-pain.mp3":{mood:"??? / unclassified",story:"Story transmission incoming_ — raised like a toast: to our pain."},
+    "write-a-song.mp3":{mood:"reflective / tender",story:"A reflective, tender ballad about the thing itself — when nothing makes sense, write a song. This is what came out."},
+    "yo-body.mp3":{mood:"sultry / groovy",story:"Sultry, groovy funk to close the crate. The bassline was written dancing. You will understand it dancing."}
+  };
+
+  /* ---------- real lyrics slot in here later: {t:seconds, w:"line"} ---------- */
+  var LYRICS={ /* e.g. "lonely22.mp3":[{t:0,w:"first line"},{t:12,w:"second line"}] */ };
+
+  /* placeholder transmissions until the real words arrive */
+  var GHOST=[
+    "( decoding vocal signal… )",
+    "the real words live in the booth for now_",
+    "la  la  la — transmission incomplete",
+    "✦ words arriving soon ✦",
+    "( static… but the feeling comes through )",
+    "hum along — you already know how it goes",
+    "…",
+    "( the booth remembers every word )"
+  ];
+  var STRUCT=[[0,"INTRO"],[ .12,"VERSE 1"],[.30,"HOOK"],[.44,"VERSE 2"],[.60,"HOOK"],[.72,"BRIDGE"],[.84,"HOOK"],[.94,"OUTRO"]];
+
+  function linesFor(i){
+    var s=R.song(i);
+    if(LYRICS[s.f]) return LYRICS[s.f].map(function(l){return {t:l.t,html:l.w};});
+    var dur=180;
+    try{ if(R.audio.duration&&isFinite(R.audio.duration)) dur=R.audio.duration; }catch(e){}
+    var out=[],gi=i;
+    STRUCT.forEach(function(st,k){
+      out.push({t:Math.round(st[0]*dur),html:'<span class="st">♪ '+st[1]+'</span>'});
+      if(k<STRUCT.length-1){
+        var mid=Math.round(((st[0]+STRUCT[k+1][0])/2)*dur);
+        out.push({t:mid,html:GHOST[(gi+k)%GHOST.length]});
+      }
+    });
+    return out;
+  }
+
+  /* ---------- dom ---------- */
+  var $=function(id){return document.getElementById(id)};
+  var stream=$("stream"),lines=[],active=-1,builtFor=-1;
+
+  function buildStrip(){
+    var h="";
+    for(var i=0;i<R.count;i++){
+      h+='<button class="chipbtn'+(i===R.current()?" now":"")+'" data-i="'+i+'">'+R.song(i).n+'</button>';
+    }
+    $("strip").innerHTML=h;
+    Array.prototype.slice.call(document.querySelectorAll(".chipbtn")).forEach(function(b){
+      b.onclick=function(){R.control.play(+b.dataset.i);};
+    });
+  }
+
+  function buildStream(i){
+    builtFor=i;active=-1;
+    var data=linesFor(i);
+    lines=[];stream.innerHTML="";
+    data.forEach(function(d){
+      var el=document.createElement("div");
+      el.className="line";el.innerHTML=d.html;
+      el.onclick=function(){ try{ R.audio.currentTime=d.t; }catch(e){} R.control.play(); };
+      stream.appendChild(el);
+      lines.push({t:d.t,el:el});
+    });
+  }
+
+  function setSongUI(){
+    var i=R.current();
+    if(i<0){return;}
+    var s=R.song(i);
+    document.documentElement.style.setProperty("--hue",s.hue);
+    $("songname").textContent=s.n;
+    var lore=LORE[s.f]||{mood:"",story:""};
+    $("songmood").textContent=(lore.mood||"")+"  ·  rare soul sessions";
+    $("story").innerHTML=lore.story+' <span class="dim">— more of the meaning &amp; creative process unlocks as the engine grows_</span>';
+    buildStrip();
+    buildStream(i);
+  }
+
+  function fmt(x){if(!isFinite(x))return"--:--";var m=Math.floor(x/60),s=Math.floor(x%60);return m+":"+(s<10?"0":"")+s;}
+
+  /* ---------- controls ---------- */
+  $("bplay").onclick=function(){
+    if(R.playing()){R.control.pause();}
+    else{R.control.play(R.current()<0?0:null);}
+  };
+  $("bnext").onclick=function(){R.control.next();};
+  $("bprev").onclick=function(){R.control.prev();};
+  var seek=$("seek"),scrub=false;
+  function sk(e){
+    var r=seek.getBoundingClientRect();
+    var x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    var fr=Math.max(0,Math.min(1,x/r.width));
+    try{ if(R.audio.duration)R.audio.currentTime=fr*R.audio.duration; }catch(err){}
+  }
+  seek.addEventListener("pointerdown",function(e){scrub=true;try{seek.setPointerCapture(e.pointerId);}catch(err){}sk(e);});
+  seek.addEventListener("pointermove",function(e){if(scrub)sk(e);});
+  seek.addEventListener("pointerup",function(){scrub=false;});
+
+  /* ---------- loop ---------- */
+  var lastCur=-2,lastPlaying=null;
+  function loop(){
+    requestAnimationFrame(loop);
+    var i=R.current();
+    if(i!==lastCur){lastCur=i;if(i>=0)setSongUI();}
+    var playing=R.playing();
+    if(playing!==lastPlaying){
+      lastPlaying=playing;
+      $("bplay").textContent=playing?"❚❚":"►";
+    }
+    var t=0,d=0;
+    try{t=R.audio.currentTime||0;d=R.audio.duration||0;}catch(e){}
+    $("tcur").textContent=fmt(t);
+    $("ttot").textContent=fmt(d);
+    if(d)$("fill").style.width=(t/d*100)+"%";
+    // rebuild stream once real duration known (placeholder timings improve)
+    if(i>=0&&i===builtFor&&d&&lines.length&&lines[lines.length-1].t<10)buildStream(i);
+    // active line
+    var idx=-1;
+    for(var k=0;k<lines.length;k++){if(lines[k].t<=t)idx=k;else break;}
+    if(idx!==active){
+      lines.forEach(function(l,k){
+        l.el.classList.toggle("active",k===idx);
+        l.el.classList.toggle("past",k<idx);
+      });
+      if(idx>=0&&lines[idx])lines[idx].el.scrollIntoView({block:"center",behavior:"smooth"});
+      active=idx;
+    }
+  }
+  loop();
+
+  /* ---------- floating glyphs ---------- */
+  var cv=$("glyphs"),cx=cv.getContext("2d"),parts=[];
+  var GLY=["♪","♫","✦","✧","·","*"];
+  function rs(){cv.width=innerWidth;cv.height=innerHeight;}
+  rs();addEventListener("resize",rs);
+  for(var i=0;i<36;i++)parts.push({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    v:.2+Math.random()*.5,s:10+Math.random()*16,
+    g:GLY[Math.floor(Math.random()*GLY.length)],o:.1+Math.random()*.25,ph:Math.random()*6.28
+  });
+  function gl(){
+    requestAnimationFrame(gl);
+    cx.clearRect(0,0,cv.width,cv.height);
+    var beat=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--beat"))||0;
+    var hue=getComputedStyle(document.documentElement).getPropertyValue("--hue")||190;
+    parts.forEach(function(p){
+      p.y-=p.v*(1+beat*3);
+      p.x+=Math.sin(p.ph+=.008)*.3;
+      if(p.y<-30){p.y=cv.height+20;p.x=Math.random()*cv.width;}
+      cx.globalAlpha=Math.min(1,p.o+beat*.4);
+      cx.fillStyle="hsl("+hue+",90%,65%)";
+      cx.font=p.s*(1+beat*.4)+"px 'VT323'";
+      cx.fillText(p.g,p.x,p.y);
+    });
+    cx.globalAlpha=1;
+  }
+  gl();
+
+  /* boot state */
+  if(R.current()>=0)setSongUI();
+})();
+</script>
+</body>
+</html>
