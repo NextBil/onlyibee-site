@@ -159,6 +159,32 @@
   }
   #pbar.show{display:flex}
   .pb-row{display:flex;align-items:center;gap:12px}
+  #pbi{display:flex;align-items:center;gap:12px;flex:1;min-width:0;cursor:pointer}
+  #pbi:hover #pbtitle{text-decoration:underline}
+  #pblist{
+    position:absolute;left:10px;right:10px;z-index:11;display:none;
+    background:rgba(0,0,0,.94);border:2px solid var(--border);
+    max-height:42%;overflow-y:auto;
+  }
+  #pblist.open{display:block}
+  .pbl-row{
+    display:flex;align-items:center;gap:12px;padding:9px 12px;cursor:pointer;
+    color:var(--dim);font-size:19px;border-bottom:1px solid #161616;
+  }
+  .pbl-row:hover{background:#101010;color:var(--ink)}
+  .pbl-row.now{color:var(--acid);background:#0d1400}
+  .pbl-row.locked{opacity:.45;cursor:not-allowed}
+  .pbl-row .no{font-family:var(--px);font-size:8px;width:26px;color:#555}
+  .pbl-row.now .no{color:var(--acid)}
+  .pbl-row .pd{width:8px;height:8px;flex:none}
+  .pbl-row .pl{margin-left:auto;font-size:15px;color:#555}
+  .pbl-head{
+    font-family:var(--px);font-size:9px;color:var(--acid);
+    padding:10px 12px;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .pbl-head span:last-child{color:var(--dim);cursor:pointer}
+  .pbl-head span:last-child:hover{color:var(--red)}
   #pbcover{width:44px;height:44px;object-fit:cover;border:1px solid var(--border);flex:none}
   .pb-info{min-width:0;flex:1}
   #pbtitle{font-family:var(--px);font-size:10px;color:var(--acid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -304,12 +330,15 @@
         <div id="engback">◀ GALAXIES</div>
         <div id="engtoast"></div>
 
+        <div id="pblist"></div>
         <div id="pbar">
           <div class="pb-row">
-            <img id="pbcover" src="assets/img/follow-me.jpg" alt="">
-            <div class="pb-info">
-              <div id="pbtitle">—</div>
-              <div id="pbsub">—</div>
+            <div id="pbi" title="open track list">
+              <img id="pbcover" src="assets/img/follow-me.jpg" alt="">
+              <div class="pb-info">
+                <div id="pbtitle">—</div>
+                <div id="pbsub">—</div>
+              </div>
             </div>
             <div class="pb-ctrl">
               <button id="pbplay" class="main">❚❚</button>
@@ -590,7 +619,7 @@
     var MAX_PLAYS=10;
 
     /* ---------- state ---------- */
-    var view="galaxy",curG=null,planets=[],playing=null;
+    var view="galaxy",curG=null,planets=[],playing=null,gridMode=false;
     var stars=null,galaxyGeo=null;
     var audioLevel=0,audioBeat=0,emaLow=0;
     var analyser=null,actx=null,freq=null;
@@ -728,8 +757,9 @@
       var w=root.clientWidth,h=root.clientHeight;
       var ts=TRACKS.filter(function(t){return t.g===g.id});
       planets=ts.map(function(t){return makePlanet(t,w,h,ts.length)});
+      gridMode=false;
       engTitle.textContent=g.name;
-      engSub.textContent=g.sub.toLowerCase()+" — tap a record to play_";
+      engSub.textContent="tap a record to play · tap the void to align_";
       engBack.classList.add("show");
       blip(340,.05);
       // keep the playing planet if it belongs here
@@ -758,13 +788,31 @@
       });
     }
 
-    function stepPlanet(pl,dt,bounds){
+    function gridSlot(i,n,bounds){
+      var cols=Math.max(1,Math.round(Math.sqrt(n*bounds.w/Math.max(1,bounds.h))));
+      cols=Math.min(cols,n);
+      var rows=Math.ceil(n/cols);
+      var mx=46,mtop=95,mbot=130;
+      var cw=(bounds.w-mx*2)/cols,ch=(bounds.h-mtop-mbot)/Math.max(1,rows);
+      var c=i%cols,r=Math.floor(i/cols);
+      return {x:mx+cw*(c+0.5),y:mtop+ch*(r+0.5)};
+    }
+    function stepPlanet(pl,dt,bounds,idx,total){
       var step=Math.min(3,dt/16);
       pl.phase+=dt*0.002;
       pl.drift+=dt*0.0009;
       pl.spin+=0.015+audioBeat*(playing===pl?0.14:0.05);
       pl.perfScale+=((playing===pl?1.45:1)-pl.perfScale)*Math.min(1,0.05*step);
       if(pl.dragging)return;
+
+      // GRID MODE — records line up like files in a folder
+      if(gridMode){
+        var slot=gridSlot(idx,total,bounds);
+        pl.x+=(slot.x-pl.x)*Math.min(1,0.14*step);
+        pl.y+=(slot.y-pl.y)*Math.min(1,0.14*step);
+        pl.vx=0;pl.vy=0;
+        return;
+      }
 
       // performer floats to center
       if(playing===pl){
@@ -940,6 +988,52 @@
     }
     var pbar=$("#pbar"),pbtitle=$("#pbtitle"),pbsub=$("#pbsub"),pbcover=$("#pbcover");
     var pbplay=$("#pbplay"),pbfill=$("#pbfill"),pbcur=$("#pbcur"),pbtot=$("#pbtot");
+    var pblist=$("#pblist");
+
+    /* keep the GALAXIES button (and track list) above the playbar */
+    function updEngback(){
+      var up=pbar.classList.contains("show");
+      var h=up?pbar.offsetHeight:0;
+      engBack.style.bottom=up?(h+22)+"px":"12px";
+      pblist.style.bottom=up?(h+18)+"px":"14px";
+    }
+
+    /* ---------- track list (tap the playing song) ---------- */
+    function galaxyOf(id){for(var i=0;i<GALX.length;i++)if(GALX[i].id===id)return GALX[i];return null;}
+    function buildPbList(){
+      var gid=playing?playing.t.g:(curG?curG.id:null);
+      if(!gid)return false;
+      var g=galaxyOf(gid);
+      var ts=TRACKS.filter(function(t){return t.g===gid});
+      var html='<div class="pbl-head"><span>'+g.name+'</span><span id="pblclose">✕</span></div>';
+      ts.forEach(function(t,i){
+        var now=playing&&playing.t.id===t.id;
+        html+='<div class="pbl-row'+(now?" now":"")+(t.locked?" locked":"")+'" data-i="'+i+'">'
+          +'<span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
+          +'<span class="pd" style="background:hsl('+t.hue+',85%,55%)"></span>'
+          +'<span>'+t.name+'</span>'
+          +'<span class="pl">'+(t.locked?"ENCRYPTED":"▶ "+playsOf(t))+'</span>'
+          +'</div>';
+      });
+      pblist.innerHTML=html;
+      document.getElementById("pblclose").onclick=function(){pblist.classList.remove("open");};
+      Array.prototype.slice.call(pblist.querySelectorAll(".pbl-row")).forEach(function(row){
+        row.onclick=function(){
+          var t=ts[+row.getAttribute("data-i")];
+          if(t.locked){toast("SIGNAL ENCRYPTED — not yet transmitted_",true);blip(120,.08);return;}
+          var pl=null;
+          if(curG&&curG.id===gid)pl=planets.filter(function(p){return p.t.id===t.id})[0];
+          if(!pl)pl=makePlanet(t,root.clientWidth,root.clientHeight,ts.length);
+          playTrack(pl);
+          buildPbList();
+        };
+      });
+      return true;
+    }
+    $("#pbi").addEventListener("click",function(){
+      if(pblist.classList.contains("open")){pblist.classList.remove("open");return;}
+      if(buildPbList()){updEngback();pblist.classList.add("open");blip(300,.04);}
+    });
     function fmt(s){if(!isFinite(s))return"--:--";var m=Math.floor(s/60),ss=Math.floor(s%60);return m+":"+(ss<10?"0":"")+ss;}
     function playTrack(pl){
       initGraph();
@@ -956,8 +1050,10 @@
       audio.play().then(function(){pbplay.textContent="❚❚";}).catch(function(){});
       SAV.plays[pl.t.id]=playsOf(pl.t)+1;save();
       pbar.classList.add("show");
+      setTimeout(updEngback,0);
       pbtitle.textContent=pl.t.name;
-      pbsub.textContent="ONLY IBEE · "+curG.name;
+      var gg=galaxyOf(pl.t.g);
+      pbsub.textContent="ONLY IBEE · "+(gg?gg.name:"");
       if(pl.t.cover)pbcover.src=pl.t.cover;
       $("#nowplaying").textContent="▶ "+pl.t.name+" — ONLY IBEE";
       assignOrbits();
@@ -975,6 +1071,8 @@
       try{audio.pause();}catch(e){}
       playing=null;
       pbar.classList.remove("show");
+      pblist.classList.remove("open");
+      updEngback();
       $("#nowplaying").textContent="IDLE — NO SIGNAL";
     }
     pbplay.addEventListener("click",function(){
@@ -1047,6 +1145,11 @@
             if(hit.t.locked){toast("SIGNAL ENCRYPTED — not yet transmitted_",true);blip(120,.08);}
             else if(playing===hit){stopTrack();}
             else{playTrack(hit);}
+          }else{
+            // tap the void → snap to grid / back to free motion
+            gridMode=!gridMode;
+            toast(gridMode?"⊞ ALIGNED TO GRID_":"✦ FREE MOTION_");
+            blip(gridMode?520:300,.05);
           }
         }
       }
@@ -1102,8 +1205,8 @@
       if(view==="galaxy"){drawGalaxies(w,h);}
       else{
         var bounds={w:w,h:h};
-        planets.forEach(function(p){stepPlanet(p,dt,bounds)});
-        if(!playing)resolveCollisions();
+        planets.forEach(function(p,i){stepPlanet(p,dt,bounds,i,planets.length)});
+        if(!playing&&!gridMode)resolveCollisions();
         planets.forEach(function(p){drawPlanet(p)});
       }
     }
@@ -1124,6 +1227,6 @@
   });
 })();
 </script>
-<script src="assets/player.js"></script>
+<script src="assets/player.js?v=3"></script>
 </body>
 </html>
