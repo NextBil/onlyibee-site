@@ -220,6 +220,14 @@
   }
   .pb-ctrl button:hover{border-color:var(--acid);color:var(--acid)}
   .pb-ctrl button.main{background:var(--acid);color:#000;border-color:var(--acid)}
+  .lyrbtn{
+    border-color:var(--acid) !important;
+    box-shadow:0 0 10px rgba(182,255,0,.35),inset 0 0 6px rgba(182,255,0,.15);
+    animation:lyrglow 1.8s ease-in-out infinite;
+  }
+  .lyrbtn img{width:26px;height:26px;image-rendering:pixelated;display:block;margin:auto}
+  .lyrbtn:hover{background:#131a00}
+  @keyframes lyrglow{0%,100%{box-shadow:0 0 8px rgba(182,255,0,.25)}50%{box-shadow:0 0 18px rgba(182,255,0,.6)}}
   #pbseek{position:relative;height:14px;border:1px solid var(--border);padding:2px;cursor:pointer}
   #pbfill{height:100%;width:0%;background:var(--red);position:relative;overflow:hidden}
   #pbfill::after{
@@ -377,7 +385,7 @@
             <div class="pb-ctrl">
               <button id="pbplay" class="main">❚❚</button>
               <button id="pbstop">■</button>
-              <button id="pblyr" title="lyrics engine">✎</button>
+              <button id="pblyr" class="lyrbtn" title="LYRICS ENGINE"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1 3 Q4.5 1.4 8 3 Q11.5 1.4 15 3 V13 Q11.5 11.4 8 13 Q4.5 11.4 1 13 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.7'/%3E%3Cline x1='8' y1='3' x2='8' y2='13' stroke='%23223300' stroke-width='.9'/%3E%3Cline x1='2.8' y1='5' x2='6.4' y2='4.6' stroke='%23223300' stroke-width='.6'/%3E%3Cline x1='2.8' y1='7' x2='6.4' y2='6.6' stroke='%23223300' stroke-width='.6'/%3E%3Cline x1='2.8' y1='9' x2='6.4' y2='8.6' stroke='%23223300' stroke-width='.6'/%3E%3Cline x1='9.6' y1='4.6' x2='13.2' y2='5' stroke='%23223300' stroke-width='.6'/%3E%3Cline x1='9.6' y1='6.6' x2='13.2' y2='7' stroke='%23223300' stroke-width='.6'/%3E%3Crect x='11' y='2' width='1.6' height='4.4' fill='%23ff2b2b'/%3E%3C/svg%3E" alt="lyrics"></button>
             </div>
           </div>
           <div id="pbseek"><div id="pbfill"></div></div>
@@ -1321,8 +1329,16 @@
       if(e.key==="Enter"){go(items[sel].getAttribute("data-go"));}
     }else if(e.key==="Escape"){go("menu");}
   });
+
+  /* arriving with #menu skips the boot sequence (home buttons on sub-pages) */
+  if(location.hash==="#menu"){
+    booted=true;clearInterval(bootTimer);
+    document.getElementById("boot").style.display="none";
+    document.getElementById("os").classList.add("on");
+    go("menu");
+  }
 })();
 </script>
-<script src="assets/player.js?v=6"></script>
+<script src="assets/player.js?v=7"></script>
 </body>
 </html>
