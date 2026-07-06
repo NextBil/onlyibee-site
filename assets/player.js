@@ -114,10 +114,10 @@
   });
 
   /* ---------- state ---------- */
-  var cur = -1, wantResume = false;
+  var cur = -1, wantResume = false, needLoad = false, pendingTime = 0;
   function save(){
     try{ localStorage.setItem("ibee_radio", JSON.stringify({
-      i: cur, t: audio.currentTime||0, p: !audio.paused && cur>=0
+      i: cur, t: needLoad ? (pendingTime||0) : (audio.currentTime||0), p: !audio.paused && cur>=0
     })); }catch(e){}
   }
   setInterval(save, 2000);
@@ -155,7 +155,10 @@
     markRows();
   }
   function play(i, time){
-    if(i !== cur) load(i, time);
+    if(i !== cur || needLoad){
+      load(i, time != null ? time : (pendingTime||0));
+      needLoad = false; pendingTime = 0;
+    }
     if(load._arm) load._arm();
     initGraph();
     if(actx && actx.state === "suspended") actx.resume();
@@ -310,6 +313,24 @@
     }
   }
   loop();
+
+  /* ---------- bridge: universe engine ↔ radio ---------- */
+  window.IBEERADIO = {
+    audio: audio,
+    playing: function(){ return cur >= 0 && !audio.paused; },
+    beat: function(){ return beat; },
+    level: function(){ return level; },
+    slug: function(){ return cur >= 0 ? SONGS[cur].f : null; },
+    indexBySlug: function(s){ for(var i=0;i<SONGS.length;i++) if(SONGS[i].f===s) return i; return -1; },
+    /* adopt a song without playing it — UI + saved state follow along */
+    adopt: function(i, t){
+      if(i < 0 || i >= SONGS.length) return;
+      cur = i; needLoad = true; pendingTime = t || 0;
+      $("rp-title").textContent = SONGS[i].n;
+      markRows(); save();
+    },
+    setPending: function(t){ if(needLoad){ pendingTime = t || 0; } }
+  };
 
   /* ---------- restore across pages ---------- */
   try{
