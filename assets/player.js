@@ -63,6 +63,10 @@
   +"background:#0e0e0e;color:#e8e8e8;border:1px solid #2a2a2a;cursor:pointer}"
   +"#rp-ctrl button:hover{border-color:#b6ff00;color:#b6ff00}"
   +"#rp-ctrl button.main{background:#b6ff00;color:#000;border-color:#b6ff00}"
+  +"#rp-lyr{border-color:#b6ff00 !important;animation:rlyrglow 1.8s ease-in-out infinite}"
+  +"#rp-lyr img{width:24px;height:24px;image-rendering:pixelated;display:block;margin:auto}"
+  +"#rp-lyr:hover{background:#131a00}"
+  +"@keyframes rlyrglow{0%,100%{box-shadow:0 0 6px rgba(182,255,0,.2)}50%{box-shadow:0 0 16px rgba(182,255,0,.55)}}"
   +"#rp-list{overflow-y:auto;max-height:min(300px,38vh)}"
   +".rp-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;color:#9a9a9a;font-size:18px;border-bottom:1px solid #161616}"
   +".rp-row:hover{background:#101010;color:#fff}"
@@ -92,7 +96,7 @@
     +'    <button id="rp-prev">◀◀</button>'
     +'    <button id="rp-play" class="main">►</button>'
     +'    <button id="rp-next">▶▶</button>'
-    +'    <button id="rp-lyr" title="lyrics engine">✎</button>'
+    +'    <button id="rp-lyr" title="LYRICS ENGINE"><img alt="lyrics" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M1 3 Q4.5 1.4 8 3 Q11.5 1.4 15 3 V13 Q11.5 11.4 8 13 Q4.5 11.4 1 13 Z\' fill=\'%23b6ff00\' stroke=\'%23223300\' stroke-width=\'.7\'/%3E%3Cline x1=\'8\' y1=\'3\' x2=\'8\' y2=\'13\' stroke=\'%23223300\' stroke-width=\'.9\'/%3E%3Cline x1=\'2.8\' y1=\'5\' x2=\'6.4\' y2=\'4.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'7\' x2=\'6.4\' y2=\'6.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'9\' x2=\'6.4\' y2=\'8.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'4.6\' x2=\'13.2\' y2=\'5\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'6.6\' x2=\'13.2\' y2=\'7\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Crect x=\'11\' y=\'2\' width=\'1.6\' height=\'4.4\' fill=\'%23ff2b2b\'/%3E%3C/svg%3E"></button>'
     +'  </div>'
     +'</div>'
     +'<div id="rp-list"></div>';
