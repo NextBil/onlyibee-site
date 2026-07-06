@@ -43,23 +43,24 @@ header .t{color:var(--dim);font-size:8px}
 
 .boardwrap{background:var(--panel);border:2px solid var(--border);padding:12px}
 #board{
-  display:grid;grid-template-columns:repeat(8,1fr);
+  display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
   width:min(88vw,520px);height:min(88vw,520px);
   border:3px solid var(--acid);box-shadow:0 0 24px rgba(182,255,0,.25);
 }
-.sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sq{overflow:hidden;min-width:0;min-height:0}
+.sq{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .sq.l{background:var(--light)} .sq.d{background:var(--dark)}
-.sq .base{position:absolute;width:72%;height:26%;bottom:6%;border-radius:50%;filter:blur(1px);opacity:.85}
+.sq .base{position:absolute;width:72%;height:26%;bottom:5%;left:14%;border-radius:50%;filter:blur(1px);opacity:.85}
 .base.w{background:radial-gradient(circle at 50% 40%,#eaffb0,#b6ff00 60%,#5c8000)}
 .base.b{background:radial-gradient(circle at 50% 40%,#ff9d9d,#ff2b2b 60%,#6e0000)}
-.sq img{position:relative;width:86%;height:92%;object-fit:contain;
+.sq img{position:absolute;left:5%;top:3%;width:90%;height:94%;object-fit:contain;object-position:center bottom;
   pointer-events:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.55));z-index:2;transition:transform .08s}
 .sq.piece:hover img{transform:translateY(-3px) scale(1.05)}
 .sq.sel{box-shadow:inset 0 0 0 4px var(--sel)}
 .sq.check{animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{box-shadow:inset 0 0 0 4px var(--check)}50%{box-shadow:inset 0 0 0 8px var(--check)}}
-.dot{position:absolute;width:24%;height:24%;background:var(--move);opacity:.75;z-index:3}
-.ring{position:absolute;width:82%;height:82%;border:4px solid var(--cap);opacity:.9;z-index:3}
+.dot{position:absolute;width:26%;height:26%;border-radius:50%;background:var(--move);opacity:.8;z-index:3;box-shadow:0 0 8px var(--move)}
+.ring{position:absolute;width:82%;height:82%;border-radius:50%;border:4px solid var(--cap);opacity:.9;z-index:3;box-shadow:0 0 8px var(--cap)}
 .last{outline:3px solid rgba(182,255,0,.4);outline-offset:-3px}
 
 .side{width:280px;display:flex;flex-direction:column;gap:12px}
@@ -119,6 +120,12 @@ footer{margin-top:20px;color:var(--dim);font-size:16px;text-align:center;padding
       <div class="row">
         <button class="on" id="m2" onclick="setMode('pvp')">2P</button>
         <button id="mai" onclick="setMode('ai')">VS CPU</button>
+      </div>
+      <div class="lbl" id="lvlbl" style="margin-top:12px;display:none">CPU LEVEL</div>
+      <div class="row" id="lvrow" style="display:none">
+        <button id="lv1" onclick="setLevel(1)">LV1</button>
+        <button class="on" id="lv2" onclick="setLevel(2)">LV2</button>
+        <button id="lv3" onclick="setLevel(3)">LV3</button>
       </div>
       <div class="row" style="margin-top:10px">
         <button class="primary" onclick="newGame()">NEW</button>
@@ -438,15 +445,26 @@ function search(b,cst,ep,col,depth,alpha,beta){
     return best;
   }
 }
+let level=2; // 1 easy · 2 normal · 3 hard
+function setLevel(l){
+  level=l;
+  [1,2,3].forEach(x=>document.getElementById('lv'+x).classList.toggle('on',x===l));
+}
 function aiMove(){
   if(gameOver)return;
   const moves=genAll(board,castling,enpassant,'b');
   if(moves.length===0)return;
+  // LV1 plays loose: sometimes a random move, otherwise shallow greed
+  if(level===1&&Math.random()<0.35){
+    const m=moves[Math.floor(Math.random()*moves.length)];
+    commit(m.from,m.to,'Q');return;
+  }
+  const depth=level===1?0:level===2?1:2;
   moves.sort((a,z)=>z.cap-a.cap);
   let best=-Infinity,pick=[];
   for(const m of moves){
     const nx=applyMove(board,castling,enpassant,m.from,m.to,'Q');
-    const v=search(nx.board,nx.castling,nx.enpassant,'w',2,-Infinity,Infinity);
+    const v=search(nx.board,nx.castling,nx.enpassant,'w',depth,-Infinity,Infinity);
     if(v>best){best=v;pick=[m];}else if(v===best)pick.push(m);
   }
   const m=pick[Math.floor(Math.random()*pick.length)];
@@ -458,6 +476,8 @@ function setMode(m){
   mode=m;
   document.getElementById('m2').classList.toggle('on',m==='pvp');
   document.getElementById('mai').classList.toggle('on',m==='ai');
+  document.getElementById('lvlbl').style.display=m==='ai'?'block':'none';
+  document.getElementById('lvrow').style.display=m==='ai'?'flex':'none';
   newGame();
 }
 function newGame(){initState();document.getElementById('status').textContent='';render();}
@@ -476,5 +496,6 @@ function undo(){
 
 initState();render();
 </script>
+<script src="../assets/player.js"></script>
 </body>
 </html>
