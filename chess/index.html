@@ -43,6 +43,7 @@ header .t{color:var(--dim);font-size:8px}
 
 .boardwrap{background:var(--panel);border:2px solid var(--border);padding:12px}
 #board{
+  position:relative;
   display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
   width:min(88vw,520px);height:min(88vw,520px);
   border:3px solid var(--acid);box-shadow:0 0 24px rgba(182,255,0,.25);
@@ -96,6 +97,67 @@ button.primary{background:var(--acid);color:#000;border-color:var(--acid)}
 .opt img{width:82%;height:82%;object-fit:contain}
 .banner{font-family:var(--px);font-size:13px;color:var(--acid);margin-bottom:18px;line-height:1.8}
 footer{margin-top:20px;color:var(--dim);font-size:16px;text-align:center;padding:0 14px;line-height:1.6}
+
+/* ============ FIGHT FX ============ */
+#board.shake{animation:bshake .3s linear}
+@keyframes bshake{
+  0%{transform:translate(0,0)}15%{transform:translate(-6px,3px)}30%{transform:translate(5px,-4px)}
+  45%{transform:translate(-4px,-3px)}60%{transform:translate(4px,3px)}75%{transform:translate(-2px,2px)}
+  100%{transform:translate(0,0)}
+}
+#board.bigshake{animation:bshake .45s linear}
+.fxflash{position:absolute;inset:0;background:#fff;pointer-events:none;z-index:20;
+  animation:fxflash .18s ease-out forwards}
+@keyframes fxflash{0%{opacity:.85}100%{opacity:0}}
+.spark{position:absolute;width:8px;height:8px;pointer-events:none;z-index:22;
+  animation:spark .45s ease-out forwards}
+@keyframes spark{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}
+}
+.impact{position:absolute;pointer-events:none;z-index:21;border-radius:50%;
+  border:4px solid #fff;animation:impact .3s ease-out forwards}
+@keyframes impact{
+  0%{width:8px;height:8px;margin:-4px;opacity:1}
+  100%{width:110px;height:110px;margin:-55px;opacity:0}
+}
+.powtxt{position:absolute;pointer-events:none;z-index:23;font-family:var(--px);
+  white-space:nowrap;text-shadow:3px 3px 0 #000;transform:translate(-50%,-50%);
+  animation:powtxt .6s cubic-bezier(.2,2,.4,1) forwards}
+@keyframes powtxt{
+  0%{transform:translate(-50%,-50%) scale(.2) rotate(-8deg);opacity:0}
+  30%{transform:translate(-50%,-50%) scale(1.35) rotate(3deg);opacity:1}
+  70%{transform:translate(-50%,-70%) scale(1.1) rotate(-2deg);opacity:1}
+  100%{transform:translate(-50%,-110%) scale(1);opacity:0}
+}
+.dust{position:absolute;width:10px;height:6px;background:rgba(255,255,255,.5);
+  border-radius:50%;pointer-events:none;z-index:19;animation:dust .35s ease-out forwards}
+@keyframes dust{0%{transform:translate(0,0) scale(1);opacity:.7}100%{transform:translate(var(--dx),6px) scale(1.8);opacity:0}}
+/* K.O. clash overlay */
+#ko{position:fixed;inset:0;z-index:9400;display:none;pointer-events:none;
+  align-items:center;justify-content:center;overflow:hidden}
+#ko.show{display:flex}
+#ko .kobg{position:absolute;inset:0;background:
+  repeating-linear-gradient(135deg,rgba(255,43,43,.18) 0 26px,rgba(0,0,0,.75) 26px 52px);
+  animation:kobg .8s linear}
+@keyframes kobg{0%{background-position:0 0}100%{background-position:220px 0}}
+#ko img{position:absolute;height:min(46vh,340px);bottom:12%;
+  filter:drop-shadow(0 8px 14px rgba(0,0,0,.7))}
+#ko .fA{left:6%;animation:fA .8s cubic-bezier(.3,1.4,.5,1) forwards}
+#ko .fB{right:6%;animation:fB .8s ease-in forwards}
+@keyframes fA{0%{transform:translateX(-120%) scale(.9)}45%{transform:translateX(14vw) scale(1.06)}60%{transform:translateX(10vw) scale(1)}100%{transform:translateX(10vw)}}
+@keyframes fB{0%{transform:translateX(120%) scaleX(-1)}45%{transform:translateX(-14vw) scaleX(-1)}62%{transform:translateX(-6vw) scaleX(-1) rotate(14deg)}100%{transform:translateX(30vw) translateY(70vh) scaleX(-1) rotate(80deg);opacity:.2}}
+#ko .kotxt{position:relative;z-index:2;font-family:var(--px);
+  font-size:clamp(34px,10vw,84px);color:var(--red);letter-spacing:4px;
+  text-shadow:0 0 30px rgba(255,43,43,.8),4px 4px 0 #000;
+  animation:kotxt .8s cubic-bezier(.2,2.4,.4,1) .18s both}
+@keyframes kotxt{0%{transform:scale(.1) rotate(-10deg);opacity:0}55%{transform:scale(1.4) rotate(4deg);opacity:1}100%{transform:scale(1)}}
+.banner.win{font-size:clamp(20px,6vw,34px);color:var(--red);
+  text-shadow:0 0 24px rgba(255,43,43,.7),3px 3px 0 #000;
+  animation:winflash .5s steps(2) infinite}
+@keyframes winflash{50%{color:var(--acid);text-shadow:0 0 24px rgba(182,255,0,.7),3px 3px 0 #000}}
+.banner img{height:120px;display:block;margin:0 auto 10px;
+  filter:drop-shadow(0 0 18px rgba(182,255,0,.5))}
 </style>
 </head>
 <body>
@@ -155,6 +217,7 @@ footer{margin-top:20px;color:var(--dim);font-size:16px;text-align:center;padding
 </div>
 
 <div class="modal" id="modal"><div class="promo" id="promoBox"></div></div>
+<div id="ko"></div>
 
 <footer>castling, en passant &amp; promotion included ♟ scan a monster, join the party<br>© ONLYIBEE — ICS</footer>
 
@@ -373,10 +436,18 @@ function commit(from,mv,promoT){
   const san=toSAN(from,mv,piece,captured,mv.flag,checkTxt);
   history.push({san,captured,mover,snapshot});
   render();
+  if(captured)FX.capture(from,mv,piece,captured);
+  else FX.move(from,mv);
   const status=document.getElementById('status');
   if(oppMoves.length===0){
     gameOver=true;
-    if(chk){status.textContent='CHECKMATE!';showBanner('CHECKMATE ♟<br>'+(mover==='w'?'GREEN':'RED')+' WINS');}
+    if(chk){
+      status.textContent='CHECKMATE!';
+      FX.mate();
+      setTimeout(function(){
+        showBanner('<img src="'+ART[mover].K+'" alt="">K.O.!!!<br><span style="font-size:12px;letter-spacing:2px">'+(mover==='w'?'GREEN':'RED')+' WINS THE SET</span>',true);
+      },700);
+    }
     else{status.textContent='STALEMATE';showBanner('STALEMATE — DRAW');}
     return;
   }
@@ -385,9 +456,9 @@ function commit(from,mv,promoT){
 }
 
 // ---------- modals ----------
-function showBanner(txt){
+function showBanner(txt,win){
   const box=document.getElementById('promoBox');
-  box.innerHTML=`<div class="banner">${txt}</div>
+  box.innerHTML=`<div class="banner${win?' win':''}">${txt}</div>
     <div class="row" style="justify-content:center">
     <button class="primary" onclick="closeModal();newGame()">PLAY AGAIN</button>
     <button onclick="closeModal()">CLOSE</button></div>`;
@@ -495,7 +566,154 @@ function undo(){
 }
 
 initState();render();
+
+/* ============================================================
+   FIGHT FX — retro fighting game juice
+============================================================ */
+var FX=(function(){
+  /* --- 8-bit sfx synth --- */
+  var sctx=null;
+  function ctxx(){ sctx=sctx||new (window.AudioContext||window.webkitAudioContext)(); return sctx; }
+  document.addEventListener('pointerdown',function(){ try{ctxx().resume();}catch(e){} },{once:true});
+  function osc(type,f0,f1,t0,dur,vol){
+    try{
+      var c=ctxx(),o=c.createOscillator(),g=c.createGain(),t=c.currentTime+t0;
+      o.type=type;o.frequency.setValueAtTime(f0,t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(30,f1),t+dur);
+      g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+.02);
+    }catch(e){}
+  }
+  function noise(t0,dur,vol,fc){
+    try{
+      var c=ctxx(),t=c.currentTime+t0;
+      var buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate),d=buf.getChannelData(0);
+      for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+      var src=c.createBufferSource();src.buffer=buf;
+      var f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=fc||1800;
+      var g=c.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      src.connect(f);f.connect(g);g.connect(c.destination);src.start(t);src.stop(t+dur);
+    }catch(e){}
+  }
+  var S={
+    move:function(){ osc('square',380,240,0,.07,.04); },
+    hit:function(){ noise(0,.12,.22,2200); osc('square',180,60,0,.14,.16); },
+    big:function(){ noise(0,.2,.3,1600); osc('square',140,40,0,.24,.2); osc('sawtooth',700,90,.02,.18,.1); },
+    ko:function(){
+      noise(0,.3,.3,1200); osc('square',120,35,0,.35,.24);
+      [660,520,392,262].forEach(function(f,i){ osc('square',f,f*.98,.28+i*.12,.12,.1); });
+    },
+    win:function(){
+      [392,523,659,784,1046].forEach(function(f,i){ osc('square',f,f,.05+i*.11,.14,.09); });
+    }
+  };
+
+  /* --- geometry helpers --- */
+  function sqEl(r,c){
+    var rows=flipped?7-r:r, cols=flipped?7-c:c;
+    return boardEl.children[rows*8+cols]||null;
+  }
+  function center(r,c){
+    var el=sqEl(r,c);if(!el)return null;
+    return {x:el.offsetLeft+el.offsetWidth/2,y:el.offsetTop+el.offsetHeight/2,s:el.offsetWidth};
+  }
+  function put(node){ boardEl.appendChild(node); }
+
+  /* --- effects --- */
+  function shake(big){
+    boardEl.classList.remove('shake','bigshake');
+    void boardEl.offsetWidth;
+    boardEl.classList.add(big?'bigshake':'shake');
+  }
+  function flash(){
+    var f=document.createElement('div');f.className='fxflash';put(f);
+    setTimeout(function(){f.remove();},220);
+  }
+  function sparks(r,c,color,n){
+    var p=center(r,c);if(!p)return;
+    for(var i=0;i<n;i++){
+      var s=document.createElement('div');s.className='spark';
+      var a=Math.random()*Math.PI*2,d=p.s*(0.6+Math.random()*1.1);
+      s.style.left=p.x+'px';s.style.top=p.y+'px';
+      s.style.background=Math.random()<.5?'#fff':color;
+      s.style.setProperty('--dx',Math.cos(a)*d+'px');
+      s.style.setProperty('--dy',Math.sin(a)*d+'px');
+      put(s);
+      (function(el){setTimeout(function(){el.remove();},500);})(s);
+    }
+    var im=document.createElement('div');im.className='impact';
+    im.style.left=p.x+'px';im.style.top=p.y+'px';im.style.borderColor=color;
+    put(im);setTimeout(function(){im.remove();},320);
+  }
+  function pow(r,c,txt,color,size){
+    var p=center(r,c);if(!p)return;
+    var t=document.createElement('div');t.className='powtxt';
+    t.textContent=txt;t.style.left=p.x+'px';t.style.top=p.y+'px';
+    t.style.color=color;t.style.fontSize=(size||16)+'px';
+    put(t);setTimeout(function(){t.remove();},650);
+  }
+  function dust(r,c){
+    var p=center(r,c);if(!p)return;
+    for(var i=0;i<3;i++){
+      var d=document.createElement('div');d.className='dust';
+      d.style.left=(p.x-6+Math.random()*12)+'px';d.style.top=(p.y+p.s*.28)+'px';
+      d.style.setProperty('--dx',(i-1)*14+'px');
+      put(d);(function(el){setTimeout(function(){el.remove();},380);})(d);
+    }
+  }
+  function slide(fromR,fromC,toR,toC){
+    var to=sqEl(toR,toC);if(!to)return;
+    var img=to.querySelector('img');if(!img)return;
+    var a=center(fromR,fromC),b=center(toR,toC);if(!a||!b)return;
+    img.style.transition='none';
+    img.style.transform='translate('+(a.x-b.x)+'px,'+(a.y-b.y)+'px)';
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      img.style.transition='transform .14s cubic-bezier(.2,.9,.4,1.2)';
+      img.style.transform='translate(0,0)';
+      setTimeout(function(){img.style.transition='transform .08s';},160);
+    });});
+  }
+  var koTimer=null;
+  function koClash(attacker,victim,txt){
+    var ko=document.getElementById('ko');
+    ko.innerHTML='<div class="kobg"></div>'
+      +'<img class="fA" src="'+ART[attacker.c][attacker.t]+'" alt="">'
+      +'<img class="fB" src="'+ART[victim.c][victim.t]+'" alt="">'
+      +'<div class="kotxt">'+txt+'</div>';
+    ko.classList.add('show');
+    clearTimeout(koTimer);
+    koTimer=setTimeout(function(){ko.classList.remove('show');ko.innerHTML='';},950);
+  }
+  var POWWORDS=['HIT!','POW!','BAM!','SMACK!','OOF!'];
+  return {
+    move:function(from,mv){
+      slide(from.r,from.c,mv.r,mv.c);
+      dust(mv.r,mv.c);
+      S.move();
+    },
+    capture:function(from,mv,piece,captured){
+      slide(from.r,from.c,mv.r,mv.c);
+      var big=(captured.t==='Q'||captured.t==='R');
+      var color=piece.c==='w'?'#b6ff00':'#ff2b2b';
+      flash();shake(big);
+      sparks(mv.r,mv.c,color,big?16:10);
+      if(big){
+        pow(mv.r,mv.c,'K.O.!','#ff2b2b',22);
+        koClash(piece,captured,captured.t==='Q'?'K.O.!':'SMASH!');
+        S.big();S.ko();
+      }else{
+        pow(mv.r,mv.c,POWWORDS[Math.floor(Math.random()*POWWORDS.length)],color,16);
+        S.hit();
+      }
+    },
+    mate:function(winnerPiece){
+      shake(true);flash();
+      S.ko();setTimeout(S.win,500);
+    },
+    winSound:S.win
+  };
+})();
 </script>
-<script src="../assets/player.js"></script>
+<script src="../assets/player.js?v=3"></script>
 </body>
 </html>
