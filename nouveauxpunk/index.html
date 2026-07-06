@@ -1,1 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOUVEAUX PUNK — THE EXPERIENCE | ONLY IBEE</title>
+<meta name="description" content="NOUVEAUX PUNK — The Experience. Rock, RnB, Blues, Emotional, Epic. A special album full of surprises.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0505;--panel:#120a0a;--ink:#e8e8e8;--dim:#8a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--border:#331a1a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:radial-gradient(circle at 50% -20%,#2a0808,var(--bg) 60%);
+  color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;overflow-x:hidden;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);
+  font-family:var(--px);font-size:10px;position:relative;z-index:50;
+}
+header a{color:var(--acid);text-decoration:none}
+header a .r{color:var(--red)}
+header span{color:var(--dim);font-size:8px}
 
+/* warning marquee */
+.mq{
+  overflow:hidden;border-bottom:2px solid var(--border);background:rgba(255,43,43,.08);
+  font-family:var(--px);font-size:9px;color:var(--red);padding:8px 0;white-space:nowrap;
+}
+.mq div{display:inline-block;animation:mq 18s linear infinite}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+main{max-width:980px;margin:0 auto;padding:34px 18px 90px;position:relative;z-index:2;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+
+/* ---------- hero ---------- */
+.hero{display:flex;align-items:center;justify-content:center;gap:26px;margin-bottom:14px}
+.gwrap{perspective:500px;width:74px;height:150px;flex:none}
+.gspin{width:100%;height:100%;transform-style:preserve-3d;animation:gspin 6s linear infinite}
+.gwrap.slow .gspin{animation-duration:8.5s;animation-direction:reverse}
+@keyframes gspin{from{transform:rotateY(0) rotateX(6deg)}to{transform:rotateY(360deg) rotateX(6deg)}}
+.gspin img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.coverwrap{perspective:900px;cursor:pointer}
+.cover{
+  width:min(320px,64vw);aspect-ratio:1;transform-style:preserve-3d;
+  animation:cwob 7s ease-in-out infinite;
+}
+@keyframes cwob{0%,100%{transform:rotateY(-14deg) rotateX(4deg)}50%{transform:rotateY(14deg) rotateX(-4deg)}}
+.cover img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  border:3px solid var(--red);box-shadow:0 0 34px rgba(255,43,43,.45),0 24px 50px rgba(0,0,0,.6);
+}
+h1{
+  font-family:var(--px);font-size:clamp(19px,5.6vw,34px);letter-spacing:2px;text-align:center;
+  color:var(--acid);text-shadow:0 0 24px rgba(182,255,0,.55),3px 3px 0 #200;
+  margin-top:22px;
+}
+.sub{
+  font-family:var(--px);font-size:clamp(9px,2.4vw,13px);color:var(--ink);
+  text-align:center;margin-top:12px;letter-spacing:3px;
+}
+.meta{color:var(--dim);text-align:center;margin-top:10px;font-size:20px;letter-spacing:2px}
+
+/* ---------- sections ---------- */
+.sec{margin-top:46px}
+.sh{
+  font-family:var(--px);font-size:clamp(11px,3vw,16px);margin-bottom:6px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.sh .r{color:var(--red)} .sh .a{color:var(--acid)}
+.ssub{color:var(--dim);margin-bottom:20px;font-size:18px}
+.card{border:2px solid var(--border);background:rgba(18,10,10,.9);padding:18px 20px}
+.prose{font-size:22px;line-height:1.55;color:#cfc5c5}
+.prose p{margin-bottom:14px}
+.prose .a{color:var(--acid)} .prose .r{color:var(--red)}
+
+/* track signals */
+.tr{
+  display:flex;align-items:center;gap:14px;padding:11px 12px;border-bottom:1px solid #1f1010;
+  color:var(--dim);cursor:not-allowed;
+}
+.tr:hover{background:#150b0b}
+.tr .no{font-family:var(--px);font-size:9px;width:30px;color:#5a3333}
+.tr .bars{flex:1;display:flex;gap:3px;align-items:center;overflow:hidden}
+.tr .bars i{width:6px;background:#2a1414;animation:stat 1.4s ease-in-out infinite}
+.tr .bars i:nth-child(3n){animation-delay:.2s}.tr .bars i:nth-child(3n+1){animation-delay:.45s}
+@keyframes stat{0%,100%{height:5px}50%{height:14px}}
+.tr .st{font-family:var(--px);font-size:8px;color:var(--red);flex:none}
+
+/* surprises vault */
+.vault{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px}
+.slot{
+  border:2px solid var(--border);background:var(--panel);padding:20px 12px 14px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.slot .stage{width:110px;height:110px;margin:0 auto;perspective:480px}
+.slot .sp{display:block;width:100%;height:100%;transform-style:preserve-3d;animation:gspin 5.4s linear infinite}
+.slot:nth-child(2n) .sp{animation-duration:6.8s;animation-direction:reverse}
+.slot .sp img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;
+  filter:brightness(0) drop-shadow(0 0 10px rgba(255,43,43,.3));opacity:.9}
+.slot .qm{
+  position:absolute;top:34%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--px);font-size:26px;color:var(--red);
+  text-shadow:0 0 14px rgba(255,43,43,.6);animation:blink 1.2s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:.25}}
+.slot .lock{
+  position:absolute;top:10px;right:10px;font-family:var(--px);font-size:7px;
+  color:var(--red);border:1px solid var(--red);padding:4px 6px;background:rgba(0,0,0,.8);
+}
+.slot .nm{font-family:var(--px);font-size:9px;line-height:1.8;margin-top:10px;color:var(--dim)}
+.slot .ds{color:#6a5555;font-size:16px;margin-top:6px;line-height:1.5}
+
+/* actions */
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:46px}
+.btn{
+  font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;
+  background:var(--acid);color:#000;
+}
+.btn.alt{background:transparent;color:var(--red);border:1px solid var(--red)}
+.btn:active{transform:translateY(2px)}
+#toast{
+  position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9500;
+  font-family:var(--px);font-size:9px;color:var(--ink);
+  background:rgba(0,0,0,.9);border:1px solid var(--acid);padding:10px 16px;
+  opacity:0;transition:all .3s ease;pointer-events:none;max-width:92vw;text-align:center;line-height:1.8;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+@media(max-width:700px){.gwrap{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../">ONLY<span class="r">IBEE</span> OS</a>
+  <span>NP.SYS</span>
+</header>
+<div class="mq"><div>
+  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ SIGNALS ENCRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
+  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ SIGNALS ENCRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
+</div></div>
+
+<main>
+  <!-- hero -->
+  <div class="hero">
+    <div class="gwrap"><div class="gspin" id="g1"></div></div>
+    <div class="coverwrap" id="coverwrap">
+      <div class="cover"><img src="../assets/img/nouveaux-punk.jpg" alt="Nouveaux Punk — The Experience"></div>
+    </div>
+    <div class="gwrap slow"><div class="gspin" id="g2"></div></div>
+  </div>
+  <h1>NOUVEAUX PUNK</h1>
+  <div class="sub">— THE EXPERIENCE —</div>
+  <div class="meta">2022 · ROCK / RNB / BLUES / EMOTIONAL / EPIC · ONLY IB</div>
+
+  <!-- about -->
+  <div class="sec">
+    <div class="sh"><span class="r">//</span> WHAT IS <span class="a">THE EXPERIENCE</span>_</div>
+    <div class="card prose">
+      <p>NOUVEAUX PUNK isn't just an EP — it's a story written by ONLY IB, based on the novel by NOUVEAUX PUNK. Rock that cries, RnB that fights, blues that refuses to lose. <span class="a">Emotional. Epic.</span></p>
+      <p>This page is the album's home. Piece by piece it will fill up with everything around it: the songs, the story behind every scream, the visuals, the relics — <span class="r">and things nobody expects_</span></p>
+      <p>Some of it unlocks with time. Some of it unlocks with codes. Some of it only unlocks if you were there.</p>
+    </div>
+  </div>
+
+  <!-- track signals -->
+  <div class="sec">
+    <div class="sh">TRACK SIGNALS <span class="r">[ENCRYPTED]</span></div>
+    <div class="ssub">the songs are sealed — transmissions will open one by one_</div>
+    <div class="card" id="tracks"></div>
+  </div>
+
+  <!-- surprises -->
+  <div class="sec">
+    <div class="sh">THE <span class="a">SURPRISES</span>_</div>
+    <div class="ssub">sealed containers — each one opens on its own day_</div>
+    <div class="vault">
+      <div class="slot"><span class="lock">SEALED</span>
+        <div class="stage"><span class="sp"><img src="../assets/chess/knight2.png" alt=""></span></div><span class="qm">?</span>
+        <div class="nm">THE FILM</div><div class="ds">a visual piece from the experience_</div>
+      </div>
+      <div class="slot"><span class="lock">SEALED</span>
+        <div class="stage"><span class="sp"><img src="../assets/chess/rook1.png" alt=""></span></div><span class="qm">?</span>
+        <div class="nm">DEMO TAPES</div><div class="ds">the versions nobody was meant to hear_</div>
+      </div>
+      <div class="slot"><span class="lock">SEALED</span>
+        <div class="stage"><span class="sp"><img src="../assets/chess/queen.png" alt=""></span></div><span class="qm">?</span>
+        <div class="nm">THE RELICS</div><div class="ds">nouveaux punk pieces — crop tops &amp; more, archive + drops_</div>
+      </div>
+      <div class="slot"><span class="lock">SEALED</span>
+        <div class="stage"><span class="sp"><img src="../assets/chess/bishop1.png" alt=""></span></div><span class="qm">?</span>
+        <div class="nm">THE STORY</div><div class="ds">the novel behind the album, chapter by chapter_</div>
+      </div>
+      <div class="slot"><span class="lock">SEALED</span>
+        <div class="stage"><span class="sp"><img src="../assets/chess/pon.png" alt=""></span></div><span class="qm">?</span>
+        <div class="nm">LIVE RITUAL</div><div class="ds">when and where the experience happens in real life_</div>
+      </div>
+      <div class="slot"><span class="lock">SEALED</span>
+        <div class="stage"><span class="sp"><img src="../assets/chess/king.png" alt=""></span></div><span class="qm">?</span>
+        <div class="nm">??????</div><div class="ds">not even the console knows what this one is_</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a class="btn" href="../?tag=NOUVEAUXPUNK">▶ ENTER THE CONSOLE</a>
+    <a class="btn alt" href="../lyrics/">✎ LYRICS ENGINE</a>
+  </div>
+</main>
+
+<div id="toast"></div>
+<footer>© ONLYIBEE — NOUVEAUX PUNK · THE EXPERIENCE</footer>
+
+<script>
+(function(){
+  "use strict";
+  /* ---------- pixel guitars (extruded 3D stacks) ---------- */
+  var V="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 40'%3E%3Crect x='9' y='0' width='2.4' height='4' fill='%23b6ff00'/%3E%3Crect x='8.2' y='0.4' width='1' height='.8' fill='%23070707'/%3E%3Crect x='11' y='1.6' width='1' height='.8' fill='%23070707'/%3E%3Crect x='9.4' y='4' width='1.6' height='15' fill='%235a3a1a'/%3E%3Cpath d='M3 19 L17 19 L11.6 37.5 L8.4 37.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='8.8' y='21' width='2.8' height='1.4' fill='%23070707'/%3E%3Crect x='8.8' y='24' width='2.8' height='1.4' fill='%23070707'/%3E%3Cline x1='9.8' y1='4' x2='9.8' y2='27' stroke='%23e8e8e8' stroke-width='.35'/%3E%3Cline x1='10.6' y1='4' x2='10.6' y2='27' stroke='%23e8e8e8' stroke-width='.35'/%3E%3C/svg%3E";
+  var S="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 40'%3E%3Crect x='9' y='0' width='2.4' height='4.4' fill='%23ff2b2b'/%3E%3Crect x='9.4' y='4.4' width='1.6' height='14' fill='%234a3a2a'/%3E%3Cpath d='M6 18 Q2 22 4.5 27 Q6 30 5 33 Q7 38 10 37.5 Q13 38 15 33 Q14 30 15.5 27 Q18 22 14 18 Q12 16.5 10 17 Q8 16.5 6 18 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.6'/%3E%3Crect x='8' y='21.5' width='4' height='1.3' fill='%23070707'/%3E%3Crect x='8' y='25' width='4' height='1.3' fill='%23070707'/%3E%3Crect x='8' y='28.5' width='4' height='1.3' fill='%23070707'/%3E%3Cline x1='9.7' y1='4' x2='9.7' y2='31' stroke='%23111' stroke-width='.35'/%3E%3Cline x1='10.5' y1='4' x2='10.5' y2='31' stroke='%23111' stroke-width='.35'/%3E%3C/svg%3E";
+  function stack(el,src){
+    var zs=[-3.2,-1.9,-0.6,0.6,1.9,3.2],html="";
+    zs.forEach(function(z,i){
+      var front=(i===zs.length-1);
+      html+='<img src="'+src+'" alt="" style="transform:translateZ('+z+'px)'+(front?'':';filter:brightness(.4)')+'">';
+    });
+    el.innerHTML=html;
+  }
+  stack(document.getElementById("g1"),V);
+  stack(document.getElementById("g2"),S);
+
+  /* ---------- encrypted track list ---------- */
+  var tr=document.getElementById("tracks"),html="";
+  for(var i=1;i<=8;i++){
+    var bars="";for(var b=0;b<26;b++)bars+="<i></i>";
+    html+='<div class="tr"><span class="no">'+(i<10?"0":"")+i+'</span><span class="bars">'+bars+'</span><span class="st">ENCRYPTED</span></div>';
+  }
+  tr.innerHTML=html;
+
+  /* ---------- toast + cover secret ---------- */
+  var toastEl=document.getElementById("toast"),tt=null;
+  function toast(m,d){toastEl.innerHTML=m;toastEl.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove("show");},d||3200);}
+  var taps=0,tapT=null;
+  document.getElementById("coverwrap").addEventListener("click",function(){
+    taps++;clearTimeout(tapT);tapT=setTimeout(function(){taps=0;},2200);
+    if(taps===5){taps=0;toast("★ FRAGMENT FOUND_<br>↑↑↓↓←→←→ B A<br>speak it to the console_",5200);}
+    else if(taps===3){toast("something is hidden in this cover_");}
+  });
+  Array.prototype.slice.call(document.querySelectorAll(".tr")).forEach(function(row){
+    row.addEventListener("click",function(){toast("SIGNAL ENCRYPTED — not yet transmitted_");});
+  });
+})();
+</script>
+<script src="../assets/player.js?v=6"></script>
+</body>
+</html>
