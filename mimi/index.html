@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIMI — CERTIFIED | ONLY IBEE</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070707;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;--border:#2a2a2a;--rc:#9a9a9a;
+--px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);min-height:100dvh;
+display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{width:100%;display:flex;justify-content:space-between;padding:14px 18px;
+border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px}
+header a{color:var(--acid);text-decoration:none}header a .red{color:var(--red)}
+header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:560px;padding:28px 18px 40px;display:flex;flex-direction:column;
+align-items:center;gap:18px;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+.sys{font-family:var(--px);font-size:9px;color:var(--dim);letter-spacing:1px}
+.box{position:relative;width:min(420px,88vw);aspect-ratio:1;border:3px solid var(--rc);
+background:#000;box-shadow:0 0 24px color-mix(in srgb,var(--rc) 45%,transparent),inset 0 0 40px rgba(0,0,0,.6)}
+.box video{width:100%;height:100%;display:block;object-fit:cover}
+.box .scan{position:absolute;left:0;right:0;top:0;height:3px;background:var(--rc);opacity:.8;
+box-shadow:0 0 12px var(--rc);animation:scan 1.4s linear 2;pointer-events:none}
+@keyframes scan{0%{top:0}100%{top:calc(100% - 3px)}}
+.box .corner{position:absolute;width:16px;height:16px;border:3px solid var(--rc);pointer-events:none}
+.c1{top:-3px;left:-3px;border-right:none;border-bottom:none}
+.c2{top:-3px;right:-3px;border-left:none;border-bottom:none}
+.c3{bottom:-3px;left:-3px;border-right:none;border-top:none}
+.c4{bottom:-3px;right:-3px;border-left:none;border-top:none}
+h1{font-family:var(--px);font-size:clamp(18px,6vw,28px);letter-spacing:2px;
+color:var(--rc);text-shadow:0 0 16px color-mix(in srgb,var(--rc) 60%,transparent)}
+.role{color:var(--dim);font-size:20px;margin-top:-10px;letter-spacing:2px}
+.chip{font-family:var(--px);font-size:9px;color:var(--rc);border:1px solid var(--rc);padding:7px 12px}
+.verify{font-family:var(--px);font-size:10px;color:var(--dim);height:18px}
+.verify.ok{color:var(--acid);text-shadow:0 0 10px rgba(182,255,0,.5)}
+.serial{color:var(--dim);font-size:17px;text-align:center;line-height:1.6}
+.btn{font-family:var(--px);font-size:10px;color:#000;background:var(--acid);padding:14px 18px;
+text-decoration:none;margin-top:6px}
+.btn:active{transform:translateY(2px)}
+footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim)}
+</style>
+</head>
+<body>
+<header><a href="../">ONLY<span class="red">IBEE</span> OS</a><span>CERTIFICATION.SYS</span></header>
+<main>
+  <div class="sys">// AUTHENTICITY CHECK_</div>
+  <div class="box">
+    <video id="v" autoplay muted loop playsinline></video>
+    <div class="scan"></div>
+    <div class="corner c1"></div><div class="corner c2"></div><div class="corner c3"></div><div class="corner c4"></div>
+  </div>
+  <h1>MIMI</h1>
+  <div class="role">ICS CHARACTER</div>
+  <div class="chip">■ COMMON</div>
+  <div class="verify" id="verify">SCANNING…</div>
+  <div class="serial">This item is real. Each piece is unique — made only once.<br>ICS · IBEE'S CHESS SET ♟️</div>
+  <a class="btn" href="../?tag=MIMI">▶ ENTER THE CONSOLE</a>
+</main>
+<footer>© ONLYIBEE — HUMAN-MADE</footer>
+<script>
+(function(){
+  var vids=["mimi.mp4"];
+  var v=document.getElementById('v');
+  v.src='../assets/cert/'+vids[Math.floor(Math.random()*vids.length)];
+  v.play().catch(function(){});
+  setTimeout(function(){
+    var e=document.getElementById('verify');
+    e.textContent='✓ VERIFIED — AUTHENTIC';
+    e.classList.add('ok');
+  },2200);
+})();
+</script>
+</body>
+</html>
