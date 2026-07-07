@@ -1468,6 +1468,15 @@
     go(_hash);
     if(_live){setTimeout(function(){try{ENG.enterPlaying();}catch(e){}},220);} // let the radio init first
   }
+
+  /* respond to hash changes too — lets the app shell's top nav switch screens in place
+     (no reload, no music blip) and makes direct #hash links work while already loaded */
+  window.addEventListener("hashchange",function(){
+    var h=location.hash.slice(1);
+    if(h==="playing"||h==="nowplaying"){ go("music"); setTimeout(function(){try{ENG.enterPlaying();}catch(e){}},60); return; }
+    var el=h&&document.getElementById(h);
+    if(el&&el.classList.contains("screen")) go(h);
+  });
 })();
 </script>
 <script src="assets/player.js?v=9"></script>
