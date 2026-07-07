@@ -690,6 +690,7 @@
 
     /* ---------- state ---------- */
     var view="galaxy",curG=null,planets=[],playing=null,gridMode=false,ghost=null,lastGhostId=null;
+    var forceGhost=false,zoomStart=0; // forceGhost: pin the radio song as performer on arrival · zoomStart: galaxy open animation
     function slugOf(t){return t.file.split("/").pop();}
     var stars=null,galaxyGeo=null;
     var audioLevel=0,audioBeat=0,emaLow=0;
@@ -826,6 +827,8 @@
     }
     function enterGalaxy(g){
       curG=g;view="system";
+      forceGhost=false;                 // normal entry: no pinned performer
+      zoomStart=performance.now();      // trigger the zoom-in animation
       var w=root.clientWidth,h=root.clientHeight;
       var ts=TRACKS.filter(function(t){return t.g===g.id});
       planets=ts.map(function(t){return makePlanet(t,w,h,ts.length)});
@@ -1262,6 +1265,7 @@
           var g=galaxyAt(p.x,p.y);
           if(g)enterGalaxy(g);
         }else{
+          forceGhost=false;   // user took over — release the pinned performer
           var hit=pickPlanet(p.x,p.y);
           if(hit){
             if(hit.t.locked){toast("SIGNAL ENCRYPTED — not yet transmitted_",true);blip(120,.08);}
@@ -1324,12 +1328,13 @@
       if(canvas.width!==Math.floor(w*devicePixelRatio))resize();
       ctx.clearRect(0,0,w,h);
       drawSpace(w,h);
-      // radio → universe: if the radio is playing one of these songs, its planet performs
+      // radio → universe: the radio's current song performs at center.
+      // plays live → always; paused but pinned (arrived via PLANETS) → still show the performer.
       ghost=null;
       var RR=window.IBEERADIO;
-      if(!playing&&view==="system"&&RR&&RR.playing()){
-        var rs=RR.slug();
-        for(var gi2=0;gi2<planets.length;gi2++){if(slugOf(planets[gi2].t)===rs){ghost=planets[gi2];break;}}
+      if(!playing&&view==="system"&&RR&&RR.slug){
+        var rs=(RR.playing&&RR.playing())?RR.slug():(forceGhost?RR.slug():null);
+        if(rs)for(var gi2=0;gi2<planets.length;gi2++){if(slugOf(planets[gi2].t)===rs){ghost=planets[gi2];break;}}
       }
       var gkey=ghost?ghost.t.id:null;
       if(gkey!==lastGhostId){lastGhostId=gkey;if(ghost)assignOrbits(ghost);}
@@ -1338,7 +1343,18 @@
         var bounds={w:w,h:h};
         planets.forEach(function(p,i){stepPlanet(p,dt,bounds,i,planets.length)});
         if(!playing&&!ghost&&!gridMode)resolveCollisions();
-        planets.forEach(function(p){drawPlanet(p)});
+        // zoom-in animation when a galaxy is opened
+        var zp=zoomStart?Math.min(1,(t-zoomStart)/430):1;
+        if(zp<1){
+          var ez=1-Math.pow(1-zp,3);          // easeOutCubic
+          ctx.save();
+          ctx.globalAlpha=0.2+0.8*ez;
+          ctx.translate(w*0.5,h*0.44);ctx.scale(1.5-0.5*ez,1.5-0.5*ez);ctx.translate(-w*0.5,-h*0.44);
+          planets.forEach(function(p){drawPlanet(p)});
+          ctx.restore();
+        }else{
+          planets.forEach(function(p){drawPlanet(p)});
+        }
       }
     }
     requestAnimationFrame(loop);
@@ -1355,7 +1371,18 @@
           if(rs){for(var i=0;i<TRACKS.length;i++){if(slugOf(TRACKS[i])===rs){target=galaxyOf(TRACKS[i].g);break;}}}
         }
         if(!target)target=galaxyOf("rss")||visGalaxies()[0]; // radio songs live here
-        if(target)enterGalaxy(target);
+        if(target){
+          enterGalaxy(target);
+          forceGhost=true;             // show the current song as the centered performer right away
+          if(R&&R.slug&&R.slug()){
+            // best-effort: resume the radio right where it stopped (saved timestamp).
+            try{if(R.control&&R.control.play)R.control.play();}catch(e){}
+            // if the browser blocks un-tapped audio, tell the user how to resume (radio resumes on first tap)
+            setTimeout(function(){
+              if(R.playing&&!R.playing())toast("▶ tap anywhere to resume the signal_");
+            },500);
+          }
+        }
       }
     };
   })();
