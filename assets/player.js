@@ -4,6 +4,17 @@
    ============================================================ */
 (function(){
   "use strict";
+  /* ---- seamless-shell awareness: never run two radios in one experience ----
+     Standalone pages behave exactly as before. When a page is loaded INSIDE the
+     ONLYIBEE shell/app frame, it defers to the parent's radio so the music never
+     restarts. If a radio already exists in this document (SPA re-inject), skip. */
+  try{
+    if(window.top !== window.self && window.top.IBEERADIO){
+      window.IBEERADIO = window.top.IBEERADIO;   // proxy to the persistent parent radio
+      return;
+    }
+  }catch(e){}
+  if(window.IBEERADIO){ return; }
   var BASE = document.currentScript.src.replace(/player\.js.*$/, "");
   var ROOT = BASE.replace(/assets\/$/, "");
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
