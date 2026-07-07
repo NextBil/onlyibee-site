@@ -56,6 +56,9 @@ text-decoration:none;margin-top:6px}
 .btn:active{transform:translateY(2px)}
 .btn2{background:transparent;color:var(--acid);border:1px solid var(--acid)}
 footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim)}
+.card{width:min(360px,88vw);border:3px solid var(--rc);background:#fff;margin-top:6px;box-shadow:0 0 22px color-mix(in srgb,var(--rc) 35%,transparent)}
+.card img{width:100%;display:block}
+.cardcap{font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -73,6 +76,8 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim)}
   <div class="verify" id="verify">SCANNING…</div>
   <div class="serial">This item is real. Each piece is unique — made only once.<br>ICS · IBEE'S CHESS SET ♟️</div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><a class="btn" href="../?tag=ABLAH">▶ ENTER THE CONSOLE</a><a class="btn btn2" href="../chess/">♟ PLAY ICS CHESS</a></div>
+  <div class="card"><img src="../assets/cards/abla.png" alt="ABLAH card" loading="lazy"></div>
+  <div class="cardcap">ORIGINAL HAND-DRAWN CARD · 1 OF 1</div>
 </main>
 <footer>© ONLYIBEE — HUMAN-MADE</footer>
 <script>
@@ -88,6 +93,6 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim)}
   },2200);
 })();
 </script>
-<script src="../assets/player.js?v=8"></script>
+<script src="../assets/player.js?v=9"></script>
 </body>
 </html>
