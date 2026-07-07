@@ -1,84 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- ===== favicon (bishop 1) ===== -->
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BEEBEE — CERTIFIED | ONLY IBEE</title>
+<title>BEEBEE — CHARACTER FILE | ONLY IBEE</title>
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#070707;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;--border:#2a2a2a;--rc:#e879c9;
---px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+:root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
+--border:#2a2a2a;--rc:#e879c9;--px:'Press Start 2P',monospace;--vt:'VT323',monospace}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--ink);font-family:var(--vt);min-height:100dvh;
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;
 display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
 background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+::selection{background:var(--rc);color:#000}
 header{width:100%;display:flex;justify-content:space-between;padding:14px 18px;
 border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px}
 header a{color:var(--acid);text-decoration:none}header a .red{color:var(--red)}
-header span{color:var(--dim);font-size:8px}
-main{flex:1;width:100%;max-width:560px;padding:28px 18px 40px;display:flex;flex-direction:column;
-align-items:center;gap:18px;animation:crtin .3s ease-out}
+header span{color:var(--dim);font-size:8px;text-align:right;line-height:1.6}
+main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-direction:column;
+align-items:center;gap:20px;animation:crtin .3s ease-out}
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+
+/* ---------- hero showcase ---------- */
 .sys{font-family:var(--px);font-size:9px;color:var(--dim);letter-spacing:1px}
-.box{position:relative;width:min(420px,88vw);aspect-ratio:1;border:3px solid var(--rc);
-background:#000;box-shadow:0 0 24px color-mix(in srgb,var(--rc) 45%,transparent),inset 0 0 40px rgba(0,0,0,.6)}
+.box{position:relative;width:min(400px,86vw);aspect-ratio:1;border:3px solid var(--rc);background:#000;
+box-shadow:0 0 24px color-mix(in srgb,var(--rc) 45%,transparent),inset 0 0 40px rgba(0,0,0,.6)}
 .box video{width:100%;height:100%;display:block;object-fit:cover}
 .box .scan{position:absolute;left:0;right:0;top:0;height:3px;background:var(--rc);opacity:.8;
 box-shadow:0 0 12px var(--rc);animation:scan 1.4s linear 2;pointer-events:none}
 @keyframes scan{0%{top:0}100%{top:calc(100% - 3px)}}
 .box .corner{position:absolute;width:16px;height:16px;border:3px solid var(--rc);pointer-events:none}
-.c1{top:-3px;left:-3px;border-right:none;border-bottom:none}
-.c2{top:-3px;right:-3px;border-left:none;border-bottom:none}
-.c3{bottom:-3px;left:-3px;border-right:none;border-top:none}
-.c4{bottom:-3px;right:-3px;border-left:none;border-top:none}
-h1{font-family:var(--px);font-size:clamp(18px,6vw,28px);letter-spacing:2px;
-color:var(--rc);text-shadow:0 0 16px color-mix(in srgb,var(--rc) 60%,transparent)}
-.role{color:var(--dim);font-size:20px;margin-top:-10px;letter-spacing:2px}
-.chip{font-family:var(--px);font-size:9px;color:var(--rc);border:1px solid var(--rc);padding:7px 12px}
-.verify{font-family:var(--px);font-size:10px;color:var(--dim);height:18px}
-.verify.ok{color:var(--acid);text-shadow:0 0 10px rgba(182,255,0,.5)}
-.serial{color:var(--dim);font-size:17px;text-align:center;line-height:1.6}
-.btn{font-family:var(--px);font-size:10px;color:#000;background:var(--acid);padding:14px 18px;
-text-decoration:none;margin-top:6px}
-.btn:active{transform:translateY(2px)}
-.btn2{background:transparent;color:var(--acid);border:1px solid var(--acid)}
-footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim)}
+.c1{top:-3px;left:-3px;border-right:none;border-bottom:none}.c2{top:-3px;right:-3px;border-left:none;border-bottom:none}
+.c3{bottom:-3px;left:-3px;border-right:none;border-top:none}.c4{bottom:-3px;right:-3px;border-left:none;border-top:none}
+.id{text-align:center}
+h1{font-family:var(--px);font-size:clamp(20px,7vw,32px);letter-spacing:2px;color:var(--rc);
+text-shadow:0 0 16px color-mix(in srgb,var(--rc) 60%,transparent)}
+.role{color:var(--dim);font-size:20px;margin-top:6px;letter-spacing:2px}
+.role .alias{color:var(--rc)}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.chip{font-family:var(--px);font-size:8px;padding:6px 9px;border:1px solid var(--rc);color:var(--rc)}
+.chip.ok{border-color:var(--acid);color:var(--acid);opacity:.4}
+.chip.ok.on{opacity:1;text-shadow:0 0 10px rgba(182,255,0,.5)}
+
+/* ---------- game menu ---------- */
+.menu{width:min(440px,92vw);border:2px solid var(--border);background:var(--panel)}
+.menu .mh{font-family:var(--px);font-size:9px;color:var(--dim);padding:12px 14px;border-bottom:2px solid var(--border);
+display:flex;justify-content:space-between}
+.menu .mh .r{color:var(--rc)}
+.menu ul{list-style:none}
+.menu li{display:flex;align-items:center;gap:12px;padding:15px 14px;cursor:pointer;color:var(--dim);
+border-bottom:1px solid #161616;font-family:var(--px);font-size:12px;user-select:none}
+.menu li:last-child{border-bottom:none}
+.menu li .cur{visibility:hidden;color:var(--acid)}
+.menu li .ico{width:20px;text-align:center;font-size:14px;color:var(--rc)}
+.menu li .lb{flex:1;line-height:1.5}
+.menu li .lb small{display:block;font-family:var(--vt);font-size:15px;color:#6a6a6a;margin-top:5px;letter-spacing:0}
+.menu li .tag{font-size:8px;color:#555}
+.menu li.sel{background:#141018;color:var(--ink)}
+.menu li.sel .cur{visibility:visible;animation:blink 1s steps(1) infinite}
+.menu li.sel .tag{color:var(--rc)}
+.menu li.play.sel{box-shadow:inset 3px 0 0 var(--acid)}
+@keyframes blink{50%{opacity:0}}
+.hint{font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;padding:11px}
+
+/* ---------- bio / stats ---------- */
+.section{width:min(560px,94vw);scroll-margin-top:20px}
+.shead{font-family:var(--px);font-size:11px;color:var(--rc);letter-spacing:1px;margin:10px 0 14px;
+border-top:1px solid #1a1a1a;padding-top:18px}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:20px}
+.stat .k{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:6px}
+.stat .v{color:var(--ink);font-size:19px}
+.bar{display:flex;gap:4px;margin-top:3px}
+.bar i{width:14px;height:12px;background:#1c1c1c;border:1px solid #333}
+.bar i.on{background:var(--rc);border-color:var(--rc);box-shadow:0 0 8px color-mix(in srgb,var(--rc) 60%,transparent)}
+.lore{font-size:21px;line-height:1.55;color:#c9c9c9;border-left:3px solid var(--rc);padding:4px 0 4px 14px;margin-bottom:8px}
+.lore .q{color:var(--rc)}
+.special{font-family:var(--px);font-size:9px;color:var(--acid);margin:16px 0;line-height:1.7}
+.card{width:100%;border:3px solid var(--rc);background:#fff;margin-top:6px;
+box-shadow:0 0 22px color-mix(in srgb,var(--rc) 35%,transparent)}
+.card img{width:100%;display:block}
+.cardcap{font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;margin-top:8px}
+
+footer{padding:22px 14px 40px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+.blip{position:fixed;opacity:0}
 </style>
 </head>
 <body>
-<header><a href="../">ONLY<span class="red">IBEE</span> OS</a><span>CERTIFICATION.SYS</span></header>
+<header>
+  <a href="../">ONLY<span class="red">IBEE</span> OS</a>
+  <span>CHARACTER FILE<br>ICS · BEEBEE</span>
+</header>
+
 <main>
-  <div class="sys">// AUTHENTICITY CHECK_</div>
+  <div class="sys">// LOADING CHARACTER_</div>
+
   <div class="box">
     <video id="v" autoplay muted loop playsinline></video>
     <div class="scan"></div>
     <div class="corner c1"></div><div class="corner c2"></div><div class="corner c3"></div><div class="corner c4"></div>
   </div>
-  <h1>BEEBEE</h1>
-  <div class="role">THE BISHOP</div>
-  <div class="chip">■ SUPER RARE</div>
-  <div class="verify" id="verify">SCANNING…</div>
-  <div class="serial">This item is real. Each piece is unique — made only once.<br>ICS · IBEE'S CHESS SET ♟️</div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><a class="btn" href="../?tag=BEEBEE">▶ ENTER THE CONSOLE</a><a class="btn btn2" href="../chess/">♟ PLAY ICS CHESS</a></div>
+
+  <div class="id">
+    <h1>BEEBEE</h1>
+    <div class="role">THE BISHOP · <span class="alias">"POOR GUY"</span></div>
+    <div class="chips">
+      <span class="chip">■ SUPER RARE</span>
+      <span class="chip ok" id="vchip">SCANNING…</span>
+    </div>
+  </div>
+
+  <!-- ===== GAME MENU ===== -->
+  <div class="menu">
+    <div class="mh"><span>SELECT_</span><span class="r">BEEBEE.SYS</span></div>
+    <ul id="mlist">
+      <li class="play sel" data-act="run" data-href="../arcade/runner/">
+        <span class="cur">▶</span><span class="ico">»</span>
+        <span class="lb">BEEBEE RUNNER<small>run the punk city to the beat</small></span><span class="tag">ARCADE</span></li>
+      <li class="play" data-act="chess" data-href="../chess/">
+        <span class="cur">▶</span><span class="ico">♟</span>
+        <span class="lb">ICS CHESS<small>play the crew on the board</small></span><span class="tag">BOARD</span></li>
+      <li data-act="bio" data-scroll="bio">
+        <span class="cur">▶</span><span class="ico">▦</span>
+        <span class="lb">CHARACTER CARD<small>bio · stats · the story</small></span><span class="tag">BIO</span></li>
+      <li data-act="console" data-href="../?tag=BEEBEE">
+        <span class="cur">▶</span><span class="ico">◈</span>
+        <span class="lb">ENTER THE CONSOLE<small>unlocks the vault</small></span><span class="tag">OS</span></li>
+    </ul>
+    <div class="hint">↑ ↓ + ENTER · or tap_</div>
+  </div>
+
+  <!-- ===== BIO / STATS ===== -->
+  <div class="section" id="bio">
+    <div class="shead">// CHARACTER CARD_</div>
+    <div class="statgrid">
+      <div class="stat"><div class="k">CLASS</div><div class="v">BISHOP</div></div>
+      <div class="stat"><div class="k">RARITY</div><div class="v" style="color:var(--rc)">SUPER RARE</div></div>
+      <div class="stat"><div class="k">ALIAS</div><div class="v">"POOR GUY"</div></div>
+      <div class="stat"><div class="k">MOOD</div><div class="v">MELANCHOLIC</div></div>
+      <div class="stat"><div class="k">SPEED</div><div class="bar" data-n="4"></div></div>
+      <div class="stat"><div class="k">JUMP</div><div class="bar" data-n="3"></div></div>
+      <div class="stat"><div class="k">HEART</div><div class="bar" data-n="5"></div></div>
+      <div class="stat"><div class="k">LUCK</div><div class="bar" data-n="1"></div></div>
+    </div>
+    <div class="lore">
+      <span class="q">"</span>This guy is so sad &amp; no one knows why. If it wasn't for the kingdom,
+      he would've crashed out already<span class="q">…"</span>
+    </div>
+    <div class="special">★ SPECIAL — THE ENDLESS RUN: outrun the sadness. play BEEBEE RUNNER ▶</div>
+    <div class="card"><img src="../assets/cards/beebee.png" alt="BEEBEE — original hand-drawn card" loading="lazy"></div>
+    <div class="cardcap">ORIGINAL HAND-DRAWN CARD · 1 OF 1</div>
+  </div>
 </main>
-<footer>© ONLYIBEE — HUMAN-MADE</footer>
+
+<footer>© ONLYIBEE — HUMAN-MADE · ICS = IBEE'S CHESS SET ♟</footer>
+
 <script>
 (function(){
-  var vids=["beebee.mp4","beebee2.mp4"];
-  var v=document.getElementById('v');
+  /* ---------- video + verification ---------- */
+  var vids=["beebee.mp4","beebee2.mp4"],v=document.getElementById('v');
   v.src='../assets/cert/'+vids[Math.floor(Math.random()*vids.length)];
   v.play().catch(function(){});
-  setTimeout(function(){
-    var e=document.getElementById('verify');
-    e.textContent='✓ VERIFIED — AUTHENTIC';
-    e.classList.add('ok');
-  },2200);
+  setTimeout(function(){var c=document.getElementById('vchip');c.textContent='✓ VERIFIED';c.classList.add('on');},2200);
+
+  /* ---------- stat bars ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.bar'),function(b){
+    var n=+b.getAttribute('data-n'),h='';for(var i=0;i<5;i++)h+='<i class="'+(i<n?'on':'')+'"></i>';b.innerHTML=h;
+  });
+
+  /* ---------- tiny bleep ---------- */
+  var actx=null;function blip(f,d){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+    var o=actx.createOscillator(),g=actx.createGain();o.type='square';o.frequency.value=f;
+    g.gain.setValueAtTime(.03,actx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);
+    o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+d);}catch(e){}}
+
+  /* ---------- game-menu navigation ---------- */
+  var items=Array.prototype.slice.call(document.querySelectorAll('#mlist li')),sel=0;
+  function paint(){items.forEach(function(it,i){it.classList.toggle('sel',i===sel);});}
+  function activate(it){
+    var href=it.getAttribute('data-href'),scroll=it.getAttribute('data-scroll');
+    blip(520,.05);
+    if(href){setTimeout(function(){location.href=href;},90);}
+    else if(scroll){var t=document.getElementById(scroll);if(t)t.scrollIntoView({behavior:'smooth'});}
+  }
+  items.forEach(function(it,i){
+    it.addEventListener('mouseenter',function(){sel=i;paint();blip(300,.02);});
+    it.addEventListener('click',function(){sel=i;paint();activate(it);});
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'){sel=(sel+1)%items.length;paint();blip(300,.02);e.preventDefault();}
+    else if(e.key==='ArrowUp'){sel=(sel-1+items.length)%items.length;paint();blip(300,.02);e.preventDefault();}
+    else if(e.key==='Enter'||e.key===' '){activate(items[sel]);e.preventDefault();}
+  });
+  paint();
 })();
 </script>
-<script src="../assets/player.js"></script>
+<script src="../assets/player.js?v=8"></script>
 </body>
 </html>
