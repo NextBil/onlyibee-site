@@ -1172,6 +1172,25 @@
     });
     function fmt(s){if(!isFinite(s))return"--:--";var m=Math.floor(s/60),ss=Math.floor(s%60);return m+":"+(ss<10?"0":"")+ss;}
     function playTrack(pl){
+      /* ===== ONE SOURCE =====
+         If this planet is a radio song, don't spin up a second player — command the
+         shared radio. The performer planet, the lyrics engine, the runner's pulse and
+         the radio bar then all follow that single stream. */
+      var RU=window.IBEERADIO;
+      if(RU&&RU.indexBySlug){
+        var rIdx=RU.indexBySlug(slugOf(pl.t));
+        if(rIdx>=0){
+          try{ if(audio&&!audio.paused) audio.pause(); }catch(e){}  // silence any local track
+          playing=null;            // the performer is driven by the radio (ghost), not a local audio
+          forceGhost=true;
+          try{ RU.control.play(rIdx); }catch(e){}
+          SAV.plays[pl.t.id]=playsOf(pl.t)+1;save();
+          var nR=playsOf(pl.t);
+          toast(nR<MAX_PLAYS?("▶ "+pl.t.name+" · planet grew "+nR+"/"+MAX_PLAYS):("✦ "+pl.t.name+" — FULL BLOOM"));
+          return;
+        }
+      }
+      /* ----- non-radio track (e.g. 20MZS) or no radio present: local engine audio ----- */
       initGraph();
       if(actx&&actx.state==="suspended")actx.resume();
       playing=pl;
@@ -1217,7 +1236,9 @@
     }
     function stopTrack(){
       try{audio.pause();}catch(e){}
-      playing=null;
+      var RU=window.IBEERADIO;                          // pause the shared radio too if it's the source
+      try{ if(RU&&RU.playing&&RU.playing()) RU.control.pause(); }catch(e){}
+      playing=null;forceGhost=false;
       pbar.classList.remove("show");
       pblist.classList.remove("open");
       $("#pbmini").classList.remove("show");
@@ -1304,7 +1325,7 @@
           var hit=pickPlanet(p.x,p.y);
           if(hit){
             if(hit.t.locked){toast("SIGNAL ENCRYPTED — not yet transmitted_",true);blip(120,.08);}
-            else if(playing===hit){stopTrack();}
+            else if(playing===hit||ghost===hit){stopTrack();}   // tap the performer (radio or local) to stop
             else{playTrack(hit);}
           }else{
             // tap the void → snap to grid / back to free motion
