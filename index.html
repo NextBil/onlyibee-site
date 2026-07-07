@@ -272,6 +272,23 @@
   .projlogo{width:min(300px,70%);filter:invert(1);display:block;margin:6px 0 20px}
   .prose{max-width:640px;font-size:22px;line-height:1.5;color:#c9c9c9}
   .prose p{margin-bottom:16px}
+  /* ICS banner video + crew cards */
+  .icsbanner{position:relative;width:100%;max-width:760px;border:2px solid var(--border);
+    background:#000;overflow:hidden;margin:4px 0 22px;box-shadow:0 0 24px rgba(182,255,0,.12)}
+  .icsbanner video{width:100%;display:block}
+  .icsbanner .lbl{position:absolute;left:0;bottom:0;font-family:var(--px);font-size:8px;color:var(--acid);
+    background:rgba(0,0,0,.7);padding:6px 9px;letter-spacing:1px}
+  .crewhead{font-family:var(--px);font-size:12px;color:var(--acid);margin:26px 0 4px}
+  .crewsub{color:var(--dim);font-size:18px;margin-bottom:16px}
+  .crew{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;max-width:760px}
+  .crew a{position:relative;display:block;text-decoration:none;border:2px solid var(--border);
+    background:#0d0d10;overflow:hidden;transition:transform .12s,border-color .12s,box-shadow .12s}
+  .crew a:hover{transform:translateY(-3px);border-color:var(--acid);box-shadow:0 0 16px rgba(182,255,0,.3)}
+  .crew a .ph{aspect-ratio:3/4;overflow:hidden;background:#0a0a0e;display:flex;align-items:center;justify-content:center}
+  .crew a img{width:100%;height:100%;object-fit:cover;display:block}
+  .crew a .cn{font-family:var(--px);font-size:8px;color:var(--ink);padding:8px 6px;border-top:2px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .crew a .cn .rr{font-size:7px;color:var(--dim)}
 
   /* ---------- Shop: game inventory ---------- */
   .rarity-legend{display:flex;flex-wrap:wrap;gap:10px;margin:-10px 0 20px}
@@ -451,11 +468,27 @@
       <span class="back" data-go="menu">◀ BACK</span>
       <div class="scrtitle"><span class="mico" style="width:74px;height:74px"><span class="sp"><img src="assets/chess/bishop2.png" alt=""></span></span>ICS<span class="red">.MONSTER</span></div>
       <div class="scrsub">project 03 // characters</div>
+      <div class="icsbanner">
+        <video src="assets/ics-banner.mp4" poster="assets/ics-banner-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+        <span class="lbl">▶ ICS — THE FULL CREW_</span>
+      </div>
       <div class="prose">
         <p>Scan the monster on your clothes and join the party. Every ICS piece carries a character — Mimi, Swordy, Goli, NanNan, Abla and the rest of the crew.</p>
         <p>Characters designed with the help of Lana Savary.</p>
         <p>From Paris to wherever you are — shipping's on us.</p>
         <p>ICS = Ibee's Chess Set. The characters aren't just designs — they're a full playable chess set. The King, Queen Abla, Beebee the bishop, Swordy &amp; Sworda the knights, Goli the pon.</p>
+
+        <div class="crewhead">// MEET THE CREW_</div>
+        <div class="crewsub">tap a card to open their file &amp; games_</div>
+        <div class="crew">
+          <a href="nannan/"><span class="ph"><img src="assets/cards/nannan.png" alt="NanNan" loading="lazy"></span><span class="cn">NANNAN<span class="rr">KING</span></span></a>
+          <a href="ablah/"><span class="ph"><img src="assets/cards/abla.png" alt="Abla" loading="lazy"></span><span class="cn">ABLA<span class="rr">QUEEN</span></span></a>
+          <a href="beebee/"><span class="ph"><img src="assets/cards/beebee.png" alt="Beebee" loading="lazy"></span><span class="cn">BEEBEE<span class="rr">BISHOP</span></span></a>
+          <a href="swordy/"><span class="ph"><img src="assets/cards/swordy.png" alt="Swordy" loading="lazy"></span><span class="cn">SWORDY<span class="rr">KNIGHT</span></span></a>
+          <a href="sworda/"><span class="ph"><img src="assets/cards/sworda.png" alt="Sworda" loading="lazy"></span><span class="cn">SWORDA<span class="rr">KNIGHT</span></span></a>
+          <a href="mimi/"><span class="ph"><img src="assets/cards/mimi.png" alt="Mimi" loading="lazy"></span><span class="cn">MIMI<span class="rr">TOWER</span></span></a>
+          <a href="goli/"><span class="ph"><img src="assets/cards/goli.png" alt="Goli" loading="lazy"></span><span class="cn">GOLI<span class="rr">PON</span></span></a>
+        </div>
         <p><img src="assets/img/ics-all-set.jpg" alt="ICS — the full 3D chess set" loading="lazy"
           onerror="this.onerror=null;this.src='ics 3d all set_.png';"
           style="width:100%;max-width:660px;display:block;border:2px solid var(--border);box-shadow:0 0 24px rgba(182,255,0,.15)"></p>
