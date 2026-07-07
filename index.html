@@ -379,6 +379,7 @@
     <!-- MUSIC ENGINE -->
     <section class="screen" id="music">
       <span class="back" data-go="menu">◀ MENU</span>
+      <a class="back" href="lyrics/" title="back to the lyrics engine" style="margin-left:8px;text-decoration:none">◀ LYRICS</a>
       <div id="engroot">
         <canvas id="engcanvas"></canvas>
         <div class="eng-hud">
@@ -861,10 +862,13 @@
     }
 
     function gridSlot(i,n,bounds){
+      var narrow=bounds.w<560;                 // phones
+      var mx=narrow?20:46, mtop=narrow?78:95, mbot=narrow?118:130;
+      var minCell=narrow?150:120;              // min horizontal room per record so titles fit
       var cols=Math.max(1,Math.round(Math.sqrt(n*bounds.w/Math.max(1,bounds.h))));
-      cols=Math.min(cols,n);
+      var fit=Math.max(1,Math.floor((bounds.w-mx*2)/minCell));
+      cols=Math.min(cols,fit,n);               // never pack tighter than titles can read
       var rows=Math.ceil(n/cols);
-      var mx=46,mtop=95,mbot=130;
       var cw=(bounds.w-mx*2)/cols,ch=(bounds.h-mtop-mbot)/Math.max(1,rows);
       var c=i%cols,r=Math.floor(i/cols);
       return {x:mx+cw*(c+0.5),y:mtop+ch*(r+0.5)};
@@ -1340,7 +1344,19 @@
     requestAnimationFrame(loop);
 
     return {
-      wake:function(){resize();}
+      wake:function(){resize();},
+      /* jump straight into the room where the current song lives, planets moving */
+      enterPlaying:function(){
+        resize();
+        var target=null,R=window.IBEERADIO;
+        if(playing){target=galaxyOf(playing.t.g);}
+        else if(R&&R.slug){
+          var rs=R.slug();
+          if(rs){for(var i=0;i<TRACKS.length;i++){if(slugOf(TRACKS[i])===rs){target=galaxyOf(TRACKS[i].g);break;}}}
+        }
+        if(!target)target=galaxyOf("rss")||visGalaxies()[0]; // radio songs live here
+        if(target)enterGalaxy(target);
+      }
     };
   })();
 
@@ -1356,12 +1372,15 @@
   /* arriving with a screen hash (#menu, #music, #shop…) skips the boot sequence
      (home buttons + the lyrics PLANETS button on sub-pages rely on this) */
   var _hash=location.hash.slice(1);
+  var _live=(_hash==="playing"||_hash==="nowplaying"); // PLANETS button → drop into the live room
+  if(_live)_hash="music";
   var _scr=_hash&&document.getElementById(_hash);
   if(_scr&&_scr.classList.contains("screen")){
     booted=true;clearInterval(bootTimer);
     document.getElementById("boot").style.display="none";
     document.getElementById("os").classList.add("on");
     go(_hash);
+    if(_live){setTimeout(function(){try{ENG.enterPlaying();}catch(e){}},220);} // let the radio init first
   }
 })();
 </script>
