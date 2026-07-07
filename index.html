@@ -5,6 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ONLY IBEE — a creative dude</title>
 <meta name="description" content="Only Ibee is a creative dude born in Ivory Coast and raised in Paris. Music, art, and unexpected creations — human-made work filled with intention and philosophy, connecting Paris, Toronto, and beyond. An engine for art and discovery.">
+<!-- ===== favicon (bishop 1) ===== -->
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<!-- ===== social / metadata ===== -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ONLYIBEE OS">
+<meta property="og:title" content="ONLY IBEE — a creative dude">
+<meta property="og:description" content="Music, art, UTOPIE clothing, LA ZONE and ICS. Human-made work filled with intention — an engine for art and discovery.">
+<meta property="og:url" content="https://onlyibee.com/">
+<meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ONLY IBEE — a creative dude">
+<meta name="twitter:description" content="Music, art, UTOPIE clothing, LA ZONE and ICS. An engine for art and discovery.">
+<meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -1337,12 +1353,15 @@
     }else if(e.key==="Escape"){go("menu");}
   });
 
-  /* arriving with #menu skips the boot sequence (home buttons on sub-pages) */
-  if(location.hash==="#menu"){
+  /* arriving with a screen hash (#menu, #music, #shop…) skips the boot sequence
+     (home buttons + the lyrics PLANETS button on sub-pages rely on this) */
+  var _hash=location.hash.slice(1);
+  var _scr=_hash&&document.getElementById(_hash);
+  if(_scr&&_scr.classList.contains("screen")){
     booted=true;clearInterval(bootTimer);
     document.getElementById("boot").style.display="none";
     document.getElementById("os").classList.add("on");
-    go("menu");
+    go(_hash);
   }
 })();
 </script>
