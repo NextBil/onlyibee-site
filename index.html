@@ -1361,28 +1361,52 @@
 
     return {
       wake:function(){resize();},
-      /* jump straight into the room where the current song lives, planets moving */
+      /* land directly ON the performing disk: enter its room, snap it to center, others orbit it */
       enterPlaying:function(){
         resize();
-        var target=null,R=window.IBEERADIO;
-        if(playing){target=galaxyOf(playing.t.g);}
-        else if(R&&R.slug){
-          var rs=R.slug();
-          if(rs){for(var i=0;i<TRACKS.length;i++){if(slugOf(TRACKS[i])===rs){target=galaxyOf(TRACKS[i].g);break;}}}
+        function trackFromRadio(){
+          if(playing)return playing.t;
+          var R=window.IBEERADIO;
+          if(R&&R.slug&&R.slug()){var rs=R.slug();for(var i=0;i<TRACKS.length;i++){if(slugOf(TRACKS[i])===rs)return TRACKS[i];}}
+          return null;
         }
-        if(!target)target=galaxyOf("rss")||visGalaxies()[0]; // radio songs live here
-        if(target){
-          enterGalaxy(target);
-          forceGhost=true;             // show the current song as the centered performer right away
-          if(R&&R.slug&&R.slug()){
-            // best-effort: resume the radio right where it stopped (saved timestamp).
-            try{if(R.control&&R.control.play)R.control.play();}catch(e){}
-            // if the browser blocks un-tapped audio, tell the user how to resume (radio resumes on first tap)
-            setTimeout(function(){
-              if(R.playing&&!R.playing())toast("▶ tap anywhere to resume the signal_");
-            },500);
+        function centerOn(tr){
+          if(!tr)return false;
+          var w=root.clientWidth,h=root.clientHeight,perf=null;
+          for(var i=0;i<planets.length;i++){if(planets[i].t.id===tr.id){perf=planets[i];break;}}
+          if(!perf)return false;
+          perf.x=w*0.5;perf.y=h*0.44;perf.perfScale=1.45;   // snap the performer to dead center
+          ghost=perf;lastGhostId=perf.t.id;assignOrbits(perf); // others swirl around it
+          return true;
+        }
+        var tr=trackFromRadio();
+        var g=tr?galaxyOf(tr.g):(galaxyOf("rss")||visGalaxies()[0]); // radio songs live in rss
+        if(!g)return;
+        enterGalaxy(g);
+        forceGhost=true;
+        centerOn(tr);
+        var R=window.IBEERADIO;
+        if(R&&R.control&&R.control.play){try{R.control.play();}catch(e){}} // resume where it stopped
+        // radio may not have restored yet — poll briefly, then center the performer once known
+        var tries=0;
+        (function poll(){
+          if(ghost||tries>25)return;      // ghost set means performer is centered
+          tries++;
+          var t2=trackFromRadio();
+          if(t2){
+            if(!curG||curG.id!==t2.g){enterGalaxy(galaxyOf(t2.g));forceGhost=true;}
+            centerOn(t2);
+            var R2=window.IBEERADIO;
+            if(R2&&R2.control&&R2.control.play){try{R2.control.play();}catch(e){}}
+            return;
           }
-        }
+          setTimeout(poll,100);
+        })();
+        // if the browser blocked un-tapped audio, tell the user how to resume
+        setTimeout(function(){
+          var R3=window.IBEERADIO;
+          if(R3&&R3.slug&&R3.slug()&&R3.playing&&!R3.playing())toast("▶ tap anywhere to resume the signal_");
+        },600);
       }
     };
   })();
