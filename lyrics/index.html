@@ -139,7 +139,7 @@ body.mini #restore{display:flex}
 <header>
   <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
   <span style="display:flex;align-items:center;gap:12px">
-    <a href="../#music" title="open the universe — planets view" style="color:var(--acid);border:1px solid var(--border);padding:7px 10px;font-size:9px">✦ PLANETS</a>
+    <a href="../#playing" title="open the universe — planets moving where the music plays" style="color:var(--acid);border:1px solid var(--border);padding:7px 10px;font-size:9px">✦ PLANETS</a>
     <span>LYRICS.ENGINE</span>
   </span>
 </header>
@@ -290,7 +290,7 @@ body.mini #restore{display:flex}
   $("bmini").onclick=function(){document.body.classList.add("mini");};
   $("restore").onclick=function(){document.body.classList.remove("mini");};
   $("bhome").onclick=function(){location.href="../#menu";};
-  $("bplanets").onclick=function(){location.href="../#music";};
+  $("bplanets").onclick=function(){location.href="../#playing";};
   var seek=$("seek"),scrub=false;
   function sk(e){
     var r=seek.getBoundingClientRect();
