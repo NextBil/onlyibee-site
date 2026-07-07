@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- ===== favicon (bishop 1) ===== -->
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARCADE — ONLYIBEE</title>
+<meta name="description" content="ONLYIBEE ARCADE — pick a game. Retro mini-games starring the ICS characters.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
+    --pink:#ff2bd6;--cyan:#26e0ff;--gold:#d9b36c;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;overflow-x:hidden}
+  ::selection{background:var(--acid);color:#000}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.26) 0 1px,transparent 1px 3px)}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+    background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.55) 100%)}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;
+    border-bottom:2px solid var(--border);font-family:var(--px);font-size:11px;position:relative;z-index:50}
+  header a{color:var(--acid);text-decoration:none}
+  header a .r{color:var(--red)}
+  header .sys{color:var(--dim);font-size:9px;text-align:right;line-height:1.6}
+
+  main{max-width:900px;margin:0 auto;padding:26px 18px 80px}
+  .back{font-family:var(--px);font-size:10px;color:var(--dim);text-decoration:none;display:inline-block;
+    margin-bottom:20px;border:1px solid var(--border);padding:8px 12px}
+  .back:hover{color:var(--acid);border-color:var(--acid)}
+  .scrtitle{font-family:var(--px);font-size:clamp(16px,4vw,24px);margin-bottom:6px;
+    text-shadow:0 0 16px rgba(182,255,0,.25)}
+  .scrtitle .n{color:var(--pink)}
+  .scrsub{color:var(--dim);font-size:20px;margin-bottom:26px}
+
+  /* ---------- retro DVD / game-case shelf ---------- */
+  .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+  .case{position:relative;display:block;aspect-ratio:3/4;text-decoration:none;color:var(--ink);
+    border:2px solid var(--border);background:#0c0c10;overflow:hidden;
+    transition:transform .12s,box-shadow .12s,border-color .12s}
+  .case:hover{transform:translateY(-4px) rotate(-.5deg)}
+  /* plastic case spine + sheen */
+  .case .spine{position:absolute;left:0;top:0;bottom:0;width:11px;z-index:3;
+    background:linear-gradient(90deg,rgba(255,255,255,.14),rgba(255,255,255,0));border-right:1px solid rgba(0,0,0,.6)}
+  .case::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
+    background:linear-gradient(115deg,rgba(255,255,255,.10) 0 12%,transparent 30%)}
+  .case .cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 38%,rgba(255,255,255,.06),transparent 62%),
+      repeating-linear-gradient(45deg,#0a0a0e 0 12px,#0d0d12 12px 24px)}
+  .case .cover img{width:80%;height:74%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+  .case .bar{position:absolute;left:0;right:0;bottom:0;z-index:5;background:rgba(0,0,0,.85);
+    border-top:2px solid var(--border);padding:9px 10px 10px}
+  .case .nm{font-family:var(--px);font-size:9px;line-height:1.5;color:var(--ink)}
+  .case .by{font-size:15px;color:var(--dim);margin-top:4px}
+  .case .tag{position:absolute;top:8px;right:8px;z-index:5;font-family:var(--px);font-size:7px;
+    padding:4px 6px;background:rgba(0,0,0,.85)}
+
+  /* live styling per game hue */
+  .case.live{border-color:#39501a}
+  .case.live:hover{border-color:var(--acid);box-shadow:0 0 20px rgba(182,255,0,.3)}
+  .case.live .tag{color:var(--acid);border:1px solid #39501a}
+  .case.live .spine{background:linear-gradient(90deg,rgba(182,255,0,.35),rgba(182,255,0,0))}
+  .case.live::before{content:"▶";position:absolute;z-index:5;top:50%;left:50%;transform:translate(-50%,-60%);
+    font-size:34px;color:#000;background:rgba(182,255,0,.92);width:64px;height:64px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;
+    box-shadow:0 0 22px rgba(182,255,0,.6)}
+  .case.live:hover::before{opacity:1}
+
+  /* coming soon */
+  .case.soon{filter:grayscale(.75) brightness(.55);pointer-events:none;border-style:dashed}
+  .case.soon .tag{color:var(--red)}
+  .case.soon .cover img{opacity:.6}
+  .case.soon .lock{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+    font-family:var(--px);font-size:9px;color:var(--dim)}
+
+  footer{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
+    padding:10px 18px;background:#000;border-top:2px solid var(--border);font-family:var(--px);font-size:9px;color:var(--dim)}
+  footer .a{color:var(--acid)}
+</style>
+</head>
+<body>
+  <header>
+    <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
+    <div class="sys">ARCADE.EXE<br>insert a cartridge_</div>
+  </header>
+
+  <main>
+    <a class="back" href="../#menu">◀ CONSOLE</a>
+    <div class="scrtitle">ONLYIBEE <span class="n">ARCADE</span></div>
+    <div class="scrsub">pick a game — the ICS crew, playable_</div>
+    <div class="shelf" id="shelf"></div>
+  </main>
+
+  <footer>
+    <span class="a">♪ ONLYIBEE OS</span>
+    <span id="foot">ARCADE // select_</span>
+  </footer>
+
+<script>
+(function(){
+  /* ===== GAMES — add a box here per game. status: "live" | "soon" ===== */
+  var GAMES = [
+    {name:"NEON RUN",   by:"Beebee runs the punk city",    cover:"runner/sprites/beebee-run-2.png", url:"runner/",     status:"live"},
+    {name:"ICS CHESS",  by:"Play the crew as chess pieces", cover:"../assets/chess/knight1.png",     url:"../chess/",   status:"live"},
+    {name:"BEAT TAPPER",by:"Tap the crew on the beat",      cover:"../assets/chess/pon.png",         url:"",            status:"soon"},
+    {name:"KNIGHT DUEL",by:"Swordy vs Sworda",              cover:"../assets/chess/knight2.png",     url:"",            status:"soon"},
+    {name:"MEMORY",     by:"Match the collectibles",        cover:"../assets/chess/queen.png",       url:"",            status:"soon"},
+    {name:"CHESS PUZZLE",by:"Mate in 1 · 2 · 3",            cover:"../assets/chess/king.png",        url:"",            status:"soon"}
+  ];
+  var TAGS={live:"▶ PLAY",soon:"SOON"};
+  var html="";
+  GAMES.forEach(function(g){
+    var cls="case "+g.status;
+    var inner='<span class="spine"></span>'
+      +'<span class="tag">'+TAGS[g.status]+'</span>'
+      +'<div class="cover"><img src="'+g.cover+'" alt="'+g.name+'" loading="lazy"></div>'
+      +(g.status==="soon"?'<div class="lock">🔒</div>':'')
+      +'<div class="bar"><div class="nm">'+g.name+'</div><div class="by">'+g.by+'</div></div>';
+    if(g.status==="live") html+='<a class="'+cls+'" href="'+g.url+'">'+inner+'</a>';
+    else html+='<div class="'+cls+'">'+inner+'</div>';
+  });
+  document.getElementById("shelf").innerHTML=html;
+  document.getElementById("foot").textContent = GAMES.filter(function(g){return g.status==="live";}).length+" GAMES LIVE_";
+})();
+</script>
+<script src="../assets/player.js?v=8"></script>
+</body>
+</html>

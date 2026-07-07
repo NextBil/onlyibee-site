@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- ===== favicon (bishop 1) ===== -->
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEON RUN — BEEBEE // ONLYIBEE ARCADE</title>
+<meta name="description" content="NEON RUN — run the retro punk city to the beat. An ONLYIBEE arcade game starring Beebee.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff3b30;--pink:#ff2bd6;--cyan:#26e0ff;
+    --warn:#ffd60a;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{height:100%;overflow:hidden;background:#000}
+  body{font-family:var(--vt);color:var(--ink);touch-action:none}
+  #crt::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:900;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px)}
+  #crt::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:901;
+    background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.5) 100%)}
+
+  #wrap{position:fixed;inset:0;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;
+    border-bottom:2px solid var(--border);font-family:var(--px);font-size:9px;z-index:50;background:#000}
+  header a{color:var(--acid);text-decoration:none}
+  header a .r{color:var(--red)}
+  header .rgt{color:var(--dim);font-size:8px}
+
+  #stage{position:relative;flex:1;overflow:hidden;background:#06040f}
+  #game{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  .hud{position:absolute;top:10px;z-index:20;font-family:var(--px);pointer-events:none;text-shadow:0 2px 0 #000}
+  #hudL{left:12px;font-size:14px;color:var(--acid)}
+  #hudL .d{font-size:8px;color:var(--dim);margin-top:5px}
+  #hudR{right:12px;text-align:right;font-size:9px;color:var(--dim)}
+  #hudR .beat{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--pink);margin-left:5px;
+    box-shadow:0 0 10px var(--pink);transform:scale(var(--b,.4));transition:transform .06s}
+  #combo{position:absolute;top:54px;left:12px;z-index:20;font-family:var(--px);font-size:15px;
+    color:var(--warn);text-shadow:0 0 12px var(--warn);opacity:0;transition:opacity .2s}
+  #combo.on{opacity:1}
+
+  .panel{position:absolute;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;gap:12px;padding:24px;background:radial-gradient(ellipse at center,rgba(10,4,24,.55),rgba(0,0,0,.88))}
+  .panel.on{display:flex}
+  .ttl{font-family:var(--px);font-size:clamp(22px,7vw,44px);color:var(--acid);
+    text-shadow:0 0 20px rgba(182,255,0,.6),0 4px 0 #143a00;letter-spacing:2px;line-height:1.3}
+  .ttl .n{color:var(--pink);text-shadow:0 0 20px var(--pink)}
+  .sub{font-size:21px;color:#b9b9c4;max-width:440px;line-height:1.45}
+  .big{font-family:var(--px);font-size:26px;color:var(--ink)}
+  .big .s{color:var(--acid)}
+  .hi{font-family:var(--px);font-size:11px;color:var(--pink)}
+  .press{font-family:var(--px);font-size:12px;color:var(--ink);animation:blink 1.1s steps(1) infinite;margin-top:4px}
+  @keyframes blink{50%{opacity:0}}
+  .loseimg{width:118px;filter:drop-shadow(0 0 16px rgba(255,59,48,.4))}
+  .keys{font-size:16px;color:var(--dim)}
+  .keys b{color:var(--acid);font-family:var(--px);font-size:9px;border:1px solid var(--border);padding:2px 6px}
+
+  .backrow{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:25}
+  .backrow a{font-family:var(--px);font-size:9px;color:var(--dim);text-decoration:none;border:1px solid var(--border);
+    padding:9px 12px;background:rgba(0,0,0,.7)}
+  .backrow a:hover{color:var(--acid);border-color:var(--acid)}
+  .backrow a.arc{color:var(--acid);border-color:#39501a}
+</style>
+</head>
+<body id="crt">
+<div id="wrap">
+  <header>
+    <a href="../">ONLY<span class="r">IBEE</span> ARCADE</a>
+    <span class="rgt">NEON RUN // BEEBEE</span>
+  </header>
+
+  <div id="stage">
+    <canvas id="game"></canvas>
+
+    <div class="hud" id="hudL">0<div class="d" id="dist">0 M</div></div>
+    <div class="hud" id="hudR">HI <span id="hi">0</span><br><span id="np">RADIO ○</span> <span class="beat"></span></div>
+    <div id="combo"></div>
+
+    <div class="panel on" id="startPanel">
+      <div class="ttl">NEON <span class="n">RUN</span></div>
+      <div class="sub">Beebee runs the punk city. <b>Jump the red barriers</b> — they drop in time with the music. Grab the green vinyls for combos.</div>
+      <div class="press">▶ TAP / SPACE TO START</div>
+      <div class="keys">jump <b>TAP</b> / <b>SPACE</b> · you can double-jump</div>
+    </div>
+
+    <div class="panel" id="overPanel">
+      <img class="loseimg" id="loseimg" alt="">
+      <div class="ttl" style="font-size:clamp(18px,6vw,32px)">WASTED_</div>
+      <div class="big">SCORE <span class="s" id="finalScore">0</span></div>
+      <div class="hi" id="finalHi">HI 0</div>
+      <div class="press">▶ TAP / SPACE TO RETRY</div>
+    </div>
+
+    <div class="backrow">
+      <a class="arc" href="../">◀ ARCADE</a>
+      <a href="../../#menu">CONSOLE</a>
+      <a href="../../lyrics/">♪ LYRICS</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var canvas=document.getElementById("game"),ctx=canvas.getContext("2d"),stage=document.getElementById("stage");
+  var W=0,H=0,DPR=Math.min(2,window.devicePixelRatio||1),S=1,groundY=0;
+  function resize(){
+    W=stage.clientWidth;H=stage.clientHeight;S=H/560;
+    canvas.width=Math.floor(W*DPR);canvas.height=Math.floor(H*DPR);
+    canvas.style.width=W+"px";canvas.style.height=H+"px";ctx.setTransform(DPR,0,0,DPR,0,0);
+    groundY=H-Math.max(70,H*0.16);
+  }
+
+  /* ---------- sprites ---------- */
+  var SP={},names=["run-0","run-1","run-2","run-3","run-4","jump-1","jump-2","jump-3","jump-4","lose"];
+  var loaded=0;
+  names.forEach(function(n){var im=new Image();im.onload=im.onerror=function(){loaded++;};im.src="sprites/beebee-"+n+".png";SP[n]=im;});
+  document.getElementById("loseimg").src="sprites/beebee-lose.png";
+  var AR=484/829;
+
+  /* ---------- state ---------- */
+  var state="start",player,obstacles,coins,dist,score,speed,frameT,runFrame,shake,flash,grace,launchT;
+  var comboN=0,comboT=0,framesSinceSpawn=0,prevBeat=0,pulse=0,floorScroll=0;
+  var HI=+(localStorage.getItem("ibee_arcade_runner")||0);
+  document.getElementById("hi").textContent=HI;
+
+  function reset(){
+    var ph=H*0.235;
+    player={x:W*0.16,y:groundY-ph,w:ph*AR,h:ph,vy:0,jumps:0,grounded:true};
+    obstacles=[];coins=[];dist=0;score=0;speed=4.6*S;frameT=0;runFrame=0;shake=0;flash=0;
+    framesSinceSpawn=-90;/* grace before first hazard */ grace=1;comboN=0;comboT=0;prevBeat=0;
+    launchT=300;/* "about to run" anticipation pose at the start */
+  }
+
+  /* ---------- background city (muted, recessed) ---------- */
+  var stars=[],bldg=[[],[]],cityOff=[0,0];
+  function initCity(){
+    stars=[];for(var i=0;i<40;i++)stars.push({x:Math.random()*W,y:Math.random()*groundY*0.8,s:Math.random()*1.4+.3});
+    bldg=[[],[]];
+    for(var L=0;L<2;L++){var x=-40;while(x<W*2+300){var bw=(48+Math.random()*80)*S,bh=(50+Math.random()*(L?120:210))*S;
+      bldg[L].push({x:x,w:bw,h:bh,lit:Math.random()*0.5+0.2});x+=bw+(14+Math.random()*26)*S;}}
+    cityOff=[0,0];
+  }
+  function drawBG(beat){
+    var g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,"#0b0620");g.addColorStop(.6,"#160b30");g.addColorStop(1,"#06040f");
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    /* stars */
+    ctx.fillStyle="rgba(180,200,255,.5)";
+    for(var i=0;i<stars.length;i++)ctx.fillRect(stars[i].x,stars[i].y,stars[i].s,stars[i].s);
+    /* recessed skyline — dark silhouettes, few soft-lit windows, NO bright outlines (so it stays background) */
+    for(var L=0;L<2;L++){
+      var layer=bldg[L],base=groundY+(L?4:-4),tint=L?"38,90,150":"90,50,140";
+      for(var b=0;b<layer.length;b++){var bx=layer[b].x+cityOff[L];if(bx>W+80||bx+layer[b].w<-80)continue;
+        var by=base-layer[b].h;
+        ctx.fillStyle=L?"#0c0a24":"#0a0820";ctx.fillRect(bx,by,layer[b].w,layer[b].h);
+        var ws=8*S,gap=7*S;
+        for(var wy=by+9*S;wy<base-9*S;wy+=ws+gap)for(var wx=bx+7*S;wx<bx+layer[b].w-9*S;wx+=ws+gap){
+          var on=((wx*13+wy*7)%11)/11 < (layer[b].lit*0.5+beat*0.2);
+          if(on){ctx.fillStyle="rgba("+tint+","+(0.32+0.3*beat)+")";ctx.fillRect(wx,wy,ws,ws);}
+        }
+      }
+      cityOff[L]-=speed*(L?0.42:0.22);
+      var last=layer.length?layer[layer.length-1]:null,span=last?last.x+last.w:0;
+      if(cityOff[L]<-span+W)cityOff[L]+=span;
+    }
+    /* ground fill */
+    ctx.fillStyle="#050309";ctx.fillRect(0,groundY,W,H-groundY);
+    /* subtle grid (low opacity, clean) */
+    ctx.strokeStyle="rgba(38,224,255,0.10)";ctx.lineWidth=1;
+    floorScroll=(floorScroll+speed)%(52*S);var vp=W*0.5;
+    for(var gx=-floorScroll;gx<W;gx+=52*S){ctx.beginPath();ctx.moveTo(gx,groundY);ctx.lineTo(vp+(gx-vp)*3.2,H);ctx.stroke();}
+    /* bright neon floor edge — pulses on the beat */
+    var glow=8+beat*22+pulse*20;
+    ctx.strokeStyle="rgba(182,255,0,"+(0.65+0.35*beat)+")";ctx.lineWidth=3;
+    ctx.shadowColor="rgba(182,255,0,.9)";ctx.shadowBlur=glow;
+    ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();ctx.shadowBlur=0;
+  }
+
+  /* ---------- clear, foreground hazards ---------- */
+  var HEIGHTS=[0.085,0.11,0.13]; /* all comfortably jumpable */
+  function spawn(){
+    var h=HEIGHTS[(Math.random()*HEIGHTS.length)|0]*H, w=Math.max(26*S,0.055*H);
+    obstacles.push({x:W+40,w:w,h:h,hit:false});
+    if(Math.random()<0.55)coins.push({x:W+40+(40+Math.random()*90),y:groundY-H*(0.24+Math.random()*0.12),r:10*S,got:false});
+  }
+  function drawObs(o,beat){
+    var x=o.x,y=groundY-o.h,w=o.w,h=o.h;
+    ctx.save();
+    /* ground puddle so it reads as ON the floor + in front */
+    ctx.fillStyle="rgba(255,59,48,"+(0.28+0.22*beat)+")";
+    ctx.beginPath();ctx.ellipse(x+w/2,groundY,w*0.95,7,0,0,7);ctx.fill();
+    /* bright body */
+    ctx.shadowColor="rgba(255,59,48,.95)";ctx.shadowBlur=16;
+    ctx.fillStyle="#1a0206";ctx.fillRect(x,y,w,h);
+    ctx.lineWidth=3;ctx.strokeStyle="#ff3b30";ctx.strokeRect(x+1.5,y+1.5,w-3,h-3);
+    ctx.shadowBlur=0;
+    /* yellow hazard chevrons pointing up = JUMP */
+    ctx.fillStyle="rgba(255,214,10,.92)";
+    var cy=y+h-8*S;
+    for(var k=0;k<3&&cy>y+4;k++){
+      ctx.beginPath();ctx.moveTo(x+3,cy);ctx.lineTo(x+w/2,cy-7*S);ctx.lineTo(x+w-3,cy);
+      ctx.lineTo(x+w-3,cy+3*S);ctx.lineTo(x+w/2,cy-4*S);ctx.lineTo(x+3,cy+3*S);ctx.closePath();ctx.fill();
+      cy-=12*S;
+    }
+    /* bright cap */
+    ctx.fillStyle="#ffd60a";ctx.fillRect(x-2,y-4*S,w+4,4*S);
+    ctx.restore();
+  }
+  function drawCoin(c){
+    ctx.save();ctx.translate(c.x,c.y);
+    ctx.shadowColor="rgba(182,255,0,.9)";ctx.shadowBlur=14;
+    ctx.fillStyle="#0e0e0e";ctx.beginPath();ctx.arc(0,0,c.r,0,7);ctx.fill();
+    ctx.strokeStyle="#b6ff00";ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle="#b6ff00";ctx.beginPath();ctx.arc(0,0,c.r*0.32,0,7);ctx.fill();
+    ctx.restore();
+  }
+
+  /* ---------- player ---------- */
+  function sprite(){
+    if(state==="over")return SP["lose"];
+    if(!player.grounded)return player.vy<0?SP["jump-2"]:SP["jump-3"];
+    if(launchT>0)return SP["run-0"];              // anticipation: about to run
+    return SP["run-"+(1+(runFrame%4))];
+  }
+  function drawPlayer(){
+    var im=sprite(),x=player.x,y=player.y,w=player.w,h=player.h;
+    if(state!=="over"){ctx.fillStyle="rgba(182,255,0,"+(player.grounded?0.20:0.10)+")";
+      ctx.beginPath();ctx.ellipse(x+w/2,groundY-2,w*0.30,6,0,0,7);ctx.fill();}
+    if(im&&im.complete&&im.naturalWidth)ctx.drawImage(im,x,y,w,h);
+    else{ctx.fillStyle="#ff2bd6";ctx.fillRect(x+w*0.3,y,w*0.4,h);}
+  }
+
+  /* ---------- beat ---------- */
+  var synth=0;
+  function beatVal(t){
+    var R=window.IBEERADIO;
+    if(R&&R.playing&&R.playing())return Math.min(1,R.beat());
+    synth=Math.max(synth*0.9,Math.pow(Math.abs(Math.sin(t/300)),8));return synth*0.6;
+  }
+
+  function popCombo(n){var e=document.getElementById("combo");e.textContent="x"+n+" COMBO";e.classList.add("on");comboT=45;}
+
+  /* ---------- loop ---------- */
+  var last=performance.now();
+  function loop(t){
+    requestAnimationFrame(loop);
+    var dt=Math.min(40,t-last);last=t;var step=dt/16.67;
+    var beat=beatVal(t);
+    /* beat onset detection */
+    var onset=(beat>0.5&&prevBeat<=0.5);prevBeat=beat;
+    if(onset)pulse=1; else pulse*=0.88;
+    document.querySelector("#hudR .beat").style.setProperty("--b",(0.4+beat).toFixed(2));
+
+    ctx.clearRect(0,0,W,H);ctx.save();
+    if(shake>0){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=0.86;}
+    drawBG(beat);
+
+    if(state==="play"){
+      speed=Math.min(10*S,speed+0.0008*step);
+      dist+=speed*step*0.05;score=Math.floor(dist);
+      document.getElementById("hudL").firstChild.textContent=score;
+      document.getElementById("dist").textContent=score+" M";
+
+      /* physics */
+      player.vy+=0.6*S*step;player.y+=player.vy*step;
+      if(player.y>=groundY-player.h){player.y=groundY-player.h;player.vy=0;player.grounded=true;player.jumps=0;}
+      else player.grounded=false;
+      if(launchT>0)launchT-=dt;                     // hold the start pose briefly, then run
+      else{frameT+=dt;if(frameT>95){frameT=0;runFrame++;}}
+
+      /* ---- rhythm spawn: on a musical beat, if spacing is safe; fallback if quiet ---- */
+      framesSinceSpawn+=step;
+      var minGap=48, maxGap=132;
+      if(framesSinceSpawn>minGap && ((onset && Math.random()<0.8) || framesSinceSpawn>maxGap)){
+        spawn();framesSinceSpawn=0;
+      }
+
+      /* hitbox: lower body only, generous */
+      var px=player.x+player.w*0.34, pw=player.w*0.32, footY=player.y+player.h;
+      for(var i=obstacles.length-1;i>=0;i--){var o=obstacles[i];o.x-=speed*step;drawObs(o,beat);
+        var obsTop=groundY-o.h;
+        if(!o.hit && px<o.x+o.w && px+pw>o.x && footY>obsTop+o.h*0.28){o.hit=true;gameOver();}
+        if(o.x+o.w<-14)obstacles.splice(i,1);
+      }
+      for(var j=coins.length-1;j>=0;j--){var c=coins[j];c.x-=speed*step;drawCoin(c);
+        if(!c.got && Math.abs((player.x+player.w/2)-c.x)<player.w*0.42+c.r && Math.abs((player.y+player.h*0.4)-c.y)<player.h*0.42+c.r){
+          c.got=true;comboN++;score+=5;dist+=5;popCombo(comboN);flash=0.5;coins.splice(j,1);}
+        else if(c.x<-20)coins.splice(j,1);
+      }
+      if(comboT>0){comboT-=step;if(comboT<=0){document.getElementById("combo").classList.remove("on");comboN=0;}}
+      drawPlayer();
+    } else drawPlayer();
+
+    if(flash>0){ctx.fillStyle="rgba(182,255,0,"+flash*0.22+")";ctx.fillRect(0,0,W,H);flash-=0.04*step;}
+    ctx.restore();
+  }
+
+  function gameOver(){
+    state="over";shake=15;
+    document.getElementById("finalScore").textContent=score;
+    if(score>HI){HI=score;try{localStorage.setItem("ibee_arcade_runner",HI);}catch(e){}}
+    document.getElementById("hi").textContent=HI;
+    document.getElementById("finalHi").textContent="HI "+HI;
+    document.getElementById("overPanel").classList.add("on");
+  }
+  function start(){
+    document.getElementById("startPanel").classList.remove("on");
+    document.getElementById("overPanel").classList.remove("on");
+    reset();state="play";
+    var R=window.IBEERADIO;if(R&&R.control&&R.control.play){try{R.control.play();}catch(e){}}
+  }
+  function jump(){
+    if(state==="start"||state==="over"){start();return;}
+    if(state==="play"&&player.jumps<2){player.vy=-12.2*S;player.grounded=false;player.jumps++;}
+  }
+  stage.addEventListener("pointerdown",function(e){e.preventDefault();jump();},{passive:false});
+  window.addEventListener("keydown",function(e){if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){e.preventDefault();jump();}});
+
+  setInterval(function(){var R=window.IBEERADIO,el=document.getElementById("np");
+    if(R&&R.playing&&R.playing()&&R.song){var s=R.song();el.textContent="♪ "+(s?s.n:"RADIO");}else el.textContent="RADIO ○";},1000);
+
+  window.addEventListener("resize",function(){resize();initCity();if(state!=="play")reset();});
+  resize();initCity();reset();requestAnimationFrame(loop);
+})();
+</script>
+<script src="../../assets/player.js?v=8"></script>
+</body>
+</html>
