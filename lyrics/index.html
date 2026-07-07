@@ -105,6 +105,11 @@ main{
 }
 #btns button:hover{border-color:hsl(var(--hue),95%,60%);color:hsl(var(--hue),95%,68%)}
 #btns button.main{background:hsl(var(--hue),95%,55%);color:#000;border-color:hsl(var(--hue),95%,55%)}
+#btns .ricon{display:inline-flex;align-items:center;justify-content:center;width:auto;padding:8px 15px}
+#btns .ricon svg{width:22px;height:22px;display:block}
+#btns .ricon.uni svg{animation:uspin 5.5s linear infinite}
+@keyframes uspin{to{transform:rotate(360deg)}}
+#btns .ricon:hover svg{filter:drop-shadow(0 0 6px hsla(var(--hue),95%,55%,.7))}
 /* song strip */
 #strip{
   display:flex;gap:8px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:none;
@@ -165,18 +170,29 @@ body.mini #restore{display:flex}
     <div id="times"><span id="tcur">0:00</span><span id="ttot">--:--</span></div>
     <div id="btns">
       <button id="bhome" title="back to the menu — no reboot" style="width:auto;padding-left:12px;padding-right:12px">⌂</button>
-      <button id="bplanets" title="open the universe — planets view" style="width:auto;padding-left:12px;padding-right:12px">✦ PLANETS</button>
+      <button id="bplanets" class="ricon uni" title="universe — the performing planet">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="12" cy="12" rx="11" ry="4.4" fill="none" stroke="#26e0ff" stroke-width="1.4" opacity=".8"/>
+          <circle cx="12" cy="12" r="5.6" fill="#0e0e0e" stroke="#b6ff00" stroke-width="1.6"/>
+          <circle cx="10" cy="10.2" r="1.5" fill="#ff2bd6"/>
+          <circle cx="13.6" cy="13" r="1" fill="#b6ff00"/>
+        </svg>
+      </button>
       <button id="bprev">◀◀</button>
       <button id="bplay" class="main">►</button>
       <button id="bnext">▶▶</button>
-      <button id="bmini" title="reduce — lyrics float in the background" style="width:auto;padding-left:12px;padding-right:12px">▼ BG</button>
+      <button id="bfs" class="ricon" title="full screen">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#b6ff00" stroke-width="2" stroke-linecap="round">
+          <path d="M3 9 V3 H9"/><path d="M21 9 V3 H15"/><path d="M3 15 V21 H9"/><path d="M21 15 V21 H15"/>
+        </svg>
+      </button>
     </div>
     <div id="strip"></div>
     <div class="note">official words arriving transmission by transmission — tap a line to jump_</div>
   </div>
 </div>
 
-<script src="../assets/player.js?v=8"></script>
+<script src="../assets/player.js?v=9"></script>
 <script>
 (function(){
   "use strict";
@@ -287,7 +303,12 @@ body.mini #restore{display:flex}
   };
   $("bnext").onclick=function(){R.control.next();};
   $("bprev").onclick=function(){R.control.prev();};
-  $("bmini").onclick=function(){document.body.classList.add("mini");};
+  $("bfs").onclick=function(){
+    try{var d=document,el=d.documentElement;
+      if(!d.fullscreenElement&&!d.webkitFullscreenElement){(el.requestFullscreen||el.webkitRequestFullscreen).call(el);}
+      else{(d.exitFullscreen||d.webkitExitFullscreen).call(d);}
+    }catch(e){}
+  };
   $("restore").onclick=function(){document.body.classList.remove("mini");};
   $("bhome").onclick=function(){location.href="../#menu";};
   $("bplanets").onclick=function(){location.href="../#playing";};
