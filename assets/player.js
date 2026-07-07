@@ -9,8 +9,10 @@
      ONLYIBEE shell/app frame, it defers to the parent's radio so the music never
      restarts. If a radio already exists in this document (SPA re-inject), skip. */
   try{
-    if(window.top !== window.self && window.top.IBEERADIO){
-      window.IBEERADIO = window.top.IBEERADIO;   // proxy to the persistent parent radio
+    if(window.top !== window.self){
+      // Inside the ONLYIBEE shell/app frame → use the parent's persistent radio and
+      // NEVER start a second one (a 2nd radio is exactly what makes the music restart).
+      try{ window.IBEERADIO = window.top.IBEERADIO || null; }catch(e){ window.IBEERADIO = null; }
       return;
     }
   }catch(e){}
