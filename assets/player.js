@@ -355,15 +355,17 @@
       $("rp-tot").textContent = "--:--";
       if(sv.p){
         wantResume = true;
-        // try to continue where the last page left off (may need a tap)
+        // try to continue where the last page left off (browsers may block un-tapped audio)
         play(sv.i, sv.t || 0);
-        // if autoplay is blocked, first tap anywhere resumes
+        // if autoplay is blocked, resume on the FIRST interaction of any kind on this page,
+        // captured early so nothing can swallow it — keeps the radio playing across every page.
+        var kickEvents = ["pointerdown","touchstart","mousedown","keydown","click","scroll"];
         var kick = function(){
           if(wantResume && audio.paused && cur >= 0) play(cur);
           wantResume = false;
-          document.removeEventListener("pointerdown", kick);
+          kickEvents.forEach(function(ev){ document.removeEventListener(ev, kick, true); });
         };
-        document.addEventListener("pointerdown", kick);
+        kickEvents.forEach(function(ev){ document.addEventListener(ev, kick, true); });
       }
     }
   }catch(e){}
