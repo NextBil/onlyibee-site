@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- ===== favicon (bishop 1) ===== -->
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LYRICS ENGINE — ONLY IBEE</title>
@@ -129,7 +138,10 @@ body.mini #restore{display:flex}
 <canvas id="glyphs"></canvas>
 <header>
   <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
-  <span>LYRICS.ENGINE</span>
+  <span style="display:flex;align-items:center;gap:12px">
+    <a href="../#music" title="open the universe — planets view" style="color:var(--acid);border:1px solid var(--border);padding:7px 10px;font-size:9px">✦ PLANETS</a>
+    <span>LYRICS.ENGINE</span>
+  </span>
 </header>
 
 <main>
@@ -153,6 +165,7 @@ body.mini #restore{display:flex}
     <div id="times"><span id="tcur">0:00</span><span id="ttot">--:--</span></div>
     <div id="btns">
       <button id="bhome" title="back to the menu — no reboot" style="width:auto;padding-left:12px;padding-right:12px">⌂</button>
+      <button id="bplanets" title="open the universe — planets view" style="width:auto;padding-left:12px;padding-right:12px">✦ PLANETS</button>
       <button id="bprev">◀◀</button>
       <button id="bplay" class="main">►</button>
       <button id="bnext">▶▶</button>
@@ -277,6 +290,7 @@ body.mini #restore{display:flex}
   $("bmini").onclick=function(){document.body.classList.add("mini");};
   $("restore").onclick=function(){document.body.classList.remove("mini");};
   $("bhome").onclick=function(){location.href="../#menu";};
+  $("bplanets").onclick=function(){location.href="../#music";};
   var seek=$("seek"),scrub=false;
   function sk(e){
     var r=seek.getBoundingClientRect();
