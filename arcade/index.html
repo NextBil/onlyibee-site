@@ -82,6 +82,26 @@
   footer{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
     padding:10px 18px;background:#000;border-top:2px solid var(--border);font-family:var(--px);font-size:9px;color:var(--dim)}
   footer .a{color:var(--acid)}
+
+  /* ---------- game-store dressing ---------- */
+  .storebar{overflow:hidden;border:1px solid var(--border);background:#0a0a0e;margin:6px 0 8px;position:relative}
+  .storebar .run{display:inline-block;white-space:nowrap;font-family:var(--px);font-size:9px;padding:9px 0;animation:mq 22s linear infinite}
+  .storebar .run span{margin:0 20px;color:var(--ink)}
+  .storebar .run .r{color:var(--red)} .storebar .run .c{color:var(--acid)} .storebar .run .y{color:var(--gold)}
+  @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .shelfhead{font-family:var(--px);font-size:11px;color:var(--acid);letter-spacing:1px;margin:24px 0 12px;
+    display:flex;align-items:center;gap:12px;text-shadow:0 0 12px rgba(182,255,0,.3)}
+  .shelfhead::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--acid),transparent);opacity:.5}
+  .shelfhead.soon{color:var(--dim);text-shadow:none}
+  .shelfhead.soon::after{background:linear-gradient(90deg,var(--border),transparent)}
+  .shelfhead .cnt{font-size:8px;color:var(--dim);letter-spacing:0}
+  .ribbon{position:absolute;top:12px;left:-32px;z-index:6;transform:rotate(-38deg);background:var(--red);color:#fff;
+    font-family:var(--px);font-size:7px;padding:3px 34px;letter-spacing:1px;box-shadow:0 0 10px rgba(255,43,43,.6)}
+  .case .brow{display:flex;align-items:center;gap:8px;margin-top:7px}
+  .case .barcode{flex:1;height:12px;background-image:repeating-linear-gradient(90deg,#d8d8d8 0 1px,transparent 1px 3px,#d8d8d8 3px 4px,transparent 4px 6px,#d8d8d8 6px 9px,transparent 9px 10px);opacity:.45}
+  .case.soon .barcode{opacity:.16}
+  .case .pr{font-family:var(--px);font-size:8px;color:var(--acid);flex:none}
+  .case.soon .pr{color:#666}
 </style>
 </head>
 <body>
@@ -93,8 +113,9 @@
   <main>
     <a class="back" href="../#menu">◀ CONSOLE</a>
     <div class="scrtitle">ONLYIBEE <span class="n">ARCADE</span></div>
-    <div class="scrsub">pick a game — the ICS crew, playable_</div>
-    <div class="shelf" id="shelf"></div>
+    <div class="scrsub">the game store — pick a cartridge · free play_</div>
+    <div class="storebar"><div class="run"><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>BEEBEE CITY</span><span>RUN, MIMI</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>BEEBEE CITY</span><span>RUN, MIMI</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span></div></div>
+    <div id="store"></div>
   </main>
 
   <footer>
@@ -104,31 +125,37 @@
 
 <script>
 (function(){
-  /* ===== GAMES — add a box here per game. status: "live" | "soon" ===== */
+  /* ===== GAMES — add a box here per game. status: "live" | "soon"; isnew:true for a NEW ribbon ===== */
   var GAMES = [
-    {name:"NEON RUN",   by:"Beebee runs the punk city",    cover:"covers/neon-run.png",     url:"runner/",   status:"live"},
-    {name:"MIMI NEON RUSH", by:"Mimi runs the neon highway to the beat", cover:"covers/mimi-rush.png",  url:"rush/",  status:"live"},
-    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",        cover:"covers/mimi-tiles.png", url:"tiles/", status:"live"},
-    {name:"ICS CHESS",  by:"Play the crew as chess pieces", cover:"covers/ics-chess.png",   url:"../chess/", status:"live"},
-    {name:"BEAT TAPPER",by:"Tap the crew on the beat",      cover:"covers/beat-tapper.png",  url:"",          status:"soon"},
-    {name:"KNIGHT DUEL",by:"Swordy vs Sworda",              cover:"covers/knight-duel.png",  url:"",          status:"soon"},
-    {name:"MEMORY",     by:"Match the collectibles",        cover:"covers/memory.png",       url:"",          status:"soon"},
-    {name:"CHESS PUZZLE",by:"Mate in 1 · 2 · 3",            cover:"covers/chess-puzzle.png", url:"",          status:"soon"}
+    {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live"},
+    {name:"BEEBEE CITY",     by:"Beebee runs the punk city to the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live"},
+    {name:"RUN, MIMI",       by:"Mimi dashes the neon highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", isnew:true},
+    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",       cover:"covers/mimi-tiles.png", url:"tiles/",    status:"live", isnew:true},
+    {name:"BEAT TAPPER", by:"Tap the crew on the beat", cover:"covers/beat-tapper.png",  url:"", status:"soon"},
+    {name:"KNIGHT DUEL", by:"Swordy vs Sworda",         cover:"covers/knight-duel.png",  url:"", status:"soon"},
+    {name:"MEMORY",      by:"Match the collectibles",   cover:"covers/memory.png",       url:"", status:"soon"},
+    {name:"CHESS PUZZLE",by:"Mate in 1 · 2 · 3",        cover:"covers/chess-puzzle.png", url:"", status:"soon"}
   ];
-  var TAGS={live:"▶ PLAY",soon:"SOON"};
-  var html="";
-  GAMES.forEach(function(g){
-    var cls="case "+g.status;
+  var TAGS={live:"\u25B6 PLAY",soon:"SOON"};
+  function card(g){
+    var soon=g.status==="soon";
     var inner='<span class="spine"></span>'
       +'<span class="tag">'+TAGS[g.status]+'</span>'
+      +(g.isnew?'<span class="ribbon">NEW</span>':'')
       +'<div class="cover"><img src="'+g.cover+'" alt="'+g.name+'" loading="lazy"></div>'
-      +(g.status==="soon"?'<div class="lock">SOON</div>':'')
-      +'<div class="bar"><div class="nm">'+g.name+'</div><div class="by">'+g.by+'</div></div>';
-    if(g.status==="live") html+='<a class="'+cls+'" href="'+g.url+'">'+inner+'</a>';
-    else html+='<div class="'+cls+'">'+inner+'</div>';
-  });
-  document.getElementById("shelf").innerHTML=html;
-  document.getElementById("foot").textContent = GAMES.filter(function(g){return g.status==="live";}).length+" GAMES LIVE_";
+      +(soon?'<div class="lock">SOON</div>':'')
+      +'<div class="bar"><div class="nm">'+g.name+'</div><div class="by">'+g.by+'</div>'
+        +'<div class="brow"><span class="barcode"></span><span class="pr">'+(soon?'SOON':'FREE')+'</span></div></div>';
+    return soon?('<div class="case soon">'+inner+'</div>'):('<a class="case live" href="'+g.url+'">'+inner+'</a>');
+  }
+  var live=GAMES.filter(function(g){return g.status==="live";}),
+      soon=GAMES.filter(function(g){return g.status==="soon";});
+  document.getElementById("store").innerHTML=
+     '<div class="shelfhead">\u25B6 AVAILABLE NOW <span class="cnt">'+live.length+' TITLES \u00B7 FREE PLAY</span></div>'
+    +'<div class="shelf">'+live.map(card).join('')+'</div>'
+    +'<div class="shelfhead soon">\u25A9 COMING SOON <span class="cnt">'+soon.length+' IN DEV</span></div>'
+    +'<div class="shelf">'+soon.map(card).join('')+'</div>';
+  document.getElementById("foot").textContent = live.length+" TITLES IN STORE_";
 })();
 </script>
 <script src="../assets/player.js?v=9"></script>
