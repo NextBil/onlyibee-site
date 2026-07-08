@@ -146,6 +146,26 @@
       bldg[L].push({x:x,w:bw,h:bh,lit:Math.random()*0.5+0.2});x+=bw+(14+Math.random()*26)*S;}}
     cityOff=[0,0];
   }
+  /* ---- lyrics drifting in the sky, synced to the shared radio ---- */
+  function drawLyricsBg(beat){
+    var R=window.IBEERADIO; if(!R||!R.slug) return;
+    var slug=R.slug(); var LY=window.IBEE_LYRICS||{}; var lines=LY[slug];
+    if(!lines||!lines.length) return;
+    var c=0,d=0; try{c=R.audio.currentTime||0;d=R.audio.duration||0;}catch(e){}
+    var frac=d>0?(c/d*lines.length):0, idx=Math.min(lines.length-1,Math.max(0,Math.floor(frac)));
+    var lineH=Math.max(30,H*0.085), cx=W*0.5, cy=H*0.33;
+    ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
+    for(var k=-3;k<=3;k++){
+      var li=idx+k; if(li<0||li>=lines.length) continue;
+      var dist=Math.abs(li-idx);
+      var a = dist===0 ? (0.28+beat*0.18) : Math.max(0, 0.11 - dist*0.028);
+      if(a<=0.005) continue;
+      ctx.font=Math.round(lineH*(dist===0?0.8:0.62))+"px VT323";
+      ctx.fillStyle="rgba(182,255,0,"+a.toFixed(3)+")";
+      ctx.fillText(lines[li], cx, cy + (li-frac)*lineH);
+    }
+    ctx.restore();
+  }
   function drawBG(beat){
     var g=ctx.createLinearGradient(0,0,0,H);
     g.addColorStop(0,"#0b0620");g.addColorStop(.6,"#160b30");g.addColorStop(1,"#06040f");
@@ -153,6 +173,7 @@
     /* stars */
     ctx.fillStyle="rgba(180,200,255,.5)";
     for(var i=0;i<stars.length;i++)ctx.fillRect(stars[i].x,stars[i].y,stars[i].s,stars[i].s);
+    drawLyricsBg(beat);   /* the song's words drift through the sky, behind the city */
     /* recessed skyline — dark silhouettes, few soft-lit windows, NO bright outlines (so it stays background) */
     for(var L=0;L<2;L++){
       var layer=bldg[L],base=groundY+(L?4:-4),tint=L?"38,90,150":"90,50,140";
@@ -329,6 +350,7 @@
   resize();initCity();reset();requestAnimationFrame(loop);
 })();
 </script>
-<script src="../../assets/player.js?v=8"></script>
+<script src="../../assets/player.js?v=9"></script>
+<script src="../../assets/lyrics-data.js"></script>
 </body>
 </html>
