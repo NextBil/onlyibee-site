@@ -60,7 +60,7 @@
   <div class="toast" id="toast"></div>
   <div class="ov" id="startScreen">
     <div class="logo">MIMI</div><div class="sub">NEON RUSH</div>
-    <div class="tag blink">▶ TAP / SPACE TO RUN</div>
+    <div class="tag blink">▶ PICK A TRACK &amp; RUN</div>
     <div class="small"><span class="keycap">◀ ▶</span>/A D/swipe = lane · <span class="keycap">SPACE</span>/tap = jump (double!) · ★ candy = 4s invincible · scenery morphs every 30s</div>
     <div class="grid2" id="songlist"></div>
     <div class="row"><button class="btn m" id="diffBtn">SPEED: NORMAL</button><button class="btn" id="vibeBtn">VIBE: AUTO</button></div>
@@ -68,7 +68,7 @@
   <div class="ov hidden" id="overScreen">
     <div class="sub" style="color:var(--red);text-shadow:0 0 14px var(--red)">CRASH</div>
     <div class="big" id="finalScore">0</div><div class="small" id="overMsg"></div>
-    <div class="row"><button class="btn" id="retryBtn">RETRY</button><button class="btn m" id="menuBtn">◀ ARCADE</button></div>
+    <div class="row"><button class="btn" id="retryBtn">RETRY</button><button class="btn m" id="menuBtn">◀ SONGS</button></div>
   </div>
   <div class="ov hidden" id="loadScreen"><div class="sub blink">LOADING…</div><div class="small" id="loadMsg">CUEING THE BEAT</div></div>
 </div></div>
@@ -90,7 +90,7 @@ const el=id=>document.getElementById(id),pad=(n,l)=>String(n).padStart(l,'0');
 const rnd=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),ease=t=>t*t*(3-2*t);
 const IM={};for(const k in SPR){IM[k]=new Image();IM[k].src=SPR[k];}
 const RUN=['r1','r2','r3','r4','r5'];
-let audioCtx,analyser,srcNode,freqData,timeData;let prevBeat=0,wordArr=[],wordSlug=null;function RAD(){try{return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null;}catch(e){return null;}}function LYRALL(){try{return window.IBEE_LYRICS||(window.top&&window.top.IBEE_LYRICS)||{};}catch(e){return {};}}
+let audioCtx,analyser,srcNode,freqData,timeData;let prevBeat=0,sinceBeat=0,lastIx=0,wordArr=[],wordSlug=null;function RAD(){try{return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null;}catch(e){return null;}}function LYRALL(){try{return window.IBEE_LYRICS||(window.top&&window.top.IBEE_LYRICS)||{};}catch(e){return {};}}
 let curEnergy=0,beatPulse=0,energyHist=[],beatCd=0,analyserWorks=false,warmup=0,metro=0;
 
 // ---------- themes ----------
@@ -136,7 +136,8 @@ for(let i=0;i<70;i++)stars.push({x:Math.random()*W,y:Math.random()*HOR,r:Math.ra
 function buildMtn(base,amp,step,col){const pts=[];let x=-40,y=base;while(x<W+120){pts.push([x,y]);x+=step;y=base-Math.random()*amp;}return{pts,col,off:0};}
 
 const songlist=el('songlist');
-
+function buildSongList(){var r=RAD();if(!r||!r.count){setTimeout(buildSongList,200);return;}songlist.innerHTML='';for(var i=0;i<r.count;i++){(function(i){var s=r.song&&r.song(i);var d=document.createElement('div');d.className='song';d.innerHTML='<span class="num">'+pad(i+1,2)+'</span><span class="nm">'+(s?s.n:('SONG '+(i+1)))+'</span>';d.onclick=function(){startGame(i);};songlist.appendChild(d);})(i);}}
+buildSongList();
 el('diffBtn').onclick=()=>{dix=(dix+1)%3;el('diffBtn').textContent='SPEED: '+DIFF[dix][0];};
 el('vibeBtn').onclick=()=>{vibeIx=vibeIx>=THEMES.length-1?-1:vibeIx+1;el('vibeBtn').textContent='VIBE: '+(vibeIx<0?'AUTO':THEMES[vibeIx].name);};
 el('stopBtn').onclick=stopToMenu;
@@ -145,10 +146,11 @@ function refreshWords(){var r=RAD();var slug=(r&&r.slug&&r.slug())||null;if(slug
 function nextWord(){refreshWords();var w=wordArr[wordIdx%wordArr.length];wordIdx++;return w||'MIMI';}
 function proj(p,lw){const s=0.16+p*p*1.5;const y=HOR+(H+30-HOR)*(p*p);const x=W/2+lw*SPREAD*s;return{x,y,s};}
 
-function startGame(){
-  var r=RAD(),si=0;if(r&&r.slug&&r.indexBySlug){var sl=r.slug();if(sl){var ix=r.indexBySlug(sl);if(ix>=0)si=ix;}}
+function startGame(ix){
+  var r=RAD();if(r&&r.control&&r.control.play&&typeof ix==='number'){try{r.control.play(ix);}catch(e){}lastIx=ix;}
+  var si=(typeof ix==='number')?ix:lastIx;
   if(vibeIx>=0){A=THEMES[vibeIx];B=A;}else{A=THEMES[si%THEMES.length];B=THEMES[(si+1)%THEMES.length];}
-  blend=0;transitioning=false;themeTimer=0;
+  blend=0;transitioning=false;themeTimer=0;sinceBeat=0;prevBeat=0;
   el('startScreen').classList.add('hidden');el('overScreen').classList.add('hidden');
   resetGame();basePspeed=DIFF[dix][1];pspeed=basePspeed;diffMul=DIFF[dix][2];wordSlug=null;refreshWords();
   el('stopBtn').style.display='block';
@@ -166,14 +168,14 @@ function jump(){if(state!=='play')return;if(jumps>0){jumps--;jvy=-560;mimiGlow=1
 function ring(){const x=mimiSX();for(let i=0;i<14;i++){const a=i/14*6.28;parts.push({sx:x,sy:proj(PM,0).y-110,vx:Math.cos(a)*170,vy:Math.sin(a)*170,life:.5,c:'#ffd319',s:3,g:0});}}
 function spawnCandy(){candies.push({p:1,lane:(Math.random()*3)|0,ph:Math.random()*6.28,got:false,ev:false});}
 function mimiSX(){return proj(PM,laneF-1).x;}
-addEventListener('keydown',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA'){e.preventDefault();move(-1);}else if(e.code==='ArrowRight'||e.code==='KeyD'){e.preventDefault();move(1);}else if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(state!=='play')startGame();else jump();}});
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA'){e.preventDefault();move(-1);}else if(e.code==='ArrowRight'||e.code==='KeyD'){e.preventDefault();move(1);}else if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump();}});
 let ptrX=0,ptrY=0;cv.addEventListener('pointerdown',e=>{ptrX=e.clientX;ptrY=e.clientY;});
-cv.addEventListener('pointerup',e=>{if(state!=='play'){startGame();return;}const dx=e.clientX-ptrX,dy=e.clientY-ptrY;if(dy<-34&&Math.abs(dy)>Math.abs(dx))jump();else if(dx>34)move(1);else if(dx<-34)move(-1);else jump();});
+cv.addEventListener('pointerup',e=>{const dx=e.clientX-ptrX,dy=e.clientY-ptrY;if(dy<-34&&Math.abs(dy)>Math.abs(dx))jump();else if(dx>34)move(1);else if(dx<-34)move(-1);else jump();});
 
-function beat(dt){var r=RAD(),bv;
-  if(r&&r.playing&&r.playing()){bv=Math.min(1,r.beat?r.beat():0);curEnergy=bv;}
-  else{metro+=dt;var iv=0.46/diffMul;bv=Math.max(0,1-((metro%iv)/0.11));curEnergy=bv*0.6;}
-  var onset=bv>0.5&&prevBeat<=0.5;prevBeat=bv;if(onset)beatPulse=1;return onset;}
+function beat(dt){var r=RAD(),playing=r&&r.playing&&r.playing();var rb=playing?Math.min(1,r.beat?r.beat():0):0;
+  var onR=rb>0.5&&prevBeat<=0.5;prevBeat=rb;sinceBeat+=dt;var iv=0.46/diffMul;var onset=false;
+  if(onR)onset=true;else if(sinceBeat>=iv)onset=true;
+  if(onset){sinceBeat=0;beatPulse=1;}curEnergy=playing?rb:(onset?0.6:curEnergy*0.9);return onset;}
 function spawnObstacle(){
   if(level>=2&&Math.random()<0.15){obs.push({p:1,lane:-1,bar:true,low:true,hue:LOW,ev:false});return;}
   let lane=(Math.random()*3)|0;if(lane===lastLaneSpawn&&Math.random()<0.6)lane=(lane+1)%3;lastLaneSpawn=lane;
@@ -337,8 +339,8 @@ function pushTicker(w){hitWords.push(w);if(hitWords.length>5)hitWords.shift();co
 let toastT;function showToast(txt,c){const t=el('toast');t.textContent=txt;t.style.color=c;t.style.textShadow='0 0 12px '+c;t.style.transition='none';t.style.opacity='1';t.style.transform='translate(-50%,-50%) scale(1.2)';clearTimeout(toastT);requestAnimationFrame(()=>{t.style.transition='opacity .6s,transform .6s';t.style.opacity='0';t.style.transform='translate(-50%,-64%) scale(1)';});}
 function updateHUD(){el('scoreN').textContent=pad(score|0,6);el('comboN').textContent=combo>1?('COMBO x'+combo):'';el('livesN').innerHTML='<span style="color:var(--red);text-shadow:0 0 8px var(--red)">'+'♥'.repeat(Math.max(0,lives))+'</span><span style="opacity:.2">'+'♥'.repeat(Math.max(0,3-lives))+'</span>';}
 function gameOver(){state='over';el('stopBtn').style.display='none';el('finalScore').textContent=pad(score|0,6);el('overMsg').textContent=((score|0)>=best&&score>0)?'NEW HI-SCORE! ★':('HI-SCORE '+pad(best,6));setTimeout(()=>el('overScreen').classList.remove('hidden'),700);}
-el('retryBtn').onclick=()=>startGame();
-el('menuBtn').onclick=()=>{location.href='../';};el('startScreen').addEventListener('click',function(e){if(e.target.closest('#diffBtn')||e.target.closest('#vibeBtn'))return;startGame();});
+el('retryBtn').onclick=()=>startGame(lastIx);
+el('menuBtn').onclick=()=>{el('overScreen').classList.add('hidden');el('startScreen').classList.remove('hidden');state='menu';};
 resetGame();if(!rafOn){rafOn=true;requestAnimationFrame(loop);}
 </script><script src="../../assets/player.js?v=9"></script>
 <script src="../../assets/lyrics-data.js"></script>
