@@ -107,6 +107,8 @@
   /* ===== GAMES — add a box here per game. status: "live" | "soon" ===== */
   var GAMES = [
     {name:"NEON RUN",   by:"Beebee runs the punk city",    cover:"covers/neon-run.png",     url:"runner/",   status:"live"},
+    {name:"MIMI NEON RUSH", by:"Mimi runs the neon highway to the beat", cover:"covers/mimi-rush.png",  url:"rush/",  status:"live"},
+    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",        cover:"covers/mimi-tiles.png", url:"tiles/", status:"live"},
     {name:"ICS CHESS",  by:"Play the crew as chess pieces", cover:"covers/ics-chess.png",   url:"../chess/", status:"live"},
     {name:"BEAT TAPPER",by:"Tap the crew on the beat",      cover:"covers/beat-tapper.png",  url:"",          status:"soon"},
     {name:"KNIGHT DUEL",by:"Swordy vs Sworda",              cover:"covers/knight-duel.png",  url:"",          status:"soon"},
@@ -129,6 +131,6 @@
   document.getElementById("foot").textContent = GAMES.filter(function(g){return g.status==="live";}).length+" GAMES LIVE_";
 })();
 </script>
-<script src="../assets/player.js?v=8"></script>
+<script src="../assets/player.js?v=9"></script>
 </body>
 </html>
