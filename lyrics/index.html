@@ -94,6 +94,9 @@ main{
   background:rgba(0,0,0,.92);border-top:2px solid var(--border);
   padding:10px 14px 12px;
 }
+/* inside the app shell the shared radio + lyrics overlay are the player — hide this bar (no double player) */
+html.framed #ctrl{display:none!important}
+html.framed main{padding-bottom:30px}
 #ctrl .inner{max-width:860px;margin:0 auto}
 #seek{position:relative;height:14px;border:1px solid var(--border);padding:2px;cursor:pointer;touch-action:none}
 #fill{height:100%;width:0%;background:hsl(var(--hue),95%,55%)}
@@ -110,6 +113,21 @@ main{
 #btns .ricon.uni svg{animation:uspin 5.5s linear infinite}
 @keyframes uspin{to{transform:rotate(360deg)}}
 #btns .ricon:hover svg{filter:drop-shadow(0 0 6px hsla(var(--hue),95%,55%,.7))}
+
+/* ===== OVERLAY MODE (when embedded as the shell's lyrics overlay) =====
+   transparent so the page behind shows through; only the text, the song box and
+   the fullscreen button remain — no duplicate transport (the shell has that). */
+body.ov{background:transparent!important}
+body.ov::before,body.ov::after{display:none!important}
+body.ov header{display:none!important}
+body.ov #storycard{display:none!important}
+body.ov #seek,body.ov #times,body.ov .note{display:none!important}
+body.ov #bhome,body.ov #bprev,body.ov #bplay,body.ov #bnext,body.ov #bplanets,body.ov #restore{display:none!important}
+body.ov #ctrl{background:linear-gradient(180deg,transparent,rgba(0,0,0,.55));border-top:0}
+body.ov #btns{justify-content:flex-end;padding-right:4px}
+body.ov main{padding-top:14px}
+body.ov #stream{text-shadow:0 2px 10px #000}     /* readable over any background */
+body.ov #glyphs{opacity:.5}
 /* song strip */
 #strip{
   display:flex;gap:8px;overflow-x:auto;padding:10px 2px 4px;scrollbar-width:none;
@@ -138,6 +156,7 @@ body.mini .line.active{font-size:clamp(30px,6vw,44px)}
 body.mini #restore{display:flex}
 @keyframes rpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 </style>
+<script>if(window.top!==window.self)document.documentElement.classList.add('framed');</script>
 </head>
 <body>
 <canvas id="glyphs"></canvas>
