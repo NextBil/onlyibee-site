@@ -1438,12 +1438,11 @@
         var tr=trackFromRadio();
         var g=tr?galaxyOf(tr.g):(galaxyOf("rss")||visGalaxies()[0]); // radio songs live in rss
         if(!g)return;
-        enterGalaxy(g);
+        enterGalaxy(g);          // system view = the planets room (never the galaxy picker)
         forceGhost=true;
         centerOn(tr);
-        var R=window.IBEERADIO;
-        if(R&&R.control&&R.control.play){try{R.control.play();}catch(e){}} // resume where it stopped
-        // radio may not have restored yet — poll briefly, then center the performer once known
+        // radio may not have restored yet — poll briefly, then center the performer once known.
+        // (no auto-play: opening the planets never starts the music.)
         var tries=0;
         (function poll(){
           if(ghost||tries>25)return;      // ghost set means performer is centered
@@ -1452,17 +1451,10 @@
           if(t2){
             if(!curG||curG.id!==t2.g){enterGalaxy(galaxyOf(t2.g));forceGhost=true;}
             centerOn(t2);
-            var R2=window.IBEERADIO;
-            if(R2&&R2.control&&R2.control.play){try{R2.control.play();}catch(e){}}
             return;
           }
           setTimeout(poll,100);
         })();
-        // if the browser blocked un-tapped audio, tell the user how to resume
-        setTimeout(function(){
-          var R3=window.IBEERADIO;
-          if(R3&&R3.slug&&R3.slug()&&R3.playing&&!R3.playing())toast("▶ tap anywhere to resume the signal_");
-        },600);
       }
     };
   })();
@@ -1487,14 +1479,14 @@
     document.getElementById("boot").style.display="none";
     document.getElementById("os").classList.add("on");
     go(_hash);
-    if(_live){setTimeout(function(){try{ENG.enterPlaying();}catch(e){}},220);} // let the radio init first
+    if(_live){requestAnimationFrame(function(){try{ENG.enterPlaying();}catch(e){}});} // straight to the planets, no galaxy flash
   }
 
   /* respond to hash changes too — lets the app shell's top nav switch screens in place
      (no reload, no music blip) and makes direct #hash links work while already loaded */
   window.addEventListener("hashchange",function(){
     var h=location.hash.slice(1);
-    if(h==="playing"||h==="nowplaying"){ go("music"); setTimeout(function(){try{ENG.enterPlaying();}catch(e){}},60); return; }
+    if(h==="playing"||h==="nowplaying"){ go("music"); requestAnimationFrame(function(){try{ENG.enterPlaying();}catch(e){}}); return; }
     var el=h&&document.getElementById(h);
     if(el&&el.classList.contains("screen")) go(h);
   });
