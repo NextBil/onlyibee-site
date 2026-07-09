@@ -271,8 +271,11 @@ function spawnTile(lane){
   beatPulse=1;
 }
 
+function songIV(r){/* metronome interval from the song's pressed BPM (beat-data); fallback 0.48s */
+  try{var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT);var g=B&&r&&r.slug&&B[r.slug()];
+    if(g&&g.bpm)return Math.max(0.32,Math.min(0.86,60/g.bpm));}catch(e){}return 0.48;}
 function detectBeat(dt){var r=RAD(),playing=r&&r.playing&&r.playing();var rb=playing?Math.min(1,r.beat?r.beat():0):0;
-  var onR=rb>0.5&&prevBeat<=0.5;prevBeat=rb;sinceBeat+=dt;var iv=(0.48/speed)/diffMul;var onset=false;
+  var onR=rb>0.5&&prevBeat<=0.5;prevBeat=rb;sinceBeat+=dt;var iv=(songIV(r)/speed)/diffMul;var onset=false;
   if(onR)onset=true;else if(sinceBeat>=iv)onset=true;
   if(onset){sinceBeat=0;}curEnergy=playing?rb:(onset?0.6:curEnergy*0.9);return onset;
 }
@@ -378,7 +381,7 @@ el('menuBtn').onclick=()=>{el('overScreen').classList.add('hidden');el('startScr
 function idleKick(){requestAnimationFrame(function idle(){if(state==='menu'){drawBoard();animateMimi(0.016);requestAnimationFrame(idle);}});}
 drawBoard();updateHUD();idleKick();
 </script>
-<script src="../../assets/player.js?v=9"></script>
+<script src="../../assets/player.js?v=12"></script>
 <script src="../../assets/lyrics-data.js"></script>
 </body>
 </html>
