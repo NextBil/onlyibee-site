@@ -19,6 +19,14 @@
   if(window.IBEERADIO){ return; }
   var BASE = document.currentScript.src.replace(/player\.js.*$/, "");
   var ROOT = BASE.replace(/assets\/$/, "");
+  /* iOS/iPadOS: keep the <audio> on the NATIVE path — never route it through
+     Web Audio. iOS suspends the AudioContext when the screen locks, which
+     silences anything piped through it; a plain media element keeps playing in
+     the background (lock-screen controls via MediaSession). The neon frame then
+     runs on the synthetic beat instead of a live analyser (no visuals while
+     locked anyway). Desktop/Android keep the real analyser + full reactivity. */
+  var IS_IOS = /iP(hone|od|ad)/.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
   var SONGS = [
     {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210},
@@ -286,7 +294,7 @@
   var actx = null, analyser = null, freq = null;
   var beat = 0, level = 0, emaLow = 0;
   function initGraph(){
-    if(actx) return;
+    if(actx || IS_IOS) return;   // iOS: leave audio on the native path (background/lock-safe)
     try{
       actx = new (window.AudioContext || window.webkitAudioContext)();
       var src = actx.createMediaElementSource(audio);
