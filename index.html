@@ -313,6 +313,18 @@
       row.onclick=function(){var r2=R();if(r2)r2.control.play(+row.getAttribute('data-i'));};});
   }
   document.getElementById('nowbtn').onclick=function(){ if(!built)buildList(); tl.classList.toggle('open'); };
+  /* click anywhere outside the track list closes it (music keeps playing) */
+  document.addEventListener('pointerdown',function(e){
+    if(!tl.classList.contains('open'))return;
+    var nb=document.getElementById('nowbtn');
+    if(tl.contains(e.target)||nb.contains(e.target))return;
+    tl.classList.remove('open');
+  });
+  /* clicks INSIDE the frame never bubble up to the shell — catch them via the
+     focus shift: when the window blurs because the iframe took focus, close. */
+  window.addEventListener('blur',function(){
+    if(tl.classList.contains('open')&&document.activeElement===frame)tl.classList.remove('open');
+  });
 
   /* ---- keep the player reflecting the one radio's state ---- */
   var rt=document.getElementById('rt'),rplay=document.getElementById('rplay'),
