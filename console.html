@@ -730,6 +730,10 @@
     var stars=null,galaxyGeo=null;
     var audioLevel=0,audioBeat=0,emaLow=0;
     var analyser=null,actx=null,freq=null;
+    /* iOS: keep local engine audio on the native path so it survives a screen lock
+       (Web Audio contexts get suspended on lock → silence). Visuals fall back to the
+       synthetic beat in updateAudio(). Same reasoning as assets/player.js. */
+    var IS_IOS=/iP(hone|od|ad)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 
     function playsOf(t){return SAV.plays[t.id]||0;}
     function sizeOf(pl){return 1+Math.min(playsOf(pl.t),MAX_PLAYS)*0.14;}
@@ -1073,7 +1077,7 @@
 
     /* ---------- audio ---------- */
     function initGraph(){
-      if(actx)return;
+      if(actx||IS_IOS)return;   // iOS: leave audio on the native path (background/lock-safe)
       try{
         actx=new (window.AudioContext||window.webkitAudioContext)();
         var src=actx.createMediaElementSource(audio);
@@ -1492,6 +1496,6 @@
   });
 })();
 </script>
-<script src="assets/player.js?v=9"></script>
+<script src="assets/player.js?v=10"></script>
 </body>
 </html>
