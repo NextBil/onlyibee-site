@@ -84,9 +84,10 @@
   @keyframes spin{to{transform:rotate(360deg)}}
 
   /* ---- lyrics overlay: ghosts over the content (game stays playable) unless full screen ---- */
-  #lyr{position:absolute;inset:0;z-index:15;display:none;flex-direction:column;pointer-events:none}
+  #lyr{position:absolute;inset:0;z-index:15;display:none;flex-direction:column;pointer-events:none;
+    background:rgba(3,3,7,.72)}
   #lyr.open{display:flex}
-  #lyr.fs{background:rgba(4,4,9,.95);pointer-events:auto}
+  #lyr.fs{background:rgba(2,2,6,.98);pointer-events:auto}
   #lyr .words{position:relative;flex:1;overflow:hidden;
     -webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);
     mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent)}
@@ -100,13 +101,17 @@
     color:var(--dim);font-family:var(--px);font-size:10px;text-align:center;padding:24px}
   #lyr .bottom{pointer-events:auto;background:rgba(0,0,0,.74);border-top:1px solid var(--border);
     padding:8px 10px 10px;display:flex;flex-direction:column;gap:8px}
-  #lyr .lbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  #lyr .lbar .t{font-family:var(--px);font-size:9px;color:var(--acid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #lyr .lbar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
+  #lyr .lbar .t{font-family:var(--px);font-size:9px;color:var(--acid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38%}
   #lyr .lbar .btns{display:flex;gap:6px;flex:none}
   #lyr .lbar button{background:#0e0e0e;border:1px solid var(--border);color:var(--ink);cursor:pointer;
     width:40px;height:34px;display:flex;align-items:center;justify-content:center;font-family:var(--px);font-size:11px}
   #lyr .lbar button:hover{border-color:var(--acid);color:var(--acid)}
   #lyr .lbar button svg{width:20px;height:20px}
+  /* full-screen button: dead center of the bar, spinning like the other ricons */
+  #lyr .lbar #lfs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+  #lyr .lbar #lfs svg{animation:spin 6s linear infinite}
+  #lyr .lbar #lfs:hover svg{filter:drop-shadow(0 0 6px rgba(182,255,0,.6))}
   #lyr .songbox{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
   #lyr .songbox::-webkit-scrollbar{display:none}
   #lyr .songbox button{font-family:var(--px);font-size:8px;white-space:nowrap;flex:none;
