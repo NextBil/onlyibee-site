@@ -192,6 +192,9 @@
     document.querySelectorAll("audio,video").forEach(function(a){
       if(a !== audio && !a.paused){ try{ a.pause(); }catch(e){} }
     });
+    // set the lock-screen "now playing" (song title, not the page title) up front,
+    // so it shows immediately and updates the instant the track changes
+    setSession();
     audio.play().then(function(){
       $("rp-play").textContent = "❚❚";
       chip.classList.remove("idle");
