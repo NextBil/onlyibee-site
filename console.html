@@ -1086,8 +1086,20 @@
         src.connect(analyser);analyser.connect(actx.destination);
       }catch(e){analyser=null;}
     }
+    /* pressed-groove lookup for the LOCAL engine audio (non-radio tracks like 20MZS):
+       beat-data keyed by filename, read at the playhead. Inside the shell frame the
+       data lives on the parent window (player.js defers there); standalone it's local. */
+    function engGroove(){
+      try{
+        var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT);if(!B)return null;
+        var base=decodeURIComponent((audio.currentSrc||audio.src||"").split("/").pop()||"");
+        var g=B[base];if(!g)return null;
+        var i=Math.max(0,Math.min(g.low.length-1,Math.floor((audio.currentTime||0)*g.r)));
+        return {low:parseInt(g.low.charAt(i),36)/35,lv:parseInt(g.lvl.charAt(i),36)/35};
+      }catch(e){return null;}
+    }
     function updateAudio(){
-      var live=analyser&&playing&&!audio.paused;
+      var live=analyser&&playing&&!audio.paused,gv;
       if(live){
         analyser.getByteFrequencyData(freq);
         var sum=0,i;for(i=0;i<freq.length;i++)sum+=freq[i];
@@ -1097,8 +1109,14 @@
         var onLow=Math.max(0,low-emaLow*1.15);
         audioBeat=Math.max(audioBeat*0.85,Math.min(1,low*0.5+onLow*3.2));
         audioLevel+=(level-audioLevel)*0.2;
+      }else if(playing&&!audio.paused&&(gv=engGroove())){
+        // no analyser (iOS native path) — same beat math, fed by the pressed groove
+        emaLow+=(gv.low-emaLow)*0.1;
+        var onG=Math.max(0,gv.low-emaLow*1.15);
+        audioBeat=Math.max(audioBeat*0.85,Math.min(1,gv.low*0.5+onG*3.2));
+        audioLevel+=(gv.lv-audioLevel)*0.2;
       }else if(playing&&!audio.paused){
-        // no analyser — fake a pulse
+        // no analyser, no groove data — fake a pulse
         audioBeat=Math.max(audioBeat*0.85,Math.pow(Math.abs(Math.sin(performance.now()/430)),8));
         audioLevel+=(0.3-audioLevel)*0.05;
       }else{
@@ -1496,6 +1514,6 @@
   });
 })();
 </script>
-<script src="assets/player.js?v=10"></script>
+<script src="assets/player.js?v=11"></script>
 </body>
 </html>
