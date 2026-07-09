@@ -211,7 +211,8 @@ body.mini #restore{display:flex}
   </div>
 </div>
 
-<script src="../assets/player.js?v=9"></script>
+<script src="../assets/player.js?v=12"></script>
+<script src="../assets/lyrics-timed.js?v=1"></script>
 <script>
 (function(){
   "use strict";
@@ -240,8 +241,19 @@ body.mini #restore{display:flex}
     "yo-body.mp3":{mood:"sultry / groovy",story:"Sultry, groovy funk to close the crate. The bassline was written dancing. You will understand it dancing."}
   };
 
-  /* ---------- real lyrics slot in here later: {t:seconds, w:"line"} ---------- */
-  var LYRICS={ /* e.g. "lonely22.mp3":[{t:0,w:"first line"},{t:12,w:"second line"}] */ };
+  /* ---------- real timed lyrics: {t:seconds, w:"line"} ----------
+     Primary source is assets/lyrics-timed.js (window.IBEE_LYRICS_TIMED), the file
+     IBEE STUDIO exports (tools/studio.html tap-sync) — deploy that one file to update
+     lyrics. Entries added to the inline map below override the external file. */
+  var LYRICS=(function(){
+    var ext={};
+    try{ ext=window.IBEE_LYRICS_TIMED||(window.top&&window.top.IBEE_LYRICS_TIMED)||{}; }catch(e){}
+    var inline={ /* e.g. "lonely22.mp3":[{t:0,w:"first line"},{t:12,w:"second line"}] */ };
+    var out={},k;
+    for(k in ext)out[k]=ext[k];
+    for(k in inline)out[k]=inline[k];
+    return out;
+  })();
 
   /* placeholder transmissions until the real words arrive */
   var GHOST=[
