@@ -34,7 +34,7 @@
      an extra <script> tag; everything degrades gracefully if it's missing. */
   try{
     var bsc = document.createElement("script");
-    bsc.src = BASE + "beat-data.js?v=1";
+    bsc.src = BASE + "beat-data.js?v=2";
     document.head.appendChild(bsc);
   }catch(e){}
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
