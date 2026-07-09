@@ -27,6 +27,16 @@
      locked anyway). Desktop/Android keep the real analyser + full reactivity. */
   var IS_IOS = /iP(hone|od|ad)/.test(navigator.userAgent)
     || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  /* the groove pressed into each record: precomputed bass/level envelopes
+     (assets/beat-data.js -> window.IBEE_BEAT). Where the live analyser can't run
+     (iOS native path), visuals read the groove at audio.currentTime instead —
+     true per-song reactivity with zero Web Audio. Self-loaded so no page needs
+     an extra <script> tag; everything degrades gracefully if it's missing. */
+  try{
+    var bsc = document.createElement("script");
+    bsc.src = BASE + "beat-data.js?v=1";
+    document.head.appendChild(bsc);
+  }catch(e){}
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
   var SONGS = [
     {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210},
@@ -306,9 +316,18 @@
       src.connect(analyser); analyser.connect(actx.destination);
     }catch(e){ analyser = null; }
   }
+  /* read the pressed groove at the playhead: {low, lv} or null if no data */
+  function groove(){
+    try{
+      var B = window.IBEE_BEAT; if(!B || cur < 0) return null;
+      var g = B[SONGS[cur].f]; if(!g) return null;
+      var i = Math.max(0, Math.min(g.low.length-1, Math.floor((audio.currentTime||0)*g.r)));
+      return { low: parseInt(g.low.charAt(i),36)/35, lv: parseInt(g.lvl.charAt(i),36)/35 };
+    }catch(e){ return null; }
+  }
   function loop(){
     requestAnimationFrame(loop);
-    var playing = cur >= 0 && !audio.paused;
+    var playing = cur >= 0 && !audio.paused, gv;
     if(playing && analyser){
       analyser.getByteFrequencyData(freq);
       var sum = 0, i; for(i=0;i<freq.length;i++) sum += freq[i];
@@ -318,6 +337,12 @@
       var on = Math.max(0, low - emaLow*1.15);
       beat = Math.max(beat*0.86, Math.min(1, low*0.5 + on*3.2));
       level += (lv-level)*0.2;
+    } else if(playing && (gv = groove())){
+      /* no analyser (iOS native path) → same beat math, fed by the groove */
+      emaLow += (gv.low-emaLow)*0.1;
+      var onG = Math.max(0, gv.low - emaLow*1.15);
+      beat = Math.max(beat*0.86, Math.min(1, gv.low*0.5 + onG*3.2));
+      level += (gv.lv-level)*0.2;
     } else if(playing){
       beat = Math.max(beat*0.86, Math.pow(Math.abs(Math.sin(performance.now()/430)), 8));
       level += (0.3-level)*0.05;
