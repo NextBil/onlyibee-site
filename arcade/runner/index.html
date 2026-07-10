@@ -125,7 +125,7 @@
 
   /* ---------- state ---------- */
   var state="start",player,obstacles,coins,dist,score,speed,frameT,runFrame,shake,flash,grace,launchT;
-  var comboN=0,comboT=0,framesSinceSpawn=0,prevBeat=0,pulse=0,floorScroll=0;
+  var comboN=0,comboT=0,framesSinceSpawn=0,prevBeat=0,pulse=0,floorScroll=0,musicSeen=false;
   var HI=+(localStorage.getItem("ibee_arcade_runner")||0);
   document.getElementById("hi").textContent=HI;
 
@@ -302,9 +302,14 @@
   function loop(t){
     requestAnimationFrame(loop);
     var dt=Math.min(40,t-last);last=t;var step=dt/16.67;
+    /* music gate: the game only runs while the radio plays — stop the music, freeze the run */
+    var _R=window.IBEERADIO,_mOn=_R&&_R.playing&&_R.playing();
+    if(state==="play"&&_mOn)musicSeen=true;
+    var frozen=state==="play"&&musicSeen&&!_mOn;
+    if(frozen){step=0;dt=0;}
     var beat=beatVal(t);
     /* onset: the pressed impulse layer when available (exact hits), beat-crossing fallback */
-    var onset=impOnset()||(beat>0.5&&prevBeat<=0.5);prevBeat=beat;
+    var onset=(!frozen)&&(impOnset()||(beat>0.5&&prevBeat<=0.5));prevBeat=beat;
     if(onset)pulse=1; else pulse*=0.88;
     document.querySelector("#hudR .beat").style.setProperty("--b",(0.4+beat).toFixed(2));
 
@@ -349,6 +354,13 @@
     } else drawPlayer();
 
     if(flash>0){ctx.fillStyle="rgba(182,255,0,"+flash*0.22+")";ctx.fillRect(0,0,W,H);flash-=0.04*step;}
+    if(frozen){
+      ctx.fillStyle="rgba(3,3,9,.62)";ctx.fillRect(0,0,W,H);
+      ctx.textAlign="center";ctx.fillStyle="#b6ff00";ctx.font="16px 'Press Start 2P'";
+      ctx.fillText("❚❚ MUSIC STOPPED",W/2,H*0.45);
+      ctx.fillStyle="#e8e8e8";ctx.font="18px VT323";
+      ctx.fillText("play the radio to keep running_",W/2,H*0.45+26);
+    }
     ctx.restore();
   }
 
@@ -363,7 +375,7 @@
   function start(){
     document.getElementById("startPanel").classList.remove("on");
     document.getElementById("overPanel").classList.remove("on");
-    reset();state="play";
+    reset();state="play";musicSeen=false;
     var R=window.IBEERADIO;if(R&&R.control&&R.control.play){try{R.control.play();}catch(e){}}
   }
   function jump(){

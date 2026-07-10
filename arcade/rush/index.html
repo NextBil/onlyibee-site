@@ -10,7 +10,8 @@
   html,body{margin:0;height:100%;}
   body{background:#07030f;color:#fff;font-family:'Courier New',ui-monospace,monospace;display:flex;align-items:center;justify-content:center;min-height:100%;overflow:hidden;touch-action:none;letter-spacing:1px;}
   #wrap{position:relative;width:900px;max-width:96vw;}
-  .stage{position:relative;width:900px;height:560px;max-width:96vw;border-radius:8px;overflow:hidden;background:#07030f;box-shadow:0 0 0 3px #180b2e,0 0 0 6px var(--mag),0 0 34px var(--mag),0 0 70px rgba(140,30,255,.5),inset 0 0 60px rgba(0,0,0,.7);}
+  /* keep the 900:560 aspect at every width so the canvas (and Mimi) never squish on phones */
+  .stage{position:relative;width:900px;max-width:96vw;aspect-ratio:900/560;border-radius:8px;overflow:hidden;background:#07030f;box-shadow:0 0 0 3px #180b2e,0 0 0 6px var(--mag),0 0 34px var(--mag),0 0 70px rgba(140,30,255,.5),inset 0 0 60px rgba(0,0,0,.7);}
   canvas{display:block;width:100%;height:100%;}
   .stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px,rgba(0,0,0,.16) 2px 4px);mix-blend-mode:multiply;}
   .stage::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;background:radial-gradient(130% 100% at 50% 44%,transparent 56%,rgba(0,0,0,.62) 100%);}
@@ -126,7 +127,7 @@ function computeLive(){const be=transitioning?ease(blend):0;
   GRID=lc(A.grid,B.grid,be);EDGE=lc(A.edge,B.edge,be);LOW=lc(A.low,B.low,be);OBS[0]=lc(A.obs[0],B.obs[0],be);OBS[1]=lc(A.obs[1],B.obs[1],be);}
 
 // ---------- state ----------
-let state='menu',curSong=null,wordIdx=0,vibeIx=-1;
+let state='menu',curSong=null,wordIdx=0,vibeIx=-1,musicSeen=false;
 let score=0,combo=0,best=0,lives=3,level=1;
 let gameTime=0,pspeed=0.32,basePspeed=0.32,diffMul=1;
 let laneF=1,targetLane=1,jumpY=0,jvy=0,jumping=false,jumps=2,mimiGlow=0,runPhase=0,tilt=0,invuln=0;
@@ -157,7 +158,7 @@ function startGame(ix){
   else if(r&&r.control&&r.playing&&!r.playing()){try{r.control.play();}catch(e){}} /* no pick → run with the radio's current record */
   var si=(typeof ix==='number')?ix:lastIx;
   if(vibeIx>=0){A=THEMES[vibeIx];B=A;}else{A=THEMES[si%THEMES.length];B=THEMES[(si+1)%THEMES.length];}
-  blend=0;transitioning=false;themeTimer=0;sinceBeat=0;prevBeat=0;
+  blend=0;transitioning=false;themeTimer=0;sinceBeat=0;prevBeat=0;musicSeen=false;
   el('startScreen').classList.add('hidden');el('overScreen').classList.add('hidden');
   resetGame();basePspeed=DIFF[dix][1];pspeed=basePspeed;diffMul=DIFF[dix][2];wordSlug=null;refreshWords();
   /* words start where the song is now (mid-song jump-ins stay in sync) */
@@ -207,7 +208,11 @@ function spawnOrb(){orbs.push({p:1,lane:(Math.random()*3)|0,high:Math.random()<0
 // ---------- loop ----------
 function loop(now){const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
   computeLive();
-  if(state==='play'){
+  /* music gate: stop the radio, freeze the run */
+  var _R=RAD(),_mOn=_R&&_R.playing&&_R.playing();
+  if(state==='play'&&_mOn)musicSeen=true;
+  var frozen=state==='play'&&musicSeen&&!_mOn;
+  if(state==='play'&&!frozen){
     gameTime+=dt;warmup+=dt;diffMul=DIFF[dix][2]*Math.min(1.7,1+gameTime/95);pspeed=basePspeed*Math.min(1.55,1+gameTime/120);
     const nl=Math.floor(gameTime/26)+1;if(nl>level){level=nl;showToast('SPEED UP!','#ff2975');}
     // theme rotation (auto)
@@ -238,7 +243,11 @@ function loop(now){const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
   }
   beatPulse=Math.max(0,beatPulse-dt*2.4);mimiGlow=Math.max(0,mimiGlow-dt*2.2);if(shake>0)shake=Math.max(0,shake-dt*42);if(flash>0)flash=Math.max(0,flash-dt*3);
   el('lvlN').textContent=state==='play'?('LVL '+level):'';
-  draw();requestAnimationFrame(loop);}
+  draw();
+  if(frozen){ctx.save();ctx.fillStyle='rgba(4,3,14,.62)';ctx.fillRect(0,0,W,H);ctx.textAlign='center';
+    ctx.fillStyle='#64f0ff';ctx.font='900 30px "Courier New",monospace';ctx.shadowColor='#64f0ff';ctx.shadowBlur=12;ctx.fillText('❚❚ MUSIC STOPPED',W/2,H/2-4);
+    ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='16px "Courier New",monospace';ctx.fillText('play the radio to keep running',W/2,H/2+26);ctx.restore();}
+  requestAnimationFrame(loop);}
 
 // ---------- draw ----------
 function draw(){ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#070311';ctx.fillRect(0,0,W,H);

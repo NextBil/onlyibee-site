@@ -177,7 +177,7 @@ const KEYMAP={a:0,s:1,d:2,f:3};
 const pad=(n,l)=>String(n).padStart(l,'0');
 
 let state='menu',tiles=[],score=0,combo=0,best=0,lives=3;
-let speed=1,baseFall=2.6,running=false,lastT=0;
+let speed=1,baseFall=2.6,running=false,lastT=0,musicSeen=false;
 let mimiState='run',mimiTimer=0,runFrame=0,mimiPop=0;
 let curSong=null, wordIdx=0, hitWords=[];let wordArr=[],wordSlug=null,prevBeat=0,sinceBeat=0,lastIx=0;
 let gameTime=0,diffMul=1,level=1,curEnergy=0,beatPulse=0,glowNow=0;
@@ -267,7 +267,7 @@ function startGame(ix){
   else if(r&&r.control&&r.playing&&!r.playing()){try{r.control.play();}catch(e){}} /* no pick → play the radio's current record */
   el('startScreen').classList.add('hidden');el('overScreen').classList.add('hidden');
   var s=r&&r.song&&r.song();el('nowplaying').textContent=s?s.n:'RADIO';
-  resetGame();speed=DIFF[diffIx][1];wordSlug=null;sinceBeat=0;prevBeat=0;refreshWords();
+  resetGame();speed=DIFF[diffIx][1];wordSlug=null;sinceBeat=0;prevBeat=0;musicSeen=false;refreshWords();
   /* tiles start where the song is now (mid-song jump-ins stay in sync) */
   try{if(r&&r.audio&&r.audio.duration&&wordArr.length)wordIdx=Math.floor((r.audio.currentTime/r.audio.duration)*wordArr.length)||0;}catch(e){}
   state='play';running=true;mimiState='run';lastT=performance.now();
@@ -302,7 +302,11 @@ let rafOn=false;
 function loop(now){
   const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
   drawBoard();
-  if(state==='play'){
+  /* music gate: stop the radio, freeze the tiles */
+  var _R=RAD(),_mOn=_R&&_R.playing&&_R.playing();
+  if(state==='play'&&_mOn)musicSeen=true;
+  var frozen=state==='play'&&musicSeen&&!_mOn;
+  if(state==='play'&&!frozen){
     warmup+=dt;gameTime+=dt;
     diffMul=Math.min(2.35,1+gameTime/38);
     const nl=Math.floor(gameTime/18)+1;
@@ -319,6 +323,9 @@ function loop(now){
     tiles=tiles.filter(t=>t.y<H+120&&(t.alpha===undefined||t.alpha>0));
   }
   for(const t of tiles)drawTile(t);
+  if(frozen){ctx.save();ctx.fillStyle='rgba(4,3,14,.64)';ctx.fillRect(0,0,W,H);ctx.textAlign='center';
+    ctx.fillStyle='#ff2bd6';ctx.font='900 20px "Courier New",monospace';ctx.shadowColor='#ff2bd6';ctx.shadowBlur=12;ctx.fillText('❚❚ MUSIC STOPPED',W/2,H/2-4);
+    ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='14px "Courier New",monospace';ctx.fillText('play the radio to keep going',W/2,H/2+24);ctx.restore();}
   // audio-reactive glow
   glowNow=Math.min(1,Math.max(curEnergy,beatPulse));
   beatPulse=Math.max(0,beatPulse-dt*2.6);
