@@ -40,6 +40,17 @@
     bsc.src = BASE + "beat-data.js?cb=" + Date.now();
     document.head.appendChild(bsc);
   }catch(e){}
+  /* extra records pressed in IBEE STUDIO (assets/songs-extra.js →
+     window.IBEE_SONGS_EXTRA). ADDITIVE ONLY: slugs already in SONGS below are
+     skipped, so the built-in list always wins; if the file doesn't exist the
+     radio is exactly as before. This is how new songs join the site with no
+     code edits — studio exports the file, it gets uploaded, done. */
+  try{
+    var xsc = document.createElement("script");
+    xsc.src = BASE + "songs-extra.js?cb=" + Date.now();
+    xsc.onload = function(){ addExtras(); };
+    document.head.appendChild(xsc);
+  }catch(e){}
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
   var SONGS = [
     {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210},
@@ -145,7 +156,7 @@
 
   var $ = function(id){ return document.getElementById(id); };
   var list = $("rp-list");
-  SONGS.forEach(function(s, i){
+  function addRow(s, i){
     var row = document.createElement("div");
     row.className = "rp-row"; row.dataset.i = i;
     row.innerHTML = '<span class="no">'+String(i+1).padStart(2,"0")+'</span>'
@@ -153,7 +164,8 @@
       +'<span>'+s.n+'</span>';
     row.onclick = function(){ play(i); openPanel(); };
     list.appendChild(row);
-  });
+  }
+  SONGS.forEach(addRow);
 
   /* ---------- state ---------- */
   var cur = -1, wantResume = false, needLoad = false, pendingTime = 0, shuffle = false;
@@ -420,26 +432,54 @@
   };
 
   /* ---------- restore across pages ---------- */
-  try{
-    var sv = JSON.parse(localStorage.getItem("ibee_radio") || "null");
-    if(sv && sv.s) setShuffle(true);
-    if(sv && sv.i >= 0 && sv.i < SONGS.length){
-      load(sv.i, sv.t || 0);
-      $("rp-tot").textContent = "--:--";
-      if(sv.p){
-        wantResume = true;
-        // try to continue where the last page left off (browsers may block un-tapped audio)
-        play(sv.i, sv.t || 0);
-        // if autoplay is blocked, resume on the FIRST interaction of any kind on this page,
-        // captured early so nothing can swallow it — keeps the radio playing across every page.
-        var kickEvents = ["pointerdown","touchstart","mousedown","keydown","click","scroll"];
-        var kick = function(){
-          if(wantResume && audio.paused && cur >= 0) play(cur);
-          wantResume = false;
-          kickEvents.forEach(function(ev){ document.removeEventListener(ev, kick, true); });
-        };
-        kickEvents.forEach(function(ev){ document.addEventListener(ev, kick, true); });
+  function restoreState(){
+    if(cur >= 0) return;   // already playing/loaded — nothing to restore
+    try{
+      var sv = JSON.parse(localStorage.getItem("ibee_radio") || "null");
+      if(sv && sv.s) setShuffle(true);
+      if(sv && sv.i >= 0 && sv.i < SONGS.length){
+        load(sv.i, sv.t || 0);
+        $("rp-tot").textContent = "--:--";
+        if(sv.p){
+          wantResume = true;
+          // try to continue where the last page left off (browsers may block un-tapped audio)
+          play(sv.i, sv.t || 0);
+          // if autoplay is blocked, resume on the FIRST interaction of any kind on this page,
+          // captured early so nothing can swallow it — keeps the radio playing across every page.
+          var kickEvents = ["pointerdown","touchstart","mousedown","keydown","click","scroll"];
+          var kick = function(){
+            if(wantResume && audio.paused && cur >= 0) play(cur);
+            wantResume = false;
+            kickEvents.forEach(function(ev){ document.removeEventListener(ev, kick, true); });
+          };
+          kickEvents.forEach(function(ev){ document.addEventListener(ev, kick, true); });
+        }
       }
-    }
-  }catch(e){}
+    }catch(e){}
+  }
+  restoreState();
+
+  /* ---------- merge the studio's extra records into the live radio ----------
+     Runs when assets/songs-extra.js arrives (see the self-loader up top).
+     Additive: dedupes by filename so built-in songs are never touched; new
+     songs get playlist rows and the public count updates so the shell and
+     every page pick them up. If the saved song was an extra (its index is past
+     the built-in list), restore is retried now that the list is long enough. */
+  function addExtras(){
+    try{
+      var X = (window.IBEE_SONGS_EXTRA && window.IBEE_SONGS_EXTRA.songs) || [];
+      var added = false;
+      X.forEach(function(e){
+        if(!e || !e.f || !e.n) return;
+        for(var i=0;i<SONGS.length;i++) if(SONGS[i].f === e.f) return;
+        SONGS.push({ f:e.f, r:e.r || e.f, n:e.n, hue:(e.hue != null ? e.hue : 190) });
+        addRow(SONGS[SONGS.length-1], SONGS.length-1);
+        added = true;
+      });
+      if(added){
+        window.IBEERADIO.count = SONGS.length;
+        restoreState();   // no-op unless the saved song needed the longer list
+      }
+    }catch(e){}
+  }
 })();
