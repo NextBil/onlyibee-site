@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>ONLY IBEE</title>
 <link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
 <link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
@@ -48,8 +48,18 @@
   #tracklist .th{font-family:var(--px);font-size:9px;color:var(--acid);padding:12px 14px;border-bottom:1px solid var(--border);
     display:flex;justify-content:space-between}
   #tracklist .th .x{color:var(--dim);cursor:pointer}
-  #tracklist .tr{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;
+  #tracklist .tr{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;
     color:var(--dim);font-size:19px;border-bottom:1px solid #141414}
+  /* album art: the record's picture (assets/covers/<song-name>.jpg|png) over a
+     hue-colored vinyl placeholder — no picture, no broken icon, just the vinyl */
+  #tracklist .tr .cv{width:36px;height:36px;flex:none;border-radius:4px;overflow:hidden;
+    border:1px solid #222;position:relative}
+  #tracklist .tr .cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  #tracklist .tr .ti{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+  #tracklist .tr .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #tracklist .tr .al{font-family:var(--px);font-size:7px;letter-spacing:1px;color:#565656;
+    margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #tracklist .tr.now .al{color:#6b8f00}
   #tracklist .tr:hover{background:#0d0d0d;color:var(--ink)}
   #tracklist .tr.now{color:var(--acid);background:#0d1400}
   #tracklist .tr .no{font-family:var(--px);font-size:8px;color:#555;width:24px}
@@ -401,10 +411,36 @@
 
   /* ---- title click → open the radio (track list) ---- */
   var tl=document.getElementById('tracklist'), built=false, builtCount=0;
+  /* album names: the site's galaxies + any new albums from songs-extra.js */
+  var GALN={rss:'RARE SOUL SESSIONS',mzs:'20 MIN ZA SESSION',np:'NOUVEAUX PUNK',pp:'PPFDB 2',
+    mv:'MINI VIBE',ddlf:'DEBUT DE LA FIN',bip:'BIPOLAIRE',vault:'THE VAULT'};
+  function albumOf(s){
+    try{((window.IBEE_SONGS_EXTRA||{}).galaxies||[]).forEach(function(g){if(g&&g.id&&!GALN[g.id])GALN[g.id]=g.name;});}catch(e){}
+    return GALN[(s&&s.g)||'rss']||'RARE SOUL SESSIONS';
+  }
   function buildList(){
     var r=R();if(!r)return; var h='<div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>';
-    for(var i=0;i<r.count;i++){var s=r.song(i);h+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?'0':'')+(i+1)+'</span>'+(s?s.n:'—')+'</div>';}
+    for(var i=0;i<r.count;i++){var s=r.song(i)||{};
+      /* cover art: song data first, else assets/covers/<song file name>.jpg → .png → original name .jpg */
+      var base=(s.f||'').replace(/\.[a-z0-9]+$/i,''), rbase=(s.r||'').replace(/\.[a-z0-9]+$/i,'');
+      var cands=[];
+      if(s.cover)cands.push(encodeURI(s.cover));
+      if(base){cands.push('assets/covers/'+encodeURI(base)+'.jpg');cands.push('assets/covers/'+encodeURI(base)+'.png');}
+      if(rbase&&rbase!==base)cands.push('assets/covers/'+encodeURI(rbase)+'.jpg');
+      h+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
+        +'<span class="cv" style="background:radial-gradient(circle,hsl('+(s.hue||75)+',85%,55%) 0 20%,#070707 22% 28%,#161616 30% 100%)">'
+        +(cands.length?'<img alt="" loading="lazy" src="'+cands[0]+'" data-alt="'+cands.slice(1).join('|')+'">':'')
+        +'</span><span class="ti"><span class="tn">'+(s.n||'—')+'</span><span class="al">'+albumOf(s)+'</span></span></div>';
+    }
     tl.innerHTML=h;built=true;builtCount=r.count;
+    /* missing picture → try the next name, then keep the vinyl (never a broken icon) */
+    Array.prototype.forEach.call(tl.querySelectorAll('.cv img'),function(im){
+      im.onerror=function(){
+        var alts=(im.dataset.alt||'').split('|').filter(Boolean);
+        if(alts.length){im.dataset.alt=alts.slice(1).join('|');im.src=alts[0];}
+        else{im.style.display='none';}
+      };
+    });
     document.getElementById('tlx').onclick=function(ev){ev.stopPropagation();tl.classList.remove('open');};
     Array.prototype.forEach.call(tl.querySelectorAll('.tr'),function(row){
       row.onclick=function(){var r2=R();if(r2)r2.control.play(+row.getAttribute('data-i'));};});

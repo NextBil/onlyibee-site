@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>ONLY IBEE — a creative dude</title>
 <meta name="description" content="Only Ibee is a creative dude born in Ivory Coast and raised in Paris. Music, art, and unexpected creations — human-made work filled with intention and philosophy, connecting Paris, Toronto, and beyond. An engine for art and discovery.">
 <!-- ===== favicon (bishop 1) ===== -->
@@ -173,8 +173,9 @@
   /* ===== universe search — records / albums / vibes, arcade style ===== */
   #uniseek{position:relative;flex:1;min-width:180px;margin-bottom:22px}
   body.musicfit #uniseek{margin-bottom:0}
+  /* 16px minimum or iOS zooms the whole page when the input is focused */
   #uniseek input{width:100%;background:#0a0a0a;border:1px solid var(--border);color:var(--acid);
-    font-family:var(--px);font-size:9px;padding:10px 12px;letter-spacing:1px;outline:none}
+    font-family:var(--vt);font-size:18px;padding:8px 12px;letter-spacing:1px;outline:none}
   #uniseek input:focus{border-color:var(--acid);box-shadow:0 0 14px rgba(182,255,0,.25)}
   #uniseek input::placeholder{color:#4a4a4a}
   #usr{position:absolute;left:0;right:0;top:100%;background:rgba(0,0,0,.96);border:1px solid var(--acid);
