@@ -392,6 +392,6 @@ function idleKick(){requestAnimationFrame(function idle(){if(state==='menu'){dra
 drawBoard();updateHUD();idleKick();
 </script>
 <script src="../../assets/player.js?v=13"></script>
-<script src="../../assets/lyrics-data.js"></script>
+<script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
 </body>
 </html>
