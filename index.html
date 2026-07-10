@@ -234,9 +234,11 @@
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
 <script src="assets/player.js?v=13"></script>
-<script src="assets/lyrics-data.js"></script>
-<script src="assets/lyrics-timed.js?v=1"></script>
-<script src="assets/song-meta.js?v=1"></script>
+<!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
+     document.write keeps them synchronous + in order (shell logic below reads these globals). -->
+<script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
 (function(){
   /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */
