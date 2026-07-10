@@ -100,7 +100,6 @@
     <div class="backrow">
       <a class="arc" href="../">◀ ARCADE</a>
       <a href="../../#menu">CONSOLE</a>
-      <a href="../../lyrics/">♪ LYRICS</a>
     </div>
   </div>
 </div>
@@ -264,6 +263,18 @@
     if(R&&R.playing&&R.playing())return Math.min(1,R.beat());
     synth=Math.max(synth*0.9,Math.pow(Math.abs(Math.sin(t/300)),8));return synth*0.6;
   }
+  /* impulse layer: the pressed hit-map (beat-data `imp`) — spawn exactly on the song's hits */
+  var lastImpI=-1;
+  function impOnset(){
+    try{
+      var R=window.IBEERADIO;if(!R||!R.playing||!R.playing())return false;
+      var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT);var g=B&&B[R.slug()];
+      if(!g||!g.imp)return false;
+      var i=Math.max(0,Math.min(g.imp.length-1,Math.floor((R.audio.currentTime||0)*g.r)));
+      if(i===lastImpI)return false; lastImpI=i;
+      return parseInt(g.imp.charAt(i),36)/35>=0.55;
+    }catch(e){return false;}
+  }
 
   function popCombo(n){var e=document.getElementById("combo");e.textContent="x"+n+" COMBO";e.classList.add("on");comboT=45;}
 
@@ -273,8 +284,8 @@
     requestAnimationFrame(loop);
     var dt=Math.min(40,t-last);last=t;var step=dt/16.67;
     var beat=beatVal(t);
-    /* beat onset detection */
-    var onset=(beat>0.5&&prevBeat<=0.5);prevBeat=beat;
+    /* onset: the pressed impulse layer when available (exact hits), beat-crossing fallback */
+    var onset=impOnset()||(beat>0.5&&prevBeat<=0.5);prevBeat=beat;
     if(onset)pulse=1; else pulse*=0.88;
     document.querySelector("#hudR .beat").style.setProperty("--b",(0.4+beat).toFixed(2));
 
@@ -350,7 +361,7 @@
   resize();initCity();reset();requestAnimationFrame(loop);
 })();
 </script>
-<script src="../../assets/player.js?v=12"></script>
+<script src="../../assets/player.js?v=13"></script>
 <script src="../../assets/lyrics-data.js"></script>
 </body>
 </html>

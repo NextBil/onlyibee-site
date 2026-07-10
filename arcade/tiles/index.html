@@ -258,6 +258,7 @@ function resetGame(){tiles=[];score=0;combo=0;lives=3;metroAcc=0;energyHist=[];w
 
 function startGame(ix){
   var r=RAD();if(r&&r.control&&r.control.play&&typeof ix==='number'){try{r.control.play(ix);}catch(e){}lastIx=ix;}
+  else if(r&&r.control&&r.playing&&!r.playing()){try{r.control.play();}catch(e){}} /* no pick → play the radio's current record */
   el('startScreen').classList.add('hidden');el('overScreen').classList.add('hidden');
   var s=r&&r.song&&r.song();el('nowplaying').textContent=s?s.n:'RADIO';
   resetGame();speed=DIFF[diffIx][1];wordSlug=null;sinceBeat=0;prevBeat=0;refreshWords();
@@ -274,8 +275,17 @@ function spawnTile(lane){
 function songIV(r){/* metronome interval from the song's pressed BPM (beat-data); fallback 0.48s */
   try{var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT);var g=B&&r&&r.slug&&B[r.slug()];
     if(g&&g.bpm)return Math.max(0.32,Math.min(0.86,60/g.bpm));}catch(e){}return 0.48;}
+var lastImpI=-1;
+function impOn(r){/* rising hit from the pressed impulse layer (beat-data `imp`) — tiles drop on real hits */
+  try{if(!r||!r.playing||!r.playing())return false;
+    var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT);var g=B&&B[r.slug()];
+    if(!g||!g.imp)return false;
+    var i=Math.max(0,Math.min(g.imp.length-1,Math.floor((r.audio.currentTime||0)*g.r)));
+    if(i===lastImpI)return false;lastImpI=i;
+    return parseInt(g.imp.charAt(i),36)/35>=0.55;
+  }catch(e){return false;}}
 function detectBeat(dt){var r=RAD(),playing=r&&r.playing&&r.playing();var rb=playing?Math.min(1,r.beat?r.beat():0):0;
-  var onR=rb>0.5&&prevBeat<=0.5;prevBeat=rb;sinceBeat+=dt;var iv=(songIV(r)/speed)/diffMul;var onset=false;
+  var onR=impOn(r)||(rb>0.5&&prevBeat<=0.5);prevBeat=rb;sinceBeat+=dt;var iv=(songIV(r)/speed)/diffMul;var onset=false;
   if(onR)onset=true;else if(sinceBeat>=iv)onset=true;
   if(onset){sinceBeat=0;}curEnergy=playing?rb:(onset?0.6:curEnergy*0.9);return onset;
 }
@@ -381,7 +391,7 @@ el('menuBtn').onclick=()=>{el('overScreen').classList.add('hidden');el('startScr
 function idleKick(){requestAnimationFrame(function idle(){if(state==='menu'){drawBoard();animateMimi(0.016);requestAnimationFrame(idle);}});}
 drawBoard();updateHUD();idleKick();
 </script>
-<script src="../../assets/player.js?v=12"></script>
+<script src="../../assets/player.js?v=13"></script>
 <script src="../../assets/lyrics-data.js"></script>
 </body>
 </html>
