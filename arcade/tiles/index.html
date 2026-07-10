@@ -419,11 +419,13 @@ function gameOver(){state='over';running=false;
 
 window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k in KEYMAP){e.preventDefault();press(KEYMAP[k]);}});
 cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)*(W/r.width);press(Math.max(0,Math.min(LANES-1,Math.floor(x/LW))));});
-el('retryBtn').onclick=()=>startGame(lastIx);
+el('retryBtn').onclick=()=>startGame();  // no index → keep the song playing where it is
 el('menuBtn').onclick=()=>{el('overScreen').classList.add('hidden');el('startScreen').classList.remove('hidden');mimiState='run';state='menu';idleKick();};
 
 function idleKick(){requestAnimationFrame(function idle(){if(state==='menu'){drawBoard();animateMimi(0.016);requestAnimationFrame(idle);}});}
 drawBoard();updateHUD();idleKick();
+/* close the shell's radio list when the game is tapped (tap is inside the frame) */
+window.addEventListener("pointerdown",function(){try{if(window.top!==window.self)window.top.postMessage("ibee-frame-tap","*");}catch(e){}},true);
 </script>
 <script src="../../assets/player.js?v=13"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>

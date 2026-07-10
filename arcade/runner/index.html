@@ -11,8 +11,8 @@
 <meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NEON RUN — BEEBEE // ONLYIBEE ARCADE</title>
-<meta name="description" content="NEON RUN — run the retro punk city to the beat. An ONLYIBEE arcade game starring Beebee.">
+<title>RUN BEEBEE! // ONLYIBEE ARCADE</title>
+<meta name="description" content="RUN BEEBEE! — run the retro punk city to the beat. An ONLYIBEE arcade game starring Beebee.">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff3b30;--pink:#ff2bd6;--cyan:#26e0ff;
@@ -72,7 +72,7 @@
 <div id="wrap">
   <header>
     <a href="../">ONLY<span class="r">IBEE</span> ARCADE</a>
-    <span class="rgt">NEON RUN // BEEBEE</span>
+    <span class="rgt">RUN BEEBEE!</span>
   </header>
 
   <div id="stage">
@@ -83,7 +83,7 @@
     <div id="combo"></div>
 
     <div class="panel on" id="startPanel">
-      <div class="ttl">NEON <span class="n">RUN</span></div>
+      <div class="ttl">RUN <span class="n">BEEBEE!</span></div>
       <div class="sub">Beebee runs the punk city. <b>Jump the red barriers</b> — they drop in time with the music. Grab the green vinyls for combos.</div>
       <div class="press">▶ TAP / SPACE — JUMP IN LIVE</div>
       <div class="keys" id="liveNote">starts with the song on air, right where it's playing_</div>
@@ -384,6 +384,9 @@
   }
   stage.addEventListener("pointerdown",function(e){e.preventDefault();jump();},{passive:false});
   window.addEventListener("keydown",function(e){if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){e.preventDefault();jump();}});
+  /* tell the shell to close its radio track list when the game is tapped (the tap
+     never reaches the shell's own outside-click handler because it's inside the frame) */
+  window.addEventListener("pointerdown",function(){try{if(window.top!==window.self)window.top.postMessage("ibee-frame-tap","*");}catch(e){}},true);
 
   setInterval(function(){var R=window.IBEERADIO,el=document.getElementById("np");
     var on=R&&R.playing&&R.playing(),s=R&&R.song&&R.song();
