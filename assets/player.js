@@ -34,7 +34,7 @@
      an extra <script> tag; everything degrades gracefully if it's missing. */
   try{
     var bsc = document.createElement("script");
-    bsc.src = BASE + "beat-data.js?v=2";
+    bsc.src = BASE + "beat-data.js?v=3";
     document.head.appendChild(bsc);
   }catch(e){}
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
@@ -94,6 +94,8 @@
   +"background:#0e0e0e;color:#e8e8e8;border:1px solid #2a2a2a;cursor:pointer}"
   +"#rp-ctrl button:hover{border-color:#b6ff00;color:#b6ff00}"
   +"#rp-ctrl button.main{background:#b6ff00;color:#000;border-color:#b6ff00}"
+  +"#rp-shuf svg{display:block;margin:auto}"
+  +"#rp-shuf.on{background:#b6ff00;color:#000;border-color:#b6ff00}"
   +"#rp-lyr{border-color:#b6ff00 !important;animation:rlyrglow 1.8s ease-in-out infinite}"
   +"#rp-lyr img{width:24px;height:24px;image-rendering:pixelated;display:block;margin:auto}"
   +"#rp-lyr:hover{background:#131a00}"
@@ -127,6 +129,7 @@
     +'    <button id="rp-prev">◀◀</button>'
     +'    <button id="rp-play" class="main">►</button>'
     +'    <button id="rp-next">▶▶</button>'
+    +'    <button id="rp-shuf" title="aleatory — let fate pick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l10 10h4"/><path d="M3 17h4l2.5-2.5"/><path d="M14.5 9.5 17 7h4"/><path d="M18 4l3 3-3 3"/><path d="M18 14l3 3-3 3"/></svg></button>'
     +'    <button id="rp-lyr" title="LYRICS ENGINE"><img alt="lyrics" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M1 3 Q4.5 1.4 8 3 Q11.5 1.4 15 3 V13 Q11.5 11.4 8 13 Q4.5 11.4 1 13 Z\' fill=\'%23b6ff00\' stroke=\'%23223300\' stroke-width=\'.7\'/%3E%3Cline x1=\'8\' y1=\'3\' x2=\'8\' y2=\'13\' stroke=\'%23223300\' stroke-width=\'.9\'/%3E%3Cline x1=\'2.8\' y1=\'5\' x2=\'6.4\' y2=\'4.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'7\' x2=\'6.4\' y2=\'6.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'9\' x2=\'6.4\' y2=\'8.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'4.6\' x2=\'13.2\' y2=\'5\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'6.6\' x2=\'13.2\' y2=\'7\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Crect x=\'11\' y=\'2\' width=\'1.6\' height=\'4.4\' fill=\'%23ff2b2b\'/%3E%3C/svg%3E"></button>'
     +'  </div>'
     +'</div>'
@@ -150,11 +153,25 @@
   });
 
   /* ---------- state ---------- */
-  var cur = -1, wantResume = false, needLoad = false, pendingTime = 0;
+  var cur = -1, wantResume = false, needLoad = false, pendingTime = 0, shuffle = false;
   function save(){
     try{ localStorage.setItem("ibee_radio", JSON.stringify({
-      i: cur, t: needLoad ? (pendingTime||0) : (audio.currentTime||0), p: !audio.paused && cur>=0
+      i: cur, t: needLoad ? (pendingTime||0) : (audio.currentTime||0), p: !audio.paused && cur>=0, s: shuffle
     })); }catch(e){}
+  }
+  /* aleatory mode: next song is a surprise (never the same one twice) */
+  function nextIndex(){
+    if(shuffle && SONGS.length > 1){
+      var j; do{ j = Math.floor(Math.random()*SONGS.length); }while(j === cur);
+      return j;
+    }
+    return cur + 1;
+  }
+  function setShuffle(on){
+    shuffle = !!on;
+    var b = document.getElementById("rp-shuf");
+    if(b) b.classList.toggle("on", shuffle);
+    save();
   }
   setInterval(save, 2000);
   window.addEventListener("pagehide", save);
@@ -255,9 +272,10 @@
     if(audio.paused) play(cur); else pause();
   };
   $("rp-prev").onclick = function(){ if(cur>=0) play(cur-1); else play(SONGS.length-1); };
-  $("rp-next").onclick = function(){ play(cur+1); };
+  $("rp-next").onclick = function(){ play(nextIndex()); };
+  $("rp-shuf").onclick = function(){ setShuffle(!shuffle); };
   $("rp-lyr").onclick = function(){ location.href = ROOT + "lyrics/"; };
-  audio.addEventListener("ended", function(){ play(cur+1); });
+  audio.addEventListener("ended", function(){ play(nextIndex()); });
   audio.addEventListener("loadedmetadata", function(){ $("rp-tot").textContent = fmt(audio.duration); });
   audio.addEventListener("timeupdate", function(){
     $("rp-cur").textContent = fmt(audio.currentTime);
@@ -388,10 +406,12 @@
     current: function(){ return cur; },
     count: SONGS.length,
     song: function(i){ return SONGS[i == null ? cur : i]; },
+    shuffled: function(){ return shuffle; },
+    toggleShuffle: function(){ setShuffle(!shuffle); return shuffle; },
     control: {
       play: function(i){ play(i == null ? (cur < 0 ? 0 : cur) : i); },
       pause: function(){ pause(); },
-      next: function(){ play(cur < 0 ? 0 : cur + 1); },
+      next: function(){ play(cur < 0 ? 0 : nextIndex()); },
       prev: function(){ play(cur < 0 ? SONGS.length - 1 : cur - 1); }
     }
   };
@@ -399,6 +419,7 @@
   /* ---------- restore across pages ---------- */
   try{
     var sv = JSON.parse(localStorage.getItem("ibee_radio") || "null");
+    if(sv && sv.s) setShuffle(true);
     if(sv && sv.i >= 0 && sv.i < SONGS.length){
       load(sv.i, sv.t || 0);
       $("rp-tot").textContent = "--:--";
