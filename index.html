@@ -69,11 +69,13 @@
   #seek{position:relative;height:11px;border:1px solid var(--border);padding:2px;cursor:pointer}
   #fill{height:100%;width:0%;background:var(--acid)}
   /* row 2: transport + spinning lyrics/universe shortcuts */
-  .pl-row{display:flex;align-items:center;justify-content:center;gap:8px}
-  .pl-row button{font-family:var(--px);font-size:11px;width:44px;height:40px;background:#0e0e0e;color:var(--ink);
+  .pl-row{display:flex;align-items:center;justify-content:center;gap:7px}
+  .pl-row button{font-family:var(--px);font-size:11px;width:40px;height:40px;background:#0e0e0e;color:var(--ink);
     border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center}
   .pl-row button:hover{border-color:var(--acid);color:var(--acid)}
   .pl-row button.main{background:var(--acid);color:#000;border-color:var(--acid)}
+  .pl-row button.tgl svg{width:19px;height:19px}
+  .pl-row button.tgl.on{background:var(--acid);color:#000;border-color:var(--acid)}
   /* the cool rotating icons */
   .ricon{perspective:120px}
   .ricon svg{width:24px;height:24px}
@@ -83,22 +85,40 @@
   @keyframes flipY{to{transform:rotateY(360deg)}}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ---- lyrics overlay: ghosts over the content (game stays playable) unless full screen ---- */
-  #lyr{position:absolute;inset:0;z-index:15;display:none;flex-direction:column;pointer-events:none;
-    background:rgba(3,3,7,.72)}
+  /* ---- lyrics overlay: opens straight into the dark room. Lines are tappable
+     (jump to that moment); the spinning center button flips to the INFO side —
+     meaning, context, vibe, time-to-create, BPM (from song-meta + beat-data). ---- */
+  #lyr{position:absolute;inset:0;z-index:15;display:none;flex-direction:column;pointer-events:auto;
+    background:rgba(2,2,5,.97)}
   #lyr.open{display:flex}
-  #lyr.fs{background:rgba(2,2,6,.98);pointer-events:auto}
   #lyr .words{position:relative;flex:1;overflow:hidden;
     -webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);
     mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent)}
   #lyr .stream{position:absolute;left:0;right:0;top:50%;text-align:center;padding:0 20px;
     transition:transform .45s cubic-bezier(.3,.7,.3,1)}
-  #lyr .ln{font-size:21px;line-height:1.4;color:#8a8a8a;opacity:.30;padding:7px 0;transition:all .35s;
-    text-shadow:0 1px 3px #000}
-  #lyr.fs .ln{color:var(--dim);opacity:.4}
+  #lyr .ln{font-size:21px;line-height:1.4;color:#8a8a8a;opacity:.35;padding:7px 0;transition:all .35s;
+    text-shadow:0 1px 3px #000;cursor:pointer}
+  #lyr .ln:hover{opacity:.85;color:var(--ink)}
   #lyr .ln.on{opacity:1;color:var(--acid);font-size:26px;text-shadow:0 0 16px rgba(182,255,0,.5),0 1px 3px #000}
   #lyr .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     color:var(--dim);font-family:var(--px);font-size:10px;text-align:center;padding:24px}
+  /* ---- INFO side (the record's soul): swaps into the words' slot, bar stays put ---- */
+  #linfo{flex:1;min-height:0;overflow-y:auto;display:none;padding:26px 20px 30px;scrollbar-width:none}
+  #linfo::-webkit-scrollbar{display:none}
+  #lyr.info .words{display:none}
+  #lyr.info #linfo{display:block}
+  #linfo .ih{font-family:var(--px);font-size:13px;color:var(--acid);text-align:center;margin-bottom:12px;
+    text-shadow:0 0 14px rgba(182,255,0,.45)}
+  #linfo .ichips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+  #linfo .ichips span{font-family:var(--px);font-size:8px;color:var(--cyan);border:1px solid #123a44;
+    padding:6px 8px;background:#061014}
+  #linfo .icard{border:1px solid var(--border);background:rgba(14,14,14,.85);padding:13px 14px;margin-bottom:12px;
+    max-width:640px;margin-left:auto;margin-right:auto}
+  #linfo .ct{font-family:var(--px);font-size:8px;color:var(--acid);margin-bottom:8px;letter-spacing:1px}
+  #linfo .cx{color:#c9c9c9;font-size:20px;line-height:1.5}
+  #linfo .cx.big{font-family:var(--px);font-size:22px;color:var(--pink);text-shadow:0 0 12px rgba(255,43,214,.4)}
+  #linfo .irow{display:flex;gap:12px;max-width:640px;margin:0 auto 12px}
+  #linfo .irow .icard{flex:1;margin:0}
   #lyr .bottom{pointer-events:auto;background:rgba(0,0,0,.74);border-top:1px solid var(--border);
     padding:8px 10px 10px;display:flex;flex-direction:column;gap:8px}
   #lyr .lbar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
@@ -140,11 +160,22 @@
         <div class="stream" id="lstream"></div>
         <div class="empty" id="lempty" style="display:none">no words for this signal yet_</div>
       </div>
+      <!-- the record's soul: meaning, context, vibe, time-to-create, BPM -->
+      <div id="linfo">
+        <div class="ih" id="liTitle">—</div>
+        <div class="ichips" id="liVibe"></div>
+        <div class="icard"><div class="ct">MEANING_</div><div class="cx" id="liMeaning">—</div></div>
+        <div class="icard"><div class="ct">CONTEXT_</div><div class="cx" id="liContext">—</div></div>
+        <div class="irow">
+          <div class="icard"><div class="ct">TIME TO CREATE</div><div class="cx" id="liTook">—</div></div>
+          <div class="icard"><div class="ct">BPM</div><div class="cx big" id="liBpm">—</div></div>
+        </div>
+      </div>
       <div class="bottom">
         <div class="lbar">
           <span class="t" id="lsong">—</span>
           <div class="btns">
-            <button id="lfs" title="full screen"><svg viewBox="0 0 24 24" fill="none" stroke="#b6ff00" stroke-width="2" stroke-linecap="round"><path d="M3 9 V3 H9"/><path d="M21 9 V3 H15"/><path d="M3 15 V21 H9"/><path d="M21 15 V21 H15"/></svg></button>
+            <button id="lfs" title="the record's soul — meaning, context, vibe"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9.4" stroke="#b6ff00" stroke-width="1.5"/><circle cx="12" cy="12" r="6.2" stroke="#2a2a2a" stroke-width="1"/><circle cx="12" cy="12" r="2.6" fill="#b6ff00"/><circle cx="12" cy="12" r="1" fill="#070707"/><rect x="11.2" y="2.2" width="1.6" height="3.4" fill="#ff2b2b"/></svg></button>
             <button id="lclose" title="close">✕</button>
           </div>
         </div>
@@ -176,6 +207,9 @@
         <button id="rprev">◀◀</button>
         <button id="rplay" class="main">►</button>
         <button id="rnext">▶▶</button>
+        <button id="rshuf" class="tgl" title="aleatory — let fate pick the next record">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l10 10h4"/><path d="M3 17h4l2.5-2.5"/><path d="M14.5 9.5 17 7h4"/><path d="M18 4l3 3-3 3"/><path d="M18 14l3 3-3 3"/></svg>
+        </button>
         <button id="buni" class="ricon uni" title="Universe — the performing planet">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="12" cy="12" rx="11" ry="4.4" fill="none" stroke="#26e0ff" stroke-width="1.4" opacity=".8"/>
@@ -199,8 +233,10 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=12"></script>
+<script src="assets/player.js?v=13"></script>
 <script src="assets/lyrics-data.js"></script>
+<script src="assets/lyrics-timed.js?v=1"></script>
+<script src="assets/song-meta.js?v=1"></script>
 <script>
 (function(){
   /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */
@@ -214,13 +250,14 @@
     {n:'CONSOLE', u:'console.html#menu'},
     {n:'UNIVERSE',u:'console.html#playing'},
     {n:'ARCADE',  u:'arcade/'},
+    {n:'TV',      u:'tv/'},
     {n:'ICS',     u:'console.html#ics'},
-    {n:'SHOP',    u:'console.html#shop'},
-    {n:'LYRICS',  u:'lyrics/'}
+    {n:'SHOP',    u:'console.html#shop'}
   ];
+  /* (lyrics left the nav — the spinning book in the player opens the overlay) */
   var navEl=document.getElementById('nav');
   NAV.forEach(function(it){var b=document.createElement('button');b.textContent=it.n;
-    b.onclick=function(){ if(it.n==='LYRICS'){lyrToggle();} else navigate(it.u); };navEl.appendChild(b);});
+    b.onclick=function(){ navigate(it.u); };navEl.appendChild(b);});
 
   function navigate(url){
     try{
@@ -254,36 +291,69 @@
   document.getElementById('rprev').onclick=function(){var r=R();if(r)r.control.prev();};
   document.getElementById('rnext').onclick=function(){var r=R();if(r)r.control.next();};
   document.getElementById('rplay').onclick=function(){var r=R();if(!r)return; if(r.playing())r.control.pause(); else r.control.play(r.current()<0?0:null);};
+  /* aleatory: let fate pick the next record */
+  var rshuf=document.getElementById('rshuf');
+  rshuf.onclick=function(){var r=R();if(r&&r.toggleShuffle)r.toggleShuffle();};
   /* spinning shortcuts */
   document.getElementById('buni').onclick=function(){navigate('console.html#playing');};
 
-  /* ================= LYRICS OVERLAY ================= */
-  var LYR=window.IBEE_LYRICS||{};
+  /* ================= LYRICS OVERLAY =================
+     Lines come from lyrics-timed.js when the song has been tap-synced in IBEE STUDIO
+     (true timestamps), else lyrics-data.js spread across the duration. Tapping a
+     line seeks the radio to that moment. The center vinyl flips to INFO — the
+     record's soul from song-meta.js + BPM from beat-data.js. */
+  var LYR=window.IBEE_LYRICS||{}, LYRT=window.IBEE_LYRICS_TIMED||{}, META=window.IBEE_META||{};
   var lyr=document.getElementById('lyr'),lstream=document.getElementById('lstream'),
       lempty=document.getElementById('lempty'),lsong=document.getElementById('lsong'),lsongbox=document.getElementById('lsongbox');
-  var lyrOpen=false,lyrSlug=null,lyrLines=[],lyrActive=-1,lyrBoxN=-1;
+  var lyrOpen=false,lyrSlug=null,lyrLines=[],lyrTimes=null,lyrActive=-1,lyrBoxN=-1;
   function esc(s){return s.replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
   function lyrToggle(){ lyrOpen=!lyrOpen; lyr.classList.toggle('open',lyrOpen); if(lyrOpen)lyrRefresh(); }
   function lyrClose(){ lyrOpen=false; lyr.classList.remove('open'); }
   document.getElementById('blyr').onclick=lyrToggle;               // the book icon toggles it
   document.getElementById('lclose').onclick=lyrClose;
-  document.getElementById('lfs').onclick=function(){ lyr.classList.toggle('fs'); };
+  document.getElementById('lfs').onclick=function(){ lyr.classList.toggle('info'); };
+  /* tap a line → jump to that moment in the song */
+  function lyrSeek(i){
+    var r=R();if(!r||!r.audio)return;
+    try{
+      if(lyrTimes){ r.audio.currentTime=Math.max(0,lyrTimes[i]); }
+      else{ var d=r.audio.duration||0; if(d) r.audio.currentTime=i/lyrLines.length*d; }
+      if(!r.playing())r.control.play();
+    }catch(e){}
+  }
   function buildSongbox(){
     var r=R();if(!r)return; var h='';
-    for(var i=0;i<r.count;i++){var s=r.song(i); if(s&&LYR[s.f]) h+='<button data-i="'+i+'">'+esc(s.n)+'</button>';}
+    for(var i=0;i<r.count;i++){var s=r.song(i); if(s&&(LYR[s.f]||LYRT[s.f])) h+='<button data-i="'+i+'">'+esc(s.n)+'</button>';}
     lsongbox.innerHTML=h; lyrBoxN=r.count;
     Array.prototype.forEach.call(lsongbox.querySelectorAll('button'),function(b){
       b.onclick=function(){var r2=R();if(r2)r2.control.play(+b.getAttribute('data-i'));};});
+  }
+  function fillInfo(slug,name){
+    var m=(slug&&META[slug])||{};
+    document.getElementById('liTitle').textContent=name||'—';
+    var vb=document.getElementById('liVibe');
+    vb.innerHTML=(m.vibe||'').split('/').map(function(v){v=v.trim();return v?'<span>'+esc(v)+'</span>':'';}).join('')
+      ||'<span>unclassified_</span>';
+    document.getElementById('liMeaning').textContent=m.meaning||'classified — the booth keeps its secrets_';
+    document.getElementById('liContext').textContent=m.context||'transmission incomplete_';
+    document.getElementById('liTook').textContent=m.took||'—';
+    var B=window.IBEE_BEAT||{},g=slug&&B[slug];
+    document.getElementById('liBpm').textContent=(g&&g.bpm)?g.bpm:'—';
   }
   function lyrRefresh(){
     var r=R();if(!r)return;
     if(lyrBoxN!==r.count)buildSongbox();
     var slug=r.slug&&r.slug();
     if(slug!==lyrSlug){
-      lyrSlug=slug; lyrLines=(slug&&LYR[slug])||[];
+      lyrSlug=slug;
+      var timed=slug&&LYRT[slug];
+      if(timed&&timed.length){ lyrLines=timed.map(function(l){return l.w;}); lyrTimes=timed.map(function(l){return l.t;}); }
+      else { lyrLines=(slug&&LYR[slug])||[]; lyrTimes=null; }
       var s=r.song&&r.song(); lsong.textContent=s?s.n:'—';
+      fillInfo(slug,s?s.n:null);
       if(lyrLines.length){ lempty.style.display='none';
         lstream.innerHTML=lyrLines.map(function(w){return '<div class="ln">'+esc(w)+'</div>';}).join('');
+        Array.prototype.forEach.call(lstream.children,function(el,i){ el.onclick=function(){lyrSeek(i);}; });
       } else { lempty.style.display='flex'; lstream.innerHTML=''; }
       lyrActive=-1; lstream.style.transform='translateY(0)';
     }
@@ -294,7 +364,12 @@
     if(!lyrOpen||!lyrLines.length)return;
     var r=R();if(!r)return;
     var c=0,d=0; try{c=r.audio.currentTime||0;d=r.audio.duration||0;}catch(e){}
-    var idx=d>0?Math.min(lyrLines.length-1,Math.max(0,Math.floor(c/d*lyrLines.length))):0;
+    var idx;
+    if(lyrTimes){ /* true timestamps: last line whose time has passed */
+      idx=0; for(var k=0;k<lyrTimes.length;k++){ if(lyrTimes[k]<=c)idx=k; else break; }
+    } else {
+      idx=d>0?Math.min(lyrLines.length-1,Math.max(0,Math.floor(c/d*lyrLines.length))):0;
+    }
     if(idx!==lyrActive){
       lyrActive=idx; var kids=lstream.children;
       for(var i=0;i<kids.length;i++)kids[i].classList.toggle('on',i===idx);
@@ -339,6 +414,7 @@
     var r=R();if(!r)return;
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
     var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
+    rshuf.classList.toggle('on',!!(r.shuffled&&r.shuffled()));
     try{bd.style.setProperty('--b',(0.45+(pl?r.beat():0)).toFixed(2));}catch(e){}
     try{var c=r.audio.currentTime||0,d=r.audio.duration||0;
       fill.style.width=(d?c/d*100:0)+'%'; timeEl.textContent=fmt(c)+' / '+fmt(d);}catch(e){}
