@@ -117,11 +117,11 @@
   }
 
   /* ---------- sprites ---------- */
-  var SP={},names=["run-0","run-1","run-2","run-3","run-4","jump-1","jump-2","jump-3","jump-4","lose"];
+  var SP={},names=["run-0","run-1","run-2","run-3","run-4","run-5","run-6","run-7","run-8","jump-1","jump-2","jump-3","jump-4","lose"];
   var loaded=0;
   names.forEach(function(n){var im=new Image();im.onload=im.onerror=function(){loaded++;};im.src="sprites/beebee-"+n+".png";SP[n]=im;});
   document.getElementById("loseimg").src="sprites/beebee-lose.png";
-  var AR=484/829;
+  var AR=0.589;   // character crop aspect (matches the new square frames' shared box)
 
   /* ---------- state ---------- */
   var state="start",player,obstacles,coins,dist,score,speed,frameT,runFrame,shake,flash,grace,launchT;
@@ -265,14 +265,20 @@
     if(state==="over")return SP["lose"];
     if(!player.grounded)return player.vy<0?SP["jump-2"]:SP["jump-3"];
     if(launchT>0)return SP["run-0"];              // anticipation: about to run
-    return SP["run-"+(1+(runFrame%4))];
+    return SP["run-"+(runFrame%9)];               // run loop: frame 0 → 8 → back to 0
   }
+  /* the frames are square 1000×1000 with padding — crop to the character (shared box
+     across every pose) so the whole sprite set stays framed identically and feet sit
+     on the ground. Fractions of the source, so any export resolution works. */
+  var SC={x:0.26,y:0.014,w:0.46,h:0.781};
   function drawPlayer(){
     var im=sprite(),x=player.x,y=player.y,w=player.w,h=player.h;
     if(state!=="over"){ctx.fillStyle="rgba(182,255,0,"+(player.grounded?0.20:0.10)+")";
       ctx.beginPath();ctx.ellipse(x+w/2,groundY-2,w*0.30,6,0,0,7);ctx.fill();}
-    if(im&&im.complete&&im.naturalWidth)ctx.drawImage(im,x,y,w,h);
-    else{ctx.fillStyle="#ff2bd6";ctx.fillRect(x+w*0.3,y,w*0.4,h);}
+    if(im&&im.complete&&im.naturalWidth){
+      var iw=im.naturalWidth,ih=im.naturalHeight;
+      ctx.drawImage(im, SC.x*iw, SC.y*ih, SC.w*iw, SC.h*ih, x, y, w, h);
+    } else{ctx.fillStyle="#ff2bd6";ctx.fillRect(x+w*0.3,y,w*0.4,h);}
   }
 
   /* ---------- beat ---------- */
@@ -328,7 +334,7 @@
       if(player.y>=groundY-player.h){player.y=groundY-player.h;player.vy=0;player.grounded=true;player.jumps=0;}
       else player.grounded=false;
       if(launchT>0)launchT-=dt;                     // hold the start pose briefly, then run
-      else{frameT+=dt;if(frameT>95){frameT=0;runFrame++;}}
+      else{frameT+=dt;if(frameT>62){frameT=0;runFrame++;}}   // 9-frame cycle → tighter per-frame timing
 
       /* ---- rhythm spawn: on a musical beat, if spacing is safe; fallback if quiet ---- */
       framesSinceSpawn+=step;
