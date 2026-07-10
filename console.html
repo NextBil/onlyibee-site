@@ -172,7 +172,8 @@
   #engcanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
   .eng-hud{
     position:absolute;top:0;left:0;right:0;z-index:5;pointer-events:none;
-    display:flex;justify-content:space-between;padding:12px 14px;
+    display:flex;justify-content:space-between;padding:12px 14px 24px;
+    background:linear-gradient(180deg,var(--bg) 55%,rgba(7,7,7,.85) 78%,transparent);
   }
   .eng-hud .l .t{font-family:var(--px);font-size:11px;color:var(--acid);text-shadow:0 0 10px rgba(182,255,0,.4)}
   .eng-hud .l .s{color:var(--dim);font-size:17px;margin-top:5px}
@@ -754,6 +755,7 @@
 
     /* ---------- state ---------- */
     var view="galaxy",curG=null,planets=[],playing=null,gridMode=false,ghost=null,lastGhostId=null;
+    var gridScrollY=0,gridMaxScroll=0;   // grid mode scrolls vertically so rows can breathe
     var forceGhost=false,zoomStart=0; // forceGhost: pin the radio song as performer on arrival · zoomStart: galaxy open animation
     function slugOf(t){return (t.file||"").split("/").pop();} /* locked planets have no file — never match */
     var stars=null,galaxyGeo=null;
@@ -871,16 +873,28 @@
         }
         ctx.globalAlpha=1;
         ctx.restore();
-        // labels
+        // labels — dark plate behind so they read over the bright starfield
         ctx.save();
         ctx.textAlign="center";
-        ctx.font=(g.r<60?"7px":"9px")+" 'Press Start 2P'";
-        ctx.fillStyle=live?"hsl("+g.g.hue+",95%,70%)":(g.g.hidden?"hsl(285,90%,75%)":"#e8e8e8");
-        ctx.shadowColor="rgba(0,0,0,.8)";ctx.shadowBlur=6;
-        ctx.fillText((live?"▶ ":"")+g.g.name,g.x,g.y+g.r*0.72+14);
-        ctx.font=(g.r<60?"13px":"15px")+" VT323";
-        ctx.fillStyle=live?"hsl("+g.g.hue+",70%,62%)":"#7a7a7a";
-        ctx.fillText(g.g.sub+" · "+g.count+" signals",g.x,g.y+g.r*0.72+32);
+        var nameF=(g.r<60?"7px":"9px")+" 'Press Start 2P'";
+        var subF=(g.r<60?"13px":"15px")+" VT323";
+        var nameTxt=(live?"▶ ":"")+g.g.name;
+        var subTxt=g.g.sub+" · "+g.count+" signals";
+        ctx.font=nameF; var w1=ctx.measureText(nameTxt).width;
+        ctx.font=subF;  var w2=ctx.measureText(subTxt).width;
+        var pw=Math.max(w1,w2)+20, ly=g.y+g.r*0.72+2;
+        ctx.fillStyle="rgba(4,4,8,.78)";
+        ctx.beginPath();
+        if(ctx.roundRect)ctx.roundRect(g.x-pw/2,ly,pw,40,6);else ctx.rect(g.x-pw/2,ly,pw,40);
+        ctx.fill();
+        ctx.strokeStyle=live?"hsla("+g.g.hue+",90%,60%,.55)":"rgba(255,255,255,.08)";
+        ctx.lineWidth=1;ctx.stroke();
+        ctx.font=nameF;
+        ctx.fillStyle=live?"hsl("+g.g.hue+",95%,74%)":(g.g.hidden?"hsl(285,95%,80%)":"#f2f2f2");
+        ctx.fillText(nameTxt,g.x,ly+14);
+        ctx.font=subF;
+        ctx.fillStyle=live?"hsl("+g.g.hue+",75%,66%)":"#9fa0a2";
+        ctx.fillText(subTxt,g.x,ly+32);
         ctx.restore();
       }
     }
@@ -914,7 +928,7 @@
       var w=root.clientWidth,h=root.clientHeight;
       var ts=TRACKS.filter(function(t){return t.g===g.id});
       planets=ts.map(function(t){return makePlanet(t,w,h,ts.length)});
-      gridMode=false;
+      gridMode=false; gridScrollY=0;
       engTitle.textContent=g.name;
       engSub.textContent="tap a record to play · tap the void to align_";
       engBack.classList.add("show");
@@ -950,15 +964,31 @@
 
     function gridSlot(i,n,bounds){
       var narrow=bounds.w<560;                 // phones
-      var mx=narrow?20:46, mtop=narrow?78:95, mbot=narrow?118:130;
+      var mx=narrow?20:46, mtop=narrow?70:88, mbot=narrow?26:34;
       var minCell=narrow?150:120;              // min horizontal room per record so titles fit
       var cols=Math.max(1,Math.round(Math.sqrt(n*bounds.w/Math.max(1,bounds.h))));
       var fit=Math.max(1,Math.floor((bounds.w-mx*2)/minCell));
-      cols=Math.min(cols,fit,n);               // never pack tighter than titles can read
+      cols=Math.min(cols,fit,n);               // same column count as before — only the vertical pitch changed
       var rows=Math.ceil(n/cols);
-      var cw=(bounds.w-mx*2)/cols,ch=(bounds.h-mtop-mbot)/Math.max(1,rows);
+      var cw=(bounds.w-mx*2)/cols;
+      /* fixed, generous vertical pitch — the grid scrolls when it's taller than the
+         stage, so rows always get real breathing room (and it scales as songs grow) */
+      var pitchY=narrow?92:104;
+      var contentH=mtop+rows*pitchY+mbot;
+      gridMaxScroll=Math.max(0,contentH-bounds.h);
+      // when everything fits, centre the block vertically; otherwise pin to the top + scroll
+      var top=gridMaxScroll>0?mtop:Math.max(mtop,(bounds.h-rows*pitchY)/2);
+      if(gridScrollY>gridMaxScroll)gridScrollY=gridMaxScroll;   // keep clamped as layout changes
       var c=i%cols,r=Math.floor(i/cols);
-      return {x:mx+cw*(c+0.5),y:mtop+ch*(r+0.5)};
+      return {x:mx+cw*(c+0.5),y:top+pitchY*(r+0.5)-gridScrollY};
+    }
+    /* pan the grid; carries the planets with it so it feels 1:1 (not rubber-banded) */
+    function panGrid(dScroll){
+      if(!gridMode)return;
+      var want=Math.max(0,Math.min(gridMaxScroll,gridScrollY+dScroll));
+      var applied=want-gridScrollY; if(!applied)return;
+      gridScrollY=want;
+      planets.forEach(function(p){ p.y-=applied; });
     }
     function stepPlanet(pl,dt,bounds,idx,total){
       var pf=playing||ghost;
@@ -1364,7 +1394,7 @@
       return hit;
     }
     canvas.addEventListener("pointerdown",function(e){
-      var p=xy(e);down={x:p.x,y:p.y,moved:0};
+      var p=xy(e);down={x:p.x,y:p.y,ly:p.y,moved:0};
       if(view==="system"){
         var hit=pickPlanet(p.x,p.y);
         if(hit&&!hit.t.locked){dragP=hit;hit.dragging=true;}
@@ -1376,7 +1406,12 @@
       var p=xy(e);
       down.moved+=Math.hypot(p.x-down.x,p.y-down.y);
       if(dragP){dragP.x=p.x;dragP.y=p.y;}
+      else if(gridMode&&view==="system"){ panGrid(-(p.y-down.ly)); }  // empty-space drag scrolls the grid
+      down.ly=p.y;
     });
+    canvas.addEventListener("wheel",function(e){
+      if(gridMode&&view==="system"&&gridMaxScroll>0){ panGrid(e.deltaY); e.preventDefault(); }
+    },{passive:false});
     function release(e){
       if(skipTap){skipTap=false;down=null;if(dragP){dragP.dragging=false;dragP=null;}
         try{canvas.releasePointerCapture(e.pointerId);}catch(err){}return;}
@@ -1397,8 +1432,8 @@
             else{playTrack(hit);}
           }else{
             // tap the void → snap to grid / back to free motion
-            gridMode=!gridMode;
-            toast(gridMode?"⊞ ALIGNED TO GRID_":"✦ FREE MOTION_");
+            gridMode=!gridMode; gridScrollY=0;
+            toast(gridMode?"⊞ ALIGNED TO GRID · drag to scroll_":"✦ FREE MOTION_");
             blip(gridMode?520:300,.05);
           }
         }
