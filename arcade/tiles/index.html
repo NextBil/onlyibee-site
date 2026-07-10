@@ -63,8 +63,8 @@
   .toast{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);font-size:30px;font-weight:900;
     opacity:0;pointer-events:none;z-index:7;letter-spacing:2px;}
 
-  .overlay{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:linear-gradient(180deg,rgba(5,4,10,.82),rgba(5,4,10,.96));gap:14px;padding:22px;text-align:center;}
+  .overlay{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:safe center;
+    background:linear-gradient(180deg,rgba(5,4,10,.9),rgba(5,4,10,.97));gap:14px;padding:22px 16px;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .overlay.hidden{display:none;}
   .logo{font-size:30px;font-weight:900;line-height:1;letter-spacing:2px;
     text-shadow:0 0 14px var(--magenta),0 0 30px var(--magenta);}
@@ -74,7 +74,7 @@
   .blink{animation:blink 1s steps(2) infinite;} @keyframes blink{50%{opacity:0}}
   .checker{width:100%;height:12px;
     background:repeating-conic-gradient(var(--yellow) 0 25%, #0000 0 50%) 0 0/14px 14px, var(--red);opacity:.85;}
-  .songlist{width:100%;max-height:296px;overflow:auto;display:flex;flex-direction:column;gap:7px;padding-right:4px;}
+  .songlist{width:100%;display:flex;flex-direction:column;gap:7px;padding-right:4px;}
   .songlist::-webkit-scrollbar{width:8px;}.songlist::-webkit-scrollbar-thumb{background:var(--magenta);border-radius:8px;}
   .song{display:flex;align-items:center;gap:10px;background:#0f0b1e;border:2px solid #241a44;border-radius:4px;padding:10px 12px;cursor:pointer;transition:.1s;text-align:left;}
   .song:hover{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,234,255,.5);transform:translateX(3px);}
@@ -202,7 +202,17 @@ el('liveBtn').onclick=()=>startGame();
 el('diffBtn').onclick=()=>{diffIx=(diffIx+1)%3;el('diffBtn').textContent='SPEED: '+DIFF[diffIx][0];};
 
 function refreshWords(){var r=RAD();var slug=(r&&r.slug&&r.slug())||null;if(slug!==wordSlug){wordSlug=slug;var LY=LYRALL();var lines=slug&&LY[slug];wordArr=(lines&&lines.length)?lines.join(' ').split(/\s+/).filter(Boolean).map(function(w){return w.toUpperCase();}):['MIMI','ONLY','IBEE','NA','NA','LA','LA','OOH','YEAH'];wordIdx=0;}}
-function nextWord(){refreshWords();var w=wordArr[wordIdx%wordArr.length];wordIdx++;return w||'MIMI';}
+/* per-word timeline from the tap-synced lyrics (website lyrics-timed) so tiles track the song */
+var _twc={s:null,a:null};
+function timedWords(){var r=RAD();var slug=(r&&r.slug&&r.slug())||null;if(_twc.s===slug)return _twc.a;
+  var T=window.IBEE_LYRICS_TIMED||(window.top&&window.top.IBEE_LYRICS_TIMED)||{};var td=slug&&T[slug];var a=null;
+  if(td&&td.length){a=[];for(var i=0;i<td.length;i++){var t0=td[i].t,t1=(i+1<td.length?td[i+1].t:t0+3);var ws=String(td[i].w).split(/\s+/).filter(Boolean);for(var k=0;k<ws.length;k++)a.push({t:t0+(k/ws.length)*(t1-t0),w:ws[k].toUpperCase()});}}
+  _twc={s:slug,a:a};return a;}
+function pickWord(look){var r=RAD();var c=0,d=0;try{c=(r.audio.currentTime||0)+(look||0);d=r.audio.duration||0;}catch(e){}
+  var a=timedWords();
+  if(a&&a.length){var lo=0,hi=a.length-1,ans=0;while(lo<=hi){var m=(lo+hi)>>1;if(a[m].t<=c){ans=m;lo=m+1;}else hi=m-1;}return a[ans].w;}
+  refreshWords();if(!wordArr.length)return 'MIMI';var idx=d>0?Math.floor((c/d)*wordArr.length):wordIdx++;return wordArr[Math.max(0,Math.min(wordArr.length-1,idx))]||'MIMI';}
+function nextWord(){return pickWord(1.0);}
 
 function drawBoard(){
   ctx.clearRect(0,0,W,H);
@@ -408,5 +418,6 @@ drawBoard();updateHUD();idleKick();
 </script>
 <script src="../../assets/player.js?v=13"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="../../assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
 </body>
 </html>

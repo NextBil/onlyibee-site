@@ -27,15 +27,16 @@
   .ticker{position:absolute;left:0;right:0;bottom:10px;z-index:5;text-align:center;pointer-events:none;font-size:18px;font-weight:900;text-transform:uppercase;text-shadow:0 0 10px var(--cyan),0 0 4px #fff;min-height:22px;transition:.08s;}
   .ticker .prev{opacity:.4;font-size:13px;color:var(--cyan);}
   .toast{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);font-size:26px;font-weight:900;opacity:0;pointer-events:none;z-index:5;letter-spacing:2px;}
-  .ov{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(7,3,15,.78),rgba(7,3,15,.95));gap:11px;padding:20px;text-align:center;}
+  /* full-screen, scrollable menu — not trapped inside the short game stage on phones */
+  .ov{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:safe center;background:linear-gradient(180deg,rgba(7,3,15,.9),rgba(7,3,15,.97));gap:11px;padding:26px 16px;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .ov.hidden{display:none;}
   .logo{font-size:44px;font-weight:900;letter-spacing:2px;line-height:.9;background:linear-gradient(180deg,var(--yel),#ff901f 45%,var(--mag) 78%,var(--pur));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,41,117,.6));}
   .sub{font-size:15px;letter-spacing:6px;color:var(--cyan);text-shadow:0 0 12px var(--cyan);margin-top:-4px;}
   .tag{font-size:12px;letter-spacing:2px;color:var(--mag);text-shadow:0 0 8px var(--mag);}
   .blink{animation:blink 1s steps(2) infinite;}@keyframes blink{50%{opacity:0}}
-  .grid2{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:640px;max-height:206px;overflow:auto;padding:2px;}
-  .grid2::-webkit-scrollbar{width:8px;}.grid2::-webkit-scrollbar-thumb{background:var(--mag);border-radius:8px;}
-  .song{display:flex;align-items:center;gap:8px;background:#120a24;border:2px solid #281747;border-radius:5px;padding:8px 10px;cursor:pointer;transition:.1s;text-align:left;}
+  .grid2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%;max-width:640px;padding:2px;}
+  @media(max-width:620px){.grid2{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  .song{display:flex;align-items:center;gap:8px;background:#120a24;border:2px solid #281747;border-radius:5px;padding:8px 10px;cursor:pointer;transition:.1s;text-align:left;min-width:0;}
   .song:hover{border-color:var(--cyan);box-shadow:0 0 12px rgba(100,240,255,.45);transform:translateY(-1px);}
   .song .num{font-size:10px;color:var(--yel);}
   .song .nm{font-weight:900;font-size:12px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -47,7 +48,7 @@
   .big{font-size:42px;font-weight:900;color:var(--yel);text-shadow:0 0 16px var(--yel);}
   .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
   .keycap{display:inline-block;border:2px solid var(--yel);color:var(--yel);border-radius:5px;padding:2px 8px;font-weight:900;box-shadow:0 0 8px rgba(255,211,25,.4);}
-  @media(max-width:920px){#wrap{transform:scale(.98);}}
+  /* (menu overlays are position:fixed, so #wrap must stay transform-free) */
 </style></head>
 <body><div id="wrap"><div class="stage">
   <canvas id="c" width="900" height="560"></canvas>
@@ -150,7 +151,18 @@ el('vibeBtn').onclick=()=>{vibeIx=vibeIx>=THEMES.length-1?-1:vibeIx+1;el('vibeBt
 el('stopBtn').onclick=stopToMenu;
 function stopToMenu(){location.href='../';}
 function refreshWords(){var r=RAD();var slug=(r&&r.slug&&r.slug())||null;if(slug!==wordSlug){wordSlug=slug;var LY=LYRALL();var lines=slug&&LY[slug];wordArr=(lines&&lines.length)?lines.join(' ').split(/\s+/).filter(Boolean).map(function(w){return w.toUpperCase();}):['MIMI','ONLY','IBEE','NA','NA','LA','LA','OOH','YEAH'];wordIdx=0;}}
-function nextWord(){refreshWords();var w=wordArr[wordIdx%wordArr.length];wordIdx++;return w||'MIMI';}
+/* per-word timeline from the tap-synced lyrics (website lyrics-timed) so game words track the song */
+var _twc={s:null,a:null};
+function timedWords(){var r=RAD();var slug=(r&&r.slug&&r.slug())||null;if(_twc.s===slug)return _twc.a;
+  var T=window.IBEE_LYRICS_TIMED||(window.top&&window.top.IBEE_LYRICS_TIMED)||{};var td=slug&&T[slug];var a=null;
+  if(td&&td.length){a=[];for(var i=0;i<td.length;i++){var t0=td[i].t,t1=(i+1<td.length?td[i+1].t:t0+3);var ws=String(td[i].w).split(/\s+/).filter(Boolean);for(var k=0;k<ws.length;k++)a.push({t:t0+(k/ws.length)*(t1-t0),w:ws[k].toUpperCase()});}}
+  _twc={s:slug,a:a};return a;}
+/* the word being sung ~look seconds ahead (so it lands on the hit line in sync) */
+function pickWord(look){var r=RAD();var c=0,d=0;try{c=(r.audio.currentTime||0)+(look||0);d=r.audio.duration||0;}catch(e){}
+  var a=timedWords();
+  if(a&&a.length){var lo=0,hi=a.length-1,ans=0;while(lo<=hi){var m=(lo+hi)>>1;if(a[m].t<=c){ans=m;lo=m+1;}else hi=m-1;}return a[ans].w;}
+  refreshWords();if(!wordArr.length)return 'MIMI';var idx=d>0?Math.floor((c/d)*wordArr.length):wordIdx++;return wordArr[Math.max(0,Math.min(wordArr.length-1,idx))]||'MIMI';}
+function nextWord(){return pickWord(0.9);}
 function proj(p,lw){const s=0.16+p*p*1.5;const y=HOR+(H+30-HOR)*(p*p);const x=W/2+lw*SPREAD*s;return{x,y,s};}
 
 function startGame(ix){
@@ -374,4 +386,5 @@ el('menuBtn').onclick=()=>{el('overScreen').classList.add('hidden');el('startScr
 resetGame();if(!rafOn){rafOn=true;requestAnimationFrame(loop);}
 </script><script src="../../assets/player.js?v=13"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="../../assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
 </body></html>
