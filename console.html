@@ -262,7 +262,10 @@
   }
   .pbl-head span:last-child{color:var(--dim);cursor:pointer}
   .pbl-head span:last-child:hover{color:var(--red)}
-  #pbcover{width:44px;height:44px;object-fit:cover;border:1px solid var(--border);flex:none}
+  #pbcover{width:44px;height:44px;object-fit:cover;border-radius:50%;border:2px solid #000;
+    box-shadow:0 0 0 1px var(--border),0 0 8px rgba(182,255,0,.15);flex:none;
+    animation:pbspin 6s linear infinite}
+  @keyframes pbspin{to{transform:rotate(360deg)}}
   .pb-info{min-width:0;flex:1}
   #pbtitle{font-family:var(--px);font-size:10px;color:var(--acid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #pbsub{color:var(--dim);font-size:16px;margin-top:3px}
@@ -461,7 +464,6 @@
             <div class="pb-ctrl">
               <button id="pbplay" class="main">❚❚</button>
               <button id="pbstop">■</button>
-              <button id="pblyr" class="lyrbtn" title="GALAXIES"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='11' ry='4.4' fill='none' stroke='%2326e0ff' stroke-width='1.4' opacity='.8'/%3E%3Ccircle cx='12' cy='12' r='5.6' fill='%230e0e0e' stroke='%23b6ff00' stroke-width='1.6'/%3E%3Ccircle cx='10' cy='10.2' r='1.5' fill='%23ff2bd6'/%3E%3Ccircle cx='13.6' cy='13' r='1' fill='%23b6ff00'/%3E%3C/svg%3E" alt="galaxies"></button>
             </div>
           </div>
           <div id="pbseek"><div id="pbfill"></div></div>
@@ -794,7 +796,7 @@
         for(var ti=0;ti<TRACKS.length;ti++)if(TRACKS[ti].file&&slugOf(TRACKS[ti])===e.f)return;
         var gOk=false;for(var g2=0;g2<GALX.length;g2++)if(GALX[g2].id===e.g){gOk=true;break;}
         TRACKS.push({id:"x-"+e.f.replace(/\.[a-z0-9]+$/,""),g:gOk?e.g:"rss",name:e.n||e.f,
-          file:"assets/audio/songs/"+e.f,alt:e.r||e.f,len:e.len||180,hue:(e.hue!=null?e.hue:190)});
+          file:"assets/audio/songs/"+e.f,alt:e.r||e.f,len:e.len||180,hue:(e.hue!=null?e.hue:190),cover:e.cover||undefined});
       });
     }catch(e){}
 
@@ -1039,11 +1041,19 @@
         });
         return out.slice(0,9);
       }
+      /* empty box → suggest every album (newest first) so a tap on the search already shows options */
+      function suggest(){
+        var out=[];
+        visGalaxies().slice().reverse().forEach(function(g){
+          out.push({k:"alb",lab:"ALBUM",n:g.name,d:g.sub||"",act:function(){enterGalaxy(g);}});
+        });
+        return out.slice(0,9);
+      }
       function render(){
-        if(!inp.value.trim()){box.classList.remove("on");box.innerHTML="";return;}
-        var rs=find(inp.value);
+        var q=inp.value.trim();
+        var rs=q?find(inp.value):suggest();
         box.classList.add("on");
-        if(!rs.length){box.innerHTML='<div class="usnone">NO SIGNAL FOUND_</div>';return;}
+        if(!rs.length){box.innerHTML='<div class="usnone">'+(q?'NO SIGNAL FOUND_':'NO ALBUMS YET_')+'</div>';return;}
         box.innerHTML="";
         rs.forEach(function(r){
           var d=document.createElement("div");d.className="usrow";
@@ -1053,6 +1063,7 @@
         });
       }
       inp.addEventListener("input",render);
+      inp.addEventListener("focus",render);   // clicking the search shows all albums right away
       inp.addEventListener("keydown",function(e){
         if(e.key==="Escape"){inp.value="";render();inp.blur();}
         if(e.key==="Enter"){var f=box.querySelector(".usrow");if(f)f.click();}
@@ -1373,8 +1384,7 @@
       if(pblist.classList.contains("open")){pblist.classList.remove("open");return;}
       if(buildPbList()){updEngback();pblist.classList.add("open");blip(300,.04);}
     });
-    $("#pblyr").addEventListener("click",exitToGalaxies);   // ← back to the galaxies (was: lyrics page)
-    var _tg=$("#topgal"); if(_tg)_tg.addEventListener("click",exitToGalaxies);  // top-bar GALAXIES (next to MENU)
+    var _tg=$("#topgal"); if(_tg)_tg.addEventListener("click",exitToGalaxies);  // top-bar GALAXIES is the only way back now
 
     /* click outside the player → hide it (music keeps playing), ♪ chip reopens */
     var pbmini=$("#pbmini"),skipTap=false;

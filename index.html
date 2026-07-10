@@ -458,6 +458,8 @@
   window.addEventListener('blur',function(){
     if(tl.classList.contains('open')&&document.activeElement===frame)tl.classList.remove('open');
   });
+  /* …and games (which preventDefault taps, so focus never shifts) post this on tap */
+  window.addEventListener('message',function(e){ if(e&&e.data==='ibee-frame-tap')tl.classList.remove('open'); });
 
   /* ---- keep the player reflecting the one radio's state ---- */
   var rt=document.getElementById('rt'),rplay=document.getElementById('rplay'),
