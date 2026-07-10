@@ -397,7 +397,7 @@
     <!-- MUSIC ENGINE -->
     <section class="screen" id="music">
       <span class="back" data-go="menu">◀ MENU</span>
-      <a class="back" href="lyrics/" title="back to the lyrics engine" style="margin-left:8px;text-decoration:none">◀ LYRICS</a>
+      <span class="back" id="topgal" title="back to the galaxies" style="margin-left:8px">◀ GALAXIES</span>
       <div id="engroot">
         <canvas id="engcanvas"></canvas>
         <div class="eng-hud">
@@ -811,17 +811,31 @@
     }
     function drawGalaxies(w,h){
       ensureGalaxies(w,h);
+      /* the galaxy holding the playing record glows to the song (engine or radio) */
+      var liveG=null,bt=0;
+      if(playing){ liveG=playing.t.g; bt=audioBeat; }
+      else{ try{ var RG=window.IBEERADIO;
+        if(RG&&RG.playing&&RG.playing()){ var sl=RG.slug(); bt=RG.beat()||0;
+          for(var ti=0;ti<TRACKS.length;ti++){ var tf=TRACKS[ti].file;   // locked planets have no file
+            if(tf&&tf.split("/").pop()===sl){ liveG=TRACKS[ti].g; break; } } }
+      }catch(e){} }
       for(var gi=0;gi<galaxyGeo.list.length;gi++){
         var g=galaxyGeo.list[gi];
-        g.spin+=0.0016;
+        var live=(liveG&&g.g.id===liveG);
+        g.spin+=0.0016+(live?bt*0.004:0);
         ctx.save();
         ctx.translate(g.x,g.y);
-        ctx.shadowColor="hsl("+g.g.hue+",90%,60%)";ctx.shadowBlur=34;
+        ctx.shadowColor="hsl("+g.g.hue+",90%,60%)";ctx.shadowBlur=34+(live?bt*50:0);
         var core=ctx.createRadialGradient(0,0,0,0,0,g.r);
-        core.addColorStop(0,"hsla("+g.g.hue+",90%,70%,.45)");
-        core.addColorStop(.3,"hsla("+g.g.hue+",80%,55%,.10)");
+        core.addColorStop(0,"hsla("+g.g.hue+",90%,70%,"+(live?(0.45+bt*0.35).toFixed(3):".45")+")");
+        core.addColorStop(.3,"hsla("+g.g.hue+",80%,55%,"+(live?(0.10+bt*0.20).toFixed(3):".10")+")");
         core.addColorStop(1,"hsla("+g.g.hue+",70%,45%,0)");
         ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,0,g.r,0,TAU);ctx.fill();
+        if(live){ /* pulse ring riding the beat */
+          ctx.strokeStyle="hsla("+g.g.hue+",95%,65%,"+(0.22+bt*0.55).toFixed(3)+")";
+          ctx.lineWidth=1.5+bt*2.5;
+          ctx.beginPath();ctx.arc(0,0,g.r*(1.04+bt*0.16),0,TAU);ctx.stroke();
+        }
         ctx.shadowBlur=0;
         ctx.rotate(g.spin);
         for(var d=0;d<g.dots.length;d++){
@@ -838,11 +852,11 @@
         ctx.save();
         ctx.textAlign="center";
         ctx.font=(g.r<60?"7px":"9px")+" 'Press Start 2P'";
-        ctx.fillStyle=g.g.hidden?"hsl(285,90%,75%)":"#e8e8e8";
+        ctx.fillStyle=live?"hsl("+g.g.hue+",95%,70%)":(g.g.hidden?"hsl(285,90%,75%)":"#e8e8e8");
         ctx.shadowColor="rgba(0,0,0,.8)";ctx.shadowBlur=6;
-        ctx.fillText(g.g.name,g.x,g.y+g.r*0.72+14);
+        ctx.fillText((live?"▶ ":"")+g.g.name,g.x,g.y+g.r*0.72+14);
         ctx.font=(g.r<60?"13px":"15px")+" VT323";
-        ctx.fillStyle="#7a7a7a";
+        ctx.fillStyle=live?"hsl("+g.g.hue+",70%,62%)":"#7a7a7a";
         ctx.fillText(g.g.sub+" · "+g.count+" signals",g.x,g.y+g.r*0.72+32);
         ctx.restore();
       }
@@ -1180,6 +1194,7 @@
       if(buildPbList()){updEngback();pblist.classList.add("open");blip(300,.04);}
     });
     $("#pblyr").addEventListener("click",exitToGalaxies);   // ← back to the galaxies (was: lyrics page)
+    var _tg=$("#topgal"); if(_tg)_tg.addEventListener("click",exitToGalaxies);  // top-bar GALAXIES (next to MENU)
 
     /* click outside the player → hide it (music keeps playing), ♪ chip reopens */
     var pbmini=$("#pbmini"),skipTap=false;
