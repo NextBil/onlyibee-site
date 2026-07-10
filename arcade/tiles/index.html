@@ -34,7 +34,9 @@
   @keyframes grid{from{background-position-y:0,0}to{background-position-y:34px,0}}
   #app{position:relative;z-index:2;display:flex;gap:26px;align-items:center;padding:18px;}
 
-  .stage{position:relative;width:400px;height:672px;border-radius:6px;overflow:hidden;
+  /* the cabinet scales to always FIT the screen (keeps 400:672); the canvas keeps its
+     own 400x672 drawing space and taps are already mapped through the real rect */
+  .stage{position:relative;width:min(400px,96vw,calc((100dvh - 20px)*400/672));aspect-ratio:400/672;border-radius:6px;overflow:hidden;
     background:#07060e;
     box-shadow:0 0 0 3px #1a1330, 0 0 0 6px var(--cyan), 0 0 28px var(--cyan),
       0 0 60px rgba(255,43,214,.35), inset 0 0 60px rgba(0,0,0,.8);}
@@ -105,7 +107,13 @@
     filter:blur(16px);opacity:.4;pointer-events:none;z-index:0;}
   #mimi{position:relative;z-index:1;}
   .lvl{font-size:11px;color:var(--yellow);text-shadow:0 0 8px var(--yellow);margin-top:3px;letter-spacing:1px;}
-  @media (max-width:900px){#app{flex-direction:column-reverse;gap:8px;transform:scale(.8);}}
+  /* phones: the cabinet IS the whole console — no scale() hack (it clipped the top:
+     transform keeps the old layout box, so the overflow got cut by overflow:hidden).
+     The stage's min() width above already shrinks it to fit the real viewport. */
+  @media (max-width:900px){
+    #app{padding:6px;gap:0;}
+    .side{display:none;}
+  }
 </style>
 </head>
 <body>
@@ -138,6 +146,7 @@
       <div class="tag blink">▶ INSERT SONG TO PLAY</div>
       <button class="btn m" id="liveBtn" style="width:100%;margin:2px 0 6px">▶ JUMP IN LIVE — TILES TO THE SONG ON AIR</button>
       <div class="checker"></div>
+      <div class="small">TAP THE LYRIC TILE WHEN IT HITS THE NEON LINE_</div>
       <div class="small">SELECT TRACK:</div>
       <div class="songlist" id="songlist"></div>
       <div class="row"><button class="btn m" id="diffBtn">SPEED: NORMAL</button></div>
