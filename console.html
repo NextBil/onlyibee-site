@@ -547,6 +547,9 @@
   </footer>
 </div>
 
+<!-- extra records from IBEE STUDIO (new songs → galaxies + planets). Clock-stamped,
+     synchronous (document.write) so the engine below sees it; missing file = no-op. -->
+<script>document.write('<script src="assets/songs-extra.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
 (function(){
   "use strict";
@@ -729,10 +732,30 @@
     ];
     var MAX_PLAYS=10;
 
+    /* ---------- extra records from IBEE STUDIO (assets/songs-extra.js) ----------
+       ADDITIVE ONLY: a new album becomes a galaxy, a new song becomes a planet.
+       Any slug the built-in TRACKS already has is skipped (built-ins always win);
+       unknown galaxy ids fall back to rss; if the file is missing nothing changes. */
+    try{
+      var XSE=window.IBEE_SONGS_EXTRA||{};
+      (XSE.galaxies||[]).forEach(function(ga){
+        if(!ga||!ga.id)return;
+        for(var gi=0;gi<GALX.length;gi++)if(GALX[gi].id===ga.id)return;
+        GALX.push({id:ga.id,name:ga.name||ga.id.toUpperCase(),sub:ga.sub||"NEW TRANSMISSION",hue:(ga.hue!=null?ga.hue:190)});
+      });
+      (XSE.songs||[]).forEach(function(e){
+        if(!e||!e.f)return;
+        for(var ti=0;ti<TRACKS.length;ti++)if(TRACKS[ti].file&&slugOf(TRACKS[ti])===e.f)return;
+        var gOk=false;for(var g2=0;g2<GALX.length;g2++)if(GALX[g2].id===e.g){gOk=true;break;}
+        TRACKS.push({id:"x-"+e.f.replace(/\.[a-z0-9]+$/,""),g:gOk?e.g:"rss",name:e.n||e.f,
+          file:"assets/audio/songs/"+e.f,alt:e.r||e.f,len:e.len||180,hue:(e.hue!=null?e.hue:190)});
+      });
+    }catch(e){}
+
     /* ---------- state ---------- */
     var view="galaxy",curG=null,planets=[],playing=null,gridMode=false,ghost=null,lastGhostId=null;
     var forceGhost=false,zoomStart=0; // forceGhost: pin the radio song as performer on arrival · zoomStart: galaxy open animation
-    function slugOf(t){return t.file.split("/").pop();}
+    function slugOf(t){return (t.file||"").split("/").pop();} /* locked planets have no file — never match */
     var stars=null,galaxyGeo=null;
     var audioLevel=0,audioBeat=0,emaLow=0;
     var analyser=null,actx=null,freq=null;

@@ -385,11 +385,11 @@
       if(r.audio&&r.audio.duration)r.audio.currentTime=Math.max(0,Math.min(1,fr))*r.audio.duration;}catch(x){}});
 
   /* ---- title click → open the radio (track list) ---- */
-  var tl=document.getElementById('tracklist'), built=false;
+  var tl=document.getElementById('tracklist'), built=false, builtCount=0;
   function buildList(){
     var r=R();if(!r)return; var h='<div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>';
     for(var i=0;i<r.count;i++){var s=r.song(i);h+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?'0':'')+(i+1)+'</span>'+(s?s.n:'—')+'</div>';}
-    tl.innerHTML=h;built=true;
+    tl.innerHTML=h;built=true;builtCount=r.count;
     document.getElementById('tlx').onclick=function(ev){ev.stopPropagation();tl.classList.remove('open');};
     Array.prototype.forEach.call(tl.querySelectorAll('.tr'),function(row){
       row.onclick=function(){var r2=R();if(r2)r2.control.play(+row.getAttribute('data-i'));};});
@@ -414,6 +414,7 @@
   function fmt(s){if(!isFinite(s))return'--:--';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
   setInterval(function(){
     var r=R();if(!r)return;
+    if(built&&r.count!==builtCount)buildList(); /* extra records arrived — rebuild the list */
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
     var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
     rshuf.classList.toggle('on',!!(r.shuffled&&r.shuffled()));
