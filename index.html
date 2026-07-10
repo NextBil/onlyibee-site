@@ -426,6 +426,9 @@
         row.classList.toggle('now',+row.getAttribute('data-i')===ci);});}
     if(lyrOpen){ lyrRefresh(); lyrSync(); }
   },350);
+  /* the 350ms heartbeat is too coarse for karaoke — while the overlay is open,
+     re-check the active line 10×/sec so it flips the instant its timestamp hits */
+  setInterval(function(){ if(lyrOpen) lyrSync(); },100);
 
   /* ---- PRESS START intro: just dismiss, do NOT start music ---- */
   var enter=document.getElementById('enter');
