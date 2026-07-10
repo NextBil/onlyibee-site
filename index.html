@@ -111,7 +111,12 @@
   #lyr .ln{font-size:21px;line-height:1.4;color:#8a8a8a;opacity:.35;padding:7px 0;transition:all .35s;
     text-shadow:0 1px 3px #000;cursor:pointer}
   #lyr .ln:hover{opacity:.85;color:var(--ink)}
-  #lyr .ln.on{opacity:1;color:var(--acid);font-size:26px;text-shadow:0 0 16px rgba(182,255,0,.5),0 1px 3px #000}
+  /* karaoke: the active line is a gradient clipped to the text — the bright part
+     sweeps left→right in time with the singing (lyrSync moves the stop each frame) */
+  #lyr .ln.on{opacity:1;font-size:26px;color:transparent;text-shadow:none;
+    -webkit-background-clip:text;background-clip:text;
+    background-image:linear-gradient(90deg,#eaffb0 0%,#b6ff00 0%,rgba(182,255,0,.30) 0%);
+    filter:drop-shadow(0 0 12px rgba(182,255,0,.4))}
   #lyr .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     color:var(--dim);font-family:var(--px);font-size:10px;text-align:center;padding:24px}
   /* ---- INFO side (the record's soul): swaps into the words' slot, bar stays put ---- */
@@ -274,6 +279,7 @@
     b.onclick=function(){ navigate(it.u); };navEl.appendChild(b);});
 
   function navigate(url){
+    try{lyrClose();}catch(e){}   /* moving to a section closes the lyrics room */
     try{
       var cur=frame.contentWindow.location, tgt=new URL(url, location.href);
       if(cur.pathname===tgt.pathname && tgt.hash){ frame.contentWindow.location.hash=tgt.hash; sync(); return; }
@@ -396,9 +402,23 @@
     } else {
       idx=d>0?Math.min(lyrLines.length-1,Math.max(0,Math.floor(c/d*lyrLines.length))):0;
     }
+    var kids=lstream.children;
     if(idx!==lyrActive){
-      lyrActive=idx; var kids=lstream.children;
+      if(lyrActive>=0&&kids[lyrActive])kids[lyrActive].style.backgroundImage='';
+      lyrActive=idx;
       for(var i=0;i<kids.length;i++)kids[i].classList.toggle('on',i===idx);
+    }
+    /* karaoke sweep: how far through the active line are we? */
+    var el=kids[lyrActive];
+    if(el){
+      var p=1;
+      if(lyrTimes){ var t0=lyrTimes[lyrActive],
+        t1=(lyrActive+1<lyrTimes.length)?lyrTimes[lyrActive+1]:Math.max(t0+2,d||t0+4);
+        p=(c-t0)/Math.max(0.2,t1-t0); }
+      else if(d>0){ var per=d/lyrLines.length; p=(c-lyrActive*per)/per; }
+      p=Math.max(0,Math.min(1,p)); var pc=p*100;
+      el.style.backgroundImage='linear-gradient(90deg,#eaffb0 0%,#b6ff00 '
+        +Math.max(0,pc-4).toFixed(1)+'%,rgba(182,255,0,.30) '+pc.toFixed(1)+'%)';
     }
     /* follow the song — unless the user is scrolling (or was, in the last 4s) */
     if(lyrActive>=0&&lyrCentered!==lyrActive&&Date.now()-lyrManual>4000)lyrCenter();
@@ -479,9 +499,9 @@
         row.classList.toggle('now',+row.getAttribute('data-i')===ci);});}
     if(lyrOpen){ lyrRefresh(); lyrSync(); }
   },350);
-  /* the 350ms heartbeat is too coarse for karaoke — while the overlay is open,
-     re-check the active line 10×/sec so it flips the instant its timestamp hits */
-  setInterval(function(){ if(lyrOpen) lyrSync(); },100);
+  /* karaoke needs frame-accurate timing: while the overlay is open, sync every
+     animation frame (the sweep + line flips land the instant their time hits) */
+  (function lyrTick(){ requestAnimationFrame(lyrTick); if(lyrOpen) lyrSync(); })();
 
   /* ---- PRESS START intro: just dismiss, do NOT start music ---- */
   var enter=document.getElementById('enter');
