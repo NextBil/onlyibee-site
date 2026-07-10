@@ -41,6 +41,9 @@
   #hudR{right:12px;text-align:right;font-size:9px;color:var(--dim)}
   #hudR .beat{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--pink);margin-left:5px;
     box-shadow:0 0 10px var(--pink);transform:scale(var(--b,.4));transition:transform .06s}
+  #fuelbar{display:inline-block;width:52px;height:7px;border:1px solid var(--border);
+    vertical-align:middle;background:rgba(0,0,0,.5);padding:1px}
+  #fuelfill{display:block;height:100%;width:100%;background:var(--warn);box-shadow:0 0 6px rgba(255,214,10,.6)}
   #combo{position:absolute;top:54px;left:12px;z-index:20;font-family:var(--px);font-size:15px;
     color:var(--warn);text-shadow:0 0 12px var(--warn);opacity:0;transition:opacity .2s}
   #combo.on{opacity:1}
@@ -61,11 +64,11 @@
   .keys{font-size:16px;color:var(--dim)}
   .keys b{color:var(--acid);font-family:var(--px);font-size:9px;border:1px solid var(--border);padding:2px 6px}
 
-  .backrow{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:25}
-  .backrow a{font-family:var(--px);font-size:9px;color:var(--dim);text-decoration:none;border:1px solid var(--border);
-    padding:9px 12px;background:rgba(0,0,0,.7)}
-  .backrow a:hover{color:var(--acid);border-color:var(--acid)}
-  .backrow a.arc{color:var(--acid);border-color:#39501a}
+  /* one small chip tucked in the corner — the rest of the bottom is jump space */
+  .backrow{position:absolute;bottom:10px;left:10px;z-index:25}
+  .backrow a.arc{font-family:var(--px);font-size:8px;color:var(--acid);text-decoration:none;
+    border:1px solid #39501a;padding:6px 9px;background:rgba(0,0,0,.72);opacity:.8}
+  .backrow a.arc:hover{opacity:1;border-color:var(--acid)}
 </style>
 </head>
 <body id="crt">
@@ -78,7 +81,8 @@
   <div id="stage">
     <canvas id="game"></canvas>
 
-    <div class="hud" id="hudL">0<div class="d" id="dist">0 M</div></div>
+    <div class="hud" id="hudL">0<div class="d" id="dist">0 M</div>
+      <div class="d">JET <span id="fuelbar"><i id="fuelfill"></i></span></div></div>
     <div class="hud" id="hudR">HI <span id="hi">0</span><br><span id="np">RADIO ○</span> <span class="beat"></span></div>
     <div id="combo"></div>
 
@@ -87,7 +91,7 @@
       <div class="sub">Beebee runs the punk city. <b>Jump the red barriers</b> — they drop in time with the music. Grab the green vinyls for combos.</div>
       <div class="press">▶ TAP / SPACE — JUMP IN LIVE</div>
       <div class="keys" id="liveNote">starts with the song on air, right where it's playing_</div>
-      <div class="keys">jump <b>TAP</b> / <b>SPACE</b> · you can double-jump</div>
+      <div class="keys">jump <b>TAP</b> / <b>SPACE</b> · double-jump · then <b>HOLD</b> = JETPACK (watch the fuel)</div>
     </div>
 
     <div class="panel" id="overPanel">
@@ -100,7 +104,6 @@
 
     <div class="backrow">
       <a class="arc" href="../">◀ ARCADE</a>
-      <a href="../../#menu">CONSOLE</a>
     </div>
   </div>
 </div>
@@ -126,6 +129,9 @@
   /* ---------- state ---------- */
   var state="start",player,obstacles,coins,dist,score,speed,frameT,runFrame,shake,flash,grace,launchT;
   var comboN=0,comboT=0,framesSinceSpawn=0,prevBeat=0,pulse=0,floorScroll=0,musicSeen=false;
+  /* jetpack: after the double-jump, HOLD to thrust — fuel drains in the air, refills on the ground */
+  var held=false,fuel=1,jetOn=false,fx=[];
+  var fuelfill=document.getElementById("fuelfill");
   var HI=+(localStorage.getItem("ibee_arcade_runner")||0);
   document.getElementById("hi").textContent=HI;
 
@@ -135,6 +141,7 @@
     obstacles=[];coins=[];dist=0;score=0;speed=4.6*S;frameT=0;runFrame=0;shake=0;flash=0;
     framesSinceSpawn=-90;/* grace before first hazard */ grace=1;comboN=0;comboT=0;prevBeat=0;
     launchT=300;/* "about to run" anticipation pose at the start */
+    fuel=1;jetOn=false;fx.length=0;
   }
 
   /* ---------- background city (muted, recessed) ---------- */
@@ -330,9 +337,21 @@
       document.getElementById("dist").textContent=score+" M";
 
       /* physics */
-      player.vy+=0.6*S*step;player.y+=player.vy*step;
+      player.vy+=0.6*S*step;
+      /* jetpack: both jumps spent + still holding + fuel left → thrust up */
+      jetOn=false;
+      if(held&&!player.grounded&&player.jumps>=2&&fuel>0){
+        player.vy-=1.02*S*step;                       // beats gravity → gentle climb
+        if(player.vy<-6.5*S)player.vy=-6.5*S;         // climb speed cap
+        fuel=Math.max(0,fuel-0.009*step);   // ≈2s of burn per tank
+        jetOn=true;
+      }
+      player.y+=player.vy*step;
+      if(player.y<H*0.05){player.y=H*0.05;if(player.vy<0)player.vy=0;}   // sky ceiling
       if(player.y>=groundY-player.h){player.y=groundY-player.h;player.vy=0;player.grounded=true;player.jumps=0;}
       else player.grounded=false;
+      if(player.grounded)fuel=Math.min(1,fuel+0.05*step);   // refuel on the floor
+      fuelfill.style.width=(fuel*100)+"%";
       if(launchT>0)launchT-=dt;                     // hold the start pose briefly, then run
       else{frameT+=dt;if(frameT>62){frameT=0;runFrame++;}}   // 9-frame cycle → tighter per-frame timing
 
@@ -356,6 +375,46 @@
         else if(c.x<-20)coins.splice(j,1);
       }
       if(comboT>0){comboT-=step;if(comboT<=0){document.getElementById("combo").classList.remove("on");comboN=0;}}
+
+      /* ---- motion FX: speed lines on the run, wind streaks in the air, jet exhaust ---- */
+      if(launchT<=0&&step>0){
+        var spd=Math.min(1,speed/(10*S));
+        if(player.grounded&&Math.random()<0.35+spd*0.45)
+          fx.push({t:0,x:player.x-4*S,y:player.y+player.h*(0.2+Math.random()*0.7),
+            len:(16+Math.random()*26)*S*(0.6+spd),vx:-(speed*2.2),f:1});
+        if(!player.grounded&&Math.random()<0.7)
+          fx.push({t:1,x:player.x+player.w*Math.random(),y:player.vy<0?player.y+player.h:player.y,
+            vy:(player.vy<0?1:-1)*(2.2+Math.random()*1.6)*S,len:(9+Math.random()*13)*S,f:1});
+        if(jetOn)for(var fj=0;fj<2;fj++)
+          fx.push({t:2,x:player.x+player.w*0.42+(Math.random()-0.5)*7*S,y:player.y+player.h*0.92,
+            vx:-(speed*0.5)-Math.random()*S,vy:(3+Math.random()*2.5)*S,r:(2.5+Math.random()*3)*S,f:1});
+      }
+      for(var fi=fx.length-1;fi>=0;fi--){var p=fx[fi];p.f-=0.055*step;
+        if(p.f<=0){fx.splice(fi,1);continue;}
+        if(p.t===0){ /* run speed line */
+          p.x+=p.vx*step*0.35;
+          ctx.strokeStyle="rgba(38,224,255,"+(0.42*p.f).toFixed(3)+")";ctx.lineWidth=2;
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.len*p.f,p.y);ctx.stroke();
+        }else if(p.t===1){ /* air wind streak */
+          p.y+=p.vy*step;
+          ctx.strokeStyle="rgba(232,232,232,"+(0.34*p.f).toFixed(3)+")";ctx.lineWidth=1.5;
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x,p.y+p.len*p.f*(p.vy>0?1:-1));ctx.stroke();
+        }else{ /* jet exhaust puff */
+          p.x+=p.vx*step;p.y+=p.vy*step;
+          ctx.fillStyle="rgba("+(p.f>0.55?"255,214,10":"255,90,30")+","+(0.75*p.f).toFixed(3)+")";
+          ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.f,0,7);ctx.fill();
+        }
+      }
+      /* jet flame at the nozzle */
+      if(jetOn){
+        ctx.save();ctx.translate(player.x+player.w*0.42,player.y+player.h*0.9);
+        var fl=(9+Math.random()*9)*S;
+        ctx.fillStyle="rgba(255,90,30,.85)";
+        ctx.beginPath();ctx.moveTo(-3.4*S,0);ctx.lineTo(3.4*S,0);ctx.lineTo(0,fl*1.8);ctx.closePath();ctx.fill();
+        ctx.fillStyle="rgba(255,214,10,.95)";
+        ctx.beginPath();ctx.moveTo(-2*S,0);ctx.lineTo(2*S,0);ctx.lineTo(0,fl);ctx.closePath();ctx.fill();
+        ctx.restore();
+      }
       drawPlayer();
     } else drawPlayer();
 
@@ -388,8 +447,14 @@
     if(state==="start"||state==="over"){start();return;}
     if(state==="play"&&player.jumps<2){player.vy=-12.2*S;player.grounded=false;player.jumps++;}
   }
-  stage.addEventListener("pointerdown",function(e){e.preventDefault();jump();},{passive:false});
-  window.addEventListener("keydown",function(e){if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){e.preventDefault();jump();}});
+  stage.addEventListener("pointerdown",function(e){e.preventDefault();held=true;jump();},{passive:false});
+  ["pointerup","pointercancel","pointerleave"].forEach(function(ev){
+    stage.addEventListener(ev,function(){held=false;});
+  });
+  window.addEventListener("keydown",function(e){if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){
+    e.preventDefault();if(!e.repeat){held=true;jump();}}});
+  window.addEventListener("keyup",function(e){if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW")held=false;});
+  window.addEventListener("blur",function(){held=false;});
   /* tell the shell to close its radio track list when the game is tapped (the tap
      never reaches the shell's own outside-click handler because it's inside the frame) */
   window.addEventListener("pointerdown",function(){try{if(window.top!==window.self)window.top.postMessage("ibee-frame-tap","*");}catch(e){}},true);
