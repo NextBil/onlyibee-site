@@ -9,7 +9,8 @@
 <meta name="theme-color" content="#070707">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <!--
-  IBEE TV — a retro set that plays the ONLYIBEE YouTube catalog.
+  IBEE TV — a retro set that plays the "ibee tv" YouTube playlist
+  (youtube.com/playlist?list=PLeMZDG5P8Kko).
   CHANNELS below is the whole programming grid: {id: youtube video id, t: title}.
   To add a channel: drop one line in. CH ▲/▼ zaps with static; the dial at the
   bottom jumps straight to a channel. Selecting a channel pauses the site radio
@@ -110,7 +111,7 @@
   <div id="dial">
     <div class="dh">PROGRAMMING_ pick a channel</div>
     <div id="chans"></div>
-    <div class="note">broadcasting the <a href="https://www.youtube.com/@ONLYIBEE" target="_blank" rel="noopener">@ONLYIBEE</a> archive — new transmissions land here first_</div>
+    <div class="note">broadcasting the <a href="https://www.youtube.com/playlist?list=PLeMZDG5P8Kko" target="_blank" rel="noopener">ibee tv</a> playlist — new transmissions land here first_</div>
   </div>
 </main>
 
@@ -118,7 +119,9 @@
 <script>
 (function(){
 "use strict";
-/* ===== THE PROGRAMMING GRID — add a line per new video ===== */
+/* ===== THE PROGRAMMING GRID — mirrors the "ibee tv" YouTube playlist
+   (youtube.com/playlist?list=PLeMZDG5P8Kko). Add a video to the playlist,
+   then add its line here (same order). ===== */
 var CHANNELS=[
   {id:"-M646sfdyiw", t:"ALL I SEE"},
   {id:"rA6zb4bp-sE", t:"PIQUÉ"},
@@ -133,23 +136,7 @@ var CHANNELS=[
   {id:"f8bar-0NK10", t:"OUTTA POCKET ft. KARMA SUTRA"},
   {id:"MaCk7vngdrA", t:"20 MIN ZA SESSION"},
   {id:"7F42hEzB44M", t:"TOUJOURS / JE NE REGRETTE RIEN"},
-  {id:"T1e6cesSEpg", t:"DANS LA STREET"},
-  {id:"NJRAlaiTqcg", t:"PLUS D'ESPOIR (NOUVEAUX PUNK)"},
-  {id:"w8I25_5eQHk", t:"VIE DE MERDE ft. ARMETTA"},
-  {id:"Y4rhdAhFaKg", t:"DIS OUI ft. ARMETTA"},
-  {id:"HfbTAdv4JDw", t:"NE ME LAISSE PAS ft. MOONINMAY"},
-  {id:"d5fheBaj4oE", t:"TROP TARD (NOUVEAUX PUNK)"},
-  {id:"eZ7aY9dFafU", t:"LIFESTYLE ft. LUKAZAM"},
-  {id:"C-1kEwM4920", t:"JUSQU'À QUAND"},
-  {id:"AcK_lWCdAp4", t:"ANXIOLYTIQUES (INTRO)"},
-  {id:"VilwObILGko", t:"DRIPIDIDRIP"},
-  {id:"MiRCIAVC6v4", t:"NIGHT CITY (x MOONINMAY)"},
-  {id:"O0TGs-Iu5Do", t:"HIGH TOUT LE TEMPS ft. MOON"},
-  {id:"vBC-S3_sYDo", t:"VIE EN ROSE"},
-  {id:"IeD8NpBepfc", t:"KHABAT AVEC TOI"},
-  {id:"AI1JQch5STM", t:"BILLET DE BANQUE"},
-  {id:"_bNujIEzlcw", t:"PRÉPARE TOI — FREESTYLE"},
-  {id:"uWKWTJ25zNQ", t:"PROFESSEUR"}
+  {id:"T1e6cesSEpg", t:"DANS LA STREET"}
 ];
 
 var yt=document.getElementById("yt"), st=document.getElementById("static"),
@@ -198,12 +185,19 @@ function tune(i){
   chN.textContent=String(cur+1).padStart(2,"0");
   markList();
   clearTimeout(staticT);
-  yt.src="https://www.youtube-nocookie.com/embed/"+c.id+"?autoplay=1&rel=0&color=white";
+  yt.src="https://www.youtube-nocookie.com/embed/"+c.id+"?autoplay=1&playsinline=1&rel=0&color=white&enablejsapi=1";
   staticT=setTimeout(function(){
     noiseOn=false; st.classList.add("off");
     setTimeout(function(){osd.classList.remove("on");},1400);
   },650);
 }
+/* belt-and-suspenders autoplay: once the player loads, order it to play
+   (some browsers ignore the autoplay param inside nested frames) */
+yt.addEventListener("load",function(){
+  if(cur<0)return;
+  var kick=function(){try{yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*");}catch(e){}};
+  setTimeout(kick,350); setTimeout(kick,1200);
+});
 document.getElementById("chup").onclick=function(){tune(cur+1);};
 document.getElementById("chdn").onclick=function(){tune(cur<0?CHANNELS.length-1:cur-1);};
 addEventListener("keydown",function(e){
