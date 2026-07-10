@@ -472,7 +472,7 @@
       X.forEach(function(e){
         if(!e || !e.f || !e.n) return;
         for(var i=0;i<SONGS.length;i++) if(SONGS[i].f === e.f) return;
-        SONGS.push({ f:e.f, r:e.r || e.f, n:e.n, hue:(e.hue != null ? e.hue : 190) });
+        SONGS.push({ f:e.f, r:e.r || e.f, n:e.n, hue:(e.hue != null ? e.hue : 190), g:e.g || "rss", cover:e.cover || "" });
         addRow(SONGS[SONGS.length-1], SONGS.length-1);
         added = true;
       });
