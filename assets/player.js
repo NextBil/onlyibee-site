@@ -34,7 +34,10 @@
      an extra <script> tag; everything degrades gracefully if it's missing. */
   try{
     var bsc = document.createElement("script");
-    bsc.src = BASE + "beat-data.js?v=3";
+    /* clock-stamped so a freshly-pushed beat-data.js is fetched immediately —
+       no manual ?v bumping. Loaded once per page (the shell persists), so this
+       is cheap. Old ?v=N versioning retired; IBEE STUDIO just replaces the file. */
+    bsc.src = BASE + "beat-data.js?cb=" + Date.now();
     document.head.appendChild(bsc);
   }catch(e){}
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
