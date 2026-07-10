@@ -397,7 +397,7 @@
     <!-- MUSIC ENGINE -->
     <section class="screen" id="music">
       <span class="back" data-go="menu">◀ MENU</span>
-      <span class="back" id="topgal" title="back to the galaxies" style="margin-left:8px">◀ GALAXIES</span>
+      <span class="back" id="topgal" title="back to the galaxies" style="margin-left:8px;display:none">◀ GALAXIES</span>
       <div id="engroot">
         <canvas id="engcanvas"></canvas>
         <div class="eng-hud">
@@ -918,6 +918,7 @@
       engTitle.textContent=g.name;
       engSub.textContent="tap a record to play · tap the void to align_";
       engBack.classList.add("show");
+      var tg1=$("#topgal"); if(tg1)tg1.style.display="";   // GALAXIES only makes sense among the planets
       blip(340,.05);
       // keep the playing planet if it belongs here
       if(playing&&playing.t.g===g.id){
@@ -930,6 +931,7 @@
       engTitle.textContent="THE UNIVERSE";
       engSub.textContent="tap a galaxy to enter_";
       engBack.classList.remove("show");
+      var tg2=$("#topgal"); if(tg2)tg2.style.display="none"; // already looking at the galaxies
       blip(260,.05);
     }
     engBack.addEventListener("click",exitToGalaxies);

@@ -91,11 +91,13 @@
   #lyr{position:absolute;inset:0;z-index:15;display:none;flex-direction:column;pointer-events:auto;
     background:rgba(2,2,5,.97)}
   #lyr.open{display:flex}
-  #lyr .words{position:relative;flex:1;overflow:hidden;
+  /* the words are a real scrolling list: it follows the song, but the user can
+     grab it and scroll anywhere — after 4s untouched it eases back to the sung line */
+  #lyr .words{position:relative;flex:1;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain;
     -webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);
     mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent)}
-  #lyr .stream{position:absolute;left:0;right:0;top:50%;text-align:center;padding:0 20px;
-    transition:transform .45s cubic-bezier(.3,.7,.3,1)}
+  #lyr .words::-webkit-scrollbar{display:none}
+  #lyr .stream{text-align:center;padding:38vh 20px}
   #lyr .ln{font-size:21px;line-height:1.4;color:#8a8a8a;opacity:.35;padding:7px 0;transition:all .35s;
     text-shadow:0 1px 3px #000;cursor:pointer}
   #lyr .ln:hover{opacity:.85;color:var(--ink)}
@@ -308,6 +310,17 @@
   var lyr=document.getElementById('lyr'),lstream=document.getElementById('lstream'),
       lempty=document.getElementById('lempty'),lsong=document.getElementById('lsong'),lsongbox=document.getElementById('lsongbox');
   var lyrOpen=false,lyrSlug=null,lyrLines=[],lyrTimes=null,lyrActive=-1,lyrBoxN=-1;
+  /* manual scroll: the user owns the list while touching it; 4s idle → follow again */
+  var lwords=lyr.querySelector('.words'),lyrManual=0,lyrCentered=-1;
+  ['wheel','touchmove','pointerdown'].forEach(function(ev){
+    lwords.addEventListener(ev,function(){lyrManual=Date.now();lyrCentered=-1;},{passive:true});
+  });
+  function lyrCenter(){
+    var el=lstream.children[lyrActive]; if(!el)return;
+    var top=el.offsetTop+el.offsetHeight/2-lwords.clientHeight/2;
+    try{lwords.scrollTo({top:top,behavior:'smooth'});}catch(e){lwords.scrollTop=top;}
+    lyrCentered=lyrActive;
+  }
   function esc(s){return s.replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
   function lyrToggle(){ lyrOpen=!lyrOpen; lyr.classList.toggle('open',lyrOpen); if(lyrOpen)lyrRefresh(); }
   function lyrClose(){ lyrOpen=false; lyr.classList.remove('open'); }
@@ -321,6 +334,7 @@
       if(lyrTimes){ r.audio.currentTime=Math.max(0,lyrTimes[i]); }
       else{ var d=r.audio.duration||0; if(d) r.audio.currentTime=i/lyrLines.length*d; }
       if(!r.playing())r.control.play();
+      lyrManual=0; lyrCentered=-1;   // tapping a line means: jump there AND follow again
     }catch(e){}
   }
   function buildSongbox(){
@@ -357,7 +371,7 @@
         lstream.innerHTML=lyrLines.map(function(w){return '<div class="ln">'+esc(w)+'</div>';}).join('');
         Array.prototype.forEach.call(lstream.children,function(el,i){ el.onclick=function(){lyrSeek(i);}; });
       } else { lempty.style.display='flex'; lstream.innerHTML=''; }
-      lyrActive=-1; lstream.style.transform='translateY(0)';
+      lyrActive=-1; lyrCentered=-1; lyrManual=0; lwords.scrollTop=0;
     }
     var ci=r.current();
     Array.prototype.forEach.call(lsongbox.querySelectorAll('button'),function(b){b.classList.toggle('now',+b.getAttribute('data-i')===ci);});
@@ -375,8 +389,9 @@
     if(idx!==lyrActive){
       lyrActive=idx; var kids=lstream.children;
       for(var i=0;i<kids.length;i++)kids[i].classList.toggle('on',i===idx);
-      var el=kids[idx]; if(el)lstream.style.transform='translateY('+(-(el.offsetTop+el.offsetHeight/2))+'px)';
     }
+    /* follow the song — unless the user is scrolling (or was, in the last 4s) */
+    if(lyrActive>=0&&lyrCentered!==lyrActive&&Date.now()-lyrManual>4000)lyrCenter();
   }
 
   var seek=document.getElementById('seek');
