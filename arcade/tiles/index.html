@@ -136,6 +136,7 @@
       <div class="logo"><b>M</b><b>I</b><b>M</b><b>I</b></div>
       <div class="logo2">MUSIC TILES</div>
       <div class="tag blink">▶ INSERT SONG TO PLAY</div>
+      <button class="btn m" id="liveBtn" style="width:100%;margin:2px 0 6px">▶ JUMP IN LIVE — TILES TO THE SONG ON AIR</button>
       <div class="checker"></div>
       <div class="small">SELECT TRACK:</div>
       <div class="songlist" id="songlist"></div>
@@ -193,6 +194,11 @@ const laneNeon=['#ff2a3a','#ffd42a','#00eaff','#ff2bd6'];
 const list=el('songlist');
 function buildSongList(){var r=RAD();if(!r||!r.count){setTimeout(buildSongList,200);return;}list.innerHTML='';for(var i=0;i<r.count;i++){(function(i){var s=r.song&&r.song(i);var d=document.createElement('div');d.className='song';d.innerHTML='<span class="num">'+pad(i+1,2)+'</span><span class="nm">'+(s?s.n:('SONG '+(i+1)))+'</span>';d.onclick=function(){startGame(i);};list.appendChild(d);})(i);}}
 buildSongList();
+/* JUMP IN LIVE — start on the song already on air, at its current time (no restart) */
+el('liveBtn').onclick=()=>startGame();
+(function updLive(){var r=RAD();var s=r&&r.song&&r.song();var on=r&&r.playing&&r.playing();var b=el('liveBtn');
+  if(b)b.textContent = s ? ((on?'▶ JUMP IN LIVE — ':'▶ START ON — ')+s.n) : '▶ JUMP IN LIVE — SONG ON AIR';
+  setTimeout(updLive,700);})();
 el('diffBtn').onclick=()=>{diffIx=(diffIx+1)%3;el('diffBtn').textContent='SPEED: '+DIFF[diffIx][0];};
 
 function refreshWords(){var r=RAD();var slug=(r&&r.slug&&r.slug())||null;if(slug!==wordSlug){wordSlug=slug;var LY=LYRALL();var lines=slug&&LY[slug];wordArr=(lines&&lines.length)?lines.join(' ').split(/\s+/).filter(Boolean).map(function(w){return w.toUpperCase();}):['MIMI','ONLY','IBEE','NA','NA','LA','LA','OOH','YEAH'];wordIdx=0;}}
@@ -262,6 +268,8 @@ function startGame(ix){
   el('startScreen').classList.add('hidden');el('overScreen').classList.add('hidden');
   var s=r&&r.song&&r.song();el('nowplaying').textContent=s?s.n:'RADIO';
   resetGame();speed=DIFF[diffIx][1];wordSlug=null;sinceBeat=0;prevBeat=0;refreshWords();
+  /* tiles start where the song is now (mid-song jump-ins stay in sync) */
+  try{if(r&&r.audio&&r.audio.duration&&wordArr.length)wordIdx=Math.floor((r.audio.currentTime/r.audio.duration)*wordArr.length)||0;}catch(e){}
   state='play';running=true;mimiState='run';lastT=performance.now();
   if(!rafOn){rafOn=true;requestAnimationFrame(loop);}
 }

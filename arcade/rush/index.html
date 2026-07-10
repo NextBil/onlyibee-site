@@ -61,6 +61,7 @@
   <div class="ov" id="startScreen">
     <div class="logo">MIMI</div><div class="sub">NEON RUSH</div>
     <div class="tag blink">▶ PICK A TRACK &amp; RUN</div>
+    <button class="btn m" id="liveBtn" style="width:100%;margin:2px 0 6px">▶ JUMP IN LIVE — RUN TO THE SONG ON AIR</button>
     <div class="small"><span class="keycap">◀ ▶</span>/A D/swipe = lane · <span class="keycap">SPACE</span>/tap = jump (double!) · ★ candy = 4s invincible · scenery morphs every 30s</div>
     <div class="grid2" id="songlist"></div>
     <div class="row"><button class="btn m" id="diffBtn">SPEED: NORMAL</button><button class="btn" id="vibeBtn">VIBE: AUTO</button></div>
@@ -138,6 +139,11 @@ function buildMtn(base,amp,step,col){const pts=[];let x=-40,y=base;while(x<W+120
 const songlist=el('songlist');
 function buildSongList(){var r=RAD();if(!r||!r.count){setTimeout(buildSongList,200);return;}songlist.innerHTML='';for(var i=0;i<r.count;i++){(function(i){var s=r.song&&r.song(i);var d=document.createElement('div');d.className='song';d.innerHTML='<span class="num">'+pad(i+1,2)+'</span><span class="nm">'+(s?s.n:('SONG '+(i+1)))+'</span>';d.onclick=function(){startGame(i);};songlist.appendChild(d);})(i);}}
 buildSongList();
+/* JUMP IN LIVE — start on the song already on air, at its current time (no restart) */
+el('liveBtn').onclick=()=>startGame();
+(function updLive(){var r=RAD();var s=r&&r.song&&r.song();var on=r&&r.playing&&r.playing();var b=el('liveBtn');
+  if(b)b.textContent = s ? ((on?'▶ JUMP IN LIVE — ':'▶ START ON — ')+s.n) : '▶ JUMP IN LIVE — SONG ON AIR';
+  setTimeout(updLive,700);})();
 el('diffBtn').onclick=()=>{dix=(dix+1)%3;el('diffBtn').textContent='SPEED: '+DIFF[dix][0];};
 el('vibeBtn').onclick=()=>{vibeIx=vibeIx>=THEMES.length-1?-1:vibeIx+1;el('vibeBtn').textContent='VIBE: '+(vibeIx<0?'AUTO':THEMES[vibeIx].name);};
 el('stopBtn').onclick=stopToMenu;
@@ -154,6 +160,8 @@ function startGame(ix){
   blend=0;transitioning=false;themeTimer=0;sinceBeat=0;prevBeat=0;
   el('startScreen').classList.add('hidden');el('overScreen').classList.add('hidden');
   resetGame();basePspeed=DIFF[dix][1];pspeed=basePspeed;diffMul=DIFF[dix][2];wordSlug=null;refreshWords();
+  /* words start where the song is now (mid-song jump-ins stay in sync) */
+  try{var rw=RAD();if(rw&&rw.audio&&rw.audio.duration&&wordArr.length)wordIdx=Math.floor((rw.audio.currentTime/rw.audio.duration)*wordArr.length)||0;}catch(e){}
   el('stopBtn').style.display='block';
   state='play';lastT=performance.now();mtn=[buildMtn(HOR+2,64,70,'rgba(140,30,255,.5)'),buildMtn(HOR+8,40,52,'rgba(255,41,117,.45)')];
   if(!rafOn){rafOn=true;requestAnimationFrame(loop);}

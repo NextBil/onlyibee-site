@@ -85,7 +85,8 @@
     <div class="panel on" id="startPanel">
       <div class="ttl">NEON <span class="n">RUN</span></div>
       <div class="sub">Beebee runs the punk city. <b>Jump the red barriers</b> — they drop in time with the music. Grab the green vinyls for combos.</div>
-      <div class="press">▶ TAP / SPACE TO START</div>
+      <div class="press">▶ TAP / SPACE — JUMP IN LIVE</div>
+      <div class="keys" id="liveNote">starts with the song on air, right where it's playing_</div>
       <div class="keys">jump <b>TAP</b> / <b>SPACE</b> · you can double-jump</div>
     </div>
 
@@ -145,23 +146,41 @@
       bldg[L].push({x:x,w:bw,h:bh,lit:Math.random()*0.5+0.2});x+=bw+(14+Math.random()*26)*S;}}
     cityOff=[0,0];
   }
-  /* ---- lyrics drifting in the sky, synced to the shared radio ---- */
+  /* ---- lyrics drifting in the sky, synced to the shared radio ----
+     uses real timestamps (lyrics-timed) when the song is tap-synced, else spreads
+     the plain lines across the duration. Each line is scaled to fit the screen so
+     it stays centred on phones instead of running off both edges. */
   function drawLyricsBg(beat){
     var R=window.IBEERADIO; if(!R||!R.slug) return;
-    var slug=R.slug(); var LY=window.IBEE_LYRICS||{}; var lines=LY[slug];
-    if(!lines||!lines.length) return;
+    var slug=R.slug();
+    var T=window.IBEE_LYRICS_TIMED||(window.top&&window.top.IBEE_LYRICS_TIMED)||{};
+    var LY=window.IBEE_LYRICS||(window.top&&window.top.IBEE_LYRICS)||{};
     var c=0,d=0; try{c=R.audio.currentTime||0;d=R.audio.duration||0;}catch(e){}
-    var frac=d>0?(c/d*lines.length):0, idx=Math.min(lines.length-1,Math.max(0,Math.floor(frac)));
-    var lineH=Math.max(30,H*0.085), cx=W*0.5, cy=H*0.33;
+    var timed=T[slug], lines, frac;
+    if(timed&&timed.length){                 // true karaoke sync
+      lines=timed.map(function(l){return l.w;});
+      var idx=0; for(var q=0;q<timed.length;q++){ if(timed[q].t<=c) idx=q; else break; }
+      var t0=timed[idx].t, t1=(idx+1<timed.length)?timed[idx+1].t:(t0+3);
+      frac=idx+Math.min(1,Math.max(0,(c-t0)/Math.max(0.001,t1-t0)));
+    } else {                                 // plain words spread across the song
+      lines=LY[slug]; if(!lines||!lines.length) return;
+      frac=d>0?(c/d*lines.length):0;
+    }
+    var idxI=Math.min(lines.length-1,Math.max(0,Math.round(frac)));
+    var narrow=W<560;
+    var lineH=Math.max(26,H*(narrow?0.072:0.085)), cx=W*0.5, cy=H*0.33, maxW=W*0.92, span=narrow?2:3;
     ctx.save();ctx.textAlign="center";ctx.textBaseline="middle";
-    for(var k=-3;k<=3;k++){
-      var li=idx+k; if(li<0||li>=lines.length) continue;
-      var dist=Math.abs(li-idx);
-      var a = dist===0 ? (0.28+beat*0.18) : Math.max(0, 0.11 - dist*0.028);
+    for(var k=-span;k<=span;k++){
+      var li=idxI+k; if(li<0||li>=lines.length) continue;
+      var dist=Math.abs(li-idxI);
+      var a = dist===0 ? (0.34+beat*0.2) : Math.max(0, 0.12 - dist*0.03);
       if(a<=0.005) continue;
-      ctx.font=Math.round(lineH*(dist===0?0.8:0.62))+"px VT323";
+      var fs=Math.round(lineH*(dist===0?0.82:0.6));
+      ctx.font=fs+"px VT323";
+      var txt=lines[li], tw=ctx.measureText(txt).width;
+      if(tw>maxW){ fs=Math.max(11,Math.floor(fs*maxW/tw)); ctx.font=fs+"px VT323"; }  // shrink to fit → stays centred
       ctx.fillStyle="rgba(182,255,0,"+a.toFixed(3)+")";
-      ctx.fillText(lines[li], cx, cy + (li-frac)*lineH);
+      ctx.fillText(txt, cx, cy + (li-frac)*lineH);
     }
     ctx.restore();
   }
@@ -355,7 +374,11 @@
   window.addEventListener("keydown",function(e){if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){e.preventDefault();jump();}});
 
   setInterval(function(){var R=window.IBEERADIO,el=document.getElementById("np");
-    if(R&&R.playing&&R.playing()&&R.song){var s=R.song();el.textContent="♪ "+(s?s.n:"RADIO");}else el.textContent="RADIO ○";},1000);
+    var on=R&&R.playing&&R.playing(),s=R&&R.song&&R.song();
+    if(on&&s){el.textContent="♪ "+(s?s.n:"RADIO");}else el.textContent="RADIO ○";
+    var ln=document.getElementById("liveNote");
+    if(ln)ln.textContent = s ? (on?"▶ NOW ON AIR: ":"❚❚ ON AIR (paused): ")+s.n+" — jump in where it's at_"
+                              : "no song on air yet — starts the radio_";},1000);
 
   window.addEventListener("resize",function(){resize();initCity();if(state!=="play")reset();});
   resize();initCity();reset();requestAnimationFrame(loop);
@@ -363,5 +386,6 @@
 </script>
 <script src="../../assets/player.js?v=13"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="../../assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
 </body>
 </html>
