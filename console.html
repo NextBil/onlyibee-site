@@ -964,11 +964,15 @@
 
     function gridSlot(i,n,bounds){
       var narrow=bounds.w<560;                 // phones
-      var mx=narrow?20:46, mtop=narrow?70:88, mbot=narrow?26:34;
-      var minCell=narrow?150:120;              // min horizontal room per record so titles fit
-      var cols=Math.max(1,Math.round(Math.sqrt(n*bounds.w/Math.max(1,bounds.h))));
-      var fit=Math.max(1,Math.floor((bounds.w-mx*2)/minCell));
-      cols=Math.min(cols,fit,n);               // same column count as before — only the vertical pitch changed
+      var mx=narrow?12:46, mtop=narrow?70:88, mbot=narrow?26:34;
+      var cols;
+      if(narrow){                              // phones: always a 4-wide grid (or fewer if <4 records)
+        cols=Math.min(4,n);
+      } else {                                 // desktop: fit to width as before
+        var minCell=120;
+        cols=Math.max(1,Math.round(Math.sqrt(n*bounds.w/Math.max(1,bounds.h))));
+        cols=Math.min(cols,Math.max(1,Math.floor((bounds.w-mx*2)/minCell)),n);
+      }
       var rows=Math.ceil(n/cols);
       var cw=(bounds.w-mx*2)/cols;
       /* fixed, generous vertical pitch — the grid scrolls when it's taller than the
@@ -1135,13 +1139,21 @@
       // title above
       ctx.save();
       ctx.textAlign="center";ctx.textBaseline="alphabetic";
-      ctx.font=(performing?"10px":"8px")+" 'Press Start 2P'";
+      var baseF=performing?10:8;
+      ctx.font=baseF+"px 'Press Start 2P'";
+      /* in the packed 4-wide phone grid, shrink each title to fit its column so they don't overlap */
+      var gridNarrow=gridMode&&root.clientWidth<560;
+      if(gridNarrow){
+        var colW=(root.clientWidth-24)/Math.min(4,planets.length)-6;
+        var tw0=ctx.measureText(t.name).width;
+        if(tw0>colW)ctx.font=Math.max(5,Math.floor(baseF*colW/tw0))+"px 'Press Start 2P'";
+      }
       ctx.lineJoin="round";ctx.lineWidth=4;ctx.strokeStyle="rgba(0,0,0,.8)";
       var ty=pl.y-r-14;
       ctx.strokeText(t.name,pl.x,ty);
       ctx.fillStyle=locked?"#7a7a7a":(performing?"hsl("+hue+",90%,75%)":"#e8e8e8");
       ctx.fillText(t.name,pl.x,ty);
-      if(!locked){
+      if(!locked&&!gridNarrow){        // hide the plays counter in the packed phone grid (no room)
         ctx.font="14px VT323";
         ctx.lineWidth=3;ctx.strokeText("▶ "+playsOf(t),pl.x,ty-14);
         ctx.fillStyle="hsl("+hue+",70%,75%)";
