@@ -169,6 +169,17 @@
     border:2px solid var(--border);background:#000;overflow:hidden;
     touch-action:none;
   }
+  .engnav{display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+  /* MUSIC-FIT: the music screen fills the viewport exactly so the PAGE never scrolls —
+     only the galaxy/planet canvas scrolls inside. Avoids two stacked scroll areas. */
+  body.musicfit{overflow:hidden}
+  body.musicfit #os{height:100dvh;min-height:0}
+  body.musicfit header{display:none}
+  body.musicfit main{flex:1;min-height:0;padding:8px 12px;overflow:hidden;display:flex;flex-direction:column}
+  body.musicfit footer{display:none}
+  body.musicfit #music.on{flex:1;min-height:0;display:flex;flex-direction:column}
+  body.musicfit .engnav{flex:none;margin-bottom:6px}
+  body.musicfit #engroot{flex:1;min-height:0;height:auto}
   #engcanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
   .eng-hud{
     position:absolute;top:0;left:0;right:0;z-index:5;pointer-events:none;
@@ -397,8 +408,10 @@
 
     <!-- MUSIC ENGINE -->
     <section class="screen" id="music">
-      <span class="back" data-go="menu">◀ MENU</span>
-      <span class="back" id="topgal" title="back to the galaxies" style="margin-left:8px;display:none">◀ GALAXIES</span>
+      <div class="engnav">
+        <span class="back" data-go="menu">◀ MENU</span>
+        <span class="back" id="topgal" title="back to the galaxies" style="margin-left:8px;display:none">◀ GALAXIES</span>
+      </div>
       <div id="engroot">
         <canvas id="engcanvas"></canvas>
         <div class="eng-hud">
@@ -584,6 +597,7 @@
     $$(".screen").forEach(function(s){s.classList.remove("on")});
     var t=document.getElementById(id);
     if(t){t.classList.add("on");current=id;window.scrollTo(0,0);blip(220,.04);}
+    document.body.classList.toggle("musicfit", id==="music");  // music screen fills the viewport (no page scroll)
     if(id==="music")ENG.wake();
   }
   document.addEventListener("click",function(e){
@@ -756,6 +770,7 @@
     /* ---------- state ---------- */
     var view="galaxy",curG=null,planets=[],playing=null,gridMode=false,ghost=null,lastGhostId=null;
     var gridScrollY=0,gridMaxScroll=0;   // grid mode scrolls vertically so rows can breathe
+    var galScrollY=0,galMaxScroll=0;     // the galaxy picker scrolls too (comfortable sizes on phones)
     var forceGhost=false,zoomStart=0; // forceGhost: pin the radio song as performer on arrival · zoomStart: galaxy open animation
     function slugOf(t){return (t.file||"").split("/").pop();} /* locked planets have no file — never match */
     var stars=null,galaxyGeo=null;
@@ -818,11 +833,18 @@
       var list=visGalaxies();
       if(galaxyGeo&&galaxyGeo.w===w&&galaxyGeo.h===h&&galaxyGeo.n===list.length)return;
       var n=list.length;
-      var cols=Math.max(1,Math.min(n,Math.round(Math.sqrt(n*w/Math.max(1,h*1.15)))));
+      var narrow=w<560;
+      /* phones: 2 comfortable columns and a fixed cell height → the picker scrolls
+         instead of squishing everything into one screenful */
+      var cols=narrow?Math.min(2,n):Math.max(1,Math.min(n,Math.round(Math.sqrt(n*w/Math.max(1,h*1.15)))));
       var rows=Math.ceil(n/cols);
-      var cellW=w/cols,cellH=(h-90)/rows;
+      var cellW=w/cols;
+      var cellH=narrow?Math.min(cellW*1.05,h*0.52):(h-90)/rows;   // fixed pitch on phones (scrolls)
       var r=Math.min(cellW,cellH)*0.30;
-      galaxyGeo={w:w,h:h,n:list.length,list:list.map(function(ga,i){
+      var contentH=56+rows*cellH+40;
+      galMaxScroll=Math.max(0,contentH-h);
+      if(galScrollY>galMaxScroll)galScrollY=galMaxScroll;
+      galaxyGeo={w:w,h:h,n:list.length,cellW:cellW,list:list.map(function(ga,i){
         var c=i%cols,rw=Math.floor(i/cols);
         var cx=cellW*(c+0.5),cy=56+cellH*(rw+0.5);
         var dots=[];var arms=2+i;
@@ -846,10 +868,12 @@
       }catch(e){} }
       for(var gi=0;gi<galaxyGeo.list.length;gi++){
         var g=galaxyGeo.list[gi];
+        var gy=g.y-galScrollY;                       // scroll offset
+        if(gy<-g.r-40||gy>h+g.r+40){continue;}       // cull off-screen galaxies
         var live=(liveG&&g.g.id===liveG);
         g.spin+=0.0016+(live?bt*0.004:0);
         ctx.save();
-        ctx.translate(g.x,g.y);
+        ctx.translate(g.x,gy);
         ctx.shadowColor="hsl("+g.g.hue+",90%,60%)";ctx.shadowBlur=34+(live?bt*50:0);
         var core=ctx.createRadialGradient(0,0,0,0,0,g.r);
         core.addColorStop(0,"hsla("+g.g.hue+",90%,70%,"+(live?(0.45+bt*0.35).toFixed(3):".45")+")");
@@ -876,13 +900,16 @@
         // labels — dark plate behind so they read over the bright starfield
         ctx.save();
         ctx.textAlign="center";
-        var nameF=(g.r<60?"7px":"9px")+" 'Press Start 2P'";
-        var subF=(g.r<60?"13px":"15px")+" VT323";
         var nameTxt=(live?"▶ ":"")+g.g.name;
         var subTxt=g.g.sub+" · "+g.count+" signals";
-        ctx.font=nameF; var w1=ctx.measureText(nameTxt).width;
-        ctx.font=subF;  var w2=ctx.measureText(subTxt).width;
-        var pw=Math.max(w1,w2)+20, ly=g.y+g.r*0.72+2;
+        var maxLW=(galaxyGeo.cellW||9999)*0.94;   // keep labels inside their column (no overflow)
+        var nameSz=g.r<60?7:9, subSz=g.r<60?13:15;
+        ctx.font=nameSz+"px 'Press Start 2P'"; var w1=ctx.measureText(nameTxt).width;
+        if(w1>maxLW){nameSz=Math.max(5,Math.floor(nameSz*maxLW/w1));ctx.font=nameSz+"px 'Press Start 2P'";w1=ctx.measureText(nameTxt).width;}
+        ctx.font=subSz+"px VT323"; var w2=ctx.measureText(subTxt).width;
+        if(w2>maxLW){subSz=Math.max(9,Math.floor(subSz*maxLW/w2));ctx.font=subSz+"px VT323";w2=ctx.measureText(subTxt).width;}
+        var nameF=nameSz+"px 'Press Start 2P'", subF=subSz+"px VT323";
+        var pw=Math.max(w1,w2)+20, ly=gy+g.r*0.72+2;
         ctx.fillStyle="rgba(4,4,8,.78)";
         ctx.beginPath();
         if(ctx.roundRect)ctx.roundRect(g.x-pw/2,ly,pw,40,6);else ctx.rect(g.x-pw/2,ly,pw,40);
@@ -902,10 +929,11 @@
       if(!galaxyGeo)return null;
       for(var i=0;i<galaxyGeo.list.length;i++){
         var g=galaxyGeo.list[i];
-        if(Math.hypot(mx-g.x,my-g.y)<g.r*1.0)return g.g;
+        if(Math.hypot(mx-g.x,my-(g.y-galScrollY))<g.r*1.0)return g.g;   // account for scroll
       }
       return null;
     }
+    function panGalaxies(dScroll){ galScrollY=Math.max(0,Math.min(galMaxScroll,galScrollY+dScroll)); }
 
     /* ---------- planets ---------- */
     function makePlanet(t,w,h,n){
@@ -941,7 +969,7 @@
       }
     }
     function exitToGalaxies(){
-      view="galaxy";curG=null;
+      view="galaxy";curG=null;galScrollY=0;
       engTitle.textContent="THE UNIVERSE";
       engSub.textContent="tap a galaxy to enter_";
       engBack.classList.remove("show");
@@ -1419,10 +1447,12 @@
       down.moved+=Math.hypot(p.x-down.x,p.y-down.y);
       if(dragP){dragP.x=p.x;dragP.y=p.y;}
       else if(gridMode&&view==="system"){ panGrid(-(p.y-down.ly)); }  // empty-space drag scrolls the grid
+      else if(view==="galaxy"){ panGalaxies(-(p.y-down.ly)); }        // drag scrolls the galaxy picker
       down.ly=p.y;
     });
     canvas.addEventListener("wheel",function(e){
       if(gridMode&&view==="system"&&gridMaxScroll>0){ panGrid(e.deltaY); e.preventDefault(); }
+      else if(view==="galaxy"&&galMaxScroll>0){ panGalaxies(e.deltaY); e.preventDefault(); }
     },{passive:false});
     function release(e){
       if(skipTap){skipTap=false;down=null;if(dragP){dragP.dragging=false;dragP=null;}
