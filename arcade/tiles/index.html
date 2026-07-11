@@ -412,6 +412,7 @@ function updateHUD(){
 }
 
 function gameOver(){state='over';running=false;
+  try{localStorage.setItem("ibee_badge_evt",JSON.stringify({k:"game",g:"tiles",v:score|0,t:Date.now()}));}catch(e){}
   mimiState='lose';mimiImg.src=SPR.lose;mimiImg.style.transform='none';mimiImg.style.filter='drop-shadow(0 0 20px rgba(255,42,58,.7))';
   el('finalScore').textContent=pad(score,6);
   el('overMsg').textContent=(score>=best&&score>0)?'NEW HI-SCORE! ★':('HI-SCORE '+pad(best,6));

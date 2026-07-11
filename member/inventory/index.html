@@ -115,11 +115,13 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
     bee:"<svg "+NS+" "+V+"><ellipse cx='34' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='66' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='50' cy='58' rx='20' ry='24' fill='#ffd60a' stroke='#0a0a0a' stroke-width='3'/><rect x='31' y='48' width='38' height='7' fill='#0a0a0a'/><rect x='31' y='62' width='38' height='7' fill='#0a0a0a'/><circle cx='50' cy='30' r='11' fill='#0a0a0a'/><circle cx='46' cy='29' r='2.5' fill='#fff'/><circle cx='54' cy='29' r='2.5' fill='#fff'/><line x1='44' y1='21' x2='41' y2='13' stroke='#0a0a0a' stroke-width='2'/><line x1='56' y1='21' x2='59' y2='13' stroke='#0a0a0a' stroke-width='2'/></svg>",
     flower:"<svg "+NS+" "+V+"><line x1='50' y1='56' x2='50' y2='88' stroke='#2e7d32' stroke-width='4'/><path d='M50 62 l-12 8 M50 70 l12 8' stroke='#2e7d32' stroke-width='3'/><g fill='#b6ff00' stroke='#143a00' stroke-width='2'><ellipse cx='50' cy='24' rx='8' ry='14'/><ellipse cx='72' cy='38' rx='14' ry='8'/><ellipse cx='28' cy='38' rx='14' ry='8'/><ellipse cx='62' cy='54' rx='9' ry='12'/><ellipse cx='38' cy='54' rx='9' ry='12'/></g><circle cx='50' cy='40' r='11' fill='#ff2bd6' stroke='#143a00' stroke-width='2'/><circle cx='50' cy='40' r='3' fill='#0a0a0a'/></svg>",
     heart:"<svg "+NS+" "+V+"><path d='M50 32 C43 18 22 19 21 37 C20 53 46 66 50 84 Z' fill='#ff2b2b' stroke='#5a0d0d' stroke-width='2.5'/><path d='M50 32 C57 18 78 19 79 37 C80 53 54 66 50 84 Z' fill='#c81f1f' stroke='#5a0d0d' stroke-width='2.5'/><path d='M50 32 l-6 12 l9 9 l-7 10 l6 12' fill='none' stroke='#0a0a0a' stroke-width='3'/></svg>",
-    disc:"<svg "+NS+" "+V+"><circle cx='50' cy='50' r='34' fill='#1a1a22' stroke='#b6ff00' stroke-width='3'/><circle cx='50' cy='50' r='30' fill='none' stroke='#26e0ff' stroke-width='1' opacity='.5'/><path d='M50 20 a30 30 0 0 1 26 15' stroke='#ff2bd6' stroke-width='3' fill='none'/><circle cx='50' cy='50' r='10' fill='#070707' stroke='#b6ff00' stroke-width='2'/><circle cx='50' cy='50' r='3' fill='#b6ff00'/></svg>"
+    disc:"<svg "+NS+" "+V+"><circle cx='50' cy='50' r='34' fill='#1a1a22' stroke='#b6ff00' stroke-width='3'/><circle cx='50' cy='50' r='30' fill='none' stroke='#26e0ff' stroke-width='1' opacity='.5'/><path d='M50 20 a30 30 0 0 1 26 15' stroke='#ff2bd6' stroke-width='3' fill='none'/><circle cx='50' cy='50' r='10' fill='#070707' stroke='#b6ff00' stroke-width='2'/><circle cx='50' cy='50' r='3' fill='#b6ff00'/></svg>",
+    engine:"<svg "+NS+" "+V+"><ellipse cx='50' cy='54' rx='42' ry='14' fill='none' stroke='#26e0ff' stroke-width='2.5' opacity='.8'/><circle cx='50' cy='50' r='24' fill='#0e0e12' stroke='#b6ff00' stroke-width='3'/><circle cx='50' cy='50' r='17' fill='none' stroke='#2a2a2a' stroke-width='1.5'/><circle cx='50' cy='50' r='11' fill='none' stroke='#333' stroke-width='1'/><circle cx='50' cy='50' r='6' fill='#b6ff00'/><circle cx='50' cy='50' r='2' fill='#070707'/><rect x='48.6' y='26' width='2.8' height='6' fill='#ff2b2b'/><circle cx='86' cy='47' r='3.5' fill='#ff2bd6'/><circle cx='14' cy='60' r='3' fill='#ffd60a'/></svg>"
   };
   /* which physical object each item is (add clothes/rares later → new forms) */
   var SHAPES={"game-runner":"bee","game-rush":"cassette","game-tiles":"floppy",
-    "env-aqua":"ufo","env-bedroom":"crt","env-terrarium":"flower","env-transit":"vhs"};
+    "env-aqua":"ufo","env-bedroom":"crt","env-terrarium":"flower","env-transit":"vhs",
+    "universe-engine":"engine"};
 
   function artifact(formKey, owned){
     var svg=FORMS[formKey]||FORMS.disc, src="data:image/svg+xml,"+encodeURIComponent(svg);
@@ -130,12 +132,12 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
 
   function slot(it, owned){
     var rar=it.rarity||'common', cls='slot r-'+rar+(owned?' owned':'');
-    var form=SHAPES[it.id]||'disc', name=owned?e2(it.name):'???', cta;
+    var form=SHAPES[it.id]||'disc', name=(owned||it.showname)?e2(it.name):'???', cta;
     if(owned){
-      if(it.type==='game'||it.type==='environment') cta='<a class="enter" href="../../'+e2(it.payload)+'">▶ ENTER</a>';
+      if(it.type==='game'||it.type==='environment'||it.type==='engine') cta='<a class="enter" href="../../'+e2(it.payload)+'">▶ ENTER</a>';
       else if(it.payload) cta='<a class="enter" href="'+e2(it.payload)+'" download>⬇ GET</a>';
       else cta='<div class="locktag">IN INVENTORY</div>';
-    } else cta='<div class="locktag">'+LOCK+' LOCKED</div>';
+    } else cta='<div class="locktag">'+LOCK+' '+(it.lockhint||'LOCKED')+'</div>';
     return '<div class="'+cls+'">'+artifact(form,owned)+'<div class="ped"></div>'
       +'<div class="nm'+(owned?'':' locked')+'">'+name+'</div>'
       +'<div class="rz">'+rar.toUpperCase()+'</div>'
@@ -165,7 +167,13 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   async function boot(){
     var sess=(await sb.auth.getSession()).data.session;
     var cat=(await sb.from('items').select('*').eq('active',true).order('value')).data||[];
+    /* the UNIVERSE MUSIC ENGINE is part of the collection too — not a DB item:
+       it unlocks by signing in + feeling a track for 10s (player.js's ibee_engine10 flag) */
+    var eng10=false; try{ eng10=localStorage.getItem("ibee_engine10")==="1"; }catch(e){}
+    cat.unshift({id:"universe-engine",name:"UNIVERSE MUSIC ENGINE",rarity:"legendary",value:"∞",
+      type:"engine",payload:"#playing",showname:true,lockhint:"10s OF MUSIC + SIGN IN"});
     var owned={};
+    if(sess&&eng10) owned["universe-engine"]={id:"universe-engine"};
     if(sess){
       var inv=await sb.rpc('my_inventory');
       (inv.data||[]).forEach(function(it){owned[it.id]=it;});
@@ -177,7 +185,7 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
       renderLogin(true);
     }
     var nOwned=Object.keys(owned).length, total=cat.length, val=0;
-    cat.forEach(function(it){ if(owned[it.id]) val+=(it.value||0); });
+    cat.forEach(function(it){ if(owned[it.id]&&typeof it.value==='number') val+=it.value; });
     $("prog").textContent="COLLECTED "+nOwned+" / "+total+"  ·  TOTAL VALUE "+val;
     $("pfill").style.width=(total?nOwned/total*100:0)+"%";
     $("grid").innerHTML=cat.map(function(it){return slot(it, !!owned[it.id]);}).join('');

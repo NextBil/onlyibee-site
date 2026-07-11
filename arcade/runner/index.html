@@ -431,6 +431,7 @@
 
   function gameOver(){
     state="over";shake=15;
+    try{localStorage.setItem("ibee_badge_evt",JSON.stringify({k:"game",g:"runner",v:score|0,t:Date.now()}));}catch(e){}
     document.getElementById("finalScore").textContent=score;
     if(score>HI){HI=score;try{localStorage.setItem("ibee_arcade_runner",HI);}catch(e){}}
     document.getElementById("hi").textContent=HI;

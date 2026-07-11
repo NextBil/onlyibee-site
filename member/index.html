@@ -323,9 +323,12 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     /* referral */
     var myLink=location.origin+location.pathname+"?ref="+encodeURIComponent(pass);
     $("ref").value=myLink;
-    $("copyref").onclick=function(){copy(myLink);};
+    /* badge event: sharing/copying your pass = RECRUITER (the shell's badges.js picks it up) */
+    function sharedEvt(){try{localStorage.setItem("ibee_badge_evt",JSON.stringify({k:"share",t:Date.now()}));}catch(e){}}
+    $("copyref").onclick=function(){copy(myLink);sharedEvt();};
     var shareText="I'm on the ONLY IBEE frequency 👾 tap in with my pass:";
     $("shareref").onclick=function(ev){
+      sharedEvt();
       if(navigator.share){ev.preventDefault();navigator.share({title:"ONLY IBEE — THE FREQUENCY",text:shareText,url:myLink}).catch(function(){});}
       else{ev.preventDefault();copy(myLink);}
     };

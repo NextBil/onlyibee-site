@@ -34,8 +34,25 @@ main{flex:1;width:100%;max-width:620px;padding:24px 18px 60px;display:flex;flex-
 .crtin{animation:crtin .35s ease-out}
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
 
+/* top bar: the collection door, pinned above the ID card */
+.topbar{width:100%;display:flex;gap:10px;justify-content:center}
+.topbar a{flex:1;max-width:300px;font-family:var(--px);font-size:10px;padding:13px 12px;text-decoration:none;
+  text-align:center;background:var(--acid);color:#000;border:1px solid var(--acid)}
+.topbar a:active{transform:translateY(2px)}
+
 .idcard{width:100%;border:2px solid hsla(var(--hue),60%,45%,.6);background:rgba(10,10,12,.92);
   padding:20px;box-shadow:0 0 26px hsla(var(--hue),90%,45%,.18),inset 0 0 40px rgba(0,0,0,.6);position:relative}
+/* the mimi avatar: small, top-right of the card, tap to change */
+.avatar{position:absolute;top:14px;right:14px;width:58px;height:58px;border-radius:50%;cursor:pointer;
+  border:2px solid hsla(var(--hue),60%,50%,.7);background:#fff;object-fit:cover;
+  box-shadow:0 0 12px hsla(var(--hue),90%,45%,.35)}
+.avatar:hover{filter:brightness(1.08)}
+.avpick{width:100%;border:1px solid var(--border);background:rgba(14,14,14,.92);padding:12px;
+  display:none;flex-wrap:wrap;gap:9px;justify-content:center}
+.avpick.open{display:flex}
+.avpick img{width:46px;height:46px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:#fff}
+.avpick img.sel{border-color:var(--acid);box-shadow:0 0 10px rgba(182,255,0,.5)}
+.avpick img:hover{border-color:var(--ink)}
 .idcard .tag{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px}
 .idcard .rank{font-family:var(--px);font-size:clamp(16px,5.4vw,26px);color:hsl(var(--hue),95%,70%);
   text-shadow:0 0 18px hsla(var(--hue),95%,55%,.55);margin:8px 0 2px;letter-spacing:2px}
@@ -63,6 +80,13 @@ main{flex:1;width:100%;max-width:620px;padding:24px 18px 60px;display:flex;flex-
 .uni{width:100%;border:2px solid hsla(190,60%,50%,.5);background:rgba(10,14,16,.9);padding:16px 18px;
   display:flex;align-items:center;gap:14px;text-align:left}
 .uni .ico{font-size:30px;flex:none}
+/* rotating engine artifact (same fake-voxel spin as the collection shelf) */
+.artstage{perspective:420px;width:64px;height:64px;flex:none}
+.art3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spin3d 6.5s linear infinite}
+.art3d .f,.art3d .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.art3d .f img,.art3d .b img{width:100%;height:100%}
+.art3d .b{transform:rotateY(180deg);filter:brightness(.55)}
+@keyframes spin3d{from{transform:rotateX(8deg) rotateY(0deg)}to{transform:rotateX(8deg) rotateY(360deg)}}
 .uni .txt{flex:1}
 .uni .nm{font-family:var(--px);font-size:11px;color:var(--cyan);letter-spacing:1px}
 .uni .ds{color:var(--dim);font-size:15px;margin-top:6px}
@@ -92,12 +116,18 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 </header>
 
 <main>
+  <div class="topbar crtin" id="topbar" style="display:none">
+    <a href="../inventory/">♟ COLLECTION</a>
+  </div>
+
   <div class="idcard crtin" id="idcard" style="display:none">
+    <img class="avatar" id="av" src="../../assets/img/avatars/mimi-00.png" alt="your avatar" title="tap to change your avatar">
     <div class="tag">// MEMBER PROFILE_</div>
     <div class="rank" id="rank">—</div>
     <div class="em" id="idem">—</div>
     <div class="since" id="since"></div>
   </div>
+  <div class="avpick crtin" id="avpick"></div>
 
   <div class="stats3 crtin" id="stats3" style="display:none">
     <div class="stat"><div class="k">ROOMS</div><div class="v" id="roomsv">—</div><div class="sub">unlocked</div></div>
@@ -106,14 +136,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </div>
 
   <div class="box crtin" id="badgebox" style="display:none">
-    <div class="h">// BADGES_</div>
+    <div class="h" id="badgehead">// BADGES_</div>
     <div class="badges" id="badges"></div>
   </div>
 
   <div class="uni crtin" id="unicard" style="display:none">
-    <div class="ico">🌌</div>
+    <div class="artstage" id="engart"></div>
     <div class="txt">
-      <div class="nm">MUSIC UNIVERSE</div>
+      <div class="nm">UNIVERSE MUSIC ENGINE</div>
       <div class="ds" id="unids">always in your collection — every play counts_</div>
     </div>
     <a class="go" href="../../#playing">▶ ENTER</a>
@@ -131,6 +161,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <footer>© ONLYIBEE — THE FREQUENCY</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../../assets/badges.js?v=1"></script>
 <script>
 (function(){
   "use strict";
@@ -176,16 +207,45 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     return '<div class="badge'+(on?' on':'')+'"><div class="bi">'+icon+'</div><div class="bn">'+e2(name)+'</div><div class="bt">'+e2(sub)+'</div></div>';
   }
 
+  /* ---- the mimi avatar: 12 faces in assets/img/avatars, choice saved on this device ---- */
+  var AV_N=12;
+  function avSrc(i){ return "../../assets/img/avatars/mimi-"+(i<10?"0":"")+i+".png"; }
+  function avGet(){ var n=parseInt(localStorage.getItem("ibee_avatar"),10); return (n>=0&&n<AV_N)?n:0; }
+  function avPaint(){ $("av").src=avSrc(avGet());
+    Array.prototype.forEach.call($("avpick").querySelectorAll("img"),function(im,i){
+      im.classList.toggle("sel",i===avGet());}); }
+  (function(){
+    var h=''; for(var i=0;i<AV_N;i++) h+='<img src="'+avSrc(i)+'" alt="mimi '+i+'" data-i="'+i+'">';
+    $("avpick").innerHTML=h;
+    Array.prototype.forEach.call($("avpick").querySelectorAll("img"),function(im){
+      im.onclick=function(){ try{localStorage.setItem("ibee_avatar",im.getAttribute("data-i"));}catch(e){}
+        avPaint(); $("avpick").classList.remove("open"); };});
+    $("av").onclick=function(){ $("avpick").classList.toggle("open"); };
+    avPaint();
+  })();
+
+  /* the engine artifact — same rotating fake-voxel object as the collection shelf */
+  var ENGSVG="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>"
+    +"<ellipse cx='50' cy='54' rx='42' ry='14' fill='none' stroke='#26e0ff' stroke-width='2.5' opacity='.8'/>"
+    +"<circle cx='50' cy='50' r='24' fill='#0e0e12' stroke='#b6ff00' stroke-width='3'/>"
+    +"<circle cx='50' cy='50' r='17' fill='none' stroke='#2a2a2a' stroke-width='1.5'/>"
+    +"<circle cx='50' cy='50' r='11' fill='none' stroke='#333' stroke-width='1'/>"
+    +"<circle cx='50' cy='50' r='6' fill='#b6ff00'/><circle cx='50' cy='50' r='2' fill='#070707'/>"
+    +"<rect x='48.6' y='26' width='2.8' height='6' fill='#ff2b2b'/>"
+    +"<circle cx='86' cy='47' r='3.5' fill='#ff2bd6'/><circle cx='14' cy='60' r='3' fill='#ffd60a'/></svg>";
+
   async function boot(){
     if(!sb){ $("loginbox").innerHTML='<div class="msg">✕ backend offline — refresh in a moment_</div>'; return; }
     var sess=(await sb.auth.getSession()).data.session;
     if(!sess){
-      ["idcard","stats3","badgebox","unicard","actions"].forEach(function(id){$(id).style.display="none";});
+      ["topbar","idcard","stats3","badgebox","unicard","actions"].forEach(function(id){$(id).style.display="none";});
+      $("avpick").classList.remove("open");
       $("sessline").textContent='';
       renderLogin(true);
       return;
     }
     renderLogin(false);
+    $("topbar").style.display="";
     $("sessline").innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout">log out</a>';
     $("logout").onclick=function(ev){ev.preventDefault();sb.auth.signOut().then(function(){location.reload();});};
 
@@ -216,18 +276,33 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("vaultsub").textContent=vault?"discovered":"still hidden";
     $("stats3").style.display="";
 
-    /* ---- badges: simple tiers off the same real numbers, no fabricated milestones ---- */
-    var collectorOn=nOwned>0, collectorTier = nOwned>=total?"FULL SET":nOwned>=Math.ceil(total*0.5)?"HALFWAY":nOwned>0?"STARTED":"—";
-    var diggerOn=plays>0, diggerTier = plays>=100?"OBSESSED":plays>=20?"REGULAR":plays>0?"FIRST SPIN":"—";
-    $("badges").innerHTML =
-        badge("🗝️","COLLECTOR",collectorTier,collectorOn)
-      + badge("🎧","DIGGER",diggerTier,diggerOn)
-      + badge("🔓","VAULT",vault?"UNLOCKED":"LOCKED",vault)
-      + badge("♟","CHESS",'always free',true);
+    /* ---- badges: the full trophy catalog from badges.js (earned = shell's tracker) ---- */
+    var BAPI=window.IBEE_BADGES;
+    if(BAPI){
+      var bst=BAPI.state(), P=BAPI.snapshot(), nEarn=0;
+      $("badges").innerHTML=BAPI.defs.map(function(d){
+        var on=!!bst.earned[d.id]; if(on)nEarn++;
+        var sub=on ? new Date(bst.earned[d.id]).toLocaleDateString(undefined,{month:'short',day:'numeric'})
+                   : (d.pr?d.pr(P):d.d);
+        return badge(d.ico,d.n,sub,on);
+      }).join('');
+      $("badgehead").textContent="// BADGES_ "+nEarn+" / "+BAPI.defs.length;
+    } else {
+      $("badges").innerHTML =
+          badge("🎧","DIGGER",plays>0?"FIRST SPIN":"—",plays>0)
+        + badge("🔓","VAULT",vault?"UNLOCKED":"LOCKED",vault);
+    }
     $("badgebox").style.display="";
 
-    /* ---- Music Universe: always part of the collection, free, shows real plays ---- */
-    $("unids").textContent = plays>0 ? plays.toLocaleString()+" plays logged — always in your collection_" : "always in your collection — every play counts_";
+    /* ---- Universe Music Engine: part of the collection, with its rotating artifact ---- */
+    var engsrc="data:image/svg+xml,"+encodeURIComponent(ENGSVG);
+    var engOn = (BAPI&&!!BAPI.state().earned.engine) || localStorage.getItem("ibee_engine10")==="1";
+    $("engart").innerHTML='<div class="art3d'+(engOn?'':' mystery')+'">'
+      +'<div class="f"><img alt="" src="'+engsrc+'"'+(engOn?'':' style="filter:grayscale(1) brightness(.35)"')+'></div>'
+      +'<div class="b"><img alt="" src="'+engsrc+'"'+(engOn?'':' style="filter:grayscale(1) brightness(.35)"')+'></div></div>';
+    $("unids").textContent = engOn
+      ? (plays>0 ? plays.toLocaleString()+" plays logged — in your collection_" : "unlocked — in your collection_")
+      : "press ► on the radio for 10 seconds to fire it up_";
     $("unicard").style.display="";
 
     $("actions").style.display="";
