@@ -173,7 +173,7 @@
   #englock{position:absolute;inset:0;z-index:30;background:rgba(5,5,8,.95);display:none;
     flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:26px}
   #englock.on{display:flex}
-  #englock .lk{font-size:44px;filter:drop-shadow(0 0 14px rgba(182,255,0,.4))}
+  #englock .lk{width:44px;height:44px;color:var(--acid);filter:drop-shadow(0 0 14px rgba(182,255,0,.4))}
   #englock .et{font-family:var(--px);font-size:14px;color:var(--acid);letter-spacing:2px;text-shadow:0 0 16px rgba(182,255,0,.5)}
   #englock .ed{color:var(--dim);font-size:19px;max-width:360px;line-height:1.4}
   #englock .esteps{font-family:var(--px);font-size:9px;color:#555;line-height:2.1}
@@ -452,12 +452,12 @@
       </div>
       <div id="engroot">
         <div id="englock">
-          <div class="lk">🔒</div>
+          <svg class="lk" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="#050505"/></svg>
           <div class="et">MUSIC ENGINE LOCKED</div>
           <div class="ed">The universe opens once you're a member and you've felt a track.</div>
           <div class="esteps" id="esteps"></div>
-          <a class="ego" href="member/" target="_top">▶ CREATE YOUR ACCOUNT</a>
-          <div class="ehint">…then press ► on the radio for 10 seconds_</div>
+          <a class="ego" id="egobtn" href="member/" target="_top">▶ CREATE YOUR ACCOUNT</a>
+          <div class="ehint" id="eghint">…then press ► on the radio for 10 seconds_</div>
         </div>
         <canvas id="engcanvas"></canvas>
         <div class="eng-hud">
@@ -663,6 +663,10 @@
     if(engineUnlocked()){ lk.classList.remove("on"); return; }
     var acct=loggedIn(), lis=localStorage.getItem("ibee_engine10")==="1", st=document.getElementById("esteps");
     if(st) st.innerHTML='<b class="'+(acct?'on':'')+'">'+(acct?'✓':'○')+' ACCOUNT MADE</b><br><b class="'+(lis?'on':'')+'">'+(lis?'✓':'○')+' FELT A TRACK 10s</b>';
+    /* already connected → no reason to ask them to make an account again, just point at listening */
+    var go=document.getElementById("egobtn"), hint=document.getElementById("eghint");
+    if(go) go.style.display = acct ? "none" : "";
+    if(hint) hint.textContent = acct ? "press ► on the radio for 10 seconds — you're in, just listen_" : "…then press ► on the radio for 10 seconds_";
     lk.classList.add("on");
   }
   setInterval(function(){ if(current==="music" && document.getElementById("englock") && document.getElementById("englock").classList.contains("on")) updateEngLock(); },1500);

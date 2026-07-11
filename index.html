@@ -49,6 +49,16 @@
     border-right:1px solid #161616;padding:13px 11px;cursor:pointer;white-space:nowrap;flex:1 0 auto}
   #nav button:hover{color:var(--ink)}
   #nav button.on{color:#000;background:var(--acid)}
+  /* ---- account pill: pinned outside the scrolling nav — always reachable, anywhere on the site ---- */
+  #acct{flex:none;border-left:1px solid var(--border)}
+  #acct button{font-family:var(--px);font-size:9px;padding:13px 12px;cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:6px;height:100%}
+  #acct button.login{background:var(--acid);color:#000;border:0}
+  #acct button.login:hover{background:#c9ff33}
+  #acct button.me{background:transparent;color:var(--acid);border:0}
+  #acct button.me:hover{color:#fff}
+  #acct .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 6px var(--acid);flex:none}
+  #acct svg{width:11px;height:11px;flex:none}
 
   /* ---- content ---- */
   #stage{position:relative;flex:1;overflow:hidden}
@@ -202,7 +212,7 @@
   <p><a href="console.html">Enter the console</a> · <a href="lyrics/">Lyrics</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE clothing</a></p>
 </div>
 <div id="app">
-  <div id="bar"><div id="nav"></div></div>
+  <div id="bar"><div id="nav"></div><div id="acct"></div></div>
 
   <div id="stage">
     <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>
@@ -312,6 +322,27 @@
   var navEl=document.getElementById('nav');
   NAV.forEach(function(it){var b=document.createElement('button');b.textContent=it.n;
     b.onclick=function(){ navigate(it.u); };navEl.appendChild(b);});
+
+  /* ---- account pill: LOG IN / PROFILE, reachable from every page (persistent shell) ----
+     No supabase-js load here — just reads the same localStorage key pattern Supabase writes
+     (sb-*-auth-token), same trick console.html's engine-lock uses. Same-origin iframe writes
+     (member/ signing in) fire a 'storage' event on this parent frame too. */
+  var ICO_USER="<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><circle cx='12' cy='8.4' r='3.6' fill='currentColor'/>"
+    +"<path d='M4.5 20c1-4.2 4.4-6.4 7.5-6.4s6.5 2.2 7.5 6.4' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round'/></svg>";
+  var acctEl=document.getElementById('acct');
+  function memberSession(){ try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
+    if(/^sb-.*-auth-token$/.test(k)){ var v=localStorage.getItem(k); if(v&&v!=="null") return true; } } }catch(e){} return false; }
+  var acctOn=null;
+  function renderAcct(){
+    var on=memberSession(); if(on===acctOn) return; acctOn=on;
+    acctEl.innerHTML = on
+      ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
+      : '<button class="login" id="acctbtn">'+ICO_USER+'LOG IN</button>';
+    document.getElementById('acctbtn').onclick=function(){ navigate(on?'member/profile/':'member/'); };
+  }
+  renderAcct();
+  window.addEventListener('storage',renderAcct);
+  setInterval(renderAcct,3000);
 
   function navigate(url){
     try{lyrClose();}catch(e){}   /* moving to a section closes the lyrics room */
