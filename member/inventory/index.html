@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>MY COLLECTION — THE FREQUENCY | ONLY IBEE</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
+  --cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:19px;min-height:100dvh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:2px solid var(--border);
+  font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{max-width:820px;margin:0 auto;padding:22px 16px 60px;position:relative;z-index:2}
+h1{font-family:var(--px);font-size:clamp(15px,5vw,24px);color:var(--acid);letter-spacing:2px;text-align:center;
+  text-shadow:0 0 18px rgba(182,255,0,.5)}
+.progress{text-align:center;color:var(--dim);font-family:var(--px);font-size:9px;letter-spacing:1px;margin:12px 0 4px}
+.pbar{max-width:340px;height:9px;border:1px solid var(--border);margin:0 auto 22px;padding:1px}
+.pbar i{display:block;height:100%;width:0;background:var(--acid);box-shadow:0 0 8px rgba(182,255,0,.6);transition:width 1s ease}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
+.slot{border:1px solid var(--border);background:rgba(12,12,14,.9);padding:14px 12px;text-align:center;position:relative;overflow:hidden}
+.slot.owned{border-color:hsla(0,0%,50%,.4)}
+.slot.r-rare.owned{border-color:#123a44;box-shadow:0 0 22px rgba(38,224,255,.16)}
+.slot.r-epic.owned{border-color:#4a1240;box-shadow:0 0 24px rgba(255,43,214,.18)}
+.slot.r-legendary.owned{border-color:#4a3a12;box-shadow:0 0 26px rgba(255,214,10,.2)}
+/* the retro game disk */
+.disc{width:104px;height:104px;margin:2px auto 12px;border-radius:50%;position:relative;
+  background:#0a0a0a;box-shadow:inset 0 0 0 2px #1c1c1c,0 6px 16px rgba(0,0,0,.6)}
+.disc .art{position:absolute;inset:8px;border-radius:50%;background-size:cover;background-position:center;
+  filter:saturate(1.1)}
+.disc.spin .art{animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.disc::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;transform:translate(-50%,-50%);
+  border-radius:50%;background:#070707;box-shadow:inset 0 0 0 2px #222}
+.disc .q{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--px);font-size:26px;color:#2c2c2c}
+.disc .sheen{position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 42%)}
+.slot .nm{font-family:var(--px);font-size:9px;line-height:1.5;min-height:26px}
+.slot.owned .nm{color:var(--ink)}.slot .nm.locked{color:#3a3a3a}
+.rz{font-family:var(--px);font-size:7px;letter-spacing:1px;padding:3px 6px;border:1px solid;display:inline-block;margin:8px 0 2px}
+.r-common .rz{color:#9a9a9a;border-color:#444}.r-rare .rz{color:var(--cyan);border-color:#123a44}
+.r-epic .rz{color:var(--pink);border-color:#4a1240}.r-legendary .rz{color:var(--gold);border-color:#4a3a12}
+.val{color:var(--dim);font-size:15px}
+.enter{display:block;margin-top:10px;font-family:var(--px);font-size:8px;padding:9px;background:var(--acid);color:#000;text-decoration:none}
+.locktag{margin-top:10px;font-family:var(--px);font-size:8px;color:#3a3a3a}
+/* login */
+.login{max-width:420px;margin:8px auto 24px;border:1px solid var(--border);background:rgba(14,14,14,.9);padding:16px;text-align:center}
+.login .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px}
+.login p{color:var(--dim);margin-bottom:10px}
+.login input{width:100%;background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px;margin-bottom:8px}
+.login button{width:100%;font-family:var(--px);font-size:10px;padding:13px;background:var(--acid);color:#000;border:0;cursor:pointer}
+.msg{color:var(--dim);font-size:16px;margin-top:8px}
+.sess{text-align:center;color:var(--dim);font-size:15px;margin-bottom:16px}
+.sess a{color:var(--acid)}
+footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:var(--dim)}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>COLLECTION.SYS</span>
+</header>
+<main>
+  <h1>MY COLLECTION</h1>
+  <div class="progress" id="prog">SYNCING THE VAULT…</div>
+  <div class="pbar"><i id="pfill"></i></div>
+  <div class="sess" id="sess"></div>
+  <div id="loginbox"></div>
+  <div class="grid" id="grid"></div>
+</main>
+<footer>© ONLYIBEE — THE FREQUENCY · EVERY PIECE EARNED</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var sb=window.supabase.createClient(SB_URL,SB_KEY);
+  /* item id → cover art (from arcade/covers) so owned discs show the real art */
+  var COVERS={"game-runner":"neon-run.png","game-rush":"mimi-rush.png","game-tiles":"mimi-tiles.png",
+    "env-aqua":"aqua-bass.png","env-bedroom":"lofi-bedroom.png","env-terrarium":"terrarium.png","env-transit":"midnight-transit.png"};
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+
+  function slot(it, owned){
+    var rar=it.rarity||'common', cls='slot r-'+rar+(owned?' owned':'');
+    var art='', disc;
+    if(owned){
+      var cov=COVERS[it.id]?('../../arcade/covers/'+COVERS[it.id]):'';
+      disc='<div class="disc spin"><div class="art" style="background-image:url('+cov+')"></div><div class="sheen"></div></div>';
+    } else {
+      disc='<div class="disc"><div class="q">?</div><div class="sheen"></div></div>';
+    }
+    var name = owned ? e2(it.name) : '???';
+    var cta;
+    if(owned){
+      if(it.type==='game'||it.type==='environment') cta='<a class="enter" href="../../'+e2(it.payload)+'">▶ ENTER</a>';
+      else if(it.payload) cta='<a class="enter" href="'+e2(it.payload)+'" download>⬇ GET</a>';
+      else cta='<div class="locktag">IN INVENTORY</div>';
+    } else cta='<div class="locktag">🔒 LOCKED</div>';
+    return '<div class="'+cls+'">'+disc
+      +'<div class="nm'+(owned?'':' locked')+'">'+name+'</div>'
+      +'<div class="rz">'+rar.toUpperCase()+'</div>'
+      +'<div class="val">value '+(it.value||0)+'</div>'+cta+'</div>';
+  }
+
+  function renderLogin(show){
+    if(!show){ $("loginbox").innerHTML=''; return; }
+    $("loginbox").innerHTML='<div class="login"><div class="h">// LOG IN TO REVEAL YOUR COLLECTION_</div>'
+      +'<p>same account you claim passes with — magic link, no password.</p>'
+      +'<input id="em" type="email" placeholder="your email" inputmode="email" autocomplete="email">'
+      +'<button id="go">▶ SEND MY LINK</button><div class="msg" id="m"></div></div>';
+    $("go").onclick=async function(){
+      var em=($("em").value||'').trim(); if(!/.+@.+\..+/.test(em)){$("m").textContent='enter a valid email_';return;}
+      $("go").disabled=true;$("m").textContent='sending…';
+      var r=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.href}});
+      $("m").textContent=r.error?('✕ '+r.error.message):'✉ check your email — tap the link to come back unlocked';
+      $("go").disabled=false;
+    };
+  }
+
+  async function boot(){
+    var sess=(await sb.auth.getSession()).data.session;
+    var cat=(await sb.from('items').select('*').eq('active',true).order('value')).data||[];
+    var owned={};
+    if(sess){
+      var inv=await sb.rpc('my_inventory');
+      (inv.data||[]).forEach(function(it){owned[it.id]=it;});
+      $("sess").innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="lo">log out</a>';
+      $("lo").onclick=function(e){e.preventDefault();sb.auth.signOut().then(function(){location.reload();});};
+      renderLogin(false);
+    } else {
+      $("sess").textContent='';
+      renderLogin(true);
+    }
+    var nOwned=Object.keys(owned).length, total=cat.length, val=0;
+    cat.forEach(function(it){ if(owned[it.id]) val+=(it.value||0); });
+    $("prog").textContent="COLLECTED "+nOwned+" / "+total+"  ·  TOTAL VALUE "+val;
+    $("pfill").style.width=(total?nOwned/total*100:0)+"%";
+    $("grid").innerHTML=cat.map(function(it){return slot(it, !!owned[it.id]);}).join('');
+  }
+  sb.auth.onAuthStateChange(function(){ boot(); });
+  boot();
+})();
+</script>
+<script src="../../assets/player.js?v=13"></script>
+</body>
+</html>

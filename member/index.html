@@ -84,7 +84,23 @@ main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-
 
 /* ---------- register (Tally) ---------- */
 #regbox{width:100%;margin-top:10px;min-height:60px}
-#regbox iframe{width:100%;border:0;background:transparent}
+.cnote{color:var(--dim);font-size:17px;line-height:1.4}
+.claim{display:flex;flex-direction:column;gap:9px}
+.claim input{background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px}
+.claim input:focus{outline:none;border-color:var(--acid)}
+.cbtn{font-family:var(--px);font-size:11px;padding:14px;background:var(--acid);color:#000;border:1px solid var(--acid);cursor:pointer;text-align:center;text-decoration:none;display:block}
+.cbtn:disabled{opacity:.5;cursor:default}
+.taken{border:1px solid var(--red);color:var(--red);font-family:var(--px);font-size:11px;padding:16px;text-align:center;letter-spacing:1px;line-height:1.6}
+.item{border:2px solid var(--border);padding:18px;text-align:center;position:relative;overflow:hidden;background:#0a0a0c;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.item .rz{font-family:var(--px);font-size:8px;letter-spacing:2px;padding:5px 8px;display:inline-block;border:1px solid}
+.item .ilabel{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px;margin-top:14px}
+.item .iname{font-family:var(--px);font-size:16px;color:hsl(var(--hue),95%,72%);margin:8px 0 6px;text-shadow:0 0 14px hsla(var(--hue),95%,55%,.5)}
+.item .ity{color:var(--dim);font-size:16px;margin-bottom:12px}
+.r-common{color:#9a9a9a;border-color:#444}.r-rare{color:var(--cyan);border-color:#123a44}
+.r-epic{color:var(--pink);border-color:#4a1240}.r-legendary{color:var(--gold);border-color:#4a3a12}
+.item.g-rare{box-shadow:0 0 26px rgba(38,224,255,.22)}.item.g-epic{box-shadow:0 0 30px rgba(255,43,214,.26)}
+.item.g-legendary{box-shadow:0 0 36px rgba(255,214,10,.3)}
 .regph{border:1px dashed var(--border);padding:16px;color:var(--dim);font-family:var(--px);font-size:8px;line-height:1.8;text-align:center}
 
 .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
@@ -120,7 +136,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <div class="mcard crtin">
     <div class="tag">// MEMBER OF THE FREQUENCY_</div>
     <div class="rank" id="rank">—</div>
-    <div class="tag" id="subrank">the signal recognizes you_</div>
+    <div id="codename" style="font-family:var(--px);font-size:11px;color:hsl(var(--hue),95%,72%);letter-spacing:1px;margin-top:6px">CODENAME · —</div>
+    <div class="tag" id="subrank" style="margin-top:6px">the signal recognizes you_</div>
     <div class="code" id="code" title="tap to copy">————</div>
     <div class="stats">
       <div class="stat"><div class="k">RARITY</div><div class="v" id="rarity">—</div></div>
@@ -141,27 +158,32 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </div>
 
   <div class="box crtin">
-    <div class="h">// LOCK IN YOUR PASS — GET THE NEXT DROP FIRST_</div>
-    <p>Register your pass so the next piece reaches you before it's public. 30 seconds, then you're in the system for real.</p>
-    <div id="regbox"></div>
+    <div class="h">// OPEN YOUR PASS_</div>
+    <p>Claim this pass to pull what's inside — it lands in your inventory forever. One pass, one claim.</p>
+    <div id="regbox"><div class="cnote">connecting…</div></div>
+    <div class="cnote" id="sessline" style="margin-top:10px;font-size:15px"></div>
   </div>
 
   <div class="actions">
     <a class="btn solid" href="../#music">▶ ENTER THE UNIVERSE</a>
-    <a class="btn" href="../auth/">♟ MY COLLECTION</a>
+    <a class="btn" href="inventory/">♟ MY COLLECTION</a>
   </div>
 </main>
 
 <footer>© ONLYIBEE — THE FREQUENCY · YOUR PASS IS YOURS ALONE</footer>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   "use strict";
   var $=function(id){return document.getElementById(id);};
 
   /* ====== SET THIS ONCE: paste your Tally form id (from the setup guide) ====== */
-  var TALLY_FORM = "";   /* e.g. "wa2Bq9" — leave "" until your Tally is ready */
+  /* ---- Supabase: accounts + single-use claim + inventory (anon key is public by design) ---- */
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
 
   /* ---- read the card + referral from the URL ---- */
   function param(n){var m=new RegExp("[?&]"+n+"=([^&]+)").exec(location.search);return m?decodeURIComponent(m[1]):"";}
@@ -192,26 +214,37 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var power = 500 + (h % 9500);                    // 500–9999
   document.documentElement.style.setProperty("--hue", T.hue);
 
-  /* ---- 3D member medallion (hex badge + monster motif), rank-colored ---- */
-  function medalSVG(hue){
-    var accent="hsl("+hue+",95%,60%)";
-    return "data:image/svg+xml,"+encodeURIComponent(
-      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>"
-      +"<path d='M12 1 L21 6.3 V17.7 L12 23 L3 17.7 V6.3 Z' fill='#0b0d0b' stroke='"+accent+"' stroke-width='1'/>"
-      +"<path d='M12 3.4 L18.8 7.4 V16.6 L12 20.6 L5.2 16.6 V7.4 Z' fill='none' stroke='"+accent+"' stroke-width='.4' opacity='.6'/>"
-      +"<path d='M8.4 9 Q12 6.6 15.6 9 Q13.8 11.6 12 11.6 Q10.2 11.6 8.4 9 Z' fill='"+accent+"'/>"
-      +"<circle cx='9.7' cy='9' r='.9' fill='#070707'/><circle cx='14.3' cy='9' r='.9' fill='#070707'/>"
-      +"<path d='M8.6 13.6 Q12 12.2 15.4 13.6 Q14.8 16.4 12 16.8 Q9.2 16.4 8.6 13.6 Z' fill='"+accent+"' opacity='.9'/>"
-      +"<rect x='9.3' y='14.2' width='1' height='1.8' fill='#070707'/><rect x='11.5' y='14' width='1' height='2.1' fill='#070707'/><rect x='13.7' y='14.2' width='1' height='1.8' fill='#070707'/>"
-      +"</svg>");
-  }
-  var mv=medalSVG(T.hue),zs=[-3.2,-1.8,-0.5,0.9,2.2,3.4],html="";
+  /* ---- 3D ROTATING MONSTER HEAD — the card's art, extruded into fake-voxel depth ----
+     Drop your transparent PNG at assets/img/monster.png. Until it exists, a stylized
+     red-horned fallback shows so the page is never broken. -->                          */
+  var MON="../assets/img/monster.png";
+  var FB="data:image/svg+xml,"+encodeURIComponent(
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'>"
+    +"<g stroke='#111' stroke-width='4' stroke-linejoin='round' fill='#ff3b30'>"
+    +"<path d='M32 52 Q10 40 20 14 Q31 24 35 44 Z'/><path d='M68 52 Q90 40 80 14 Q69 24 65 44 Z'/>"
+    +"<path d='M50 40 Q86 44 84 78 Q84 108 50 111 Q16 108 16 78 Q14 44 50 40 Z'/></g>"
+    +"<g stroke='#ffd60a' stroke-width='7' stroke-linecap='round'><path d='M20 72 L11 76 M18 86 L9 92 M24 98 L18 107 M50 109 L50 118 M80 72 L89 76 M82 86 L91 92 M76 98 L82 107'/></g>"
+    +"<circle cx='40' cy='78' r='7.5' fill='#fff' stroke='#111' stroke-width='4'/><circle cx='64' cy='78' r='7.5' fill='#fff' stroke='#111' stroke-width='4'/>"
+    +"<circle cx='52' cy='97' r='2.6' fill='#111'/>"
+    +"<g stroke='#fff' stroke-width='3' stroke-linecap='round'><path d='M39 60 h6 M56 60 h6 M28 90 l6 -3 M72 90 l-6 -3'/></g></svg>");
+  var zs=[-4,-2.4,-0.8,0.8,2.4,4],html="";
   zs.forEach(function(z,i){var front=(i===zs.length-1);
-    html+="<img src='"+mv+"' alt='"+(front?'member medallion':'')+"' style='transform:translateZ("+z+"px)"+(front?'':";filter:brightness(.45)")+"'>";});
+    html+="<img src='"+MON+"' alt='"+(front?'ONLY IBEE monster head':'')+"' style='transform:translateZ("+z+"px)"+(front?'':";filter:brightness(.4)")+"'>";});
   $("medal").innerHTML=html;
+  Array.prototype.forEach.call($("medal").querySelectorAll("img"),function(im){
+    im.onerror=function(){this.onerror=null;this.src=FB;};});
+
+  /* ---- premade codename: a handle assigned to this pass, stable + unique per card ---- */
+  var NAMES=["RED NOMAD","NEON STRAY","VOID RUNNER","STATIC GHOST","ACID SAINT","MIDNIGHT FOX",
+    "CHROME WOLF","PIXEL SHAMAN","ROGUE SIGNAL","VELVET RIOT","GLASS TIGER","ECHO BANDIT",
+    "SOLAR STRAY","NIGHT MARROW","CRIMSON DRIFT","LUCID FIEND","OFFGRID KING","FERAL BLOOM",
+    "COBALT MONK","DUSK PROWLER","NOVA THIEF","SILK STATIC","GRIM NEON","ZERO HOUR",
+    "MAD ORACLE","WIRED SAINT","GHOST FREQ","LO-FI BEAST","IRON MAGPIE","PLASMA STRAY"];
+  var codename=NAMES[hash(pass+"n")%NAMES.length]+" #"+(1000+(hash(pass+"x")%9000)); // suffix → always distinct
 
   /* ---- fill the card ---- */
   $("rank").textContent=T.n;
+  $("codename").textContent="CODENAME · "+codename;
   $("subrank").textContent=T.sub;
   $("code").textContent=pass;
   $("rarity").textContent=T.n;
@@ -231,17 +264,62 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     else{e.preventDefault();copy(myLink);}
   };
 
-  /* ---- register capture (Tally, hidden fields carry pass + ref) ---- */
-  function mountTally(){
-    var host=$("regbox");
-    if(!TALLY_FORM){
-      host.innerHTML='<div class="regph">▹ REGISTER PANEL GOES LIVE ONCE YOUR TALLY IS CONNECTED<br>(paste your form id in member/index.html — see the setup guide)</div>';
-      return;
+  /* ---- accounts + single-use claim + item reveal (Supabase) ---- */
+  var RCLASS={common:'r-common',rare:'r-rare',epic:'r-epic',legendary:'r-legendary'};
+  var host=$("regbox");
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function itemCard(item,label){
+    var rar=item.rarity||'common', cta;
+    if(item.type==='game'||item.type==='environment') cta='<a class="cbtn" href="../'+e2(item.payload)+'">▶ ENTER '+e2(item.name)+'</a>';
+    else if(item.payload) cta='<a class="cbtn" href="'+e2(item.payload)+'" download>⬇ DOWNLOAD</a>';
+    else cta='<div class="cnote">it\'s in your inventory now_</div>';
+    return '<div class="item g-'+rar+'"><span class="rz '+(RCLASS[rar]||'r-common')+'">'+rar.toUpperCase()+' · VALUE '+(item.value||0)+'</span>'
+      +'<div class="ilabel">'+e2(label)+'</div><div class="iname">'+e2(item.name)+'</div><div class="ity">'+e2(item.type)+'</div>'+cta+'</div>';
+  }
+  async function rpc(fn,args){ if(!sb)return{status:'error'}; var r=await sb.rpc(fn,args); return r.error?{status:'error',error:r.error.message}:r.data; }
+  async function mountClaim(){
+    if(!sb){ host.innerHTML='<div class="cnote">✕ backend offline — refresh in a moment_</div>'; return; }
+    sb.auth.onAuthStateChange(function(){ refresh(); });
+    await refresh();
+  }
+  async function refresh(){
+    var sess=(await sb.auth.getSession()).data.session;
+    var el=$("sessline");
+    if(el){ if(sess&&sess.user){ el.innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout" style="color:var(--acid)">log out</a>';
+        $("logout").onclick=function(ev){ev.preventDefault();sb.auth.signOut();}; } else el.textContent=''; }
+    render(await rpc('card_status',{card_code:pass}), sess);
+  }
+  function render(st, sess){
+    var s=st&&st.status;
+    if(s==='taken'){ host.innerHTML='<div class="taken">🔒 SEAT TAKEN — this pass was already claimed</div>'; return; }
+    if(s==='owned'){ host.innerHTML=itemCard(st.item,'✓ YOURS'); return; }
+    if(s==='invalid'){ host.innerHTML='<div class="cnote">this pass isn\'t loaded in the system yet — check back soon_</div>'; return; }
+    if(sess){
+      host.innerHTML='<button class="cbtn" id="claimbtn">✦ OPEN MY DROP</button><div class="cnote" id="cmsg" style="margin-top:8px"></div>';
+      $("claimbtn").onclick=doClaim;
+    } else {
+      host.innerHTML='<div class="claim"><div class="cnote">make your account to open this pass — we email a magic link, no password.</div>'
+        +'<input id="cemail" type="email" placeholder="your email" autocomplete="email" inputmode="email">'
+        +'<button class="cbtn" id="loginbtn">▶ CLAIM MY DROP</button><div class="cnote" id="cmsg"></div></div>';
+      $("loginbtn").onclick=doLogin;
     }
-    var src="https://tally.so/embed/"+TALLY_FORM
-      +"?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
-      +"&pass="+encodeURIComponent(pass)+"&ref="+encodeURIComponent(ref||"")+"&rank="+encodeURIComponent(T.n);
-    host.innerHTML='<iframe src="'+src+'" height="440" title="Register your pass" loading="lazy"></iframe>';
+  }
+  async function doLogin(){
+    var email=($("cemail").value||'').trim(); if(!/.+@.+\..+/.test(email)){ $("cmsg").textContent='enter a valid email_'; return; }
+    $("loginbtn").disabled=true; $("cmsg").textContent='sending…';
+    var r=await sb.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});
+    $("cmsg").textContent=r.error?('✕ '+r.error.message):'✉ check your email — tap the link, you\'ll land back here to open your drop';
+    $("loginbtn").disabled=false;
+  }
+  async function doClaim(){
+    var b=$("claimbtn"); if(b)b.disabled=true; if($("cmsg"))$("cmsg").textContent='opening…';
+    var r=await rpc('claim_card',{card_code:pass});
+    if(r.status==='claimed'||r.status==='owned'){
+      if(r.item){ host.innerHTML=itemCard(r.item, r.status==='owned'?'✓ YOURS':'✦ YOU PULLED'); toast('CLAIMED_'); }
+      else host.innerHTML='<div class="cnote">claimed — you already hold everything in the pool_</div>';
+    } else if(r.status==='taken'){ host.innerHTML='<div class="taken">🔒 SEAT TAKEN</div>'; }
+    else if(r.status==='need_login'){ render({status:'available'}, null); }
+    else { if($("cmsg"))$("cmsg").textContent='✕ could not claim ('+(r.error||r.status)+')'; if(b)b.disabled=false; }
   }
 
   /* ---- boot sequence → reveal ---- */
@@ -256,7 +334,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       $("boot").classList.add("gone");
       var st=$("stage"); st.style.visibility="visible";
       $("powerbar").style.width=Math.min(100, power/9999*100)+"%";
-      mountTally();
+      mountClaim();
     }
   })();
 })();
