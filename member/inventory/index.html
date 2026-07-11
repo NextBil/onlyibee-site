@@ -121,10 +121,12 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   /* which physical object each item is (add clothes/rares later → new forms) */
   var SHAPES={"game-runner":"bee","game-rush":"cassette","game-tiles":"floppy",
     "env-aqua":"ufo","env-bedroom":"crt","env-terrarium":"flower","env-transit":"vhs",
-    "universe-engine":"engine"};
+    "universe-engine":"engine","ics-chess":"img:../../assets/chess/knight1.png"};
 
   function artifact(formKey, owned){
-    var svg=FORMS[formKey]||FORMS.disc, src="data:image/svg+xml,"+encodeURIComponent(svg);
+    var src=(formKey&&formKey.indexOf("img:")===0)
+      ? formKey.slice(4)
+      : "data:image/svg+xml,"+encodeURIComponent(FORMS[formKey]||FORMS.disc);
     return "<div class='artstage'><div class='art3d"+(owned?"":" mystery")+"'>"
       +'<div class="f"><img alt="" src="'+src+'"></div><div class="b"><img alt="" src="'+src+'"></div></div>'
       +(owned?"":"<div class='qmark'>?</div>")+"</div>";
@@ -172,8 +174,15 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
     var eng10=false; try{ eng10=localStorage.getItem("ibee_engine10")==="1"; }catch(e){}
     cat.unshift({id:"universe-engine",name:"UNIVERSE MUSIC ENGINE",rarity:"legendary",value:"∞",
       type:"engine",payload:"#playing",showname:true,lockhint:"10s OF MUSIC + SIGN IN"});
+    /* ICS CHESS is in EVERY collection — always free, now music-reactive */
+    cat.splice(1,0,{id:"ics-chess",name:"ICS CHESS",rarity:"rare",value:"FREE",
+      type:"game",payload:"chess/",showname:true});
     var owned={};
+    owned["ics-chess"]={id:"ics-chess"};                      /* everyone's, always */
     if(sess&&eng10) owned["universe-engine"]={id:"universe-engine"};
+    /* the owner's account: the whole shelf is theirs */
+    var isOwner=!!sess&&((sess.user.email||'').toLowerCase()==='droguepuissance4@gmail.com');
+    if(isOwner) cat.forEach(function(it){ owned[it.id]=owned[it.id]||{id:it.id}; });
     if(sess){
       var inv=await sb.rpc('my_inventory');
       (inv.data||[]).forEach(function(it){owned[it.id]=it;});

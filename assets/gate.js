@@ -57,6 +57,9 @@
     var sb=window.supabase.createClient(SB_URL,SB_KEY);
     sb.auth.getSession().then(function(res){
       if(!res.data.session){ finish(function(){locked(null);}); return; }        // not logged in
+      /* the owner's account: everything open */
+      var em=((res.data.session.user&&res.data.session.user.email)||'').toLowerCase();
+      if(em==='droguepuissance4@gmail.com'){ finish(unlock); return; }
       sb.rpc("owns",{item:itemId}).then(function(r){
         finish(function(){ if(r.data===true) unlock(); else locked(false); });    // owns? play : locked
       }).catch(function(){ finish(function(){locked("error");}); });

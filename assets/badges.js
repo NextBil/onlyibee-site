@@ -83,7 +83,21 @@
     {id:"recruiter",ico:"📣",n:"RECRUITER",d:"put a friend on the frequency",
       chk:function(P){return P.shared>=1;},pr:function(){return "share your pass";}},
     {id:"vault",ico:"🔓",n:"VAULT FINDER",d:"found the hidden vault",
-      chk:function(P){return P.vault;},pr:function(){return "it's out there_";}}
+      chk:function(P){return P.vault;},pr:function(){return "it's out there_";}},
+    /* ---- hidden badges: pure luck, no task to chase. They show as "???" until
+       they win themselves; only then the rule & reason (why) is revealed. ---- */
+    {id:"lucky-spin",ico:"🎰",n:"LUCKY SPIN",secret:true,
+      d:"fate picked you while the records turned",
+      why:"pure luck — every time a new record starts, a hidden 1-in-100 roll fires. no skill, no grind. the universe just said hi_",
+      chk:function(P){return P.lucky>=1;}},
+    {id:"comet",ico:"☄️",n:"COMET",secret:true,
+      d:"caught a comet crossing the frequency",
+      why:"pure luck — every full minute of real listening rolls a hidden 1-in-150 chance. you were under the sky when it passed_",
+      chk:function(P){return P.comet>=1;}},
+    {id:"the-glitch",ico:"🌀",n:"THE GLITCH",secret:true,
+      d:"the machine blinked at the end of your run",
+      why:"pure luck — every finished room run rolls a hidden 1-in-60 chance. the console glitched in your favor_",
+      chk:function(P){return P.glitch>=1;}}
   ];
 
   /* one enriched snapshot per tick — every chk/pr reads from this */
@@ -92,7 +106,8 @@
     var p=S.prog;
     return {listen:p.listen,night:p.night,full:p.full,best:p.best,shared:p.shared,chess:p.chess,
       nsongs:nkeys(p.songs),roomsN:nkeys(p.rooms),days:p.days,streak:streak(),
-      plays:playsTotal(),vault:!!sav().vault,loggedIn:loggedIn(),eng10:eng10(),maxPlay:maxPlay};
+      plays:playsTotal(),vault:!!sav().vault,loggedIn:loggedIn(),eng10:eng10(),maxPlay:maxPlay,
+      lucky:p.lucky||0,comet:p.comet||0,glitch:p.glitch||0};
   }
 
   /* ---------- unread ledger (iMessage-style) ----------
@@ -205,14 +220,34 @@
   function toast(t){ queue.push(t); pump(); }
 
   /* =====================  TRACKING (top window only)  ===================== */
-  var curSlug=null,lastT=0,playSec=0,fullDone=false,daySec=0,promptShown=false;
+  var curSlug=null,lastT=0,playSec=0,fullDone=false,daySec=0,promptShown=false,minAcc=0;
+
+  /* ---- the owner's account: full access, everywhere. Reads the Supabase token
+     straight from localStorage (no library) and flips the site's unlock flags. ---- */
+  var OWNER="droguepuissance4@gmail.com", ownerDone=false;
+  function ownerIn(){
+    try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
+      if(/^sb-.*-auth-token$/.test(k)){
+        var v=JSON.parse(localStorage.getItem(k)||"null");
+        var em=(v&&((v.user&&v.user.email)||(v.currentSession&&v.currentSession.user&&v.currentSession.user.email)))||"";
+        if(String(em).toLowerCase()===OWNER) return true;
+      } } }catch(e){}
+    return false;
+  }
+  function ownerGrant(){
+    if(ownerDone||!ownerIn()) return; ownerDone=true;
+    try{ localStorage.setItem("ibee_engine10","1"); }catch(e){}
+    try{ var sv=sav(); if(!sv.vault){ sv.vault=true; localStorage.setItem("ibee_sav",JSON.stringify(sv)); } }catch(e){}
+  }
 
   function consumeEvent(){
     try{
       var raw=localStorage.getItem(EVT); if(!raw) return;
       var e=JSON.parse(raw); if(!e||!e.t||e.t<=S.evtT) return;
       S.evtT=e.t;
-      if(e.k==="game"&&e.g){ S.prog.rooms[e.g]=1; if((+e.v||0)>S.prog.best) S.prog.best=(+e.v||0); }
+      if(e.k==="game"&&e.g){ S.prog.rooms[e.g]=1; if((+e.v||0)>S.prog.best) S.prog.best=(+e.v||0);
+        /* hidden THE GLITCH: every finished run rolls 1-in-60 */
+        if(!S.prog.glitch&&Math.random()<1/60) S.prog.glitch=1; }
       else if(e.k==="share"){ S.prog.shared=1; }
       else if(e.k==="chess"){ S.prog.chess=1; }
       dirty=true;
@@ -227,7 +262,8 @@
       var ok=false; try{ ok=def.chk(P); }catch(e){}
       if(!ok) return;
       S.earned[def.id]=Date.now(); dirty=true;
-      toast({ico:def.ico,h:def.gold?"⭐ UNLOCKED":"BADGE EARNED",n:def.n2||def.n,d:def.d,gold:def.gold});
+      toast({ico:def.ico,h:def.gold?"⭐ UNLOCKED":(def.secret?"✦ SECRET BADGE":"BADGE EARNED"),
+        n:def.n2||def.n,d:def.d,gold:def.gold});
       if(def.id==="engine"){ try{ localStorage.setItem("ibee_engine10","1"); }catch(e){} }
     });
     /* the hook: signal felt but no account yet → one small nudge per visit */
@@ -244,7 +280,11 @@
     var r=window.IBEERADIO;
     if(r&&r.audio){
       var slug=null; try{ slug=r.slug&&r.slug(); }catch(e){}
-      if(slug!==curSlug){ curSlug=slug; playSec=0; fullDone=false; try{lastT=r.audio.currentTime||0;}catch(e){lastT=0;} }
+      if(slug!==curSlug){
+        /* hidden LUCKY SPIN: a new record starting rolls 1-in-100 */
+        if(curSlug&&slug&&!S.prog.lucky&&Math.random()<0.01){ S.prog.lucky=1; dirty=true; }
+        curSlug=slug; playSec=0; fullDone=false; try{lastT=r.audio.currentTime||0;}catch(e){lastT=0;}
+      }
       var playing=false; try{ playing=r.playing(); }catch(e){}
       if(playing){
         var t=0,d=0; try{ t=r.audio.currentTime||0; d=r.audio.duration||0; }catch(e){}
@@ -255,6 +295,8 @@
           var h=new Date().getHours(); if(h<5) S.prog.night+=dt;
           if(playSec>=20&&slug&&!S.prog.songs[slug]) S.prog.songs[slug]=1;
           if(!fullDone&&d>60&&playSec>=d*0.9){ fullDone=true; S.prog.full++; }
+          /* hidden COMET: every full minute of listening rolls 1-in-150 */
+          minAcc+=dt; if(minAcc>=60){ minAcc-=60; if(!S.prog.comet&&Math.random()<1/150){ S.prog.comet=1; } }
           if(daySec>=30&&!S.prog.days[ymd()]){
             S.prog.days[ymd()]=1;
             var ks=Object.keys(S.prog.days); if(ks.length>45){ ks.sort(); delete S.prog.days[ks[0]]; }
@@ -264,5 +306,6 @@
     }
     check();
     updateNavCount();
+    ownerGrant();
   },1000);
 })();
