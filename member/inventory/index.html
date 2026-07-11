@@ -28,25 +28,31 @@ h1{font-family:var(--px);font-size:clamp(15px,5vw,24px);color:var(--acid);letter
 .pbar{max-width:340px;height:9px;border:1px solid var(--border);margin:0 auto 22px;padding:1px}
 .pbar i{display:block;height:100%;width:0;background:var(--acid);box-shadow:0 0 8px rgba(182,255,0,.6);transition:width 1s ease}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
-.slot{border:1px solid var(--border);background:rgba(12,12,14,.9);padding:14px 12px;text-align:center;position:relative;overflow:hidden}
-.slot.owned{border-color:hsla(0,0%,50%,.4)}
-.slot.r-rare.owned{border-color:#123a44;box-shadow:0 0 22px rgba(38,224,255,.16)}
-.slot.r-epic.owned{border-color:#4a1240;box-shadow:0 0 24px rgba(255,43,214,.18)}
-.slot.r-legendary.owned{border-color:#4a3a12;box-shadow:0 0 26px rgba(255,214,10,.2)}
-/* the retro game disk */
-.disc{width:104px;height:104px;margin:2px auto 12px;border-radius:50%;position:relative;
-  background:#0a0a0a;box-shadow:inset 0 0 0 2px #1c1c1c,0 6px 16px rgba(0,0,0,.6)}
-.disc .art{position:absolute;inset:8px;border-radius:50%;background-size:cover;background-position:center;
-  filter:saturate(1.1)}
-.disc.spin .art{animation:spin 6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.disc::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;transform:translate(-50%,-50%);
-  border-radius:50%;background:#070707;box-shadow:inset 0 0 0 2px #222}
-.disc .q{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:var(--px);font-size:26px;color:#2c2c2c}
-.disc .sheen{position:absolute;inset:0;border-radius:50%;
-  background:linear-gradient(135deg,rgba(255,255,255,.14),transparent 42%)}
+/* ---- the shelf: rows of physically-distinct objects, each rotating ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 8px}
+.slot{padding:10px 6px 16px;text-align:center;position:relative;
+  border-bottom:2px solid #16161b;background:linear-gradient(180deg,transparent 60%,rgba(255,255,255,.02))}
+/* rotating 3D artifact (fake-voxel extrusion of the object's art) */
+.artstage{perspective:620px;width:116px;height:116px;margin:0 auto}
+.art3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spin3d 6.5s linear infinite}
+.art3d .f,.art3d .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.art3d .f img,.art3d .b img{width:100%;height:100%}
+.art3d .b{transform:rotateY(180deg);filter:brightness(.55)}
+@keyframes spin3d{from{transform:rotateX(8deg) rotateY(0deg)}to{transform:rotateX(8deg) rotateY(360deg)}}
+.art3d.mystery .f img,.art3d.mystery .b img{filter:grayscale(1) brightness(.2)}
+.slot.r-common.owned .artstage{filter:drop-shadow(0 0 9px rgba(182,255,0,.3))}
+.slot.r-rare.owned .artstage{filter:drop-shadow(0 0 12px rgba(38,224,255,.4))}
+.slot.r-epic.owned .artstage{filter:drop-shadow(0 0 14px rgba(255,43,214,.45))}
+.slot.r-legendary.owned .artstage{filter:drop-shadow(0 0 16px rgba(255,214,10,.5))}
+.qmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--px);font-size:30px;color:#333;pointer-events:none}
+.ped{width:78px;height:13px;margin:-4px auto 8px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(110,110,110,.2),transparent 70%);animation:pulse 3.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.72);opacity:.45}}
+.slot.r-common.owned .ped{background:radial-gradient(ellipse,rgba(182,255,0,.28),transparent 70%)}
+.slot.r-rare.owned .ped{background:radial-gradient(ellipse,rgba(38,224,255,.3),transparent 70%)}
+.slot.r-epic.owned .ped{background:radial-gradient(ellipse,rgba(255,43,214,.32),transparent 70%)}
+.slot.r-legendary.owned .ped{background:radial-gradient(ellipse,rgba(255,214,10,.34),transparent 70%)}
 .slot .nm{font-family:var(--px);font-size:9px;line-height:1.5;min-height:26px}
 .slot.owned .nm{color:var(--ink)}.slot .nm.locked{color:#3a3a3a}
 .rz{font-family:var(--px);font-size:7px;letter-spacing:1px;padding:3px 6px;border:1px solid;display:inline-block;margin:8px 0 2px}
@@ -90,28 +96,43 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
   var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
   var sb=window.supabase.createClient(SB_URL,SB_KEY);
-  /* item id → cover art (from arcade/covers) so owned discs show the real art */
-  var COVERS={"game-runner":"neon-run.png","game-rush":"mimi-rush.png","game-tiles":"mimi-tiles.png",
-    "env-aqua":"aqua-bass.png","env-bedroom":"lofi-bedroom.png","env-terrarium":"terrarium.png","env-transit":"midnight-transit.png"};
   function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+
+  /* ---- the artifact library: each collectible is a physically distinct object,
+     drawn flat then extruded into a rotating 3D piece (floppy, cassette, CRT…) ---- */
+  var V="viewBox='0 0 100 100'", NS="xmlns='http://www.w3.org/2000/svg'";
+  var FORMS={
+    floppy:"<svg "+NS+" "+V+"><path d='M22 16 h48 l12 12 v56 h-60 z' fill='#3b46a8' stroke='#0a0d2a' stroke-width='3'/><rect x='32' y='16' width='34' height='24' fill='#c9ccdd' stroke='#0a0d2a' stroke-width='2'/><rect x='48' y='18' width='11' height='20' fill='#7c81a6'/><rect x='28' y='50' width='46' height='30' fill='#e8e4cf' stroke='#0a0d2a' stroke-width='2'/><rect x='32' y='55' width='38' height='5' fill='#ff2b2b'/><line x1='32' y1='66' x2='70' y2='66' stroke='#0a0d2a' stroke-width='2'/><line x1='32' y1='72' x2='60' y2='72' stroke='#0a0d2a' stroke-width='2'/></svg>",
+    cassette:"<svg "+NS+" "+V+"><rect x='8' y='28' width='84' height='44' rx='5' fill='#15151d' stroke='#b6ff00' stroke-width='3'/><rect x='16' y='35' width='68' height='19' rx='2' fill='#050505' stroke='#333' stroke-width='1.5'/><circle cx='36' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='64' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='36' cy='45' r='2.5' fill='#b6ff00'/><circle cx='64' cy='45' r='2.5' fill='#b6ff00'/><rect x='28' y='60' width='44' height='7' fill='#ff2bd6'/><rect x='40' y='68' width='6' height='4' fill='#555'/><rect x='54' y='68' width='6' height='4' fill='#555'/></svg>",
+    vhs:"<svg "+NS+" "+V+"><rect x='12' y='24' width='76' height='52' rx='3' fill='#0e0e12' stroke='#26e0ff' stroke-width='3'/><rect x='22' y='30' width='56' height='20' fill='#e8e4cf'/><rect x='24' y='33' width='40' height='5' fill='#ff2b2b'/><line x1='24' y1='43' x2='72' y2='43' stroke='#555' stroke-width='2'/><rect x='30' y='56' width='40' height='14' rx='2' fill='#050505' stroke='#26e0ff' stroke-width='1.5'/><rect x='34' y='60' width='14' height='6' fill='#1a1a1a'/><rect x='52' y='60' width='14' height='6' fill='#1a1a1a'/></svg>",
+    crt:"<svg "+NS+" "+V+"><line x1='40' y1='28' x2='30' y2='12' stroke='#7a7a7a' stroke-width='2'/><line x1='50' y1='28' x2='62' y2='12' stroke='#7a7a7a' stroke-width='2'/><rect x='12' y='28' width='60' height='54' rx='6' fill='#2a2a2a' stroke='#0a0a0a' stroke-width='3'/><rect x='18' y='34' width='42' height='40' rx='3' fill='#0a1a10' stroke='#b6ff00' stroke-width='2'/><path d='M22 40 q18 6 34 0' stroke='#b6ff00' stroke-width='2' fill='none' opacity='.55'/><rect x='64' y='34' width='22' height='48' rx='3' fill='#1a1a1a' stroke='#0a0a0a' stroke-width='2'/><circle cx='75' cy='44' r='3' fill='#b6ff00'/><circle cx='75' cy='54' r='3' fill='#7a7a7a'/><rect x='70' y='62' width='10' height='4' fill='#7a7a7a'/></svg>",
+    ufo:"<svg "+NS+" "+V+"><path d='M34 50 a16 11 0 0 1 32 0 z' fill='#0a1a24' stroke='#26e0ff' stroke-width='2'/><ellipse cx='50' cy='44' rx='13' ry='7' fill='#26e0ff' opacity='.5'/><ellipse cx='50' cy='58' rx='38' ry='12' fill='#8a8f9e' stroke='#26e0ff' stroke-width='2.5'/><circle cx='28' cy='60' r='3' fill='#ff2bd6'/><circle cx='42' cy='63' r='3' fill='#b6ff00'/><circle cx='58' cy='63' r='3' fill='#ffd60a'/><circle cx='72' cy='60' r='3' fill='#ff2bd6'/></svg>",
+    skull:"<svg "+NS+" "+V+"><path d='M50 16 C28 16 20 34 22 52 c1 8 6 12 10 14 v10 h8 v-6 h6 v6 h8 v-6 h6 v6 h8 v-10 c4-2 9-6 10-14 C82 34 72 16 50 16 Z' fill='#0a0a0a' stroke='#ff2bd6' stroke-width='3'/><circle cx='38' cy='46' r='8' fill='#ff2bd6'/><circle cx='62' cy='46' r='8' fill='#ff2bd6'/><circle cx='38' cy='46' r='3' fill='#0a0a0a'/><circle cx='62' cy='46' r='3' fill='#0a0a0a'/><path d='M46 58 l4 7 l4-7 z' fill='#ff2bd6'/></svg>",
+    bee:"<svg "+NS+" "+V+"><ellipse cx='34' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='66' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='50' cy='58' rx='20' ry='24' fill='#ffd60a' stroke='#0a0a0a' stroke-width='3'/><rect x='31' y='48' width='38' height='7' fill='#0a0a0a'/><rect x='31' y='62' width='38' height='7' fill='#0a0a0a'/><circle cx='50' cy='30' r='11' fill='#0a0a0a'/><circle cx='46' cy='29' r='2.5' fill='#fff'/><circle cx='54' cy='29' r='2.5' fill='#fff'/><line x1='44' y1='21' x2='41' y2='13' stroke='#0a0a0a' stroke-width='2'/><line x1='56' y1='21' x2='59' y2='13' stroke='#0a0a0a' stroke-width='2'/></svg>",
+    flower:"<svg "+NS+" "+V+"><line x1='50' y1='56' x2='50' y2='88' stroke='#2e7d32' stroke-width='4'/><path d='M50 62 l-12 8 M50 70 l12 8' stroke='#2e7d32' stroke-width='3'/><g fill='#b6ff00' stroke='#143a00' stroke-width='2'><ellipse cx='50' cy='24' rx='8' ry='14'/><ellipse cx='72' cy='38' rx='14' ry='8'/><ellipse cx='28' cy='38' rx='14' ry='8'/><ellipse cx='62' cy='54' rx='9' ry='12'/><ellipse cx='38' cy='54' rx='9' ry='12'/></g><circle cx='50' cy='40' r='11' fill='#ff2bd6' stroke='#143a00' stroke-width='2'/><circle cx='50' cy='40' r='3' fill='#0a0a0a'/></svg>",
+    heart:"<svg "+NS+" "+V+"><path d='M50 32 C43 18 22 19 21 37 C20 53 46 66 50 84 Z' fill='#ff2b2b' stroke='#5a0d0d' stroke-width='2.5'/><path d='M50 32 C57 18 78 19 79 37 C80 53 54 66 50 84 Z' fill='#c81f1f' stroke='#5a0d0d' stroke-width='2.5'/><path d='M50 32 l-6 12 l9 9 l-7 10 l6 12' fill='none' stroke='#0a0a0a' stroke-width='3'/></svg>",
+    disc:"<svg "+NS+" "+V+"><circle cx='50' cy='50' r='34' fill='#1a1a22' stroke='#b6ff00' stroke-width='3'/><circle cx='50' cy='50' r='30' fill='none' stroke='#26e0ff' stroke-width='1' opacity='.5'/><path d='M50 20 a30 30 0 0 1 26 15' stroke='#ff2bd6' stroke-width='3' fill='none'/><circle cx='50' cy='50' r='10' fill='#070707' stroke='#b6ff00' stroke-width='2'/><circle cx='50' cy='50' r='3' fill='#b6ff00'/></svg>"
+  };
+  /* which physical object each item is (add clothes/rares later → new forms) */
+  var SHAPES={"game-runner":"bee","game-rush":"cassette","game-tiles":"floppy",
+    "env-aqua":"ufo","env-bedroom":"crt","env-terrarium":"flower","env-transit":"vhs"};
+
+  function artifact(formKey, owned){
+    var svg=FORMS[formKey]||FORMS.disc, src="data:image/svg+xml,"+encodeURIComponent(svg);
+    return "<div class='artstage'><div class='art3d"+(owned?"":" mystery")+"'>"
+      +'<div class="f"><img alt="" src="'+src+'"></div><div class="b"><img alt="" src="'+src+'"></div></div>'
+      +(owned?"":"<div class='qmark'>?</div>")+"</div>";
+  }
 
   function slot(it, owned){
     var rar=it.rarity||'common', cls='slot r-'+rar+(owned?' owned':'');
-    var art='', disc;
-    if(owned){
-      var cov=COVERS[it.id]?('../../arcade/covers/'+COVERS[it.id]):'';
-      disc='<div class="disc spin"><div class="art" style="background-image:url('+cov+')"></div><div class="sheen"></div></div>';
-    } else {
-      disc='<div class="disc"><div class="q">?</div><div class="sheen"></div></div>';
-    }
-    var name = owned ? e2(it.name) : '???';
-    var cta;
+    var form=SHAPES[it.id]||'disc', name=owned?e2(it.name):'???', cta;
     if(owned){
       if(it.type==='game'||it.type==='environment') cta='<a class="enter" href="../../'+e2(it.payload)+'">▶ ENTER</a>';
       else if(it.payload) cta='<a class="enter" href="'+e2(it.payload)+'" download>⬇ GET</a>';
       else cta='<div class="locktag">IN INVENTORY</div>';
     } else cta='<div class="locktag">🔒 LOCKED</div>';
-    return '<div class="'+cls+'">'+disc
+    return '<div class="'+cls+'">'+artifact(form,owned)+'<div class="ped"></div>'
       +'<div class="nm'+(owned?'':' locked')+'">'+name+'</div>'
       +'<div class="rz">'+rar.toUpperCase()+'</div>'
       +'<div class="val">value '+(it.value||0)+'</div>'+cta+'</div>';
