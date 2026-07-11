@@ -34,21 +34,30 @@ main{flex:1;width:100%;max-width:620px;padding:24px 18px 60px;display:flex;flex-
 .crtin{animation:crtin .35s ease-out}
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
 
-/* NEW feed: freshly earned things, each row deletable (clears the nav counter) */
-.newbox{border-color:#3a2f10;box-shadow:0 0 18px rgba(255,214,10,.08)}
+/* NEW feed: freshly won things — each is its own deletable BOX (obvious card + big ✕) */
+.newbox{border-color:#3a2f10;box-shadow:0 0 20px rgba(255,214,10,.1)}
 .newbox .nh{display:flex;justify-content:space-between;align-items:center;font-family:var(--px);
-  font-size:9px;letter-spacing:1px;color:var(--gold);margin-bottom:6px}
-.newbox .nclear{color:var(--dim);font-size:8px;cursor:pointer;padding:4px}
-.newbox .nclear:hover{color:var(--red)}
-.newrow{display:flex;align-items:center;gap:11px;padding:10px 2px;border-bottom:1px solid #141414}
-.newrow:last-child{border-bottom:0}
-.newrow .ni{font-size:22px;flex:none;line-height:1}
+  font-size:10px;letter-spacing:1px;color:var(--gold);margin-bottom:12px}
+.newbox .nclear{color:var(--dim);font-size:8px;cursor:pointer;padding:6px 8px;border:1px solid var(--border)}
+.newbox .nclear:hover{color:var(--red);border-color:#3a1414}
+.newrow{display:flex;align-items:center;gap:13px;padding:13px 12px;margin-bottom:12px;
+  border:1px solid #2f2f2f;border-left:4px solid var(--acid);background:#0b0b0d;position:relative}
+.newrow:last-child{margin-bottom:0}
+.newrow.gold{border-left-color:var(--gold);box-shadow:0 0 16px rgba(255,214,10,.12)}
+.newrow.news{border-left-color:var(--cyan)}
+.newrow .ni{font-size:28px;flex:none;line-height:1;filter:drop-shadow(0 0 6px rgba(182,255,0,.35))}
+.newrow.gold .ni{filter:drop-shadow(0 0 7px rgba(255,214,10,.5))}
 .newrow .nt{flex:1;min-width:0}
-.newrow .nn{font-family:var(--px);font-size:9px;color:var(--acid);line-height:1.5}
+.newrow .ntag{font-family:var(--px);font-size:7px;letter-spacing:2px;color:var(--gold)}
+.newrow.news .ntag{color:var(--cyan)}
+.newrow .nn{font-family:var(--px);font-size:11px;color:var(--acid);line-height:1.6;margin-top:6px}
 .newrow.gold .nn{color:var(--gold)}
-.newrow .nd{color:var(--dim);font-size:14px;margin-top:3px}
-.newrow .nx{flex:none;font-family:var(--px);font-size:10px;color:#555;cursor:pointer;padding:8px}
-.newrow .nx:hover{color:var(--red)}
+.newrow .nd{color:#a9a9a9;font-size:15px;margin-top:5px;line-height:1.3}
+.newrow .nwhen{color:#555;font-size:13px;margin-top:4px;font-family:var(--px);font-size:7px;letter-spacing:1px}
+.newrow .nx{flex:none;width:40px;height:40px;border:1px solid #3a1414;background:rgba(255,43,43,.08);
+  color:var(--red);font-family:var(--px);font-size:13px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border-radius:5px}
+.newrow .nx:hover{background:var(--red);color:#000;border-color:var(--red)}
 
 /* top bar: the collection door, pinned above the ID card */
 .topbar{width:100%;display:flex;gap:10px;justify-content:center}
@@ -156,7 +165,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
 <main>
   <div class="box crtin newbox" id="newbox" style="display:none">
-    <div class="nh"><span>// NEW_</span><span class="nclear" id="nclear">CLEAR ALL ✕</span></div>
+    <div class="nh"><span>🎉 YOU JUST WON — CONGRATS_</span><span class="nclear" id="nclear">CLEAR ALL ✕</span></div>
     <div id="newlist"></div>
   </div>
 
@@ -217,7 +226,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <footer>© ONLYIBEE — THE FREQUENCY</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../../assets/badges.js?v=3"></script>
+<script>document.write('<script src="../../assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="../../assets/badges.js?v=4"></script>
 <script>
 (function(){
   "use strict";
@@ -280,21 +290,31 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     avPaint();
   })();
 
-  /* ---- NEW feed: freshly earned, unseen things. Deleting a row marks it seen,
-     which also clears the number on the shell's PROFILE pill. Works logged out too
-     (badges are device-local), so it doubles as a sign-in teaser. ---- */
+  /* ---- "YOU JUST WON" feed: freshly won badges + unread news, each its own deletable box.
+     Deleting marks it seen, which also clears the matching red dot in the shell. Works
+     logged out too (badges/news are device-local), so it doubles as a sign-in teaser. ---- */
+  var TAGLABEL={drop:"NEW DROP",merch:"NEW MERCH",shop:"IN THE SHOP",video:"NEW VIDEO",
+    channel:"NEW CHANNEL",tv:"ON IBEE TV",song:"NEW SONG",galaxy:"NEW GALAXY",music:"NEW MUSIC",
+    news:"NEWS",note:"NOTE",info:"INFO",collection:"COLLECTION",item:"ITEM"};
   function renderNew(){
     var B=window.IBEE_BADGES, box=$("newbox");
-    if(!B){ box.style.display="none"; return; }
-    var u=B.unseen();
-    if(!u.length){ box.style.display="none"; return; }
+    if(!B||!B.inbox){ box.style.display="none"; return; }
+    var items=B.inbox();
+    if(!items.length){ box.style.display="none"; return; }
     box.style.display="";
-    $("newlist").innerHTML=u.map(function(x){
-      var d=x.def, when=new Date(x.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
-      return '<div class="newrow'+(d.gold?' gold':'')+'" data-id="'+e2(d.id)+'">'
-        +'<div class="ni">'+d.ico+'</div><div class="nt"><div class="nn">'+(d.gold?'⭐ ':'')+e2(d.n2||d.n)+'</div>'
-        +'<div class="nd">'+e2(d.d)+' · '+when+'</div></div>'
-        +'<div class="nx" title="delete">✕</div></div>';
+    $("newlist").innerHTML=items.map(function(x){
+      var isBadge=(x.kind==="badge"), gold=isBadge&&x.def&&x.def.gold;
+      var when=new Date(x.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      var cls="newrow"+(gold?" gold":(isBadge?"":" news"));
+      var tag= isBadge ? (gold?"⭐ TROPHY UNLOCKED":"🏆 BADGE WON") : ("📣 "+(TAGLABEL[x.type]||"NEWS"));
+      var lead= isBadge ? "you just won this — " : "";
+      return '<div class="'+cls+'" data-id="'+e2(x.id)+'">'
+        +'<div class="ni">'+e2(x.icon)+'</div>'
+        +'<div class="nt"><div class="ntag">'+tag+'</div>'
+          +'<div class="nn">'+e2(x.n)+'</div>'
+          +(x.d?'<div class="nd">'+lead+e2(x.d)+'</div>':'')
+          +'<div class="nwhen">'+when+'</div></div>'
+        +'<div class="nx" title="delete this notification">✕</div></div>';
     }).join('');
     Array.prototype.forEach.call($("newlist").querySelectorAll(".nx"),function(x){
       x.onclick=function(){ B.markSeen(x.parentNode.getAttribute("data-id")); renderNew(); };
