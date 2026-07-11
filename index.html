@@ -312,7 +312,6 @@
   /* ---- section nav (fills the bar) ---- */
   var NAV=[
     {n:'CONSOLE', u:'console.html#menu'},
-    {n:'UNIVERSE',u:'console.html#playing'},
     {n:'ROOMS',   u:'arcade/'},
     {n:'TV',      u:'tv/'},
     {n:'ICS',     u:'console.html#ics'},
@@ -338,7 +337,7 @@
     acctEl.innerHTML = on
       ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
       : '<button class="login" id="acctbtn">'+ICO_USER+'LOG IN</button>';
-    document.getElementById('acctbtn').onclick=function(){ navigate(on?'member/profile/':'member/'); };
+    document.getElementById('acctbtn').onclick=function(){ navigate(on?'member/profile/':'member/?login=1'); };
   }
   renderAcct();
   window.addEventListener('storage',renderAcct);
