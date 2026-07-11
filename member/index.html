@@ -123,17 +123,32 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 .gate .sub{color:var(--dim);font-size:16px;line-height:1.4}
 .gate .or{color:var(--dim);font-family:var(--px);font-size:8px;text-align:center;letter-spacing:2px;margin:8px 0;
   border-top:1px solid var(--border);padding-top:12px}
-/* ---------- starter pick: choose 1 of 3 rooms ---------- */
-.picks{display:grid;grid-template-columns:1fr;gap:10px}
-@media(min-width:520px){.picks{grid-template-columns:repeat(3,1fr)}}
-.pick{border:2px solid var(--border);background:#0a0a0c;padding:16px 10px;text-align:center;cursor:pointer;
-  font-family:var(--vt);color:var(--ink);transition:.15s;position:relative;overflow:hidden}
-.pick:hover,.pick:focus{border-color:hsl(var(--hue),95%,55%);transform:translateY(-2px);
-  box-shadow:0 0 22px hsla(var(--hue),90%,45%,.28);outline:none}
+/* ---------- starter pick: choose 1 of 3 rooms (rotating 3D room cards) ---------- */
+.picks{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:560px){.picks{grid-template-columns:repeat(3,1fr)}}
+.pick{border:2px solid var(--border);background:radial-gradient(ellipse at 50% -10%,hsla(var(--hue),80%,40%,.14),#0a0a0c 65%);
+  padding:16px 12px 14px;text-align:center;cursor:pointer;font-family:var(--vt);color:var(--ink);
+  transition:.18s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+.pick:hover,.pick:focus-visible{border-color:hsl(var(--hue),95%,55%);transform:translateY(-3px);
+  box-shadow:0 0 26px hsla(var(--hue),90%,45%,.3);outline:none}
 .pick:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
-.pick .pico{font-size:32px;line-height:1}
-.pick .pn{font-family:var(--px);font-size:10px;color:hsl(var(--hue),95%,72%);margin:10px 0 6px;line-height:1.5}
-.pick .pt{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px}
+/* the room itself: perspective box the artifact spins inside, walls implied by gradient + floor */
+.proom{perspective:520px;width:84px;height:84px;margin:2px auto 4px;position:relative}
+.proom::after{content:"";position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);width:60px;height:11px;
+  border-radius:50%;background:radial-gradient(ellipse,hsla(var(--hue),90%,55%,.35),transparent 70%);
+  animation:pulse 3.2s ease-in-out infinite}
+.part3{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spin3d 6s linear infinite}
+.part3 .f,.part3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.part3 .f img,.part3 .b img{width:100%;height:100%}
+.part3 .b{transform:rotateY(180deg);filter:brightness(.55)}
+.pick .pn{font-family:var(--px);font-size:10px;color:hsl(var(--hue),95%,72%);margin:8px 0 8px;line-height:1.5}
+.vibes{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:8px}
+.vibes span{font-family:var(--px);font-size:6px;letter-spacing:1px;color:hsl(var(--hue),80%,68%);
+  border:1px solid hsla(var(--hue),60%,45%,.5);padding:4px 6px;white-space:nowrap}
+.pick .pdesc{color:#b8b8b8;font-size:15px;line-height:1.4;margin-bottom:10px;flex:1}
+.pick .pt{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px;
+  border-top:1px solid var(--border);padding-top:9px;width:100%}
+.pick:hover .pt,.pick:focus-visible .pt{color:hsl(var(--hue),95%,68%)}
 </style>
 </head>
 <body>
@@ -186,6 +201,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <div class="actions" id="actions" style="display:none">
     <a class="btn solid" href="../#music">▶ THE UNIVERSE</a>
     <a class="btn" href="inventory/">♟ MY COLLECTION</a>
+    <a class="btn" href="profile/">☺ MY PROFILE</a>
   </div>
 </main>
 
@@ -259,11 +275,26 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     });
   }
 
-  /* ---- the 3 starter rooms (Pokémon pick — choose one, find the others later) ---- */
+  /* ---- the 3 starter rooms (Pokémon pick — choose one, find the others later) ----
+     Vibe tags + a feel-not-spoilers description per room; art reuses the collection's
+     rotating-artifact system (see member/inventory/index.html FORMS) so a room feels
+     like the same object whether it's on the pick screen or in your shelf later. ---- */
+  var V="viewBox='0 0 100 100'", NS="xmlns='http://www.w3.org/2000/svg'";
+  var PFORMS={
+    bee:"<svg "+NS+" "+V+"><ellipse cx='34' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='66' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='50' cy='58' rx='20' ry='24' fill='#ffd60a' stroke='#0a0a0a' stroke-width='3'/><rect x='31' y='48' width='38' height='7' fill='#0a0a0a'/><rect x='31' y='62' width='38' height='7' fill='#0a0a0a'/><circle cx='50' cy='30' r='11' fill='#0a0a0a'/><circle cx='46' cy='29' r='2.5' fill='#fff'/><circle cx='54' cy='29' r='2.5' fill='#fff'/><line x1='44' y1='21' x2='41' y2='13' stroke='#0a0a0a' stroke-width='2'/><line x1='56' y1='21' x2='59' y2='13' stroke='#0a0a0a' stroke-width='2'/></svg>",
+    cassette:"<svg "+NS+" "+V+"><rect x='8' y='28' width='84' height='44' rx='5' fill='#15151d' stroke='#b6ff00' stroke-width='3'/><rect x='16' y='35' width='68' height='19' rx='2' fill='#050505' stroke='#333' stroke-width='1.5'/><circle cx='36' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='64' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='36' cy='45' r='2.5' fill='#b6ff00'/><circle cx='64' cy='45' r='2.5' fill='#b6ff00'/><rect x='28' y='60' width='44' height='7' fill='#ff2bd6'/><rect x='40' y='68' width='6' height='4' fill='#555'/><rect x='54' y='68' width='6' height='4' fill='#555'/></svg>",
+    floppy:"<svg "+NS+" "+V+"><path d='M22 16 h48 l12 12 v56 h-60 z' fill='#3b46a8' stroke='#0a0d2a' stroke-width='3'/><rect x='32' y='16' width='34' height='24' fill='#c9ccdd' stroke='#0a0d2a' stroke-width='2'/><rect x='48' y='18' width='11' height='20' fill='#7c81a6'/><rect x='28' y='50' width='46' height='30' fill='#e8e4cf' stroke='#0a0d2a' stroke-width='2'/><rect x='32' y='55' width='38' height='5' fill='#ff2b2b'/><line x1='32' y1='66' x2='70' y2='66' stroke='#0a0d2a' stroke-width='2'/><line x1='32' y1='72' x2='60' y2='72' stroke='#0a0d2a' stroke-width='2'/></svg>"
+  };
   var STARTERS=[
-    {id:'game-runner',name:'RUN BEEBEE',ico:'🐝'},
-    {id:'game-rush',  name:'MIMI GUITAR RUSH',ico:'🎸'},
-    {id:'game-tiles', name:'MIMI MUSIC TILES',ico:'🎹'}
+    {id:'game-runner',name:'RUN BEEBEE',form:'bee',
+     vibes:['⚡ FAST','🎤 LYRICS SKY','🏙 CITY RUN'],
+     desc:'A jumping game built out of the words themselves — the city scrolls, the lyrics rain down overhead, and you time your jumps to the beat.'},
+    {id:'game-rush',  name:'MIMI GUITAR RUSH',form:'cassette',
+     vibes:['🎸 NEON HIGHWAY','⚡ FAST','🔥 INTENSE'],
+     desc:'A dash down a glowing guitar-neck highway. Lanes, obstacles, and a tempo that only gets hungrier the deeper you go.'},
+    {id:'game-tiles', name:'MIMI MUSIC TILES', form:'floppy',
+     vibes:['🎹 RHYTHM TAPS','🎯 PRECISION','📖 LYRICS'],
+     desc:'A calmer, precision rhythm room — lyric tiles fall in time with the song and you tap them right as they land.'}
   ];
   var RCLASS={common:'r-common',rare:'r-rare',epic:'r-epic',legendary:'r-legendary'};
   var host=$("regbox"), grant=$("grant"), boxh=$("boxh");
@@ -413,13 +444,23 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   }
 
   /* ---- CHOOSE YOUR STARTER ROOM (1 of 3) ---- */
+  function roomArt(formKey){
+    var svg=PFORMS[formKey]||PFORMS.floppy, src="data:image/svg+xml,"+encodeURIComponent(svg);
+    return '<div class="proom"><div class="part3">'
+      +'<div class="f"><img alt="" src="'+src+'"></div><div class="b"><img alt="" src="'+src+'"></div>'
+      +'</div></div>';
+  }
   function starterPick(){
     boxh.textContent="// CHOOSE YOUR STARTER ROOM_";
     var cards=STARTERS.map(function(g){
-      return '<button class="pick" data-id="'+g.id+'"><div class="pico">'+g.ico+'</div>'
-        +'<div class="pn">'+e2(g.name)+'</div><div class="pt">CHOOSE</div></button>';
+      var vibes=g.vibes.map(function(v){return '<span>'+e2(v)+'</span>';}).join('');
+      return '<button class="pick" data-id="'+g.id+'">'+roomArt(g.form)
+        +'<div class="pn">'+e2(g.name)+'</div>'
+        +'<div class="vibes">'+vibes+'</div>'
+        +'<div class="pdesc">'+e2(g.desc)+'</div>'
+        +'<div class="pt">▶ CHOOSE THIS ROOM</div></button>';
     }).join('');
-    host.innerHTML='<div class="cnote" style="margin-bottom:12px">Welcome in. Pick your first room — the other two are out there to discover.</div>'
+    host.innerHTML='<div class="cnote" style="margin-bottom:12px">Welcome in. Step into your first room — the other two are still out there to discover.</div>'
       +'<div class="picks">'+cards+'</div><div class="cnote" id="cmsg" style="margin-top:10px"></div>';
     Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){
       b.onclick=function(){ pickGame(b.getAttribute('data-id')); };

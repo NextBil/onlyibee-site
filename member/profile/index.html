@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>PROFILE — THE FREQUENCY | ONLY IBEE</title>
+<meta name="description" content="ONLY IBEE member profile. Your rooms, your stats, your badges.">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --hue:88;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+.bgglow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 22%,hsla(var(--hue),90%,45%,.16),transparent 60%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:620px;padding:24px 18px 60px;display:flex;flex-direction:column;
+  align-items:center;gap:14px;text-align:center;position:relative;z-index:2}
+.crtin{animation:crtin .35s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
+
+.idcard{width:100%;border:2px solid hsla(var(--hue),60%,45%,.6);background:rgba(10,10,12,.92);
+  padding:20px;box-shadow:0 0 26px hsla(var(--hue),90%,45%,.18),inset 0 0 40px rgba(0,0,0,.6);position:relative}
+.idcard .tag{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px}
+.idcard .rank{font-family:var(--px);font-size:clamp(16px,5.4vw,26px);color:hsl(var(--hue),95%,70%);
+  text-shadow:0 0 18px hsla(var(--hue),95%,55%,.55);margin:8px 0 2px;letter-spacing:2px}
+.idcard .em{color:var(--ink);font-size:19px;margin-top:4px}
+.idcard .since{color:var(--dim);font-size:15px;margin-top:6px}
+
+.stats3{display:flex;gap:10px;width:100%;flex-wrap:wrap}
+.stat{flex:1;min-width:140px;border:1px solid var(--border);background:rgba(14,14,14,.8);padding:14px 10px;text-align:center}
+.stat .k{font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px}
+.stat .v{font-family:var(--px);font-size:16px;color:hsl(var(--hue),95%,70%);margin-top:8px}
+.stat .sub{color:var(--dim);font-size:14px;margin-top:4px}
+
+.box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:16px 18px;text-align:left}
+.box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:12px;text-align:center}
+
+.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.badge{border:1px solid var(--border);padding:12px 8px;text-align:center;position:relative;overflow:hidden}
+.badge.on{border-color:hsla(var(--hue),60%,50%,.7);box-shadow:0 0 14px hsla(var(--hue),90%,45%,.2)}
+.badge .bi{font-size:26px;line-height:1;filter:grayscale(1) brightness(.5)}
+.badge.on .bi{filter:none}
+.badge .bn{font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px;margin-top:8px;line-height:1.6}
+.badge.on .bn{color:hsl(var(--hue),95%,72%)}
+.badge .bt{color:var(--dim);font-size:13px;margin-top:4px}
+
+.uni{width:100%;border:2px solid hsla(190,60%,50%,.5);background:rgba(10,14,16,.9);padding:16px 18px;
+  display:flex;align-items:center;gap:14px;text-align:left}
+.uni .ico{font-size:30px;flex:none}
+.uni .txt{flex:1}
+.uni .nm{font-family:var(--px);font-size:11px;color:var(--cyan);letter-spacing:1px}
+.uni .ds{color:var(--dim);font-size:15px;margin-top:6px}
+.uni .go{font-family:var(--px);font-size:8px;color:var(--cyan);text-decoration:none;border:1px solid #123a44;padding:8px 10px;white-space:nowrap}
+
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.btn{font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;background:transparent;color:var(--acid);border:1px solid var(--acid)}
+.btn.solid{background:var(--acid);color:#000}
+.btn:active{transform:translateY(2px)}
+
+.login{width:100%;border:1px solid var(--border);background:rgba(14,14,14,.9);padding:16px;text-align:center}
+.login .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px}
+.login p{color:var(--dim);margin-bottom:10px}
+.login input{width:100%;background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px;margin-bottom:8px}
+.login button{width:100%;font-family:var(--px);font-size:10px;padding:13px;background:var(--acid);color:#000;border:0;cursor:pointer}
+.msg{color:var(--dim);font-size:16px;margin-top:8px}
+.sess{color:var(--dim);font-size:15px}
+.sess a{color:var(--acid)}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+</style>
+</head>
+<body>
+<div class="bgglow"></div>
+<header>
+  <a href="../../#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>PROFILE.SYS</span>
+</header>
+
+<main>
+  <div class="idcard crtin" id="idcard" style="display:none">
+    <div class="tag">// MEMBER PROFILE_</div>
+    <div class="rank" id="rank">—</div>
+    <div class="em" id="idem">—</div>
+    <div class="since" id="since"></div>
+  </div>
+
+  <div class="stats3 crtin" id="stats3" style="display:none">
+    <div class="stat"><div class="k">ROOMS</div><div class="v" id="roomsv">—</div><div class="sub">unlocked</div></div>
+    <div class="stat"><div class="k">PLAYS</div><div class="v" id="playsv">—</div><div class="sub">songs played</div></div>
+    <div class="stat"><div class="k">VAULT</div><div class="v" id="vaultv">—</div><div class="sub" id="vaultsub"></div></div>
+  </div>
+
+  <div class="box crtin" id="badgebox" style="display:none">
+    <div class="h">// BADGES_</div>
+    <div class="badges" id="badges"></div>
+  </div>
+
+  <div class="uni crtin" id="unicard" style="display:none">
+    <div class="ico">🌌</div>
+    <div class="txt">
+      <div class="nm">MUSIC UNIVERSE</div>
+      <div class="ds" id="unids">always in your collection — every play counts_</div>
+    </div>
+    <a class="go" href="../../#playing">▶ ENTER</a>
+  </div>
+
+  <div class="actions crtin" id="actions" style="display:none">
+    <a class="btn solid" href="../inventory/">♟ FULL COLLECTION</a>
+    <a class="btn" href="../../arcade/">▶ ROOMS</a>
+  </div>
+
+  <div id="loginbox" style="width:100%"></div>
+  <div class="sess crtin" id="sessline"></div>
+</main>
+
+<footer>© ONLYIBEE — THE FREQUENCY</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0);}
+  var NAMES=["RED NOMAD","NEON STRAY","VOID RUNNER","STATIC GHOST","ACID SAINT","MIDNIGHT FOX",
+    "CHROME WOLF","PIXEL SHAMAN","ROGUE SIGNAL","VELVET RIOT","GLASS TIGER","ECHO BANDIT",
+    "SOLAR STRAY","NIGHT MARROW","CRIMSON DRIFT","LUCID FIEND","OFFGRID KING","FERAL BLOOM",
+    "COBALT MONK","DUSK PROWLER","NOVA THIEF","SILK STATIC","GRIM NEON","ZERO HOUR",
+    "MAD ORACLE","WIRED SAINT","GHOST FREQ","LO-FI BEAST","IRON MAGPIE","PLASMA STRAY"];
+  var RANKS=[{n:"INITIATE",hue:88},{n:"OPERATIVE",hue:190},{n:"ELITE",hue:40},{n:"LEGEND",hue:300}];
+
+  /* ---- real stats only: read what's already tracked, no new tracking added ---- */
+  function readSav(){ try{ return JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}; }catch(e){ return {}; } }
+  function playsTotal(sav){ var p=sav.plays||{}, t=0; Object.keys(p).forEach(function(k){ t+=(+p[k]||0); }); return t; }
+
+  function renderLogin(show){
+    var box=$("loginbox");
+    if(!show){ box.innerHTML=''; return; }
+    box.innerHTML='<div class="login"><div class="h">// LOG IN TO SEE YOUR PROFILE_</div>'
+      +'<p>Already claimed a pass? Sign in to see your rooms, stats, and badges.</p>'
+      +'<input id="em" type="email" placeholder="email" inputmode="email" autocomplete="email">'
+      +'<input id="pw" type="password" placeholder="password" autocomplete="current-password" style="margin-bottom:8px">'
+      +'<button id="go">▶ ENTER</button><div class="msg" id="m"></div>'
+      +'<div class="msg" style="margin-top:10px">No pass yet? <a href="../" style="color:var(--acid)">get one here</a>_</div></div>';
+    $("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") $("go").click(); });
+    $("go").onclick=async function(){
+      var em=($("em").value||'').trim(), pw=($("pw").value||'');
+      if(!/.+@.+\..+/.test(em)){$("m").textContent='enter your email_';return;}
+      if(pw.length<6){$("m").textContent='password: 6+ characters_';return;}
+      $("go").disabled=true;$("m").textContent='…';
+      var si=await sb.auth.signInWithPassword({email:em,password:pw});
+      if(si.error){$("m").textContent='✕ wrong email or password_';$("go").disabled=false;return;}
+      boot();
+    };
+  }
+
+  function badge(icon,name,sub,on){
+    return '<div class="badge'+(on?' on':'')+'"><div class="bi">'+icon+'</div><div class="bn">'+e2(name)+'</div><div class="bt">'+e2(sub)+'</div></div>';
+  }
+
+  async function boot(){
+    if(!sb){ $("loginbox").innerHTML='<div class="msg">✕ backend offline — refresh in a moment_</div>'; return; }
+    var sess=(await sb.auth.getSession()).data.session;
+    if(!sess){
+      ["idcard","stats3","badgebox","unicard","actions"].forEach(function(id){$(id).style.display="none";});
+      $("sessline").textContent='';
+      renderLogin(true);
+      return;
+    }
+    renderLogin(false);
+    $("sessline").innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout">log out</a>';
+    $("logout").onclick=function(ev){ev.preventDefault();sb.auth.signOut().then(function(){location.reload();});};
+
+    /* ---- rooms owned (real) ---- */
+    var cat=(await sb.from('items').select('*').eq('active',true)).data||[];
+    var inv=await sb.rpc('my_inventory');
+    var owned=(inv.data||[]);
+    var nOwned=owned.length, total=cat.length;
+
+    /* ---- identity: rank tied to real progress (rooms owned), codename from account id ---- */
+    var uid=sess.user.id;
+    var pct = total? nOwned/total : 0;
+    var rankIdx = pct>=0.85?3 : pct>=0.55?2 : pct>=0.25?1 : 0;
+    var R=RANKS[rankIdx];
+    document.documentElement.style.setProperty("--hue",R.hue);
+    var codename=NAMES[hash(uid+"n")%NAMES.length]+" #"+(1000+(hash(uid+"x")%9000));
+    $("rank").textContent=R.n+" · "+codename;
+    $("idem").textContent=sess.user.email||'member';
+    var since=sess.user.created_at?new Date(sess.user.created_at):null;
+    $("since").textContent = since ? "member since "+since.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : "";
+    $("idcard").style.display="";
+
+    /* ---- stats: existing data only (ibee_sav is the site-wide Music Universe save) ---- */
+    var sav=readSav(), plays=playsTotal(sav), vault=!!sav.vault;
+    $("roomsv").textContent=nOwned+" / "+total;
+    $("playsv").textContent=plays.toLocaleString();
+    $("vaultv").textContent=vault?"OPEN":"SEALED";
+    $("vaultsub").textContent=vault?"discovered":"still hidden";
+    $("stats3").style.display="";
+
+    /* ---- badges: simple tiers off the same real numbers, no fabricated milestones ---- */
+    var collectorOn=nOwned>0, collectorTier = nOwned>=total?"FULL SET":nOwned>=Math.ceil(total*0.5)?"HALFWAY":nOwned>0?"STARTED":"—";
+    var diggerOn=plays>0, diggerTier = plays>=100?"OBSESSED":plays>=20?"REGULAR":plays>0?"FIRST SPIN":"—";
+    $("badges").innerHTML =
+        badge("🗝️","COLLECTOR",collectorTier,collectorOn)
+      + badge("🎧","DIGGER",diggerTier,diggerOn)
+      + badge("🔓","VAULT",vault?"UNLOCKED":"LOCKED",vault)
+      + badge("♟","CHESS",'always free',true);
+    $("badgebox").style.display="";
+
+    /* ---- Music Universe: always part of the collection, free, shows real plays ---- */
+    $("unids").textContent = plays>0 ? plays.toLocaleString()+" plays logged — always in your collection_" : "always in your collection — every play counts_";
+    $("unicard").style.display="";
+
+    $("actions").style.display="";
+  }
+  boot();
+  if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') boot(); });
+})();
+</script>
+<script src="../../assets/player.js?v=13"></script>
+</body>
+</html>

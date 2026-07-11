@@ -11,8 +11,8 @@
 <meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCADE — ONLYIBEE</title>
-<meta name="description" content="ONLYIBEE ARCADE — pick a game. Retro mini-games starring the ICS characters.">
+<title>ROOMS — ONLYIBEE</title>
+<meta name="description" content="ONLYIBEE ROOMS — creative, artistic ways to listen to music. Games and worlds starring the ICS characters.">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
@@ -79,6 +79,29 @@
   .case.soon .lock{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
     font-family:var(--px);font-size:18px;color:#e8e8e8;letter-spacing:2px;text-shadow:0 0 10px #000,0 3px 0 #000}
 
+  /* ---------- rotating 3D artifact badge — sits ON TOP of the cover, same object
+     language as the collection page (member/inventory/). Owned/free = full colour;
+     locked-but-registered = visible but dim + a padlock, funnels to member/ to unlock. ---------- */
+  .badge{position:absolute;right:6px;bottom:6px;z-index:6;width:44px;height:44px;perspective:380px}
+  .badge .bring{position:absolute;inset:-5px;border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle,rgba(0,0,0,.72),rgba(0,0,0,.3) 68%,transparent 100%)}
+  .badge .b3{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spin3d 6.5s linear infinite}
+  .badge .b3 .f,.badge .b3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+  .badge .b3 .b{transform:rotateY(180deg);filter:brightness(.5)}
+  .badge .b3 img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 6px rgba(182,255,0,.35))}
+  @keyframes spin3d{from{transform:rotateX(8deg) rotateY(0deg)}to{transform:rotateX(8deg) rotateY(360deg)}}
+
+  /* locked-but-registered: visible, distinct from "soon" — dimmed + padlock, still clickable (routes to member/) */
+  .case.locked{border-color:#3a2a2a}
+  .case.locked:hover{border-color:var(--red);box-shadow:0 0 18px rgba(255,43,43,.22)}
+  .case.locked .cover{filter:saturate(.3) brightness(.5)}
+  .case.locked .badge .b3 img{filter:grayscale(1) brightness(.7) drop-shadow(0 0 0 transparent)}
+  .case.locked .tag{color:var(--red);border:1px solid #3a1414}
+  .case.locked::before{content:"🔒";position:absolute;z-index:5;top:50%;left:50%;transform:translate(-50%,-60%);
+    font-size:26px;opacity:0;transition:opacity .15s;text-shadow:0 0 14px #000}
+  .case.locked:hover::before{opacity:.9}
+  .case.live.locked::before{content:"🔒";background:none;box-shadow:none;font-size:26px;color:initial;width:auto;height:auto}
+
   footer{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
     padding:10px 18px;background:#000;border-top:2px solid var(--border);font-family:var(--px);font-size:9px;color:var(--dim)}
   footer .a{color:var(--acid)}
@@ -107,59 +130,116 @@
 <body>
   <header>
     <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
-    <div class="sys">ARCADE.EXE<br>insert a cartridge_</div>
+    <div class="sys">ROOMS.EXE<br>insert a cartridge_</div>
   </header>
 
   <main>
     <a class="back" href="../#menu">◀ CONSOLE</a>
-    <div class="scrtitle">ONLYIBEE <span class="n">ARCADE</span></div>
-    <div class="scrsub">the game store — pick a cartridge · free play_</div>
+    <div class="scrtitle">ONLYIBEE <span class="n">ROOMS</span></div>
+    <div class="scrsub">creative, artistic ways to listen — pick a room · free play_</div>
     <div class="storebar"><div class="run"><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span></div></div>
     <div id="store"></div>
   </main>
 
   <footer>
     <span class="a">♪ ONLYIBEE OS</span>
-    <span id="foot">ARCADE // select_</span>
+    <span id="foot">ROOMS // select_</span>
   </footer>
 
 <script>
 (function(){
-  /* ===== GAMES — add a box here per game. status: "live" | "soon"; isnew:true for a NEW ribbon ===== */
+  /* ===== GAMES — add a box here per room. status: "live" | "soon"; isnew:true for a NEW ribbon.
+     item: the Supabase items.id this room is gated behind (null = always free, e.g. chess).
+     badge: which rotating 3D artifact to show on top of the cover (matches member/inventory/'s
+     SHAPES so a room feels like the same object on the hub as it does in the collection). ===== */
   var GAMES = [
-    {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live"},
-    {name:"RUN BEEBEE!",     by:"Beebee runs the punk city to the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live"},
-    {name:"MIMI GUITAR RUSH",by:"Mimi dashes the guitar-neck highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", isnew:true},
-    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",       cover:"covers/mimi-tiles.png", url:"tiles/",    status:"live", isnew:true},
-    {name:"AQUA BASS",       by:"Bass pulses through a neon aquarium",   cover:"covers/aqua-bass.png",      url:"aqua/",      status:"live", isnew:true},
-    {name:"ICS LOFI BEDROOM",by:"Chill in the ICS room, beats on loop",  cover:"covers/lofi-bedroom.png",   url:"bedroom/",   status:"live", isnew:true},
-    {name:"SYNTH TERRARIUM", by:"A little world that grows to the music",cover:"covers/terrarium.png",      url:"terrarium/", status:"live", isnew:true},
-    {name:"MIDNIGHT TRANSIT",by:"Ride the night line to the beat",       cover:"covers/midnight-transit.png",url:"transit/",  status:"live", isnew:true},
+    {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live", item:null, badge:"chess"},
+    {name:"RUN BEEBEE!",     by:"A lyrics engine you jump through — words rain from the sky, city runs by on the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live", item:"game-runner", badge:"bee"},
+    {name:"MIMI GUITAR RUSH",by:"Mimi dashes the guitar-neck highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", isnew:true, item:"game-rush", badge:"cassette"},
+    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",       cover:"covers/mimi-tiles.png", url:"tiles/",    status:"live", isnew:true, item:"game-tiles", badge:"floppy"},
+    {name:"AQUA BASS",       by:"Bass pulses through a neon aquarium",   cover:"covers/aqua-bass.png",      url:"aqua/",      status:"live", isnew:true, item:"env-aqua", badge:"ufo"},
+    {name:"ICS LOFI BEDROOM",by:"Chill in the ICS room, beats on loop",  cover:"covers/lofi-bedroom.png",   url:"bedroom/",   status:"live", isnew:true, item:"env-bedroom", badge:"crt"},
+    {name:"SYNTH TERRARIUM", by:"A little world that grows to the music",cover:"covers/terrarium.png",      url:"terrarium/", status:"live", isnew:true, item:"env-terrarium", badge:"flower"},
+    {name:"MIDNIGHT TRANSIT",by:"Ride the night line to the beat",       cover:"covers/midnight-transit.png",url:"transit/",  status:"live", isnew:true, item:"env-transit", badge:"vhs"},
     {name:"BEAT TAPPER", by:"Tap the crew on the beat", cover:"covers/beat-tapper.png",  url:"", status:"soon"},
     {name:"KNIGHT DUEL", by:"Swordy vs Sworda",         cover:"covers/knight-duel.png",  url:"", status:"soon"},
     {name:"MEMORY",      by:"Match the collectibles",   cover:"covers/memory.png",       url:"", status:"soon"},
     {name:"CHESS PUZZLE",by:"Mate in 1 · 2 · 3",        cover:"covers/chess-puzzle.png", url:"", status:"soon"}
   ];
-  var TAGS={live:"\u25B6 PLAY",soon:"SOON"};
+
+  /* ---- rotating artifact library — same objects as member/inventory/, plus the chess piece ---- */
+  var V="viewBox='0 0 100 100'", NS="xmlns='http://www.w3.org/2000/svg'";
+  var FORMS={
+    bee:"<svg "+NS+" "+V+"><ellipse cx='34' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='66' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='50' cy='58' rx='20' ry='24' fill='#ffd60a' stroke='#0a0a0a' stroke-width='3'/><rect x='31' y='48' width='38' height='7' fill='#0a0a0a'/><rect x='31' y='62' width='38' height='7' fill='#0a0a0a'/><circle cx='50' cy='30' r='11' fill='#0a0a0a'/><circle cx='46' cy='29' r='2.5' fill='#fff'/><circle cx='54' cy='29' r='2.5' fill='#fff'/><line x1='44' y1='21' x2='41' y2='13' stroke='#0a0a0a' stroke-width='2'/><line x1='56' y1='21' x2='59' y2='13' stroke='#0a0a0a' stroke-width='2'/></svg>",
+    cassette:"<svg "+NS+" "+V+"><rect x='8' y='28' width='84' height='44' rx='5' fill='#15151d' stroke='#b6ff00' stroke-width='3'/><rect x='16' y='35' width='68' height='19' rx='2' fill='#050505' stroke='#333' stroke-width='1.5'/><circle cx='36' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='64' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='36' cy='45' r='2.5' fill='#b6ff00'/><circle cx='64' cy='45' r='2.5' fill='#b6ff00'/><rect x='28' y='60' width='44' height='7' fill='#ff2bd6'/><rect x='40' y='68' width='6' height='4' fill='#555'/><rect x='54' y='68' width='6' height='4' fill='#555'/></svg>",
+    floppy:"<svg "+NS+" "+V+"><path d='M22 16 h48 l12 12 v56 h-60 z' fill='#3b46a8' stroke='#0a0d2a' stroke-width='3'/><rect x='32' y='16' width='34' height='24' fill='#c9ccdd' stroke='#0a0d2a' stroke-width='2'/><rect x='48' y='18' width='11' height='20' fill='#7c81a6'/><rect x='28' y='50' width='46' height='30' fill='#e8e4cf' stroke='#0a0d2a' stroke-width='2'/><rect x='32' y='55' width='38' height='5' fill='#ff2b2b'/><line x1='32' y1='66' x2='70' y2='66' stroke='#0a0d2a' stroke-width='2'/><line x1='32' y1='72' x2='60' y2='72' stroke='#0a0d2a' stroke-width='2'/></svg>",
+    vhs:"<svg "+NS+" "+V+"><rect x='12' y='24' width='76' height='52' rx='3' fill='#0e0e12' stroke='#26e0ff' stroke-width='3'/><rect x='22' y='30' width='56' height='20' fill='#e8e4cf'/><rect x='24' y='33' width='40' height='5' fill='#ff2b2b'/><line x1='24' y1='43' x2='72' y2='43' stroke='#555' stroke-width='2'/><rect x='30' y='56' width='40' height='14' rx='2' fill='#050505' stroke='#26e0ff' stroke-width='1.5'/><rect x='34' y='60' width='14' height='6' fill='#1a1a1a'/><rect x='52' y='60' width='14' height='6' fill='#1a1a1a'/></svg>",
+    ufo:"<svg "+NS+" "+V+"><path d='M34 50 a16 11 0 0 1 32 0 z' fill='#0a1a24' stroke='#26e0ff' stroke-width='2'/><ellipse cx='50' cy='44' rx='13' ry='7' fill='#26e0ff' opacity='.5'/><ellipse cx='50' cy='58' rx='38' ry='12' fill='#8a8f9e' stroke='#26e0ff' stroke-width='2.5'/><circle cx='28' cy='60' r='3' fill='#ff2bd6'/><circle cx='42' cy='63' r='3' fill='#b6ff00'/><circle cx='58' cy='63' r='3' fill='#ffd60a'/><circle cx='72' cy='60' r='3' fill='#ff2bd6'/></svg>",
+    crt:"<svg "+NS+" "+V+"><line x1='40' y1='28' x2='30' y2='12' stroke='#7a7a7a' stroke-width='2'/><line x1='50' y1='28' x2='62' y2='12' stroke='#7a7a7a' stroke-width='2'/><rect x='12' y='28' width='60' height='54' rx='6' fill='#2a2a2a' stroke='#0a0a0a' stroke-width='3'/><rect x='18' y='34' width='42' height='40' rx='3' fill='#0a1a10' stroke='#b6ff00' stroke-width='2'/><path d='M22 40 q18 6 34 0' stroke='#b6ff00' stroke-width='2' fill='none' opacity='.55'/><rect x='64' y='34' width='22' height='48' rx='3' fill='#1a1a1a' stroke='#0a0a0a' stroke-width='2'/><circle cx='75' cy='44' r='3' fill='#b6ff00'/><circle cx='75' cy='54' r='3' fill='#7a7a7a'/><rect x='70' y='62' width='10' height='4' fill='#7a7a7a'/></svg>",
+    flower:"<svg "+NS+" "+V+"><line x1='50' y1='56' x2='50' y2='88' stroke='#2e7d32' stroke-width='4'/><path d='M50 62 l-12 8 M50 70 l12 8' stroke='#2e7d32' stroke-width='3'/><g fill='#b6ff00' stroke='#143a00' stroke-width='2'><ellipse cx='50' cy='24' rx='8' ry='14'/><ellipse cx='72' cy='38' rx='14' ry='8'/><ellipse cx='28' cy='38' rx='14' ry='8'/><ellipse cx='62' cy='54' rx='9' ry='12'/><ellipse cx='38' cy='54' rx='9' ry='12'/></g><circle cx='50' cy='40' r='11' fill='#ff2bd6' stroke='#143a00' stroke-width='2'/><circle cx='50' cy='40' r='3' fill='#0a0a0a'/></svg>"
+  };
+  function artHTML(g){
+    if(g.badge==="chess"){
+      return '<img src="../assets/chess/knight1.png" alt="">';
+    }
+    var svg=FORMS[g.badge]; if(!svg) return "";
+    var src="data:image/svg+xml,"+encodeURIComponent(svg);
+    return '<img src="'+src+'" alt="">';
+  }
+
+  /* ---- ownership: who's logged in + what they own (my_inventory), same backend as member/ ---- */
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var owned={};
+
+  var TAGS={live:"▶ PLAY",soon:"SOON",locked:"🔒 LOCKED"};
   function card(g){
     var soon=g.status==="soon";
+    var isLocked = !soon && g.item && !owned[g.item];
+    var tagKey = soon?"soon":(isLocked?"locked":"live");
+    var art=artHTML(g);
     var inner='<span class="spine"></span>'
-      +'<span class="tag">'+TAGS[g.status]+'</span>'
-      +(g.isnew?'<span class="ribbon">NEW</span>':'')
+      +'<span class="tag">'+TAGS[tagKey]+'</span>'
+      +(g.isnew&&!isLocked?'<span class="ribbon">NEW</span>':'')
       +'<div class="cover"><img src="'+g.cover+'" alt="'+g.name+'" loading="lazy"></div>'
       +(soon?'<div class="lock">SOON</div>':'')
+      +(art?'<div class="badge"><div class="bring"></div><div class="b3"><div class="f">'+art+'</div><div class="b">'+art+'</div></div></div>':'')
       +'<div class="bar"><div class="nm">'+g.name+'</div><div class="by">'+g.by+'</div>'
-        +'<div class="brow"><span class="barcode"></span><span class="pr">'+(soon?'SOON':'FREE')+'</span></div></div>';
-    return soon?('<div class="case soon">'+inner+'</div>'):('<a class="case live" href="'+g.url+'">'+inner+'</a>');
+        +'<div class="brow"><span class="barcode"></span><span class="pr">'+(soon?'SOON':(isLocked?'LOCKED':'FREE'))+'</span></div></div>';
+    if(soon) return '<div class="case soon">'+inner+'</div>';
+    if(isLocked) return '<a class="case live locked" href="../member/">'+inner+'</a>';
+    return '<a class="case live" href="'+g.url+'">'+inner+'</a>';
   }
-  var live=GAMES.filter(function(g){return g.status==="live";}),
-      soon=GAMES.filter(function(g){return g.status==="soon";});
-  document.getElementById("store").innerHTML=
-     '<div class="shelfhead">\u25B6 AVAILABLE NOW <span class="cnt">'+live.length+' TITLES \u00B7 FREE PLAY</span></div>'
-    +'<div class="shelf">'+live.map(card).join('')+'</div>'
-    +'<div class="shelfhead soon">\u25A9 COMING SOON <span class="cnt">'+soon.length+' IN DEV</span></div>'
-    +'<div class="shelf">'+soon.map(card).join('')+'</div>';
-  document.getElementById("foot").textContent = live.length+" TITLES IN STORE_";
+  function render(){
+    var live=GAMES.filter(function(g){return g.status==="live";}),
+        soon=GAMES.filter(function(g){return g.status==="soon";});
+    var unlockedCount=live.filter(function(g){return !g.item||owned[g.item];}).length;
+    document.getElementById("store").innerHTML=
+       '<div class="shelfhead">▶ AVAILABLE NOW <span class="cnt">'+unlockedCount+'/'+live.length+' UNLOCKED</span></div>'
+      +'<div class="shelf">'+live.map(card).join('')+'</div>'
+      +'<div class="shelfhead soon">▩ COMING SOON <span class="cnt">'+soon.length+' IN DEV</span></div>'
+      +'<div class="shelf">'+soon.map(card).join('')+'</div>';
+    document.getElementById("foot").textContent = unlockedCount+"/"+live.length+" ROOMS UNLOCKED_";
+  }
+  render();                                          // paint instantly (chess free, rest shown locked)
+
+  function loadSB(cb){
+    if(window.supabase&&window.supabase.createClient) return cb();
+    var s=document.createElement("script"); s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    s.onload=cb; s.onerror=function(){cb();}; document.head.appendChild(s);
+  }
+  loadSB(function(){
+    if(!(window.supabase&&window.supabase.createClient)) return;
+    var sb=window.supabase.createClient(SB_URL,SB_KEY);
+    sb.auth.getSession().then(function(res){
+      var sess=res.data.session;
+      if(!sess) return;                              // not logged in → stays all-locked (except chess)
+      sb.rpc("my_inventory").then(function(r){
+        (r.data||[]).forEach(function(it){ owned[it.id]=true; });
+        render();                                     // re-paint with real ownership
+      }).catch(function(){});
+    }).catch(function(){});
+  });
 })();
 </script>
 <script src="../assets/player.js?v=13"></script>
