@@ -88,6 +88,35 @@ begin
   return jsonb_build_object('status','claimed','item',to_jsonb(pick));
 end; $$;
 
+-- ============ claim_card_pick: claim ONCE + grant the room the member CHOSE (Pokémon starter) ============
+-- The member picks 1 of the 3 starter games; the other two are found later. Server-side we only
+-- allow a pick that is an active game (type='game'), so nobody can claim an epic room this way.
+create or replace function public.claim_card_pick(card_code text, want text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); rec public.cards%rowtype; pick public.items%rowtype;
+begin
+  if uid is null then return jsonb_build_object('status','need_login'); end if;
+  -- the chosen room must be one of the free starter games
+  select * into pick from public.items where id = want and active and type = 'game';
+  if not found then return jsonb_build_object('status','bad_pick'); end if;
+  select * into rec from public.cards where code = card_code;
+  if not found then return jsonb_build_object('status','invalid'); end if;
+  if rec.claimed_by is not null then
+    if rec.claimed_by = uid then
+      select * into pick from public.items where id = rec.item_id;
+      return jsonb_build_object('status','owned','item',to_jsonb(pick));
+    else
+      return jsonb_build_object('status','taken');
+    end if;
+  end if;
+  update public.cards set claimed_by = uid, claimed_at = now(), item_id = pick.id
+    where code = card_code and claimed_by is null;
+  if not found then return jsonb_build_object('status','taken'); end if;   -- someone beat us
+  insert into public.inventory(user_id,item_id,source_code) values (uid,pick.id,card_code) on conflict do nothing;
+  return jsonb_build_object('status','claimed','item',to_jsonb(pick));
+end; $$;
+grant execute on function public.claim_card_pick(text,text) to anon, authenticated;
+
 -- ============ inventory + game-gate helpers ============
 create or replace function public.my_inventory()
 returns jsonb language sql security definer set search_path = public as $$

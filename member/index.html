@@ -111,6 +111,29 @@ main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-
   color:var(--acid);font-family:var(--px);font-size:9px;padding:10px 16px;z-index:9500;opacity:0;transition:.2s;pointer-events:none}
 .toast.on{opacity:1}
 footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+
+/* ---------- access banner: green (granted) vs red (locked) ---------- */
+.banner{font-family:var(--px);font-size:clamp(11px,3.2vw,14px);letter-spacing:2px;line-height:1.5}
+.banner.granted{color:hsl(var(--hue),95%,68%);text-shadow:0 0 16px hsla(var(--hue),95%,55%,.6)}
+.banner.locked{color:var(--red);text-shadow:0 0 16px rgba(255,43,43,.55)}
+/* ---------- locked gate: enter a code / log in ---------- */
+.gate{display:flex;flex-direction:column;gap:9px}
+.gate input{background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px}
+.gate input:focus{outline:none;border-color:var(--acid)}
+.gate .sub{color:var(--dim);font-size:16px;line-height:1.4}
+.gate .or{color:var(--dim);font-family:var(--px);font-size:8px;text-align:center;letter-spacing:2px;margin:8px 0;
+  border-top:1px solid var(--border);padding-top:12px}
+/* ---------- starter pick: choose 1 of 3 rooms ---------- */
+.picks{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:520px){.picks{grid-template-columns:repeat(3,1fr)}}
+.pick{border:2px solid var(--border);background:#0a0a0c;padding:16px 10px;text-align:center;cursor:pointer;
+  font-family:var(--vt);color:var(--ink);transition:.15s;position:relative;overflow:hidden}
+.pick:hover,.pick:focus{border-color:hsl(var(--hue),95%,55%);transform:translateY(-2px);
+  box-shadow:0 0 22px hsla(var(--hue),90%,45%,.28);outline:none}
+.pick:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+.pick .pico{font-size:32px;line-height:1}
+.pick .pn{font-family:var(--px);font-size:10px;color:hsl(var(--hue),95%,72%);margin:10px 0 6px;line-height:1.5}
+.pick .pt{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px}
 </style>
 </head>
 <body>
@@ -128,12 +151,12 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 </div>
 
 <main id="stage" style="visibility:hidden">
-  <div class="granted crtin" id="grant">✓ ACCESS GRANTED — WELCOME TO THE FREQUENCY</div>
+  <div class="banner locked crtin" id="grant">🔒 CHECKING ACCESS…</div>
 
   <div class="stage"><div class="o3" id="medal"></div></div>
   <div class="ped"></div>
 
-  <div class="mcard crtin">
+  <div class="mcard crtin" id="mcard" style="display:none">
     <div class="rank" id="rank">—</div>
     <div id="codename" style="font-family:var(--px);font-size:11px;color:hsl(var(--hue),95%,72%);letter-spacing:1px;margin-top:6px">—</div>
     <div class="code" id="code" title="tap to copy">————</div>
@@ -145,12 +168,12 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </div>
 
   <div class="box crtin">
-    <div class="h">// OPEN YOUR PASS_</div>
+    <div class="h" id="boxh">// ACCESS_</div>
     <div id="regbox"><div class="cnote">connecting…</div></div>
     <div class="cnote" id="sessline" style="margin-top:10px;font-size:15px"></div>
   </div>
 
-  <div class="box crtin">
+  <div class="box crtin" id="recruit" style="display:none">
     <div class="h">// RECRUIT_</div>
     <div class="reflink">
       <input id="ref" readonly value="">
@@ -160,7 +183,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="refby" id="refby" style="display:none"></div>
   </div>
 
-  <div class="actions">
+  <div class="actions" id="actions" style="display:none">
     <a class="btn solid" href="../#music">▶ THE UNIVERSE</a>
     <a class="btn" href="inventory/">♟ MY COLLECTION</a>
   </div>
@@ -175,45 +198,46 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   "use strict";
   var $=function(id){return document.getElementById(id);};
 
-  /* ====== SET THIS ONCE: paste your Tally form id (from the setup guide) ====== */
   /* ---- Supabase: accounts + single-use claim + inventory (anon key is public by design) ---- */
   var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
   var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
   var sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
 
-  /* ---- read the card + referral from the URL ---- */
+  /* ---- read the card + referral from the URL (NO fabricated guest pass — locked by default) ---- */
   function param(n){var m=new RegExp("[?&]"+n+"=([^&]+)").exec(location.search);return m?decodeURIComponent(m[1]):"";}
   var LS="ibee_member";
   var saved={}; try{saved=JSON.parse(localStorage.getItem(LS)||"{}")||{};}catch(e){}
 
-  var pass=(param("pass")||param("tag")||saved.pass||"").toUpperCase().trim();
-  if(!pass){ pass="FREQ-"+Math.random().toString(36).slice(2,7).toUpperCase(); } // no card → guest signal, still a member
+  var pass=(param("pass")||param("tag")||"").toUpperCase().trim();   // empty = no card = stays LOCKED
   var ref=(param("ref")||saved.ref||"").toUpperCase().trim();
   if(ref===pass) ref="";                          // can't refer yourself
-  // persist first-touch referrer
-  var rec={pass:pass, ref:ref||saved.ref||"", ts:saved.ts||Date.now()};
-  try{localStorage.setItem(LS,JSON.stringify(rec));}catch(e){}
-  ref=rec.ref;
+  if(pass){                                        // persist first-touch referrer only for a real pass
+    var rec={pass:pass, ref:ref||saved.ref||"", ts:saved.ts||Date.now()};
+    try{localStorage.setItem(LS,JSON.stringify(rec));}catch(e){}
+    ref=rec.ref;
+  }
 
-  /* ---- deterministic game stats from the pass code ---- */
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
+  function copy(txt){try{navigator.clipboard.writeText(txt);toast("COPIED_");}catch(e){var i=$("ref");i.select();document.execCommand&&document.execCommand("copy");toast("COPIED_");}}
+  function setHue(h){document.documentElement.style.setProperty("--hue",h);}
+  async function rpc(fn,args){ if(!sb)return{status:'error',error:'offline'}; var r=await sb.rpc(fn,args); return r.error?{status:'error',error:r.error.message}:r.data; }
+
+  /* ---- deterministic member stats from the pass code (only shown once granted) ---- */
   function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0);}
-  var h=hash(pass);
   var TIERS=[
-    {n:"INITIATE", sub:"you found the door_",           hue:88,  min:60},
-    {n:"OPERATIVE",sub:"the signal trusts you_",         hue:190, min:28},
-    {n:"ELITE",    sub:"few carry this frequency_",      hue:40,  min:9},
-    {n:"LEGEND",   sub:"the frequency bends to you_",    hue:300, min:3}
+    {n:"INITIATE", hue:88 },{n:"OPERATIVE",hue:190},{n:"ELITE",hue:40},{n:"LEGEND",hue:300}
   ];
-  // weighted roll → most people INITIATE, rare LEGEND
-  var roll=h%100, tier = roll<60?0 : roll<88?1 : roll<97?2 : 3;
-  var T=TIERS[tier];
-  var power = 500 + (h % 9500);                    // 500–9999
-  document.documentElement.style.setProperty("--hue", T.hue);
+  var NAMES=["RED NOMAD","NEON STRAY","VOID RUNNER","STATIC GHOST","ACID SAINT","MIDNIGHT FOX",
+    "CHROME WOLF","PIXEL SHAMAN","ROGUE SIGNAL","VELVET RIOT","GLASS TIGER","ECHO BANDIT",
+    "SOLAR STRAY","NIGHT MARROW","CRIMSON DRIFT","LUCID FIEND","OFFGRID KING","FERAL BLOOM",
+    "COBALT MONK","DUSK PROWLER","NOVA THIEF","SILK STATIC","GRIM NEON","ZERO HOUR",
+    "MAD ORACLE","WIRED SAINT","GHOST FREQ","LO-FI BEAST","IRON MAGPIE","PLASMA STRAY"];
 
-  /* ---- 3D ROTATING MONSTER HEAD — the card's art, extruded into fake-voxel depth ----
-     Drop your transparent PNG at assets/img/monster.png. Until it exists, a stylized
-     red-horned fallback shows so the page is never broken. -->                          */
-  var MON="../assets/img/monster.png";
+  /* ---- 3D ROTATING MONSTER HEAD — drop your transparent PNG at assets/img/monster.png.
+     The code tries a couple of common names, then falls back to a drawn head so the page
+     is never broken. Exact path it loads first: onlyibee.com/assets/img/monster.png ---- */
+  var MON_CANDS=["../assets/img/monster.png","../assets/img/monster-head.png","../assets/img/monster.PNG"];
   var FB="data:image/svg+xml,"+encodeURIComponent(
     "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'>"
     +"<g stroke='#111' stroke-width='4' stroke-linejoin='round' fill='#ff3b30'>"
@@ -223,85 +247,150 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +"<circle cx='40' cy='78' r='7.5' fill='#fff' stroke='#111' stroke-width='4'/><circle cx='64' cy='78' r='7.5' fill='#fff' stroke='#111' stroke-width='4'/>"
     +"<circle cx='52' cy='97' r='2.6' fill='#111'/>"
     +"<g stroke='#fff' stroke-width='3' stroke-linecap='round'><path d='M39 60 h6 M56 60 h6 M28 90 l6 -3 M72 90 l-6 -3'/></g></svg>");
-  var zs=[-4,-2.4,-0.8,0.8,2.4,4],html="";
-  zs.forEach(function(z,i){var front=(i===zs.length-1);
-    html+="<img src='"+MON+"' alt='"+(front?'ONLY IBEE monster head':'')+"' style='transform:translateZ("+z+"px)"+(front?'':";filter:brightness(.4)")+"'>";});
-  $("medal").innerHTML=html;
-  Array.prototype.forEach.call($("medal").querySelectorAll("img"),function(im){
-    im.onerror=function(){this.onerror=null;this.src=FB;};});
+  function buildMedal(){
+    var zs=[-4,-2.4,-0.8,0.8,2.4,4],html="";
+    zs.forEach(function(z,i){var front=(i===zs.length-1);
+      html+="<img src='"+MON_CANDS[0]+"' data-ci='0' alt='"+(front?'ONLY IBEE monster head':'')+"' style='transform:translateZ("+z+"px)"+(front?'':";filter:brightness(.4)")+"'>";});
+    $("medal").innerHTML=html;
+    Array.prototype.forEach.call($("medal").querySelectorAll("img"),function(im){
+      im.onerror=function(){ var ci=(+this.getAttribute('data-ci'))+1;
+        if(ci<MON_CANDS.length){ this.setAttribute('data-ci',ci); this.src=MON_CANDS[ci]; }
+        else { this.onerror=null; this.src=FB; } };
+    });
+  }
 
-  /* ---- premade codename: a handle assigned to this pass, stable + unique per card ---- */
-  var NAMES=["RED NOMAD","NEON STRAY","VOID RUNNER","STATIC GHOST","ACID SAINT","MIDNIGHT FOX",
-    "CHROME WOLF","PIXEL SHAMAN","ROGUE SIGNAL","VELVET RIOT","GLASS TIGER","ECHO BANDIT",
-    "SOLAR STRAY","NIGHT MARROW","CRIMSON DRIFT","LUCID FIEND","OFFGRID KING","FERAL BLOOM",
-    "COBALT MONK","DUSK PROWLER","NOVA THIEF","SILK STATIC","GRIM NEON","ZERO HOUR",
-    "MAD ORACLE","WIRED SAINT","GHOST FREQ","LO-FI BEAST","IRON MAGPIE","PLASMA STRAY"];
-  var codename=NAMES[hash(pass+"n")%NAMES.length]+" #"+(1000+(hash(pass+"x")%9000)); // suffix → always distinct
-
-  /* ---- fill the card ---- */
-  $("rank").textContent=T.n;
-  $("codename").textContent="CODENAME · "+codename;
-  $("code").textContent=pass;
-  $("rarity").textContent=T.n;
-  $("power").textContent=power.toLocaleString();
-  if(ref){ var rb=$("refby"); rb.style.display="block"; rb.textContent="↳ RECRUITED BY "+ref; }
-
-  /* ---- referral link (their pass = their code) ---- */
-  var myLink=location.origin+location.pathname+"?ref="+encodeURIComponent(pass);
-  $("ref").value=myLink;
-  function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
-  function copy(txt){try{navigator.clipboard.writeText(txt);toast("COPIED_");}catch(e){var i=$("ref");i.select();document.execCommand&&document.execCommand("copy");toast("COPIED_");}}
-  $("copyref").onclick=function(){copy(myLink);};
-  $("code").onclick=function(){copy(pass);};
-  var shareText="I'm on the ONLY IBEE frequency 👾 tap in with my pass:";
-  $("shareref").onclick=function(e){
-    if(navigator.share){e.preventDefault();navigator.share({title:"ONLY IBEE — THE FREQUENCY",text:shareText,url:myLink}).catch(function(){});}
-    else{e.preventDefault();copy(myLink);}
-  };
-
-  /* ---- accounts + single-use claim + item reveal (Supabase) ---- */
+  /* ---- the 3 starter rooms (Pokémon pick — choose one, find the others later) ---- */
+  var STARTERS=[
+    {id:'game-runner',name:'RUN BEEBEE',ico:'🐝'},
+    {id:'game-rush',  name:'MIMI GUITAR RUSH',ico:'🎸'},
+    {id:'game-tiles', name:'MIMI MUSIC TILES',ico:'🎹'}
+  ];
   var RCLASS={common:'r-common',rare:'r-rare',epic:'r-epic',legendary:'r-legendary'};
-  var host=$("regbox");
-  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-  function itemCard(item,label){
-    var rar=item.rarity||'common', cta;
-    if(item.type==='game'||item.type==='environment') cta='<a class="cbtn" href="../'+e2(item.payload)+'">▶ ENTER '+e2(item.name)+'</a>';
-    else if(item.payload) cta='<a class="cbtn" href="'+e2(item.payload)+'" download>⬇ DOWNLOAD</a>';
-    else cta='<div class="cnote">it\'s in your inventory now_</div>';
-    return '<div class="item g-'+rar+'"><span class="rz '+(RCLASS[rar]||'r-common')+'">'+rar.toUpperCase()+' · VALUE '+(item.value||0)+'</span>'
-      +'<div class="ilabel">'+e2(label)+'</div><div class="iname">'+e2(item.name)+'</div><div class="ity">'+e2(item.type)+'</div>'+cta+'</div>';
+  var host=$("regbox"), grant=$("grant"), boxh=$("boxh");
+
+  /* ---- fill the green member card from the pass (only when access is granted) ---- */
+  function fillCard(){
+    var h=hash(pass), roll=h%100, tier=roll<60?0:roll<88?1:roll<97?2:3, T=TIERS[tier];
+    var power=500+(h%9500);
+    setHue(T.hue);
+    $("rank").textContent=T.n;
+    $("codename").textContent="CODENAME · "+NAMES[hash(pass+"n")%NAMES.length]+" #"+(1000+(hash(pass+"x")%9000));
+    $("code").textContent=pass;
+    $("rarity").textContent=T.n;
+    $("power").textContent=power.toLocaleString();
+    $("powerbar").style.width=Math.min(100,power/9999*100)+"%";
+    $("code").onclick=function(){copy(pass);};
+    /* referral */
+    var myLink=location.origin+location.pathname+"?ref="+encodeURIComponent(pass);
+    $("ref").value=myLink;
+    $("copyref").onclick=function(){copy(myLink);};
+    var shareText="I'm on the ONLY IBEE frequency 👾 tap in with my pass:";
+    $("shareref").onclick=function(ev){
+      if(navigator.share){ev.preventDefault();navigator.share({title:"ONLY IBEE — THE FREQUENCY",text:shareText,url:myLink}).catch(function(){});}
+      else{ev.preventDefault();copy(myLink);}
+    };
+    if(ref){ var rb=$("refby"); rb.style.display="block"; rb.textContent="↳ RECRUITED BY "+ref; }
   }
-  async function rpc(fn,args){ if(!sb)return{status:'error'}; var r=await sb.rpc(fn,args); return r.error?{status:'error',error:r.error.message}:r.data; }
-  async function mountClaim(){
-    if(!sb){ host.innerHTML='<div class="cnote">✕ backend offline — refresh in a moment_</div>'; return; }
-    sb.auth.onAuthStateChange(function(){ refresh(); });
-    await refresh();
+
+  /* ---- visual states ---- */
+  function showGranted(){
+    grant.className="banner granted crtin";
+    grant.textContent="✓ ACCESS GRANTED — WELCOME TO THE FREQUENCY";
+    $("mcard").style.display=""; $("recruit").style.display=""; $("actions").style.display="";
+    fillCard();
   }
-  async function refresh(){
-    var sess=(await sb.auth.getSession()).data.session;
+  function showLocked(msg){
+    setHue(0);                                    // red glow when locked
+    grant.className="banner locked crtin";
+    grant.textContent=msg;
+    $("mcard").style.display="none"; $("recruit").style.display="none"; $("actions").style.display="none";
+  }
+  function updSess(sess){
     var el=$("sessline");
-    if(el){ if(sess&&sess.user){ el.innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout" style="color:var(--acid)">log out</a>';
-        $("logout").onclick=function(ev){ev.preventDefault();sb.auth.signOut();}; } else el.textContent=''; }
-    render(await rpc('card_status',{card_code:pass}), sess);
+    if(sess&&sess.user){ el.innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout" style="color:var(--acid)">log out</a>';
+      $("logout").onclick=function(ev){ev.preventDefault();sb.auth.signOut();}; }
+    else el.textContent='';
   }
-  function render(st, sess){
-    var s=st&&st.status;
-    if(s==='taken'){ host.innerHTML='<div class="taken">🔒 SEAT TAKEN — this pass was already claimed</div>'; return; }
-    if(s==='owned'){ host.innerHTML=itemCard(st.item,'✓ YOURS'); return; }
-    if(s==='invalid'){ host.innerHTML='<div class="cnote">this pass isn\'t loaded in the system yet — check back soon_</div>'; return; }
+
+  /* ---- item card (owned room) ---- */
+  function itemCard(item,label){
+    var rar=(item&&item.rarity)||'common', route=(item&&item.payload)||'', name=(item&&item.name)||'YOUR ROOM';
+    var cta = route ? '<a class="cbtn" href="../'+e2(route)+'">▶ ENTER '+e2(name)+'</a>'
+                    : '<div class="cnote">it\'s in your collection now_</div>';
+    return '<div class="item g-'+rar+'"><span class="rz '+(RCLASS[rar]||'r-common')+'">'+rar.toUpperCase()+'</span>'
+      +'<div class="ilabel">'+e2(label)+'</div><div class="iname">'+e2(name)+'</div>'+cta+'</div>'
+      +'<div class="cnote" style="margin-top:10px">The other two starter rooms are still out there — keep exploring to find them.</div>';
+  }
+
+  /* ================= routing ================= */
+  async function route(){
+    if(!sb){ showLocked("✕ BACKEND OFFLINE"); host.innerHTML='<div class="cnote">refresh in a moment_</div>'; return; }
+    var sess=(await sb.auth.getSession()).data.session;
+    updSess(sess);
+    var st = pass ? await rpc('card_status',{card_code:pass}) : {status:'none'};
+    var s = st&&st.status;
+    if(s==='available'){ showGranted(); redeemFlow(sess); }
+    else if(s==='owned'){ showGranted(); boxh.textContent="// YOUR ROOM_"; host.innerHTML=itemCard(st.item,'✓ YOURS'); }
+    else if(s==='taken'){ showLocked("🔒 SEAT TAKEN — THIS PASS IS CLAIMED");
+      boxh.textContent="// PASS STATUS_"; host.innerHTML='<div class="taken">🔒 This pass was already redeemed by another account.</div>'; }
+    else { lockedGate(sess, s==='invalid'); }        // 'invalid' or 'none'
+  }
+
+  /* ---- LOCKED: no valid pass → enter a code, or log in to see your collection ---- */
+  function lockedGate(sess, invalid){
+    showLocked(invalid ? "🔒 PASS NOT RECOGNIZED" : "🔒 ACCESS RESTRICTED — MEMBERS ONLY");
+    boxh.textContent="// ENTER THE FREQUENCY_";
     if(sess){
-      host.innerHTML='<button class="cbtn" id="claimbtn">✦ OPEN MY DROP</button><div class="cnote" id="cmsg" style="margin-top:8px"></div>';
-      $("claimbtn").onclick=doClaim;
-    } else {
-      host.innerHTML='<div class="claim">'
-        +'<input id="cemail" type="email" placeholder="email" autocomplete="email" inputmode="email">'
-        +'<input id="cpass" type="password" placeholder="password (make one)" autocomplete="current-password">'
-        +'<button class="cbtn" id="loginbtn">✦ CLAIM MY DROP</button><div class="cnote" id="cmsg"></div></div>';
-      $("cpass").addEventListener("keydown",function(e){ if(e.key==="Enter") doAuth(); });
-      $("loginbtn").onclick=doAuth;
+      host.innerHTML='<div class="cnote" style="margin-bottom:10px">you\'re signed in.</div>'
+        +'<a class="cbtn" href="inventory/">♟ VIEW MY COLLECTION</a>';
+      return;
     }
+    host.innerHTML='<div class="gate">'
+      +'<div class="sub">Got a pass code from your garment? Enter it:</div>'
+      +'<input id="gcode" placeholder="IBEE-XXXX-0000-XXXX" autocapitalize="characters" autocomplete="off">'
+      +'<button class="cbtn" id="gcodego">▶ UNLOCK WITH CODE</button>'
+      +'<div class="or">OR LOG IN</div>'
+      +'<div class="sub">Already a member? Sign in to see your collection:</div>'
+      +'<input id="gemail" type="email" placeholder="email" autocomplete="email" inputmode="email">'
+      +'<input id="gpass" type="password" placeholder="password" autocomplete="current-password">'
+      +'<button class="cbtn" id="glogin">✦ LOG IN</button>'
+      +'<div class="cnote" id="gmsg"></div></div>';
+    $("gcodego").onclick=function(){ var c=($("gcode").value||'').toUpperCase().trim();
+      if(!c){$("gmsg").textContent='enter your code_';return;} location.search='?pass='+encodeURIComponent(c); };
+    $("gcode").addEventListener("keydown",function(e){ if(e.key==="Enter") $("gcodego").click(); });
+    $("gpass").addEventListener("keydown",function(e){ if(e.key==="Enter") $("glogin").click(); });
+    $("glogin").onclick=async function(){
+      var em=($("gemail").value||'').trim(), pw=$("gpass").value||'';
+      if(!/.+@.+\..+/.test(em)){$("gmsg").textContent='enter your email_';return;}
+      if(pw.length<6){$("gmsg").textContent='password: 6+ characters_';return;}
+      $("glogin").disabled=true;$("gmsg").textContent='…';
+      var si=await sb.auth.signInWithPassword({email:em,password:pw});
+      if(si.error){ $("gmsg").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ wrong email or password_'; $("glogin").disabled=false; return; }
+      location.href='inventory/';
+    };
   }
-  /* instant account: sign up (or log in if the email already exists), then claim right away */
+
+  /* ---- GRANTED + unclaimed: redeem first, then account ---- */
+  function redeemFlow(sess){
+    boxh.textContent="// REDEEM YOUR PASS_";
+    if(sess){ starterPick(); return; }            // already signed in → pick right away
+    host.innerHTML='<div class="cnote" style="margin-bottom:10px">This pass is unclaimed. Redeem it to join the frequency and choose your first room.</div>'
+      +'<button class="cbtn" id="redeembtn">✦ REDEEM THIS PASS</button>';
+    $("redeembtn").onclick=authForm;
+  }
+
+  function authForm(){
+    boxh.textContent="// CREATE YOUR ACCESS_";
+    host.innerHTML='<div class="claim">'
+      +'<div class="cnote" style="text-align:left">One last step — your email + a password. That\'s your account.</div>'
+      +'<input id="cemail" type="email" placeholder="email" autocomplete="email" inputmode="email">'
+      +'<input id="cpass" type="password" placeholder="password (make one, 6+ chars)" autocomplete="new-password">'
+      +'<button class="cbtn" id="loginbtn">✦ JOIN THE FREQUENCY</button><div class="cnote" id="cmsg"></div></div>';
+    $("cpass").addEventListener("keydown",function(e){ if(e.key==="Enter") doAuth(); });
+    $("loginbtn").onclick=doAuth;
+  }
+
+  /* instant account: sign up (or log in if the email already exists), then pick a room */
   async function doAuth(){
     var email=($("cemail").value||'').trim(), pw=($("cpass").value||'');
     if(!/.+@.+\..+/.test(email)){ $("cmsg").textContent='enter your email_'; return; }
@@ -309,27 +398,50 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("loginbtn").disabled=true; $("cmsg").textContent='…';
     await sb.auth.signUp({email:email,password:pw});
     var sess=(await sb.auth.getSession()).data.session;
-    if(!sess){                                   // already registered, or email-confirm is on
+    if(!sess){                                    // already registered, or email-confirm is still ON
       var si=await sb.auth.signInWithPassword({email:email,password:pw});
-      if(si.error){ $("cmsg").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ '+si.error.message; $("loginbtn").disabled=false; return; }
+      if(si.error){
+        $("cmsg").textContent=/confirm/i.test(si.error.message)
+          ? '✉ confirm your email, then reopen this link_'
+          : '✕ that email already exists with a different password_';
+        $("loginbtn").disabled=false; return;
+      }
       sess=(await sb.auth.getSession()).data.session;
     }
-    if(sess){ doClaim(); }                        // logged in → open the drop now
-    else { $("cmsg").textContent='✉ check your email to confirm, then tap CLAIM again_'; $("loginbtn").disabled=false; }
-  }
-  async function doClaim(){
-    var b=$("claimbtn"); if(b)b.disabled=true; if($("cmsg"))$("cmsg").textContent='opening…';
-    var r=await rpc('claim_card',{card_code:pass});
-    if(r.status==='claimed'||r.status==='owned'){
-      if(r.item){ host.innerHTML=itemCard(r.item, r.status==='owned'?'✓ YOURS':'✦ YOU PULLED'); toast('CLAIMED_'); }
-      else host.innerHTML='<div class="cnote">claimed — you already hold everything in the pool_</div>';
-    } else if(r.status==='taken'){ host.innerHTML='<div class="taken">🔒 SEAT TAKEN</div>'; }
-    else if(r.status==='need_login'){ render({status:'available'}, null); }
-    else { if($("cmsg"))$("cmsg").textContent='✕ could not claim ('+(r.error||r.status)+')'; if(b)b.disabled=false; }
+    if(sess){ starterPick(); }
+    else { $("cmsg").textContent='✉ check your email to confirm, then reopen this link_'; $("loginbtn").disabled=false; }
   }
 
-  /* ---- boot sequence → reveal ---- */
-  var msgs=["READING PASS…","VERIFYING SIGNATURE…","MATCHING FREQUENCY…","ACCESS GRANTED"];
+  /* ---- CHOOSE YOUR STARTER ROOM (1 of 3) ---- */
+  function starterPick(){
+    boxh.textContent="// CHOOSE YOUR STARTER ROOM_";
+    var cards=STARTERS.map(function(g){
+      return '<button class="pick" data-id="'+g.id+'"><div class="pico">'+g.ico+'</div>'
+        +'<div class="pn">'+e2(g.name)+'</div><div class="pt">CHOOSE</div></button>';
+    }).join('');
+    host.innerHTML='<div class="cnote" style="margin-bottom:12px">Welcome in. Pick your first room — the other two are out there to discover.</div>'
+      +'<div class="picks">'+cards+'</div><div class="cnote" id="cmsg" style="margin-top:10px"></div>';
+    Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){
+      b.onclick=function(){ pickGame(b.getAttribute('data-id')); };
+    });
+  }
+  async function pickGame(id){
+    Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){b.disabled=true;});
+    var msg=$("cmsg"); if(msg)msg.textContent='opening your room…';
+    var r=await rpc('claim_card_pick',{card_code:pass, want:id});
+    if(r.status==='claimed'||r.status==='owned'){
+      boxh.textContent="// YOUR ROOM_"; host.innerHTML=itemCard(r.item, r.status==='owned'?'✓ YOURS':'✦ ROOM UNLOCKED');
+      toast(r.status==='owned'?'ALREADY YOURS_':'ROOM UNLOCKED_');
+    } else if(r.status==='taken'){ showLocked("🔒 SEAT TAKEN"); host.innerHTML='<div class="taken">🔒 This pass was just claimed by another account.</div>'; }
+    else if(r.status==='need_login'){ authForm(); }
+    else { if(msg)msg.textContent='✕ could not unlock ('+(r.error||r.status)+')'; Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){b.disabled=false;}); }
+  }
+
+  /* re-route only when the session is dropped (sign-in transitions are driven explicitly) */
+  if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') route(); });
+
+  /* ---- boot sequence → reveal → route ---- */
+  var msgs=["READING PASS…","VERIFYING SIGNATURE…","MATCHING FREQUENCY…","STAND BY…"];
   var i=0,bar=$("bootbar"),bl=$("bootl");
   (function step(){
     bl.textContent=msgs[Math.min(i,msgs.length-1)];
@@ -338,9 +450,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     if(i<=msgs.length){ setTimeout(step, i===msgs.length?520:430); }
     else{
       $("boot").classList.add("gone");
-      var st=$("stage"); st.style.visibility="visible";
-      $("powerbar").style.width=Math.min(100, power/9999*100)+"%";
-      mountClaim();
+      $("stage").style.visibility="visible";
+      buildMedal();
+      route();
     }
   })();
 })();
