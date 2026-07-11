@@ -115,21 +115,60 @@
      without racing the shell's tracker, which owns "ibee_badges". */
   var SEEN="ibee_badges_seen";
   function seenMap(){ try{ return JSON.parse(localStorage.getItem(SEEN)||"{}")||{}; }catch(e){ return {}; } }
-  function unseen(){
+
+  /* ---------- typed news ----------
+     Two sources: assets/news-data.js (window.IBEE_NEWS — written in tools/newsroom.html,
+     deployed like any data file) and ibee_auto_news (drops the tracker detects itself:
+     new songs / new galaxies arriving via songs-extra.js).
+     Each entry: {id, t:type, icon, n:title, d:text, date|ts, link}.
+     The type decides WHERE the red dot appears (TARGET below). */
+  var TARGET={badge:"profile",item:"profile",collection:"profile",info:"profile",note:"profile",news:"profile",
+    shop:"shop",drop:"shop",merch:"shop",
+    tv:"tv",video:"tv",channel:"tv",
+    music:"music",song:"music",galaxy:"music"};
+  function autoNews(){ try{ return JSON.parse(localStorage.getItem("ibee_auto_news")||"[]")||[]; }catch(e){ return []; } }
+  function newsAll(){ var a=[]; try{ a=(window.IBEE_NEWS||[]).slice(); }catch(e){} return a.concat(autoNews()); }
+
+  /* the whole unread inbox: unseen badge wins + unseen news, newest first */
+  function inbox(){
+    var s=load(),m=seenMap(),out=[];
+    DEFS.forEach(function(d){ if(s.earned[d.id]&&!m[d.id])
+      out.push({id:d.id,kind:"badge",def:d,icon:d.ico,n:d.n2||d.n,d:d.d,ts:s.earned[d.id],target:"profile"}); });
+    newsAll().forEach(function(x){ if(!x||!x.id||m[x.id]) return;
+      out.push({id:x.id,kind:"news",icon:x.icon||"📰",n:x.n||"NEWS",d:x.d||"",
+        ts:x.ts||(x.date?+new Date(x.date):Date.now()),type:x.t,link:x.link||"",
+        target:TARGET[x.t]||"profile"}); });
+    out.sort(function(a,b){ return b.ts-a.ts; });
+    return out;
+  }
+  function unseen(){ /* kept for compat: badge-only view */
     var s=load(),m=seenMap(),out=[];
     DEFS.forEach(function(d){ if(s.earned[d.id]&&!m[d.id]) out.push({def:d,ts:s.earned[d.id]}); });
     return out;
   }
   function markSeen(id){
     var m=seenMap();
-    if(id==null){ var s=load(); for(var k in s.earned) m[k]=1; } else m[id]=1;
+    if(id==null){ inbox().forEach(function(i){ m[i.id]=1; }); }
+    else m[id]=1;
+    try{ localStorage.setItem(SEEN,JSON.stringify(m)); }catch(e){}
+  }
+  /* per-destination unread tally (drives the red dots on profile/shop/tv/galaxy) */
+  function targetCounts(){
+    var c={profile:0,shop:0,tv:0,music:0};
+    inbox().forEach(function(i){ var t=i.target||"profile"; if(c[t]==null) c.profile++; else c[t]++; });
+    return c;
+  }
+  /* clear one destination's dot — called when the user actually opens that section */
+  function markSeenTarget(target){
+    var m=seenMap();
+    inbox().forEach(function(i){ if((i.target||"profile")===target) m[i.id]=1; });
     try{ localStorage.setItem(SEEN,JSON.stringify(m)); }catch(e){}
   }
 
   /* public: the profile page (and anything else) renders from this */
   window.IBEE_BADGES={defs:DEFS,state:function(){return load();},snapshot:snapshot,
     earned:function(){ var s=load(),n=0; for(var k in s.earned) n++; return n; },
-    unseen:unseen,markSeen:markSeen};
+    unseen:unseen,inbox:inbox,markSeen:markSeen,targetCounts:targetCounts,markSeenTarget:markSeenTarget};
 
   if(!TOP) return;   /* framed copy = catalog only; the shell above is tracking */
 
@@ -156,25 +195,29 @@
     +".bgt.link{cursor:pointer;border-left-color:#26e0ff;box-shadow:0 4px 18px rgba(0,0,0,.6),0 0 16px rgba(38,224,255,.2)}"
     +".bgt.link .bn{color:#26e0ff}.bgt.link:hover{background:rgba(10,16,18,.96)}"
     +".bgt .bxx{flex:none;color:#555;font-size:9px;padding:2px 0 2px 6px;cursor:pointer}.bgt .bxx:hover{color:#fff}"
-    /* unread bubble on the shell's PROFILE / LOG IN pill (iMessage-style) */
-    +"#acct button{position:relative;overflow:visible}"
-    +".bgnum{position:absolute;top:3px;right:3px;min-width:15px;height:15px;border-radius:8px;"
-    +"background:#ff2b2b;color:#fff;font-family:'Press Start 2P',monospace;font-size:7px;"
-    +"display:flex;align-items:center;justify-content:center;padding:0 3px;pointer-events:none;"
-    +"box-shadow:0 0 7px rgba(255,43,43,.8);animation:bgnpop .35s cubic-bezier(.2,1.6,.4,1)}"
+    /* red dot on whichever button the unread belongs to: profile pill, SHOP, TV, galaxy */
+    +"#acct button,#nav button,#buni{position:relative;overflow:visible}"
+    +".ibdot{position:absolute;top:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#ff2b2b;"
+    +"pointer-events:none;box-shadow:0 0 7px rgba(255,43,43,.9);animation:bgnpop .35s cubic-bezier(.2,1.6,.4,1)}"
+    +"#buni .ibdot{top:0;right:0}"
     +"@keyframes bgnpop{0%{transform:scale(0)}100%{transform:scale(1)}}";
   document.head.appendChild(css);
 
-  /* keep the nav pill's unread count honest (shell only — #acct exists there) */
-  function updateNavCount(){
-    var btn=document.getElementById("acctbtn"); if(!btn) return;
-    var n=unseen().length, b=btn.querySelector(".bgnum");
-    if(n>0){
-      if(!b){ b=document.createElement("span"); b.className="bgnum"; btn.appendChild(b); }
-      var txt=n>9?"9+":String(n); if(b.textContent!==txt) b.textContent=txt;
-    } else if(b) b.remove();
+  /* place / clear a red dot on an element (shell only — these ids/attrs exist there) */
+  function dotOn(el,on){
+    if(!el) return;
+    var d=el.querySelector(":scope > .ibdot");
+    if(on){ if(!d){ d=document.createElement("span"); d.className="ibdot"; el.appendChild(d); } }
+    else if(d) d.remove();
   }
-  window.addEventListener("storage",function(ev){ if(ev&&ev.key===SEEN) updateNavCount(); });
+  function placeDots(){
+    var c=targetCounts();
+    dotOn(document.getElementById("acctbtn"), c.profile>0);
+    dotOn(document.querySelector('#nav [data-nav="SHOP"]'), c.shop>0);
+    dotOn(document.querySelector('#nav [data-nav="TV"]'), c.tv>0);
+    dotOn(document.getElementById("buni"), c.music>0);
+  }
+  window.addEventListener("storage",function(ev){ if(ev&&(ev.key===SEEN||ev.key==="ibee_auto_news")) placeDots(); });
   var host=document.createElement("div"); host.id="bgtoasts"; document.body.appendChild(host);
 
   function blipT(){ try{
@@ -211,8 +254,9 @@
       el.querySelector(".bxx").addEventListener("click",function(ev){ev.stopPropagation();bye();});
       el.addEventListener("click",function(){
         bye();
+        var href=t.href; if(!href) return;            /* no destination → tap just dismisses */
         var f=document.getElementById("frame");
-        if(f) f.src="member/?login=1"; else location.href="member/?login=1";
+        if(f) f.src=href; else location.href=href;
       });
     }
     setTimeout(bye,life);
@@ -270,9 +314,57 @@
     if(!promptShown && S.earned["first-signal"] && !S.earned["engine"] && !P.loggedIn && P.listen>=10){
       promptShown=true;
       toast({ico:"🌌",h:"ONE LAST THING",n:"UNLOCK THE UNIVERSE MUSIC ENGINE",
-        d:"a few seconds — sign in & it's yours. tap here_",link:true});
+        d:"a few seconds — sign in & it's yours. tap here_",link:true,href:"member/?login=1"});
     }
     save();
+  }
+
+  /* ---- auto-news: new songs / galaxies arriving via songs-extra.js (IBEE_SONGS_EXTRA).
+     First run seeds a baseline silently; after that, a fresh record/album writes an
+     auto-news entry → toast + a dot on the galaxy button. ---- */
+  var KNOWN="ibee_news_known";
+  function slugify(s){ return String(s||"").toLowerCase().replace(/\.(mp3|wav|m4a)$/,"").trim(); }
+  function detectDrops(){
+    var ex=window.IBEE_SONGS_EXTRA; if(!ex) return;
+    var songs=ex.songs||[], gals=ex.galaxies||[];
+    var known; try{ known=JSON.parse(localStorage.getItem(KNOWN)||"null"); }catch(e){ known=null; }
+    var first=(known===null); if(!known) known={songs:{},galaxies:{}};
+    if(!known.songs) known.songs={}; if(!known.galaxies) known.galaxies={};
+    var auto=autoNews(), changed=false, added=false;
+    songs.forEach(function(s){ var id=slugify(s.f||s.n); if(!id||known.songs[id]) return;
+      known.songs[id]=1; changed=true;
+      if(!first){ auto.push({id:"auto-song-"+id,t:"song",icon:"🎵",n:"NEW SONG",
+        d:(s.n||"a new record")+" just dropped on the radio",date:ymd(),link:"console.html#playing"}); added=true; } });
+    gals.forEach(function(g){ var id=slugify(g.id||g.name); if(!id||known.galaxies[id]) return;
+      known.galaxies[id]=1; changed=true;
+      if(!first){ auto.push({id:"auto-gal-"+id,t:"galaxy",icon:"🌌",n:"NEW GALAXY",
+        d:(g.name||"a new album")+" opened in the universe",date:ymd(),link:"console.html#playing"}); added=true; } });
+    if(changed){ try{ localStorage.setItem(KNOWN,JSON.stringify(known)); }catch(e){} }
+    if(added){ try{ localStorage.setItem("ibee_auto_news",JSON.stringify(auto)); }catch(e){} }
+  }
+
+  /* ---- announce typed news (manual news-data.js + auto drops) as one-time toasts.
+     First run seeds the ledger silently so a freshly-deployed backlog doesn't storm a
+     new visitor — the red dots still show; only genuinely-new items toast afterwards. ---- */
+  var ANN="ibee_news_ann";
+  function hdrFor(t){
+    if(t==="drop"||t==="merch"||t==="shop") return "🛍 NEW IN THE SHOP";
+    if(t==="video"||t==="channel"||t==="tv") return "📺 ON IBEE TV";
+    if(t==="song"||t==="galaxy"||t==="music") return "🌌 NEW ON THE RADIO";
+    return "📣 NEWS";
+  }
+  function announceNews(){
+    var raw; try{ raw=JSON.parse(localStorage.getItem(ANN)||"null"); }catch(e){ raw=null; }
+    var first=(raw===null), a=raw||{}, seen=seenMap();
+    newsAll().forEach(function(x){
+      if(!x||!x.id||a[x.id]) return;
+      a[x.id]=1;
+      if(!first && !seen[x.id]){
+        var tgt=TARGET[x.t]||"profile";
+        toast({ico:x.icon||"📰",h:hdrFor(x.t),n:x.n||"NEWS",d:x.d||"",link:true,href:x.link||"",gold:(tgt==="shop")});
+      }
+    });
+    try{ localStorage.setItem(ANN,JSON.stringify(a)); }catch(e){}
   }
 
   setInterval(function(){
@@ -305,7 +397,9 @@
       }
     }
     check();
-    updateNavCount();
+    detectDrops();
+    announceNews();
+    placeDots();
     ownerGrant();
   },1000);
 })();
