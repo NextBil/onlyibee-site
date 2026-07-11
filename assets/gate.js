@@ -19,7 +19,7 @@
   var css="#ibgate{position:fixed;inset:0;z-index:99999;background:#050507;display:flex;flex-direction:column;"
     +"align-items:center;justify-content:center;gap:16px;text-align:center;padding:28px;font-family:'Press Start 2P',monospace;color:#e8e8e8}"
     +"#ibgate::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}"
-    +"#ibgate .lk{font-size:44px;filter:drop-shadow(0 0 14px rgba(182,255,0,.35))}"
+    +"#ibgate .lk{width:46px;height:46px;color:#ff2b2b;filter:drop-shadow(0 0 12px rgba(255,43,43,.55))}"
     +"#ibgate h2{font-size:15px;color:#b6ff00;letter-spacing:2px;line-height:1.6}"
     +"#ibgate p{font-family:'VT323',monospace;font-size:20px;color:#9a9a9a;max-width:360px;line-height:1.4}"
     +"#ibgate .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}"
@@ -27,8 +27,11 @@
     +"#ibgate a.go{background:#b6ff00;color:#000;border-color:#b6ff00}";
   var st=document.createElement("style"); st.textContent=css; document.head.appendChild(st);
 
+  var LOCK="<svg class='lk' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
+    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
   var ov=document.createElement("div"); ov.id="ibgate";
-  ov.innerHTML='<div class="lk">🔒</div><h2 id="ibgt">CHECKING ACCESS…</h2><p id="ibgp">verifying your pass_</p><div class="row" id="ibgr"></div>';
+  ov.innerHTML=LOCK+'<h2 id="ibgt">CHECKING ACCESS…</h2><p id="ibgp">verifying your pass_</p><div class="row" id="ibgr"></div>';
   function mount(){ if(document.body && !document.getElementById("ibgate")) document.body.appendChild(ov); }
   if(document.body) mount(); else document.addEventListener("DOMContentLoaded",mount);
 
