@@ -37,7 +37,7 @@ Read this before touching anything. Each section says what a file does, how it w
 | `assets/song-meta.js` | `window.IBEE_META` — **the record's soul**: per song `{vibe, meaning, context, took}`. Written in IBEE STUDIO's INFO tab; shown on the lyrics overlay's INFO side. |
 | `assets/lyrics-timed.js` | `window.IBEE_LYRICS_TIMED` — karaoke-synced lyrics (`{t,w}` lines) consumed by **the shell's lyrics overlay** (line highlight + tap-to-seek use real timestamps when present) and `lyrics/index.html`. Exported from IBEE STUDIO's tap-sync. |
 | `assets/songs-extra.js` | `window.IBEE_SONGS_EXTRA` — **new records joining the site with zero code edits**: `{songs:[{f,r,n,hue,g,len}], galaxies:[{id,name,sub,hue}]}`. `player.js` appends the songs to the radio (self-loaded, clock-stamped); `console.html` gives each a planet and each new album a galaxy. **Additive + deduped by filename** — built-in songs always win, so this file can only ever ADD; if it's missing the site is exactly as before. Exported from IBEE STUDIO's RADIO & UNIVERSE card (INFO tab). |
-| `tools/studio.html` | **IBEE STUDIO — the pressing plant.** Local-only (not deployed). Four tabs: **GROOVE** (drop an mp3 → press with genre/vibe knobs → live preview with the site's exact beat math), **LYRICS** (tap-sync DistroKid-style), **INFO** (vibe / meaning / context / time-to-create + **BPM override** + the **RADIO & UNIVERSE card**: ON THE RADIO toggle, COLOR, ALBUM/galaxy incl. founding new albums), **EXPORT** (per-record file list + download deploy-ready `songs-extra.js` / `beat-data.js` / `lyrics-data.js` / `lyrics-timed.js` / `song-meta.js`). Edits persist in the browser until exported. |
+| `tools/studio.html` | **IBEE STUDIO — the pressing plant.** Local-only (not deployed). Four tabs: **GROOVE** (drop an mp3 → press with genre/vibe knobs → live preview with the site's exact beat math), **LYRICS** (tap-sync DistroKid-style), **INFO** (vibe / meaning / context / time-to-create + **BPM override** + the **RADIO & UNIVERSE card**: ON THE RADIO toggle, COLOR, ALBUM/galaxy incl. founding new albums), **EXPORT** (per-record file list + deploy-ready `songs-extra.js` / `beat-data.js` / `lyrics-data.js` / `lyrics-timed.js` / `song-meta.js`, **+ 📦 EXPORT ALL → one `.ibee` bundle per song** with IMPORT to restore). Extras: **cover art** upload per song (data URL → rides in `songs-extra.js` as `cover`, shown on the playbar/planet), **choose save location** on export (`showSaveFilePicker`, falls back to download), and tap-sync that **resumes without erasing** (START/RESUME from the first untimed line, ◀ −5s rewind, click a line to re-tap from there) and **mirrors edits** — change a word in the lyrics box and it updates in the sync list, keeping times. Edits persist in the browser until exported. |
 | `tools/make-beat-data.py` | Batch generator for `beat-data.js` (uses macOS's built-in `afconvert` + python3, no installs). Same algorithm as the studio; handy for re-pressing everything at once. Not part of the deployed site. |
 | `assets/img/` | Logos, album covers, shop image, ICS full-set render. |
 | `assets/audio/20mzs.mp3` | The 20MZS track (streaming quality). `20mzs-raw.mp3` is the higher-quality Vault version. |
@@ -46,7 +46,7 @@ Read this before touching anything. Each section says what a file does, how it w
 | `assets/chess/` | The character chess-piece cutouts (transparent PNGs, 512px tall). |
 | `chess/index.html` | ICS Chess — full chess game with the characters as pieces. See §5. |
 | `lyrics/index.html` | The Lyrics Engine — karaoke-style timed lines + song stories. See §6. |
-| `arcade/` | The **arcade hub** (`arcade/index.html`) plus the beat-runner games in `arcade/runner/` (BEEBEE CITY), `arcade/rush/` (RUN, MIMI), and `arcade/tiles/` (MIMI MUSIC TILES). Covers live in `arcade/covers/`. See §9. |
+| `arcade/` | The **arcade hub** (`arcade/index.html`) plus the beat-runner games in `arcade/runner/` (RUN BEEBEE!), `arcade/rush/` (MIMI GUITAR RUSH), and `arcade/tiles/` (MIMI MUSIC TILES). Covers live in `arcade/covers/`. See §9. |
 | `auth/index.html` | The **access terminal** — the landing/registry for authenticated NFC tags; shows the owner's collection + a site directory and can flip the console's Vault flag. See §10. |
 | `product-page/utopie-hoodie/index.html` | A self-hosted product page (replaces the old Wix hotlink for that item). |
 | `tv/index.html` | **IBEE TV** — a retro CRT set that broadcasts the "ibee tv" YouTube playlist: CH ▲/▼ with static between channels, a programming dial of all videos. The `CHANNELS` array at the top of its script is the whole grid — one line per video. Tuning in pauses the radio. See §11. |
@@ -113,9 +113,11 @@ To **add a real song**: the no-code way is IBEE STUDIO's RADIO & UNIVERSE card �
 
 Mechanics worth knowing:
 - Planets wander with per-planet personality values; when a track plays, the performer floats to center and the rest **orbit** it (`assignOrbits`), pulsing to real audio analysis (`updateAudio` computes `audioBeat`/`audioLevel` from a WebAudio analyser).
-- **Grid mode:** tapping empty void space toggles `gridMode` — planets ease into a grid (`gridSlot`) — tap again to free them.
+- **Grid mode:** tapping empty void space toggles `gridMode` — planets ease into a clean grid (`gridSlot`) — tap again to free them. The grid uses a **fixed generous row pitch and scrolls vertically** (`gridScrollY`/`gridMaxScroll`, `panGrid()`): drag empty space or mouse-wheel to scroll when there are more records than fit the stage. **Columns: phones are locked to a 4-wide grid** (`cols=Math.min(4,n)` in the `narrow` branch); desktop fits to width. In the packed phone grid, `drawPlanet` shrinks each title to its column width and hides the plays counter so they don't overlap.
 - **Ghost performer:** if the site-wide radio is playing one of these songs, the engine shows that planet performing (variable `ghost`) driven by the *radio's* beat — visuals only, no second audio.
-- **On-air galaxy:** in the galaxy picker, the galaxy holding the playing record glows to the song — beat-driven halo, pulse ring, faster spin, colored "▶ ON AIR" label (`drawGalaxies` reads the engine's `audioBeat` or the radio's `beat()`). The music screen's top bar has MENU + **GALAXIES** buttons (the old lyrics-page link is gone; `#topgal` → `exitToGalaxies`).
+- **Galaxy picker scrolls too:** on phones the picker is a comfortable **2-column** grid with a fixed cell height (`ensureGalaxies`), and scrolls vertically (`galScrollY`/`galMaxScroll`, `panGalaxies()` — drag or wheel) when the galaxies don't all fit; `drawGalaxies`/`galaxyAt` apply the scroll offset. Galaxy labels shrink to their column width so they don't overflow into neighbours.
+- **Music-fit (no double scroll):** the music screen adds `body.musicfit` (toggled in `go()`), which makes `#os`/`main`/`#music`/`#engroot` a flex column filling exactly `100dvh`, drops the min-height, hides the console's own header + footer, and sets `overflow:hidden` — so **the page never scrolls, only the engine canvas does**. This avoids two stacked scroll areas (page + canvas). Other screens are unaffected (header back, normal page scroll).
+- **On-air galaxy:** in the galaxy picker, the galaxy holding the playing record glows to the song — beat-driven halo, pulse ring, faster spin, a ▶ marker on the name (`drawGalaxies` reads the engine's `audioBeat` or the radio's `beat()`). Galaxy labels sit on a **dark plate** so they read over the bright starfield. The music screen's top bar has MENU + a **GALAXIES** button (`#topgal`) that **only appears in the planets view** — `enterGalaxy` shows it, `exitToGalaxies` hides it (the galaxy picker itself doesn't need it). The old lyrics-page link is gone.
 - **Playbar** (`#pbar`): tapping the song info (`#pbi`) opens the track list (`#pblist`); tapping outside the bar hides it and shows the pulsing `#pbmini` chip (music continues); `#pblyr` is now the **GALAXIES** button (planet icon → `exitToGalaxies()`; it used to link to the lyrics page). `updEngback()` keeps the GALAXIES back-button above the bar.
 - **Plays persistence:** each play increments `SAV.plays[trackId]` in localStorage key **`ibee_sav`**; planets grow with plays (max 10).
 
@@ -205,13 +207,25 @@ The pixel guitars on the NP page are inline SVG data-URIs (`V` and `S` constants
 
 The games themselves are self-contained pages, each in its own folder:
 
-- `arcade/runner/` — **BEEBEE CITY** (a beat-runner; Beebee runs the punk city to the music).
-- `arcade/rush/` — **RUN, MIMI** (neon-highway dash on the beat).
+- `arcade/runner/` — **RUN BEEBEE!** (a beat-runner; Beebee runs the punk city to the music).
+- `arcade/rush/` — **MIMI GUITAR RUSH** (neon-highway dash on the beat).
 - `arcade/tiles/` — **MIMI MUSIC TILES** (tap lyric tiles on the beat; reads `assets/lyrics-data.js`).
 
 All three include `player.js` (so the radio persists) and the rhythm games pull words from `lyrics-data.js`. The hub's HOME/BACK links point at `../#menu`, which the shell/console boot-skip understands.
 
-**Beat timing (three layers, best available wins):** ① the **impulse layer** — `impOn()`/`impOnset()` read `beat-data.js`'s `imp` string at the playhead and fire on real hits (all three games); ② radio-beat crossings; ③ a metronome locked to the song's `bpm` (`songIV()`). **Music-on-start:** every game starts/resumes the radio when you hit start, so you always play inside the currently-playing record — its words drift through the game, its hits drive the spawns. (Beebee's old lyrics-page link was removed.)
+**Beat timing (three layers, best available wins):** ① the **impulse layer** — `impOn()`/`impOnset()` read `beat-data.js`'s `imp` string at the playhead and fire on real hits (all three games); ② radio-beat crossings; ③ a metronome locked to the song's `bpm` (`songIV()`). (Beebee's old lyrics-page link was removed.)
+
+**JUMP IN LIVE (start mid-song):** each game's start screen has a **`#liveBtn`** ("▶ JUMP IN LIVE / START ON — <song>", label auto-updates to the on-air track) that calls `startGame()` with **no index** — so it does *not* restart the song. The radio keeps playing at its current position and the game's rhythm (impulse read at `audio.currentTime`) and words start **right where the song is now**. Picking a track from the list still restarts that song from 0 (`startGame(i)`). Rush/tiles seed `wordIdx` from `currentTime/duration` so the lyric words match the current moment on a mid-song jump-in; Beebee's `start()` already continues the on-air song. **RETRY keeps the song:** the over-screen RETRY now calls `startGame()` (no index) so the run restarts but the music keeps playing where it is. **MIMI GUITAR RUSH intro:** `startGame` enters `state='intro'` for `INTRO_DUR` (~1.15s) and `drawGuitarIntro()` zooms a neon guitar onto the road (its fretboard = the road) before gameplay. **Cross-frame radio-list close:** each game posts `postMessage('ibee-frame-tap')` to the shell on tap, and the shell closes its open track list on that message (taps inside the iframe never reach the shell's own outside-click handler).
+
+**Beebee sky lyrics:** `drawLyricsBg()` uses **real timestamps from `lyrics-timed.js`** when the song is tap-synced (else spreads the plain `lyrics-data.js` lines across the duration), and **scales each line to fit the screen width** so lines stay centred on phones instead of overflowing both edges. Runner now includes `lyrics-timed.js`.
+
+**Music gate (radio stops → game stops):** all three games freeze when the radio isn't playing. Each loop tracks `musicSeen` (set true once the radio is heard playing during a run) and computes `frozen = playing && musicSeen && !radioPlaying`; while frozen the game skips its update (runner zeroes `step`/`dt`; rush/tiles skip the play block) and draws a "❚❚ MUSIC STOPPED — play the radio to keep going" overlay. It resumes seamlessly when the radio plays again. `musicSeen` resets on each start so a game never freezes before its music has begun (autoplay-blocked starts still run).
+
+**Rush aspect fix:** RUN, MIMI draws in a fixed 900×560 logical space; its `.stage` used a fixed `height:560px` while width shrank on phones, squishing the canvas (and Mimi) horizontally. Now `.stage` uses `aspect-ratio:900/560` (no fixed height) so it scales uniformly at every width. (Tiles is portrait 400×672 and scales via a `transform:scale()` media query — already uniform.)
+
+**Game words follow the song (`pickWord`/`timedWords`):** rush and tiles no longer advance an independent word counter (which drifted). Each spawn calls `pickWord(look)` which, if the song has tap-synced lyrics (`lyrics-timed.js`), builds a per-word timeline (splitting each timed line across its duration) and returns the word being sung `look` seconds ahead (0.9s rush / 1.0s tiles, ≈ the obstacle travel time so it lands on the hit line in sync); otherwise it falls back to the plain `lyrics-data.js` words indexed by `currentTime/duration`. Both games now include `lyrics-timed.js`. So the game words track the website's lyrics for the current song position.
+
+**Menus scroll on phones:** the rush aspect fix made its `.stage` short, and both games' menus lived *inside* the clipped `overflow:hidden` stage — so on phones they were cut off with no scroll. **Rush:** the `.ov` overlays are now `position:fixed;inset:0;overflow-y:auto` full-screen (the `#wrap transform` was removed so fixed is viewport-relative), and the song grid drops to 2 columns under 620px with `minmax(0,1fr)`+`min-width:0` so long names truncate instead of overflowing. **Tiles:** the `.overlay` got `overflow-y:auto` + `justify-content:safe center` and the song list lost its inner `max-height` cap, so the whole menu scrolls within the stage. Both use `justify-content:safe center` so content centers when it fits and never clips the top when it doesn't.
 
 ## 10. `auth/` — the access terminal, and product pages
 
@@ -248,11 +262,41 @@ A retro CRT television (`IBEETRON 2000`) that broadcasts the **"ibee tv" YouTube
 - **Fix a wrong auto-BPM:** studio → INFO tab → BPM OVERRIDE → SAVE → re-export `beat-data.js` (override wins over the machine's guess).
 - **Add a TV channel:** one `{id:"youtubeId", t:"TITLE"}` line in the `CHANNELS` array in `tv/index.html`.
 - **Add overlay / rhythm-game lyrics:** add a `"filename.mp3": ["line", …]` entry to **`assets/lyrics-data.js`** (or SAVE WORDS in the studio and export). This feeds the shell's LYRICS overlay and the arcade tile game (separate from the timed map above).
+- **Add a cover picture to a song:** studio → INFO tab → RADIO & UNIVERSE card → ADD PICTURE → SAVE RADIO/UNIVERSE → export `songs-extra.js` (the image ships inside it as `cover`).
+- **Back up / move one song:** studio → EXPORT tab → 📦 EXPORT ALL → one `.ibee` file (groove+words+timing+info+cover); IMPORT A SONG FILE restores it.
 - **Press / re-press a groove with a vibe:** `tools/studio.html` → GROOVE tab → drop the mp3 → pick TRAP/SOUL/PUNK/AMBIENT or tweak the knobs → PRESS → preview → SAVE → EXPORT `beat-data.js` → upload it (auto-refreshes, no bump).
 - **Add a shop item:** one entry in the `SHOP` array in **`console.html`**.
 - **Add an arcade game:** create `arcade/<slug>/index.html`, add a cover to `arcade/covers/`, add one entry to the `GAMES` array in `arcade/index.html`.
 - **Unlock a Vault-of-Objects slot:** edit `utopie/index.html`, remove `locked` from the slot, swap the image/name/description.
 - **New character page:** copy an existing character folder, change the name/role/rarity/color/video paths, convert the video to mp4, add the video to `assets/cert/`.
 - **Change the site colors:** edit the `:root` variables at the top of each file (they're duplicated per page deliberately — pages can theme themselves, e.g. Nouveaux Punk runs red). The shell (`index.html`) has its own `:root` too.
+
+---
+
+## 14. `member/` — the member system (Supabase accounts + card claims)
+
+`member/index.html` is the **MEMBER ACCESS terminal** — the page an NFC garment tag opens (`onlyibee.com/member/?pass=IBEE-DROP-0007-9F2A`). It is **gated**: it is NOT a "everyone's a member" page.
+
+**States (driven by the live DB, `card_status(pass)`):**
+- **No pass / unrecognized code → LOCKED (red).** Red banner "ACCESS RESTRICTED / PASS NOT RECOGNIZED", locked 🔒, red glow (`--hue:0`). Shows a gate: **enter a pass code** (→ reloads with `?pass=`) *or* **log in** (returning members go to their collection). No member card, no fake stats. This is the default at bare `onlyibee.com/member`.
+- **Valid unclaimed pass → GRANTED (green).** "✓ ACCESS GRANTED", open lock feel, spinning **monster head** medallion, the green member card (rank/codename/power derived from the pass hash), recruit box. Flow: **REDEEM THIS PASS → email + password → CHOOSE YOUR STARTER ROOM (1 of 3 games)**. Pokémon-style: pick RUN BEEBEE **or** MIMI GUITAR RUSH **or** MIMI MUSIC TILES; the other two are found later.
+- **Already yours → GRANTED**, shows the room you picked + ENTER link.
+- **Claimed by someone else → LOCKED**, "SEAT TAKEN".
+
+**Backend = Supabase** (`hloxwicoeahczifshyoe.supabase.co`; the `anon` key is public by design — safety is the RLS-locked `cards` table + `security definer` functions, not key secrecy). Schema + functions live in **`member/setup.sql`** (run it in Supabase → SQL Editor). Tables: `items` (loot catalog — 3 games + 4 environment "rooms", readable), `inventory` (what each account owns, own-rows RLS), `cards` (one row per physical NFC chip, **no RLS policies — access only through the functions**). Functions: `card_status(code)`, `claim_card(code)` (legacy random draw), **`claim_card_pick(code, want)`** (the starter pick — validates `want` is an active `type='game'` item, claims the card once atomically, grants the chosen room), `my_inventory()`, `owns(item)`.
+
+**`member/inventory/index.html`** is MY COLLECTION — logs in, calls `my_inventory()`, renders every catalog item as a spinning 3D artifact (owned = revealed, unowned = grey "?"). Shapes are inline-SVG data-URIs keyed by item id (`SHAPES`).
+
+**The monster medallion:** loads `assets/img/monster.png` (tries `monster-head.png` / `.PNG` too), else draws an SVG fallback head. **Drop the transparent PNG at exactly `assets/img/monster.png`.**
+
+### Operator checklist (what a human must do — the page can't)
+1. **Supabase → run `member/setup.sql`** (loads tables + functions incl. `claim_card_pick`).
+2. **Supabase → Authentication → turn OFF "Confirm email".** With it ON, sign-up returns no session and the claim shows "Invalid credentials" — the instant email+password claim REQUIRES autoconfirm.
+3. **Load cards:** `tools/card-factory.html` → mint a batch → paste its SUPABASE SQL tab into Supabase (registers the chips as unclaimed) → burn the NFC URLs. Until a code exists in `cards`, every pass reads "not recognized".
+4. **Deploy `assets/img/monster.png`.**
+
+*Tools:* `tools/card-factory.html` mints codes `IBEE-DROP-SERIAL-RAND4` + the NFC URLs + the batch SQL. Not deployed. See `member/SUPABASE-SETUP.md`.
+
+---
 
 *Written by the original build process — keep this file updated when the architecture changes.*
