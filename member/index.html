@@ -385,15 +385,19 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         +'<a class="cbtn" href="inventory/">♟ VIEW MY COLLECTION</a>';
       return;
     }
-    host.innerHTML='<div class="gate">'
-      +'<div class="sub">Got a pass code from your garment? Enter it:</div>'
+    /* came from the shell's LOG IN button (?login=1) → lead with the login form; otherwise lead with the code */
+    var loginFirst = !!param("login");
+    var codeBlock='<div class="sub">Got a pass code from your garment? Enter it:</div>'
       +'<input id="gcode" placeholder="IBEE-XXXX-0000-XXXX" autocapitalize="characters" autocomplete="off">'
-      +'<button class="cbtn" id="gcodego">▶ UNLOCK WITH CODE</button>'
-      +'<div class="or">OR LOG IN</div>'
-      +'<div class="sub">Already a member? Sign in to see your collection:</div>'
+      +'<button class="cbtn" id="gcodego">▶ UNLOCK WITH CODE</button>';
+    var loginBlock='<div class="sub">Already a member? Sign in to see your collection:</div>'
       +'<input id="gemail" type="email" placeholder="email" autocomplete="email" inputmode="email">'
       +'<input id="gpass" type="password" placeholder="password" autocomplete="current-password">'
-      +'<button class="cbtn" id="glogin">✦ LOG IN</button>'
+      +'<button class="cbtn" id="glogin">✦ LOG IN</button>';
+    host.innerHTML='<div class="gate">'
+      +(loginFirst
+        ? loginBlock+'<div class="or">OR UNLOCK WITH A CODE</div>'+codeBlock
+        : codeBlock+'<div class="or">OR LOG IN</div>'+loginBlock)
       +'<div class="cnote" id="gmsg"></div></div>';
     $("gcodego").onclick=function(){ var c=($("gcode").value||'').toUpperCase().trim();
       if(!c){$("gmsg").textContent='enter your code_';return;} location.search='?pass='+encodeURIComponent(c); };
