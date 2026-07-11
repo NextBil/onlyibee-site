@@ -134,43 +134,39 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <div class="ped"></div>
 
   <div class="mcard crtin">
-    <div class="tag">// MEMBER OF THE FREQUENCY_</div>
     <div class="rank" id="rank">—</div>
-    <div id="codename" style="font-family:var(--px);font-size:11px;color:hsl(var(--hue),95%,72%);letter-spacing:1px;margin-top:6px">CODENAME · —</div>
-    <div class="tag" id="subrank" style="margin-top:6px">the signal recognizes you_</div>
+    <div id="codename" style="font-family:var(--px);font-size:11px;color:hsl(var(--hue),95%,72%);letter-spacing:1px;margin-top:6px">—</div>
     <div class="code" id="code" title="tap to copy">————</div>
     <div class="stats">
       <div class="stat"><div class="k">RARITY</div><div class="v" id="rarity">—</div></div>
-      <div class="stat"><div class="k">POWER LEVEL</div><div class="v" id="power">—</div>
+      <div class="stat"><div class="k">POWER</div><div class="v" id="power">—</div>
         <div class="powerwrap"><i id="powerbar"></i></div></div>
     </div>
   </div>
 
   <div class="box crtin">
-    <div class="h">// RECRUIT — YOUR SIGNAL_</div>
-    <p>Share your pass. Every head you turn onto the frequency levels you up — first access to drops, rarer status.</p>
-    <div class="reflink">
-      <input id="ref" readonly value="">
-      <button id="copyref">COPY</button>
-    </div>
-    <a class="share" id="shareref" href="#">▶ SHARE THE FREQUENCY</a>
-    <div class="refby" id="refby" style="display:none"></div>
-  </div>
-
-  <div class="box crtin">
     <div class="h">// OPEN YOUR PASS_</div>
-    <p>Claim this pass to pull what's inside — it lands in your inventory forever. One pass, one claim.</p>
     <div id="regbox"><div class="cnote">connecting…</div></div>
     <div class="cnote" id="sessline" style="margin-top:10px;font-size:15px"></div>
   </div>
 
+  <div class="box crtin">
+    <div class="h">// RECRUIT_</div>
+    <div class="reflink">
+      <input id="ref" readonly value="">
+      <button id="copyref">COPY</button>
+    </div>
+    <a class="share" id="shareref" href="#">▶ SHARE — every friend who joins levels you up</a>
+    <div class="refby" id="refby" style="display:none"></div>
+  </div>
+
   <div class="actions">
-    <a class="btn solid" href="../#music">▶ ENTER THE UNIVERSE</a>
+    <a class="btn solid" href="../#music">▶ THE UNIVERSE</a>
     <a class="btn" href="inventory/">♟ MY COLLECTION</a>
   </div>
 </main>
 
-<footer>© ONLYIBEE — THE FREQUENCY · YOUR PASS IS YOURS ALONE</footer>
+<footer>© ONLYIBEE — THE FREQUENCY</footer>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -245,7 +241,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   /* ---- fill the card ---- */
   $("rank").textContent=T.n;
   $("codename").textContent="CODENAME · "+codename;
-  $("subrank").textContent=T.sub;
   $("code").textContent=pass;
   $("rarity").textContent=T.n;
   $("power").textContent=power.toLocaleString();
@@ -298,18 +293,29 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       host.innerHTML='<button class="cbtn" id="claimbtn">✦ OPEN MY DROP</button><div class="cnote" id="cmsg" style="margin-top:8px"></div>';
       $("claimbtn").onclick=doClaim;
     } else {
-      host.innerHTML='<div class="claim"><div class="cnote">make your account to open this pass — we email a magic link, no password.</div>'
-        +'<input id="cemail" type="email" placeholder="your email" autocomplete="email" inputmode="email">'
-        +'<button class="cbtn" id="loginbtn">▶ CLAIM MY DROP</button><div class="cnote" id="cmsg"></div></div>';
-      $("loginbtn").onclick=doLogin;
+      host.innerHTML='<div class="claim">'
+        +'<input id="cemail" type="email" placeholder="email" autocomplete="email" inputmode="email">'
+        +'<input id="cpass" type="password" placeholder="password (make one)" autocomplete="current-password">'
+        +'<button class="cbtn" id="loginbtn">✦ CLAIM MY DROP</button><div class="cnote" id="cmsg"></div></div>';
+      $("cpass").addEventListener("keydown",function(e){ if(e.key==="Enter") doAuth(); });
+      $("loginbtn").onclick=doAuth;
     }
   }
-  async function doLogin(){
-    var email=($("cemail").value||'').trim(); if(!/.+@.+\..+/.test(email)){ $("cmsg").textContent='enter a valid email_'; return; }
-    $("loginbtn").disabled=true; $("cmsg").textContent='sending…';
-    var r=await sb.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});
-    $("cmsg").textContent=r.error?('✕ '+r.error.message):'✉ check your email — tap the link, you\'ll land back here to open your drop';
-    $("loginbtn").disabled=false;
+  /* instant account: sign up (or log in if the email already exists), then claim right away */
+  async function doAuth(){
+    var email=($("cemail").value||'').trim(), pw=($("cpass").value||'');
+    if(!/.+@.+\..+/.test(email)){ $("cmsg").textContent='enter your email_'; return; }
+    if(pw.length<6){ $("cmsg").textContent='password: 6+ characters_'; return; }
+    $("loginbtn").disabled=true; $("cmsg").textContent='…';
+    await sb.auth.signUp({email:email,password:pw});
+    var sess=(await sb.auth.getSession()).data.session;
+    if(!sess){                                   // already registered, or email-confirm is on
+      var si=await sb.auth.signInWithPassword({email:email,password:pw});
+      if(si.error){ $("cmsg").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ '+si.error.message; $("loginbtn").disabled=false; return; }
+      sess=(await sb.auth.getSession()).data.session;
+    }
+    if(sess){ doClaim(); }                        // logged in → open the drop now
+    else { $("cmsg").textContent='✉ check your email to confirm, then tap CLAIM again_'; $("loginbtn").disabled=false; }
   }
   async function doClaim(){
     var b=$("claimbtn"); if(b)b.disabled=true; if($("cmsg"))$("cmsg").textContent='opening…';

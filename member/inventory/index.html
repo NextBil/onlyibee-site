@@ -141,15 +141,20 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   function renderLogin(show){
     if(!show){ $("loginbox").innerHTML=''; return; }
     $("loginbox").innerHTML='<div class="login"><div class="h">// LOG IN TO REVEAL YOUR COLLECTION_</div>'
-      +'<p>same account you claim passes with — magic link, no password.</p>'
-      +'<input id="em" type="email" placeholder="your email" inputmode="email" autocomplete="email">'
-      +'<button id="go">▶ SEND MY LINK</button><div class="msg" id="m"></div></div>';
+      +'<input id="em" type="email" placeholder="email" inputmode="email" autocomplete="email">'
+      +'<input id="pw" type="password" placeholder="password" autocomplete="current-password" style="margin-bottom:8px">'
+      +'<button id="go">▶ ENTER</button><div class="msg" id="m"></div></div>';
+    $("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") $("go").click(); });
     $("go").onclick=async function(){
-      var em=($("em").value||'').trim(); if(!/.+@.+\..+/.test(em)){$("m").textContent='enter a valid email_';return;}
-      $("go").disabled=true;$("m").textContent='sending…';
-      var r=await sb.auth.signInWithOtp({email:em,options:{emailRedirectTo:location.href}});
-      $("m").textContent=r.error?('✕ '+r.error.message):'✉ check your email — tap the link to come back unlocked';
-      $("go").disabled=false;
+      var em=($("em").value||'').trim(), pw=($("pw").value||'');
+      if(!/.+@.+\..+/.test(em)){$("m").textContent='enter your email_';return;}
+      if(pw.length<6){$("m").textContent='password: 6+ characters_';return;}
+      $("go").disabled=true;$("m").textContent='…';
+      await sb.auth.signUp({email:em,password:pw});
+      var sess=(await sb.auth.getSession()).data.session;
+      if(!sess){ var si=await sb.auth.signInWithPassword({email:em,password:pw});
+        if(si.error){$("m").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ '+si.error.message;$("go").disabled=false;return;} }
+      /* onAuthStateChange re-runs boot() and reveals the collection */
     };
   }
 
