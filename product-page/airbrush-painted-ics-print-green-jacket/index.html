@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- ===== favicon (bishop 1) ===== -->
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Airbrush Painted ICS Green Jacket — 1 of 1 | ONLY IBEE</title>
+<meta name="description" content="Airbrush Painted Green Jacket by ONLY IBEE — hand-cut ICS Cow print stencil, airbrushed by hand, made once. Archive piece. Every garment carries an NFC tag behind the monster head.">
+<!-- social share = the real piece -->
+<meta property="og:type" content="product">
+<meta property="og:title" content="Airbrush Painted ICS Green Jacket — 1 of 1">
+<meta property="og:description" content="Hand-cut ICS Cow print stencil, airbrushed by hand, made once. Archive piece.">
+<meta property="og:image" content="https://static.wixstatic.com/media/0fcae7_45eb9a693dd2428c92b05040e835208c~mv2.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://static.wixstatic.com/media/0fcae7_45eb9a693dd2428c92b05040e835208c~mv2.png">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--border:#2a2a2a;
+  --green:#3f6b2e;--cream:#e8e4cf;   /* the jacket: forest green + cow-print cream */
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);
+  font-family:var(--px);font-size:10px;position:relative;z-index:50;
+}
+header a{color:var(--acid);text-decoration:none}
+header a .r{color:var(--red)}
+header span{color:var(--dim);font-size:8px}
+main{
+  flex:1;width:100%;max-width:640px;padding:26px 18px 54px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  animation:crtin .3s ease-out;text-align:center;position:relative;z-index:2;
+}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+.sys{font-family:var(--px);font-size:9px;color:var(--dim);letter-spacing:1px}
+
+/* ---------- archive display: the real piece, floating in a retro-futuristic frame ---------- */
+.stage{position:relative;width:min(340px,82vw);height:min(360px,86vw);margin-top:4px;
+  display:flex;align-items:center;justify-content:center}
+/* rotating conic "scanner" ring behind the piece */
+.stage .ring{position:absolute;width:112%;height:112%;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0 78%,rgba(182,255,0,.5) 88%,transparent 100%);
+  filter:blur(2px);animation:spin 5.5s linear infinite;opacity:.7}
+.stage .ring.r2{width:96%;height:96%;animation-duration:8s;animation-direction:reverse;
+  background:conic-gradient(from 0deg,transparent 0 82%,rgba(232,228,207,.45) 92%,transparent 100%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.frame{position:relative;width:100%;height:100%;border:1px solid #2c3a22;
+  background:radial-gradient(ellipse at 50% 40%,rgba(63,107,46,.22),rgba(7,7,7,.9) 72%);
+  box-shadow:0 0 0 1px #1a2413, inset 0 0 40px rgba(0,0,0,.7), 0 0 34px rgba(63,107,46,.35);
+  display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* corner brackets — the "targeting" HUD */
+.frame::before,.frame::after{content:"";position:absolute;width:22px;height:22px;border:2px solid var(--acid);opacity:.8}
+.frame::before{top:8px;left:8px;border-right:0;border-bottom:0}
+.frame::after{bottom:8px;right:8px;border-left:0;border-top:0}
+.piece{width:88%;height:88%;object-fit:contain;image-rendering:auto;
+  filter:drop-shadow(0 10px 24px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(182,255,0,.12));
+  animation:bob 4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.scanbar{position:absolute;left:6px;right:6px;height:2px;background:linear-gradient(90deg,transparent,var(--acid),transparent);
+  opacity:.55;animation:scan 3.2s ease-in-out infinite;box-shadow:0 0 10px var(--acid)}
+@keyframes scan{0%,100%{top:12%}50%{top:86%}}
+
+/* ---------- spinning ICS emblem (the green circle badge, made 3D) ---------- */
+.emblem{perspective:400px;width:64px;height:64px;margin:-6px auto 2px}
+.emblem .e3{width:100%;height:100%;transform-style:preserve-3d;animation:spinY 4.5s linear infinite}
+@keyframes spinY{to{transform:rotateY(360deg)}}
+.emblem .e3 img{position:absolute;inset:0;width:100%;height:100%}
+
+h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:2px;line-height:1.9;
+  color:var(--cream);text-shadow:0 0 16px rgba(232,228,207,.35)}
+.brandline{font-family:var(--px);font-size:10px;color:var(--dim);letter-spacing:2px}
+.brandline .a{color:var(--acid)}
+
+.priceline{font-family:var(--px);font-size:14px;color:var(--ink);letter-spacing:1px;margin-top:4px}
+.priceline s{color:var(--dim)}
+#verify{font-family:var(--px);font-size:clamp(11px,3.4vw,15px);letter-spacing:2px;color:var(--dim);min-height:22px;margin-top:6px}
+#verify.ok{color:var(--acid);text-shadow:0 0 16px rgba(182,255,0,.65);
+  animation:stamp .5s cubic-bezier(.2,2.2,.4,1) both}
+@keyframes stamp{0%{transform:scale(2.4) rotate(-6deg);opacity:0}60%{transform:scale(.95) rotate(1deg);opacity:1}100%{transform:scale(1)}}
+.chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.chip{font-family:var(--px);font-size:8px;padding:7px 10px;border:1px solid var(--border);color:var(--dim)}
+.chip.g{color:#8fd06a;border-color:#3f6b2e}
+.chip.a{color:var(--acid);border-color:var(--acid)}
+.chip.r{color:var(--red);border-color:var(--red)}
+
+.card{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);
+  padding:16px 18px;text-align:left;font-size:21px;line-height:1.55;color:#c9c9c9;margin-top:12px}
+.card .h{font-family:var(--px);font-size:9px;color:#8fd06a;margin-bottom:10px;letter-spacing:1px}
+.card p{margin-bottom:12px}.card p:last-child{margin-bottom:0}
+.card .a{color:var(--acid)}
+.card ul{list-style:none;margin:2px 0 0}
+.card li{padding-left:16px;position:relative;margin-bottom:6px;font-size:19px}
+.card li::before{content:"▸";position:absolute;left:0;color:#8fd06a}
+.fine{font-size:16px;color:var(--dim);line-height:1.5}
+
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.btn{font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;background:var(--acid);color:#000;border:1px solid var(--acid)}
+.btn.alt{background:transparent;color:var(--cream);border:1px solid #4a4638}
+.btn.g{background:transparent;color:#8fd06a;border:1px solid #3f6b2e}
+.btn:active{transform:translateY(2px)}
+footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>PRODUCT.SYS</span>
+</header>
+
+<main>
+  <div class="sys">// ARCHIVE RECORD — AUTHENTICITY CHECK_</div>
+
+  <div class="stage">
+    <div class="ring"></div><div class="ring r2"></div>
+    <div class="frame">
+      <img class="piece" alt="Airbrush Painted ICS Cow-print Green Jacket by ONLY IBEE"
+        src="https://static.wixstatic.com/media/0fcae7_45eb9a693dd2428c92b05040e835208c~mv2.png">
+      <div class="scanbar"></div>
+    </div>
+  </div>
+  <div class="emblem"><div class="e3" id="emblem"></div></div>
+
+  <h1>AIRBRUSH PAINTED<br>ICS GREEN JACKET</h1>
+  <div class="brandline">ONLY IBEE · <span class="a">HAND-MADE</span> · ICS COW PRINT</div>
+
+  <div class="priceline">€100.00</div>
+  <div id="verify">SCANNING…</div>
+  <div class="chips">
+    <span class="chip a">✓ REAL — VERIFIED</span>
+    <span class="chip g">1 OF 1</span>
+    <span class="chip r">ARCHIVE — SOLD OUT</span>
+  </div>
+
+  <div class="card">
+    <div class="h">// THIS PIECE_</div>
+    <p>Airbrush painted, <span class="a">hand-cut ICS Cow print stencil</span>. Each piece is unique and made only once — this one has already found its owner.</p>
+    <p>Forest-green track jacket, cow-print sleeves and trim, the ICS emblem on the chest. Sprayed and cut by hand in the studio, not printed, not repeated.</p>
+  </div>
+
+  <div class="card">
+    <div class="h">// THE MONSTER HEAD 👾_</div>
+    <p>Every ONLY IBEE garment hides an <span class="a">NFC tag behind the red monster head</span>. Scan it to:</p>
+    <ul>
+      <li>See exclusive info about your item</li>
+      <li>Check if it's <span class="a">real or fake</span></li>
+      <li>Find the number you got from the limited drop</li>
+      <li>If it's a chess character — check your rarity &amp; power level ♟️</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="h">// TERMS_</div>
+    <p class="fine">Worldwide shipping ✈️ collected upon purchase. Each piece is unique — <span class="a">all sales final</span>. Returns only for damaged or defective items. Review your selection carefully before checkout.</p>
+  </div>
+
+  <div class="actions">
+    <a class="btn" href="../../auth/">▶ SCAN / VERIFY MY TAG</a>
+    <a class="btn g" href="../../#ics">♟ SEE THE ICS CHARACTERS</a>
+    <a class="btn alt" href="../../#shop">☂ THE SHOP</a>
+  </div>
+  <div class="sys" style="margin-top:14px">SOLD OUT — want first access to the next drop? tap <b style="color:var(--acid)">SCAN / VERIFY</b> and join the frequency_</div>
+</main>
+
+<footer>© ONLYIBEE — ICS™ · EACH PIECE UNIQUE · MADE ONCE</footer>
+
+<script>
+(function(){
+  "use strict";
+  /* 3D-spun ICS emblem — the green chest badge, stacked into fake voxel depth */
+  var E="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%233f6b2e' stroke='%23e8e4cf' stroke-width='1'/%3E%3Cpath d='M9 8 Q12 6 15 8 Q13.5 10 12 10 Q10.5 10 9 8 Z M8.5 13 Q12 11.5 15.5 13 Q15 16 12 16.5 Q9 16 8.5 13 Z' fill='%23e8e4cf'/%3E%3Ccircle cx='12' cy='12' r='1.4' fill='%23b6ff00'/%3E%3C/svg%3E";
+  var zs=[-3,-1.6,-0.4,0.8,2,3.2],html="";
+  zs.forEach(function(z,i){var front=(i===zs.length-1);
+    html+='<img src="'+E+'" alt="'+(front?'ICS emblem':'')+'" style="transform:translateZ('+z+'px)'+(front?'':';filter:brightness(.5)')+'">';});
+  document.getElementById("emblem").innerHTML=html;
+
+  /* scan → verified stamp */
+  setTimeout(function(){var v=document.getElementById("verify");
+    v.textContent="✓ VERIFIED — REAL PIECE";v.classList.add("ok");},2200);
+})();
+</script>
+<script src="../../assets/player.js?v=13"></script>
+</body>
+</html>

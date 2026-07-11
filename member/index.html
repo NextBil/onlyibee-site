@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>MEMBER ACCESS — THE FREQUENCY | ONLY IBEE</title>
+<meta name="description" content="ONLY IBEE member access. Scan your garment's monster head to enter the frequency.">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --hue:88;                                  /* recolored per member rank */
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+/* animated starfield tint by rank */
+.bgglow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 22%,hsla(var(--hue),90%,45%,.16),transparent 60%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-direction:column;
+  align-items:center;gap:14px;text-align:center;position:relative;z-index:2}
+
+/* ---------- boot / authenticating ---------- */
+#boot{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;font-family:var(--px);padding:24px;text-align:center}
+#boot.gone{opacity:0;pointer-events:none;transition:opacity .5s}
+#boot .lock{font-size:44px;color:var(--dim);filter:drop-shadow(0 0 10px rgba(0,0,0,.6))}
+#boot .l{font-size:10px;color:var(--acid);letter-spacing:2px;min-height:16px}
+#boot .bar{width:min(260px,70vw);height:10px;border:1px solid var(--border);padding:1px}
+#boot .bar i{display:block;height:100%;width:0;background:var(--acid);box-shadow:0 0 10px var(--acid)}
+
+.crtin{animation:crtin .35s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
+.granted{font-family:var(--px);font-size:clamp(11px,3.2vw,14px);letter-spacing:2px;color:hsl(var(--hue),95%,68%);
+  text-shadow:0 0 16px hsla(var(--hue),95%,55%,.6)}
+
+/* ---------- spinning 3D member medallion ---------- */
+.stage{perspective:640px;width:min(230px,60vw);height:min(230px,60vw);margin-top:4px}
+.o3{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:spin 6s linear infinite}
+@keyframes spin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
+.o3 img{position:absolute;inset:0;width:100%;height:100%}
+.ped{width:150px;height:26px;border-radius:50%;margin:-6px auto 6px;
+  background:radial-gradient(ellipse,hsla(var(--hue),95%,55%,.5),transparent 70%);animation:pulse 3.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scaleX(1);opacity:.85}50%{transform:scaleX(.7);opacity:.4}}
+
+/* ---------- member card ---------- */
+.mcard{width:100%;border:2px solid hsla(var(--hue),60%,45%,.6);background:rgba(10,10,12,.92);
+  padding:18px;margin-top:6px;box-shadow:0 0 26px hsla(var(--hue),90%,45%,.18),inset 0 0 40px rgba(0,0,0,.6);position:relative}
+.mcard .tag{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px}
+.mcard .rank{font-family:var(--px);font-size:clamp(16px,5.4vw,26px);color:hsl(var(--hue),95%,70%);
+  text-shadow:0 0 18px hsla(var(--hue),95%,55%,.55);margin:8px 0 2px;letter-spacing:2px}
+.mcard .code{font-family:var(--px);font-size:12px;color:var(--ink);letter-spacing:2px;cursor:pointer;margin-top:8px}
+.mcard .code:hover{color:var(--acid)}
+.stats{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.stat{flex:1;min-width:120px;border:1px solid var(--border);padding:9px}
+.stat .k{font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px}
+.stat .v{font-family:var(--px);font-size:14px;color:hsl(var(--hue),95%,70%);margin-top:6px}
+.powerwrap{height:8px;border:1px solid var(--border);margin-top:8px;padding:1px}
+.powerwrap i{display:block;height:100%;width:0;background:hsl(var(--hue),95%,55%);box-shadow:0 0 8px hsla(var(--hue),95%,55%,.7);transition:width 1.4s ease}
+
+/* ---------- referral / recruit ---------- */
+.box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:16px 18px;text-align:left;margin-top:14px}
+.box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
+.box p{color:#bdbdbd;font-size:19px;line-height:1.5;margin-bottom:10px}
+.reflink{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.reflink input{flex:1;min-width:160px;background:#050505;border:1px solid var(--border);color:var(--acid);
+  font-family:var(--vt);font-size:17px;padding:10px}
+.reflink button,.share{font-family:var(--px);font-size:9px;padding:0 14px;background:var(--acid);color:#000;border:1px solid var(--acid);cursor:pointer}
+.share{padding:12px 14px;margin-top:8px;display:inline-block;text-decoration:none;background:transparent;color:var(--cyan);border-color:#123a44}
+.refby{font-family:var(--px);font-size:8px;color:var(--gold);margin-top:10px}
+
+/* ---------- register (Tally) ---------- */
+#regbox{width:100%;margin-top:10px;min-height:60px}
+#regbox iframe{width:100%;border:0;background:transparent}
+.regph{border:1px dashed var(--border);padding:16px;color:var(--dim);font-family:var(--px);font-size:8px;line-height:1.8;text-align:center}
+
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.btn{font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;background:transparent;color:var(--acid);border:1px solid var(--acid)}
+.btn.solid{background:var(--acid);color:#000}
+.btn:active{transform:translateY(2px)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--acid);
+  color:var(--acid);font-family:var(--px);font-size:9px;padding:10px 16px;z-index:9500;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+</style>
+</head>
+<body>
+<div class="bgglow"></div>
+<header>
+  <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>MEMBER.SYS</span>
+</header>
+
+<!-- boot: authenticating the pass -->
+<div id="boot">
+  <div class="lock">🔒</div>
+  <div class="l" id="bootl">READING PASS…</div>
+  <div class="bar"><i id="bootbar"></i></div>
+</div>
+
+<main id="stage" style="visibility:hidden">
+  <div class="granted crtin" id="grant">✓ ACCESS GRANTED — WELCOME TO THE FREQUENCY</div>
+
+  <div class="stage"><div class="o3" id="medal"></div></div>
+  <div class="ped"></div>
+
+  <div class="mcard crtin">
+    <div class="tag">// MEMBER OF THE FREQUENCY_</div>
+    <div class="rank" id="rank">—</div>
+    <div class="tag" id="subrank">the signal recognizes you_</div>
+    <div class="code" id="code" title="tap to copy">————</div>
+    <div class="stats">
+      <div class="stat"><div class="k">RARITY</div><div class="v" id="rarity">—</div></div>
+      <div class="stat"><div class="k">POWER LEVEL</div><div class="v" id="power">—</div>
+        <div class="powerwrap"><i id="powerbar"></i></div></div>
+    </div>
+  </div>
+
+  <div class="box crtin">
+    <div class="h">// RECRUIT — YOUR SIGNAL_</div>
+    <p>Share your pass. Every head you turn onto the frequency levels you up — first access to drops, rarer status.</p>
+    <div class="reflink">
+      <input id="ref" readonly value="">
+      <button id="copyref">COPY</button>
+    </div>
+    <a class="share" id="shareref" href="#">▶ SHARE THE FREQUENCY</a>
+    <div class="refby" id="refby" style="display:none"></div>
+  </div>
+
+  <div class="box crtin">
+    <div class="h">// LOCK IN YOUR PASS — GET THE NEXT DROP FIRST_</div>
+    <p>Register your pass so the next piece reaches you before it's public. 30 seconds, then you're in the system for real.</p>
+    <div id="regbox"></div>
+  </div>
+
+  <div class="actions">
+    <a class="btn solid" href="../#music">▶ ENTER THE UNIVERSE</a>
+    <a class="btn" href="../auth/">♟ MY COLLECTION</a>
+  </div>
+</main>
+
+<footer>© ONLYIBEE — THE FREQUENCY · YOUR PASS IS YOURS ALONE</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* ====== SET THIS ONCE: paste your Tally form id (from the setup guide) ====== */
+  var TALLY_FORM = "";   /* e.g. "wa2Bq9" — leave "" until your Tally is ready */
+
+  /* ---- read the card + referral from the URL ---- */
+  function param(n){var m=new RegExp("[?&]"+n+"=([^&]+)").exec(location.search);return m?decodeURIComponent(m[1]):"";}
+  var LS="ibee_member";
+  var saved={}; try{saved=JSON.parse(localStorage.getItem(LS)||"{}")||{};}catch(e){}
+
+  var pass=(param("pass")||param("tag")||saved.pass||"").toUpperCase().trim();
+  if(!pass){ pass="FREQ-"+Math.random().toString(36).slice(2,7).toUpperCase(); } // no card → guest signal, still a member
+  var ref=(param("ref")||saved.ref||"").toUpperCase().trim();
+  if(ref===pass) ref="";                          // can't refer yourself
+  // persist first-touch referrer
+  var rec={pass:pass, ref:ref||saved.ref||"", ts:saved.ts||Date.now()};
+  try{localStorage.setItem(LS,JSON.stringify(rec));}catch(e){}
+  ref=rec.ref;
+
+  /* ---- deterministic game stats from the pass code ---- */
+  function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0);}
+  var h=hash(pass);
+  var TIERS=[
+    {n:"INITIATE", sub:"you found the door_",           hue:88,  min:60},
+    {n:"OPERATIVE",sub:"the signal trusts you_",         hue:190, min:28},
+    {n:"ELITE",    sub:"few carry this frequency_",      hue:40,  min:9},
+    {n:"LEGEND",   sub:"the frequency bends to you_",    hue:300, min:3}
+  ];
+  // weighted roll → most people INITIATE, rare LEGEND
+  var roll=h%100, tier = roll<60?0 : roll<88?1 : roll<97?2 : 3;
+  var T=TIERS[tier];
+  var power = 500 + (h % 9500);                    // 500–9999
+  document.documentElement.style.setProperty("--hue", T.hue);
+
+  /* ---- 3D member medallion (hex badge + monster motif), rank-colored ---- */
+  function medalSVG(hue){
+    var accent="hsl("+hue+",95%,60%)";
+    return "data:image/svg+xml,"+encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>"
+      +"<path d='M12 1 L21 6.3 V17.7 L12 23 L3 17.7 V6.3 Z' fill='#0b0d0b' stroke='"+accent+"' stroke-width='1'/>"
+      +"<path d='M12 3.4 L18.8 7.4 V16.6 L12 20.6 L5.2 16.6 V7.4 Z' fill='none' stroke='"+accent+"' stroke-width='.4' opacity='.6'/>"
+      +"<path d='M8.4 9 Q12 6.6 15.6 9 Q13.8 11.6 12 11.6 Q10.2 11.6 8.4 9 Z' fill='"+accent+"'/>"
+      +"<circle cx='9.7' cy='9' r='.9' fill='#070707'/><circle cx='14.3' cy='9' r='.9' fill='#070707'/>"
+      +"<path d='M8.6 13.6 Q12 12.2 15.4 13.6 Q14.8 16.4 12 16.8 Q9.2 16.4 8.6 13.6 Z' fill='"+accent+"' opacity='.9'/>"
+      +"<rect x='9.3' y='14.2' width='1' height='1.8' fill='#070707'/><rect x='11.5' y='14' width='1' height='2.1' fill='#070707'/><rect x='13.7' y='14.2' width='1' height='1.8' fill='#070707'/>"
+      +"</svg>");
+  }
+  var mv=medalSVG(T.hue),zs=[-3.2,-1.8,-0.5,0.9,2.2,3.4],html="";
+  zs.forEach(function(z,i){var front=(i===zs.length-1);
+    html+="<img src='"+mv+"' alt='"+(front?'member medallion':'')+"' style='transform:translateZ("+z+"px)"+(front?'':";filter:brightness(.45)")+"'>";});
+  $("medal").innerHTML=html;
+
+  /* ---- fill the card ---- */
+  $("rank").textContent=T.n;
+  $("subrank").textContent=T.sub;
+  $("code").textContent=pass;
+  $("rarity").textContent=T.n;
+  $("power").textContent=power.toLocaleString();
+  if(ref){ var rb=$("refby"); rb.style.display="block"; rb.textContent="↳ RECRUITED BY "+ref; }
+
+  /* ---- referral link (their pass = their code) ---- */
+  var myLink=location.origin+location.pathname+"?ref="+encodeURIComponent(pass);
+  $("ref").value=myLink;
+  function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
+  function copy(txt){try{navigator.clipboard.writeText(txt);toast("COPIED_");}catch(e){var i=$("ref");i.select();document.execCommand&&document.execCommand("copy");toast("COPIED_");}}
+  $("copyref").onclick=function(){copy(myLink);};
+  $("code").onclick=function(){copy(pass);};
+  var shareText="I'm on the ONLY IBEE frequency 👾 tap in with my pass:";
+  $("shareref").onclick=function(e){
+    if(navigator.share){e.preventDefault();navigator.share({title:"ONLY IBEE — THE FREQUENCY",text:shareText,url:myLink}).catch(function(){});}
+    else{e.preventDefault();copy(myLink);}
+  };
+
+  /* ---- register capture (Tally, hidden fields carry pass + ref) ---- */
+  function mountTally(){
+    var host=$("regbox");
+    if(!TALLY_FORM){
+      host.innerHTML='<div class="regph">▹ REGISTER PANEL GOES LIVE ONCE YOUR TALLY IS CONNECTED<br>(paste your form id in member/index.html — see the setup guide)</div>';
+      return;
+    }
+    var src="https://tally.so/embed/"+TALLY_FORM
+      +"?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+      +"&pass="+encodeURIComponent(pass)+"&ref="+encodeURIComponent(ref||"")+"&rank="+encodeURIComponent(T.n);
+    host.innerHTML='<iframe src="'+src+'" height="440" title="Register your pass" loading="lazy"></iframe>';
+  }
+
+  /* ---- boot sequence → reveal ---- */
+  var msgs=["READING PASS…","VERIFYING SIGNATURE…","MATCHING FREQUENCY…","ACCESS GRANTED"];
+  var i=0,bar=$("bootbar"),bl=$("bootl");
+  (function step(){
+    bl.textContent=msgs[Math.min(i,msgs.length-1)];
+    bar.style.width=Math.min(100,(i+1)/msgs.length*100)+"%";
+    i++;
+    if(i<=msgs.length){ setTimeout(step, i===msgs.length?520:430); }
+    else{
+      $("boot").classList.add("gone");
+      var st=$("stage"); st.style.visibility="visible";
+      $("powerbar").style.width=Math.min(100, power/9999*100)+"%";
+      mountTally();
+    }
+  })();
+})();
+</script>
+<script src="../assets/player.js?v=13"></script>
+</body>
+</html>
