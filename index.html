@@ -301,8 +301,10 @@
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
-<!-- the trophy system: corner badge pops + milestone tracking (top window only) -->
-<script src="assets/badges.js?v=2"></script>
+<!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
+<script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
+<!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
+<script src="assets/badges.js?v=4"></script>
 <script>
 (function(){
   /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */
@@ -321,8 +323,14 @@
   ];
   /* (lyrics left the nav — the spinning book in the player opens the overlay) */
   var navEl=document.getElementById('nav');
+  /* which nav label clears which notification dot when opened */
+  var NAV_TGT={SHOP:'shop',TV:'tv'};
   NAV.forEach(function(it){var b=document.createElement('button');b.textContent=it.n;
-    b.onclick=function(){ navigate(it.u); };navEl.appendChild(b);});
+    b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
+    b.onclick=function(){ var tg=NAV_TGT[it.n];
+      if(tg&&window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget(tg);
+      navigate(it.u); };
+    navEl.appendChild(b);});
 
   /* ---- account pill: LOG IN / PROFILE, reachable from every page (persistent shell) ----
      No supabase-js load here — just reads the same localStorage key pattern Supabase writes
@@ -382,7 +390,10 @@
   var rshuf=document.getElementById('rshuf');
   rshuf.onclick=function(){var r=R();if(r&&r.toggleShuffle)r.toggleShuffle();};
   /* spinning shortcuts */
-  document.getElementById('buni').onclick=function(){navigate('console.html#playing');};
+  document.getElementById('buni').onclick=function(){
+    if(window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget('music'); /* clear the new-music dot */
+    navigate('console.html#playing');
+  };
 
   /* ================= LYRICS OVERLAY =================
      Lines come from lyrics-timed.js when the song has been tap-synced in IBEE STUDIO
