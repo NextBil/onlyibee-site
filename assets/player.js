@@ -296,6 +296,16 @@
     $("rp-cur").textContent = fmt(audio.currentTime);
     if(audio.duration) $("rp-fill").style.width = (audio.currentTime/audio.duration*100)+"%";
   });
+  /* unlock the Music Engine after ~10s of real listening (member flow). Sets a
+     localStorage flag the console checks; guards seeks/track-changes with dt<1. */
+  var _lt=0,_listened=0;
+  audio.addEventListener("timeupdate", function(){
+    try{
+      if(localStorage.getItem("ibee_engine10")==="1") return;
+      var t=audio.currentTime||0, dt=t-_lt; _lt=t;
+      if(dt>0 && dt<1 && !audio.paused){ _listened+=dt; if(_listened>=10) localStorage.setItem("ibee_engine10","1"); }
+    }catch(e){}
+  });
 
   /* if some other player starts (music engine planets), pause the radio */
   document.addEventListener("play", function(e){
