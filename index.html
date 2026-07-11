@@ -3,11 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>ONLY IBEE</title>
+<title>ONLY IBEE — music, played as a world</title>
+<meta name="description" content="Only Ibee — a genre-blending artist and a playable music console. Alternative RnB, soul and hip hop across a reactive universe, arcade games, karaoke lyrics, ICS characters and UTOPIE clothing.">
+<link rel="canonical" href="https://onlyibee.com/">
 <link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
 <link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
 <meta name="theme-color" content="#070707">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ONLY IBEE">
+<meta property="og:title" content="ONLY IBEE — music, played as a world">
+<meta property="og:description" content="A playable music console: every page reacts to the song. Music, games, lyrics, ICS characters, UTOPIE clothing.">
+<meta property="og:url" content="https://onlyibee.com/">
 <meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta name="twitter:card" content="summary">
+<!-- structured data: tells Google this is the artist Only Ibee. Add your real social URLs to sameAs for stronger branded search. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MusicGroup","name":"Only Ibee","alternateName":"ONLYIBEE",
+"url":"https://onlyibee.com/","image":"https://onlyibee.com/assets/chess/bishop1.png",
+"genre":["Alternative RnB","Soul","Hip Hop"],
+"description":"Only Ibee — genre-blending artist and creative world: music, UTOPIE clothing, ICS characters, presented as a playable music console where every page reacts to the song.",
+"sameAs":[]}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <!--
   ONLYIBEE — persistent app shell.
@@ -166,6 +182,26 @@
 </style>
 </head>
 <body>
+<!-- crawlable content: the app is JS/canvas (invisible to search engines). This gives
+     Google real text about Only Ibee so the site owns its branded search. It sits in the
+     normal flow at z-index 0; the fixed, opaque #app (z-index 1) paints over it and the
+     body's overflow:hidden clips it — so users see the console, crawlers read this. -->
+<div id="seo" style="position:absolute;left:0;top:0;width:100%;z-index:0;color:#7a7a7a;padding:16px;font-family:monospace">
+  <h1>ONLY IBEE</h1>
+  <p>Only Ibee is a genre-blending artist and creative world — alternative RnB, soul and hip hop — built as a playable music console where every page reacts to the song that's playing.</p>
+  <h2>The world</h2>
+  <ul>
+    <li>Music Universe — galaxies of releases, planets you can play</li>
+    <li>Lyrics Engine — synced karaoke lyrics and the story behind each song</li>
+    <li>Arcade — rhythm games that run on the music (Run Beebee, Mimi Neon Rush, Mimi Music Tiles)</li>
+    <li>ICS — Ibee's Chess Set characters: Beebee, Mimi, Goli, Swordy, Sworda, Nannan, Abla</li>
+    <li>UTOPIE — hand-made, NFC-tagged clothing, each piece unique</li>
+    <li>IBEE TV — the video channel</li>
+  </ul>
+  <h2>Songs</h2>
+  <p>All I Need, Bounceee, Callin On U, Freestyle Sept9, Head, Lonely22, Maintenant, Mix 100, Nananannn, Obsess, Real To Me, Ride It, Right Middle, Silouhette, Strippin Down, To Our Pain, Write A Song, Yo Body, 20MZS.</p>
+  <p><a href="console.html">Enter the console</a> · <a href="lyrics/">Lyrics</a> · <a href="arcade/">Arcade</a> · <a href="utopie/">UTOPIE clothing</a></p>
+</div>
 <div id="app">
   <div id="bar"><div id="nav"></div></div>
 
