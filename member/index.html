@@ -37,7 +37,8 @@ main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-
 #boot{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:18px;font-family:var(--px);padding:24px;text-align:center}
 #boot.gone{opacity:0;pointer-events:none;transition:opacity .5s}
-#boot .lock{font-size:44px;color:var(--dim);filter:drop-shadow(0 0 10px rgba(0,0,0,.6))}
+#boot .lock{width:44px;height:44px;color:var(--red);filter:drop-shadow(0 0 12px rgba(255,43,43,.5))}
+.banner .gi{width:.9em;height:.9em;vertical-align:-0.12em}
 #boot .l{font-size:10px;color:var(--acid);letter-spacing:2px;min-height:16px}
 #boot .bar{width:min(260px,70vw);height:10px;border:1px solid var(--border);padding:1px}
 #boot .bar i{display:block;height:100%;width:0;background:var(--acid);box-shadow:0 0 10px var(--acid)}
@@ -91,6 +92,7 @@ main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-
 .cbtn{font-family:var(--px);font-size:11px;padding:14px;background:var(--acid);color:#000;border:1px solid var(--acid);cursor:pointer;text-align:center;text-decoration:none;display:block}
 .cbtn:disabled{opacity:.5;cursor:default}
 .taken{border:1px solid var(--red);color:var(--red);font-family:var(--px);font-size:11px;padding:16px;text-align:center;letter-spacing:1px;line-height:1.6}
+.taken .gi{width:1em;height:1em;vertical-align:-0.12em}
 .item{border:2px solid var(--border);padding:18px;text-align:center;position:relative;overflow:hidden;background:#0a0a0c;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
 .item .rz{font-family:var(--px);font-size:8px;letter-spacing:2px;padding:5px 8px;display:inline-block;border:1px solid}
@@ -160,13 +162,13 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
 <!-- boot: authenticating the pass -->
 <div id="boot">
-  <div class="lock">🔒</div>
+  <svg class="lock" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="#050505"/></svg>
   <div class="l" id="bootl">READING PASS…</div>
   <div class="bar"><i id="bootbar"></i></div>
 </div>
 
 <main id="stage" style="visibility:hidden">
-  <div class="banner locked crtin" id="grant">🔒 CHECKING ACCESS…</div>
+  <div class="banner locked crtin" id="grant"><svg class="gi" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="#050505"/></svg> CHECKING ACCESS…</div>
 
   <div class="stage"><div class="o3" id="medal"></div></div>
   <div class="ped"></div>
@@ -233,6 +235,13 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     ref=rec.ref;
   }
 
+  /* flat neon lock/unlock icons — no emoji; currentColor picks up the banner's red/green */
+  var LOCK="<svg class='gi' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
+    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
+  var UNLOCK="<svg class='gi' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 7.3-3.9' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
+    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
   function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
   function copy(txt){try{navigator.clipboard.writeText(txt);toast("COPIED_");}catch(e){var i=$("ref");i.select();document.execCommand&&document.execCommand("copy");toast("COPIED_");}}
@@ -326,14 +335,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   /* ---- visual states ---- */
   function showGranted(){
     grant.className="banner granted crtin";
-    grant.textContent="✓ ACCESS GRANTED — WELCOME TO THE FREQUENCY";
+    grant.innerHTML=UNLOCK+" ACCESS GRANTED — WELCOME TO THE FREQUENCY";
     $("mcard").style.display=""; $("recruit").style.display=""; $("actions").style.display="";
     fillCard();
   }
   function showLocked(msg){
     setHue(0);                                    // red glow when locked
     grant.className="banner locked crtin";
-    grant.textContent=msg;
+    grant.innerHTML=LOCK+" "+e2(msg);
     $("mcard").style.display="none"; $("recruit").style.display="none"; $("actions").style.display="none";
   }
   function updSess(sess){
@@ -362,14 +371,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var s = st&&st.status;
     if(s==='available'){ showGranted(); redeemFlow(sess); }
     else if(s==='owned'){ showGranted(); boxh.textContent="// YOUR ROOM_"; host.innerHTML=itemCard(st.item,'✓ YOURS'); }
-    else if(s==='taken'){ showLocked("🔒 SEAT TAKEN — THIS PASS IS CLAIMED");
-      boxh.textContent="// PASS STATUS_"; host.innerHTML='<div class="taken">🔒 This pass was already redeemed by another account.</div>'; }
+    else if(s==='taken'){ showLocked("SEAT TAKEN — THIS PASS IS CLAIMED");
+      boxh.textContent="// PASS STATUS_"; host.innerHTML='<div class="taken">'+LOCK+' This pass was already redeemed by another account.</div>'; }
     else { lockedGate(sess, s==='invalid'); }        // 'invalid' or 'none'
   }
 
   /* ---- LOCKED: no valid pass → enter a code, or log in to see your collection ---- */
   function lockedGate(sess, invalid){
-    showLocked(invalid ? "🔒 PASS NOT RECOGNIZED" : "🔒 ACCESS RESTRICTED — MEMBERS ONLY");
+    showLocked(invalid ? "PASS NOT RECOGNIZED" : "ACCESS RESTRICTED — MEMBERS ONLY");
     boxh.textContent="// ENTER THE FREQUENCY_";
     if(sess){
       host.innerHTML='<div class="cnote" style="margin-bottom:10px">you\'re signed in.</div>'
@@ -473,7 +482,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     if(r.status==='claimed'||r.status==='owned'){
       boxh.textContent="// YOUR ROOM_"; host.innerHTML=itemCard(r.item, r.status==='owned'?'✓ YOURS':'✦ ROOM UNLOCKED');
       toast(r.status==='owned'?'ALREADY YOURS_':'ROOM UNLOCKED_');
-    } else if(r.status==='taken'){ showLocked("🔒 SEAT TAKEN"); host.innerHTML='<div class="taken">🔒 This pass was just claimed by another account.</div>'; }
+    } else if(r.status==='taken'){ showLocked("SEAT TAKEN"); host.innerHTML='<div class="taken">'+LOCK+' This pass was just claimed by another account.</div>'; }
     else if(r.status==='need_login'){ authForm(); }
     else { if(msg)msg.textContent='✕ could not unlock ('+(r.error||r.status)+')'; Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){b.disabled=false;}); }
   }
