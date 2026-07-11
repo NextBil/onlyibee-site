@@ -95,9 +95,26 @@
       plays:playsTotal(),vault:!!sav().vault,loggedIn:loggedIn(),eng10:eng10(),maxPlay:maxPlay};
   }
 
+  /* ---------- unread ledger (iMessage-style) ----------
+     Lives in its OWN key so the profile page (framed) can mark things seen
+     without racing the shell's tracker, which owns "ibee_badges". */
+  var SEEN="ibee_badges_seen";
+  function seenMap(){ try{ return JSON.parse(localStorage.getItem(SEEN)||"{}")||{}; }catch(e){ return {}; } }
+  function unseen(){
+    var s=load(),m=seenMap(),out=[];
+    DEFS.forEach(function(d){ if(s.earned[d.id]&&!m[d.id]) out.push({def:d,ts:s.earned[d.id]}); });
+    return out;
+  }
+  function markSeen(id){
+    var m=seenMap();
+    if(id==null){ var s=load(); for(var k in s.earned) m[k]=1; } else m[id]=1;
+    try{ localStorage.setItem(SEEN,JSON.stringify(m)); }catch(e){}
+  }
+
   /* public: the profile page (and anything else) renders from this */
   window.IBEE_BADGES={defs:DEFS,state:function(){return load();},snapshot:snapshot,
-    earned:function(){ var s=load(),n=0; for(var k in s.earned) n++; return n; }};
+    earned:function(){ var s=load(),n=0; for(var k in s.earned) n++; return n; },
+    unseen:unseen,markSeen:markSeen};
 
   if(!TOP) return;   /* framed copy = catalog only; the shell above is tracking */
 
@@ -123,8 +140,26 @@
     +".bgt.gold .bn{color:#ffd60a}.bgt.gold .bi{filter:drop-shadow(0 0 8px rgba(255,214,10,.6))}"
     +".bgt.link{cursor:pointer;border-left-color:#26e0ff;box-shadow:0 4px 18px rgba(0,0,0,.6),0 0 16px rgba(38,224,255,.2)}"
     +".bgt.link .bn{color:#26e0ff}.bgt.link:hover{background:rgba(10,16,18,.96)}"
-    +".bgt .bxx{flex:none;color:#555;font-size:9px;padding:2px 0 2px 6px;cursor:pointer}.bgt .bxx:hover{color:#fff}";
+    +".bgt .bxx{flex:none;color:#555;font-size:9px;padding:2px 0 2px 6px;cursor:pointer}.bgt .bxx:hover{color:#fff}"
+    /* unread bubble on the shell's PROFILE / LOG IN pill (iMessage-style) */
+    +"#acct button{position:relative;overflow:visible}"
+    +".bgnum{position:absolute;top:3px;right:3px;min-width:15px;height:15px;border-radius:8px;"
+    +"background:#ff2b2b;color:#fff;font-family:'Press Start 2P',monospace;font-size:7px;"
+    +"display:flex;align-items:center;justify-content:center;padding:0 3px;pointer-events:none;"
+    +"box-shadow:0 0 7px rgba(255,43,43,.8);animation:bgnpop .35s cubic-bezier(.2,1.6,.4,1)}"
+    +"@keyframes bgnpop{0%{transform:scale(0)}100%{transform:scale(1)}}";
   document.head.appendChild(css);
+
+  /* keep the nav pill's unread count honest (shell only — #acct exists there) */
+  function updateNavCount(){
+    var btn=document.getElementById("acctbtn"); if(!btn) return;
+    var n=unseen().length, b=btn.querySelector(".bgnum");
+    if(n>0){
+      if(!b){ b=document.createElement("span"); b.className="bgnum"; btn.appendChild(b); }
+      var txt=n>9?"9+":String(n); if(b.textContent!==txt) b.textContent=txt;
+    } else if(b) b.remove();
+  }
+  window.addEventListener("storage",function(ev){ if(ev&&ev.key===SEEN) updateNavCount(); });
   var host=document.createElement("div"); host.id="bgtoasts"; document.body.appendChild(host);
 
   function blipT(){ try{
@@ -228,5 +263,6 @@
       }
     }
     check();
+    updateNavCount();
   },1000);
 })();
