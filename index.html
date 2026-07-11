@@ -182,11 +182,10 @@
 </style>
 </head>
 <body>
-<!-- crawlable content: the app is JS/canvas (invisible to search engines). This gives
-     Google real text about Only Ibee so the site owns its branded search. It sits in the
-     normal flow at z-index 0; the fixed, opaque #app (z-index 1) paints over it and the
-     body's overflow:hidden clips it — so users see the console, crawlers read this. -->
-<div id="seo" style="position:absolute;left:0;top:0;width:100%;z-index:0;color:#7a7a7a;padding:16px;font-family:monospace">
+<!-- crawlable content for search engines (the app is JS/canvas Google can't read).
+     Screen-reader/crawler-only: 1px + clipped, so it's in the DOM and indexable but takes
+     ZERO visible space and can never flash on screen during page transitions. -->
+<div id="seo" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap;border:0">
   <h1>ONLY IBEE</h1>
   <p>Only Ibee is a genre-blending artist and creative world — alternative RnB, soul and hip hop — built as a playable music console where every page reacts to the song that's playing.</p>
   <h2>The world</h2>

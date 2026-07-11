@@ -169,6 +169,17 @@
     border:2px solid var(--border);background:#000;overflow:hidden;
     touch-action:none;
   }
+  /* music-engine lock: opens after account + 10s of listening */
+  #englock{position:absolute;inset:0;z-index:30;background:rgba(5,5,8,.95);display:none;
+    flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:26px}
+  #englock.on{display:flex}
+  #englock .lk{font-size:44px;filter:drop-shadow(0 0 14px rgba(182,255,0,.4))}
+  #englock .et{font-family:var(--px);font-size:14px;color:var(--acid);letter-spacing:2px;text-shadow:0 0 16px rgba(182,255,0,.5)}
+  #englock .ed{color:var(--dim);font-size:19px;max-width:360px;line-height:1.4}
+  #englock .esteps{font-family:var(--px);font-size:9px;color:#555;line-height:2.1}
+  #englock .esteps b{color:#555;font-weight:normal}#englock .esteps b.on{color:var(--acid)}
+  #englock .ego{font-family:var(--px);font-size:11px;padding:14px 18px;background:var(--acid);color:#000;text-decoration:none;margin-top:2px}
+  #englock .ehint{color:var(--dim);font-size:16px}
   .engnav{display:flex;align-items:center;flex-wrap:wrap;gap:8px;position:relative;z-index:40}
   /* ===== universe search — records / albums / vibes, arcade style ===== */
   #uniseek{position:relative;flex:1;min-width:180px;margin-bottom:22px}
@@ -440,6 +451,14 @@
         </div>
       </div>
       <div id="engroot">
+        <div id="englock">
+          <div class="lk">🔒</div>
+          <div class="et">MUSIC ENGINE LOCKED</div>
+          <div class="ed">The universe opens once you're a member and you've felt a track.</div>
+          <div class="esteps" id="esteps"></div>
+          <a class="ego" href="member/" target="_top">▶ CREATE YOUR ACCOUNT</a>
+          <div class="ehint">…then press ► on the radio for 10 seconds_</div>
+        </div>
         <canvas id="engcanvas"></canvas>
         <div class="eng-hud">
           <div class="l">
@@ -631,8 +650,22 @@
     var t=document.getElementById(id);
     if(t){t.classList.add("on");current=id;window.scrollTo(0,0);blip(220,.04);}
     document.body.classList.toggle("musicfit", id==="music");  // music screen fills the viewport (no page scroll)
-    if(id==="music")ENG.wake();
+    if(id==="music"){ ENG.wake(); updateEngLock(); }
   }
+  /* ---- Music Engine lock: opens after an account exists AND a track was felt for 10s.
+     Lightweight — reads the Supabase session token + the radio's listen flag from
+     localStorage (same origin), no extra library loaded here. ---- */
+  function loggedIn(){ try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
+    if(/^sb-.*-auth-token$/.test(k)){ var v=localStorage.getItem(k); if(v&&v!=="null") return true; } } }catch(e){} return false; }
+  function engineUnlocked(){ try{ return loggedIn() && localStorage.getItem("ibee_engine10")==="1"; }catch(e){ return true; } }
+  function updateEngLock(){
+    var lk=document.getElementById("englock"); if(!lk) return;
+    if(engineUnlocked()){ lk.classList.remove("on"); return; }
+    var acct=loggedIn(), lis=localStorage.getItem("ibee_engine10")==="1", st=document.getElementById("esteps");
+    if(st) st.innerHTML='<b class="'+(acct?'on':'')+'">'+(acct?'✓':'○')+' ACCOUNT MADE</b><br><b class="'+(lis?'on':'')+'">'+(lis?'✓':'○')+' FELT A TRACK 10s</b>';
+    lk.classList.add("on");
+  }
+  setInterval(function(){ if(current==="music" && document.getElementById("englock") && document.getElementById("englock").classList.contains("on")) updateEngLock(); },1500);
   document.addEventListener("click",function(e){
     var el=e.target.closest("[data-go]");
     if(el){go(el.getAttribute("data-go"));}
