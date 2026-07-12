@@ -412,7 +412,7 @@
   }
   renderAcct();
   window.addEventListener('storage',renderAcct);
-  setInterval(renderAcct,3000);
+  // Interval removed here to save battery - relies on storage event listener only!
 
   function navigate(url){
     try{lyrClose();}catch(e){}   /* moving to a section closes the lyrics room */
@@ -638,7 +638,9 @@
     else pcoverimg.style.display='none';
   }
   function fmt(s){if(!isFinite(s))return'--:--';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
-  setInterval(function(){
+  
+  // Replaced setInterval player polling with event-driven logic
+  function updatePlayerUI() {
     var r=R();if(!r)return;
     if(built&&r.count!==builtCount)buildList(); /* extra records arrived — rebuild the list */
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
@@ -652,7 +654,27 @@
       Array.prototype.forEach.call(tl.querySelectorAll('.tr'),function(row){
         row.classList.toggle('now',+row.getAttribute('data-i')===ci);});}
     if(lyrOpen){ lyrRefresh(); lyrSync(); }
-  },350);
+  }
+
+  function initPlayerListeners() {
+    var r = R();
+    if (r && r.audio && !r._uiListenersAttached) {
+      r.audio.addEventListener('timeupdate', updatePlayerUI);
+      r.audio.addEventListener('play', updatePlayerUI);
+      r.audio.addEventListener('pause', updatePlayerUI);
+      r.audio.addEventListener('loadeddata', updatePlayerUI);
+      r.audio.addEventListener('ended', updatePlayerUI);
+      r._uiListenersAttached = true;
+      updatePlayerUI(); // Run once immediately
+    } else if (!r || !r._uiListenersAttached) {
+      // If player.js hasn't finished setting up audio yet, check again shortly
+      setTimeout(initPlayerListeners, 500);
+    }
+  }
+  
+  // Start the initialization sequence
+  initPlayerListeners();
+
   /* karaoke needs frame-accurate timing: while the overlay is open, sync every
      animation frame (the sweep + line flips land the instant their time hits) */
   (function lyrTick(){ requestAnimationFrame(lyrTick); if(lyrOpen) lyrSync(); })();
