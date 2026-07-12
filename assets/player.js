@@ -726,6 +726,20 @@
      the built-in list), restore is retried now that the list is long enough. */
   function addExtras(){
     try{
+      /* new albums first: a studio-founded galaxy (IBEE_SONGS_EXTRA.galaxies) is
+         registered as an album here too, so its songs wear the real album name /
+         tint / cover on the radio instead of falling back to RARE SOUL SESSIONS
+         (the universe already knows these galaxies; the radio didn't). Built-in
+         albums are never overridden. Optional per-galaxy `cover`/`tint`/`room`. */
+      var GX = (window.IBEE_SONGS_EXTRA && window.IBEE_SONGS_EXTRA.galaxies) || [];
+      GX.forEach(function(ga){
+        if(!ga || !ga.id || ALBUMS[ga.id]) return;
+        var a = { name: ga.name || String(ga.id).toUpperCase() };
+        if(ga.cover) a.cover = ga.cover;      // else songs use own cover / hue disc
+        if(ga.tint)  a.tint  = ga.tint;
+        if(ga.room){ a.room = ga.room; a.galaxy = ga.id; }
+        ALBUMS[ga.id] = a;
+      });
       var X = (window.IBEE_SONGS_EXTRA && window.IBEE_SONGS_EXTRA.songs) || [];
       var added = false;
       X.forEach(function(e){
