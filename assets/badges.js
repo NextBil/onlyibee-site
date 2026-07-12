@@ -195,27 +195,33 @@
     +".bgt.link{cursor:pointer;border-left-color:#26e0ff;box-shadow:0 4px 18px rgba(0,0,0,.6),0 0 16px rgba(38,224,255,.2)}"
     +".bgt.link .bn{color:#26e0ff}.bgt.link:hover{background:rgba(10,16,18,.96)}"
     +".bgt .bxx{flex:none;color:#555;font-size:9px;padding:2px 0 2px 6px;cursor:pointer}.bgt .bxx:hover{color:#fff}"
-    /* red dot on whichever button the unread belongs to: profile pill, SHOP, TV, galaxy */
+    /* iMessage-style unread COUNT badge on whichever button the unread belongs to:
+       profile pill, SHOP, TV, galaxy. Bigger + shows the number (9+ past 9). */
     +"#acct button,#nav button,#buni{position:relative;overflow:visible}"
-    +".ibdot{position:absolute;top:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#ff2b2b;"
-    +"pointer-events:none;box-shadow:0 0 7px rgba(255,43,43,.9);animation:bgnpop .35s cubic-bezier(.2,1.6,.4,1)}"
-    +"#buni .ibdot{top:0;right:0}"
-    +"@keyframes bgnpop{0%{transform:scale(0)}100%{transform:scale(1)}}";
+    +".ibdot{position:absolute;top:-6px;right:-4px;min-width:19px;height:19px;border-radius:10px;background:#ff2b2b;"
+    +"color:#fff;font-family:'Press Start 2P',monospace;font-size:9px;line-height:1;display:flex;align-items:center;"
+    +"justify-content:center;padding:0 5px;pointer-events:none;border:2px solid #070707;"
+    +"box-shadow:0 0 9px rgba(255,43,43,.9),0 1px 3px rgba(0,0,0,.6);animation:bgnpop .35s cubic-bezier(.2,1.6,.4,1)}"
+    +"#buni .ibdot{top:-7px;right:-7px}"
+    +"@keyframes bgnpop{0%{transform:scale(0)}60%{transform:scale(1.25)}100%{transform:scale(1)}}";
   document.head.appendChild(css);
 
-  /* place / clear a red dot on an element (shell only — these ids/attrs exist there) */
-  function dotOn(el,on){
+  /* place / update / clear the count badge on an element (shell only — these ids/attrs exist there) */
+  function dotOn(el,n){
     if(!el) return;
     var d=el.querySelector(":scope > .ibdot");
-    if(on){ if(!d){ d=document.createElement("span"); d.className="ibdot"; el.appendChild(d); } }
-    else if(d) d.remove();
+    if(n>0){
+      if(!d){ d=document.createElement("span"); d.className="ibdot"; el.appendChild(d); }
+      var txt=n>9?"9+":String(n);
+      if(d.textContent!==txt) d.textContent=txt;
+    } else if(d) d.remove();
   }
   function placeDots(){
     var c=targetCounts();
-    dotOn(document.getElementById("acctbtn"), c.profile>0);
-    dotOn(document.querySelector('#nav [data-nav="SHOP"]'), c.shop>0);
-    dotOn(document.querySelector('#nav [data-nav="TV"]'), c.tv>0);
-    dotOn(document.getElementById("buni"), c.music>0);
+    dotOn(document.getElementById("acctbtn"), c.profile);
+    dotOn(document.querySelector('#nav [data-nav="SHOP"]'), c.shop);
+    dotOn(document.querySelector('#nav [data-nav="TV"]'), c.tv);
+    dotOn(document.getElementById("buni"), c.music);
   }
   window.addEventListener("storage",function(ev){ if(ev&&(ev.key===SEEN||ev.key==="ibee_auto_news")) placeDots(); });
   var host=document.createElement("div"); host.id="bgtoasts"; document.body.appendChild(host);
