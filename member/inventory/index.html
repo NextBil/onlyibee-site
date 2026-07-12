@@ -122,7 +122,7 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   var SHAPES={"game-runner":"bee","game-rush":"cassette","game-tiles":"floppy",
     "env-aqua":"ufo","env-bedroom":"crt","env-terrarium":"flower","env-transit":"vhs",
     "universe-engine":"engine","ics-chess":"img:../../assets/chess/knight1.png",
-    "np-album":"img:../../assets/img/np-cover.jpg"};
+    "np-album":"img:../../assets/img/np-cover.jpg","mzs-album":"img:../../assets/img/20mzs-album.png"};
 
   function artifact(formKey, owned){
     var src=(formKey&&formKey.indexOf("img:")===0)
@@ -181,9 +181,13 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
     /* NOUVEAUX PUNK — the full album (27 tracks on its page), free for members */
     cat.splice(2,0,{id:"np-album",name:"NOUVEAUX PUNK — THE EXPERIENCE",rarity:"epic",value:"FREE",
       type:"album",payload:"nouveauxpunk/",showname:true,lockhint:"SIGN IN — IT'S FREE"});
+    /* 20 MIN ZA SESSION — the one-take stoner cassette, free for members */
+    cat.splice(3,0,{id:"mzs-album",name:"20 MIN ZA SESSION",rarity:"epic",value:"FREE",
+      type:"album",payload:"20minzasession/",showname:true,lockhint:"SIGN IN — IT'S FREE"});
     var owned={};
     owned["ics-chess"]={id:"ics-chess"};                      /* everyone's, always */
     if(sess) owned["np-album"]={id:"np-album"};               /* every member's */
+    if(sess) owned["mzs-album"]={id:"mzs-album"};             /* every member's */
     if(sess&&eng10) owned["universe-engine"]={id:"universe-engine"};
     /* the owner's account: the whole shelf is theirs */
     var isOwner=!!sess&&((sess.user.email||'').toLowerCase()==='droguepuissance4@gmail.com');
@@ -208,6 +212,6 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   boot();
 })();
 </script>
-<script src="../../assets/player.js?v=13"></script>
+<script src="../../assets/player.js?v=14"></script>
 </body>
 </html>

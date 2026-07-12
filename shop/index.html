@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>THE DROP — ONLY IBEE</title>
+<meta name="description" content="ONLY IBEE — UTOPIE clothing drops. Each piece unique, made only once.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<!--
+  Generic FOLDER (drop) page: shop/?f=<folder id>.
+  Renders every product whose folder matches, from assets/products-data.js
+  (window.IBEE_PRODUCTS.folders + .products). Products with no folder fall
+  into the first folder. Same retro style as the console shop.
+-->
+<style>
+:root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
+  border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-index:2;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+.crumbs{font-family:var(--px);font-size:8px;margin-bottom:20px}
+.crumbs a{color:var(--dim);text-decoration:none}.crumbs a:hover{color:var(--acid)}
+.fhead{border:2px solid var(--border);background:linear-gradient(180deg,#101010,#0b0b0b);padding:20px;margin-bottom:24px}
+.fhead.r-leg{border-color:#4d6600}.fhead.r-sdr{border-color:#5c4b2c}
+.fhead h1{font-family:var(--px);font-size:clamp(14px,4vw,22px);color:var(--ink);line-height:1.5}
+.fhead .proto{display:inline-block;margin-top:12px;font-family:var(--px);font-size:9px;color:#0a0a0a;
+  background:var(--gold);padding:7px 10px;letter-spacing:1px}
+.fhead.r-leg .proto{background:var(--acid)}
+.fhead .cnt{color:var(--dim);font-size:19px;margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.item{border:2px solid var(--border);background:var(--panel);text-decoration:none;color:var(--ink);
+  display:block;transition:transform .15s,border-color .2s,box-shadow .2s}
+.item:hover{transform:translateY(-3px)}
+.item .sq{position:relative;aspect-ratio:1/1;background:#0a0a0c;overflow:hidden}
+.item .sq img{width:100%;height:100%;object-fit:cover;display:block}
+.item .sq .noimg{color:var(--dim);font-family:var(--px);font-size:8px;text-align:center;line-height:2;padding:8px;
+  display:flex;align-items:center;justify-content:center;height:100%}
+.item .rtag{position:absolute;top:8px;left:8px;font-family:var(--px);font-size:7px;letter-spacing:1px;
+  padding:5px 6px;background:rgba(0,0,0,.7)}
+.item .meta{padding:10px;border-top:2px solid var(--border);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.item .nm{font-family:var(--px);font-size:8px;line-height:1.7}
+.item .pr{font-family:var(--px);font-size:9px;color:var(--acid);white-space:nowrap}
+.item.r-c:hover{border-color:#9a9a9a}.item.r-c .rtag{color:#9a9a9a}
+.item.r-sr{border-color:#5c3350}.item.r-sr .rtag{color:#e879c9}.item.r-sr:hover{border-color:#e879c9;box-shadow:0 0 16px rgba(232,121,201,.35)}
+.item.r-sdr{border-color:#5c4b2c}.item.r-sdr .rtag{color:#d9b36c}.item.r-sdr:hover{border-color:#d9b36c;box-shadow:0 0 16px rgba(217,179,108,.4)}
+.item.r-leg{border-color:#4d6600}.item.r-leg .rtag{color:var(--acid)}.item.r-leg:hover{border-color:var(--acid)}
+.item.soldout{opacity:.4;filter:grayscale(1)}.item.soldout .pr{color:var(--red)}
+.notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0;text-align:center}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <a href="../console.html#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>DROP.SYS</span>
+</header>
+<main>
+  <div class="crumbs"><a href="../console.html#shop">◀ BACK TO THE SHOP_</a></div>
+  <div id="wrap"></div>
+</main>
+<footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
+
+<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>
+(function(){
+  "use strict";
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};
+  var D=window.IBEE_PRODUCTS||{};
+  var folders=D.folders||[], products=D.products||[];
+  var fid=decodeURIComponent((new RegExp("[?&]f=([^&]+)").exec(location.search)||[])[1]||"");
+  if(!fid && folders.length) fid=folders[0].id;
+  var fd=null; folders.forEach(function(f){ if(f.id===fid) fd=f; });
+  if(!fd) fd={id:fid||"all",name:"THE SHOP",sub:"",tint:"leg"};
+  var defId=folders.length?folders[0].id:fd.id;
+  var items=products.filter(function(p){ return (p.folder||defId)===fd.id; });
+
+  document.title=fd.name+" — ONLY IBEE";
+  var head='<div class="fhead r-'+(fd.tint||'leg')+'"><h1>'+e2(fd.name)+'</h1>'
+    +(fd.sub?'<div class="proto">'+e2(fd.sub)+'</div>':'')
+    +'<div class="cnt">'+items.length+' piece'+(items.length===1?'':'s')+' · each made once, then never again_</div></div>';
+  var grid;
+  if(!items.length){
+    grid='<div class="notfound">✕ NOTHING IN THIS FOLDER YET_<br><br>stay tuned — the drop is loading_</div>';
+  } else {
+    grid='<div class="grid">'+items.map(function(p){
+      var out=!!p.out, cls="item r-"+(p.r||"c")+(out?" soldout":"");
+      var sq=(p.imgs&&p.imgs[0])?'<img loading="lazy" src="'+e2(p.imgs[0])+'" alt="'+e2(p.n)+'">'
+        :'<div class="noimg">NO VISUAL<br>TAP TO VIEW</div>';
+      return '<a class="'+cls+'" href="../product-page/?id='+encodeURIComponent(p.id)+'">'
+        +'<div class="sq">'+sq+'<span class="rtag">'+(RNAME[p.r]||"COMMON")+'</span></div>'
+        +'<div class="meta"><span class="nm">'+e2(p.n)+'</span>'
+        +'<span class="pr">'+(out?"CLAIMED":e2((p.cur||"€")+p.price))+'</span></div></a>';
+    }).join('')+'</div>';
+  }
+  document.getElementById("wrap").innerHTML=head+grid;
+})();
+</script>
+<script src="../assets/player.js?v=14"></script>
+</body>
+</html>
