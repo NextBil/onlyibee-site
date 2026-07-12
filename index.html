@@ -90,6 +90,53 @@
   #tracklist .tr.now{color:var(--acid);background:#0d1400}
   #tracklist .tr .no{font-family:var(--px);font-size:8px;color:#555;width:24px}
   #tracklist .tr.now .no{color:var(--acid)}
+  #tracklist .tr .rmroom{font-family:var(--px);font-size:7px;color:#000;background:var(--rt,var(--red));padding:5px 6px;flex:none}
+  #tracklist .tr.locked{opacity:.5;cursor:not-allowed}
+  #tracklist .tr.locked .cv{filter:brightness(.4) grayscale(.7)}
+  #tracklist .tr .lk{width:13px;height:13px;flex:none;color:var(--red)}
+
+  /* ---- search + grid/list toggle (GRID is the default view) ---- */
+  #tltools{display:flex;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)}
+  #tlsearch{flex:1;background:#0a0a0a;border:1px solid var(--border);color:var(--ink);font-family:var(--vt);
+    font-size:16px;padding:7px 9px;outline:none}
+  #tlsearch:focus{border-color:var(--acid)}
+  #tlsearch::placeholder{color:#555}
+  #tlview{font-family:var(--px);font-size:8px;padding:0 9px;height:31px;flex:none;background:#0e0e0e;
+    color:var(--dim);border:1px solid var(--border);cursor:pointer}
+  #tlview:hover,#tlview.on{border-color:var(--acid);color:var(--acid)}
+  #tlempty{padding:22px 14px;text-align:center;color:#555;font-family:var(--px);font-size:8px;line-height:2;display:none}
+
+  /* ---- GO TO THE ROOM: persistent pulsing button for the current special album ---- */
+  #roomband{display:none;padding:8px 14px;border-bottom:1px solid var(--border)}
+  #roomband.show{display:block}
+  #roomband button{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--px);font-size:9px;padding:11px 10px;color:#000;background:var(--rtint,var(--red));
+    border:1px solid var(--rtint,var(--red));letter-spacing:1px;cursor:pointer;animation:roompulse 1.9s ease-in-out infinite}
+  @keyframes roompulse{0%,100%{box-shadow:0 0 6px rgba(255,80,40,.35)}50%{box-shadow:0 0 18px rgba(255,80,40,.75)}}
+
+  /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
+  #tlbody{max-height:52vh;overflow-y:auto}
+  #tlbody.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px}
+  .tl-tile{cursor:pointer;perspective:640px}
+  .tl-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;
+    transform:rotateY(-18deg);transform-origin:center;transition:transform .35s cubic-bezier(.2,.7,.2,1);overflow:hidden}
+  .tl-tile:hover .art{transform:rotateY(0)}
+  .tl-tile.now .art{border-color:var(--acid);box-shadow:0 0 14px rgba(182,255,0,.4)}
+  .tl-tile .art img{width:100%;height:100%;object-fit:cover;display:block}
+  .tl-tile .gtag{position:absolute;left:0;bottom:0;right:0;padding:5px 6px;font-family:var(--vt);font-size:12px;
+    color:#d7d7d7;background:linear-gradient(0deg,rgba(0,0,0,.82),transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tl-tile .gnow{position:absolute;top:6px;left:6px;font-family:var(--px);font-size:7px;color:#000;background:var(--acid);padding:3px 4px}
+  .tl-tile .roomb{position:absolute;top:6px;right:6px;font-family:var(--px);font-size:7px;color:#000;
+    background:var(--rt,var(--red));padding:4px 5px;letter-spacing:.5px}
+  .tl-tile .nm{font-family:var(--px);font-size:8px;color:#cfcfcf;margin-top:7px;line-height:1.5;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tl-tile.now .nm{color:var(--acid)}
+  .tl-tile.locked{cursor:not-allowed}
+  .tl-tile.locked .art img{filter:brightness(.32) grayscale(.75)}
+  .tl-tile.locked .art::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.35)}
+  .tl-tile.locked .lockb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:26px;height:26px;
+    color:var(--red);filter:drop-shadow(0 0 8px rgba(255,43,43,.6))}
+  .tl-tile.locked .nm{color:#5a5a5a}
 
   #player{background:#000;border-top:2px solid var(--border);padding:8px 12px 10px;
     display:flex;flex-direction:column;gap:7px}
@@ -251,7 +298,16 @@
   </div>
 
   <div id="bottom">
-    <div id="tracklist"></div>
+    <div id="tracklist">
+      <div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>
+      <div id="tltools">
+        <input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false">
+        <button id="tlview" title="grid / list view">≡ LIST</button>
+      </div>
+      <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
+      <div id="tlbody" class="grid"></div>
+      <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
+    </div>
     <div id="player">
       <div class="pl-top">
         <span id="pcover"><img alt="" id="pcoverimg"></span>
@@ -300,7 +356,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=15"></script>
+<script src="assets/player.js?v=16"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -309,7 +365,7 @@
 <!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
 <script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
-<script src="assets/badges.js?v=7"></script>
+<script src="assets/badges.js?v=8"></script>
 <script>
 (function(){
   /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */
