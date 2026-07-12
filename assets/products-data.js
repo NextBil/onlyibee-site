@@ -6,11 +6,16 @@
    file goes live in ~1 min, no version bumps.
    Each product: {id, n:name, price, cur, r:rarity(c/sr/sdr/leg), out:0/1,
    desc, imgs:[urls], pay:{wix, stripe, paypal}} - empty pay links hide
-   their button on the product page. Seeded 2026-07-12 from the old Wix
+   their button on the product page. pay_config.paypalClientId (a PayPal
+   Business "Client ID") turns on real on-page PayPal checkout for everything. Seeded 2026-07-12 from the old Wix
    store (JSON-LD scrape: names, prices, descriptions, galleries, stock).
    ===================================================================== */
 window.IBEE_PRODUCTS={
  "v": 1,
+ "pay_config": {
+  "paypalClientId": "",
+  "currency": "EUR"
+ },
  "products": [
   {
    "id": "all-ics-pink",
