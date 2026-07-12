@@ -212,7 +212,7 @@
   <p><a href="console.html">Enter the console</a> · <a href="lyrics/">Lyrics</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE clothing</a></p>
 </div>
 <div id="app">
-  <div id="bar"><div id="nav"></div><div id="acct"></div></div>
+  <div id="bar"><div id="nav"></div><div id="lang"></div><div id="acct"></div></div>
 
   <div id="stage">
     <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>
@@ -220,25 +220,25 @@
     <div id="lyr">
       <div class="words">
         <div class="stream" id="lstream"></div>
-        <div class="empty" id="lempty" style="display:none">no words for this signal yet_</div>
+        <div class="empty" id="lempty" data-i18n="lyr.empty" style="display:none">no words for this signal yet_</div>
       </div>
       <!-- the record's soul: meaning, context, vibe, time-to-create, BPM -->
       <div id="linfo">
         <div class="ih" id="liTitle">—</div>
         <div class="ichips" id="liVibe"></div>
-        <div class="icard"><div class="ct">MEANING_</div><div class="cx" id="liMeaning">—</div></div>
-        <div class="icard"><div class="ct">CONTEXT_</div><div class="cx" id="liContext">—</div></div>
+        <div class="icard"><div class="ct" data-i18n="lyr.meaning">MEANING_</div><div class="cx" id="liMeaning">—</div></div>
+        <div class="icard"><div class="ct" data-i18n="lyr.context">CONTEXT_</div><div class="cx" id="liContext">—</div></div>
         <div class="irow">
-          <div class="icard"><div class="ct">TIME TO CREATE</div><div class="cx" id="liTook">—</div></div>
-          <div class="icard"><div class="ct">BPM</div><div class="cx big" id="liBpm">—</div></div>
+          <div class="icard"><div class="ct" data-i18n="lyr.time">TIME TO CREATE</div><div class="cx" id="liTook">—</div></div>
+          <div class="icard"><div class="ct" data-i18n="lyr.bpm">BPM</div><div class="cx big" id="liBpm">—</div></div>
         </div>
       </div>
       <div class="bottom">
         <div class="lbar">
           <span class="t" id="lsong">—</span>
           <div class="btns">
-            <button id="lfs" title="the record's soul — meaning, context, vibe"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9.4" stroke="#b6ff00" stroke-width="1.5"/><circle cx="12" cy="12" r="6.2" stroke="#2a2a2a" stroke-width="1"/><circle cx="12" cy="12" r="2.6" fill="#b6ff00"/><circle cx="12" cy="12" r="1" fill="#070707"/><rect x="11.2" y="2.2" width="1.6" height="3.4" fill="#ff2b2b"/></svg></button>
-            <button id="lclose" title="close">✕</button>
+            <button id="lfs" data-i18n-title="lyr.soul" title="the record's soul — meaning, context, vibe"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9.4" stroke="#b6ff00" stroke-width="1.5"/><circle cx="12" cy="12" r="6.2" stroke="#2a2a2a" stroke-width="1"/><circle cx="12" cy="12" r="2.6" fill="#b6ff00"/><circle cx="12" cy="12" r="1" fill="#070707"/><rect x="11.2" y="2.2" width="1.6" height="3.4" fill="#ff2b2b"/></svg></button>
+            <button id="lclose" data-i18n-title="lyr.close" title="close">✕</button>
           </div>
         </div>
         <div class="songbox" id="lsongbox"></div>
@@ -288,8 +288,8 @@
 <!-- PRESS START intro overlay -->
 <div id="enter">
   <div class="g">ONLY<span class="r">IBEE</span></div>
-  <div class="t">console for art &amp; discovery_</div>
-  <div class="s">▶ PRESS START</div>
+  <div class="t" data-i18n="shell.tagline">console for art &amp; discovery_</div>
+  <div class="s" data-i18n="shell.pressstart">▶ PRESS START</div>
 </div>
 
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
@@ -305,6 +305,8 @@
 <script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
 <script src="assets/badges.js?v=5"></script>
+<!-- translation layer (EN·FR·日本語); clock-stamped so added strings go live at once -->
+<script>document.write('<script src="assets/i18n.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
 (function(){
   /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */
@@ -315,11 +317,11 @@
 
   /* ---- section nav (fills the bar) ---- */
   var NAV=[
-    {n:'CONSOLE', u:'console.html#menu'},
-    {n:'ROOMS',   u:'arcade/'},
-    {n:'TV',      u:'tv/'},
-    {n:'ICS',     u:'console.html#ics'},
-    {n:'SHOP',    u:'console.html#shop'}
+    {n:'CONSOLE', u:'console.html#menu', k:'nav.console'},
+    {n:'ROOMS',   u:'arcade/',           k:'nav.rooms'},
+    {n:'TV',      u:'tv/',               k:'nav.tv'},
+    {n:'ICS',     u:'console.html#ics',  k:'nav.ics'},
+    {n:'SHOP',    u:'console.html#shop', k:'nav.shop'}
   ];
   /* (lyrics left the nav — the spinning book in the player opens the overlay) */
   var navEl=document.getElementById('nav');
@@ -327,10 +329,13 @@
   var NAV_TGT={SHOP:'shop',TV:'tv'};
   NAV.forEach(function(it){var b=document.createElement('button');b.textContent=it.n;
     b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
+    b.setAttribute('data-i18n',it.k);           /* i18n.js translates the label */
     b.onclick=function(){ var tg=NAV_TGT[it.n];
       if(tg&&window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget(tg);
       navigate(it.u); };
     navEl.appendChild(b);});
+  /* language switcher (EN · FR · 日) — persistent, lives in the shell so it's reachable everywhere */
+  if(window.IBEE_I18N) IBEE_I18N.mount(document.getElementById('lang'));
 
   /* ---- account pill: LOG IN / PROFILE, reachable from every page (persistent shell) ----
      No supabase-js load here — just reads the same localStorage key pattern Supabase writes
@@ -342,15 +347,17 @@
   function memberSession(){ try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
     if(/^sb-.*-auth-token$/.test(k)){ var v=localStorage.getItem(k); if(v&&v!=="null") return true; } } }catch(e){} return false; }
   var acctOn=null;
-  function renderAcct(){
-    var on=memberSession(); if(on===acctOn) return; acctOn=on;
+  function T(k,f){ return window.IBEE_I18N?IBEE_I18N.t(k,f):f; }
+  function renderAcct(force){
+    var on=memberSession(); if(on===acctOn && !force) return; acctOn=on;
     acctEl.innerHTML = on
-      ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
-      : '<button class="login" id="acctbtn">'+ICO_USER+'LOG IN</button>';
+      ? '<button class="me" id="acctbtn"><span class="dot"></span>'+T('acct.profile','PROFILE')+'</button>'
+      : '<button class="login" id="acctbtn">'+ICO_USER+T('acct.login','LOG IN')+'</button>';
     document.getElementById('acctbtn').onclick=function(){ navigate(on?'member/profile/':'member/?login=1'); };
   }
   renderAcct();
   window.addEventListener('storage',renderAcct);
+  window.addEventListener('ibee-lang',function(){ renderAcct(true); });   /* re-label on language change */
   setInterval(renderAcct,3000);
 
   function navigate(url){
@@ -367,7 +374,9 @@
   var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
   if(/^(https?:)?\/\//i.test(p)) p='console.html#menu';
   frame.src=p;
-  frame.addEventListener('load',function(){ frame.classList.add('on'); sync(); });
+  frame.addEventListener('load',function(){ frame.classList.add('on'); sync();
+    /* translate the framed page to the current language (same-origin; harmless if it has none tagged) */
+    try{ if(window.IBEE_I18N && frame.contentDocument) IBEE_I18N.apply(frame.contentDocument); }catch(e){} });
 
   function sync(){
     try{
