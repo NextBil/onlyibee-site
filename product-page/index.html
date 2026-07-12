@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>PRODUCT — ONLY IBEE</title>
+<meta name="description" content="ONLY IBEE — UTOPIE clothing. Each piece unique, made only once.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<!--
+  Generic product page: product-page/?id=<product id>.
+  Renders from assets/products-data.js (window.IBEE_PRODUCTS — edited in
+  tools/shop-manager.html). Payment buttons appear for whichever pay links the
+  product has (stripe / paypal / wix); none for CLAIMED archive pieces.
+-->
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:680px;padding:22px 16px 60px;display:flex;flex-direction:column;
+  align-items:center;gap:14px;text-align:center;position:relative;z-index:2;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+.crumbs{width:100%;text-align:left;font-family:var(--px);font-size:8px}
+.crumbs a{color:var(--dim);text-decoration:none}.crumbs a:hover{color:var(--acid)}
+
+/* ---- gallery ---- */
+.gal{width:100%;border:2px solid var(--border);background:var(--panel);padding:10px}
+.gal .big{position:relative;width:100%;aspect-ratio:1/1;background:#0a0a0c;overflow:hidden}
+.gal .big img{width:100%;height:100%;object-fit:contain;display:block}
+.gal .rtag{position:absolute;top:10px;left:10px;font-family:var(--px);font-size:8px;letter-spacing:1px;
+  padding:6px 8px;border:1px solid;background:rgba(0,0,0,.75)}
+.gal .claimtag{position:absolute;top:10px;right:10px;font-family:var(--px);font-size:8px;letter-spacing:1px;
+  padding:6px 8px;color:var(--red);border:1px solid var(--red);background:rgba(20,5,5,.85)}
+.thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.thumbs::-webkit-scrollbar{display:none}
+.thumbs img{width:64px;height:64px;object-fit:cover;flex:none;cursor:pointer;
+  border:2px solid var(--border);background:#0a0a0c;opacity:.65}
+.thumbs img.on{border-color:var(--acid);opacity:1}
+.thumbs img:hover{opacity:1}
+
+h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-height:1.8;color:var(--ink)}
+.price{font-family:var(--px);font-size:clamp(18px,5.5vw,26px);color:var(--acid);
+  text-shadow:0 0 16px rgba(182,255,0,.5)}
+.price.claimed{color:var(--red);text-shadow:0 0 16px rgba(255,43,43,.4)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{font-family:var(--px);font-size:8px;padding:7px 10px;border:1px solid var(--border);color:var(--dim)}
+.chip.a{color:var(--acid);border-color:#3a5500}
+.chip.r{color:var(--red);border-color:#551111}
+
+/* rarity colors (match the console shop) */
+.rz-c{color:#9a9a9a;border-color:#444}.rz-sr{color:var(--cyan);border-color:#123a44}
+.rz-sdr{color:var(--pink);border-color:#4a1240}.rz-leg{color:var(--gold);border-color:#4a3a12}
+
+.card{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);
+  padding:16px 18px;text-align:left;font-size:21px;line-height:1.55;color:#c9c9c9}
+.card .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px;letter-spacing:1px}
+
+/* ---- payment ---- */
+.paybtns{display:flex;flex-direction:column;gap:10px}
+.paybtn{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--px);
+  font-size:10px;padding:15px 16px;text-decoration:none;letter-spacing:1px}
+.paybtn.card{background:var(--acid);color:#000}
+.paybtn.pp{background:transparent;color:var(--cyan);border:1px solid #123a44}
+.paybtn.wx{background:transparent;color:var(--dim);border:1px solid var(--border)}
+.paybtn:active{transform:translateY(2px)}
+.paynote{color:var(--dim);font-size:16px;margin-top:10px;text-align:center}
+.claimbox{border:1px solid var(--red);color:var(--red);font-family:var(--px);font-size:9px;
+  padding:14px;text-align:center;line-height:1.8;background:#140505}
+
+.notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0}
+.back{font-family:var(--px);font-size:9px;color:var(--acid);text-decoration:none;border:1px solid var(--acid);padding:12px 16px}
+footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <a href="../console.html#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>PRODUCT.SYS</span>
+</header>
+
+<main id="main">
+  <div class="crumbs"><a href="../console.html#shop">◀ BACK TO THE SHOP_</a></div>
+  <div id="pwrap" style="width:100%;display:none;flex-direction:column;gap:14px;align-items:center">
+    <div class="gal">
+      <div class="big"><img id="bigimg" src="" alt=""><span class="rtag" id="rtag"></span><span class="claimtag" id="claimtag" style="display:none">CLAIMED</span></div>
+      <div class="thumbs" id="thumbs"></div>
+    </div>
+    <h1 id="pname">—</h1>
+    <div class="price" id="pprice">—</div>
+    <div class="chips" id="pchips"></div>
+    <div class="card"><div class="h">// THIS PIECE_</div><div id="pdesc">—</div></div>
+    <div class="card"><div class="h">// GET IT_</div>
+      <div class="paybtns" id="paybtns"></div>
+      <div class="paynote" id="paynote">from paris to wherever you are — shipping's on us_</div>
+    </div>
+  </div>
+  <div class="notfound" id="notfound" style="display:none">✕ PIECE NOT FOUND_<br><br>
+    <a class="back" href="../console.html#shop">◀ BACK TO THE SHOP</a></div>
+</main>
+
+<footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
+
+<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};
+
+  var id=(new RegExp("[?&]id=([^&]+)").exec(location.search)||[])[1]||"";
+  id=decodeURIComponent(id);
+  var all=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.products)||[];
+  var p=null; all.forEach(function(x){ if(x.id===id) p=x; });
+
+  if(!p){ $("notfound").style.display=""; return; }
+  document.title=p.n+" — ONLY IBEE";
+  $("pwrap").style.display="flex";
+
+  /* gallery */
+  var imgs=(p.imgs&&p.imgs.length)?p.imgs:[];
+  var big=$("bigimg");
+  function show(i){
+    if(!imgs.length){ big.style.display="none"; return; }
+    big.src=imgs[i]; big.alt=p.n;
+    Array.prototype.forEach.call($("thumbs").children,function(t,k){ t.classList.toggle("on",k===i); });
+  }
+  $("thumbs").innerHTML=imgs.map(function(u,i){ return '<img src="'+e2(u)+'" alt="" data-i="'+i+'" loading="lazy">'; }).join('');
+  Array.prototype.forEach.call($("thumbs").children,function(t){ t.onclick=function(){ show(+t.getAttribute("data-i")); }; });
+  show(0);
+  if(imgs.length<2) $("thumbs").style.display="none";
+
+  /* identity */
+  var rz=$("rtag"); rz.textContent=RNAME[p.r]||"COMMON"; rz.className="rtag rz-"+(p.r||"c");
+  $("pname").textContent=p.n;
+  var out=!!p.out;
+  $("pprice").textContent=out?"CLAIMED":((p.cur||"€")+p.price);
+  $("pprice").className="price"+(out?" claimed":"");
+  if(out) $("claimtag").style.display="";
+  $("pchips").innerHTML='<span class="chip a">✓ HUMAN-MADE</span><span class="chip a">1 OF 1</span>'
+    +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">IN STOCK</span>');
+  $("pdesc").textContent=p.desc||"made once, by hand, then never again_";
+
+  /* payment: a button per configured link (external → new tab, works inside the shell frame) */
+  var pay=p.pay||{}, btns="";
+  if(!out){
+    if(pay.stripe)  btns+='<a class="paybtn card" href="'+e2(pay.stripe)+'" target="_blank" rel="noopener">💳 PAY BY CARD — '+e2((p.cur||"€")+p.price)+'</a>';
+    if(pay.paypal)  btns+='<a class="paybtn pp" href="'+e2(pay.paypal)+'" target="_blank" rel="noopener">PAY WITH PAYPAL</a>';
+    if(pay.wix)     btns+='<a class="paybtn wx" href="'+e2(pay.wix)+'" target="_blank" rel="noopener">BUY VIA THE OLD STORE ↗</a>';
+    if(!btns){ btns='<div class="claimbox">CHECKOUT OFFLINE — DM TO CLAIM THIS PIECE_</div>'; $("paynote").style.display="none"; }
+  } else {
+    btns='<div class="claimbox">CLAIMED — THIS PIECE LIVES WITH SOMEONE NOW_<br>EACH ONE IS MADE ONLY ONCE</div>';
+    $("paynote").style.display="none";
+  }
+  $("paybtns").innerHTML=btns;
+})();
+</script>
+<script src="../assets/player.js?v=13"></script>
+</body>
+</html>
