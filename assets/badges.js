@@ -38,6 +38,11 @@
   function loggedIn(){ try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
     if(/^sb-.*-auth-token$/.test(k)){ var v=localStorage.getItem(k); if(v&&v!=="null") return true; } } }catch(e){} return false; }
   function eng10(){ try{ return localStorage.getItem("ibee_engine10")==="1"; }catch(e){ return false; } }
+  /* room pages write these (they use their own audio, not IBEERADIO): the NP room
+     marks each distinct song felt in ibee_np_songs; the 20MZS room flags a full
+     20-min ride in ibee_mzs_full. We only READ them, so there's no write race. */
+  function npSongsN(){ try{ var o=JSON.parse(localStorage.getItem("ibee_np_songs")||"{}")||{}; return nkeys(o); }catch(e){ return 0; } }
+  function mzsFull(){ try{ return localStorage.getItem("ibee_mzs_full")==="1"; }catch(e){ return false; } }
   function sav(){ try{ return JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}; }catch(e){ return {}; } }
   function playsTotal(){ var p=sav().plays||{},t=0; for(var k in p) t+=(+p[k]||0); return t; }
   function ymd(d){ d=d||new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
@@ -84,6 +89,13 @@
       chk:function(P){return P.shared>=1;},pr:function(){return "share your pass";}},
     {id:"vault",ico:"🔓",n:"VAULT FINDER",d:"found the hidden vault",
       chk:function(P){return P.vault;},pr:function(){return "it's out there_";}},
+    /* ---- album badges: earned inside the room pages, which write their own
+       localStorage keys (ibee_np_songs / ibee_mzs_full). Each carries a custom
+       logo (img) that falls back to the emoji until the PNG is deployed. ---- */
+    {id:"true-punk",ico:"🎸",img:"/nouveauxpunk/np%20noit%20tr.png",n:"TRUE PUNK",d:"felt 7 tracks of NOUVEAUX PUNK",
+      chk:function(P){return P.npSongs>=7;},pr:function(P){return Math.min(7,P.npSongs)+"/7 NP tracks";}},
+    {id:"certified-stoner",ico:"🌿",img:"/20minzasession/20%20min%20za%20logo.png",n:"CERTIFIED STONER",d:"rode the whole 20 MIN ZA SESSION",
+      chk:function(P){return P.mzsFull;},pr:function(){return "ride the full 20-min take_";}},
     /* ---- hidden badges: pure luck, no task to chase. They show as "???" until
        they win themselves; only then the rule & reason (why) is revealed. ---- */
     {id:"lucky-spin",ico:"🎰",n:"LUCKY SPIN",secret:true,
@@ -107,6 +119,7 @@
     return {listen:p.listen,night:p.night,full:p.full,best:p.best,shared:p.shared,chess:p.chess,
       nsongs:nkeys(p.songs),roomsN:nkeys(p.rooms),days:p.days,streak:streak(),
       plays:playsTotal(),vault:!!sav().vault,loggedIn:loggedIn(),eng10:eng10(),maxPlay:maxPlay,
+      npSongs:npSongsN(),mzsFull:mzsFull(),
       lucky:p.lucky||0,comet:p.comet||0,glitch:p.glitch||0};
   }
 
@@ -133,7 +146,7 @@
   function inbox(){
     var s=load(),m=seenMap(),out=[];
     DEFS.forEach(function(d){ if(s.earned[d.id]&&!m[d.id])
-      out.push({id:d.id,kind:"badge",def:d,icon:d.ico,n:d.n2||d.n,d:d.d,ts:s.earned[d.id],target:"profile"}); });
+      out.push({id:d.id,kind:"badge",def:d,icon:d.ico,img:d.img,n:d.n2||d.n,d:d.d,ts:s.earned[d.id],target:"profile"}); });
     newsAll().forEach(function(x){ if(!x||!x.id||m[x.id]) return;
       out.push({id:x.id,kind:"news",icon:x.icon||"📰",n:x.n||"NEWS",d:x.d||"",
         ts:x.ts||(x.date?+new Date(x.date):Date.now()),type:x.t,link:x.link||"",
@@ -165,8 +178,18 @@
     try{ localStorage.setItem(SEEN,JSON.stringify(m)); }catch(e){}
   }
 
+  /* a badge icon is either an emoji (ico) or a custom logo image (img). When img
+     is set we render an <img>; if it fails to load (e.g. not deployed yet) it
+     swaps itself back to the emoji. Shared with the profile page via the API. */
+  function icoHTML(o){
+    var em=(o&&(o.ico||o.icon))||'🏆';   /* DEFS use .ico, inbox items use .icon */
+    if(o&&o.img) return '<img class="bimg" src="'+o.img+'" alt="" '
+      +'onerror="this.outerHTML=&quot;'+em+'&quot;">';
+    return (o&&(o.ico||o.icon))||'';
+  }
+
   /* public: the profile page (and anything else) renders from this */
-  window.IBEE_BADGES={defs:DEFS,state:function(){return load();},snapshot:snapshot,
+  window.IBEE_BADGES={defs:DEFS,state:function(){return load();},snapshot:snapshot,icoHTML:icoHTML,
     earned:function(){ var s=load(),n=0; for(var k in s.earned) n++; return n; },
     unseen:unseen,inbox:inbox,markSeen:markSeen,targetCounts:targetCounts,markSeenTarget:markSeenTarget};
 
@@ -185,6 +208,8 @@
     +".bgt.bye{transform:translateX(0) translateY(-6px);opacity:0;transition:opacity .45s,transform .45s}"
     +".bgt .bi{font-size:22px;line-height:1;flex:none;filter:drop-shadow(0 0 6px rgba(182,255,0,.5));"
     +"animation:bgpop .5s cubic-bezier(.2,1.6,.4,1)}"
+    +".bimg{width:1.15em;height:1.15em;object-fit:contain;display:inline-block;vertical-align:middle}"
+    +".bgt .bi .bimg{width:26px;height:26px}"
     +"@keyframes bgpop{0%{transform:scale(.2) rotate(-18deg)}100%{transform:scale(1) rotate(0)}}"
     +".bgt .bx{display:flex;flex-direction:column;gap:5px;min-width:0}"
     +".bgt .bh{font-size:7px;color:#7a7a7a;letter-spacing:1px}"
@@ -246,7 +271,7 @@
     if(showing||!queue.length) return; showing=true;
     var t=queue.shift(), el=document.createElement("div");
     el.className="bgt"+(t.gold?" gold":"")+(t.link?" link":"");
-    el.innerHTML='<div class="bi">'+t.ico+'</div><div class="bx"><div class="bh">'+esc(t.h)
+    el.innerHTML='<div class="bi">'+icoHTML(t)+'</div><div class="bx"><div class="bh">'+esc(t.h)
       +'</div><div class="bn">'+esc(t.n)+'</div>'+(t.d?'<div class="bd2">'+esc(t.d)+'</div>':'')
       +'</div>'+(t.link?'<div class="bxx" title="dismiss">✕</div>':'');
     host.appendChild(el);
@@ -313,7 +338,7 @@
       var ok=false; try{ ok=def.chk(P); }catch(e){}
       if(!ok) return;
       S.earned[def.id]=Date.now(); dirty=true;
-      toast({ico:def.ico,h:def.gold?"⭐ UNLOCKED":(def.secret?"✦ SECRET BADGE":"BADGE EARNED"),
+      toast({ico:def.ico,img:def.img,h:def.gold?"⭐ UNLOCKED":(def.secret?"✦ SECRET BADGE":"BADGE EARNED"),
         n:def.n2||def.n,d:def.d,gold:def.gold});
       if(def.id==="engine"){ try{ localStorage.setItem("ibee_engine10","1"); }catch(e){} }
     });
