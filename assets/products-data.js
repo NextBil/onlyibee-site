@@ -16,6 +16,22 @@ window.IBEE_PRODUCTS={
   "paypalClientId": "",
   "currency": "EUR"
  },
+ "folders": [
+  {
+   "id": "ics-v1-autumn-2024",
+   "name": "ICS V1 — AUTUMN 2024",
+   "sub": "FIRST DROP PROTOTYPE",
+   "tint": "leg",
+   "hype": 0
+  },
+  {
+   "id": "ics-v3",
+   "name": "ICS V3",
+   "sub": "NEXT DROP — LOADING…",
+   "tint": "sdr",
+   "hype": 1
+  }
+ ],
  "products": [
   {
    "id": "all-ics-pink",

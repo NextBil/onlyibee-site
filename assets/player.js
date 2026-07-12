@@ -51,27 +51,51 @@
     xsc.onload = function(){ addExtras(); };
     document.head.appendChild(xsc);
   }catch(e){}
-  /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback) */
+
+  /* ---------- albums: the cover + name every song wears, and (for specials)
+     the ROOM it belongs to + the galaxy it maps to in the music universe.
+     `room` present ⇒ the album is a "special project" that has its own
+     immersive page; those get a GO TO THE ROOM button by the player. -------- */
+  var ALBUMS = {
+    rss: { name:"RARE SOUL SESSIONS", cover: ROOT+"assets/img/follow-me.jpg" },
+    np:  { name:"NOUVEAUX PUNK",      cover: ROOT+"assets/img/nouveaux-punk.jpg",
+           room: ROOT+"nouveauxpunk/", galaxy:"np",  tint:"#ff2b2b" },
+    mzs: { name:"20 MIN ZA SESSION",  cover: ROOT+"assets/img/20mzs-album.png",
+           room: ROOT+"20minzasession/", galaxy:"mzs", tint:"#ff7a1a" }
+  };
+  function album(id){ return ALBUMS[id] || ALBUMS.rss; }
+
+  /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback)
+     al = album id (cover + name) · special albums also expose a ROOM. */
   var SONGS = [
-    {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210},
-    {f:"bounceee.mp3",      r:"bounceee3.mp3",      n:"BOUNCEEE",        hue:285},
-    {f:"callin-on-u.mp3",   r:"callin on u .mp3",   n:"CALLIN ON U",     hue:200},
-    {f:"freestyle-sept9.mp3",r:"freestylesept9.mp3",n:"FREESTYLE SEPT9", hue:150},
-    {f:"head.mp3",          r:"head .mp3",          n:"HEAD",            hue:120},
-    {f:"lonely22.mp3",      r:"lonely22.mp3",       n:"LONELY22",        hue:230},
-    {f:"maintenant.mp3",    r:"maintenant.mp3",     n:"MAINTENANT",      hue:40},
-    {f:"mix-100.mp3",       r:"mix 100.mp3",        n:"MIX 100",         hue:20},
-    {f:"nananannn.mp3",     r:"nananannn.mp3",      n:"NANANANNN",       hue:300},
-    {f:"obsess.mp3",        r:"obsess.mp3",         n:"OBSESS",          hue:320},
-    {f:"real-to-me.mp3",    r:"real to me .mp3",    n:"REAL TO ME",      hue:190},
-    {f:"ride-it.mp3",       r:"riddeit2.mp3",       n:"RIDE IT",         hue:265},
-    {f:"right-middle.mp3",  r:"right middle.mp3",   n:"RIGHT MIDDLE",    hue:175},
-    {f:"silouhette.mp3",    r:"silouhette.mp3",     n:"SILOUHETTE",      hue:250},
-    {f:"strippin-down.mp3", r:"strippin down.mp3",  n:"STRIPPIN DOWN",   hue:340},
-    {f:"to-our-pain.mp3",   r:"to our pain .mp3",   n:"TO OUR PAIN",     hue:0},
-    {f:"write-a-song.mp3",  r:"write a song v1.mp3",n:"WRITE A SONG",    hue:45},
-    {f:"yo-body.mp3",       r:"yo body .mp3",       n:"YO BODY",         hue:75}
+    {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210, al:"rss"},
+    {f:"bounceee.mp3",      r:"bounceee3.mp3",      n:"BOUNCEEE",        hue:285, al:"rss"},
+    {f:"callin-on-u.mp3",   r:"callin on u .mp3",   n:"CALLIN ON U",     hue:200, al:"rss"},
+    {f:"freestyle-sept9.mp3",r:"freestylesept9.mp3",n:"FREESTYLE SEPT9", hue:150, al:"rss"},
+    {f:"head.mp3",          r:"head .mp3",          n:"HEAD",            hue:120, al:"rss"},
+    {f:"lonely22.mp3",      r:"lonely22.mp3",       n:"LONELY22",        hue:230, al:"rss"},
+    {f:"maintenant.mp3",    r:"maintenant.mp3",     n:"MAINTENANT",      hue:40,  al:"rss"},
+    {f:"mix-100.mp3",       r:"mix 100.mp3",        n:"MIX 100",         hue:20,  al:"rss"},
+    {f:"nananannn.mp3",     r:"nananannn.mp3",      n:"NANANANNN",       hue:300, al:"rss"},
+    {f:"obsess.mp3",        r:"obsess.mp3",         n:"OBSESS",          hue:320, al:"rss"},
+    {f:"real-to-me.mp3",    r:"real to me .mp3",    n:"REAL TO ME",      hue:190, al:"rss", cover: ROOT+"assets/covers/real to me.jpg"},
+    {f:"ride-it.mp3",       r:"riddeit2.mp3",       n:"RIDE IT",         hue:265, al:"rss"},
+    {f:"right-middle.mp3",  r:"right middle.mp3",   n:"RIGHT MIDDLE",    hue:175, al:"rss"},
+    {f:"silouhette.mp3",    r:"silouhette.mp3",     n:"SILOUHETTE",      hue:250, al:"rss"},
+    {f:"strippin-down.mp3", r:"strippin down.mp3",  n:"STRIPPIN DOWN",   hue:340, al:"rss"},
+    {f:"to-our-pain.mp3",   r:"to our pain .mp3",   n:"TO OUR PAIN",     hue:0,   al:"rss"},
+    {f:"write-a-song.mp3",  r:"write a song v1.mp3",n:"WRITE A SONG",    hue:45,  al:"rss"},
+    {f:"yo-body.mp3",       r:"yo body .mp3",       n:"YO BODY",         hue:75,  al:"rss"},
+    /* ---- special projects — playable on the radio AND have their own room ---- */
+    {f:"20mzs.mp3",         r:"Only Ibee - 20MZS.mp3", n:"20 MIN ZA SESSION", hue:32, al:"mzs"}
   ];
+  /* NOUVEAUX PUNK lives as a full 27-track EXPERIENCE inside its room, so on the
+     radio it shows as one album card whose action is "go to the room" (roomOnly).
+     Any album with a `room` also gets a persistent GO TO THE ROOM button. */
+  var ROOMS = [
+    {al:"np", roomOnly:true}
+  ];
+  function songCover(s){ return s.cover || album(s.al).cover; }
 
   /* ---------- styles ---------- */
   var css = ""
@@ -90,16 +114,21 @@
   +"#radiochip .eq i:nth-child(2){animation-delay:.2s}#radiochip .eq i:nth-child(3){animation-delay:.4s}"
   +"#radiochip.idle .eq i{animation:none;height:3px}"
   +"@keyframes req{0%,100%{height:3px}50%{height:10px}}"
-  +"#radiopanel{position:fixed;right:14px;bottom:104px;z-index:8996;width:min(320px,92vw);"
+  +"#radiopanel{position:fixed;right:14px;bottom:104px;z-index:8996;width:min(340px,92vw);"
   +"background:rgba(0,0,0,.94);border:2px solid #2a2a2a;display:none;flex-direction:column;font-family:'VT323',monospace;color:#e8e8e8}"
   +"#radiopanel.open{display:flex}"
   +"#rp-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #2a2a2a;"
   +"font-family:'Press Start 2P',monospace;font-size:9px;color:#b6ff00}"
   +"#rp-close{cursor:pointer;color:#7a7a7a;font-size:12px;padding:2px 6px}#rp-close:hover{color:#ff2b2b}"
   +"#rp-now{padding:12px;border-bottom:1px solid #2a2a2a}"
-  +"#rp-title{font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;margin-bottom:3px;"
+  /* now-playing: album cover next to the title, album name small under it */
+  +"#rp-nowtop{display:flex;gap:11px;align-items:center;cursor:pointer;margin-bottom:11px}"
+  +"#rp-cover{width:52px;height:52px;flex:none;object-fit:cover;background:#111;border:1px solid #2a2a2a;image-rendering:auto}"
+  +"#rp-nowtext{min-width:0;flex:1}"
+  +"#rp-title{font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;margin-bottom:5px;line-height:1.4;"
   +"white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
-  +"#rp-sub{color:#7a7a7a;font-size:16px;margin-bottom:10px}"
+  +"#rp-album{color:#8f8f8f;font-size:15px;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+  +"#rp-album .browse{color:#b6ff00;opacity:.75}"
   +"#rp-seek{position:relative;height:14px;border:1px solid #2a2a2a;padding:2px;cursor:pointer;touch-action:none}"
   +"#rp-fill{height:100%;width:0%;background:#b6ff00;position:relative}"
   +"#rp-times{display:flex;justify-content:space-between;color:#7a7a7a;font-size:14px;margin-top:3px}"
@@ -114,15 +143,70 @@
   +"#rp-lyr img{width:24px;height:24px;image-rendering:pixelated;display:block;margin:auto}"
   +"#rp-lyr:hover{background:#131a00}"
   +"@keyframes rlyrglow{0%,100%{box-shadow:0 0 6px rgba(182,255,0,.2)}50%{box-shadow:0 0 16px rgba(182,255,0,.55)}}"
-  +"#rp-list{overflow-y:auto;max-height:min(300px,38vh)}"
-  +".rp-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;color:#9a9a9a;font-size:18px;border-bottom:1px solid #161616}"
+  /* GO TO THE ROOM — special-project button, always near the player */
+  +"#rp-room{margin-top:10px;display:none;text-decoration:none}"
+  +"#rp-room.show{display:block}"
+  +"#rp-room a{display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Press Start 2P',monospace;"
+  +"font-size:9px;padding:11px 10px;text-decoration:none;color:#000;background:var(--roomtint,#ff2b2b);"
+  +"border:1px solid var(--roomtint,#ff2b2b);letter-spacing:1px;animation:roompulse 1.9s ease-in-out infinite}"
+  +"#rp-room a:hover{filter:brightness(1.12)}"
+  +"@keyframes roompulse{0%,100%{box-shadow:0 0 6px rgba(255,80,40,.35)}50%{box-shadow:0 0 18px rgba(255,80,40,.75)}}"
+  /* search + view toggle */
+  +"#rp-tools{display:flex;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid #2a2a2a}"
+  +"#rp-search{flex:1;background:#0a0a0a;border:1px solid #2a2a2a;color:#e8e8e8;font-family:'VT323',monospace;"
+  +"font-size:17px;padding:7px 9px;outline:none}"
+  +"#rp-search:focus{border-color:#b6ff00}"
+  +"#rp-search::placeholder{color:#5a5a5a}"
+  +"#rp-view{font-family:'Press Start 2P',monospace;font-size:8px;padding:0 9px;height:33px;flex:none;"
+  +"background:#0e0e0e;color:#7a7a7a;border:1px solid #2a2a2a;cursor:pointer}"
+  +"#rp-view:hover,#rp-view.on{border-color:#b6ff00;color:#b6ff00}"
+  +"#rp-list{overflow-y:auto;max-height:min(340px,44vh)}"
+  /* ----- list rows (with mini cover) ----- */
+  +".rp-row{display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;color:#9a9a9a;font-size:17px;border-bottom:1px solid #161616}"
   +".rp-row:hover{background:#101010;color:#fff}"
   +".rp-row.now{color:#b6ff00;background:#0d1400}"
-  +".rp-row .no{font-family:'Press Start 2P',monospace;font-size:8px;width:24px;color:#555}"
+  +".rp-row .no{font-family:'Press Start 2P',monospace;font-size:8px;width:22px;color:#555}"
   +".rp-row.now .no{color:#b6ff00}"
-  +".rp-row .dot{width:8px;height:8px;flex:none}"
+  +".rp-row .rc{width:34px;height:34px;flex:none;object-fit:cover;background:#111;border:1px solid #222}"
+  +".rp-row .rt{min-width:0;flex:1;overflow:hidden}"
+  +".rp-row .rt .rn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+  +".rp-row .rt .ra{font-size:13px;color:#6a6a6a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+  +".rp-row .rmroom{font-family:'Press Start 2P',monospace;font-size:7px;color:#000;background:var(--rt,#ff2b2b);padding:5px 6px;flex:none}"
+  +".rp-row.locked{opacity:.5;cursor:not-allowed}"
+  +".rp-row.locked .rc{filter:brightness(.4) grayscale(.7)}"
+  +".rp-row .lk{width:13px;height:13px;flex:none;color:#ff2b2b}"
+  /* ----- Spotify-style grid with 3D sideways tilt ----- */
+  +"#rp-list.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px}"
+  +".rp-tile{cursor:pointer;perspective:640px}"
+  +".rp-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;"
+  +"transform:rotateY(-19deg);transform-origin:center;transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s;"
+  +"box-shadow:-12px 9px 24px rgba(0,0,0,.65);overflow:hidden}"
+  +".rp-tile:hover .art{transform:rotateY(0);box-shadow:0 10px 26px rgba(0,0,0,.6)}"
+  +".rp-tile.now .art{border-color:#b6ff00;box-shadow:-10px 9px 24px rgba(0,0,0,.6),0 0 16px rgba(182,255,0,.4)}"
+  +".rp-tile .art img{width:100%;height:100%;object-fit:cover;display:block}"
+  +".rp-tile .art.pad img{object-fit:contain;padding:9%;background:radial-gradient(circle at 50% 40%,#241207,#0a0604)}"
+  +".rp-tile .gtag{position:absolute;left:0;bottom:0;right:0;padding:5px 6px;font-family:'VT323',monospace;font-size:13px;"
+  +"color:#d7d7d7;background:linear-gradient(0deg,rgba(0,0,0,.82),transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+  +".rp-tile .gnow{position:absolute;top:6px;left:6px;font-family:'Press Start 2P',monospace;font-size:7px;color:#000;background:#b6ff00;padding:3px 4px}"
+  +".rp-tile .nm{font-family:'Press Start 2P',monospace;font-size:8px;color:#cfcfcf;margin-top:8px;line-height:1.5;"
+  +"white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+  +".rp-tile:hover .nm{color:#fff}"
+  +".rp-tile.now .nm{color:#b6ff00}"
+  /* locked tiles: darkened + lock badge */
+  +".rp-tile.locked .art img{filter:brightness(.32) grayscale(.75)}"
+  +".rp-tile.locked .art::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.35)}"
+  +".rp-tile.locked .lockb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;"
+  +"width:30px;height:30px;color:#ff2b2b;filter:drop-shadow(0 0 8px rgba(255,43,43,.6))}"
+  +".rp-tile.locked .nm{color:#6a6a6a}"
+  /* room tile flag */
+  +".rp-tile .roomb{position:absolute;top:6px;right:6px;z-index:2;font-family:'Press Start 2P',monospace;font-size:7px;"
+  +"color:#000;background:var(--rt,#ff2b2b);padding:4px 5px;letter-spacing:.5px}"
+  +"#rp-empty{padding:22px 12px;text-align:center;color:#5a5a5a;font-family:'Press Start 2P',monospace;font-size:8px;line-height:2;display:none}"
   ;
   var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
+
+  var LOCK_SVG = "<svg class='lk' viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
+  var LOCK_BIG = "<svg class='lockb' viewBox='0 0 24 24' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
 
   /* ---------- DOM ---------- */
   var nf = document.createElement("div"); nf.id = "nf"; document.body.appendChild(nf);
@@ -136,7 +220,11 @@
   panel.innerHTML = ''
     +'<div id="rp-head"><span>IBEE RADIO_</span><span id="rp-close">✕</span></div>'
     +'<div id="rp-now">'
-    +'  <div id="rp-title">—</div><div id="rp-sub">rare soul sessions</div>'
+    +'  <div id="rp-nowtop" title="browse all songs & albums">'
+    +'    <img id="rp-cover" alt="" src="">'
+    +'    <div id="rp-nowtext"><div id="rp-title">—</div>'
+    +'      <div id="rp-album">rare soul sessions <span class="browse">· tap to browse</span></div></div>'
+    +'  </div>'
     +'  <div id="rp-seek"><div id="rp-fill"></div></div>'
     +'  <div id="rp-times"><span id="rp-cur">0:00</span><span id="rp-tot">--:--</span></div>'
     +'  <div id="rp-ctrl">'
@@ -146,8 +234,14 @@
     +'    <button id="rp-shuf" title="aleatory — let fate pick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l10 10h4"/><path d="M3 17h4l2.5-2.5"/><path d="M14.5 9.5 17 7h4"/><path d="M18 4l3 3-3 3"/><path d="M18 14l3 3-3 3"/></svg></button>'
     +'    <button id="rp-lyr" title="LYRICS ENGINE"><img alt="lyrics" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M1 3 Q4.5 1.4 8 3 Q11.5 1.4 15 3 V13 Q11.5 11.4 8 13 Q4.5 11.4 1 13 Z\' fill=\'%23b6ff00\' stroke=\'%23223300\' stroke-width=\'.7\'/%3E%3Cline x1=\'8\' y1=\'3\' x2=\'8\' y2=\'13\' stroke=\'%23223300\' stroke-width=\'.9\'/%3E%3Cline x1=\'2.8\' y1=\'5\' x2=\'6.4\' y2=\'4.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'7\' x2=\'6.4\' y2=\'6.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'9\' x2=\'6.4\' y2=\'8.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'4.6\' x2=\'13.2\' y2=\'5\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'6.6\' x2=\'13.2\' y2=\'7\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Crect x=\'11\' y=\'2\' width=\'1.6\' height=\'4.4\' fill=\'%23ff2b2b\'/%3E%3C/svg%3E"></button>'
     +'  </div>'
+    +'  <div id="rp-room"></div>'
     +'</div>'
-    +'<div id="rp-list"></div>';
+    +'<div id="rp-tools">'
+    +'  <input id="rp-search" type="text" placeholder="search songs & albums_" autocomplete="off" spellcheck="false">'
+    +'  <button id="rp-view" title="grid / list view">▦ GRID</button>'
+    +'</div>'
+    +'<div id="rp-list"></div>'
+    +'<div id="rp-empty">NO SIGNALS_<br>TRY ANOTHER WORD</div>';
   document.body.appendChild(panel);
 
   var audio = document.createElement("audio");
@@ -156,16 +250,105 @@
 
   var $ = function(id){ return document.getElementById(id); };
   var list = $("rp-list");
-  function addRow(s, i){
-    var row = document.createElement("div");
-    row.className = "rp-row"; row.dataset.i = i;
-    row.innerHTML = '<span class="no">'+String(i+1).padStart(2,"0")+'</span>'
-      +'<span class="dot" style="background:hsl('+s.hue+',85%,55%)"></span>'
-      +'<span>'+s.n+'</span>';
-    row.onclick = function(){ play(i); openPanel(); };
-    list.appendChild(row);
+
+  /* placeholder cover generator (hue disc) so a missing image never shows broken */
+  function fallbackCover(hue){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E"
+      +"%3Crect width='100' height='100' fill='hsl("+(hue||190)+",45%25,12%25)'/%3E"
+      +"%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='hsl("+(hue||190)+",90%25,55%25)' stroke-width='3'/%3E"
+      +"%3Ccircle cx='50' cy='50' r='7' fill='hsl("+(hue||190)+",90%25,55%25)'/%3E%3C/svg%3E";
   }
-  SONGS.forEach(addRow);
+  function coverImg(cls, src, hue){
+    return '<img class="'+cls+'" alt="" loading="lazy" src="'+src+'" '
+      +'onerror="this.onerror=null;this.src=\''+fallbackCover(hue)+'\'">';
+  }
+
+  /* ===================== LIST + GRID RENDERING ===================== */
+  var viewMode = "list";   // "list" | "grid"
+  var query = "";
+
+  function matches(name, albName){
+    if(!query) return true;
+    var q = query.toLowerCase();
+    return name.toLowerCase().indexOf(q) >= 0 || albName.toLowerCase().indexOf(q) >= 0;
+  }
+
+  function render(){
+    list.className = viewMode === "grid" ? "grid" : "";
+    var html = "", shown = 0, i;
+    if(viewMode === "grid"){
+      for(i=0;i<SONGS.length;i++){
+        var s = SONGS[i], al = album(s.al);
+        if(!matches(s.n, al.name)) continue;
+        shown++;
+        var padc = al.pad ? " pad" : "";
+        html += '<div class="rp-tile'+(i===cur?" now":"")+(s.locked?" locked":"")+'" data-i="'+i+'"'
+          + (al.room?' style="--rt:'+(al.tint||"#ff2b2b")+'"':'')+'>'
+          + '<div class="art'+padc+'">'+coverImg("", songCover(s), s.hue)
+          + (i===cur?'<span class="gnow">NOW</span>':'')
+          + (s.locked?LOCK_BIG:'')
+          + (al.room?'<span class="roomb">ROOM</span>':'')
+          + '<span class="gtag">'+esc(al.name)+'</span></div>'
+          + '<div class="nm">'+esc(s.n)+'</div></div>';
+      }
+      /* album cards for room-only specials (e.g. NOUVEAUX PUNK) */
+      ROOMS.forEach(function(r){
+        var al = album(r.al);
+        if(!matches(al.name, al.name)) return;
+        shown++;
+        html += '<div class="rp-tile" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
+          + '<div class="art'+(al.pad?" pad":"")+'">'+coverImg("", al.cover, 110)
+          + '<span class="roomb">ROOM</span>'
+          + '<span class="gtag">ALBUM · THE EXPERIENCE</span></div>'
+          + '<div class="nm">'+esc(al.name)+'</div></div>';
+      });
+    } else {
+      for(i=0;i<SONGS.length;i++){
+        var s2 = SONGS[i], al2 = album(s2.al);
+        if(!matches(s2.n, al2.name)) continue;
+        shown++;
+        html += '<div class="rp-row'+(i===cur?" now":"")+(s2.locked?" locked":"")+'" data-i="'+i+'"'
+          + (al2.room?' style="--rt:'+(al2.tint||"#ff2b2b")+'"':'')+'>'
+          + '<span class="no">'+String(i+1).padStart(2,"0")+'</span>'
+          + coverImg("rc", songCover(s2), s2.hue)
+          + '<span class="rt"><span class="rn">'+esc(s2.n)+'</span><span class="ra">'+esc(al2.name)+'</span></span>'
+          + (s2.locked?LOCK_SVG:(al2.room?'<span class="rmroom">ROOM</span>':''))
+          + '</div>';
+      }
+      ROOMS.forEach(function(r){
+        var al = album(r.al);
+        if(!matches(al.name, al.name)) return;
+        shown++;
+        html += '<div class="rp-row" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
+          + '<span class="no">EP</span>'
+          + coverImg("rc", al.cover, 110)
+          + '<span class="rt"><span class="rn">'+esc(al.name)+'</span><span class="ra">the experience · tap for the room</span></span>'
+          + '<span class="rmroom">ROOM</span></div>';
+      });
+    }
+    list.innerHTML = html;
+    $("rp-empty").style.display = shown ? "none" : "block";
+    bindRows();
+  }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m];}); }
+
+  function bindRows(){
+    Array.prototype.forEach.call(list.children, function(el){
+      var roomId = el.getAttribute("data-room");
+      if(roomId){ el.onclick = function(){ gotoRoom(roomId); }; return; }
+      var i = +el.dataset.i;
+      el.onclick = function(){
+        var s = SONGS[i];
+        if(s && s.locked){ return; }   // locked → not playable
+        play(i); openPanel();
+      };
+    });
+  }
+
+  function gotoRoom(id){
+    var al = album(id);
+    if(al.room){ location.href = al.room; }
+  }
 
   /* ---------- state ---------- */
   var cur = -1, wantResume = false, needLoad = false, pendingTime = 0, shuffle = false;
@@ -174,13 +357,20 @@
       i: cur, t: needLoad ? (pendingTime||0) : (audio.currentTime||0), p: !audio.paused && cur>=0, s: shuffle
     })); }catch(e){}
   }
-  /* aleatory mode: next song is a surprise (never the same one twice) */
+  /* aleatory mode: next song is a surprise (never the same one twice); skip locked */
   function nextIndex(){
     if(shuffle && SONGS.length > 1){
-      var j; do{ j = Math.floor(Math.random()*SONGS.length); }while(j === cur);
+      var j, guard=0; do{ j = Math.floor(Math.random()*SONGS.length); }while((j === cur || SONGS[j].locked) && ++guard<40);
       return j;
     }
-    return cur + 1;
+    var k = cur, guard2=0;
+    do{ k = (k + 1) % SONGS.length; }while(SONGS[k].locked && ++guard2 < SONGS.length);
+    return k;
+  }
+  function prevIndex(){
+    var k = cur < 0 ? 0 : cur, guard=0;
+    do{ k = (k - 1 + SONGS.length) % SONGS.length; }while(SONGS[k].locked && ++guard < SONGS.length);
+    return k;
   }
   function setShuffle(on){
     shuffle = !!on;
@@ -194,8 +384,43 @@
   function fmt(s){ if(!isFinite(s)) return "--:--"; var m=Math.floor(s/60), ss=Math.floor(s%60); return m+":"+(ss<10?"0":"")+ss; }
 
   function markRows(){
-    var rows = list.children;
-    for(var i=0;i<rows.length;i++) rows[i].classList.toggle("now", i===cur);
+    Array.prototype.forEach.call(list.children, function(el){
+      if(el.getAttribute("data-room")) return;
+      var on = (+el.dataset.i === cur);
+      el.classList.toggle("now", on);
+      if(viewMode==="grid"){
+        var g = el.querySelector(".gnow");
+        if(on && !g && !el.classList.contains("locked")){
+          var s=document.createElement("span"); s.className="gnow"; s.textContent="NOW";
+          var art=el.querySelector(".art"); if(art) art.insertBefore(s, art.firstChild);
+        } else if(!on && g){ g.remove(); }
+      }
+    });
+  }
+
+  /* update the now-playing header: cover + title + album, and the ROOM button */
+  function paintNow(){
+    if(cur < 0) return;
+    var s = SONGS[cur], al = album(s.al);
+    $("rp-title").textContent = s.n;
+    $("rp-album").innerHTML = esc(al.name) + ' <span class="browse">· tap to browse</span>';
+    var cov = $("rp-cover");
+    cov.onerror = function(){ cov.onerror=null; cov.src = fallbackCover(s.hue); };
+    cov.src = songCover(s);
+    cov.style.padding = al.pad ? "6px" : "0";
+    cov.style.background = al.pad ? "radial-gradient(circle at 50% 40%,#241207,#0a0604)" : "#111";
+    paintRoomBtn(al);
+  }
+  function paintRoomBtn(al){
+    var box = $("rp-room");
+    if(al && al.room){
+      box.innerHTML = '<a href="'+al.room+'">▶ GO TO THE ROOM</a>';
+      box.style.setProperty("--roomtint", al.tint || "#ff2b2b");
+      box.classList.add("show");
+    } else {
+      box.classList.remove("show");
+      box.innerHTML = "";
+    }
   }
 
   function load(i, time){
@@ -203,6 +428,8 @@
     var s = SONGS[cur];
     // try: tidy folder → tidy name at site root → original name at site root
     var cands = [BASE + "audio/songs/" + s.f, ROOT + s.f, ROOT + encodeURI(s.r)];
+    /* 20mzs lives in assets/audio/ (not /songs/) and at the site root */
+    if(s.al === "mzs"){ cands = [BASE + "audio/" + s.f, ROOT + s.f, ROOT + encodeURI(s.r)]; }
     var ci = 0;
     audio.onerror = function(){
       ci++;
@@ -219,10 +446,11 @@
     load._arm = function(){ wantAuto = true; };
     audio.src = cands[0];
     try{ if(time) { audio.currentTime = time; } }catch(e){}
-    $("rp-title").textContent = s.n;
+    paintNow();
     markRows();
   }
   function play(i, time){
+    if(i != null && SONGS[i] && SONGS[i].locked) return;   // never play a locked song
     if(i !== cur || needLoad){
       load(i, time != null ? time : (pendingTime||0));
       needLoad = false; pendingTime = 0;
@@ -251,16 +479,17 @@
   function setSession(){
     if(!("mediaSession" in navigator) || cur < 0) return;
     try{
+      var s = SONGS[cur], al = album(s.al);
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: SONGS[cur].n,
+        title: s.n,
         artist: "ONLY IBEE",
-        album: "RARE SOUL SESSIONS",
-        artwork: [{src: ROOT + "assets/img/follow-me.jpg", sizes: "512x512", type: "image/jpeg"}]
+        album: al.name,
+        artwork: [{src: songCover(s), sizes: "512x512", type: "image/jpeg"}]
       });
       navigator.mediaSession.setActionHandler("play", function(){ play(cur); });
       navigator.mediaSession.setActionHandler("pause", function(){ pause(); });
-      navigator.mediaSession.setActionHandler("previoustrack", function(){ play(cur-1); });
-      navigator.mediaSession.setActionHandler("nexttrack", function(){ play(cur+1); });
+      navigator.mediaSession.setActionHandler("previoustrack", function(){ play(prevIndex()); });
+      navigator.mediaSession.setActionHandler("nexttrack", function(){ play(nextIndex()); });
       navigator.mediaSession.setActionHandler("seekto", function(d){
         if(d.seekTime != null && audio.duration){ try{ audio.currentTime = d.seekTime; }catch(e){} }
       });
@@ -286,7 +515,7 @@
     if(cur < 0){ play(0); return; }
     if(audio.paused) play(cur); else pause();
   };
-  $("rp-prev").onclick = function(){ if(cur>=0) play(cur-1); else play(SONGS.length-1); };
+  $("rp-prev").onclick = function(){ play(prevIndex()); };
   $("rp-next").onclick = function(){ play(nextIndex()); };
   $("rp-shuf").onclick = function(){ setShuffle(!shuffle); };
   $("rp-lyr").onclick = function(){ location.href = ROOT + "lyrics/"; };
@@ -339,12 +568,31 @@
   function togglePanel(){ panel.classList.toggle("open"); }
   chip.onclick = togglePanel;
   $("rp-close").onclick = function(){ panel.classList.remove("open"); };
+  /* tap the cover / title → open the browser (grid) + focus search */
+  $("rp-nowtop").onclick = function(){
+    viewMode = "grid";
+    $("rp-view").textContent = "≡ LIST"; $("rp-view").classList.add("on");
+    render();
+    openPanel();
+    setTimeout(function(){ try{ $("rp-search").focus(); }catch(e){} }, 60);
+  };
+  /* search box */
+  $("rp-search").addEventListener("input", function(){ query = this.value.trim(); render(); });
+  /* grid / list toggle */
+  $("rp-view").onclick = function(){
+    viewMode = (viewMode === "grid") ? "list" : "grid";
+    this.textContent = viewMode === "grid" ? "≡ LIST" : "▦ GRID";
+    this.classList.toggle("on", viewMode === "grid");
+    render();
+  };
   /* click anywhere outside the box closes it — music keeps playing */
   document.addEventListener("pointerdown", function(e){
     if(!panel.classList.contains("open")) return;
     if(panel.contains(e.target) || chip.contains(e.target)) return;
     panel.classList.remove("open");
   });
+
+  render();   // initial paint (list view)
 
   /* ---------- analyser → neon frame ---------- */
   var actx = null, analyser = null, freq = null;
@@ -424,20 +672,21 @@
     adopt: function(i, t){
       if(i < 0 || i >= SONGS.length) return;
       cur = i; needLoad = true; pendingTime = t || 0;
-      $("rp-title").textContent = SONGS[i].n;
+      paintNow();
       markRows(); save();
     },
     setPending: function(t){ if(needLoad){ pendingTime = t || 0; } },
     current: function(){ return cur; },
     count: SONGS.length,
     song: function(i){ return SONGS[i == null ? cur : i]; },
+    album: function(i){ return album((SONGS[i == null ? cur : i]||{}).al); },
     shuffled: function(){ return shuffle; },
     toggleShuffle: function(){ setShuffle(!shuffle); return shuffle; },
     control: {
       play: function(i){ play(i == null ? (cur < 0 ? 0 : cur) : i); },
       pause: function(){ pause(); },
       next: function(){ play(cur < 0 ? 0 : nextIndex()); },
-      prev: function(){ play(cur < 0 ? SONGS.length - 1 : cur - 1); }
+      prev: function(){ play(cur < 0 ? SONGS.length - 1 : prevIndex()); }
     }
   };
 
@@ -482,12 +731,15 @@
       X.forEach(function(e){
         if(!e || !e.f || !e.n) return;
         for(var i=0;i<SONGS.length;i++) if(SONGS[i].f === e.f) return;
-        SONGS.push({ f:e.f, r:e.r || e.f, n:e.n, hue:(e.hue != null ? e.hue : 190), g:e.g || "rss", cover:e.cover || "" });
-        addRow(SONGS[SONGS.length-1], SONGS.length-1);
+        /* a studio song can name an album id (g) or bring its own cover */
+        var alId = e.g && ALBUMS[e.g] ? e.g : "rss";
+        SONGS.push({ f:e.f, r:e.r || e.f, n:e.n, hue:(e.hue != null ? e.hue : 190),
+          al:alId, cover:e.cover || "", locked:!!e.locked });
         added = true;
       });
       if(added){
         window.IBEERADIO.count = SONGS.length;
+        render();
         restoreState();   // no-op unless the saved song needed the longer list
       }
     }catch(e){}
