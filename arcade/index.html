@@ -221,6 +221,11 @@
     sb.auth.getSession().then(function(res){
       var sess=res.data.session;
       if(!sess) return;                              // not logged in → stays all-locked (except chess)
+      /* the owner's account: every room open, no inventory check needed */
+      if(((sess.user&&sess.user.email)||'').toLowerCase()==='droguepuissance4@gmail.com'){
+        GAMES.forEach(function(g){ if(g.item) owned[g.item]=true; });
+        render(); return;
+      }
       sb.rpc("my_inventory").then(function(r){
         (r.data||[]).forEach(function(it){ owned[it.id]=true; });
         render();                                     // re-paint with real ownership
