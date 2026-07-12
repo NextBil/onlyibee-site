@@ -181,7 +181,12 @@ body.storm .cloud{opacity:.8}
 @keyframes flash{0%{opacity:0}4%{opacity:1}9%{opacity:.15}13%{opacity:.95}22%{opacity:.08}100%{opacity:0}}
 body.quake main{animation:quake .5s ease}
 @keyframes quake{0%,100%{transform:translate(0,0)}20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,-1px)}80%{transform:translate(2px,1px)}}
-/* 3D rotating pills — floating up through the room */
+/* 3D rotating pills — floating up through the room.
+   #pills MUST be explicitly sized+positioned: the moment ANY descendant rule
+   gives #pills a filter/transform, a static 0-height div becomes the pills'
+   containing block and every top:% collapses to the top edge. Same trap the
+   codebase already warns about for <body> — fix it at the source. */
+#pills{position:absolute;inset:0}
 .pill{position:absolute;width:52px;height:24px;perspective:220px;opacity:0;
   animation:pillFloat ease-in-out infinite alternate;transition:opacity 1.2s}
 body.storm .pill{opacity:.92}
@@ -194,8 +199,8 @@ body.storm .pill{opacity:.92}
 @keyframes pillFloat{from{transform:translateY(30px)}to{transform:translateY(-46px)}}
 /* the cover cries when it storms — glow pulses with the song */
 body.storm .cover img{box-shadow:0 0 calc(38px + var(--npbeat,0)*54px) rgba(255,43,43,.75),0 24px 60px rgba(0,0,0,.7)}
-/* pills flare, title burns brighter — both ride the beat */
-body.storm #pills{filter:drop-shadow(0 0 calc(var(--npbeat,0)*16px) rgba(255,80,60,.6))}
+/* pills flare with the beat — filter lives on each .pill, never on #pills itself */
+body.storm .pill{filter:drop-shadow(0 0 calc(var(--npbeat,0)*16px) rgba(255,80,60,.6))}
 body.storm h1{text-shadow:0 0 calc(24px + var(--npbeat,0)*34px) rgba(182,255,0,.6),3px 3px 0 #200}
 body.storm h1{animation:h1flick 3.5s steps(1) infinite}
 @keyframes h1flick{0%,97%,100%{opacity:1}98%{opacity:.4}}
@@ -609,7 +614,7 @@ body.storm #roomtag{opacity:.9}
   });
 })();
 </script>
-<script src="../assets/player.js?v=14"></script>
-<script src="../assets/badges.js?v=7"></script>
+<script src="../assets/player.js?v=16"></script>
+<script src="../assets/badges.js?v=8"></script>
 </body>
 </html>
