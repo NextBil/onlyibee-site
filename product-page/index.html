@@ -155,13 +155,11 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">IN STOCK</span>');
   $("pdesc").textContent=p.desc||"made once, by hand, then never again_";
 
-  /* payment: a button per configured link (external → new tab, works inside the shell frame) */
-  var pay=p.pay||{}, btns="";
+  /* payment: everything happens ON THIS SITE — one button into the checkout page
+     (checkout.html collects the buyer's info + pays via PayPal / card / invoice) */
+  var btns="";
   if(!out){
-    if(pay.stripe)  btns+='<a class="paybtn card" href="'+e2(pay.stripe)+'" target="_blank" rel="noopener">💳 PAY BY CARD — '+e2((p.cur||"€")+p.price)+'</a>';
-    if(pay.paypal)  btns+='<a class="paybtn pp" href="'+e2(pay.paypal)+'" target="_blank" rel="noopener">PAY WITH PAYPAL</a>';
-    if(pay.wix)     btns+='<a class="paybtn wx" href="'+e2(pay.wix)+'" target="_blank" rel="noopener">BUY VIA THE OLD STORE ↗</a>';
-    if(!btns){ btns='<div class="claimbox">CHECKOUT OFFLINE — DM TO CLAIM THIS PIECE_</div>'; $("paynote").style.display="none"; }
+    btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
   } else {
     btns='<div class="claimbox">CLAIMED — THIS PIECE LIVES WITH SOMEONE NOW_<br>EACH ONE IS MADE ONLY ONCE</div>';
     $("paynote").style.display="none";

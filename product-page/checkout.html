@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>CHECKOUT — ONLY IBEE</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<!--
+  On-site checkout: product-page/checkout.html?id=<product id>.
+  The buyer enters their info, then pays with PayPal (Smart Buttons — needs
+  pay_config.paypalClientId in products-data.js), by card (the product's
+  Stripe Payment Link), or places the order to pay by invoice. Every order is
+  recorded in Supabase's insert-only "orders" table (run member/orders.sql once)
+  — check them in Supabase → Table Editor → orders.
+-->
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--gold:#ffd60a;--border:#2a2a2a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:560px;padding:22px 16px 60px;display:flex;flex-direction:column;
+  gap:14px;position:relative;z-index:2;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+.crumbs{font-family:var(--px);font-size:8px}
+.crumbs a{color:var(--dim);text-decoration:none}.crumbs a:hover{color:var(--acid)}
+
+.sum{display:flex;align-items:center;gap:14px;border:2px solid var(--border);background:var(--panel);padding:12px}
+.sum img{width:74px;height:74px;object-fit:cover;border:1px solid #222;flex:none;background:#0a0a0c}
+.sum .ti{flex:1;min-width:0;text-align:left}
+.sum .nm{font-family:var(--px);font-size:10px;line-height:1.6}
+.sum .pr{font-family:var(--px);font-size:14px;color:var(--acid);margin-top:6px}
+
+.card{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:16px 18px;text-align:left}
+.card .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:12px;letter-spacing:1px}
+.f{margin-bottom:10px}
+.f label{display:block;font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:5px}
+.f input,.f textarea{width:100%;background:#050505;border:1px solid var(--border);color:var(--acid);
+  font-family:var(--vt);font-size:18px;padding:10px}
+.f textarea{min-height:56px;resize:vertical}
+.frow{display:flex;gap:10px}.frow .f{flex:1}
+.paybtn{display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--px);
+  font-size:10px;padding:15px 16px;text-decoration:none;letter-spacing:1px;width:100%;
+  border:0;cursor:pointer;margin-bottom:10px}
+.paybtn.card2{background:var(--acid);color:#000}
+.paybtn.pp{background:#ffc439;color:#000}
+.paybtn.inv{background:transparent;color:var(--dim);border:1px solid var(--border)}
+.paybtn.inv:hover{color:var(--ink);border-color:#3a3a3a}
+.paybtn:active{transform:translateY(2px)}
+#ppzone{margin-bottom:6px}
+.mnote{color:var(--dim);font-size:16px;text-align:center;margin-top:4px;line-height:1.4}
+#msg{color:var(--red);font-size:17px;min-height:22px;text-align:center;font-family:var(--vt)}
+
+/* success */
+#done{display:none;text-align:center;padding:20px 0}
+#done .big{font-family:var(--px);font-size:14px;color:var(--acid);text-shadow:0 0 16px rgba(182,255,0,.5);line-height:2}
+#done p{color:var(--dim);margin-top:12px;line-height:1.5}
+#done a{display:inline-block;margin-top:18px;font-family:var(--px);font-size:9px;color:#000;background:var(--acid);
+  padding:13px 16px;text-decoration:none}
+.notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;text-align:center;padding:40px 0}
+footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <a href="../console.html#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>CHECKOUT.SYS</span>
+</header>
+
+<main>
+  <div class="crumbs"><a href="#" id="backlink">◀ BACK TO THE PIECE_</a></div>
+
+  <div id="flow" style="display:none">
+    <div class="sum" style="margin-bottom:14px">
+      <img id="simg" src="" alt=""><div class="ti">
+        <div class="nm" id="snm">—</div><div class="pr" id="spr">—</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="h">// YOUR INFO_ (for shipping)</div>
+      <div class="f"><label>FULL NAME</label><input id="f_name" autocomplete="name"></div>
+      <div class="f"><label>EMAIL</label><input id="f_email" type="email" inputmode="email" autocomplete="email"></div>
+      <div class="f"><label>ADDRESS</label><input id="f_addr" autocomplete="street-address"></div>
+      <div class="frow">
+        <div class="f"><label>CITY</label><input id="f_city" autocomplete="address-level2"></div>
+        <div class="f"><label>ZIP</label><input id="f_zip" autocomplete="postal-code"></div>
+      </div>
+      <div class="f"><label>COUNTRY</label><input id="f_country" autocomplete="country-name"></div>
+      <div class="f"><label>NOTE / SIZE (optional)</label><textarea id="f_note"></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="h">// PAY_</div>
+      <div id="ppzone"></div>
+      <div id="paybtns"></div>
+      <div id="msg"></div>
+      <div class="mnote">from paris to wherever you are — shipping's on us_<br>each piece is unique, made only once</div>
+    </div>
+  </div>
+
+  <div id="done">
+    <div class="big">✓ ORDER RECEIVED_</div>
+    <p id="donetxt">—</p>
+    <a href="../console.html#shop">◀ BACK TO THE SHOP</a>
+  </div>
+
+  <div class="notfound" id="notfound" style="display:none">✕ PIECE NOT FOUND_</div>
+</main>
+
+<footer>© ONLYIBEE — UTOPIE™</footer>
+
+<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+
+  /* same backend as member/ — orders go into the insert-only "orders" table */
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
+
+  var id=decodeURIComponent((new RegExp("[?&]id=([^&]+)").exec(location.search)||[])[1]||"");
+  var all=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.products)||[];
+  var CFG=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.pay_config)||{};
+  var p=null; all.forEach(function(x){ if(x.id===id) p=x; });
+  $("backlink").href="./?id="+encodeURIComponent(id);
+
+  if(!p||p.out){ $("notfound").style.display=""; return; }
+  document.title="CHECKOUT — "+p.n+" | ONLY IBEE";
+  $("flow").style.display="";
+  $("simg").src=(p.imgs&&p.imgs[0])||""; $("snm").textContent=p.n;
+  var priceTxt=(p.cur||"€")+p.price;
+  $("spr").textContent=priceTxt;
+
+  function info(){
+    return { name:($("f_name").value||"").trim(), email:($("f_email").value||"").trim(),
+      addr:($("f_addr").value||"").trim(), city:($("f_city").value||"").trim(),
+      zip:($("f_zip").value||"").trim(), country:($("f_country").value||"").trim(),
+      note:($("f_note").value||"").trim() };
+  }
+  function valid(){
+    var v=info();
+    if(v.name.length<2){ $("msg").textContent="✕ your name_"; return null; }
+    if(!/.+@.+\..+/.test(v.email)){ $("msg").textContent="✕ a real email_"; return null; }
+    if(v.addr.length<4||!v.city||!v.country){ $("msg").textContent="✕ full address (street, city, country)_"; return null; }
+    $("msg").textContent=""; return v;
+  }
+  async function saveOrder(method,status,ref){
+    var v=info();
+    var row={ product_id:p.id, product_name:p.n, price:p.price, currency:p.cur||"€",
+      buyer_name:v.name, email:v.email,
+      address:v.addr+", "+v.zip+" "+v.city+", "+v.country, note:v.note,
+      method:method, pay_ref:ref||"", status:status };
+    try{ if(sb) await sb.from("orders").insert(row); }catch(e){}
+    try{ var log=JSON.parse(localStorage.getItem("ibee_orders_out")||"[]");
+      log.push({t:Date.now(),o:row}); localStorage.setItem("ibee_orders_out",JSON.stringify(log)); }catch(e){}
+  }
+  function success(txt){
+    $("flow").style.display="none"; $("done").style.display="block";
+    $("donetxt").innerHTML=txt;
+  }
+
+  /* ---- PayPal Smart Buttons (real on-page payment) — needs pay_config.paypalClientId ---- */
+  if(CFG.paypalClientId){
+    var s=document.createElement("script");
+    s.src="https://www.paypal.com/sdk/js?client-id="+encodeURIComponent(CFG.paypalClientId)
+      +"&currency="+encodeURIComponent(CFG.currency||"EUR")+"&intent=capture";
+    s.onload=function(){
+      if(!window.paypal||!window.paypal.Buttons) return;
+      window.paypal.Buttons({
+        style:{color:"gold",shape:"rect",label:"pay",height:45},
+        onClick:function(data,actions){ return valid()?actions.resolve():actions.reject(); },
+        createOrder:function(data,actions){
+          return actions.order.create({purchase_units:[{
+            description:p.n.slice(0,120),
+            amount:{value:String(p.price),currency_code:CFG.currency||"EUR"}}]});
+        },
+        onApprove:function(data,actions){
+          return actions.order.capture().then(function(det){
+            saveOrder("paypal","paid",(det&&det.id)||data.orderID);
+            success("payment confirmed — <b style='color:var(--acid)'>"+e2(p.n)+"</b> is yours_<br>a confirmation lives in your PayPal; we'll email you the shipping details.");
+          });
+        },
+        onError:function(){ $("msg").textContent="✕ paypal hiccup — try again_"; }
+      }).render("#ppzone");
+    };
+    document.head.appendChild(s);
+  }
+
+  /* ---- other methods ---- */
+  var b="";
+  if(p.pay&&p.pay.stripe)
+    b+='<button class="paybtn card2" id="stripeBtn">💳 PAY BY CARD — '+e2(priceTxt)+'</button>';
+  if(!CFG.paypalClientId&&p.pay&&p.pay.paypal)
+    b+='<button class="paybtn pp" id="ppmeBtn">PAY WITH PAYPAL — '+e2(priceTxt)+'</button>';
+  b+='<button class="paybtn inv" id="invBtn">✉ PLACE ORDER — PAY BY INVOICE</button>';
+  $("paybtns").innerHTML=b;
+
+  var sBtn=$("stripeBtn");
+  if(sBtn) sBtn.onclick=async function(){
+    if(!valid())return; sBtn.disabled=true;
+    await saveOrder("stripe-link","pending","");
+    window.open(p.pay.stripe,"_blank","noopener");
+    success("finish the card payment in the Stripe tab that just opened_<br>your order + address are already saved on our side.");
+  };
+  var mBtn=$("ppmeBtn");
+  if(mBtn) mBtn.onclick=async function(){
+    if(!valid())return; mBtn.disabled=true;
+    await saveOrder("paypal-me","pending","");
+    window.open(p.pay.paypal,"_blank","noopener");
+    success("finish the payment in the PayPal tab that just opened_<br>your order + address are already saved on our side.");
+  };
+  $("invBtn").onclick=async function(){
+    if(!valid())return; $("invBtn").disabled=true; $("invBtn").textContent="…";
+    await saveOrder("invoice","new","");
+    success("your order for <b style='color:var(--acid)'>"+e2(p.n)+"</b> is in_<br>we'll email <b>"+e2(info().email)+"</b> to finish the payment — nothing to do right now.");
+  };
+})();
+</script>
+<script src="../assets/player.js?v=13"></script>
+</body>
+</html>

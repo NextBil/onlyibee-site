@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- ===== favicon (bishop 1) ===== -->
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NOUVEAUX PUNK — THE EXPERIENCE | ONLY IBEE</title>
@@ -83,18 +92,25 @@ h1{
 .prose p{margin-bottom:14px}
 .prose .a{color:var(--acid)} .prose .r{color:var(--red)}
 
-/* track signals */
+/* track signals — the album, playable (tap a row) */
 .tr{
   display:flex;align-items:center;gap:14px;padding:11px 12px;border-bottom:1px solid #1f1010;
-  color:var(--dim);cursor:not-allowed;
+  color:var(--dim);cursor:pointer;
 }
 .tr:hover{background:#150b0b}
 .tr .no{font-family:var(--px);font-size:9px;width:30px;color:#5a3333}
+.tr .ti{flex:none;max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:#cfc5c5;font-size:19px}
 .tr .bars{flex:1;display:flex;gap:3px;align-items:center;overflow:hidden}
-.tr .bars i{width:6px;background:#2a1414;animation:stat 1.4s ease-in-out infinite}
+.tr .bars i{width:6px;height:5px;background:#2a1414;animation:stat 1.4s ease-in-out infinite;animation-play-state:paused}
 .tr .bars i:nth-child(3n){animation-delay:.2s}.tr .bars i:nth-child(3n+1){animation-delay:.45s}
 @keyframes stat{0%,100%{height:5px}50%{height:14px}}
-.tr .st{font-family:var(--px);font-size:8px;color:var(--red);flex:none}
+.tr .st{font-family:var(--px);font-size:8px;color:var(--red);flex:none;min-width:36px;text-align:right}
+.tr.playing{background:#101505;color:var(--ink)}
+.tr.playing .no{color:var(--acid)}
+.tr.playing .ti{color:var(--acid)}
+.tr.playing .st{color:var(--acid)}
+.tr.playing .bars i{background:#4a5500;animation-play-state:running}
 
 /* surprises vault */
 .vault{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px}
@@ -145,8 +161,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <span>NP.SYS</span>
 </header>
 <div class="mq"><div>
-  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ SIGNALS ENCRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
-  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ SIGNALS ENCRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
+  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ 27 SIGNALS DECRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
+  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ 27 SIGNALS DECRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
 </div></div>
 
 <main>
@@ -174,8 +190,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   <!-- track signals -->
   <div class="sec">
-    <div class="sh">TRACK SIGNALS <span class="r">[ENCRYPTED]</span></div>
-    <div class="ssub">the songs are sealed — transmissions will open one by one_</div>
+    <div class="sh">TRACK SIGNALS <span class="a">[DECRYPTED]</span></div>
+    <div class="ssub">the experience, open — 27 transmissions. tap one to play_</div>
     <div class="card" id="tracks"></div>
   </div>
 
@@ -237,13 +253,71 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   stack(document.getElementById("g1"),V);
   stack(document.getElementById("g2"),S);
 
-  /* ---------- encrypted track list ---------- */
+  /* ---------- THE EXPERIENCE — the album, decrypted (assets/audio/np/) ----------
+     Plays through its own audio element; the site radio is paused on play
+     (the shell's politeness listener can't see inside this frame, so we pause
+     it ourselves via the IBEERADIO bridge) and vice-versa via a small watcher. */
+  var NP=[
+    {f:"np-01-dsl-de-l-attente.mp3",t:"Dsl de l'attente",d:124},
+    {f:"np-02-toujours.mp3",t:"Toujours",d:217},
+    {f:"np-03-je-ne-regrette-rien.mp3",t:"Je ne regrette rien",d:183},
+    {f:"np-04-get-loose.mp3",t:"Get Loose",d:183},
+    {f:"np-05-comme-les-autres.mp3",t:"Comme les autres",d:192},
+    {f:"np-06-stresse.mp3",t:"Stressé",d:247},
+    {f:"np-07-to-get-u.mp3",t:"To Get U",d:204},
+    {f:"np-08-ne-me-laisse-pas.mp3",t:"Ne me laisse pas",d:185},
+    {f:"np-09-je-m-en-vais.mp3",t:"Je m'en vais",d:159},
+    {f:"np-10-trop-tard.mp3",t:"Trop tard",d:278},
+    {f:"np-11-vie-de-merde.mp3",t:"Vie de Merde",d:216},
+    {f:"np-12-je-sens-le-blues-interlude.mp3",t:"Je sens le blues (interlude)",d:114},
+    {f:"np-13-merci-bye-bye.mp3",t:"Merci bye-bye",d:178},
+    {f:"np-14-roule-un-auuutre.mp3",t:"Roule un auuutre",d:130},
+    {f:"np-15-du-love.mp3",t:"Du love",d:162},
+    {f:"np-16-que-faut-il.mp3",t:"Que Faut-il",d:143},
+    {f:"np-17-plus-d-espoirs.mp3",t:"Plus d'espoirs",d:178},
+    {f:"np-18-desert.mp3",t:"Desert",d:150},
+    {f:"np-19-fans-seulement-mix-1.mp3",t:"Fans seulement (mix 1)",d:248},
+    {f:"np-20-baby-let-s-go.mp3",t:"Baby Let's Go",d:115},
+    {f:"np-21-dans-la-street.mp3",t:"Dans la street",d:110},
+    {f:"np-22-radio-hit.mp3",t:"Radio Hit",d:158},
+    {f:"np-23-lost-in-the-world.mp3",t:"Lost in the world",d:183},
+    {f:"np-24-chouf-chouf-topline.mp3",t:"Chouf chouf topline",d:102},
+    {f:"np-25-anormal.mp3",t:"Anormal",d:195},
+    {f:"np-26-si-jamais.mp3",t:"Si Jamais",d:106},
+    {f:"np-27-celui-qu-elle-veut.mp3",t:"Celui qu'elle veut",d:173}
+  ];
   var tr=document.getElementById("tracks"),html="";
-  for(var i=1;i<=8;i++){
+  function fmt(s){var m=Math.floor(s/60),ss=Math.floor(s%60);return m+":"+(ss<10?"0":"")+ss;}
+  NP.forEach(function(s,i){
     var bars="";for(var b=0;b<26;b++)bars+="<i></i>";
-    html+='<div class="tr"><span class="no">'+(i<10?"0":"")+i+'</span><span class="bars">'+bars+'</span><span class="st">ENCRYPTED</span></div>';
-  }
+    html+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
+      +'<span class="ti">'+s.t+'</span><span class="bars">'+bars+'</span><span class="st">'+fmt(s.d)+'</span></div>';
+  });
   tr.innerHTML=html;
+
+  var npAudio=new Audio(); npAudio.preload="none";
+  var npCur=-1;
+  function radioPause(){ try{ var R=window.IBEERADIO; if(R&&R.playing()) R.control.pause(); }catch(e){} }
+  function rowState(){
+    Array.prototype.forEach.call(tr.children,function(row,i){
+      var on=(i===npCur&&!npAudio.paused);
+      row.classList.toggle("playing",on);
+      row.querySelector(".st").textContent = on?"❚❚":(i===npCur?"▶":fmt(NP[i].d));
+    });
+  }
+  function playNP(i){
+    if(i===npCur){ if(npAudio.paused){ radioPause(); npAudio.play().catch(function(){}); } else npAudio.pause(); rowState(); return; }
+    npCur=i; npAudio.src="../assets/audio/np/"+NP[i].f;
+    radioPause();
+    npAudio.play().catch(function(){});
+    rowState();
+  }
+  npAudio.addEventListener("play",function(){ radioPause(); rowState(); });
+  npAudio.addEventListener("pause",rowState);
+  npAudio.addEventListener("ended",function(){ if(npCur<NP.length-1) playNP(npCur+1); else { npCur=-1; rowState(); } });
+  /* the other direction: radio starts → the album steps aside */
+  setInterval(function(){ try{ var R=window.IBEERADIO;
+    if(R&&R.playing()&&!npAudio.paused) npAudio.pause(); }catch(e){} },800);
 
   /* ---------- toast + cover secret ---------- */
   var toastEl=document.getElementById("toast"),tt=null;
@@ -255,10 +329,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     else if(taps===3){toast("something is hidden in this cover_");}
   });
   Array.prototype.slice.call(document.querySelectorAll(".tr")).forEach(function(row){
-    row.addEventListener("click",function(){toast("SIGNAL ENCRYPTED — not yet transmitted_");});
+    row.addEventListener("click",function(){ playNP(+row.getAttribute("data-i")); });
   });
 })();
 </script>
-<script src="../assets/player.js?v=6"></script>
+<script src="../assets/player.js?v=13"></script>
 </body>
 </html>
