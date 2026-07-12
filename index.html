@@ -93,8 +93,12 @@
 
   #player{background:#000;border-top:2px solid var(--border);padding:8px 12px 10px;
     display:flex;flex-direction:column;gap:7px}
-  /* row 1: song title (clickable → tracks) + time */
+  /* row 1: album cover + song title (clickable → tracks) + time */
   .pl-top{display:flex;align-items:center;gap:10px}
+  /* the now-playing album cover: real art over a hue-vinyl placeholder (never a broken icon) */
+  #pcover{width:38px;height:38px;flex:none;border-radius:5px;overflow:hidden;border:1px solid var(--border);
+    position:relative;background:radial-gradient(circle,#333 0 20%,#070707 22% 28%,#141414 30% 100%);cursor:pointer}
+  #pcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
   #nowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;
     color:var(--acid);font-family:var(--px);font-size:9px;cursor:pointer;text-align:left;padding:0}
   #nowbtn #rt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -250,6 +254,7 @@
     <div id="tracklist"></div>
     <div id="player">
       <div class="pl-top">
+        <span id="pcover"><img alt="" id="pcoverimg"></span>
         <button id="nowbtn" title="open the radio"><span class="bd"></span><span id="rt">RADIO</span></button>
         <span id="time">0:00 / --:--</span>
       </div>
@@ -519,10 +524,13 @@
   function buildList(){
     var r=R();if(!r)return; var h='<div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>';
     for(var i=0;i<r.count;i++){var s=r.song(i)||{};
-      /* cover art: song data first, else assets/covers/<song file name>.jpg → .png → original name .jpg */
+      /* cover art: song's own picture → its ALBUM cover (rss/np/mzs/…) → legacy
+         assets/covers/<song file name>.jpg|png → vinyl placeholder (never a broken icon) */
       var base=(s.f||'').replace(/\.[a-z0-9]+$/i,''), rbase=(s.r||'').replace(/\.[a-z0-9]+$/i,'');
+      var alb=r.album?r.album(i):null;
       var cands=[];
       if(s.cover)cands.push(encodeURI(s.cover));
+      if(alb&&alb.cover)cands.push(encodeURI(alb.cover));
       if(base){cands.push('assets/covers/'+encodeURI(base)+'.jpg');cands.push('assets/covers/'+encodeURI(base)+'.png');}
       if(rbase&&rbase!==base)cands.push('assets/covers/'+encodeURI(rbase)+'.jpg');
       h+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
@@ -562,11 +570,23 @@
   /* ---- keep the player reflecting the one radio's state ---- */
   var rt=document.getElementById('rt'),rplay=document.getElementById('rplay'),
       fill=document.getElementById('fill'),timeEl=document.getElementById('time'),bd=document.querySelector('#nowbtn .bd');
+  /* the now-playing album cover in the bar: song's own art → album cover → hue vinyl */
+  var pcover=document.getElementById('pcover'),pcoverimg=document.getElementById('pcoverimg'),lastCoverI=-2;
+  pcover.onclick=function(){ if(!built)buildList(); tl.classList.toggle('open'); };
+  function setPcover(r,i,s){
+    var hue=(s&&s.hue!=null)?s.hue:75;
+    pcover.style.background='radial-gradient(circle,hsl('+hue+',85%,55%) 0 20%,#070707 22% 28%,#141414 30% 100%)';
+    var alb=r.album?r.album(i):null, cov=(s&&s.cover)||(alb&&alb.cover)||'';
+    if(cov){ pcoverimg.onerror=function(){pcoverimg.style.display='none';};
+      pcoverimg.style.display='block'; pcoverimg.src=cov; }
+    else pcoverimg.style.display='none';
+  }
   function fmt(s){if(!isFinite(s))return'--:--';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
   setInterval(function(){
     var r=R();if(!r)return;
     if(built&&r.count!==builtCount)buildList(); /* extra records arrived — rebuild the list */
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
+    var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s); }
     var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
     rshuf.classList.toggle('on',!!(r.shuffled&&r.shuffled()));
     try{bd.style.setProperty('--b',(0.45+(pl?r.beat():0)).toFixed(2));}catch(e){}
