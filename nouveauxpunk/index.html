@@ -152,10 +152,89 @@ h1{
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+
+/* ============================================================
+   THE ROOM — this page is a room in disguise. It looks normal
+   until a track plays; then it storms: rain, lightning, thunder,
+   drifting clouds and 3D rotating pills. All of it lives here,
+   dormant, until body.storm is set (see the script).
+   ============================================================ */
+#room{position:fixed;inset:0;width:100vw;height:100vh;z-index:8;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+body.storm #room{opacity:1}
+/* NOTE: never put filter/transform on <body> here — it would turn body into a
+   containing block for every position:fixed layer (scanlines, radio chip, rain)
+   and collapse them. The "boom" is done with an immediate lightning strike. */
+#rain{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block}
+.cloud{position:absolute;width:360px;height:150px;filter:blur(7px);opacity:0;
+  background:radial-gradient(circle at 30% 60%,rgba(70,20,20,.95),transparent 60%),
+             radial-gradient(circle at 62% 48%,rgba(45,14,14,.9),transparent 62%),
+             radial-gradient(circle at 78% 66%,rgba(58,18,18,.85),transparent 60%);
+  animation:cloudDrift linear infinite}
+body.storm .cloud{opacity:.8}
+.cloud.c-a{top:2%;animation-duration:34s}
+.cloud.c-b{top:16%;transform:scale(1.5);animation-duration:52s;animation-delay:-12s}
+.cloud.c-c{top:-3%;transform:scale(.8);animation-duration:44s;animation-delay:-26s}
+@keyframes cloudDrift{from{transform:translateX(-45vw)}to{transform:translateX(125vw)}}
+.lightning{position:absolute;inset:0;mix-blend-mode:screen;opacity:0;
+  background:radial-gradient(circle at 50% 12%,rgba(255,245,225,.95),rgba(255,120,80,.28) 42%,transparent 72%)}
+.lightning.flash{animation:flash .8s ease-out}
+@keyframes flash{0%{opacity:0}4%{opacity:1}9%{opacity:.15}13%{opacity:.95}22%{opacity:.08}100%{opacity:0}}
+body.quake main{animation:quake .5s ease}
+@keyframes quake{0%,100%{transform:translate(0,0)}20%{transform:translate(-3px,2px)}40%{transform:translate(3px,-2px)}60%{transform:translate(-2px,-1px)}80%{transform:translate(2px,1px)}}
+/* 3D rotating pills — floating up through the room */
+.pill{position:absolute;width:52px;height:24px;perspective:220px;opacity:0;
+  animation:pillFloat ease-in-out infinite alternate;transition:opacity 1.2s}
+body.storm .pill{opacity:.92}
+.pill i{display:block;width:100%;height:100%;border-radius:999px;transform-style:preserve-3d;
+  background:linear-gradient(90deg,var(--red) 0 50%,#f2f2f2 50% 100%);
+  box-shadow:0 0 20px rgba(255,80,60,.55),inset 0 -4px 8px rgba(0,0,0,.4),inset 0 3px 6px rgba(255,255,255,.35);
+  animation:pillSpin linear infinite}
+.pill.g i{background:linear-gradient(90deg,var(--acid) 0 50%,#101010 50% 100%);box-shadow:0 0 20px rgba(182,255,0,.5),inset 0 -4px 8px rgba(0,0,0,.5)}
+@keyframes pillSpin{from{transform:rotateY(0) rotateZ(22deg)}to{transform:rotateY(360deg) rotateZ(22deg)}}
+@keyframes pillFloat{from{transform:translateY(30px)}to{transform:translateY(-46px)}}
+/* the cover cries when it storms — glow pulses with the song */
+body.storm .cover img{box-shadow:0 0 calc(38px + var(--npbeat,0)*54px) rgba(255,43,43,.75),0 24px 60px rgba(0,0,0,.7)}
+/* pills flare, title burns brighter — both ride the beat */
+body.storm #pills{filter:drop-shadow(0 0 calc(var(--npbeat,0)*16px) rgba(255,80,60,.6))}
+body.storm h1{text-shadow:0 0 calc(24px + var(--npbeat,0)*34px) rgba(182,255,0,.6),3px 3px 0 #200}
+body.storm h1{animation:h1flick 3.5s steps(1) infinite}
+@keyframes h1flick{0%,97%,100%{opacity:1}98%{opacity:.4}}
+/* room banner that rises when the storm hits */
+#roomtag{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:9;opacity:0;
+  font-family:var(--px);font-size:9px;color:var(--red);letter-spacing:2px;text-align:center;
+  text-shadow:0 0 14px rgba(255,43,43,.7);transition:opacity 1s ease;pointer-events:none}
+body.storm #roomtag{opacity:.9}
+
+/* ===== LISTENING NOTICE (from the original NP notice) ===== */
+.notice{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--red);
+  border:2px solid var(--red);box-shadow:0 0 26px rgba(255,43,43,.35)}
+.np-note{background:#050303;padding:22px 14px 16px;text-align:center;cursor:pointer;position:relative;
+  transition:background .2s}
+.np-note:hover{background:#120606}
+.np-note .ic{font-size:34px;line-height:1;filter:drop-shadow(0 0 12px rgba(230,220,60,.8));margin-bottom:12px}
+.np-note .pf{font-size:17px;color:#f4f4f4;line-height:1.35;min-height:46px;margin-bottom:12px}
+.np-note .pl{width:40px;height:40px;margin:0 auto 12px;border-radius:50%;background:var(--red);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;
+  box-shadow:0 0 16px rgba(255,43,43,.6);transition:transform .2s}
+.np-note:hover .pl{transform:scale(1.12)}
+.np-note .rc{color:var(--red);font-size:15px;line-height:1.45}
+.np-note .rc b{color:var(--acid);font-weight:400}
+.np-note.playing{background:#160707}
+.np-note.playing .pl{background:var(--acid);color:#000;box-shadow:0 0 18px rgba(182,255,0,.7)}
+@media(max-width:640px){.notice{grid-template-columns:repeat(2,1fr)}}
+
 @media(max-width:700px){.gwrap{display:none}}
 </style>
 </head>
 <body>
+<!-- THE ROOM — dormant storm layer, wakes when a track plays -->
+<div id="room" aria-hidden="true">
+  <canvas id="rain"></canvas>
+  <div class="cloud c-a"></div><div class="cloud c-b"></div><div class="cloud c-c"></div>
+  <div class="lightning" id="ltng"></div>
+  <div id="pills"></div>
+</div>
+<div id="roomtag">▓ THE ROOM IS OPEN ▓<br>you're inside the experience now_</div>
 <header>
   <a href="../">ONLY<span class="r">IBEE</span> OS</a>
   <span>NP.SYS</span>
@@ -227,8 +306,15 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     </div>
   </div>
 
+  <!-- listening notice — how to hear it, from the original NP notice -->
+  <div class="sec">
+    <div class="sh">THE <span class="a">LISTENING NOTICE</span>_</div>
+    <div class="ssub">how the experience is meant to be heard — tap a mood to press play_</div>
+    <div class="notice" id="notice"></div>
+  </div>
+
   <div class="actions">
-    <a class="btn" href="../?tag=NOUVEAUXPUNK">▶ ENTER THE CONSOLE</a>
+    <a class="btn" href="../?tag=NOUVEAUXPUNK">▶ ENTER THE GALAXY</a>
     <a class="btn alt" href="../lyrics/">✎ LYRICS ENGINE</a>
   </div>
 </main>
@@ -315,9 +401,199 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   npAudio.addEventListener("play",function(){ radioPause(); rowState(); });
   npAudio.addEventListener("pause",rowState);
   npAudio.addEventListener("ended",function(){ if(npCur<NP.length-1) playNP(npCur+1); else { npCur=-1; rowState(); } });
+
+  /* ---- badge tracking: 7 distinct songs from THE EXPERIENCE unlocks the
+     NOUVEAUX PUNK badge. A song counts once you've felt ~15s of it. We keep the
+     set in its own localStorage key ("ibee_np_songs") so badges.js can read the
+     count without racing its own writes. ---- */
+  var npListenT=0, npLastT=0;
+  function npMark(){
+    try{
+      var f=NP[npCur]&&NP[npCur].f; if(!f) return;
+      var o=JSON.parse(localStorage.getItem("ibee_np_songs")||"{}")||{};
+      if(!o[f]){ o[f]=1; localStorage.setItem("ibee_np_songs",JSON.stringify(o)); }
+    }catch(e){}
+  }
+  npAudio.addEventListener("timeupdate",function(){
+    var t=npAudio.currentTime||0, dt=t-npLastT; npLastT=t;
+    if(dt>0 && dt<1 && !npAudio.paused){ npListenT+=dt; if(npListenT>=15) npMark(); }
+  });
+  npAudio.addEventListener("play",function(){ npListenT=0; npLastT=npAudio.currentTime||0; });
   /* the other direction: radio starts → the album steps aside */
   setInterval(function(){ try{ var R=window.IBEERADIO;
     if(R&&R.playing()&&!npAudio.paused) npAudio.pause(); }catch(e){} },800);
+
+  /* =====================================================================
+     THE LISTENING NOTICE — the original NP notice, reborn in the site vibe.
+     Each mood presses play on the sound it recommends (first one that exists).
+     ===================================================================== */
+  function npIndex(title){
+    for(var i=0;i<NP.length;i++){ if(NP[i].t.toLowerCase()===title.toLowerCase()) return i; }
+    return -1;
+  }
+  var NOTES=[
+    {ic:"🌃",pf:"Parfait pour les balades nocturnes en voiture.",songs:["Toujours","Get Loose"]},
+    {ic:"💨",pf:"Parfait pour se poser et rouler toute la nuit.",songs:["Dans la street","Roule un auuutre"]},
+    {ic:"😔",pf:"Parfait quand t'es vraiment au fond.",songs:["Que Faut-il","Trop tard"]},
+    {ic:"🌙",pf:"Parfait la nuit, tout simplement…",songs:["Je sens le blues (interlude)","Je ne regrette rien"]},
+    {ic:"💊",pf:"Parfait quand t'es éclaté à la mort.",songs:["Desert","Merci bye-bye"]},
+    {ic:"🛋️",pf:"Parfait pour chill et réfléchir.",songs:["Anormal","Stressé"]}
+  ];
+  var noticeEl=document.getElementById("notice"),nh="";
+  NOTES.forEach(function(nt,k){
+    var rec=nt.songs.map(function(s){return '“'+s.replace(/ \(interlude\)/,'')+'”';}).join(' &amp; ');
+    nh+='<div class="np-note" data-k="'+k+'"><div class="ic">'+nt.ic+'</div>'
+      +'<div class="pf">'+nt.pf+'</div><div class="pl">▶</div>'
+      +'<div class="rc">Je recommande le son <b>'+rec+'</b></div></div>';
+  });
+  noticeEl.innerHTML=nh;
+  Array.prototype.forEach.call(noticeEl.children,function(el){
+    el.addEventListener("click",function(){
+      var nt=NOTES[+el.getAttribute("data-k")],idx=-1;
+      for(var j=0;j<nt.songs.length&&idx<0;j++) idx=npIndex(nt.songs[j]);
+      if(idx>=0) playNP(idx);
+    });
+  });
+  function markNotes(){
+    Array.prototype.forEach.call(noticeEl.children,function(el){
+      var nt=NOTES[+el.getAttribute("data-k")],on=false;
+      if(npCur>=0&&!npAudio.paused){ for(var j=0;j<nt.songs.length;j++){ if(npIndex(nt.songs[j])===npCur){on=true;break;} } }
+      el.classList.toggle("playing",on);
+    });
+  }
+
+  /* =====================================================================
+     THE STORM — it looks like a normal page, then a track plays and BOOM:
+     rain, lightning, thunder, drifting clouds, 3D rotating pills. This is
+     the room in disguise. Everything below only runs while a track plays.
+     ===================================================================== */
+  var body=document.body, storming=false;
+  var rain=document.getElementById("rain"), rctx=rain.getContext("2d");
+  var drops=[], W=0, H=0, dpr=Math.min(2,window.devicePixelRatio||1);
+  function sizeRain(){
+    W=window.innerWidth||document.documentElement.clientWidth||screen.width||1280;
+    H=window.innerHeight||document.documentElement.clientHeight||screen.height||720;
+    rain.width=W*dpr; rain.height=H*dpr; rctx.setTransform(dpr,0,0,dpr,0,0);
+    var n=Math.round(W*H/9000);   // density scales with the screen
+    drops=[];
+    for(var i=0;i<n;i++) drops.push({x:Math.random()*W,y:Math.random()*H,l:6+Math.random()*16,v:5+Math.random()*7});
+  }
+  window.addEventListener("resize",function(){ if(storming) sizeRain(); });
+  var gust=0;
+  /* ---- reactivity: read the PRESSED GROOVE for the current NP track from
+     window.IBEE_BEAT (player.js self-loads assets/beat-data.js). Same architecture
+     the radio + universe use — NO Web Audio on the media element, so the album
+     keeps playing in the background / on the lock screen. Tracks without groove
+     data yet fall back to a gentle synthetic pulse. ---- */
+  var npBeat=0, npLevel=0, npEma=0, lastOnset=0;
+  function extraBolt(){
+    if(!storming) return;
+    ltng.classList.remove("flash"); void ltng.offsetWidth; ltng.classList.add("flash");
+    gust=Math.max(gust,2+Math.random()*1.5);
+  }
+  function groove(){
+    var B=window.IBEE_BEAT; if(!B||npCur<0) return null;
+    var g=B[NP[npCur].f]; if(!g) return null;
+    var i=Math.max(0,Math.min(g.low.length-1,Math.floor((npAudio.currentTime||0)*g.r)));
+    return { low:parseInt(g.low.charAt(i),36)/35, lv:parseInt(g.lvl.charAt(i),36)/35 };
+  }
+  function stepBeat(){
+    var gv=groove();
+    if(gv){
+      npEma+=(gv.low-npEma)*0.1;
+      var on=Math.max(0,gv.low-npEma*1.15);
+      npBeat=Math.max(npBeat*0.85,Math.min(1,gv.low*0.5+on*3.4));
+      npLevel+=(gv.lv-npLevel)*0.2;
+      var now=performance.now();
+      if(on>0.2 && now-lastOnset>1500){ lastOnset=now; extraBolt(); }   // big hit → lightning
+    } else {
+      npBeat=Math.max(npBeat*0.86,Math.pow(Math.abs(Math.sin(performance.now()/430)),8));
+      npLevel+=(0.3-npLevel)*0.05;
+    }
+    document.documentElement.style.setProperty("--npbeat",npBeat.toFixed(3));
+  }
+  function drawRain(){
+    if(!storming){ return; }
+    requestAnimationFrame(drawRain);
+    stepBeat();
+    rctx.clearRect(0,0,W,H);
+    rctx.strokeStyle="rgba(255,80,80,"+(0.18+npLevel*0.4).toFixed(2)+")"; rctx.lineWidth=1.1+npBeat*0.9;
+    var slant=1.6+gust+npBeat*2.4, spd=1+npLevel*0.9;
+    rctx.beginPath();
+    for(var i=0;i<drops.length;i++){
+      var d=drops[i];
+      rctx.moveTo(d.x,d.y); rctx.lineTo(d.x-slant,d.y+d.l*(1+npBeat*0.6));
+      d.y+=d.v*spd; d.x-=slant*0.4;
+      if(d.y>H){ d.y=-d.l; d.x=Math.random()*W; }
+    }
+    rctx.stroke();
+    gust*=0.94;
+  }
+
+  /* pills — spawn a handful, floating & spinning */
+  var pillsEl=document.getElementById("pills");
+  function spawnPills(){
+    if(pillsEl.children.length) return;
+    for(var i=0;i<7;i++){
+      var p=document.createElement("div");
+      p.className="pill"+(i%2?" g":"");
+      p.style.left=(6+Math.random()*88)+"%";
+      p.style.top=(12+Math.random()*74)+"%";
+      p.style.animationDuration=(3.4+Math.random()*3.4)+"s";
+      p.style.animationDelay=(-Math.random()*4)+"s";
+      var inner=document.createElement("i");
+      inner.style.animationDuration=(1.6+Math.random()*2.4)+"s";
+      p.appendChild(inner);
+      pillsEl.appendChild(p);
+    }
+  }
+
+  /* lightning + a soft synthesized thunder (no asset needed) */
+  var thunderCtx=null, ltng=document.getElementById("ltng"), boltTimer=null;
+  function thunder(){
+    try{
+      thunderCtx=thunderCtx||new (window.AudioContext||window.webkitAudioContext)();
+      if(thunderCtx.state==="suspended") thunderCtx.resume();
+      var dur=1.1+Math.random()*0.9, sr=thunderCtx.sampleRate;
+      var buf=thunderCtx.createBuffer(1,sr*dur,sr), ch=buf.getChannelData(0);
+      for(var i=0;i<ch.length;i++){ ch[i]=(Math.random()*2-1)*Math.pow(1-i/ch.length,2); }
+      var src=thunderCtx.createBufferSource(); src.buffer=buf;
+      var lp=thunderCtx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=380;
+      var g=thunderCtx.createGain(); g.gain.value=0.0001;
+      var t=thunderCtx.currentTime;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.16,t+0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      src.connect(lp); lp.connect(g); g.connect(thunderCtx.destination);
+      src.start();
+    }catch(e){}
+  }
+  function bolt(){
+    if(!storming) return;
+    ltng.classList.remove("flash"); void ltng.offsetWidth; ltng.classList.add("flash");
+    gust=2.2+Math.random()*2;                 // rain leans with the strike
+    body.classList.add("quake"); setTimeout(function(){ body.classList.remove("quake"); },500);
+    setTimeout(thunder, 180+Math.random()*260); // thunder trails the flash
+    boltTimer=setTimeout(bolt, 3500+Math.random()*6500);
+  }
+
+  function startStorm(){
+    if(storming) return; storming=true;
+    body.classList.add("storm");
+    sizeRain(); spawnPills(); drawRain();
+    clearTimeout(boltTimer);
+    setTimeout(bolt, 350);   // the "boom" — an opening strike right as it kicks in
+  }
+  function stopStorm(){
+    if(!storming) return; storming=false;
+    body.classList.remove("storm");
+    clearTimeout(boltTimer);
+    setTimeout(function(){ if(!storming) rctx.clearRect(0,0,rain.width,rain.height); },200);
+  }
+  npAudio.addEventListener("play",function(){ startStorm(); markNotes(); });
+  npAudio.addEventListener("playing",startStorm);
+  npAudio.addEventListener("pause",function(){ stopStorm(); markNotes(); });
+  npAudio.addEventListener("ended",markNotes);
 
   /* ---------- toast + cover secret ---------- */
   var toastEl=document.getElementById("toast"),tt=null;
@@ -333,6 +609,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   });
 })();
 </script>
-<script src="../assets/player.js?v=13"></script>
+<script src="../assets/player.js?v=14"></script>
+<script src="../assets/badges.js?v=7"></script>
 </body>
 </html>
