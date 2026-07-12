@@ -198,7 +198,7 @@
     /* iMessage-style unread COUNT badge on whichever button the unread belongs to:
        profile pill, SHOP, TV, galaxy. Bigger + shows the number (9+ past 9). */
     +"#acct button,#nav button,#buni{position:relative;overflow:visible}"
-    +".ibdot{position:absolute;top:-6px;right:-4px;min-width:19px;height:19px;border-radius:10px;background:#ff2b2b;"
+    +".ibdot{position:absolute;top:3px;right:2px;min-width:18px;height:18px;border-radius:9px;background:#ff2b2b;"
     +"color:#fff;font-family:'Press Start 2P',monospace;font-size:9px;line-height:1;display:flex;align-items:center;"
     +"justify-content:center;padding:0 5px;pointer-events:none;border:2px solid #070707;"
     +"box-shadow:0 0 9px rgba(255,43,43,.9),0 1px 3px rgba(0,0,0,.6);animation:bgnpop .35s cubic-bezier(.2,1.6,.4,1)}"
@@ -218,7 +218,8 @@
   }
   function placeDots(){
     var c=targetCounts();
-    dotOn(document.getElementById("acctbtn"), c.profile);
+    /* profile dot only for signed-in members — a guest has no profile to notify */
+    dotOn(document.getElementById("acctbtn"), loggedIn()?c.profile:0);
     dotOn(document.querySelector('#nav [data-nav="SHOP"]'), c.shop);
     dotOn(document.querySelector('#nav [data-nav="TV"]'), c.tv);
     dotOn(document.getElementById("buni"), c.music);
