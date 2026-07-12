@@ -102,6 +102,11 @@ main{flex:1;width:100%;max-width:620px;padding:24px 18px 60px;display:flex;flex-
 .badge.on{border-color:hsla(var(--hue),60%,50%,.7);box-shadow:0 0 14px hsla(var(--hue),90%,45%,.2)}
 .badge .bi{font-size:26px;line-height:1;filter:grayscale(1) brightness(.5)}
 .badge.on .bi{filter:none}
+/* custom logo icons (TRUE PUNK / CERTIFIED STONER) render as <img class="bimg"> */
+.bimg{width:1em;height:1em;object-fit:contain;display:inline-block;vertical-align:middle}
+.badge .bi .bimg{width:30px;height:30px}
+.newrow .ni .bimg{width:30px;height:30px}
+.bcard .bic .bimg{width:52px;height:52px}
 .badge .bn{font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px;margin-top:8px;line-height:1.6}
 .badge.on .bn{color:hsl(var(--hue),95%,72%)}
 .badge .bt{color:var(--dim);font-size:13px;margin-top:4px}
@@ -227,7 +232,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>document.write('<script src="../../assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
-<script src="../../assets/badges.js?v=6"></script>
+<script src="../../assets/badges.js?v=7"></script>
 <script>
 (function(){
   "use strict";
@@ -309,7 +314,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       var tag= isBadge ? (gold?"⭐ TROPHY UNLOCKED":"🏆 BADGE WON") : ("📣 "+(TAGLABEL[x.type]||"NEWS"));
       var lead= isBadge ? "you just won this — " : "";
       return '<div class="'+cls+'" data-id="'+e2(x.id)+'">'
-        +'<div class="ni">'+e2(x.icon)+'</div>'
+        +'<div class="ni">'+((window.IBEE_BADGES&&window.IBEE_BADGES.icoHTML)?window.IBEE_BADGES.icoHTML(x):e2(x.icon))+'</div>'
         +'<div class="nt"><div class="ntag">'+tag+'</div>'
           +'<div class="nn">'+e2(x.n)+'</div>'
           +(x.d?'<div class="nd">'+lead+e2(x.d)+'</div>':'')
@@ -327,7 +332,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   function openBadge(d,on,ts,P){
     var card=$("bcard");
     card.className="bcard"+(d.gold?" gold":"")+(d.secret?" secret":"");
-    $("bmic").textContent=d.ico;
+    $("bmic").innerHTML=(window.IBEE_BADGES&&window.IBEE_BADGES.icoHTML)?window.IBEE_BADGES.icoHTML(d):d.ico;
     $("bmnm").textContent=d.n2||d.n;
     var st=$("bmst");
     if(on){ st.className="bst on"; st.textContent="✓ EARNED · "+new Date(ts).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
@@ -408,7 +413,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         var sub=on ? new Date(bst.earned[d.id]).toLocaleDateString(undefined,{month:'short',day:'numeric'})
                    : (hush?"hidden badge_":(d.pr?d.pr(P):d.d));
         return '<div class="badge'+(on?' on':'')+(hush?' hush':'')+'" data-id="'+e2(d.id)+'">'
-          +'<div class="bi">'+(hush?'❓':d.ico)+'</div><div class="bn">'+(hush?'???':e2(d.n))+'</div>'
+          +'<div class="bi">'+(hush?'❓':(BAPI.icoHTML?BAPI.icoHTML(d):d.ico))+'</div><div class="bn">'+(hush?'???':e2(d.n))+'</div>'
           +'<div class="bt">'+e2(sub)+'</div></div>';
       }).join('');
       $("badgehead").textContent="// BADGES_ "+nEarn+" / "+BAPI.defs.length;
@@ -446,6 +451,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') boot(); });
 })();
 </script>
-<script src="../../assets/player.js?v=14"></script>
+<script src="../../assets/player.js?v=15"></script>
 </body>
 </html>
