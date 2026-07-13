@@ -242,9 +242,11 @@
     } else if(d) d.remove();
   }
   function placeDots(){
-    var c=targetCounts();
-    /* profile dot only for signed-in members — a guest has no profile to notify */
-    dotOn(document.getElementById("acctbtn"), loggedIn()?c.profile:0);
+    /* NO notifications for guests at all (user's call, 2026-07-13): a visitor with
+       no account gets zero dots anywhere. Badges/news still accrue device-locally
+       (shown in the profile feed once they sign in) — they just don't nag. */
+    var lin=loggedIn(), c=lin?targetCounts():{profile:0,shop:0,tv:0,music:0};
+    dotOn(document.getElementById("acctbtn"), c.profile);
     dotOn(document.querySelector('#nav [data-nav="SHOP"]'), c.shop);
     dotOn(document.querySelector('#nav [data-nav="TV"]'), c.tv);
     dotOn(document.getElementById("buni"), c.music);
@@ -352,10 +354,13 @@
   }
 
   /* ---- auto-news: new songs / galaxies arriving via songs-extra.js (IBEE_SONGS_EXTRA).
-     First run seeds a baseline silently; after that, a fresh record/album writes an
-     auto-news entry → toast + a dot on the galaxy button. ---- */
+     First run seeds a baseline silently; after that, new records write auto-news.
+     BATCHED PER ALBUM (2026-07-12): dropping a whole album makes ONE entry —
+     "NOUVEAUX PUNK just dropped — 27 titles" — never a pop-up per song. A lone
+     single still gets its own "X just dropped on the radio" line. ---- */
   var KNOWN="ibee_news_known";
   function slugify(s){ return String(s||"").toLowerCase().replace(/\.(mp3|wav|m4a)$/,"").trim(); }
+  var GALNAME={rss:"RARE SOUL SESSIONS",np:"NOUVEAUX PUNK",mzs:"20 MIN ZA SESSION"};
   function detectDrops(){
     var ex=window.IBEE_SONGS_EXTRA; if(!ex) return;
     var songs=ex.songs||[], gals=ex.galaxies||[];
@@ -363,13 +368,36 @@
     var first=(known===null); if(!known) known={songs:{},galaxies:{}};
     if(!known.songs) known.songs={}; if(!known.galaxies) known.galaxies={};
     var auto=autoNews(), changed=false, added=false;
+    function galName(id){
+      var nm=null;
+      gals.forEach(function(g){ if(g&&g.id===id) nm=g.name||null; });
+      return nm||GALNAME[id]||(id?String(id).toUpperCase():"a new album");
+    }
+    /* collect the fresh songs first, grouped by album */
+    var by={}, order=[];
     songs.forEach(function(s){ var id=slugify(s.f||s.n); if(!id||known.songs[id]) return;
       known.songs[id]=1; changed=true;
-      if(!first){ auto.push({id:"auto-song-"+id,t:"song",icon:"🎵",n:"NEW SONG",
-        d:(s.n||"a new record")+" just dropped on the radio",date:ymd(),link:"console.html#playing"}); added=true; } });
+      if(first) return;
+      var g=s.g||"rss";
+      if(!by[g]){ by[g]={n:0,one:s}; order.push(g); }
+      by[g].n++;
+    });
+    order.forEach(function(g){
+      var b=by[g];
+      if(b.n>1){ /* an album drop → one line for the whole thing */
+        auto.push({id:"auto-drop-"+slugify(g)+"-"+b.n,t:"galaxy",icon:"🌌",n:"NEW ALBUM",
+          d:galName(g)+" just dropped — "+b.n+" titles",date:ymd(),link:"console.html#playing"});
+      }else{
+        var s=b.one;
+        auto.push({id:"auto-song-"+slugify(s.f||s.n),t:"song",icon:"🎵",n:"NEW SONG",
+          d:(s.n||"a new record")+" just dropped on the radio",date:ymd(),link:"console.html#playing"});
+      }
+      added=true;
+    });
     gals.forEach(function(g){ var id=slugify(g.id||g.name); if(!id||known.galaxies[id]) return;
       known.galaxies[id]=1; changed=true;
-      if(!first){ auto.push({id:"auto-gal-"+id,t:"galaxy",icon:"🌌",n:"NEW GALAXY",
+      /* a new galaxy whose songs were already announced as an album drop stays quiet */
+      if(!first && !by[g.id]){ auto.push({id:"auto-gal-"+id,t:"galaxy",icon:"🌌",n:"NEW GALAXY",
         d:(g.name||"a new album")+" opened in the universe",date:ymd(),link:"console.html#playing"}); added=true; } });
     if(changed){ try{ localStorage.setItem(KNOWN,JSON.stringify(known)); }catch(e){} }
     if(added){ try{ localStorage.setItem("ibee_auto_news",JSON.stringify(auto)); }catch(e){} }
@@ -388,10 +416,14 @@
   function announceNews(){
     var raw; try{ raw=JSON.parse(localStorage.getItem(ANN)||"null"); }catch(e){ raw=null; }
     var first=(raw===null), a=raw||{}, seen=seenMap();
+    var lin=loggedIn();
     newsAll().forEach(function(x){
       if(!x||!x.id||a[x.id]) return;
       a[x.id]=1;
-      if(!first && !seen[x.id]){
+      /* guests get NO news toasts — only signed-in members. And drops are already
+         batched per album upstream (one "NOUVEAUX PUNK just dropped — N titles"
+         line, never one pop per song), so members aren't stormed either. */
+      if(!first && !seen[x.id] && lin){
         var tgt=TARGET[x.t]||"profile";
         toast({ico:x.icon||"📰",h:hdrFor(x.t),n:x.n||"NEWS",d:x.d||"",link:true,href:x.link||"",gold:(tgt==="shop")});
       }

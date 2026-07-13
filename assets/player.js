@@ -518,7 +518,10 @@
   $("rp-prev").onclick = function(){ play(prevIndex()); };
   $("rp-next").onclick = function(){ play(nextIndex()); };
   $("rp-shuf").onclick = function(){ setShuffle(!shuffle); };
-  $("rp-lyr").onclick = function(){ location.href = ROOT + "lyrics/"; };
+  /* the LYRICS ENGINE now lives as the shell's lyrics overlay (opened by the book
+     icon in the shell player). This standalone panel button just returns to the
+     shell, where that overlay is available. */
+  $("rp-lyr").onclick = function(){ location.href = ROOT; };
   audio.addEventListener("ended", function(){ play(nextIndex()); });
   audio.addEventListener("loadedmetadata", function(){ $("rp-tot").textContent = fmt(audio.duration); });
   audio.addEventListener("timeupdate", function(){
@@ -680,6 +683,15 @@
     count: SONGS.length,
     song: function(i){ return SONGS[i == null ? cur : i]; },
     album: function(i){ return album((SONGS[i == null ? cur : i]||{}).al); },
+    /* room-only special albums (e.g. NOUVEAUX PUNK's full EXPERIENCE lives only in
+       its room, not as a single radio track) — the shell's browser renders these
+       as extra album cards alongside the playable songs. */
+    rooms: function(){
+      return ROOMS.map(function(r){
+        var al = album(r.al);
+        return { id:r.al, name:al.name, cover:al.cover, room:al.room, tint:al.tint, pad:al.pad };
+      });
+    },
     shuffled: function(){ return shuffle; },
     toggleShuffle: function(){ setShuffle(!shuffle); return shuffle; },
     control: {
