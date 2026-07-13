@@ -160,6 +160,9 @@ main{flex:1;width:100%;max-width:620px;padding:24px 18px 60px;display:flex;flex-
 .login p{color:var(--dim);margin-bottom:10px}
 .login input{width:100%;background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px;margin-bottom:8px}
 .login button{width:100%;font-family:var(--px);font-size:10px;padding:13px;background:var(--acid);color:#000;border:0;cursor:pointer}
+.login button.ghost{background:transparent;color:var(--acid);border:1px solid var(--acid);margin-top:8px}
+.login button.ghost:hover{background:rgba(182,255,0,.08)}
+.login .or{color:#555;font-family:var(--px);font-size:7px;letter-spacing:2px;margin:10px 0 8px}
 .msg{color:var(--dim);font-size:16px;margin-top:8px}
 .sess{color:var(--dim);font-size:15px}
 .sess a{color:var(--acid)}
@@ -261,21 +264,51 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   function renderLogin(show){
     var box=$("loginbox");
     if(!show){ box.innerHTML=''; return; }
-    box.innerHTML='<div class="login"><div class="h">// LOG IN TO SEE YOUR PROFILE_</div>'
-      +'<p>Already claimed a pass? Sign in to see your rooms, stats, and badges.</p>'
-      +'<input id="em" type="email" placeholder="email" inputmode="email" autocomplete="email">'
-      +'<input id="pw" type="password" placeholder="password" autocomplete="current-password" style="margin-bottom:8px">'
-      +'<button id="go">▶ ENTER</button><div class="msg" id="m"></div>'
-      +'<div class="msg" style="margin-top:10px">No pass yet? <a href="../" style="color:var(--acid)">get one here</a>_</div></div>';
+    box.innerHTML='<div class="login"><div class="h">// JOIN THE FREQUENCY_</div>'
+      +'<p><b style="color:var(--ink)">New here? It takes 2 seconds.</b> Just an email and a password — no pass, no invite, nothing to buy. Make an account and your rooms, stats and badges start saving.</p>'
+      +'<input id="em" type="email" placeholder="your email" inputmode="email" autocomplete="email">'
+      +'<input id="pw" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password" style="margin-bottom:8px">'
+      +'<button id="reg">＋ CREATE MY ACCOUNT — FREE, 2 SEC</button>'
+      +'<div class="or">— ALREADY JOINED? —</div>'
+      +'<button id="go" class="ghost">▶ LOG IN</button>'
+      +'<div class="msg" id="m"></div>'
+      +'<div class="msg" style="margin-top:10px">Got a garment pass? <a href="../" style="color:var(--acid)">redeem it here</a>_</div></div>';
     $("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") $("go").click(); });
-    $("go").onclick=async function(){
+    function valid(){
       var em=($("em").value||'').trim(), pw=($("pw").value||'');
-      if(!/.+@.+\..+/.test(em)){$("m").textContent='enter your email_';return;}
-      if(pw.length<6){$("m").textContent='password: 6+ characters_';return;}
-      $("go").disabled=true;$("m").textContent='…';
-      var si=await sb.auth.signInWithPassword({email:em,password:pw});
-      if(si.error){$("m").textContent='✕ wrong email or password_';$("go").disabled=false;return;}
+      if(!/.+@.+\..+/.test(em)){$("m").textContent='enter your email_';return null;}
+      if(pw.length<6){$("m").textContent='password needs 6+ characters_';return null;}
+      return {em:em,pw:pw};
+    }
+    /* LOG IN — existing account */
+    $("go").onclick=async function(){
+      var v=valid(); if(!v)return;
+      $("go").disabled=true;$("reg").disabled=true;$("m").textContent='…';
+      var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+      if(si.error){$("m").textContent='✕ wrong email or password — new here? tap CREATE MY ACCOUNT_';$("go").disabled=false;$("reg").disabled=false;return;}
       boot();
+    };
+    /* CREATE ACCOUNT — the 2-second join (email + password, no pass needed).
+       Needs Supabase → Auth → "Confirm email" OFF so sign-up returns a session
+       instantly (see README §14). If the email already exists we fall back to login. */
+    $("reg").onclick=async function(){
+      var v=valid(); if(!v)return;
+      $("go").disabled=true;$("reg").disabled=true;$("m").textContent='creating your account…';
+      var su=await sb.auth.signUp({email:v.em,password:v.pw});
+      if(su.error){
+        var msg=String(su.error.message||'').toLowerCase();
+        if(msg.indexOf('already')>=0||msg.indexOf('registered')>=0){
+          /* email already has an account → just log them in */
+          var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+          if(!si.error){ boot(); return; }
+          $("m").textContent='✕ that email is already registered — check your password_';
+        } else { $("m").textContent='✕ '+(su.error.message||'could not create account')+'_'; }
+        $("go").disabled=false;$("reg").disabled=false;return;
+      }
+      if(su.data&&su.data.session){ boot(); return; }   // autoconfirm on → straight in
+      /* Confirm-email still ON in Supabase → no instant session */
+      $("m").textContent='✓ account made — check your email to confirm, then LOG IN_';
+      $("go").disabled=false;$("reg").disabled=false;
     };
   }
 

@@ -393,10 +393,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var codeBlock='<div class="sub">Got a pass code from your garment? Enter it:</div>'
       +'<input id="gcode" placeholder="IBEE-XXXX-0000-XXXX" autocapitalize="characters" autocomplete="off">'
       +'<button class="cbtn" id="gcodego">▶ UNLOCK WITH CODE</button>';
-    var loginBlock='<div class="sub">Already a member? Sign in to see your collection:</div>'
-      +'<input id="gemail" type="email" placeholder="email" autocomplete="email" inputmode="email">'
-      +'<input id="gpass" type="password" placeholder="password" autocomplete="current-password">'
-      +'<button class="cbtn" id="glogin">✦ LOG IN</button>';
+    var loginBlock='<div class="sub"><b style="color:var(--ink)">New here? Joining takes 2 seconds</b> — just an email and a password. No pass, no invite, free.</div>'
+      +'<input id="gemail" type="email" placeholder="your email" autocomplete="email" inputmode="email">'
+      +'<input id="gpass" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password">'
+      +'<button class="cbtn" id="gsignup">＋ CREATE ACCOUNT — FREE, 2 SEC</button>'
+      +'<button class="cbtn" id="glogin" style="background:transparent;border:1px solid var(--acid);color:var(--acid);margin-top:8px">▶ LOG IN (already joined)</button>';
     host.innerHTML='<div class="gate">'
       +(loginFirst
         ? loginBlock+'<div class="or">OR UNLOCK WITH A CODE</div>'+codeBlock
@@ -406,14 +407,37 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       if(!c){$("gmsg").textContent='enter your code_';return;} location.search='?pass='+encodeURIComponent(c); };
     $("gcode").addEventListener("keydown",function(e){ if(e.key==="Enter") $("gcodego").click(); });
     $("gpass").addEventListener("keydown",function(e){ if(e.key==="Enter") $("glogin").click(); });
-    $("glogin").onclick=async function(){
+    function gvalid(){
       var em=($("gemail").value||'').trim(), pw=$("gpass").value||'';
-      if(!/.+@.+\..+/.test(em)){$("gmsg").textContent='enter your email_';return;}
-      if(pw.length<6){$("gmsg").textContent='password: 6+ characters_';return;}
-      $("glogin").disabled=true;$("gmsg").textContent='…';
-      var si=await sb.auth.signInWithPassword({email:em,password:pw});
-      if(si.error){ $("gmsg").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ wrong email or password_'; $("glogin").disabled=false; return; }
+      if(!/.+@.+\..+/.test(em)){$("gmsg").textContent='enter your email_';return null;}
+      if(pw.length<6){$("gmsg").textContent='password needs 6+ characters_';return null;}
+      return {em:em,pw:pw};
+    }
+    $("glogin").onclick=async function(){
+      var v=gvalid(); if(!v)return;
+      $("glogin").disabled=true;$("gsignup").disabled=true;$("gmsg").textContent='…';
+      var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+      if(si.error){ $("gmsg").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ wrong email or password — new? tap CREATE ACCOUNT_'; $("glogin").disabled=false;$("gsignup").disabled=false; return; }
       location.href='inventory/';
+    };
+    /* the 2-second join: email + password, no pass. Needs Supabase Auth "Confirm
+       email" OFF for an instant session (README §14); else prompts to confirm. */
+    $("gsignup").onclick=async function(){
+      var v=gvalid(); if(!v)return;
+      $("glogin").disabled=true;$("gsignup").disabled=true;$("gmsg").textContent='creating your account…';
+      var su=await sb.auth.signUp({email:v.em,password:v.pw});
+      if(su.error){
+        var m=String(su.error.message||'').toLowerCase();
+        if(m.indexOf('already')>=0||m.indexOf('registered')>=0){
+          var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+          if(!si.error){ location.href='inventory/'; return; }
+          $("gmsg").textContent='✕ that email already has an account — check your password_';
+        } else { $("gmsg").textContent='✕ '+(su.error.message||'could not create account')+'_'; }
+        $("glogin").disabled=false;$("gsignup").disabled=false; return;
+      }
+      if(su.data&&su.data.session){ location.href='inventory/'; return; }
+      $("gmsg").textContent='✓ account made — check your email to confirm, then log in_';
+      $("glogin").disabled=false;$("gsignup").disabled=false;
     };
   }
 
@@ -514,6 +538,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   })();
 })();
 </script>
-<script src="../assets/player.js?v=14"></script>
+<script src="../assets/player.js?v=17"></script>
 </body>
 </html>
