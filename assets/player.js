@@ -589,15 +589,26 @@
   });
 
   /* search box */
-  $("rp-search").addEventListener("input", function(){ query = this.value.trim(); render(); });
-  
-  /* grid / list toggle */
-  $("rp-view").onclick = function(){
-    viewMode = (viewMode === "grid") ? "list" : "grid";
-    this.textContent = viewMode === "grid" ? "≡ LIST" : "▦ GRID";
-    this.classList.toggle("on", viewMode === "grid");
-    render();
-  };
+  let listRendered = false;
+
+$("rp-nowtop").addEventListener("click", function () {
+    if (!listRendered) {
+        render();
+        listRendered = true;
+    }
+
+    openPanel();
+
+    requestAnimationFrame(() => {
+        $("rp-search")?.focus();
+    });
+
+function invalidateList(){
+
+    listRendered = false;
+
+}
+});
 
   /* click anywhere outside the box closes it — music keeps playing */
   document.addEventListener("click", function(e){
