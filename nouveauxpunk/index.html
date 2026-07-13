@@ -320,7 +320,6 @@ body.storm #roomtag{opacity:.9}
 
   <div class="actions">
     <a class="btn" href="../?tag=NOUVEAUXPUNK">▶ ENTER THE GALAXY</a>
-    <a class="btn alt" href="../lyrics/">✎ LYRICS ENGINE</a>
   </div>
 </main>
 
@@ -386,47 +385,53 @@ body.storm #roomtag{opacity:.9}
   });
   tr.innerHTML=html;
 
-  var npAudio=new Audio(); npAudio.preload="none";
+  /* ---- ONE RADIO, IN SYNC ----------------------------------------------------
+     The 27 NP tracks live on the site radio (assets/songs-extra.js, g:"np"), so
+     this page no longer owns an <audio> element. Tapping a track DRIVES the radio
+     (IBEERADIO.control.play) — so it plays here AND on the radio bar, the same
+     stream, and it keeps playing when you leave the room. A sync loop mirrors the
+     radio back into the page: if you ARRIVE while the radio is already on an NP
+     track, the row lights up + the storm opens automatically. All groove/visuals
+     read the radio's audio at the playhead (background-safe, no Web Audio). */
   var npCur=-1;
-  function radioPause(){ try{ var R=window.IBEERADIO; if(R&&R.playing()) R.control.pause(); }catch(e){} }
+  function RADIO(){ try{ return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null; }catch(e){ return null; } }
+  function npIdxOf(slug){ if(!slug)return -1; for(var i=0;i<NP.length;i++) if(NP[i].f===slug) return i; return -1; }
   function rowState(){
+    var r=RADIO(),playing=false; try{ playing=!!(r&&r.playing()); }catch(e){}
     Array.prototype.forEach.call(tr.children,function(row,i){
-      var on=(i===npCur&&!npAudio.paused);
+      var on=(i===npCur&&playing);
       row.classList.toggle("playing",on);
       row.querySelector(".st").textContent = on?"❚❚":(i===npCur?"▶":fmt(NP[i].d));
     });
   }
-  function playNP(i){
-    if(i===npCur){ if(npAudio.paused){ radioPause(); npAudio.play().catch(function(){}); } else npAudio.pause(); rowState(); return; }
-    npCur=i; npAudio.src="../assets/audio/np/"+NP[i].f;
-    radioPause();
-    npAudio.play().catch(function(){});
-    rowState();
+  /* play (or pause/resume) NP track i through the radio; poll until the radio +
+     the extra records are ready (they load async on a standalone visit). */
+  function playNP(i,tries){
+    tries=tries||0; var r=RADIO();
+    if(!r){ if(tries<40) setTimeout(function(){ playNP(i,tries+1); },200); return; }
+    var ri=r.indexBySlug?r.indexBySlug(NP[i].f):-1;
+    if(ri<0){ if(tries<40) setTimeout(function(){ playNP(i,tries+1); },250); return; }
+    if(r.current()===ri && r.playing()) r.control.pause();
+    else r.control.play(ri);
+    npCur=i; rowState();
   }
-  npAudio.addEventListener("play",function(){ radioPause(); rowState(); });
-  npAudio.addEventListener("pause",rowState);
-  npAudio.addEventListener("ended",function(){ if(npCur<NP.length-1) playNP(npCur+1); else { npCur=-1; rowState(); } });
 
   /* ---- badge tracking: 7 distinct songs from THE EXPERIENCE unlocks the
-     NOUVEAUX PUNK badge. A song counts once you've felt ~15s of it. We keep the
-     set in its own localStorage key ("ibee_np_songs") so badges.js can read the
-     count without racing its own writes. ---- */
-  var npListenT=0, npLastT=0;
+     NOUVEAUX PUNK badge. A song counts once you've felt ~15s of it. Kept in its
+     own localStorage key ("ibee_np_songs") so badges.js reads without a write race. ---- */
+  var npListenT=0, npLastT=-1, npMarkedFor=-1;
   function npMark(){
-    try{
-      var f=NP[npCur]&&NP[npCur].f; if(!f) return;
+    try{ var f=NP[npCur]&&NP[npCur].f; if(!f) return;
       var o=JSON.parse(localStorage.getItem("ibee_np_songs")||"{}")||{};
       if(!o[f]){ o[f]=1; localStorage.setItem("ibee_np_songs",JSON.stringify(o)); }
     }catch(e){}
   }
-  npAudio.addEventListener("timeupdate",function(){
-    var t=npAudio.currentTime||0, dt=t-npLastT; npLastT=t;
-    if(dt>0 && dt<1 && !npAudio.paused){ npListenT+=dt; if(npListenT>=15) npMark(); }
-  });
-  npAudio.addEventListener("play",function(){ npListenT=0; npLastT=npAudio.currentTime||0; });
-  /* the other direction: radio starts → the album steps aside */
-  setInterval(function(){ try{ var R=window.IBEERADIO;
-    if(R&&R.playing()&&!npAudio.paused) npAudio.pause(); }catch(e){} },800);
+  function npAccum(r){
+    var t=0; try{ t=r.audio.currentTime||0; }catch(e){}
+    if(npLastT<0||npMarkedFor!==npCur){ npLastT=t; npListenT=0; npMarkedFor=npCur; }
+    var dt=t-npLastT; npLastT=t;
+    if(dt>0&&dt<1){ npListenT+=dt; if(npListenT>=15) npMark(); }
+  }
 
   /* =====================================================================
      THE LISTENING NOTICE — the original NP notice, reborn in the site vibe.
@@ -462,7 +467,8 @@ body.storm #roomtag{opacity:.9}
   function markNotes(){
     Array.prototype.forEach.call(noticeEl.children,function(el){
       var nt=NOTES[+el.getAttribute("data-k")],on=false;
-      if(npCur>=0&&!npAudio.paused){ for(var j=0;j<nt.songs.length;j++){ if(npIndex(nt.songs[j])===npCur){on=true;break;} } }
+      var pl=false; try{ var r=RADIO(); pl=!!(r&&r.playing()); }catch(e){}
+      if(npCur>=0&&pl){ for(var j=0;j<nt.songs.length;j++){ if(npIndex(nt.songs[j])===npCur){on=true;break;} } }
       el.classList.toggle("playing",on);
     });
   }
@@ -497,9 +503,10 @@ body.storm #roomtag{opacity:.9}
     gust=Math.max(gust,2+Math.random()*1.5);
   }
   function groove(){
-    var B=window.IBEE_BEAT; if(!B||npCur<0) return null;
+    var r=RADIO(),B=window.IBEE_BEAT; if(!r||!B||npCur<0) return null;
     var g=B[NP[npCur].f]; if(!g) return null;
-    var i=Math.max(0,Math.min(g.low.length-1,Math.floor((npAudio.currentTime||0)*g.r)));
+    var t=0; try{ t=r.audio.currentTime||0; }catch(e){}
+    var i=Math.max(0,Math.min(g.low.length-1,Math.floor(t*g.r)));
     return { low:parseInt(g.low.charAt(i),36)/35, lv:parseInt(g.lvl.charAt(i),36)/35 };
   }
   function stepBeat(){
@@ -595,10 +602,21 @@ body.storm #roomtag{opacity:.9}
     clearTimeout(boltTimer);
     setTimeout(function(){ if(!storming) rctx.clearRect(0,0,rain.width,rain.height); },200);
   }
-  npAudio.addEventListener("play",function(){ startStorm(); markNotes(); });
-  npAudio.addEventListener("playing",startStorm);
-  npAudio.addEventListener("pause",function(){ stopStorm(); markNotes(); });
-  npAudio.addEventListener("ended",markNotes);
+  /* ---- the sync loop: the radio is the single source of truth ----------------
+     Mirror the radio into the page 4×/sec: which NP track is on air, is it
+     playing, and open/close the storm to match. This is what makes arriving
+     mid-song "just work" (the storm opens on its own) and what keeps the album
+     playing seamlessly whether you tap here or on the radio bar. */
+  function syncFromRadio(){
+    var r=RADIO(); if(!r) return;
+    var slug=null; try{ slug=r.slug&&r.slug(); }catch(e){}
+    var idx=npIdxOf(slug), playing=false; try{ playing=!!r.playing(); }catch(e){}
+    npCur=idx;
+    if(playing&&idx>=0){ startStorm(); npAccum(r); } else { stopStorm(); npLastT=-1; }
+    rowState(); markNotes();
+  }
+  setInterval(syncFromRadio,250);
+  syncFromRadio();
 
   /* ---------- toast + cover secret ---------- */
   var toastEl=document.getElementById("toast"),tt=null;
@@ -614,7 +632,7 @@ body.storm #roomtag{opacity:.9}
   });
 })();
 </script>
-<script src="../assets/player.js?v=16"></script>
-<script src="../assets/badges.js?v=8"></script>
+<script src="../assets/player.js?v=17"></script>
+<script src="../assets/badges.js?v=9"></script>
 </body>
 </html>
