@@ -184,16 +184,24 @@
     -webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);
     mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent)}
   #lyr .words::-webkit-scrollbar{display:none}
-  #lyr .stream{text-align:center;padding:38vh 20px}
-  #lyr .ln{font-size:21px;line-height:1.4;color:#8a8a8a;opacity:.35;padding:7px 0;transition:all .35s;
+  /* floating glyphs behind the words (Lyrics Engine look) + the now-playing header */
+  #lglyphs{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55}
+  #lyr .lnp{text-align:center;padding:22px 16px 4px;position:relative;z-index:2}
+  #lname{font-family:var(--px);font-size:clamp(18px,5.4vw,30px);letter-spacing:2px;
+    color:hsl(var(--songhue,190),95%,68%);text-shadow:0 0 22px hsla(var(--songhue,190),95%,55%,.55);
+    transform:scale(calc(1 + var(--beat,0)*0.06));transition:color .4s}
+  #lmood{color:var(--dim);font-size:19px;margin-top:9px;letter-spacing:2px}
+  #lyr .words{z-index:2}
+  #lyr .stream{text-align:center;padding:14vh 20px 22vh}
+  /* Lyrics-Engine line styling: dim by default, the sung line big + hue-glow +
+     beat-scaled, already-sung lines fade back. Tap a line to jump there. */
+  #lyr .ln{font-size:22px;line-height:1.5;color:#8a8a8a;opacity:.4;margin:14px 0;padding:0 10px;transition:all .35s ease;
     text-shadow:0 1px 3px #000;cursor:pointer}
   #lyr .ln:hover{opacity:.85;color:var(--ink)}
-  /* karaoke: the active line is a gradient clipped to the text — the bright part
-     sweeps left→right in time with the singing (lyrSync moves the stop each frame) */
-  #lyr .ln.on{opacity:1;font-size:26px;color:transparent;text-shadow:none;
-    -webkit-background-clip:text;background-clip:text;
-    background-image:linear-gradient(90deg,#eaffb0 0%,#b6ff00 0%,rgba(182,255,0,.30) 0%);
-    filter:drop-shadow(0 0 12px rgba(182,255,0,.4))}
+  #lyr .ln.past{opacity:.2}
+  #lyr .ln.on{opacity:1;font-size:28px;color:hsl(var(--songhue,190),95%,72%);
+    text-shadow:0 0 18px hsla(var(--songhue,190),95%,55%,.55);
+    transform:scale(calc(1 + var(--beat,0)*0.05))}
   #lyr .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     color:var(--dim);font-family:var(--px);font-size:10px;text-align:center;padding:24px}
   /* ---- INFO side (the record's soul): swaps into the words' slot, bar stays put ---- */
@@ -260,15 +268,17 @@
   </ul>
   <h2>Songs</h2>
   <p>All I Need, Bounceee, Callin On U, Freestyle Sept9, Head, Lonely22, Maintenant, Mix 100, Nananannn, Obsess, Real To Me, Ride It, Right Middle, Silouhette, Strippin Down, To Our Pain, Write A Song, Yo Body, 20MZS.</p>
-  <p><a href="console.html">Enter the console</a> · <a href="lyrics/">Lyrics</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE clothing</a></p>
+  <p><a href="console.html">Enter the console</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE clothing</a></p>
 </div>
 <div id="app">
   <div id="bar"><div id="nav"></div><div id="acct"></div></div>
 
   <div id="stage">
     <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>
-    <!-- lyrics overlay -->
+    <!-- lyrics overlay — the LYRICS ENGINE, in the shell's black room -->
     <div id="lyr">
+      <canvas id="lglyphs"></canvas>
+      <div class="lnp"><div id="lname">LYRICS ENGINE</div><div id="lmood">press play — the words follow the music_</div></div>
       <div class="words">
         <div class="stream" id="lstream"></div>
         <div class="empty" id="lempty" style="display:none">no words for this signal yet_</div>
@@ -356,7 +366,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=16"></script>
+<script src="assets/player.js?v=17"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -365,7 +375,7 @@
 <!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
 <script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
-<script src="assets/badges.js?v=8"></script>
+<script src="assets/badges.js?v=9"></script>
 <script>
 (function(){
   /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */
@@ -412,7 +422,7 @@
   }
   renderAcct();
   window.addEventListener('storage',renderAcct);
-  // Interval removed here to save battery - relies on storage event listener only!
+  setInterval(renderAcct,3000);
 
   function navigate(url){
     try{lyrClose();}catch(e){}   /* moving to a section closes the lyrics room */
@@ -521,6 +531,10 @@
       if(timed&&timed.length){ lyrLines=timed.map(function(l){return l.w;}); lyrTimes=timed.map(function(l){return l.t;}); }
       else { lyrLines=(slug&&LYR[slug])||[]; lyrTimes=null; }
       var s=r.song&&r.song(); lsong.textContent=s?s.n:'—';
+      var ln=document.getElementById('lname'), lm=document.getElementById('lmood');
+      if(ln) ln.textContent=s?s.n:'LYRICS ENGINE';
+      var mv=(slug&&META[slug]&&META[slug].vibe)||'';
+      if(lm) lm.textContent=mv?mv.replace(/\//g,' · '):(lyrLines.length?'the words follow the music_':'no words for this signal yet_');
       fillInfo(slug,s?s.n:null);
       if(lyrLines.length){ lempty.style.display='none';
         lstream.innerHTML=lyrLines.map(function(w){return '<div class="ln">'+esc(w)+'</div>';}).join('');
@@ -531,33 +545,20 @@
     var ci=r.current();
     Array.prototype.forEach.call(lsongbox.querySelectorAll('button'),function(b){b.classList.toggle('now',+b.getAttribute('data-i')===ci);});
   }
+  /* Lyrics-Engine sync: light the sung line (big + hue glow + beat scale), fade the
+     lines already passed. Real timestamps when the song is tap-synced, else the plain
+     lines spread across the duration. (No karaoke gradient sweep — the /lyrics/ look.) */
   function lyrSync(){
     if(!lyrOpen||!lyrLines.length)return;
     var r=R();if(!r)return;
     var c=0,d=0; try{c=r.audio.currentTime||0;d=r.audio.duration||0;}catch(e){}
     var idx;
-    if(lyrTimes){ /* true timestamps: last line whose time has passed */
-      idx=0; for(var k=0;k<lyrTimes.length;k++){ if(lyrTimes[k]<=c)idx=k; else break; }
-    } else {
-      idx=d>0?Math.min(lyrLines.length-1,Math.max(0,Math.floor(c/d*lyrLines.length))):0;
-    }
+    if(lyrTimes){ idx=0; for(var k=0;k<lyrTimes.length;k++){ if(lyrTimes[k]<=c)idx=k; else break; } }
+    else { idx=d>0?Math.min(lyrLines.length-1,Math.max(0,Math.floor(c/d*lyrLines.length))):0; }
     var kids=lstream.children;
     if(idx!==lyrActive){
-      if(lyrActive>=0&&kids[lyrActive])kids[lyrActive].style.backgroundImage='';
       lyrActive=idx;
-      for(var i=0;i<kids.length;i++)kids[i].classList.toggle('on',i===idx);
-    }
-    /* karaoke sweep: how far through the active line are we? */
-    var el=kids[lyrActive];
-    if(el){
-      var p=1;
-      if(lyrTimes){ var t0=lyrTimes[lyrActive],
-        t1=(lyrActive+1<lyrTimes.length)?lyrTimes[lyrActive+1]:Math.max(t0+2,d||t0+4);
-        p=(c-t0)/Math.max(0.2,t1-t0); }
-      else if(d>0){ var per=d/lyrLines.length; p=(c-lyrActive*per)/per; }
-      p=Math.max(0,Math.min(1,p)); var pc=p*100;
-      el.style.backgroundImage='linear-gradient(90deg,#eaffb0 0%,#b6ff00 '
-        +Math.max(0,pc-4).toFixed(1)+'%,rgba(182,255,0,.30) '+pc.toFixed(1)+'%)';
+      for(var i=0;i<kids.length;i++){ kids[i].classList.toggle('on',i===idx); kids[i].classList.toggle('past',i<idx); }
     }
     /* follow the song — unless the user is scrolling (or was, in the last 4s) */
     if(lyrActive>=0&&lyrCentered!==lyrActive&&Date.now()-lyrManual>4000)lyrCenter();
@@ -568,46 +569,129 @@
     try{var rc=seek.getBoundingClientRect(),fr=(e.clientX-rc.left)/rc.width;
       if(r.audio&&r.audio.duration)r.audio.currentTime=Math.max(0,Math.min(1,fr))*r.audio.duration;}catch(x){}});
 
-  /* ---- title click → open the radio (track list) ---- */
-  var tl=document.getElementById('tracklist'), built=false, builtCount=0;
-  /* album names: the site's galaxies + any new albums from songs-extra.js */
-  var GALN={rss:'RARE SOUL SESSIONS',mzs:'20 MIN ZA SESSION',np:'NOUVEAUX PUNK',pp:'PPFDB 2',
-    mv:'MINI VIBE',ddlf:'DEBUT DE LA FIN',bip:'BIPOLAIRE',vault:'THE VAULT'};
-  function albumOf(s){
-    try{((window.IBEE_SONGS_EXTRA||{}).galaxies||[]).forEach(function(g){if(g&&g.id&&!GALN[g.id])GALN[g.id]=g.name;});}catch(e){}
-    return GALN[(s&&s.g)||'rss']||'RARE SOUL SESSIONS';
+  /* ================= THE RADIO BROWSER (grid default + list + search) =================
+     Renders into the STATIC scaffolding (#tltools search, #roomband, #tlbody, #tlempty) —
+     it no longer overwrites #tracklist, so the header/tools/room-band stay put. GRID is the
+     default view (Spotify-style covers with a 3D sideways tilt that straightens on hover),
+     LIST is the second choice. Album name / cover / room all come from the radio bridge's
+     album(i) — the authoritative source (song objects carry .al, not .g). */
+  var tl=document.getElementById('tracklist'),
+      tlbody=document.getElementById('tlbody'),
+      tlempty=document.getElementById('tlempty'),
+      tlsearch=document.getElementById('tlsearch'),
+      tlview=document.getElementById('tlview'),
+      roomband=document.getElementById('roomband'),
+      roombtn=document.getElementById('roombtn');
+  var viewMode='grid', query='', builtCount=-1;
+  var LKSVG="<svg class='lk' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
+  var LKBIG="<svg class='lockb' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
+  function e3(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function matchQ(name,alb){ if(!query)return true; var q=query.toLowerCase();
+    return (name||'').toLowerCase().indexOf(q)>=0 || (alb||'').toLowerCase().indexOf(q)>=0; }
+  function vinyl(hue){ return 'radial-gradient(circle,hsl('+(hue||75)+',85%,55%) 0 20%,#070707 22% 28%,#161616 30% 100%)'; }
+  /* cover art: song's own picture → its ALBUM cover → legacy assets/covers/<name>.jpg|png → vinyl */
+  function coverCands(s,alb){
+    var base=(s.f||'').replace(/\.[a-z0-9]+$/i,''), rbase=(s.r||'').replace(/\.[a-z0-9]+$/i,''), c=[];
+    if(s.cover)c.push(encodeURI(s.cover));
+    if(alb&&alb.cover)c.push(encodeURI(alb.cover));
+    if(base){c.push('assets/covers/'+encodeURI(base)+'.jpg');c.push('assets/covers/'+encodeURI(base)+'.png');}
+    if(rbase&&rbase!==base)c.push('assets/covers/'+encodeURI(rbase)+'.jpg');
+    return c;
   }
-  function buildList(){
-    var r=R();if(!r)return; var h='<div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>';
-    for(var i=0;i<r.count;i++){var s=r.song(i)||{};
-      /* cover art: song's own picture → its ALBUM cover (rss/np/mzs/…) → legacy
-         assets/covers/<song file name>.jpg|png → vinyl placeholder (never a broken icon) */
-      var base=(s.f||'').replace(/\.[a-z0-9]+$/i,''), rbase=(s.r||'').replace(/\.[a-z0-9]+$/i,'');
-      var alb=r.album?r.album(i):null;
-      var cands=[];
-      if(s.cover)cands.push(encodeURI(s.cover));
-      if(alb&&alb.cover)cands.push(encodeURI(alb.cover));
-      if(base){cands.push('assets/covers/'+encodeURI(base)+'.jpg');cands.push('assets/covers/'+encodeURI(base)+'.png');}
-      if(rbase&&rbase!==base)cands.push('assets/covers/'+encodeURI(rbase)+'.jpg');
-      h+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
-        +'<span class="cv" style="background:radial-gradient(circle,hsl('+(s.hue||75)+',85%,55%) 0 20%,#070707 22% 28%,#161616 30% 100%)">'
-        +(cands.length?'<img alt="" loading="lazy" src="'+cands[0]+'" data-alt="'+cands.slice(1).join('|')+'">':'')
-        +'</span><span class="ti"><span class="tn">'+(s.n||'—')+'</span><span class="al">'+albumOf(s)+'</span></span></div>';
+  function imgTag(cands){ return cands.length?'<img alt="" loading="lazy" src="'+cands[0]+'" data-alt="'+cands.slice(1).join('|')+'">':''; }
+  function renderTracks(){
+    var r=R();if(!r)return;
+    tlbody.className = viewMode==='grid'?'grid':'';
+    var html='',shown=0,i,cur=r.current?r.current():-1;
+    for(i=0;i<r.count;i++){
+      var s=r.song(i)||{}, alb=r.album?r.album(i):null, aln=(alb&&alb.name)||'RARE SOUL SESSIONS';
+      if(!matchQ(s.n,aln))continue; shown++;
+      var img0=imgTag(coverCands(s,alb)), room=alb&&alb.room, tint=(alb&&alb.tint)||'#ff2b2b';
+      if(viewMode==='grid'){
+        html+='<div class="tl-tile'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
+          +'<div class="art" style="background:'+vinyl(s.hue)+'">'+img0
+          +(i===cur?'<span class="gnow">NOW</span>':'')
+          +(s.locked?LKBIG:'')
+          +(room?'<span class="roomb">ROOM</span>':'')
+          +'<span class="gtag">'+e3(aln)+'</span></div>'
+          +'<div class="nm">'+e3(s.n||'—')+'</div></div>';
+      } else {
+        html+='<div class="tr'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
+          +'<span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
+          +'<span class="cv" style="background:'+vinyl(s.hue)+'">'+img0+'</span>'
+          +'<span class="ti"><span class="tn">'+e3(s.n||'—')+'</span><span class="al">'+e3(aln)+'</span></span>'
+          +(s.locked?LKSVG:(room?'<span class="rmroom">ROOM</span>':''))
+          +'</div>';
+      }
     }
-    tl.innerHTML=h;built=true;builtCount=r.count;
-    /* missing picture → try the next name, then keep the vinyl (never a broken icon) */
-    Array.prototype.forEach.call(tl.querySelectorAll('.cv img'),function(im){
-      im.onerror=function(){
-        var alts=(im.dataset.alt||'').split('|').filter(Boolean);
-        if(alts.length){im.dataset.alt=alts.slice(1).join('|');im.src=alts[0];}
-        else{im.style.display='none';}
-      };
+    /* room-only album cards (e.g. NOUVEAUX PUNK — the full experience) */
+    (r.rooms?r.rooms():[]).forEach(function(rm){
+      if(!matchQ(rm.name,rm.name))return; shown++;
+      var tint=rm.tint||'#ff2b2b', cov=rm.cover?'<img alt="" loading="lazy" src="'+encodeURI(rm.cover)+'">':'';
+      if(viewMode==='grid'){
+        html+='<div class="tl-tile" data-room="'+e3(rm.room)+'" style="--rt:'+tint+'">'
+          +'<div class="art" style="background:'+vinyl(110)+'">'+cov
+          +'<span class="roomb">ROOM</span><span class="gtag">ALBUM · THE EXPERIENCE</span></div>'
+          +'<div class="nm">'+e3(rm.name)+'</div></div>';
+      } else {
+        html+='<div class="tr" data-room="'+e3(rm.room)+'">'
+          +'<span class="no">EP</span>'
+          +'<span class="cv" style="background:'+vinyl(110)+'">'+cov+'</span>'
+          +'<span class="ti"><span class="tn">'+e3(rm.name)+'</span><span class="al">the experience · tap for the room</span></span>'
+          +'<span class="rmroom">ROOM</span></div>';
+      }
     });
-    document.getElementById('tlx').onclick=function(ev){ev.stopPropagation();tl.classList.remove('open');};
-    Array.prototype.forEach.call(tl.querySelectorAll('.tr'),function(row){
-      row.onclick=function(){var r2=R();if(r2)r2.control.play(+row.getAttribute('data-i'));};});
+    tlbody.innerHTML=html;
+    tlempty.style.display=shown?'none':'block';
+    builtCount=r.count;
+    /* missing picture → walk the fallback names, then keep the vinyl (never a broken icon) */
+    Array.prototype.forEach.call(tlbody.querySelectorAll('img'),function(im){
+      im.onerror=function(){ var alts=(im.dataset.alt||'').split('|').filter(Boolean);
+        if(alts.length){im.dataset.alt=alts.slice(1).join('|');im.src=alts[0];}else{im.style.display='none';} };
+    });
+    Array.prototype.forEach.call(tlbody.children,function(el){
+      var rmu=el.getAttribute('data-room');
+      if(rmu){ el.onclick=function(){ navigate(rmu); tl.classList.remove('open'); }; return; }
+      var i=+el.getAttribute('data-i');
+      el.onclick=function(){ var r2=R(); if(!r2)return; var s=r2.song(i); if(s&&s.locked)return; r2.control.play(i); };
+    });
   }
-  document.getElementById('nowbtn').onclick=function(){ if(!built)buildList(); tl.classList.toggle('open'); };
+  function markNow(){
+    var r=R();if(!r)return; var cur=r.current();
+    Array.prototype.forEach.call(tlbody.children,function(el){
+      if(el.getAttribute('data-room'))return;
+      var on=(+el.getAttribute('data-i')===cur);
+      el.classList.toggle('now',on);
+      if(viewMode==='grid'){
+        var g=el.querySelector('.gnow');
+        if(on&&!g&&!el.classList.contains('locked')){var sp=document.createElement('span');sp.className='gnow';sp.textContent='NOW';var art=el.querySelector('.art');if(art)art.insertBefore(sp,art.firstChild);}
+        else if(!on&&g)g.remove();
+      }
+    });
+  }
+  /* GO TO THE ROOM — shows for whichever special album is on air (NOUVEAUX PUNK, 20 MIN ZA
+     SESSION, any studio album with a room). Navigates in-frame so the radio keeps playing. */
+  var lastRoomKey='';
+  function updateRoomband(){
+    var r=R();if(!r){roomband.classList.remove('show');return;}
+    var i=r.current?r.current():-1, alb=(i>=0&&r.album)?r.album(i):null;
+    var room=alb&&alb.room, key=room?(alb.name+'|'+room):'';
+    if(key===lastRoomKey)return; lastRoomKey=key;
+    if(room){ roombtn.textContent='▶ GO TO THE ROOM';
+      roomband.style.setProperty('--rtint',alb.tint||'#ff2b2b');
+      roomband.dataset.room=room; roomband.classList.add('show'); }
+    else roomband.classList.remove('show');
+  }
+  roombtn.onclick=function(){ var u=roomband.dataset.room; if(u){ navigate(u); tl.classList.remove('open'); } };
+  tlsearch.addEventListener('input',function(){ query=this.value.trim(); renderTracks(); markNow(); });
+  tlview.onclick=function(){ viewMode=(viewMode==='grid')?'list':'grid';
+    this.textContent=viewMode==='grid'?'≡ LIST':'▦ GRID';
+    this.classList.toggle('on',viewMode==='grid'); renderTracks(); markNow(); };
+  tlview.classList.toggle('on',viewMode==='grid');
+  document.getElementById('tlx').onclick=function(ev){ ev.stopPropagation(); tl.classList.remove('open'); };
+  function openTL(){ var r=R(); if(r&&builtCount!==r.count)renderTracks(); tl.classList.add('open'); updateRoomband(); markNow(); }
+  function toggleTL(){ if(tl.classList.contains('open'))tl.classList.remove('open'); else openTL(); }
+  document.getElementById('nowbtn').onclick=toggleTL;
   /* click anywhere outside the track list closes it (music keeps playing) */
   document.addEventListener('pointerdown',function(e){
     if(!tl.classList.contains('open'))return;
@@ -628,7 +712,7 @@
       fill=document.getElementById('fill'),timeEl=document.getElementById('time'),bd=document.querySelector('#nowbtn .bd');
   /* the now-playing album cover in the bar: song's own art → album cover → hue vinyl */
   var pcover=document.getElementById('pcover'),pcoverimg=document.getElementById('pcoverimg'),lastCoverI=-2;
-  pcover.onclick=function(){ if(!built)buildList(); tl.classList.toggle('open'); };
+  pcover.onclick=toggleTL;
   function setPcover(r,i,s){
     var hue=(s&&s.hue!=null)?s.hue:75;
     pcover.style.background='radial-gradient(circle,hsl('+hue+',85%,55%) 0 20%,#070707 22% 28%,#141414 30% 100%)';
@@ -638,11 +722,9 @@
     else pcoverimg.style.display='none';
   }
   function fmt(s){if(!isFinite(s))return'--:--';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
-  
-  // Replaced setInterval player polling with event-driven logic
-  function updatePlayerUI() {
+  setInterval(function(){
     var r=R();if(!r)return;
-    if(built&&r.count!==builtCount)buildList(); /* extra records arrived — rebuild the list */
+    if(builtCount!==r.count)renderTracks(); /* extra records arrived — rebuild the browser */
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
     var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s); }
     var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
@@ -650,34 +732,36 @@
     try{bd.style.setProperty('--b',(0.45+(pl?r.beat():0)).toFixed(2));}catch(e){}
     try{var c=r.audio.currentTime||0,d=r.audio.duration||0;
       fill.style.width=(d?c/d*100:0)+'%'; timeEl.textContent=fmt(c)+' / '+fmt(d);}catch(e){}
-    if(tl.classList.contains('open')){var ci=r.current();
-      Array.prototype.forEach.call(tl.querySelectorAll('.tr'),function(row){
-        row.classList.toggle('now',+row.getAttribute('data-i')===ci);});}
+    updateRoomband();
+    if(tl.classList.contains('open'))markNow();
     if(lyrOpen){ lyrRefresh(); lyrSync(); }
-  }
-
-  function initPlayerListeners() {
-    var r = R();
-    if (r && r.audio && !r._uiListenersAttached) {
-      r.audio.addEventListener('timeupdate', updatePlayerUI);
-      r.audio.addEventListener('play', updatePlayerUI);
-      r.audio.addEventListener('pause', updatePlayerUI);
-      r.audio.addEventListener('loadeddata', updatePlayerUI);
-      r.audio.addEventListener('ended', updatePlayerUI);
-      r._uiListenersAttached = true;
-      updatePlayerUI(); // Run once immediately
-    } else if (!r || !r._uiListenersAttached) {
-      // If player.js hasn't finished setting up audio yet, check again shortly
-      setTimeout(initPlayerListeners, 500);
-    }
-  }
-  
-  // Start the initialization sequence
-  initPlayerListeners();
-
+  },350);
   /* karaoke needs frame-accurate timing: while the overlay is open, sync every
      animation frame (the sweep + line flips land the instant their time hits) */
   (function lyrTick(){ requestAnimationFrame(lyrTick); if(lyrOpen) lyrSync(); })();
+
+  /* ---- floating glyphs behind the lyrics (the Lyrics Engine ambience) ----
+     Drifts up in the song's hue, faster on the beat. Only runs while the overlay
+     is open; sizes itself the first time it's shown (the canvas is 0×0 hidden). */
+  (function(){
+    var cv=document.getElementById('lglyphs'); if(!cv)return; var cx=cv.getContext('2d');
+    var GLY=['♪','♫','✦','✧','·','*'], parts=[];
+    function rs(){ cv.width=cv.clientWidth||lyr.clientWidth||window.innerWidth; cv.height=cv.clientHeight||lyr.clientHeight||window.innerHeight; }
+    function seed(){ parts=[]; for(var i=0;i<38;i++) parts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,
+      v:.2+Math.random()*.5,s:10+Math.random()*16,g:GLY[Math.floor(Math.random()*GLY.length)],o:.1+Math.random()*.25,ph:Math.random()*6.28}); }
+    (function gl(){ requestAnimationFrame(gl);
+      if(!lyr.classList.contains('open')) return;
+      if(cv.width<2||cv.height<2||Math.abs(cv.width-cv.clientWidth)>4){ rs(); seed(); }
+      var beat=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--beat'))||0;
+      var hue=getComputedStyle(document.documentElement).getPropertyValue('--songhue')||190;
+      cx.clearRect(0,0,cv.width,cv.height);
+      parts.forEach(function(p){ p.y-=p.v*(1+beat*3); p.x+=Math.sin(p.ph+=.008)*.3;
+        if(p.y<-30){p.y=cv.height+20;p.x=Math.random()*cv.width;}
+        cx.globalAlpha=Math.min(1,p.o+beat*.4); cx.fillStyle='hsl('+hue+',90%,65%)';
+        cx.font=(p.s*(1+beat*.4))+"px 'VT323'"; cx.fillText(p.g,p.x,p.y); });
+      cx.globalAlpha=1;
+    })();
+  })();
 
   /* ---- PRESS START intro: just dismiss, do NOT start music ---- */
   var enter=document.getElementById('enter');
