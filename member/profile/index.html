@@ -183,7 +183,18 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </div>
 
   <div class="topbar crtin" id="topbar" style="display:none">
+    <a href="../../room/">⌂ MY ROOM</a>
     <a href="../inventory/">♟ COLLECTION</a>
+  </div>
+
+  <!-- the profile IS the room now: your room front-and-center, everything else below -->
+  <div class="uni crtin" id="roomcard" style="display:none;border-color:hsla(var(--hue),60%,50%,.55);background:rgba(12,14,10,.9)">
+    <div class="ico">⌂</div>
+    <div class="txt">
+      <div class="nm" style="color:hsl(var(--hue),95%,70%)" id="roomnm">MY ROOM</div>
+      <div class="ds" id="roomds">—</div>
+    </div>
+    <a class="go" id="roomgo" href="../../room/" style="color:hsl(var(--hue),95%,70%);border-color:hsla(var(--hue),60%,45%,.5)">▶ ENTER</a>
   </div>
 
   <div class="idcard crtin" id="idcard" style="display:none">
@@ -399,7 +410,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     if(!sb){ $("loginbox").innerHTML='<div class="msg">✕ backend offline — refresh in a moment_</div>'; return; }
     var sess=(await sb.auth.getSession()).data.session;
     if(!sess){
-      ["topbar","idcard","stats3","badgebox","unicard","actions"].forEach(function(id){$(id).style.display="none";});
+      ["topbar","roomcard","idcard","stats3","badgebox","unicard","actions"].forEach(function(id){$(id).style.display="none";});
       $("avpick").classList.remove("open");
       $("sessline").textContent='';
       renderLogin(true);
@@ -409,6 +420,22 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("topbar").style.display="";
     $("sessline").innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout">log out</a>';
     $("logout").onclick=function(ev){ev.preventDefault();sb.auth.signOut().then(function(){location.reload();});};
+
+    /* ---- MY ROOM: the member's own room (nickname + kind from the profiles table).
+       Needs member/room.sql run once in Supabase; fails soft into a "found it" CTA. ---- */
+    (async function(){
+      var KN={garage:"MIDNIGHT GARAGE",attic:"ACID ATTIC",vhs:"VHS DEN",moon:"MOON LOBBY",cellar:"TAPE CELLAR",green:"NEON GREENHOUSE"};
+      var card=$("roomcard"); card.style.display="";
+      var p=null; try{ var r=await sb.rpc('my_profile'); if(!r.error)p=r.data; }catch(e){}
+      if(p&&p.username){
+        $("roomnm").textContent="MY ROOM · "+p.username.toUpperCase();
+        $("roomds").textContent=(KN[(p.room||{}).k]||"your room")+" — share it: onlyibee.com/room/"+p.username;
+      } else {
+        $("roomnm").textContent="MY ROOM — UNCLAIMED";
+        $("roomds").textContent="pick your name, choose your door, get your own room_";
+        $("roomgo").textContent="✦ FOUND IT";
+      }
+    })();
 
     /* ---- rooms owned (real) ---- */
     var cat=(await sb.from('items').select('*').eq('active',true)).data||[];

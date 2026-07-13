@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>BLACK DENIM — NEON &amp; BLACK DENIM | ONLY IBEE</title>
+<meta name="description" content="NEON & BLACK DENIM — the ICS black denim collection. Hand-painted jeans, skirts and vests by Only Ibee. Every piece is 1 of 1.">
+<link rel="canonical" href="https://onlyibee.com/blackdenim/">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+.bgglow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 14%,rgba(182,255,0,.12),transparent 55%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:860px;padding:26px 16px 90px;display:flex;flex-direction:column;
+  align-items:center;gap:16px;position:relative;z-index:2}
+.crtin{animation:crtin .35s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
+
+/* ---------- hero ---------- */
+.hero{text-align:center;padding:12px 0 2px}
+.hero .kicker{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:3px}
+.hero h1{font-family:var(--px);font-size:clamp(17px,5.4vw,30px);letter-spacing:2px;line-height:1.6;margin-top:12px;
+  color:var(--ink);text-shadow:0 0 22px rgba(182,255,0,.35)}
+.hero h1 .n{color:var(--acid)}.hero h1 .b{color:var(--dim)}
+.hero p{color:#bdbdbd;font-size:19px;line-height:1.5;max-width:560px;margin:14px auto 0}
+/* the neon drip underline */
+.drip{width:min(340px,70vw);height:3px;margin:16px auto 0;background:linear-gradient(90deg,transparent,var(--acid),var(--pink),transparent);
+  box-shadow:0 0 14px rgba(182,255,0,.5);animation:drip 3.4s ease-in-out infinite}
+@keyframes drip{0%,100%{filter:hue-rotate(0)}50%{filter:hue-rotate(50deg)}}
+
+/* ---------- marquee ---------- */
+.mq{width:100%;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:9px 0;white-space:nowrap}
+.mq i{display:inline-block;font-family:var(--px);font-style:normal;font-size:8px;letter-spacing:2px;color:var(--dim);
+  animation:mq 22s linear infinite}
+.mq b{color:var(--acid)}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ---------- grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;width:100%}
+.piece{border:2px solid var(--border);background:#0a0a0c;text-decoration:none;color:var(--ink);
+  display:flex;flex-direction:column;position:relative;overflow:hidden;transition:.18s}
+a.piece:hover{border-color:var(--acid);transform:translateY(-3px);box-shadow:0 0 22px rgba(182,255,0,.22)}
+.piece .ph{aspect-ratio:1;background:#101012;position:relative;overflow:hidden}
+.piece .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(1.05)}
+.piece.gone .ph img{filter:grayscale(.55) brightness(.6)}
+.piece .rz{position:absolute;top:8px;left:8px;font-family:var(--px);font-size:6px;letter-spacing:1px;
+  padding:5px 7px;background:rgba(0,0,0,.75);border:1px solid var(--gold);color:var(--gold);z-index:2}
+.piece .claimed{position:absolute;top:8px;right:8px;font-family:var(--px);font-size:6px;letter-spacing:1px;
+  padding:5px 7px;background:rgba(0,0,0,.8);border:1px solid var(--red);color:var(--red);z-index:2}
+.piece .info{padding:11px 12px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px;flex:1}
+.piece .nm{font-family:var(--px);font-size:8.5px;line-height:1.7;letter-spacing:1px;color:var(--ink)}
+.piece .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.piece .pr{font-family:var(--px);font-size:10px;color:var(--acid)}
+.piece.gone .pr{color:var(--dim);text-decoration:line-through}
+.piece .go{font-family:var(--px);font-size:7px;color:var(--acid);letter-spacing:1px}
+.piece.gone .go{color:var(--red)}
+.one{font-family:var(--px);font-size:6px;color:var(--dim);letter-spacing:1px}
+
+/* ---------- about strip ---------- */
+.box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:16px 18px;text-align:left}
+.box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
+.box p{color:#bdbdbd;font-size:18px;line-height:1.5}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.btn{font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;background:transparent;color:var(--acid);border:1px solid var(--acid)}
+.btn.solid{background:var(--acid);color:#000}
+.btn:active{transform:translateY(2px)}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+</style>
+</head>
+<body>
+<div class="bgglow"></div>
+<header>
+  <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>BLACKDENIM.SYS</span>
+</header>
+
+<main>
+  <div class="hero crtin">
+    <div class="kicker">// ICS COLLECTION_</div>
+    <h1><span class="n">NEON</span> <span class="b">&amp;</span> BLACK DENIM_</h1>
+    <p>Black denim as the canvas, neon as the voice. Every jean, skirt and vest is hand-painted —
+      one piece, one story, never repeated. When it's claimed, it's gone.</p>
+    <div class="drip"></div>
+  </div>
+
+  <div class="mq crtin"><i>
+    HAND-PAINTED_ · <b>1 OF 1</b> · BLACK DENIM_ · NEON_ · ICS_ · WORN, NOT DISPLAYED_ ·
+    HAND-PAINTED_ · <b>1 OF 1</b> · BLACK DENIM_ · NEON_ · ICS_ · WORN, NOT DISPLAYED_ ·
+  </i></div>
+
+  <div class="grid crtin" id="grid"></div>
+
+  <div class="box crtin">
+    <div class="h">// THE CANVAS_</div>
+    <p>This is where UTOPIE meets the street: raw black denim reworked by hand with neon coats,
+      sprayed characters and painted flowers. The claimed pieces stay on the wall here as the
+      collection's archive — proof that each one only ever existed once.</p>
+  </div>
+
+  <div class="actions crtin">
+    <a class="btn solid" href="../console.html#shop">▶ THE SHOP</a>
+    <a class="btn" href="../utopie/">UTOPIE WORLD</a>
+  </div>
+</main>
+
+<footer>© ONLYIBEE — NEON &amp; BLACK DENIM</footer>
+
+<script>
+(function(){
+  "use strict";
+  /* The collection, migrated from the old Wix /blackdenim page (2026-07-13).
+     id = the self-hosted catalog id (assets/products-data.js) → links to
+     ../product-page/?id=… ; id:null = a claimed piece that predates the
+     catalog — shown as archive only. Images stay hotlinked on Wix's CDN,
+     same as the shop (fit/w_800 = full-quality crop). */
+  var WIX="https://static.wixstatic.com/media/";
+  function img(m){ return WIX+m+"/v1/fit/w_800,h_800,q_90/file."+(m.indexOf(".jpg")>=0?"jpg":"png"); }
+  var PIECES=[
+    {id:null,               n:"NEON COATED BLACK JEAN — MIMI", price:"€95",  out:1, sr:1,
+     m:"0fcae7_65b80bf2c6bf46899208a3725e20fecc~mv2.png"},
+    {id:null,               n:"LIBERTY NEON BLACK JEAN",       price:"€110", out:1,
+     m:"0fcae7_d52445bc4406433fb64242217ae9ce94~mv2.jpg"},
+    {id:"weed-jean",        n:"FLOWER NEON PAINTED BLACK JEAN — MIMI", price:"€90", out:0,
+     m:"0fcae7_97f1b1535c7640c5bd4f23609b13c616~mv2.png"},
+    {id:"drinking-skull-jean", n:"SIPPIN SKELETON JEAN XL",    price:"€90",  out:0,
+     m:"0fcae7_99958a73a78a461e9cf437fdfe404305~mv2.png"},
+    {id:"rib-jean",         n:"RIB JEAN",                      price:"€60",  out:0,
+     m:"0fcae7_6d1ac2d979fa4909b4bf504474fac719~mv2.png"},
+    {id:null,               n:"SPRAY-PAINTED DENIM VEST",      price:"€65",  out:1,
+     m:"0fcae7_7da8c0005df14a50bd8e6e12efb8599d~mv2.jpg"},
+    {id:"denim-skirt-3",    n:"BISOUS DENIM SKIRT",            price:"€50",  out:0,
+     m:"0fcae7_866dcd2c99e64b8ba51849bfd3d15d07~mv2.jpg"},
+    {id:"denim-skirt-2",    n:"PUNK GENERAL DENIM SKIRT",      price:"€70",  out:0,
+     m:"0fcae7_0c2bcab017e246b288417fb871ba0f99~mv2.png"},
+    {id:"denim-skirt-1",    n:"MIMI BLACK DENIM SKIRT — SKELETON", price:"€60", out:0,
+     m:"0fcae7_2e8a21e0eba848718f8717f95de25a85~mv2.png"}
+  ];
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  document.getElementById("grid").innerHTML=PIECES.map(function(p){
+    var gone=!!p.out;
+    var inner='<div class="ph">'
+      +(p.sr?'<span class="rz">SUPER RARE</span>':'')
+      +(gone?'<span class="claimed">CLAIMED</span>':'')
+      +'<img loading="lazy" alt="'+e2(p.n)+'" src="'+img(p.m)+'"></div>'
+      +'<div class="info"><div class="nm">'+e2(p.n)+'</div><span class="one">HAND-PAINTED · 1 OF 1</span>'
+      +'<div class="row"><span class="pr">'+e2(p.price)+'</span>'
+      +'<span class="go">'+(gone?'IN THE ARCHIVE_':'▶ GET IT_')+'</span></div></div>';
+    return gone
+      ? '<div class="piece gone">'+inner+'</div>'
+      : '<a class="piece" href="../product-page/?id='+encodeURIComponent(p.id)+'">'+inner+'</a>';
+  }).join('');
+})();
+</script>
+<script src="../assets/player.js?v=17"></script>
+</body>
+</html>

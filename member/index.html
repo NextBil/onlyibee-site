@@ -202,6 +202,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   <div class="actions" id="actions" style="display:none">
     <a class="btn solid" href="../#music">▶ THE UNIVERSE</a>
+    <a class="btn" href="../room/">⌂ MY ROOM</a>
     <a class="btn" href="inventory/">♟ MY COLLECTION</a>
     <a class="btn" href="profile/">☺ MY PROFILE</a>
   </div>
@@ -362,6 +363,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
                     : '<div class="cnote">it\'s in your collection now_</div>';
     return '<div class="item g-'+rar+'"><span class="rz '+(RCLASS[rar]||'r-common')+'">'+rar.toUpperCase()+'</span>'
       +'<div class="ilabel">'+e2(label)+'</div><div class="iname">'+e2(name)+'</div>'+cta+'</div>'
+      +'<a class="cbtn" style="margin-top:10px;background:transparent;border:1px solid var(--acid);color:var(--acid)" href="../room/">⌂ FOUND YOUR OWN ROOM — pick your name_</a>'
       +'<div class="cnote" style="margin-top:10px">The other two starter rooms are still out there — keep exploring to find them.</div>';
   }
 
@@ -435,7 +437,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         } else { $("gmsg").textContent='✕ '+(su.error.message||'could not create account')+'_'; }
         $("glogin").disabled=false;$("gsignup").disabled=false; return;
       }
-      if(su.data&&su.data.session){ location.href='inventory/'; return; }
+      /* fresh account → straight to founding their room (nickname + starter pick) */
+      if(su.data&&su.data.session){ location.href='../room/'; return; }
       $("gmsg").textContent='✓ account made — check your email to confirm, then log in_';
       $("glogin").disabled=false;$("gsignup").disabled=false;
     };

@@ -25,7 +25,7 @@ site was modified** — they are pure additions, waiting to be wired into the ar
 {name:"AQUA BASS",         by:"The record is water — raise your B MAJOR pet", cover:"covers/aqua-bass.png",    url:"aqua/",      status:"live", isnew:true},
 ```
 
-That's it — no version bumps needed (they include `player.js?v=13` like every other page,
+That's it — no version bumps needed (they include `player.js?v=17` like every other page,
 and load the data layers with the standard clock-stamped `?cb=` includes).
 
 ## How they fit the machine (for the README, §9)

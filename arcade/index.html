@@ -149,6 +149,7 @@
   /* ===== GAMES — add a box here per room. status: "live" | "soon"; isnew:true for a NEW ribbon.
      item: the Supabase items.id this room is gated behind (null = always free, e.g. chess). ===== */
   var GAMES = [
+    {name:"MY ROOM",         by:"Your own room — pick a name, place your things, share it", cover:"covers/my-room.svg", url:"../room/", status:"live", isnew:true, item:null},
     {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live", item:null},
     {name:"RUN BEEBEE!",     by:"A lyrics engine you jump through — words rain from the sky, city runs by on the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live", item:"game-runner"},
     {name:"MIMI GUITAR RUSH",by:"Mimi dashes the guitar-neck highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", isnew:true, item:"game-rush"},
@@ -234,6 +235,6 @@
   });
 })();
 </script>
-<script src="../assets/player.js?v=13"></script>
+<script src="../assets/player.js?v=17"></script>
 </body>
 </html>

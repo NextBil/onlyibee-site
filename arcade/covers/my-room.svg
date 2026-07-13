@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#0a0a0c"/>
+  <radialGradient id="g" cx="50%" cy="10%" r="80%">
+    <stop offset="0%" stop-color="#b6ff00" stop-opacity=".22"/><stop offset="100%" stop-color="#0a0a0c" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="320" height="200" fill="url(#g)"/>
+  <!-- iso room: two walls + diamond floor -->
+  <polygon points="160,34 60,84 60,132 160,84" fill="#141a0a"/>
+  <polygon points="160,34 260,84 260,132 160,84" fill="#101507"/>
+  <line x1="160" y1="84" x2="60" y2="132" stroke="#b6ff00" stroke-width="2" opacity=".7"/>
+  <line x1="160" y1="84" x2="260" y2="132" stroke="#b6ff00" stroke-width="2" opacity=".7"/>
+  <g stroke="#b6ff00" stroke-opacity=".35" stroke-width="1">
+    <polygon points="160,84 196,102 160,120 124,102" fill="#141a0a"/>
+    <polygon points="196,102 232,120 196,138 160,120" fill="#0f1408"/>
+    <polygon points="124,102 160,120 124,138 88,120" fill="#0f1408"/>
+    <polygon points="160,120 196,138 160,156 124,138" fill="#141a0a"/>
+  </g>
+  <!-- window with a hue sky -->
+  <polygon points="92,62 128,44 128,76 92,94" fill="#12300a" stroke="#b6ff00" stroke-width="1.6"/>
+  <circle cx="112" cy="66" r="5" fill="#d9ff7a"/>
+  <!-- shelf on the right wall -->
+  <polygon points="182,64 244,95 244,101 182,70" fill="#241c10" stroke="#8fbf10" stroke-width="1"/>
+  <text x="196" y="66" font-size="13">🗝️</text><text x="216" y="76" font-size="13">💿</text>
+  <!-- furniture -->
+  <text x="142" y="112" font-size="24">🛋️</text>
+  <text x="186" y="132" font-size="20">🪴</text>
+  <text x="108" y="132" font-size="20">📻</text>
+  <text x="20" y="188" font-family="monospace" font-size="15" fill="#b6ff00" letter-spacing="2">MY ROOM_</text>
+  <text x="20" y="172" font-family="monospace" font-size="9" fill="#7a7a7a" letter-spacing="1">onlyibee.com/room/you</text>
+</svg>
