@@ -571,10 +571,8 @@
   function togglePanel(){ panel.classList.toggle("open"); }
   chip.onclick = togglePanel;
   $("rp-close").onclick = function(){ panel.classList.remove("open"); };
-  /* tap the cover / title → open the browser (grid) + focus search */
+  /* tap the cover / title → open the browser (list) + focus search */
   $("rp-nowtop").onclick = function(){
-    viewMode = "grid";
-    $("rp-view").textContent = "≡ LIST"; $("rp-view").classList.add("on");
     render();
     openPanel();
     setTimeout(function(){ try{ $("rp-search").focus(); }catch(e){} }, 60);
