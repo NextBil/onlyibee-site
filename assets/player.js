@@ -569,27 +569,47 @@
   /* ---------- panel ---------- */
   function openPanel(){ panel.classList.add("open"); }
   function togglePanel(){ panel.classList.toggle("open"); }
-  chip.onclick = togglePanel;
-  $("rp-close").onclick = function(){ panel.classList.remove("open"); };
+
+  /* Unified pointerdown events + stopPropagation to prevent the double-fire bounce bug */
+  chip.addEventListener("pointerdown", function(e){
+    togglePanel();
+    e.stopPropagation();
+  });
+
+  $("rp-close").addEventListener("pointerdown", function(e){
+    panel.classList.remove("open");
+    e.stopPropagation();
+  });
+
   /* tap the cover / title → open the browser (list) + focus search */
-  $("rp-nowtop").onclick = function(){
+  $("rp-nowtop").addEventListener("pointerdown", function(e){
     render();
     openPanel();
-    setTimeout(function(){ try{ $("rp-search").focus(); }catch(e){} }, 60);
-  };
+    setTimeout(function(){ try{ $("rp-search").focus(); }catch(err){} }, 60);
+    e.stopPropagation();
+  });
+
   /* search box */
   $("rp-search").addEventListener("input", function(){ query = this.value.trim(); render(); });
-  /* grid / list toggle */
+  
+  /* grid / list toggle (safe to leave as click since it's inside the panel) */
   $("rp-view").onclick = function(){
     viewMode = (viewMode === "grid") ? "list" : "grid";
     this.textContent = viewMode === "grid" ? "≡ LIST" : "▦ GRID";
     this.classList.toggle("on", viewMode === "grid");
     render();
   };
+
   /* click anywhere outside the box closes it — music keeps playing */
   document.addEventListener("pointerdown", function(e){
+    // Only proceed if the panel is actually open
     if(!panel.classList.contains("open")) return;
-    if(panel.contains(e.target) || chip.contains(e.target)) return;
+    
+    // Do nothing if the click happened INSIDE the panel.
+    // (Clicks on the chip or cover are caught by stopPropagation above)
+    if(panel.contains(e.target)) return;
+    
+    // Otherwise, the click was outside. Close the panel.
     panel.classList.remove("open");
   });
 
