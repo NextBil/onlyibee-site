@@ -95,7 +95,7 @@
   #tracklist .tr.locked .cv{filter:brightness(.4) grayscale(.7)}
   #tracklist .tr .lk{width:13px;height:13px;flex:none;color:var(--red)}
 
-  /* ---- search + grid/list toggle (GRID is the default view) ---- */
+  /* ---- search + grid/list toggle (LIST is the default view) ---- */
   #tltools{display:flex;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)}
   #tlsearch{flex:1;background:#0a0a0a;border:1px solid var(--border);color:var(--ink);font-family:var(--vt);
     font-size:16px;padding:7px 9px;outline:none}
@@ -117,7 +117,7 @@
   /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
   #tlbody{max-height:52vh;overflow-y:auto}
   #tlbody.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:12px}
-  .tl-tile{cursor:pointer;perspective:640px}
+  .tl-tile{cursor:pointer;perspective:640px;min-width:0}
   .tl-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;
     transform:rotateY(-18deg);transform-origin:center;transition:transform .35s cubic-bezier(.2,.7,.2,1);overflow:hidden}
   .tl-tile:hover .art{transform:rotateY(0)}
@@ -312,10 +312,10 @@
       <div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>
       <div id="tltools">
         <input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false">
-        <button id="tlview" title="grid / list view">≡ LIST</button>
+        <button id="tlview" title="grid / list view">▦ GRID</button>
       </div>
       <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
-      <div id="tlbody" class="grid"></div>
+      <div id="tlbody"></div>
       <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
     </div>
     <div id="player">
@@ -569,12 +569,13 @@
     try{var rc=seek.getBoundingClientRect(),fr=(e.clientX-rc.left)/rc.width;
       if(r.audio&&r.audio.duration)r.audio.currentTime=Math.max(0,Math.min(1,fr))*r.audio.duration;}catch(x){}});
 
-  /* ================= THE RADIO BROWSER (grid default + list + search) =================
+  /* ================= THE RADIO BROWSER (list default + grid + search) =================
      Renders into the STATIC scaffolding (#tltools search, #roomband, #tlbody, #tlempty) —
-     it no longer overwrites #tracklist, so the header/tools/room-band stay put. GRID is the
-     default view (Spotify-style covers with a 3D sideways tilt that straightens on hover),
-     LIST is the second choice. Album name / cover / room all come from the radio bridge's
-     album(i) — the authoritative source (song objects carry .al, not .g). */
+     it no longer overwrites #tracklist, so the header/tools/room-band stay put. LIST is the
+     default view (compact rows: track no. + cover + title/album), GRID is the alternate
+     choice (Spotify-style covers with a 3D sideways tilt that straightens on hover). Album
+     name / cover / room all come from the radio bridge's album(i) — the authoritative source
+     (song objects carry .al, not .g). */
   var tl=document.getElementById('tracklist'),
       tlbody=document.getElementById('tlbody'),
       tlempty=document.getElementById('tlempty'),
@@ -582,7 +583,7 @@
       tlview=document.getElementById('tlview'),
       roomband=document.getElementById('roomband'),
       roombtn=document.getElementById('roombtn');
-  var viewMode='grid', query='', builtCount=-1;
+  var viewMode='list', query='', builtCount=-1;
   var LKSVG="<svg class='lk' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
   var LKBIG="<svg class='lockb' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
   function e3(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
