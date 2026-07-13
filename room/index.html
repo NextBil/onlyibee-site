@@ -6,8 +6,9 @@
 <meta name="theme-color" content="#070707">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>MY ROOM — ONLY IBEE</title>
-<meta name="description" content="Your own room on the ONLY IBEE frequency — decorate it, share it, let friends sign the guestbook.">
+<title>MY PROFILE — ONLY IBEE</title>
+<meta name="description" content="Your profile on the ONLY IBEE frequency — your room, your collection, your badges. Arrange it, share it, let friends sign the guestbook.">
+<meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -168,6 +169,117 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .pick:hover .pt{color:var(--acid)}
 .msg{color:var(--dim);font-size:16px;margin-top:10px;min-height:20px}
 
+/* ---------- IDENTITY BAND: the nameplate — the profile flattened onto the room ---------- */
+.idband{width:100%;display:flex;align-items:center;gap:14px;border:2px solid hsla(var(--hue),60%,45%,.55);
+  background:linear-gradient(180deg,hsla(var(--hue),70%,30%,.14),rgba(10,10,12,.92));padding:14px 16px;
+  box-shadow:0 0 calc(18px + var(--mb,0)*30px) hsla(var(--mh,var(--hue)),90%,45%,.22),inset 0 0 40px rgba(0,0,0,.5);position:relative}
+.idband .av{width:64px;height:64px;flex:none;border-radius:50%;cursor:pointer;background:#fff;object-fit:cover;
+  border:2px solid hsla(var(--hue),60%,50%,.75);
+  box-shadow:0 0 calc(8px + var(--mb,0)*16px) hsla(var(--mh,var(--hue)),90%,50%,.5);
+  transform:scale(calc(1 + var(--mb,0)*.05));transition:transform .1s linear}
+.idband .av:hover{filter:brightness(1.08)}
+.idband .who{flex:1;min-width:0}
+.idband .rank{font-family:var(--px);font-size:clamp(11px,3.2vw,14px);color:hsl(var(--hue),95%,72%);
+  text-shadow:0 0 14px hsla(var(--hue),95%,55%,.5);letter-spacing:1px;line-height:1.5}
+.idband .em{color:var(--ink);font-size:16px;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.idband .since{color:var(--dim);font-size:13px;margin-top:3px}
+.idband .logout{font-family:var(--px);font-size:7px;color:var(--dim);cursor:pointer;text-decoration:none;
+  border:1px solid var(--border);padding:8px 9px;align-self:flex-start;white-space:nowrap}
+.idband .logout:hover{color:var(--red);border-color:#3a1414}
+/* avatar picker drops under the band */
+.avpick{width:100%;border:1px solid var(--border);background:rgba(14,14,14,.92);padding:12px;
+  display:none;flex-wrap:wrap;gap:9px;justify-content:center}
+.avpick.open{display:flex}
+.avpick img{width:44px;height:44px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:#fff}
+.avpick img.sel{border-color:var(--acid);box-shadow:0 0 10px rgba(182,255,0,.5)}
+.avpick img:hover{border-color:var(--ink)}
+
+/* ---------- STAT SCREENS: a row of little readouts that pulse to the groove ---------- */
+/* collection = a full-width hero screen; PLAYS / BADGES / VAULT tidy underneath */
+.screens{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%}
+.scr{border:1px solid var(--border);background:#080808;padding:11px 8px;text-align:center;position:relative;overflow:hidden}
+.scr::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:hsl(var(--mh,var(--hue)),95%,55%);
+  opacity:calc(.25 + var(--mb,0)*.75);box-shadow:0 0 calc(3px + var(--mb,0)*8px) hsl(var(--mh,var(--hue)),95%,55%)}
+.scr.hero{border-color:hsla(var(--hue),60%,50%,.7);grid-column:1 / -1;
+  background:linear-gradient(180deg,hsla(var(--hue),70%,30%,.12),#080808)}
+.scr .k{font-family:var(--px);font-size:6.5px;color:var(--dim);letter-spacing:1px}
+.scr.hero .k{font-size:8px;color:hsl(var(--hue),95%,68%)}
+.scr .v{font-family:var(--px);font-size:14px;color:hsl(var(--hue),95%,72%);margin-top:8px;
+  text-shadow:0 0 calc(4px + var(--mb,0)*10px) hsla(var(--mh,var(--hue)),95%,55%,.5)}
+.scr.hero .v{font-size:22px;margin-top:10px}
+.scr .sub{color:var(--dim);font-size:12px;margin-top:4px}
+
+/* ---------- BADGES ---------- */
+.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px}
+.badge{border:1px solid var(--border);padding:11px 7px;text-align:center;position:relative;cursor:pointer}
+.badge:hover{border-color:#3a3a3a}
+.badge.hush{cursor:default}
+.badge.hush .bi{filter:none;opacity:.5}
+.badge .bi{font-size:23px;line-height:1;filter:grayscale(1) brightness(.5)}
+.badge.on .bi{filter:none}
+.badge.on{border-color:hsla(var(--hue),60%,50%,.7);box-shadow:0 0 12px hsla(var(--hue),90%,45%,.18)}
+.bimg{width:1em;height:1em;object-fit:contain;display:inline-block;vertical-align:middle}
+.badge .bi .bimg{width:26px;height:26px}
+.badge .bn{font-family:var(--px);font-size:6.5px;color:var(--dim);letter-spacing:1px;margin-top:7px;line-height:1.6}
+.badge.on .bn{color:hsl(var(--hue),95%,72%)}
+.badge.hush .bn{color:#3a3a3a}
+.badge .bt{color:var(--dim);font-size:12px;margin-top:4px}
+/* "you just won" feed */
+.newbox{border-color:#3a2f10}
+.newbox .h{display:flex;justify-content:space-between;align-items:center;color:var(--gold)}
+.newbox .nclear{color:var(--dim);font-size:8px;cursor:pointer;padding:5px 7px;border:1px solid var(--border)}
+.newbox .nclear:hover{color:var(--red);border-color:#3a1414}
+#newlist{max-height:220px;overflow-y:auto;scrollbar-width:thin}
+.newrow{display:flex;align-items:center;gap:9px;padding:7px 9px;margin-bottom:7px;
+  border:1px solid #2f2f2f;border-left:3px solid var(--acid);background:#0b0b0d}
+.newrow:last-child{margin-bottom:0}
+.newrow.gold{border-left-color:var(--gold)}.newrow.news{border-left-color:var(--cyan)}
+.newrow .ni{font-size:16px;flex:none}.newrow .ni .bimg{width:26px;height:26px}
+.newrow .nt{flex:1;min-width:0}
+.newrow .ntag{font-family:var(--px);font-size:6px;letter-spacing:1px;color:var(--gold)}
+.newrow.news .ntag{color:var(--cyan)}
+.newrow .nn{font-family:var(--px);font-size:7px;color:var(--acid);line-height:1.5;margin-top:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.newrow.gold .nn{color:var(--gold)}
+.newrow .nd{color:#9a9a9a;font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.newrow .nx{flex:none;width:28px;height:28px;border:1px solid #3a1414;background:rgba(255,43,43,.08);
+  color:var(--red);font-family:var(--px);font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:4px}
+.newrow .nx:hover{background:var(--red);color:#000}
+/* badge modal */
+.bmodal{position:fixed;inset:0;z-index:8500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:20px}
+.bmodal.open{display:flex}
+.bcard{max-width:360px;width:100%;border:2px solid var(--border);background:#0b0b0d;padding:22px 18px;text-align:center;position:relative}
+.bcard .bic{font-size:42px}.bcard .bic .bimg{width:48px;height:48px}
+.bcard .bnm{font-family:var(--px);font-size:11px;color:var(--acid);margin-top:12px;line-height:1.7}
+.bcard.gold .bnm{color:var(--gold)}.bcard.secret .bnm{color:var(--pink)}
+.bcard .bst{font-family:var(--px);font-size:7px;margin-top:9px;color:var(--dim)}
+.bcard .bst.on{color:var(--acid)}
+.bcard .bpanel{margin-top:12px;border:1px solid var(--border);padding:10px 11px;text-align:left}
+.bcard .bpanel .pt{font-family:var(--px);font-size:7px;color:var(--cyan);margin-bottom:6px}
+.bcard .bpanel .px2{color:#c9c9c9;font-size:16px;line-height:1.45}
+.bcard .bclose{position:absolute;top:8px;right:8px;font-family:var(--px);font-size:10px;color:#555;cursor:pointer;background:0;border:0}
+
+/* ---------- LOGIN / JOIN box (logged out) ---------- */
+.login{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.92);padding:18px 16px;text-align:center}
+.login .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px}
+.login p{color:#bdbdbd;font-size:17px;line-height:1.5;margin-bottom:12px}
+.login input{width:100%;background:#050505;border:1px solid var(--border);color:var(--acid);
+  font-family:var(--vt);font-size:18px;padding:11px;margin-bottom:8px}
+.login input:focus{outline:none;border-color:var(--acid)}
+.login button{width:100%;font-family:var(--px);font-size:10px;padding:13px;background:var(--acid);color:#000;border:0;cursor:pointer}
+.login button.ghost{background:transparent;color:var(--acid);border:1px solid var(--acid);margin-top:8px}
+.login .or{color:#555;font-family:var(--px);font-size:7px;letter-spacing:2px;margin:12px 0 8px}
+.login .msg{color:var(--dim);font-size:15px;margin-top:8px}
+
+/* drawer tabs (FURNITURE | COLLECTION) */
+.dtabs{display:flex;gap:8px;margin-bottom:10px}
+.dtab{font-family:var(--px);font-size:7px;padding:8px 10px;border:1px solid var(--border);background:transparent;
+  color:var(--dim);cursor:pointer;letter-spacing:1px}
+.dtab.on{color:#000;background:var(--acid);border-color:var(--acid)}
+.chip.coll{border-color:hsla(var(--hue),60%,45%,.6)}
+.chip.coll .cn{color:hsl(var(--hue),95%,70%)}
+.chip .ce .mini3{display:inline-block;animation:spin3d 5s linear infinite;transform-style:preserve-3d}
+
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--acid);
   color:var(--acid);font-family:var(--px);font-size:9px;padding:10px 16px;z-index:9500;opacity:0;transition:.2s;pointer-events:none}
 .toast.on{opacity:1}
@@ -178,10 +290,33 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <div class="bgglow"></div>
 <header>
   <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
-  <span>ROOM.SYS</span>
+  <span>PROFILE.SYS</span>
 </header>
 
 <main id="main">
+  <!-- logged out: the login / join box -->
+  <div id="loginbox" style="width:100%"></div>
+
+  <!-- IDENTITY BAND: avatar + name + rank + logout (own profile) -->
+  <div class="idband crtin" id="idband" style="display:none">
+    <img class="av" id="av" src="../assets/img/avatars/mimi-00.png" alt="your avatar" title="tap to change your avatar">
+    <div class="who">
+      <div class="rank" id="idrank">—</div>
+      <div class="em" id="idem"></div>
+      <div class="since" id="idsince"></div>
+    </div>
+    <a class="logout" id="logout" href="#">LOG OUT</a>
+  </div>
+  <div class="avpick crtin" id="avpick"></div>
+
+  <!-- STAT SCREENS: collection (hero) + plays + badges + vault, all pulsing to the groove -->
+  <div class="screens crtin" id="screens" style="display:none">
+    <div class="scr hero"><div class="k">COLLECTION</div><div class="v" id="scColl">—</div><div class="sub">items owned</div></div>
+    <div class="scr"><div class="k">PLAYS</div><div class="v" id="scPlays">—</div><div class="sub">songs played</div></div>
+    <div class="scr"><div class="k">BADGES</div><div class="v" id="scBadges">—</div><div class="sub">earned</div></div>
+    <div class="scr"><div class="k">VAULT</div><div class="v" id="scVault">—</div><div class="sub" id="scVaultSub"></div></div>
+  </div>
+
   <div class="titlebar crtin" id="titlebar" style="display:none">
     <div class="rn" id="roomname">—</div>
     <div class="tbtns" id="tbtns"></div>
@@ -198,9 +333,25 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </div>
 
   <div id="drawer" class="crtin">
-    <div class="h"><span>// FURNITURE_</span><span class="cnt" id="itmcnt"></span></div>
+    <div class="h"><span>// ARRANGE_</span><span class="cnt" id="itmcnt"></span></div>
+    <div class="dtabs">
+      <button class="dtab on" id="tabFurn" data-tab="furn">FURNITURE</button>
+      <button class="dtab" id="tabColl" data-tab="coll">MY COLLECTION</button>
+    </div>
     <div class="chips" id="chips"></div>
     <div class="drawhint" id="drawhint">tap an item, then tap a floor tile to place it. tap a placed item to turn or remove it.</div>
+  </div>
+
+  <!-- YOU JUST WON feed (badges + news) -->
+  <div class="box crtin newbox" id="newbox" style="display:none">
+    <div class="h"><span>🎉 YOU JUST WON_</span><span class="nclear" id="nclear">CLEAR ALL ✕</span></div>
+    <div id="newlist"></div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="box crtin" id="badgebox" style="display:none">
+    <div class="h" id="badgehead">// BADGES_</div>
+    <div class="badges" id="badges"></div>
   </div>
 
   <div class="box crtin" id="sharebox" style="display:none">
@@ -218,10 +369,24 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <div class="ob crtin" id="ob" style="display:none"></div>
 </main>
 
+<!-- badge window -->
+<div class="bmodal" id="bmodal">
+  <div class="bcard" id="bcard">
+    <button class="bclose" id="bclose">✕</button>
+    <div class="bic" id="bmic">🏆</div>
+    <div class="bnm" id="bmnm">—</div>
+    <div class="bst" id="bmst">—</div>
+    <div class="bpanel"><div class="pt" id="bmtt">// THE TASK_</div><div class="px2" id="bmtask">—</div></div>
+    <div class="bpanel" id="bmwhybox" style="display:none"><div class="pt">// WHY YOU GOT IT_</div><div class="px2" id="bmwhy">—</div></div>
+  </div>
+</div>
+
 <footer>© ONLYIBEE — THE FREQUENCY</footer>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>document.write('<script src="../assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="../assets/badges.js?v=9"></script>
 <script>
 (function(){
   "use strict";
@@ -357,6 +522,16 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var ME=null, MYPROF=null;                    // session, my profile
   var ROOM=null, OWNERNAME="", ISMINE=false, DIRTY=false;
   var geom=null, selTileItem=null, selChip=null;
+  var OWNED=[], drawerTab='furn';              // the member's collection + which drawer tab is open
+
+  /* ---- profile identity (same codename/rank scheme as the old profile page) ---- */
+  var NAMES=["RED NOMAD","NEON STRAY","VOID RUNNER","STATIC GHOST","ACID SAINT","MIDNIGHT FOX",
+    "CHROME WOLF","PIXEL SHAMAN","ROGUE SIGNAL","VELVET RIOT","GLASS TIGER","ECHO BANDIT",
+    "SOLAR STRAY","NIGHT MARROW","CRIMSON DRIFT","LUCID FIEND","OFFGRID KING","FERAL BLOOM",
+    "COBALT MONK","DUSK PROWLER","NOVA THIEF","SILK STATIC","GRIM NEON","ZERO HOUR",
+    "MAD ORACLE","WIRED SAINT","GHOST FREQ","LO-FI BEAST","IRON MAGPIE","PLASMA STRAY"];
+  var RANKS=[{n:"INITIATE"},{n:"OPERATIVE"},{n:"ELITE"},{n:"LEGEND"}];
+  var OWNER_EMAIL="droguepuissance4@gmail.com";
 
   function starterRoom(kind){
     var K=KINDS[kind];
@@ -371,10 +546,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   function renderItems(){
     var lay=$("itemlayer"), html="";
     (ROOM.tiles||[]).forEach(function(t,idx){
-      var d=ITEMS[t.i]; if(!d)return;
+      var isColl=(t.i&&t.i.indexOf("inv:")===0), d=shelfMeta(t.i); if(!d)return;
       var flip=(t.f%2===1)?-1:1;
-      html+='<div class="itm f'+(t.f||0)+'" data-idx="'+idx+'" style="left:'+px(t.x,t.y)+'px;top:'+(py(t.x,t.y)+TH/2+10)+'px;z-index:'+(10+t.x+t.y)+';--fx:'+flip+'">'
-        +'<span class="g">'+d.e+'</span></div>';
+      /* collection trophies spin in place (3D flip) so they read as prized display pieces */
+      var glyph=isColl
+        ? '<span class="g" style="perspective:120px"><span class="s3" style="display:inline-block;transform-style:preserve-3d;animation:spin3d 5s linear infinite">'+d.e+'</span></span>'
+        : '<span class="g">'+d.e+'</span>';
+      html+='<div class="itm f'+(t.f||0)+'" data-idx="'+idx+'" title="'+e2(d.n)+'" style="left:'+px(t.x,t.y)+'px;top:'+(py(t.x,t.y)+TH/2+10)+'px;z-index:'+(10+t.x+t.y)+';--fx:'+flip+'">'
+        +glyph+'</div>';
     });
     /* shelf items along the plank — every one spins in 3D (relics + the collection) */
     var sh=(ROOM.shelf||[]).slice(0,8);
@@ -396,22 +575,21 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }
   }
 
-  /* the collection joins the shelf: read the member's real inventory (same rpc as
-     member/inventory/) and append anything new as 'inv:' shelf items. Marks the room
-     dirty so a SAVE publishes the shelf for visitors too. */
-  async function syncShelf(){
+  /* read the member's real collection (same rpc as member/inventory/) into OWNED, auto-seed
+     any NEW piece onto the shelf, refresh the drawer + stat screens. The collection is the
+     profile's main attraction, so it drives the COLLECTION stat + the drawer's second shelf. */
+  async function loadCollection(){
     if(!sb||!ISMINE)return;
-    var want=[];
-    try{
-      var r=await sb.rpc('my_inventory');
-      (r.data||[]).forEach(function(it){ if(INVMETA[it.id]) want.push('inv:'+it.id); });
-    }catch(e){}
-    try{ if(localStorage.getItem('ibee_engine10')==='1') want.push('inv:universe-engine'); }catch(e){}
-    if(!want.length)return;
-    ROOM.shelf=ROOM.shelf||[];
-    var changed=false;
-    want.forEach(function(id){ if(ROOM.shelf.indexOf(id)<0&&ROOM.shelf.length<8){ ROOM.shelf.push(id); changed=true; } });
-    if(changed){ renderItems(); markDirty(); toast("COLLECTION ON THE SHELF_"); }
+    OWNED=[];
+    try{ var r=await sb.rpc('my_inventory'); (r.data||[]).forEach(function(it){ if(INVMETA[it.id]) OWNED.push(it.id); }); }catch(e){}
+    var isOwner=(((ME&&ME.user&&ME.user.email)||'').toLowerCase()===OWNER_EMAIL);
+    if(isOwner){ Object.keys(INVMETA).forEach(function(id){ if(id!=='universe-engine'&&OWNED.indexOf(id)<0)OWNED.push(id); }); }
+    /* auto-place newly-owned pieces on the shelf (up to 8) so the collection always shows */
+    ROOM.shelf=ROOM.shelf||[]; var changed=false;
+    collectionIds().forEach(function(id){ var s='inv:'+id;
+      if(ROOM.shelf.indexOf(s)<0&&ROOM.shelf.length<8){ ROOM.shelf.push(s); changed=true; } });
+    renderItems(); renderDrawer(); renderStats();
+    if(changed){ markDirty(); toast("COLLECTION ON THE SHELF_"); }
   }
 
   /* fit the fixed-size stage into the panel width — scales UP on laptops, down on phones */
@@ -458,12 +636,29 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   }
   function markDirty(){ DIRTY=true; var b=$("savebtn"); if(b){b.disabled=false;b.textContent="▣ SAVE ROOM";} }
 
+  /* the drawer has two shelves: FURNITURE (basics + room-exclusives) and MY COLLECTION
+     (the member's owned games/environments/engine, placeable as display trophies). */
   function renderDrawer(){
-    var ids=myItems(), K=KINDS[ROOM.k]||KINDS.attic;
-    $("chips").innerHTML=ids.map(function(id){
-      var d=ITEMS[id], ex=(K.items.indexOf(id)>=0);
-      return '<div class="chip'+(ex?' rare':'')+'" data-id="'+id+'"><div class="ce">'+d.e+'</div><div class="cn">'+e2(d.n)+(ex?'<br>ROOM EXCL.':'')+'</div></div>';
-    }).join('');
+    var html="", K=KINDS[ROOM.k]||KINDS.attic;
+    if(drawerTab==='furn'){
+      $("drawhint").textContent="tap an item, then tap a floor tile to place it. tap a placed item to turn or remove it.";
+      html=myItems().map(function(id){
+        var d=ITEMS[id], ex=(K.items.indexOf(id)>=0);
+        return '<div class="chip'+(ex?' rare':'')+'" data-id="'+id+'"><div class="ce">'+d.e+'</div><div class="cn">'+e2(d.n)+(ex?'<br>ROOM EXCL.':'')+'</div></div>';
+      }).join('');
+    } else {
+      var coll=collectionIds();
+      if(!coll.length){
+        $("drawhint").textContent="unlock rooms & the engine and they show up here to display in your room.";
+        html='<div class="drawhint" style="padding:6px 2px">no collectibles yet — <a href="../arcade/" style="color:var(--acid)">unlock a room</a> or play 10s of music to earn the engine_</div>';
+      } else {
+        $("drawhint").textContent="your collection — tap a piece, then a floor tile, to display it as a trophy in your room.";
+        html=coll.map(function(id){ var d=INVMETA[id]||{e:"✦",n:id.toUpperCase()};
+          return '<div class="chip coll" data-id="inv:'+id+'"><div class="ce">'+d.e+'</div><div class="cn">'+e2(d.n)+'</div></div>';
+        }).join('');
+      }
+    }
+    $("chips").innerHTML=html;
     Array.prototype.forEach.call($("chips").querySelectorAll(".chip"),function(c){
       c.onclick=function(){
         var id=c.getAttribute("data-id");
@@ -475,6 +670,20 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     });
     $("drawer").classList.add("open");
   }
+  /* collection ids the member owns (env/games from Supabase + the engine flag) */
+  function collectionIds(){
+    var ids=OWNED.filter(function(id){return INVMETA[id];});
+    try{ if(localStorage.getItem('ibee_engine10')==='1'&&ids.indexOf('universe-engine')<0) ids.push('universe-engine'); }catch(e){}
+    return ids;
+  }
+  (function(){  /* drawer tab switch */
+    ['tabFurn','tabColl'].forEach(function(id){ var el=$(id); if(!el)return;
+      el.onclick=function(){ drawerTab=el.getAttribute('data-tab'); selChip=null;
+        $("tabFurn").classList.toggle('on',drawerTab==='furn');
+        $("tabColl").classList.toggle('on',drawerTab==='coll');
+        renderDrawer(); };
+    });
+  })();
 
   async function saveRoom(){
     var b=$("savebtn"); b.disabled=true; b.textContent="SAVING…";
@@ -521,20 +730,119 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }
   }
 
+  /* ================= the mimi avatar (device-local, shared key ibee_avatar) ================= */
+  var AV_N=12;
+  function avSrc(i){ return "../assets/img/avatars/mimi-"+(i<10?"0":"")+i+".png"; }
+  function avGet(){ var n=parseInt(localStorage.getItem("ibee_avatar"),10); return (n>=0&&n<AV_N)?n:0; }
+  function avPaint(){ $("av").src=avSrc(avGet());
+    Array.prototype.forEach.call($("avpick").querySelectorAll("img"),function(im,i){ im.classList.toggle("sel",i===avGet()); }); }
+  (function(){
+    var h=''; for(var i=0;i<AV_N;i++) h+='<img src="'+avSrc(i)+'" alt="mimi '+i+'" data-i="'+i+'">';
+    $("avpick").innerHTML=h;
+    Array.prototype.forEach.call($("avpick").querySelectorAll("img"),function(im){
+      im.onclick=function(){ try{localStorage.setItem("ibee_avatar",im.getAttribute("data-i"));}catch(e){}
+        avPaint(); $("avpick").classList.remove("open"); toast("AVATAR SET_"); };});
+    $("av").onclick=function(){ $("avpick").classList.toggle("open"); };
+  })();
+
+  /* ================= identity + stats + badges (own profile) ================= */
+  function playsCount(){ try{ var p=(JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}).plays||{},t=0;
+    Object.keys(p).forEach(function(k){t+=(+p[k]||0);}); return t; }catch(e){ return 0; } }
+  function vaultOpen(){ try{ return !!(JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}).vault; }catch(e){ return false; } }
+
+  function renderIdentity(prof){
+    var uid=(ME&&ME.user&&ME.user.id)||OWNERNAME;
+    var codename=NAMES[hash(uid+"n")%NAMES.length]+" #"+(1000+(hash(uid+"x")%9000));
+    var rankIdx = OWNED.length>=6?3 : OWNED.length>=3?2 : OWNED.length>=1?1 : 0;
+    $("idrank").textContent=RANKS[rankIdx].n+" · "+OWNERNAME.toUpperCase();
+    $("idem").textContent=(ME&&ME.user&&ME.user.email)||"";
+    var since=prof.since?new Date(prof.since).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):"";
+    $("idsince").textContent="codename "+codename+(since?" · since "+since:"");
+    $("idband").style.display=""; avPaint();
+    $("logout").onclick=function(ev){ ev.preventDefault(); if(sb)sb.auth.signOut().then(function(){location.reload();}); };
+  }
+  function renderStats(){
+    $("scColl").textContent=OWNED.length? (OWNED.length+" pcs") : "0";
+    $("scPlays").textContent=playsCount().toLocaleString();
+    var B=window.IBEE_BADGES, ne=0; if(B){ var st=B.state(); ne=Object.keys(st.earned||{}).length; }
+    $("scBadges").textContent=B? (ne+" / "+B.defs.length) : "—";
+    var vo=vaultOpen(); $("scVault").textContent=vo?"OPEN":"SEALED"; $("scVaultSub").textContent=vo?"discovered":"still hidden";
+    $("screens").style.display="";
+  }
+  function renderBadges(){
+    var B=window.IBEE_BADGES; if(!B){ return; }
+    var bst=B.state(), P=B.snapshot(), nEarn=0;
+    $("badges").innerHTML=B.defs.map(function(d){
+      var on=!!bst.earned[d.id]; if(on)nEarn++; var hush=d.secret&&!on;
+      var sub=on ? new Date(bst.earned[d.id]).toLocaleDateString(undefined,{month:'short',day:'numeric'})
+                 : (hush?"hidden_":(d.pr?d.pr(P):d.d));
+      return '<div class="badge'+(on?' on':'')+(hush?' hush':'')+'" data-id="'+e2(d.id)+'">'
+        +'<div class="bi">'+(hush?'❓':(B.icoHTML?B.icoHTML(d):d.ico))+'</div>'
+        +'<div class="bn">'+(hush?'???':e2(d.n))+'</div><div class="bt">'+e2(sub)+'</div></div>';
+    }).join('');
+    $("badgehead").textContent="// BADGES_ "+nEarn+" / "+B.defs.length;
+    Array.prototype.forEach.call($("badges").querySelectorAll(".badge"),function(el){
+      el.onclick=function(){ var id=el.getAttribute("data-id"),d=null;
+        B.defs.forEach(function(x){ if(x.id===id)d=x; }); if(!d)return;
+        var on=!!bst.earned[d.id]; if(d.secret&&!on)return; openBadge(d,on,bst.earned[d.id],P); };
+    });
+    $("badgebox").style.display="";
+  }
+  function openBadge(d,on,ts,P){
+    var card=$("bcard"); card.className="bcard"+(d.gold?" gold":"")+(d.secret?" secret":"");
+    var B=window.IBEE_BADGES;
+    $("bmic").innerHTML=(B&&B.icoHTML)?B.icoHTML(d):d.ico;
+    $("bmnm").textContent=d.n2||d.n;
+    var st=$("bmst");
+    if(on){ st.className="bst on"; st.textContent="✓ EARNED · "+new Date(ts).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
+    else { st.className="bst"; st.textContent="○ NOT EARNED YET"; }
+    $("bmtt").textContent=d.secret?"// THE RULE_":"// THE TASK_";
+    $("bmtask").textContent=d.d+((!on&&d.pr&&P)?("  ·  "+d.pr(P)):"");
+    var wb=$("bmwhybox");
+    if(d.secret&&on&&d.why){ wb.style.display=""; $("bmwhy").textContent=d.why; } else wb.style.display="none";
+    $("bmodal").classList.add("open");
+  }
+  $("bclose").onclick=function(){ $("bmodal").classList.remove("open"); };
+  $("bmodal").addEventListener("click",function(e){ if(e.target===$("bmodal"))$("bmodal").classList.remove("open"); });
+
+  /* the "YOU JUST WON" feed — badges + unread news, each a deletable box (badges.js inbox) */
+  var TAGLABEL={drop:"NEW DROP",merch:"NEW MERCH",shop:"IN THE SHOP",video:"NEW VIDEO",channel:"NEW CHANNEL",
+    tv:"ON IBEE TV",song:"NEW SONG",galaxy:"NEW GALAXY",music:"NEW MUSIC",news:"NEWS",note:"NOTE",info:"INFO",collection:"COLLECTION",item:"ITEM"};
+  function renderNew(){
+    var B=window.IBEE_BADGES, box=$("newbox"); if(!B||!B.inbox){ box.style.display="none"; return; }
+    var items=B.inbox(); if(!items.length){ box.style.display="none"; return; }
+    box.style.display="";
+    $("newlist").innerHTML=items.map(function(x){
+      var isBadge=(x.kind==="badge"), gold=isBadge&&x.def&&x.def.gold;
+      var when=new Date(x.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      var cls="newrow"+(gold?" gold":(isBadge?"":" news"));
+      var tag= isBadge ? (gold?"⭐ TROPHY UNLOCKED":"🏆 BADGE WON") : ("📣 "+(TAGLABEL[x.type]||"NEWS"));
+      return '<div class="'+cls+'" data-id="'+e2(x.id)+'"><div class="ni">'+((B.icoHTML)?B.icoHTML(x):e2(x.icon))+'</div>'
+        +'<div class="nt"><div class="ntag">'+tag+'</div><div class="nn">'+e2(x.n)+'</div>'
+        +(x.d?'<div class="nd">'+e2(x.d)+'</div>':'')+'<div class="nd" style="color:#555">'+when+'</div></div>'
+        +'<div class="nx" title="delete">✕</div></div>';
+    }).join('');
+    Array.prototype.forEach.call($("newlist").querySelectorAll(".nx"),function(x){
+      x.onclick=function(){ B.markSeen(x.parentNode.getAttribute("data-id")); renderNew(); renderBadges(); renderStats(); };
+    });
+  }
+  $("nclear").onclick=function(){ if(window.IBEE_BADGES){ window.IBEE_BADGES.markSeen(null); renderNew(); renderBadges(); } };
+
   /* ================= views ================= */
   function showRoom(prof,mine){
     OWNERNAME=prof.username; ROOM=prof.room||{}; ISMINE=mine;
     if(!ROOM.k)ROOM={v:1,k:"attic",tiles:[],shelf:[]};
     var K=KINDS[ROOM.k]||KINDS.attic;
-    document.title=(mine?"MY ROOM":OWNERNAME.toUpperCase()+"'S ROOM")+" — ONLY IBEE";
+    document.title=(mine?"MY PROFILE":OWNERNAME.toUpperCase()+"'S ROOM")+" — ONLY IBEE";
     $("titlebar").style.display="";
     $("roomname").textContent=(mine?"MY ROOM · ":"")+OWNERNAME.toUpperCase()+" — "+K.n;
     var since=prof.since?new Date(prof.since).toLocaleDateString(undefined,{year:'numeric',month:'short'}):"";
-    $("roomsub").textContent=(mine?"your room on the frequency":"you are visiting — look, don't touch")+(since?" · est. "+since:"");
+    $("roomsub").textContent=(mine?"your profile — arrange it, show your collection, share it":"you are visiting — look, don't touch")+(since?" · est. "+since:"");
     var tb=$("tbtns"); tb.innerHTML="";
     if(mine){
       tb.innerHTML='<button class="tb solid" id="savebtn" disabled>✓ SAVED</button>'
-        +'<a class="tb" href="?u='+encodeURIComponent(OWNERNAME)+'">👁 VIEW AS VISITOR</a>';
+        +'<a class="tb" href="?u='+encodeURIComponent(OWNERNAME)+'">👁 VIEW AS VISITOR</a>'
+        +'<a class="tb" href="../member/inventory/">♟ COLLECTION</a>';
       $("savebtn").onclick=saveRoom;
       var link=location.origin+"/room/?u="+encodeURIComponent(OWNERNAME);
       $("sharebox").style.display=""; $("sharelink").value=link;
@@ -542,14 +850,15 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         if(navigator.share){navigator.share({title:"my room on ONLY IBEE",url:link}).catch(function(){});}
         try{navigator.clipboard.writeText(link);toast("LINK COPIED_");}catch(e){}
       };
+      renderIdentity(prof); renderStats(); renderBadges(); renderNew();
     } else {
-      tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY ROOM":"✦ GET YOUR OWN ROOM")+'</a>';
+      tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY PROFILE":"✦ GET YOUR OWN ROOM")+'</a>';
     }
     $("stagewrap").style.display="";
     geom=drawRoom(ROOM.k);
     fitStage();
     renderItems();
-    if(mine){ document.body.classList.add("edit"); renderDrawer(); syncShelf(); }
+    if(mine){ document.body.classList.add("edit"); renderDrawer(); loadCollection(); }
     $("stage").onclick=stageClick;
     loadGuestbook(OWNERNAME);
   }
@@ -622,12 +931,41 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }
   }
 
+  /* logged-out: a real login / 2-second join box (the profile IS the room, so this is
+     the profile's login too). On success → boot() re-runs into onboarding or the room. */
   function showJoin(){
-    var ob=$("ob"); ob.style.display="";
-    ob.innerHTML='<div class="bigh">A ROOM OF YOUR OWN_</div>'
-      +'<div class="cnote" style="max-width:420px;margin:0 auto">every member gets a room — pick your name, choose your door, place your things, '
-      +'and share it at onlyibee.com/room/<b style="color:var(--acid)">you</b>. visitors can sign your guestbook_</div>'
-      +'<div class="nick"><a class="cbtn" style="text-decoration:none" href="../member/?login=1">＋ JOIN — FREE, 2 SEC</a></div>';
+    if(!sb){ $("loginbox").innerHTML='<div class="login"><div class="msg">✕ backend offline — refresh in a moment_</div></div>'; return; }
+    $("loginbox").innerHTML='<div class="login crtin"><div class="h">// YOUR PROFILE + YOUR ROOM_</div>'
+      +'<p><b style="color:var(--ink)">Every member gets a room.</b> Pick a name, choose your door, place your collection, share it at onlyibee.com/room/<b style="color:var(--acid)">you</b>. Joining takes 2 seconds — just an email and a password.</p>'
+      +'<input id="lem" type="email" placeholder="your email" inputmode="email" autocomplete="email">'
+      +'<input id="lpw" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password">'
+      +'<button id="lreg">＋ CREATE MY ACCOUNT — FREE, 2 SEC</button>'
+      +'<div class="or">— ALREADY JOINED? —</div>'
+      +'<button id="llog" class="ghost">▶ LOG IN</button>'
+      +'<div class="msg" id="lmsg"></div>'
+      +'<div class="msg" style="margin-top:8px">Got a garment pass? <a href="../member/" style="color:var(--acid)">redeem it here</a>_</div></div>';
+    $("lpw").addEventListener("keydown",function(e){ if(e.key==="Enter")$("llog").click(); });
+    function valid(){ var em=($("lem").value||'').trim(), pw=$("lpw").value||'';
+      if(!/.+@.+\..+/.test(em)){$("lmsg").textContent='enter your email_';return null;}
+      if(pw.length<6){$("lmsg").textContent='password needs 6+ characters_';return null;} return {em:em,pw:pw}; }
+    $("llog").onclick=async function(){ var v=valid(); if(!v)return;
+      $("llog").disabled=true;$("lreg").disabled=true;$("lmsg").textContent='…';
+      var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+      if(si.error){$("lmsg").textContent='✕ wrong email or password — new? tap CREATE MY ACCOUNT_';$("llog").disabled=false;$("lreg").disabled=false;return;}
+      $("loginbox").innerHTML=''; boot(); };
+    $("lreg").onclick=async function(){ var v=valid(); if(!v)return;
+      $("llog").disabled=true;$("lreg").disabled=true;$("lmsg").textContent='creating your account…';
+      var su=await sb.auth.signUp({email:v.em,password:v.pw});
+      if(su.error){ var m=String(su.error.message||'').toLowerCase();
+        if(m.indexOf('already')>=0||m.indexOf('registered')>=0){
+          var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+          if(!si.error){ $("loginbox").innerHTML=''; boot(); return; }
+          $("lmsg").textContent='✕ that email is already registered — check your password_';
+        } else { $("lmsg").textContent='✕ '+(su.error.message||'could not create account')+'_'; }
+        $("llog").disabled=false;$("lreg").disabled=false; return; }
+      if(su.data&&su.data.session){ $("loginbox").innerHTML=''; boot(); return; }
+      $("lmsg").textContent='✓ account made — check your email to confirm, then LOG IN_';
+      $("llog").disabled=false;$("lreg").disabled=false; };
   }
 
   /* ================= music: the room is a living display of the radio =================
@@ -642,10 +980,13 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var b=0,lvl=0,h=null,r=window.IBEERADIO,nm="",slug="",on=false;
     try{ if(r&&r.playing()){ on=true; b=r.beat()||0; lvl=(r.level&&r.level())||0; h=75;
       slug=(r.slug&&r.slug())||""; var s=r.song&&r.song(); if(s){ if(s.hue!=null)h=s.hue; nm=s.n||""; } } }catch(e){}
-    var st=$("stage");
+    var st=$("stage"), root=document.documentElement;
     st.style.setProperty("--mb",b.toFixed(3));
+    /* also drive the whole profile (idband, stat screens, badges) — the page follows the groove */
+    root.style.setProperty("--mb",b.toFixed(3));
     /* radio silent → leave --mh unset so the walls fall back to the room kind's hue */
-    if(h!=null) st.style.setProperty("--mh",h); else st.style.removeProperty("--mh");
+    if(h!=null){ st.style.setProperty("--mh",h); root.style.setProperty("--mh",h); }
+    else { st.style.removeProperty("--mh"); root.style.removeProperty("--mh"); }
     $("npline").textContent=nm?("♪ "+nm):"";
     /* the wall EQ: 9 bars, per-bar phase over the beat so they dance, not jump in unison */
     var t=(Date.now()-tick0)/1000;
