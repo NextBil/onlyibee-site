@@ -62,10 +62,29 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .itm.sel{outline:2px dashed var(--acid);outline-offset:3px}
 .edit .itm{cursor:pointer}
 .tilehint{position:absolute;width:0;height:0;pointer-events:none}
-/* shelf items sit smaller, on the wall */
+/* shelf items: the member's collection, spinning in 3D on the plank */
 .shitm{position:absolute;transform:translate(-50%,-100%);line-height:1;user-select:none;-webkit-user-select:none;
   filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
-.shitm .g{display:block;font-size:21px;transform:translateY(calc(var(--mb,0)*-2px))}
+.shitm .sp{perspective:220px;width:26px;height:26px;display:block;
+  transform:translateY(calc(var(--mb,0)*-2px))}
+.shitm .s3{width:100%;height:100%;position:relative;transform-style:preserve-3d;
+  animation:spin3d var(--sdur,6s) linear infinite;animation-delay:var(--sdel,0s)}
+.shitm .s3 .f,.shitm .s3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;font-size:20px}
+.shitm .s3 .b{transform:rotateY(180deg);filter:brightness(.55)}
+@keyframes spin3d{from{transform:rotateX(6deg) rotateY(0)}to{transform:rotateX(6deg) rotateY(360deg)}}
+/* floating hue glyphs while the radio plays */
+.gly{position:absolute;font-size:15px;pointer-events:none;color:hsl(var(--mh,75),95%,68%);
+  text-shadow:0 0 8px hsla(var(--mh,75),95%,55%,.7);animation:glyup 3.4s ease-out forwards;z-index:40}
+@keyframes glyup{0%{opacity:0;transform:translateY(0) scale(.7)}12%{opacity:.95}
+  100%{opacity:0;transform:translateY(-110px) scale(1.15) rotate(14deg)}}
+/* the SVG wall gear: baseboards + eq bars + stat screen breathe with the beat */
+#roomsvg line.bb{stroke-opacity:calc(.35 + var(--mb,0)*.65)}
+#roomsvg rect.eqb{fill:hsl(var(--mh,75),95%,60%);transition:height .09s linear,y .09s linear}
+#roomsvg .scrbox{filter:drop-shadow(0 0 calc(3px + var(--mb,0)*7px) hsla(var(--mh,75),95%,55%,.55))}
+#roomsvg text{font-family:var(--px);letter-spacing:.5px}
+#roomsvg text.scr-t{fill:hsl(var(--mh,75),95%,72%)}
+#roomsvg text.scr-d{fill:#9a9a9a;font-family:var(--vt)}
 /* now-playing plaque on the wall */
 #npline{position:absolute;font-family:var(--px);font-size:7px;color:hsl(var(--mh,75),95%,70%);
   letter-spacing:1px;text-shadow:0 0 8px hsla(var(--mh,75),95%,55%,.6);white-space:nowrap;overflow:hidden;
@@ -131,7 +150,17 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
   font-family:var(--vt);color:var(--ink);transition:.18s;display:flex;flex-direction:column;align-items:center}
 .pick:hover{transform:translateY(-3px);outline:none}
 .pick:disabled{opacity:.4;cursor:default;transform:none}
-.pick svg{width:120px;height:84px;margin-bottom:6px}
+/* the pick renders as a little rotating 3D room (same spin trick as everywhere on the site) */
+.pick .proom{perspective:520px;width:132px;height:92px;margin:2px auto 8px;position:relative}
+.pick .proom::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
+  width:78px;height:12px;border-radius:50%;background:radial-gradient(ellipse,var(--pglow,rgba(182,255,0,.4)),transparent 70%);
+  animation:pedpulse 3.2s ease-in-out infinite}
+@keyframes pedpulse{0%,100%{transform:translateX(-50%) scaleX(1);opacity:.85}50%{transform:translateX(-50%) scaleX(.72);opacity:.4}}
+.pick .part3{width:100%;height:100%;position:relative;transform-style:preserve-3d;
+  animation:spin3d var(--pdur,7s) linear infinite}
+.pick .part3 .f,.pick .part3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pick .part3 .b{transform:rotateY(180deg);filter:brightness(.5)}
+.pick .part3 svg{width:100%;height:100%}
 .pick .pn{font-family:var(--px);font-size:9px;line-height:1.6;margin-bottom:6px}
 .pick .pd{color:#b0b0b0;font-size:14px;line-height:1.35;flex:1;margin-bottom:8px}
 .pick .pt{font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:2px;border-top:1px solid var(--border);
@@ -255,6 +284,17 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   };
   var BASICS=["sofa","chair","plant","lamp","tv","boombox","vinyl","guitar","books","cat","mic","headset","candle","arcade","skate","phone"];
   var MAXITEMS=40;
+  /* the collection on the shelf: Supabase inventory items shown as 'inv:<id>' shelf entries */
+  var INVMETA={
+    "game-runner":{e:"🐝",n:"RUN BEEBEE"},"game-rush":{e:"🎸",n:"MIMI GUITAR RUSH"},
+    "game-tiles":{e:"💾",n:"MIMI MUSIC TILES"},"env-aqua":{e:"🐠",n:"AQUA BASS"},
+    "env-bedroom":{e:"🛏️",n:"ICS LOFI BEDROOM"},"env-terrarium":{e:"🦎",n:"SYNTH TERRARIUM"},
+    "env-transit":{e:"🚈",n:"MIDNIGHT TRANSIT"},"universe-engine":{e:"💠",n:"UNIVERSE ENGINE"}
+  };
+  function shelfMeta(id){
+    if(id&&id.indexOf("inv:")===0) return INVMETA[id.slice(4)]||{e:"✦",n:id.slice(4).toUpperCase()};
+    return ITEMS[id];
+  }
 
   /* ================= iso projection ================= */
   var GX=8,GY=6,TW=64,TH=32,WH=88;                 // grid, tile size, wall height
@@ -274,15 +314,29 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     /* left wall (along the y axis edge) + right wall (along the x axis edge) */
     s+='<polygon points="'+px(0,0)+','+(py(0,0)-WH)+' '+px(0,GY)+','+(py(0,GY)-WH)+' '+px(0,GY)+','+py(0,GY)+' '+px(0,0)+','+py(0,0)+'" fill="'+K.wall+'" stroke="#000" stroke-width="1"/>';
     s+='<polygon points="'+px(0,0)+','+(py(0,0)-WH)+' '+px(GX,0)+','+(py(GX,0)-WH)+' '+px(GX,0)+','+py(GX,0)+' '+px(0,0)+','+py(0,0)+'" fill="'+K.wall2+'" stroke="#000" stroke-width="1"/>';
-    /* baseboard glow lines where walls meet floor */
-    s+='<line x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(0,GY)+'" y2="'+py(0,GY)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6" opacity=".6"/>';
-    s+='<line x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(GX,0)+'" y2="'+py(GX,0)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6" opacity=".6"/>';
+    /* baseboard glow lines where walls meet floor — class bb breathes with --mb */
+    s+='<line class="bb" x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(0,GY)+'" y2="'+py(0,GY)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6"/>';
+    s+='<line class="bb" x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(GX,0)+'" y2="'+py(GX,0)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6"/>';
     /* the window on the left wall — the sky lives in the song's hue (CSS var --mh) */
-    var wx1=px(0,1.2),wy1=py(0,1.2)-WH+16,wx2=px(0,3.4),wy2=py(0,3.4)-WH+16;
-    s+='<polygon points="'+wx1+','+wy1+' '+wx2+','+wy2+' '+wx2+','+(wy2+34)+' '+wx1+','+(wy1+34)+'" fill="hsl(var(--mh,'+K.hue+'),70%,22%)" stroke="hsl(var(--mh,'+K.hue+'),95%,60%)" stroke-width="1.5"><animate attributeName="opacity" values="1;.85;1" dur="4s" repeatCount="indefinite"/></polygon>';
-    s+='<circle cx="'+((wx1+wx2)/2)+'" cy="'+((wy1+wy2)/2+12)+'" r="4" fill="hsl(var(--mh,'+K.hue+'),95%,75%)" opacity=".9"/>';
-    /* the SHELF on the right wall — every starter room has one */
-    var sx1=px(2.2,0),sy1=py(2.2,0)-WH+46,sx2=px(6.4,0),sy2=py(6.4,0)-WH+46;
+    var wx1=px(0,0.5),wy1=py(0,0.5)-WH+10,wx2=px(0,2.5),wy2=py(0,2.5)-WH+10;
+    s+='<polygon points="'+wx1+','+wy1+' '+wx2+','+wy2+' '+wx2+','+(wy2+30)+' '+wx1+','+(wy1+30)+'" fill="hsl(var(--mh,'+K.hue+'),70%,22%)" stroke="hsl(var(--mh,'+K.hue+'),95%,60%)" stroke-width="1.5"><animate attributeName="opacity" values="1;.85;1" dur="4s" repeatCount="indefinite"/></polygon>';
+    s+='<circle cx="'+((wx1+wx2)/2)+'" cy="'+((wy1+wy2)/2+11)+'" r="4" fill="hsl(var(--mh,'+K.hue+'),95%,75%)" opacity=".9"/>';
+    /* the EQUALIZER on the left wall — 9 LED bars that dance to the groove (heights set in the music loop) */
+    for(var q=0;q<9;q++){
+      var yy=3.0+q*0.3, bx=px(0,yy), base=py(0,yy)-WH+62;
+      s+='<rect class="eqb" data-base="'+base+'" x="'+(bx-3)+'" y="'+(base-4)+'" width="6" height="4" rx="1" opacity=".9"/>';
+    }
+    /* the STAT SCREEN on the right wall — skewed onto the wall plane, filled by the music loop */
+    var scx=px(2.3,0), scy=py(2.3,0)-WH+2, scw=120, sch=27;
+    s+='<g class="scrbox" transform="translate('+scx+','+scy+') skewY(26.565)">'
+      +'<rect x="0" y="0" width="'+scw+'" height="'+sch+'" fill="#050505" stroke="hsl(var(--mh,'+K.hue+'),80%,55%)" stroke-width="1.2"/>'
+      +'<circle id="scrLed" cx="'+(scw-7)+'" cy="6.5" r="2.2" fill="#3a3a3a"/>'
+      +'<text id="scrOwner" x="5" y="8.5" font-size="4.5" class="scr-t">ROOM.SYS_</text>'
+      +'<text id="scrSong" x="5" y="16.5" font-size="5" fill="#e8e8e8">RADIO OFF_</text>'
+      +'<text id="scrMeta" x="5" y="24.5" font-size="6.5" class="scr-d">tap ► on the radio_</text>'
+      +'</g>';
+    /* the SHELF on the right wall — the collection lives here, spinning */
+    var sx1=px(2.2,0),sy1=py(2.2,0)-WH+64,sx2=px(7.2,0),sy2=py(7.2,0)-WH+64;
     s+='<polygon points="'+sx1+','+sy1+' '+sx2+','+sy2+' '+(sx2)+','+(sy2+6)+' '+(sx1)+','+(sy1+6)+'" fill="#241c10" stroke="hsl('+K.hue+',60%,45%)" stroke-width="1"/>';
     /* floor tiles */
     for(var y=0;y<GY;y++)for(var x=0;x<GX;x++){
@@ -322,14 +376,15 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       html+='<div class="itm f'+(t.f||0)+'" data-idx="'+idx+'" style="left:'+px(t.x,t.y)+'px;top:'+(py(t.x,t.y)+TH/2+10)+'px;z-index:'+(10+t.x+t.y)+';--fx:'+flip+'">'
         +'<span class="g">'+d.e+'</span></div>';
     });
-    /* shelf items along the shelf plank */
-    var sh=(ROOM.shelf||[]).slice(0,5);
+    /* shelf items along the plank — every one spins in 3D (relics + the collection) */
+    var sh=(ROOM.shelf||[]).slice(0,8);
     if(geom&&sh.length){
       sh.forEach(function(id,i){
-        var d=ITEMS[id]; if(!d)return;
+        var d=shelfMeta(id); if(!d)return;
         var f=(i+1)/(sh.length+1);
         var sx=geom.shelf.x1+(geom.shelf.x2-geom.shelf.x1)*f, sy=geom.shelf.y1+(geom.shelf.y2-geom.shelf.y1)*f;
-        html+='<div class="shitm" title="'+e2(d.n)+'" style="left:'+sx+'px;top:'+sy+'px;z-index:5"><span class="g">'+d.e+'</span></div>';
+        html+='<div class="shitm" title="'+e2(d.n)+'" style="left:'+sx+'px;top:'+sy+'px;z-index:5;--sdur:'+(5.2+(i%4)*0.9)+'s;--sdel:-'+(i*0.7)+'s">'
+          +'<span class="sp"><span class="s3"><span class="f">'+d.e+'</span><span class="b">'+d.e+'</span></span></span></div>';
       });
     }
     lay.innerHTML=html;
@@ -341,12 +396,33 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }
   }
 
-  /* fit the fixed-size stage into the panel width */
+  /* the collection joins the shelf: read the member's real inventory (same rpc as
+     member/inventory/) and append anything new as 'inv:' shelf items. Marks the room
+     dirty so a SAVE publishes the shelf for visitors too. */
+  async function syncShelf(){
+    if(!sb||!ISMINE)return;
+    var want=[];
+    try{
+      var r=await sb.rpc('my_inventory');
+      (r.data||[]).forEach(function(it){ if(INVMETA[it.id]) want.push('inv:'+it.id); });
+    }catch(e){}
+    try{ if(localStorage.getItem('ibee_engine10')==='1') want.push('inv:universe-engine'); }catch(e){}
+    if(!want.length)return;
+    ROOM.shelf=ROOM.shelf||[];
+    var changed=false;
+    want.forEach(function(id){ if(ROOM.shelf.indexOf(id)<0&&ROOM.shelf.length<8){ ROOM.shelf.push(id); changed=true; } });
+    if(changed){ renderItems(); markDirty(); toast("COLLECTION ON THE SHELF_"); }
+  }
+
+  /* fit the fixed-size stage into the panel width — scales UP on laptops, down on phones */
   function fitStage(){
     var wrap=$("stagewrap"), st=$("stage");
-    var sc=Math.min(1,(wrap.clientWidth-8)/W);
-    st.style.width=W+"px"; st.style.height=(H*sc)+"px";
-    st.style.transform="scale("+sc+")";
+    var avail=wrap.clientWidth-8, sc=Math.min(1.55,avail/W);
+    st.style.width=W+"px"; st.style.height=(H*sc)+"px"; st.style.margin="0";
+    /* origin top-left + explicit translate: center the SCALED room, not the layout box
+       (origin:center left the room clipped right on phones where sc<1) */
+    st.style.transformOrigin="top left";
+    st.style.transform="translateX("+Math.max(0,(avail-W*sc)/2+4)+"px) scale("+sc+")";
     st.dataset.sc=sc;
   }
   window.addEventListener("resize",fitStage);
@@ -473,7 +549,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     geom=drawRoom(ROOM.k);
     fitStage();
     renderItems();
-    if(mine){ document.body.classList.add("edit"); renderDrawer(); }
+    if(mine){ document.body.classList.add("edit"); renderDrawer(); syncShelf(); }
     $("stage").onclick=stageClick;
     loadGuestbook(OWNERNAME);
   }
@@ -519,8 +595,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       ob.innerHTML='<div class="bigh">CHOOSE YOUR ROOM_</div>'
         +'<div class="cnote">hey <b style="color:var(--acid)">'+e2(nm)+'</b> — three doors opened for you (every member gets a different three). '
         +'each room comes with a shelf and a founding relic that will never be sold_</div>'
-        +'<div class="picks">'+offer.map(function(k){var K=KINDS[k];
-          return '<button class="pick" data-k="'+k+'" style="border-color:hsla('+K.hue+',60%,45%,.6)">'+miniRoomSVG(K)
+        +'<div class="picks">'+offer.map(function(k,ki){var K=KINDS[k],art=miniRoomSVG(K);
+          return '<button class="pick" data-k="'+k+'" style="border-color:hsla('+K.hue+',60%,45%,.6);'
+            +'--pglow:hsla('+K.hue+',90%,55%,.45);--pdur:'+(6.2+ki*0.9)+'s">'
+            +'<div class="proom"><div class="part3"><div class="f">'+art+'</div><div class="b">'+art+'</div></div></div>'
             +'<div class="pn" style="color:hsl('+K.hue+',95%,70%)">'+e2(K.n)+'</div>'
             +'<div class="pd">'+e2(K.d)+'</div>'
             +'<div class="pt">▶ MOVE IN</div></button>';}).join('')
@@ -552,21 +630,58 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       +'<div class="nick"><a class="cbtn" style="text-decoration:none" href="../member/?login=1">＋ JOIN — FREE, 2 SEC</a></div>';
   }
 
-  /* ================= music: the room breathes with the radio ================= */
+  /* ================= music: the room is a living display of the radio =================
+     One 100ms loop reads the bridge (beat, level, song, slug) + the pressed groove
+     (window.IBEE_BEAT — bpm) + the universe save (plays) and paints: CSS vars --mb/--mh
+     (items bob, tiles glow, baseboards breathe), the wall EQ bars, the stat screen,
+     the now-playing plaque, and floating hue glyphs over the floor. */
+  function playsTotal(){ try{ var p=(JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}).plays||{},t=0;
+    Object.keys(p).forEach(function(k){t+=(+p[k]||0);}); return t; }catch(e){ return 0; } }
+  var GLYPHS=["♪","♫","✦","✧","◆"], glyN=0, tick0=Date.now();
   setInterval(function(){
-    var b=0,h=null,r=window.IBEERADIO,nm="";
-    try{ if(r&&r.playing()){ b=r.beat()||0; h=75; var s=r.song&&r.song(); if(s){ if(s.hue!=null)h=s.hue; nm=s.n||""; } } }catch(e){}
+    var b=0,lvl=0,h=null,r=window.IBEERADIO,nm="",slug="",on=false;
+    try{ if(r&&r.playing()){ on=true; b=r.beat()||0; lvl=(r.level&&r.level())||0; h=75;
+      slug=(r.slug&&r.slug())||""; var s=r.song&&r.song(); if(s){ if(s.hue!=null)h=s.hue; nm=s.n||""; } } }catch(e){}
     var st=$("stage");
     st.style.setProperty("--mb",b.toFixed(3));
-    /* radio silent → leave --mh unset so the window sky falls back to the room kind's hue */
+    /* radio silent → leave --mh unset so the walls fall back to the room kind's hue */
     if(h!=null) st.style.setProperty("--mh",h); else st.style.removeProperty("--mh");
     $("npline").textContent=nm?("♪ "+nm):"";
+    /* the wall EQ: 9 bars, per-bar phase over the beat so they dance, not jump in unison */
+    var t=(Date.now()-tick0)/1000;
+    Array.prototype.forEach.call(document.querySelectorAll("#roomsvg rect.eqb"),function(el,i){
+      var base=+el.getAttribute("data-base");
+      var v=on ? (0.18+0.82*Math.abs(Math.sin(t*2.3+i*1.65)))*(0.25+b*0.55+lvl*0.45) : 0.1;
+      var hh=Math.max(3,Math.round(4+24*Math.min(1,v)));
+      el.setAttribute("height",hh); el.setAttribute("y",base-hh);
+    });
+    /* the stat screen: who lives here + what's on air + the groove's numbers */
+    var so=$("scrOwner"),ss=$("scrSong"),sm=$("scrMeta"),sl=$("scrLed");
+    if(so){
+      so.textContent=((OWNERNAME||"ROOM").toUpperCase()+".SYS_").slice(0,20);
+      ss.textContent=on?("▶ "+(nm.length>18?nm.slice(0,17)+"…":nm).toUpperCase()):"RADIO OFF_";
+      var bpm=null; try{ var bd=window.IBEE_BEAT&&window.IBEE_BEAT[slug]; if(bd&&bd.bpm)bpm=Math.round(bd.bpm); }catch(e){}
+      sm.textContent=on ? ((bpm?("BPM "+bpm+" · "):"")+playsTotal().toLocaleString()+" plays_")
+                        : "tap ► on the radio_";
+      if(sl){ sl.setAttribute("fill",on?"hsl(var(--mh,75),95%,60%)":"#3a3a3a");
+        sl.setAttribute("opacity",on?(0.35+b*0.65).toFixed(2):"1"); }
+    }
+    /* floating glyphs drift up from the floor while the record spins */
+    if(on&&glyN<7&&Math.random()<0.13){
+      var gx=Math.random()*GX, gy=Math.random()*GY;
+      var d=document.createElement("div"); d.className="gly";
+      d.textContent=GLYPHS[(Math.random()*GLYPHS.length)|0];
+      d.style.left=px(gx,gy)+"px"; d.style.top=(py(gx,gy)+TH/2)+"px";
+      $("itemlayer").appendChild(d); glyN++;
+      setTimeout(function(){ d.remove(); glyN--; },3500);
+    }
   },100);
 
   /* ================= boot ================= */
   async function boot(){
     /* ?demo=<kind>[&edit=1] — preview any starter room with no account (also the dev harness) */
     var demo=param("demo");
+    if(demo==="pick"){ onboard('pick','demo'); return; }
     if(demo){ var dk=KINDS[demo]?demo:"vhs";
       showRoom({username:"demo",room:starterRoom(dk),since:new Date().toISOString()},!!param("edit"));
       return; }
