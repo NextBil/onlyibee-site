@@ -177,7 +177,7 @@
   +".rp-row .lk{width:13px;height:13px;flex:none;color:#ff2b2b}"
   /* ----- Spotify-style grid with 3D sideways tilt ----- */
   +"#rp-list.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px}"
-  +".rp-tile{cursor:pointer;perspective:640px}"
+  +".rp-tile{cursor:pointer;perspective:640px;min-width:0}"
   +".rp-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;"
   +"transform:rotateY(-19deg);transform-origin:center;transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s;"
   +"box-shadow:-12px 9px 24px rgba(0,0,0,.65);overflow:hidden}"
