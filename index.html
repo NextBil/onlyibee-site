@@ -420,7 +420,8 @@
     acctEl.innerHTML = on
       ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
       : '<button class="login" id="acctbtn">'+ICO_USER+'JOIN</button>';
-    document.getElementById('acctbtn').onclick=function(){ navigate(on?'member/profile/':'member/?login=1'); };
+    /* profile === room now (one concept, 2026-07-13): the pill opens the member's room/profile */
+    document.getElementById('acctbtn').onclick=function(){ navigate(on?'room/':'member/?login=1'); };
   }
   renderAcct();
   window.addEventListener('storage',renderAcct);
