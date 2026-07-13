@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>MY ROOM — ONLY IBEE</title>
+<meta name="description" content="Your own room on the ONLY IBEE frequency — decorate it, share it, let friends sign the guestbook.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --hue:88;                    /* the room kind's hue */
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+.bgglow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 20%,hsla(var(--hue),90%,45%,.14),transparent 60%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-direction:column;
+  align-items:center;gap:12px;position:relative;z-index:2}
+.crtin{animation:crtin .35s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
+
+/* ---------- room title bar ---------- */
+.titlebar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.titlebar .rn{font-family:var(--px);font-size:clamp(11px,3.4vw,15px);color:hsl(var(--hue),95%,70%);
+  text-shadow:0 0 14px hsla(var(--hue),95%,55%,.5);letter-spacing:1px;line-height:1.5}
+.titlebar .sub{color:var(--dim);font-size:15px;width:100%}
+.tbtns{display:flex;gap:8px;flex-wrap:wrap}
+.tb{font-family:var(--px);font-size:8px;padding:10px 12px;background:transparent;color:var(--acid);
+  border:1px solid var(--acid);cursor:pointer;text-decoration:none;letter-spacing:1px}
+.tb.solid{background:var(--acid);color:#000}
+.tb.red{color:var(--red);border-color:#3a1414}
+.tb:active{transform:translateY(2px)}
+.tb:disabled{opacity:.4;cursor:default}
+
+/* ---------- the room stage ---------- */
+#stagewrap{width:100%;border:2px solid var(--border);background:
+  radial-gradient(ellipse at 50% 0%,hsla(var(--hue),70%,30%,.2),transparent 60%),#0a0a0c;
+  position:relative;overflow:hidden}
+#stage{position:relative;margin:0 auto;transform-origin:top center}
+#roomsvg{display:block}
+#itemlayer{position:absolute;inset:0}
+.itm{position:absolute;transform:translate(-50%,-92%);cursor:default;line-height:1;
+  filter:drop-shadow(0 6px 5px rgba(0,0,0,.55));transition:transform .12s;user-select:none;-webkit-user-select:none}
+.itm .g{display:block;font-size:34px;
+  transform:scaleX(var(--fx,1)) translateY(calc(var(--mb,0)*-3.5px)) scale(calc(1 + var(--mb,0)*.03));
+  transition:transform .1s linear}
+.itm.f2 .g,.itm.f3 .g{filter:brightness(.85)}
+.itm.sel{outline:2px dashed var(--acid);outline-offset:3px}
+.edit .itm{cursor:pointer}
+.tilehint{position:absolute;width:0;height:0;pointer-events:none}
+/* shelf items sit smaller, on the wall */
+.shitm{position:absolute;transform:translate(-50%,-100%);line-height:1;user-select:none;-webkit-user-select:none;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
+.shitm .g{display:block;font-size:21px;transform:translateY(calc(var(--mb,0)*-2px))}
+/* now-playing plaque on the wall */
+#npline{position:absolute;font-family:var(--px);font-size:7px;color:hsl(var(--mh,75),95%,70%);
+  letter-spacing:1px;text-shadow:0 0 8px hsla(var(--mh,75),95%,55%,.6);white-space:nowrap;overflow:hidden;
+  transform:translateX(-50%);text-align:center;max-width:200px;text-overflow:ellipsis}
+
+/* ---------- selected-item popup ---------- */
+#itmpop{position:absolute;z-index:60;display:none;gap:6px;background:#0b0b0d;border:1px solid var(--border);
+  padding:6px;transform:translate(-50%,-130%)}
+#itmpop button{font-family:var(--px);font-size:8px;padding:8px 9px;background:transparent;border:1px solid var(--acid);
+  color:var(--acid);cursor:pointer}
+#itmpop button.rm{color:var(--red);border-color:#3a1414}
+#itmpop.open{display:flex}
+
+/* ---------- item drawer (owner edit) ---------- */
+#drawer{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.92);padding:12px;display:none}
+#drawer.open{display:block}
+#drawer .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px;
+  display:flex;justify-content:space-between;align-items:center}
+#drawer .h .cnt{color:var(--dim);font-size:8px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.chip{flex:none;width:64px;border:1px solid var(--border);background:#0a0a0c;padding:8px 4px 6px;text-align:center;cursor:pointer}
+.chip:hover{border-color:#3a3a3a}
+.chip.sel{border-color:var(--acid);box-shadow:0 0 12px rgba(182,255,0,.35)}
+.chip .ce{font-size:24px;line-height:1.2}
+.chip .cn{font-family:var(--px);font-size:5.5px;color:var(--dim);margin-top:5px;line-height:1.5;letter-spacing:.5px}
+.chip.rare .cn{color:var(--gold)}
+.chip.rare{border-color:#4a3a12}
+.drawhint{color:var(--dim);font-size:15px;margin-top:8px}
+
+/* ---------- boxes (guestbook / share / info) ---------- */
+.box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:14px 16px;text-align:left}
+.box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
+.cnote{color:var(--dim);font-size:16px;line-height:1.45}
+.gnote{display:flex;gap:9px;align-items:flex-start;border:1px solid #232323;border-left:3px solid hsla(var(--hue),60%,50%,.8);
+  background:#0b0b0d;padding:8px 10px;margin-bottom:8px}
+.gnote .who{font-family:var(--px);font-size:7px;color:hsl(var(--hue),95%,70%);letter-spacing:1px}
+.gnote .when{color:#555;font-size:12px;margin-left:6px}
+.gnote .m{color:#c9c9c9;font-size:17px;line-height:1.35;margin-top:4px;word-break:break-word}
+.gnote .gx{margin-left:auto;flex:none;color:var(--red);cursor:pointer;font-family:var(--px);font-size:9px;padding:4px 6px;
+  border:1px solid #3a1414;display:none}
+.gnote .gx.on{display:block}
+.gwrite{display:flex;gap:8px;margin-top:10px}
+.gwrite input{flex:1;background:#050505;border:1px solid var(--border);color:var(--acid);
+  font-family:var(--vt);font-size:17px;padding:10px;min-width:0}
+.gwrite input:focus{outline:none;border-color:var(--acid)}
+.gwrite button{font-family:var(--px);font-size:8px;padding:0 13px;background:var(--acid);color:#000;border:0;cursor:pointer}
+.sharebar{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.sharebar input{flex:1;min-width:150px;background:#050505;border:1px solid var(--border);color:var(--acid);
+  font-family:var(--vt);font-size:16px;padding:10px}
+
+/* ---------- onboarding: nickname + pick 1 of 3 starter rooms ---------- */
+.ob{width:100%;text-align:center}
+.ob .bigh{font-family:var(--px);font-size:clamp(11px,3.4vw,14px);color:var(--acid);letter-spacing:2px;line-height:1.7;margin:8px 0 4px}
+.nick{display:flex;flex-direction:column;gap:9px;max-width:380px;margin:12px auto 0}
+.nick input{background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--px);
+  font-size:13px;padding:13px;text-align:center;letter-spacing:2px;text-transform:lowercase}
+.nick input:focus{outline:none;border-color:var(--acid)}
+.nick .cbtn{font-family:var(--px);font-size:10px;padding:14px;background:var(--acid);color:#000;border:0;cursor:pointer}
+.nick .cbtn:disabled{opacity:.5}
+.picks{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+@media(min-width:560px){.picks{grid-template-columns:repeat(3,1fr)}}
+.pick{border:2px solid var(--border);background:#0a0a0c;padding:14px 10px 12px;text-align:center;cursor:pointer;
+  font-family:var(--vt);color:var(--ink);transition:.18s;display:flex;flex-direction:column;align-items:center}
+.pick:hover{transform:translateY(-3px);outline:none}
+.pick:disabled{opacity:.4;cursor:default;transform:none}
+.pick svg{width:120px;height:84px;margin-bottom:6px}
+.pick .pn{font-family:var(--px);font-size:9px;line-height:1.6;margin-bottom:6px}
+.pick .pd{color:#b0b0b0;font-size:14px;line-height:1.35;flex:1;margin-bottom:8px}
+.pick .pt{font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:2px;border-top:1px solid var(--border);
+  padding-top:8px;width:100%}
+.pick:hover .pt{color:var(--acid)}
+.msg{color:var(--dim);font-size:16px;margin-top:10px;min-height:20px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--acid);
+  color:var(--acid);font-family:var(--px);font-size:9px;padding:10px 16px;z-index:9500;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+</style>
+</head>
+<body>
+<div class="bgglow"></div>
+<header>
+  <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <span>ROOM.SYS</span>
+</header>
+
+<main id="main">
+  <div class="titlebar crtin" id="titlebar" style="display:none">
+    <div class="rn" id="roomname">—</div>
+    <div class="tbtns" id="tbtns"></div>
+    <div class="sub" id="roomsub"></div>
+  </div>
+
+  <div id="stagewrap" class="crtin" style="display:none">
+    <div id="stage">
+      <div id="roomsvg"></div>
+      <div id="itemlayer"></div>
+      <div id="npline"></div>
+      <div id="itmpop"><button id="poprot">↻ TURN</button><button id="poprm" class="rm">✕ REMOVE</button></div>
+    </div>
+  </div>
+
+  <div id="drawer" class="crtin">
+    <div class="h"><span>// FURNITURE_</span><span class="cnt" id="itmcnt"></span></div>
+    <div class="chips" id="chips"></div>
+    <div class="drawhint" id="drawhint">tap an item, then tap a floor tile to place it. tap a placed item to turn or remove it.</div>
+  </div>
+
+  <div class="box crtin" id="sharebox" style="display:none">
+    <div class="h">// SHARE MY ROOM_</div>
+    <div class="sharebar"><input id="sharelink" readonly value=""><button class="tb solid" id="sharecopy" style="border:0">COPY</button></div>
+    <div class="cnote" style="margin-top:8px">anyone with this link can visit — only you can move the furniture_</div>
+  </div>
+
+  <div class="box crtin" id="gbook" style="display:none">
+    <div class="h">// GUESTBOOK_</div>
+    <div id="glist"><div class="cnote">loading…</div></div>
+    <div id="gwritewrap"></div>
+  </div>
+
+  <div class="ob crtin" id="ob" style="display:none"></div>
+</main>
+
+<footer>© ONLYIBEE — THE FREQUENCY</footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
+  function param(n){var m=new RegExp("[?&]"+n+"=([^&]+)").exec(location.search);return m?decodeURIComponent(m[1]):"";}
+  function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0);}
+  async function rpc(fn,args){ if(!sb)return{status:'error',error:'offline'}; var r=await sb.rpc(fn,args); return r.error?{status:'error',error:r.error.message}:r.data; }
+
+  /* ================= THE ROOM KINDS — the randomized starter pool =================
+     Each kind is a whole vibe: palette, a shelf, a founding relic that will never be
+     obtainable again outside this kind (rare-item culture), and a starter layout. */
+  var KINDS={
+    garage:{n:"MIDNIGHT GARAGE",hue:190,fA:"#101820",fB:"#0c121a",wall:"#0e1a24",wall2:"#0a141c",
+      d:"concrete, chrome and one bare bulb — the band practices here.",
+      items:["moto","toolbox","tire"],relic:"relic-garage",
+      layout:[{i:"moto",x:5,y:1,f:1},{i:"boombox",x:1,y:2,f:0},{i:"toolbox",x:6,y:4,f:0}]},
+    attic:{n:"ACID ATTIC",hue:88,fA:"#141a0a",fB:"#0f1408",wall:"#161d0c",wall2:"#101507",
+      d:"dust, crates and green light through the roof window.",
+      items:["crate","mirror","violin"],relic:"relic-attic",
+      layout:[{i:"crate",x:1,y:1,f:0},{i:"lamp",x:6,y:1,f:0},{i:"books",x:2,y:4,f:1}]},
+    vhs:{n:"VHS DEN",hue:300,fA:"#180f1c",fB:"#120b16",wall:"#1c1022",wall2:"#150c1a",
+      d:"a shrine of static — tapes, tube screens, magenta glow.",
+      items:["vhs","crt","clapper"],relic:"relic-vhs",
+      layout:[{i:"crt",x:4,y:1,f:0},{i:"sofa",x:2,y:3,f:1},{i:"vhs",x:6,y:4,f:0}]},
+    moon:{n:"MOON LOBBY",hue:220,fA:"#0e1220",fB:"#0a0e1a",wall:"#101528",wall2:"#0b101e",
+      d:"quiet, blue, weightless — a waiting room for the night side.",
+      items:["telescope","planet","moonlamp"],relic:"relic-moon",
+      layout:[{i:"telescope",x:6,y:1,f:1},{i:"plant",x:1,y:2,f:0},{i:"moonlamp",x:3,y:4,f:0}]},
+    cellar:{n:"TAPE CELLAR",hue:40,fA:"#1a140a",fB:"#141008",wall:"#1e180c",wall2:"#171208",
+      d:"warm dust and analog gold — everything down here still spins.",
+      items:["barrel","oldradio","drum"],relic:"relic-cellar",
+      layout:[{i:"barrel",x:1,y:1,f:0},{i:"oldradio",x:5,y:2,f:1},{i:"drum",x:3,y:4,f:0}]},
+    green:{n:"NEON GREENHOUSE",hue:130,fA:"#0a180e",fB:"#08120b",wall:"#0c1e12",wall2:"#09160d",
+      d:"plants that grow to the bass — a garden wired to the radio.",
+      items:["cactus","fern","mushroom"],relic:"relic-green",
+      layout:[{i:"fern",x:1,y:1,f:0},{i:"cactus",x:6,y:2,f:0},{i:"mushroom",x:2,y:4,f:1}]}
+  };
+  /* the furniture catalog — everyone gets BASICS; your kind adds its exclusives + relic */
+  var ITEMS={
+    sofa:{e:"🛋️",n:"SOFA"},chair:{e:"🪑",n:"CHAIR"},plant:{e:"🪴",n:"PLANT"},lamp:{e:"💡",n:"BULB"},
+    tv:{e:"📺",n:"TV"},boombox:{e:"📻",n:"BOOMBOX"},vinyl:{e:"💿",n:"RECORD"},guitar:{e:"🎸",n:"GUITAR"},
+    books:{e:"📚",n:"BOOKS"},cat:{e:"🐈‍⬛",n:"CAT"},mic:{e:"🎤",n:"MIC"},headset:{e:"🎧",n:"PHONES"},
+    candle:{e:"🕯️",n:"CANDLE"},arcade:{e:"🕹️",n:"ARCADE"},skate:{e:"🛹",n:"SKATE"},phone:{e:"☎️",n:"PHONE"},
+    moto:{e:"🏍️",n:"MOTO"},toolbox:{e:"🧰",n:"TOOLBOX"},tire:{e:"🛞",n:"TIRE"},
+    crate:{e:"📦",n:"CRATE"},mirror:{e:"🪞",n:"MIRROR"},violin:{e:"🎻",n:"VIOLIN"},
+    vhs:{e:"📼",n:"VHS"},crt:{e:"🖥️",n:"CRT"},clapper:{e:"🎬",n:"CLAPPER"},
+    telescope:{e:"🔭",n:"SCOPE"},planet:{e:"🪐",n:"PLANET"},moonlamp:{e:"🌙",n:"MOON LMP"},
+    barrel:{e:"🛢️",n:"BARREL"},oldradio:{e:"📟",n:"RADIO"},drum:{e:"🥁",n:"DRUM"},
+    cactus:{e:"🌵",n:"CACTUS"},fern:{e:"🌿",n:"FERN"},mushroom:{e:"🍄",n:"SHROOM"},
+    /* founding relics — shelf-born, one per room kind, never sold again */
+    "relic-garage":{e:"🔧",n:"FOUNDER WRENCH",rare:1},"relic-attic":{e:"🗝️",n:"ATTIC KEY",rare:1},
+    "relic-vhs":{e:"📹",n:"FIRST TAPE",rare:1},"relic-moon":{e:"🌑",n:"MOON STONE",rare:1},
+    "relic-cellar":{e:"🕰️",n:"CELLAR CLOCK",rare:1},"relic-green":{e:"🌱",n:"FIRST SEED",rare:1},
+    "press001":{e:"💿",n:"PRESSING 001",rare:1}
+  };
+  var BASICS=["sofa","chair","plant","lamp","tv","boombox","vinyl","guitar","books","cat","mic","headset","candle","arcade","skate","phone"];
+  var MAXITEMS=40;
+
+  /* ================= iso projection ================= */
+  var GX=8,GY=6,TW=64,TH=32,WH=88;                 // grid, tile size, wall height
+  var W=(GX+GY)*TW/2, H=WH+(GX+GY)*TH/2+30, OX=W/2, OY=WH+6;
+  function px(x,y){return OX+(x-y)*TW/2;}
+  function py(x,y){return OY+(x+y)*TH/2;}
+  function unproject(mx,my){
+    var a=(mx-OX)/(TW/2), b=(my-OY-TH/2)/(TH/2);   // -TH/2: aim at tile centers
+    return {x:Math.round((a+b)/2), y:Math.round((b-a)/2)};
+  }
+
+  /* the room shell drawn as one inline SVG: two walls, a window, the shelf, the floor grid */
+  function drawRoom(kind){
+    var K=KINDS[kind]||KINDS.attic;
+    document.documentElement.style.setProperty("--hue",K.hue);
+    var s='<svg id="rsvg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+    /* left wall (along the y axis edge) + right wall (along the x axis edge) */
+    s+='<polygon points="'+px(0,0)+','+(py(0,0)-WH)+' '+px(0,GY)+','+(py(0,GY)-WH)+' '+px(0,GY)+','+py(0,GY)+' '+px(0,0)+','+py(0,0)+'" fill="'+K.wall+'" stroke="#000" stroke-width="1"/>';
+    s+='<polygon points="'+px(0,0)+','+(py(0,0)-WH)+' '+px(GX,0)+','+(py(GX,0)-WH)+' '+px(GX,0)+','+py(GX,0)+' '+px(0,0)+','+py(0,0)+'" fill="'+K.wall2+'" stroke="#000" stroke-width="1"/>';
+    /* baseboard glow lines where walls meet floor */
+    s+='<line x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(0,GY)+'" y2="'+py(0,GY)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6" opacity=".6"/>';
+    s+='<line x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(GX,0)+'" y2="'+py(GX,0)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6" opacity=".6"/>';
+    /* the window on the left wall — the sky lives in the song's hue (CSS var --mh) */
+    var wx1=px(0,1.2),wy1=py(0,1.2)-WH+16,wx2=px(0,3.4),wy2=py(0,3.4)-WH+16;
+    s+='<polygon points="'+wx1+','+wy1+' '+wx2+','+wy2+' '+wx2+','+(wy2+34)+' '+wx1+','+(wy1+34)+'" fill="hsl(var(--mh,'+K.hue+'),70%,22%)" stroke="hsl(var(--mh,'+K.hue+'),95%,60%)" stroke-width="1.5"><animate attributeName="opacity" values="1;.85;1" dur="4s" repeatCount="indefinite"/></polygon>';
+    s+='<circle cx="'+((wx1+wx2)/2)+'" cy="'+((wy1+wy2)/2+12)+'" r="4" fill="hsl(var(--mh,'+K.hue+'),95%,75%)" opacity=".9"/>';
+    /* the SHELF on the right wall — every starter room has one */
+    var sx1=px(2.2,0),sy1=py(2.2,0)-WH+46,sx2=px(6.4,0),sy2=py(6.4,0)-WH+46;
+    s+='<polygon points="'+sx1+','+sy1+' '+sx2+','+sy2+' '+(sx2)+','+(sy2+6)+' '+(sx1)+','+(sy1+6)+'" fill="#241c10" stroke="hsl('+K.hue+',60%,45%)" stroke-width="1"/>';
+    /* floor tiles */
+    for(var y=0;y<GY;y++)for(var x=0;x<GX;x++){
+      var cx=px(x,y),cy=py(x,y),f=((x+y)%2===0)?K.fA:K.fB;
+      s+='<polygon class="tile" data-x="'+x+'" data-y="'+y+'" points="'
+        +cx+','+cy+' '+(cx+TW/2)+','+(cy+TH/2)+' '+cx+','+(cy+TH)+' '+(cx-TW/2)+','+(cy+TH/2)
+        +'" fill="'+f+'" stroke="hsla('+K.hue+',80%,55%,calc(.12 + var(--mb,0)*.4))" stroke-width="1"/>';
+    }
+    s+='</svg>';
+    $("roomsvg").innerHTML=s;
+    /* now-playing plaque position: centered on the right wall, under the shelf */
+    var np=$("npline"); np.style.left=((sx1+sx2)/2)+"px"; np.style.top=(((sy1+sy2)/2)+26)+"px";
+    return {shelf:{x1:sx1,y1:sy1,x2:sx2,y2:sy2}};
+  }
+
+  /* ================= state ================= */
+  var visiting=(param("u")||"").toLowerCase().trim();
+  var ME=null, MYPROF=null;                    // session, my profile
+  var ROOM=null, OWNERNAME="", ISMINE=false, DIRTY=false;
+  var geom=null, selTileItem=null, selChip=null;
+
+  function starterRoom(kind){
+    var K=KINDS[kind];
+    return {v:1,k:kind,tiles:JSON.parse(JSON.stringify(K.layout)),shelf:[K.relic,"press001"]};
+  }
+  function myItems(){                          // what the owner may place
+    var K=KINDS[(ROOM&&ROOM.k)||"attic"];
+    return BASICS.concat(K?K.items:[]);
+  }
+
+  /* ================= render the placed items ================= */
+  function renderItems(){
+    var lay=$("itemlayer"), html="";
+    (ROOM.tiles||[]).forEach(function(t,idx){
+      var d=ITEMS[t.i]; if(!d)return;
+      var flip=(t.f%2===1)?-1:1;
+      html+='<div class="itm f'+(t.f||0)+'" data-idx="'+idx+'" style="left:'+px(t.x,t.y)+'px;top:'+(py(t.x,t.y)+TH/2+10)+'px;z-index:'+(10+t.x+t.y)+';--fx:'+flip+'">'
+        +'<span class="g">'+d.e+'</span></div>';
+    });
+    /* shelf items along the shelf plank */
+    var sh=(ROOM.shelf||[]).slice(0,5);
+    if(geom&&sh.length){
+      sh.forEach(function(id,i){
+        var d=ITEMS[id]; if(!d)return;
+        var f=(i+1)/(sh.length+1);
+        var sx=geom.shelf.x1+(geom.shelf.x2-geom.shelf.x1)*f, sy=geom.shelf.y1+(geom.shelf.y2-geom.shelf.y1)*f;
+        html+='<div class="shitm" title="'+e2(d.n)+'" style="left:'+sx+'px;top:'+sy+'px;z-index:5"><span class="g">'+d.e+'</span></div>';
+      });
+    }
+    lay.innerHTML=html;
+    $("itmcnt").textContent=(ROOM.tiles||[]).length+" / "+MAXITEMS+" placed";
+    if(ISMINE){
+      Array.prototype.forEach.call(lay.querySelectorAll(".itm"),function(el){
+        el.onclick=function(ev){ ev.stopPropagation(); selectItem(+el.getAttribute("data-idx"), el); };
+      });
+    }
+  }
+
+  /* fit the fixed-size stage into the panel width */
+  function fitStage(){
+    var wrap=$("stagewrap"), st=$("stage");
+    var sc=Math.min(1,(wrap.clientWidth-8)/W);
+    st.style.width=W+"px"; st.style.height=(H*sc)+"px";
+    st.style.transform="scale("+sc+")";
+    st.dataset.sc=sc;
+  }
+  window.addEventListener("resize",fitStage);
+
+  /* ================= owner editing ================= */
+  function selectItem(idx,el){
+    selTileItem=idx;
+    Array.prototype.forEach.call(document.querySelectorAll(".itm"),function(x){x.classList.remove("sel");});
+    el.classList.add("sel");
+    var pop=$("itmpop"); pop.style.left=el.style.left; pop.style.top=el.style.top; pop.classList.add("open");
+  }
+  function unselect(){ selTileItem=null; $("itmpop").classList.remove("open");
+    Array.prototype.forEach.call(document.querySelectorAll(".itm"),function(x){x.classList.remove("sel");}); }
+  $("poprot").onclick=function(ev){ ev.stopPropagation();
+    if(selTileItem==null)return; var t=ROOM.tiles[selTileItem]; t.f=((t.f||0)+1)%4;
+    markDirty(); renderItems(); unselect(); };
+  $("poprm").onclick=function(ev){ ev.stopPropagation();
+    if(selTileItem==null)return; ROOM.tiles.splice(selTileItem,1);
+    markDirty(); renderItems(); unselect(); };
+
+  function stageClick(ev){
+    if(!ISMINE)return;
+    unselect();
+    if(!selChip)return;
+    var st=$("stage"), r=st.getBoundingClientRect(), sc=+st.dataset.sc||1;
+    var mx=(ev.clientX-r.left)/sc, my=(ev.clientY-r.top)/sc;
+    var t=unproject(mx,my);
+    if(t.x<0||t.x>=GX||t.y<0||t.y>=GY)return;
+    if((ROOM.tiles||[]).length>=MAXITEMS){toast("ROOM FULL_");return;}
+    for(var i=0;i<ROOM.tiles.length;i++)if(ROOM.tiles[i].x===t.x&&ROOM.tiles[i].y===t.y){toast("TILE TAKEN_");return;}
+    ROOM.tiles.push({i:selChip,x:t.x,y:t.y,f:0});
+    markDirty(); renderItems();
+  }
+  function markDirty(){ DIRTY=true; var b=$("savebtn"); if(b){b.disabled=false;b.textContent="▣ SAVE ROOM";} }
+
+  function renderDrawer(){
+    var ids=myItems(), K=KINDS[ROOM.k]||KINDS.attic;
+    $("chips").innerHTML=ids.map(function(id){
+      var d=ITEMS[id], ex=(K.items.indexOf(id)>=0);
+      return '<div class="chip'+(ex?' rare':'')+'" data-id="'+id+'"><div class="ce">'+d.e+'</div><div class="cn">'+e2(d.n)+(ex?'<br>ROOM EXCL.':'')+'</div></div>';
+    }).join('');
+    Array.prototype.forEach.call($("chips").querySelectorAll(".chip"),function(c){
+      c.onclick=function(){
+        var id=c.getAttribute("data-id");
+        if(selChip===id){selChip=null;c.classList.remove("sel");return;}
+        selChip=id;
+        Array.prototype.forEach.call($("chips").querySelectorAll(".chip"),function(x){x.classList.remove("sel");});
+        c.classList.add("sel");
+      };
+    });
+    $("drawer").classList.add("open");
+  }
+
+  async function saveRoom(){
+    var b=$("savebtn"); b.disabled=true; b.textContent="SAVING…";
+    var r=await rpc('save_room',{r:ROOM});
+    if(r&&r.status==='ok'){ DIRTY=false; b.textContent="✓ SAVED"; toast("ROOM SAVED_"); }
+    else { b.disabled=false; b.textContent="▣ SAVE ROOM"; toast("✕ COULD NOT SAVE"); }
+  }
+
+  /* ================= guestbook ================= */
+  async function loadGuestbook(name){
+    $("gbook").style.display="";
+    var notes=await rpc('get_guestbook',{name:name});
+    if(!Array.isArray(notes)){ $("glist").innerHTML='<div class="cnote">guestbook offline_</div>'; return; }
+    $("glist").innerHTML = notes.length ? notes.map(function(g){
+      var when=new Date(g.at).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      return '<div class="gnote" data-id="'+g.id+'"><div style="flex:1;min-width:0">'
+        +'<span class="who">'+e2(g.who).toUpperCase()+'</span><span class="when">'+when+'</span>'
+        +'<div class="m">'+e2(g.msg)+'</div></div>'
+        +'<div class="gx'+(ISMINE?' on':'')+'" title="remove">✕</div></div>';
+    }).join('') : '<div class="cnote">no notes yet — the ink is still fresh_</div>';
+    Array.prototype.forEach.call($("glist").querySelectorAll(".gx.on"),function(x){
+      x.onclick=async function(){
+        var id=+x.parentNode.getAttribute("data-id");
+        var r=await rpc('erase_note',{note_id:id});
+        if(r&&r.status==='ok'){ x.parentNode.remove(); }
+      };
+    });
+    /* the write bar: signed-in visitors (and the owner) can sign */
+    var ww=$("gwritewrap");
+    if(ME){
+      ww.innerHTML='<div class="gwrite"><input id="gmsg" maxlength="140" placeholder="leave a note (140 max)_"><button id="gsend">SIGN</button></div>';
+      $("gsend").onclick=async function(){
+        var m=($("gmsg").value||'').trim(); if(!m)return;
+        $("gsend").disabled=true;
+        var r=await rpc('sign_guestbook',{name:name,note:m});
+        $("gsend").disabled=false;
+        if(r&&r.status==='ok'){ $("gmsg").value=''; toast("SIGNED_"); loadGuestbook(name); }
+        else if(r&&r.status==='slow_down') toast("EASY — 5 NOTES A DAY_");
+        else toast("✕ COULD NOT SIGN");
+      };
+      $("gmsg").addEventListener("keydown",function(e){ if(e.key==="Enter")$("gsend").click(); });
+    } else {
+      ww.innerHTML='<div class="cnote" style="margin-top:8px"><a href="../member/?login=1" style="color:var(--acid)">join the frequency</a> to sign the guestbook_</div>';
+    }
+  }
+
+  /* ================= views ================= */
+  function showRoom(prof,mine){
+    OWNERNAME=prof.username; ROOM=prof.room||{}; ISMINE=mine;
+    if(!ROOM.k)ROOM={v:1,k:"attic",tiles:[],shelf:[]};
+    var K=KINDS[ROOM.k]||KINDS.attic;
+    document.title=(mine?"MY ROOM":OWNERNAME.toUpperCase()+"'S ROOM")+" — ONLY IBEE";
+    $("titlebar").style.display="";
+    $("roomname").textContent=(mine?"MY ROOM · ":"")+OWNERNAME.toUpperCase()+" — "+K.n;
+    var since=prof.since?new Date(prof.since).toLocaleDateString(undefined,{year:'numeric',month:'short'}):"";
+    $("roomsub").textContent=(mine?"your room on the frequency":"you are visiting — look, don't touch")+(since?" · est. "+since:"");
+    var tb=$("tbtns"); tb.innerHTML="";
+    if(mine){
+      tb.innerHTML='<button class="tb solid" id="savebtn" disabled>✓ SAVED</button>'
+        +'<a class="tb" href="?u='+encodeURIComponent(OWNERNAME)+'">👁 VIEW AS VISITOR</a>';
+      $("savebtn").onclick=saveRoom;
+      var link=location.origin+"/room/?u="+encodeURIComponent(OWNERNAME);
+      $("sharebox").style.display=""; $("sharelink").value=link;
+      $("sharecopy").onclick=function(){
+        if(navigator.share){navigator.share({title:"my room on ONLY IBEE",url:link}).catch(function(){});}
+        try{navigator.clipboard.writeText(link);toast("LINK COPIED_");}catch(e){}
+      };
+    } else {
+      tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY ROOM":"✦ GET YOUR OWN ROOM")+'</a>';
+    }
+    $("stagewrap").style.display="";
+    geom=drawRoom(ROOM.k);
+    fitStage();
+    renderItems();
+    if(mine){ document.body.classList.add("edit"); renderDrawer(); }
+    $("stage").onclick=stageClick;
+    loadGuestbook(OWNERNAME);
+  }
+
+  /* ---------- onboarding: nickname + pick 1 of 3 randomized starter rooms ---------- */
+  function miniRoomSVG(K){
+    var s='<svg viewBox="0 0 120 84" xmlns="http://www.w3.org/2000/svg">';
+    s+='<polygon points="60,6 12,30 12,54 60,30" fill="'+K.wall+'"/>';
+    s+='<polygon points="60,6 108,30 108,54 60,30" fill="'+K.wall2+'"/>';
+    for(var y=0;y<3;y++)for(var x=0;x<3;x++){
+      var cx=60+(x-y)*16, cy=30+(x+y)*8;
+      s+='<polygon points="'+cx+','+cy+' '+(cx+16)+','+(cy+8)+' '+cx+','+(cy+16)+' '+(cx-16)+','+(cy+8)+'" fill="'+(((x+y)%2===0)?K.fA:K.fB)+'" stroke="hsl('+K.hue+',80%,50%)" stroke-width=".6" stroke-opacity=".5"/>';
+    }
+    s+='<polygon points="30,18 44,25 44,34 30,27" fill="hsl('+K.hue+',70%,25%)" stroke="hsl('+K.hue+',95%,60%)" stroke-width="1"/>';
+    return s+'</svg>';
+  }
+  function onboard(step,keep){
+    var ob=$("ob"); ob.style.display="";
+    if(step==='nick'){
+      ob.innerHTML='<div class="bigh">CLAIM YOUR NAME_</div>'
+        +'<div class="cnote">your unique id on the frequency — it names your room:<br>onlyibee.com/room/<b style="color:var(--acid)">yourname</b> · 3–16 chars · a-z 0-9 _ · permanent</div>'
+        +'<div class="nick"><input id="nick" maxlength="16" placeholder="pick_your_name" autocapitalize="off" autocomplete="off" spellcheck="false">'
+        +'<button class="cbtn" id="nickgo">▶ CHECK &amp; CONTINUE</button></div><div class="msg" id="nmsg"></div>';
+      var inp=$("nick"); if(keep)inp.value=keep;
+      inp.addEventListener("input",function(){ this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,''); });
+      inp.addEventListener("keydown",function(e){ if(e.key==="Enter")$("nickgo").click(); });
+      $("nickgo").onclick=async function(){
+        var nm=(inp.value||'').trim();
+        if(!/^[a-z0-9_]{3,16}$/.test(nm)){$("nmsg").textContent='3–16 characters, a-z 0-9 _ only_';return;}
+        $("nickgo").disabled=true; $("nmsg").textContent='checking…';
+        var q=await sb.from('profiles').select('username').eq('username',nm).limit(1);
+        if(q.error){$("nmsg").textContent='✕ backend not ready — run member/room.sql in Supabase_';$("nickgo").disabled=false;return;}
+        if(q.data&&q.data.length){$("nmsg").textContent='✕ "'+nm+'" is taken — try another_';$("nickgo").disabled=false;return;}
+        onboard('pick',nm);
+      };
+    }
+    if(step==='pick'){
+      var nm=keep;
+      /* 3 of the 6 kinds, randomized per account — every new member sees a different shelf of doors */
+      var all=Object.keys(KINDS), seed=hash((ME&&ME.user.id)||String(Date.now())), offer=[];
+      var pool=all.slice();
+      for(var i=0;i<3;i++){ var j=(seed>>> (i*5))%pool.length; offer.push(pool.splice(j,1)[0]); }
+      ob.innerHTML='<div class="bigh">CHOOSE YOUR ROOM_</div>'
+        +'<div class="cnote">hey <b style="color:var(--acid)">'+e2(nm)+'</b> — three doors opened for you (every member gets a different three). '
+        +'each room comes with a shelf and a founding relic that will never be sold_</div>'
+        +'<div class="picks">'+offer.map(function(k){var K=KINDS[k];
+          return '<button class="pick" data-k="'+k+'" style="border-color:hsla('+K.hue+',60%,45%,.6)">'+miniRoomSVG(K)
+            +'<div class="pn" style="color:hsl('+K.hue+',95%,70%)">'+e2(K.n)+'</div>'
+            +'<div class="pd">'+e2(K.d)+'</div>'
+            +'<div class="pt">▶ MOVE IN</div></button>';}).join('')
+        +'</div><div class="msg" id="pmsg"></div>'
+        +'<div class="cnote"><a href="#" id="backnick" style="color:var(--dim)">← change my name</a></div>';
+      $("backnick").onclick=function(e){e.preventDefault();onboard('nick',nm);};
+      Array.prototype.forEach.call(ob.querySelectorAll('.pick'),function(b){
+        b.onclick=async function(){
+          Array.prototype.forEach.call(ob.querySelectorAll('.pick'),function(x){x.disabled=true;});
+          $("pmsg").textContent='opening the door…';
+          var kind=b.getAttribute('data-k');
+          var r=await rpc('claim_profile',{name:nm,room0:starterRoom(kind)});
+          if(r&&r.status==='ok'){ toast("WELCOME HOME_"); ob.style.display="none";
+            showRoom({username:r.username,room:starterRoom(kind),since:new Date().toISOString()},true); }
+          else if(r&&r.status==='taken'){ onboard('nick',nm); $("nmsg")&&($("nmsg").textContent='✕ that name just got taken_'); }
+          else if(r&&r.status==='have'){ location.href='./'; }
+          else { $("pmsg").textContent='✕ could not move in ('+((r&&(r.error||r.status))||'offline')+')';
+            Array.prototype.forEach.call(ob.querySelectorAll('.pick'),function(x){x.disabled=false;}); }
+        };
+      });
+    }
+  }
+
+  function showJoin(){
+    var ob=$("ob"); ob.style.display="";
+    ob.innerHTML='<div class="bigh">A ROOM OF YOUR OWN_</div>'
+      +'<div class="cnote" style="max-width:420px;margin:0 auto">every member gets a room — pick your name, choose your door, place your things, '
+      +'and share it at onlyibee.com/room/<b style="color:var(--acid)">you</b>. visitors can sign your guestbook_</div>'
+      +'<div class="nick"><a class="cbtn" style="text-decoration:none" href="../member/?login=1">＋ JOIN — FREE, 2 SEC</a></div>';
+  }
+
+  /* ================= music: the room breathes with the radio ================= */
+  setInterval(function(){
+    var b=0,h=null,r=window.IBEERADIO,nm="";
+    try{ if(r&&r.playing()){ b=r.beat()||0; h=75; var s=r.song&&r.song(); if(s){ if(s.hue!=null)h=s.hue; nm=s.n||""; } } }catch(e){}
+    var st=$("stage");
+    st.style.setProperty("--mb",b.toFixed(3));
+    /* radio silent → leave --mh unset so the window sky falls back to the room kind's hue */
+    if(h!=null) st.style.setProperty("--mh",h); else st.style.removeProperty("--mh");
+    $("npline").textContent=nm?("♪ "+nm):"";
+  },100);
+
+  /* ================= boot ================= */
+  async function boot(){
+    /* ?demo=<kind>[&edit=1] — preview any starter room with no account (also the dev harness) */
+    var demo=param("demo");
+    if(demo){ var dk=KINDS[demo]?demo:"vhs";
+      showRoom({username:"demo",room:starterRoom(dk),since:new Date().toISOString()},!!param("edit"));
+      return; }
+    if(!sb){ showJoin(); return; }
+    ME=(await sb.auth.getSession()).data.session;
+    if(visiting){
+      var prof=await rpc('get_room',{name:visiting});
+      if(prof&&prof.username){
+        /* visiting your own link → still read-only, with a MY ROOM button */
+        var mineToo=false;
+        if(ME){ MYPROF=await rpc('my_profile'); mineToo=!!(MYPROF&&MYPROF.username===prof.username); }
+        showRoom(prof,false);
+        return;
+      }
+      $("titlebar").style.display="";
+      $("roomname").textContent="ROOM NOT FOUND_";
+      $("roomsub").textContent='nobody lives at "'+visiting+'" — the hallway is empty.';
+      $("tbtns").innerHTML='<a class="tb" href="./">✦ GET YOUR OWN ROOM</a>';
+      return;
+    }
+    if(!ME){ showJoin(); return; }
+    MYPROF=await rpc('my_profile');
+    if(MYPROF&&MYPROF.username){ showRoom(MYPROF,true); }
+    else onboard('nick');
+  }
+  boot();
+  if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') location.reload(); });
+
+  /* warn before leaving with unsaved furniture */
+  window.addEventListener("beforeunload",function(e){ if(DIRTY){e.preventDefault();e.returnValue="";} });
+})();
+</script>
+<script src="../assets/player.js?v=17"></script>
+</body>
+</html>

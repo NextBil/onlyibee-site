@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>404 — ONLY IBEE</title>
+<script>
+/* GitHub Pages serves this file for any unknown path.
+   Pretty room links — onlyibee.com/room/<name> — land here and get
+   rewritten to the real page: /room/?u=<name>. Everything else gets
+   the themed 404 below. */
+(function(){
+  var m=location.pathname.match(/^\/room\/([A-Za-z0-9_]{3,16})\/?$/);
+  if(m){ location.replace("/room/?u="+encodeURIComponent(m[1].toLowerCase())); }
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070707;--acid:#b6ff00;--red:#ff2b2b;--dim:#7a7a7a;--border:#2a2a2a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:#e8e8e8;font-family:var(--vt);min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:24px}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+h1{font-family:var(--px);font-size:clamp(18px,6vw,34px);color:var(--red);text-shadow:0 0 18px rgba(255,43,43,.5)}
+p{color:var(--dim);font-size:20px}
+a{font-family:var(--px);font-size:10px;color:var(--acid);border:1px solid var(--acid);padding:14px 18px;text-decoration:none}
+a:active{transform:translateY(2px)}
+</style>
+</head>
+<body>
+<h1>404_</h1>
+<p>this signal doesn't exist — the static ate it.</p>
+<a href="/">▶ BACK TO THE CONSOLE</a>
+</body>
+</html>
