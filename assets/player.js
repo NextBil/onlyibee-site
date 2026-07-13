@@ -567,26 +567,51 @@
   seek.addEventListener("pointercancel", function(){ scrubbing = false; });
 
   /* ---------- panel ---------- */
+  /* ---------- panel ---------- */
   function openPanel(){ panel.classList.add("open"); }
   function togglePanel(){ panel.classList.toggle("open"); }
 
-  /* Unified pointerdown events + stopPropagation to prevent the double-fire bounce bug */
-  chip.addEventListener("pointerdown", function(e){
+  /* Bulletproof fix: Use standard click events and explicitly ignore the chip 
+     in the document listener to completely eliminate the bounce/double-fire glitch. */
+  chip.addEventListener("click", function(e){
     togglePanel();
-    e.stopPropagation();
   });
 
-  $("rp-close").addEventListener("pointerdown", function(e){
+  $("rp-close").addEventListener("click", function(e){
     panel.classList.remove("open");
-    e.stopPropagation();
   });
 
   /* tap the cover / title → open the browser (list) + focus search */
-  $("rp-nowtop").addEventListener("pointerdown", function(e){
+  $("rp-nowtop").addEventListener("click", function(e){
     render();
     openPanel();
     setTimeout(function(){ try{ $("rp-search").focus(); }catch(err){} }, 60);
-    e.stopPropagation();
+  });
+
+  /* search box */
+  $("rp-search").addEventListener("input", function(){ query = this.value.trim(); render(); });
+  
+  /* grid / list toggle */
+  $("rp-view").onclick = function(){
+    viewMode = (viewMode === "grid") ? "list" : "grid";
+    this.textContent = viewMode === "grid" ? "≡ LIST" : "▦ GRID";
+    this.classList.toggle("on", viewMode === "grid");
+    render();
+  };
+
+  /* click anywhere outside the box closes it — music keeps playing */
+  document.addEventListener("click", function(e){
+    // Only proceed if the panel is actually open
+    if(!panel.classList.contains("open")) return;
+    
+    // Do nothing if the click happened INSIDE the panel
+    if(panel.contains(e.target)) return;
+    
+    // Do nothing if the click happened ON the radio chip (this stops the bounce!)
+    if(chip.contains(e.target)) return;
+    
+    // Otherwise, the click was purely outside. Close the panel.
+    panel.classList.remove("open");
   });
 
   /* search box */
