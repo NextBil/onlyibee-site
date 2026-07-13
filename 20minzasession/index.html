@@ -60,13 +60,30 @@ h1{font-family:var(--px);font-size:clamp(15px,4.4vw,26px);letter-spacing:1px;col
 .spliff .ash{position:absolute;left:0;top:0;height:100%;width:0;border-radius:9px 2px 2px 9px;
   background:repeating-linear-gradient(90deg,#8f8f8f 0 3px,#6a6a6a 3px 6px),linear-gradient(180deg,#9a9a9a,#404040);
   box-shadow:inset 0 0 6px rgba(0,0,0,.5)}
-.spliff .ember{position:absolute;left:0;top:50%;transform:translate(-50%,-50%);width:15px;height:21px;border-radius:50%;z-index:3;
-  background:radial-gradient(circle at 50% 40%,#fff4c0,#ff9d2b 45%,#ff3b1a 82%);
-  box-shadow:0 0 calc(9px + var(--emb,0)*26px) rgba(255,110,30,.95),0 0 6px #ffcf5c}
-.spliff .smoke{position:absolute;left:0;bottom:15px;width:9px;height:9px;margin-left:-4px;border-radius:50%;
-  background:rgba(225,215,235,.3);filter:blur(3px);opacity:0}
-body.playing .spliff .smoke{animation:spliffsmoke 2.6s ease-out infinite}
-@keyframes spliffsmoke{0%{opacity:.55;transform:translateY(0) scale(.6)}100%{opacity:0;transform:translateY(-46px) scale(2.4)}}
+/* the lit cherry — bigger, hotter, flickers with the beat */
+.spliff .ember{position:absolute;left:0;top:50%;transform:translate(-50%,-50%);width:19px;height:24px;border-radius:50%;z-index:3;
+  background:radial-gradient(circle at 50% 38%,#fff7d2,#ff9d2b 42%,#ff3b1a 80%);
+  box-shadow:0 0 calc(12px + var(--emb,0)*34px) rgba(255,110,30,.98),0 0 8px #ffcf5c,0 0 3px #fff}
+body.playing .spliff .ember{animation:emberflick .18s steps(2) infinite}
+@keyframes emberflick{0%{filter:brightness(1)}100%{filter:brightness(1.22)}}
+/* base smoke stream — bigger + more visible than before */
+.spliff .stick{overflow:visible}
+.spliff .smoke{position:absolute;left:0;bottom:14px;width:16px;height:16px;margin-left:-8px;border-radius:50%;
+  background:radial-gradient(circle,rgba(235,228,246,.6),rgba(205,196,220,.25) 60%,transparent 74%);
+  filter:blur(3px);opacity:0;z-index:2}
+body.playing .spliff .smoke{animation:spliffsmoke 2.4s ease-out infinite}
+@keyframes spliffsmoke{0%{opacity:.7;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(22px,-64px) scale(2.8)}}
+/* extra rising smoke puffs (spawned in JS while playing) — makes the smoke read clearly */
+.puff{position:absolute;bottom:14px;width:14px;height:14px;margin-left:-7px;border-radius:50%;z-index:2;pointer-events:none;
+  background:radial-gradient(circle,rgba(238,231,248,.55),rgba(205,196,220,.2) 60%,transparent 74%);
+  filter:blur(2px);animation:puffrise 2.8s ease-out forwards}
+@keyframes puffrise{0%{opacity:.72;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(30px,-74px) scale(2.7)}}
+/* falling ash flakes — drop off the burning cherry */
+.ashbit{position:absolute;top:50%;width:4px;height:4px;margin-left:-2px;border-radius:1px;z-index:3;pointer-events:none;
+  background:linear-gradient(180deg,#cdcdcd,#565656);box-shadow:0 0 3px rgba(255,120,40,.55);
+  animation:ashfall linear forwards}
+@keyframes ashfall{0%{opacity:1;transform:translate(0,0) rotate(0)}
+  100%{opacity:0;transform:translate(var(--dx,0px),48px) rotate(220deg)}}
 
 .sec{margin-top:46px}
 .sh{font-family:var(--px);font-size:clamp(11px,3vw,16px);margin-bottom:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -182,8 +199,6 @@ body.playing #roomtag{opacity:.92}
   <canvas id="drive"></canvas>
   <div class="smoke s1"></div><div class="smoke s2"></div><div class="smoke s3"></div>
 </div>
-<div id="roomtag">▓ 20 MINUTES, ENGINE ON ▓<br>pull down the blinds — you're in the session now_</div>
-
 <header>
   <a href="../">ONLY<span class="r">IBEE</span> OS</a>
   <span>ZA.SYS</span>
@@ -202,17 +217,7 @@ body.playing #roomtag{opacity:.92}
     <div class="meta">2024 · TORONTO · ONE TAKE · 20 MINUTES · BY ONLY IBEE</div>
   </div>
 
-  <!-- videos — first -->
-  <div class="sec">
-    <div class="sh">THE <span class="m">VISUALS</span>_</div>
-    <div class="ssub">two moving pieces from the session_</div>
-    <div class="vids">
-      <div class="vid"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/MaCk7vngdrA" title="20MZS video 1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-      <div class="vid"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/f8bar-0NK10" title="20MZS video 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-    </div>
-  </div>
-
-  <!-- THE CASSETTE DECK — the spliff burns as it plays -->
+  <!-- THE CASSETTE DECK — the spliff burns as it plays (player first, then the 9 songs) -->
   <div class="sec">
     <div class="sh">THE <span class="m">TAPE DECK</span>_</div>
     <div class="ssub">spark it up — the spliff burns down as the session rolls_</div>
@@ -239,7 +244,24 @@ body.playing #roomtag{opacity:.92}
     </div>
   </div>
 
-  <!-- USER MANUAL (old notice, reborn) -->
+  <!-- 9 SONGS — right under the player -->
+  <div class="sec">
+    <div class="sh">THE <span class="p">9 SONGS</span>_</div>
+    <div class="ssub" id="tracksub">the session splits into 9 — dropping later with lyrics + stories. sealed for now_</div>
+    <div class="tracks" id="tracks"></div>
+  </div>
+
+  <!-- videos -->
+  <div class="sec">
+    <div class="sh">THE <span class="m">VISUALS</span>_</div>
+    <div class="ssub">two moving pieces from the session_</div>
+    <div class="vids">
+      <div class="vid"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/MaCk7vngdrA" title="20MZS video 1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="vid"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/f8bar-0NK10" title="20MZS video 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+    </div>
+  </div>
+
+  <!-- USER MANUAL (old notice, reborn) — data-driven (see MAN[] in the script / studio) -->
   <div class="sec">
     <div class="sh">20 MIN ZA SESSION <span class="m">USER MANUAL</span>_</div>
     <div class="ssub">roll up your spliffs, hop in the whip, pull down the blinds… here's what u can do during your 20 min session_</div>
@@ -247,13 +269,6 @@ body.playing #roomtag{opacity:.92}
       <div class="mh"><b>USER MANUAL</b><span>six ways to spend your twenty minutes_</span></div>
       <div class="mgrid" id="mgrid"></div>
     </div>
-  </div>
-
-  <!-- 9 SONGS -->
-  <div class="sec">
-    <div class="sh">THE <span class="p">9 SONGS</span>_</div>
-    <div class="ssub">the session splits into 9 — dropping later with lyrics + stories. sealed for now_</div>
-    <div class="tracks" id="tracks"></div>
   </div>
 
   <!-- 3D relics -->
@@ -286,7 +301,6 @@ body.playing #roomtag{opacity:.92}
   <div class="actions">
     <a class="btn claim" id="claimbtn" href="../member/inventory/">＋ ADD TO MY COLLECTION — FREE</a>
     <a class="btn" href="../?tag=20MZS">▶ ENTER THE GALAXY</a>
-    <a class="btn alt" href="../lyrics/">✎ LYRICS ENGINE</a>
   </div>
 </main>
 
@@ -316,34 +330,70 @@ body.playing #roomtag{opacity:.92}
     return '<div class="mcard"><div class="ic">'+m.ic+'</div><div class="t">'+m.t+'</div><div class="d">'+m.d+'</div></div>';
   }).join('');
 
-  /* ---------- 9 songs (sealed placeholders — real ones drop later) ---------- */
-  var tk=$("tracks"),th="";
-  for(var i=1;i<=9;i++){
-    th+='<div class="trk"><div class="n">SONG '+(i<10?"0":"")+i+'</div><div class="s">??????</div><div class="lk">SEALED</div></div>';
+  /* ---------- the 9 songs — DATA-DRIVEN (fed by IBEE STUDIO later) ----------
+     The session splits into 9. Those songs arrive from the song data: add them in
+     IBEE STUDIO as records with galaxy g:"mzs" (assets/songs-extra.js) and they
+     render here on their own — tapping one plays it on the radio, in sync. Until
+     the data is supplied, the slots stay sealed. No code edit needed to fill them. */
+  function mzsSongs(){
+    var out=[]; try{
+      var ex=window.IBEE_SONGS_EXTRA||(window.top&&window.top.IBEE_SONGS_EXTRA);
+      ((ex&&ex.songs)||[]).forEach(function(s){ if(s&&s.g==="mzs"&&s.f!=="20mzs.mp3") out.push(s); });
+    }catch(e){}
+    return out;
   }
-  tk.innerHTML=th;
+  function playSong(f,tries){ tries=tries||0; var r=RADIO();
+    if(!r){ if(tries<40) setTimeout(function(){ playSong(f,tries+1); },200); return; }
+    var ri=r.indexBySlug?r.indexBySlug(f):-1;
+    if(ri<0){ if(tries<40) setTimeout(function(){ playSong(f,tries+1); },250); return; }
+    if(r.current()===ri && r.playing()) r.control.pause(); else r.control.play(ri);
+  }
+  function renderTracks9(){
+    var tk=$("tracks"), songs=mzsSongs(), th="";
+    for(var i=0;i<9;i++){ var s=songs[i], n2=(i+1<10?"0":"")+(i+1);
+      if(s){ th+='<div class="trk live" data-f="'+(s.f||'')+'" style="cursor:pointer"><div class="n">SONG '+n2+'</div>'
+        +'<div class="s">'+(s.n||'—')+'</div><div class="lk" style="color:var(--za);border-color:var(--za)">▶ PLAY</div></div>'; }
+      else { th+='<div class="trk"><div class="n">SONG '+n2+'</div><div class="s">??????</div><div class="lk">SEALED</div></div>'; }
+    }
+    tk.innerHTML=th;
+    if(songs.length){ var sub=$("tracksub"); if(sub) sub.textContent="the session splits into 9 — tap one to play_"; }
+    Array.prototype.forEach.call(tk.querySelectorAll(".trk.live"),function(el){
+      el.onclick=function(){ playSong(el.getAttribute("data-f")); };
+    });
+  }
+  renderTracks9();
+  /* the studio records load async (songs-extra.js) — pick them up when they arrive */
+  setTimeout(renderTracks9,1500); setTimeout(renderTracks9,3500);
 
   /* =====================================================================
      THE TAPE DECK — the one 20-minute take. Playing it opens THE ROOM.
      Uses the site radio bridge so the radio steps aside (and vice-versa).
      ===================================================================== */
-  var deck=new Audio(); deck.preload="none";
-  var SRC=["../assets/audio/20mzs.mp3","../Only Ibee - 20MZS.mp3"], si=0;
-  deck.src=SRC[0];
-  deck.onerror=function(){ if(++si<SRC.length){ deck.src=SRC[si]; } };
-  function radioPause(){ try{ var R=window.IBEERADIO; if(R&&R.playing()) R.control.pause(); }catch(e){} }
+  /* ---- ONE RADIO, IN SYNC ----------------------------------------------------
+     The session lives on the site radio as the "20MZS" track (assets/audio/20mzs.mp3,
+     al:"mzs"). The deck no longer owns an <audio> element — SPARK THE SESSION DRIVES
+     the radio, so it plays here AND on the radio bar (the same stream) and keeps
+     rolling when you leave the room. A sync loop mirrors the radio back: arrive while
+     the session is already on air and the deck lights up + the night-drive opens by
+     itself. The spliff/road read the radio's audio at the playhead (background-safe). */
+  function RADIO(){ try{ return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null; }catch(e){ return null; } }
   function fmt(s){ if(!isFinite(s))return "--:--"; var m=Math.floor(s/60),ss=Math.floor(s%60); return m+":"+(ss<10?"0":"")+ss; }
+  function mzsIdx(){ var r=RADIO(); return (r&&r.indexBySlug)?r.indexBySlug("20mzs.mp3"):-1; }
+  function isMzsOn(){ var r=RADIO(); try{ return !!(r&&r.slug&&r.slug()==="20mzs.mp3"); }catch(e){ return false; } }
 
-  $("dplay").onclick=function(){
-    if(deck.paused){ radioPause(); deck.play().catch(function(){ toast("tap again to roll the tape_"); }); }
-    else deck.pause();
-  };
-  $("dback").onclick=function(){ deck.currentTime=Math.max(0,deck.currentTime-15); };
-  $("dfwd").onclick=function(){ if(deck.duration) deck.currentTime=Math.min(deck.duration,deck.currentTime+15); };
-  deck.addEventListener("play",function(){ radioPause(); $("dplay").textContent="❚❚ PAUSE"; startRoom(); });
-  deck.addEventListener("pause",function(){ $("dplay").textContent="► SPARK THE SESSION"; stopRoom(); });
-  deck.addEventListener("ended",function(){ $("dplay").textContent="► SPARK THE SESSION"; stopRoom(); });
-  deck.addEventListener("loadedmetadata",function(){ $("dtot").textContent=fmt(deck.duration); });
+  function playPauseDeck(tries){
+    tries=tries||0; var r=RADIO();
+    if(!r){ if(tries<40) setTimeout(function(){ playPauseDeck(tries+1); },200); else toast("tap again to roll the tape_"); return; }
+    if(isMzsOn() && r.playing()){ r.control.pause(); return; }
+    if(isMzsOn()){ r.control.play(); return; }
+    var ri=mzsIdx();
+    if(ri<0){ if(tries<40) setTimeout(function(){ playPauseDeck(tries+1); },250); return; }
+    r.control.play(ri);
+  }
+  $("dplay").onclick=function(){ playPauseDeck(); };
+  $("dback").onclick=function(){ if(!isMzsOn())return; var r=RADIO(); try{ r.audio.currentTime=Math.max(0,(r.audio.currentTime||0)-15); }catch(e){} };
+  $("dfwd").onclick=function(){ if(!isMzsOn())return; var r=RADIO(); try{ if(r.audio.duration) r.audio.currentTime=Math.min(r.audio.duration,(r.audio.currentTime||0)+15); }catch(e){} };
+
   /* the spliff burns down as the session rolls: ash grows, ember + smoke ride the burn line */
   var ash=$("ash"),ember=$("ember"),smk=$("smk");
   function setProgress(fr){
@@ -351,55 +401,107 @@ body.playing #roomtag{opacity:.92}
     ash.style.width=pct; ember.style.left=pct; smk.style.left=pct;
   }
   /* ---- badge: ride the WHOLE 20-minute mix → CERTIFIED STONER. Flagged in its
-     own localStorage key ("ibee_mzs_full") once you're past 92% (or it ends), so
-     badges.js can award it without racing its own state. ---- */
+     own localStorage key ("ibee_mzs_full") once you're past 92% (or it ends). ---- */
   function mzsCertify(){ try{ localStorage.setItem("ibee_mzs_full","1"); }catch(e){} }
-  deck.addEventListener("timeupdate",function(){
-    $("dcur").textContent=fmt(deck.currentTime);
-    if(deck.duration){
-      setProgress(deck.currentTime/deck.duration);
-      if(deck.duration>60 && deck.currentTime>=deck.duration*0.92) mzsCertify();
-    }
-  });
-  deck.addEventListener("ended",mzsCertify);
-  /* radio starts → the tape steps aside */
-  setInterval(function(){ try{ var R=window.IBEERADIO;
-    if(R&&R.playing()&&!deck.paused) deck.pause(); }catch(e){} },800);
-  /* draggable seek along the spliff */
+
+  /* draggable seek along the spliff → seek the radio (only while the session is on air) */
   var stick=$("stick"),scr=false;
-  function seekTo(e){ var r=stick.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-    var fr=Math.max(0,Math.min(1,x/r.width)); if(deck.duration) deck.currentTime=fr*deck.duration; setProgress(fr); }
+  function seekTo(e){ if(!isMzsOn())return; var r=RADIO(),rc=stick.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-rc.left;
+    var fr=Math.max(0,Math.min(1,x/rc.width)); try{ if(r.audio.duration) r.audio.currentTime=fr*r.audio.duration; }catch(e2){} setProgress(fr); }
   var spl=$("spliff");
   spl.addEventListener("pointerdown",function(e){ scr=true; try{spl.setPointerCapture(e.pointerId);}catch(x){} seekTo(e); });
   spl.addEventListener("pointermove",function(e){ if(scr) seekTo(e); });
   spl.addEventListener("pointerup",function(e){ scr=false; try{spl.releasePointerCapture(e.pointerId);}catch(x){} });
 
+  /* the sync loop: the radio is the single source of truth (4×/sec) */
+  function syncDeck(){
+    var r=RADIO(); if(!r)return;
+    var on=isMzsOn(), playing=false; try{ playing=!!r.playing(); }catch(e){}
+    var c=0,d=0; try{ c=r.audio.currentTime||0; d=r.audio.duration||0; }catch(e){}
+    if(on){
+      $("dtot").textContent=fmt(d||1200);
+      $("dcur").textContent=fmt(c);
+      if(d){ setProgress(c/d); if(d>60 && c>=d*0.92) mzsCertify(); }
+      $("dplay").textContent=playing?"❚❚ PAUSE":"► SPARK THE SESSION";
+      if(playing) startRoom(); else stopRoom();
+    } else {
+      $("dplay").textContent="► SPARK THE SESSION"; stopRoom();
+    }
+  }
+  setInterval(syncDeck,250); syncDeck();
+
   /* spokes for the reels */
   function spokes(el){ var h=""; for(var a=0;a<6;a++){ h+='<i style="transform:translate(-50%,-50%) rotate('+(a*60)+'deg)"></i>'; } el.innerHTML=h; }
   spokes($("sp1")); spokes($("sp2"));
+
+  /* ---- rising smoke puffs + falling ash flakes off the burning cherry ----
+     Only while the session rolls (body.playing). Both emit from the ember's
+     current burn position (ember.style.left), so they track the spliff as it
+     burns down. Elements self-remove when their animation ends. */
+  function emberLeft(){ return ember.style.left || "0%"; }
+  function spawnPuff(){ if(!body.classList.contains("playing"))return;
+    var p=document.createElement("span"); p.className="puff"; p.style.left=emberLeft();
+    p.style.animationDuration=(2.3+Math.random()*0.9)+"s"; stick.appendChild(p);
+    setTimeout(function(){ if(p.parentNode)p.remove(); },3400); }
+  function spawnAsh(){ if(!body.classList.contains("playing"))return;
+    var a=document.createElement("span"); a.className="ashbit"; a.style.left=emberLeft();
+    a.style.setProperty("--dx",(Math.random()*18-9).toFixed(0)+"px");
+    a.style.animationDuration=(1.1+Math.random()*0.9)+"s"; stick.appendChild(a);
+    setTimeout(function(){ if(a.parentNode)a.remove(); },2200); }
+  setInterval(spawnPuff,380);
+  setInterval(spawnAsh,820);
 
   /* =====================================================================
      THE ROOM — a road unspooling into the dark, streetlights sliding by,
      smoke drifting. Canvas driven while the tape rolls.
      ===================================================================== */
   var driving=false, cv=$("drive"), cx=cv.getContext("2d");
-  var W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1), lights=[], t0=0;
+  var W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1), lights=[], stars=[], t0=0;
   function sizeDrive(){
     W=window.innerWidth||document.documentElement.clientWidth||screen.width||1280;
     H=window.innerHeight||document.documentElement.clientHeight||screen.height||720;
     cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
+    buildStars();
   }
   window.addEventListener("resize",function(){ if(driving) sizeDrive(); });
   function spawnLight(){ lights.push({z:1, side:Math.random()<.5?-1:1, hue:Math.random()<.5?"#ff9d2b":"#7b4bff", life:0}); }
+  /* a fixed field of stars scattered across the night sky (above the horizon) */
+  function buildStars(){ stars=[]; var horizon=H*0.40, n=Math.round(W/16);
+    for(var i=0;i<n;i++) stars.push({x:Math.random()*W,y:Math.random()*horizon,r:Math.random()*1.3+0.3,ph:Math.random()*6.28,tw:0.6+Math.random()*1.6}); }
+  /* NIGHT — dark sky above the road, a glowing moon, a scatter of twinkling stars.
+     Drawn first each frame so the road + lights sit on top of the night. This is
+     what makes "outside the road" read as a dark night while the tape plays. */
+  function drawNight(horizon){
+    var sky=cx.createLinearGradient(0,0,0,horizon);
+    sky.addColorStop(0,"rgba(3,2,9,0.94)"); sky.addColorStop(1,"rgba(15,9,28,0.88)");
+    cx.fillStyle=sky; cx.fillRect(0,0,W,horizon);
+    cx.fillStyle="rgba(6,4,15,0.82)"; cx.fillRect(0,horizon,W,H-horizon);   // dark ground wash
+    /* stars */
+    var now=performance.now()/1000;
+    for(var i=0;i<stars.length;i++){ var s=stars[i], a=0.35+0.5*Math.abs(Math.sin(now*s.tw+s.ph));
+      cx.globalAlpha=a; cx.fillStyle="#fff7ea"; cx.beginPath(); cx.arc(s.x,s.y,s.r,0,7); cx.fill(); }
+    cx.globalAlpha=1;
+    /* the moon, up in the corner, with a soft halo */
+    var mx=W*0.80, my=horizon*0.42, mr=Math.max(24,Math.min(50,W*0.055));
+    var halo=cx.createRadialGradient(mx,my,0,mx,my,mr*2.6);
+    halo.addColorStop(0,"rgba(255,250,235,0.85)"); halo.addColorStop(0.42,"rgba(255,240,205,0.4)"); halo.addColorStop(1,"transparent");
+    cx.fillStyle=halo; cx.beginPath(); cx.arc(mx,my,mr*2.6,0,7); cx.fill();
+    cx.fillStyle="rgba(255,250,240,0.98)"; cx.beginPath(); cx.arc(mx,my,mr,0,7); cx.fill();
+    cx.fillStyle="rgba(206,201,186,0.5)";
+    cx.beginPath(); cx.arc(mx-mr*0.32,my-mr*0.22,mr*0.22,0,7); cx.fill();
+    cx.beginPath(); cx.arc(mx+mr*0.26,my+mr*0.30,mr*0.15,0,7); cx.fill();
+    cx.beginPath(); cx.arc(mx+mr*0.05,my-mr*0.4,mr*0.1,0,7); cx.fill();
+  }
 
   /* ---- beat from the song's own data: read the pressed groove for 20mzs.mp3
      (window.IBEE_BEAT, self-loaded by player.js) at the playhead — same
      architecture the radio + universe use. No Web Audio → background-safe. ---- */
   var beat=0, level=0, emaLow=0, scrollPos=0, lastT=0;
   function groove(){
-    var B=window.IBEE_BEAT; if(!B) return null;
+    var r=RADIO(),B=window.IBEE_BEAT; if(!B) return null;
     var g=B["20mzs.mp3"]||B["20mzs-raw.mp3"]; if(!g) return null;
-    var idx=Math.max(0,Math.min(g.low.length-1,Math.floor((deck.currentTime||0)*g.r)));
+    var t=0; try{ t=(r&&r.audio.currentTime)||0; }catch(e){}
+    var idx=Math.max(0,Math.min(g.low.length-1,Math.floor(t*g.r)));
     return { low:parseInt(g.low.charAt(idx),36)/35, lv:parseInt(g.lvl.charAt(idx),36)/35 };
   }
   function stepBeat(){
@@ -425,6 +527,7 @@ body.playing #roomtag{opacity:.92}
     stepBeat();
     cx.clearRect(0,0,W,H);
     var horizon=H*0.40, cxp=W/2;
+    drawNight(horizon);
     /* road — WIDER: near-full width at the bottom, a broad apex at the horizon */
     var apex=26+beat*10, base=W*0.50;         // half-width of the road at the bottom
     var g=cx.createLinearGradient(0,horizon,0,H);
@@ -501,15 +604,23 @@ body.playing #roomtag{opacity:.92}
     document.querySelectorAll(".vload").forEach(function(v){ v.innerHTML="3D VIEWER OFFLINE_<br><small style='font-size:14px'>check your connection</small>"; });
     return;
   }
-  var loader=new THREE.FBXLoader();
   function makeViewer(el){
     var src=el.getAttribute("data-src"), loadEl=el.querySelector(".vload");
+    /* one loader PER viewer, with its resource path set to the model's own folder,
+       so any external texture reference resolves next to the .fbx (the scans also
+       embed their JPEG texture, which the loader unpacks — this is the fallback). */
+    var loader=new THREE.FBXLoader();
+    try{ loader.setResourcePath(src.replace(/[^\/]+$/,"")); }catch(e){}
     var w=el.clientWidth||400, h=el.clientHeight||400;
     var scene=new THREE.Scene(); scene.background=null;
     var camera=new THREE.PerspectiveCamera(45, w/h, 0.1, 5000);
     var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
     renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
     renderer.setSize(w,h); el.appendChild(renderer.domElement);
+    /* sRGB output so the scan's baked photo texture reads at its true colour
+       (default linear output makes photogrammetry textures look washed/dark) */
+    try{ if(THREE.sRGBEncoding) renderer.outputEncoding=THREE.sRGBEncoding; }catch(e){}
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
     scene.add(new THREE.HemisphereLight(0xfff0d0, 0x241238, 1.1));
     var key=new THREE.DirectionalLight(0xffb04a, 1.3); key.position.set(3,6,4); scene.add(key);
     var rim=new THREE.DirectionalLight(0x7b4bff, .7); rim.position.set(-4,2,-3); scene.add(rim);
@@ -523,6 +634,25 @@ body.playing #roomtag{opacity:.92}
     }
     window.addEventListener("resize",resize);
     loader.load(src, function(obj){
+      /* fix up the scan's materials so the TEXTURE actually shows:
+         · sRGB colour space on the baked photo map (else it renders washed/dark)
+         · DoubleSide — photogrammetry meshes are thin/one-sided, so backface
+           culling was hiding faces and leaving only a bare shape
+         · vertex colours enabled when the scan baked colour into the geometry
+           (some scans carry no texture map at all, only vertex colours) */
+      obj.traverse(function(ch){
+        if(!ch.isMesh) return;
+        ch.frustumCulled=false;
+        var mats=Array.isArray(ch.material)?ch.material:[ch.material];
+        mats.forEach(function(m){
+          if(!m) return;
+          m.side=THREE.DoubleSide;
+          if(m.map){ try{ if(THREE.sRGBEncoding) m.map.encoding=THREE.sRGBEncoding; m.map.needsUpdate=true; }catch(e){} }
+          if(ch.geometry&&ch.geometry.attributes&&ch.geometry.attributes.color){ m.vertexColors=true; }
+          if(m.emissive&&m.emissive.setRGB) m.emissive.setRGB(0,0,0);
+          m.needsUpdate=true;
+        });
+      });
       /* center + frame the model so it fills the view */
       var box=new THREE.Box3().setFromObject(obj);
       var size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
@@ -558,7 +688,7 @@ body.playing #roomtag{opacity:.92}
   document.querySelectorAll(".viewer").forEach(function(v){ io.observe(v); });
 })();
 </script>
-<script src="../assets/player.js?v=14"></script>
-<script src="../assets/badges.js?v=7"></script>
+<script src="../assets/player.js?v=17"></script>
+<script src="../assets/badges.js?v=9"></script>
 </body>
 </html>
