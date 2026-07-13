@@ -116,7 +116,7 @@
 
   /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
   #tlbody{max-height:52vh;overflow-y:auto}
-  #tlbody.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px}
+  #tlbody.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:12px}
   .tl-tile{cursor:pointer;perspective:640px}
   .tl-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;
     transform:rotateY(-18deg);transform-origin:center;transition:transform .35s cubic-bezier(.2,.7,.2,1);overflow:hidden}
@@ -388,9 +388,9 @@
   var NAV=[
     {n:'CONSOLE', u:'console.html#menu'},
     {n:'ROOMS',   u:'arcade/'},
+    {n:'SHOP',    u:'console.html#shop'},
     {n:'TV',      u:'tv/'},
-    {n:'ICS',     u:'console.html#ics'},
-    {n:'SHOP',    u:'console.html#shop'}
+    {n:'ICS',     u:'console.html#ics'}
   ];
   /* (lyrics left the nav — the spinning book in the player opens the overlay) */
   var navEl=document.getElementById('nav');
@@ -417,7 +417,7 @@
     var on=memberSession(); if(on===acctOn) return; acctOn=on;
     acctEl.innerHTML = on
       ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
-      : '<button class="login" id="acctbtn">'+ICO_USER+'LOG IN</button>';
+      : '<button class="login" id="acctbtn">'+ICO_USER+'JOIN</button>';
     document.getElementById('acctbtn').onclick=function(){ navigate(on?'member/profile/':'member/?login=1'); };
   }
   renderAcct();
