@@ -177,7 +177,7 @@
   +".rp-row .lk{width:13px;height:13px;flex:none;color:#ff2b2b}"
   /* ----- Spotify-style grid with 3D sideways tilt ----- */
   +"#rp-list.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px}"
-  +".rp-tile{cursor:pointer;perspective:640px;min-width:0}"
+  +".rp-tile{cursor:pointer;perspective:640px}"
   +".rp-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;"
   +"transform:rotateY(-19deg);transform-origin:center;transition:transform .4s cubic-bezier(.2,.7,.2,1),box-shadow .4s;"
   +"box-shadow:-12px 9px 24px rgba(0,0,0,.65);overflow:hidden}"
@@ -567,85 +567,31 @@
   seek.addEventListener("pointercancel", function(){ scrubbing = false; });
 
   /* ---------- panel ---------- */
-  /* ---------- panel ---------- */
   function openPanel(){ panel.classList.add("open"); }
   function togglePanel(){ panel.classList.toggle("open"); }
-
-  /* Bulletproof fix: Use standard click events and explicitly ignore the chip 
-     in the document listener to completely eliminate the bounce/double-fire glitch. */
-  chip.addEventListener("click", function(e){
-    togglePanel();
-  });
-
-  $("rp-close").addEventListener("click", function(e){
-    panel.classList.remove("open");
-  });
-
-  /* tap the cover / title → open the browser (list) + focus search */
-  $("rp-nowtop").addEventListener("click", function(e){
+  chip.onclick = togglePanel;
+  $("rp-close").onclick = function(){ panel.classList.remove("open"); };
+  /* tap the cover / title → open the browser (grid) + focus search */
+  $("rp-nowtop").onclick = function(){
+    viewMode = "grid";
+    $("rp-view").textContent = "≡ LIST"; $("rp-view").classList.add("on");
     render();
     openPanel();
-    setTimeout(function(){ try{ $("rp-search").focus(); }catch(err){} }, 60);
-  });
-
-  /* search box */
-  let listRendered = false;
-
-$("rp-nowtop").addEventListener("click", function () {
-    if (!listRendered) {
-        render();
-        listRendered = true;
-    }
-
-    openPanel();
-
-    requestAnimationFrame(() => {
-        $("rp-search")?.focus();
-    });
-
-function invalidateList(){
-
-    listRendered = false;
-
-}
-});
-
-  /* click anywhere outside the box closes it — music keeps playing */
-  document.addEventListener("click", function(e){
-    // Only proceed if the panel is actually open
-    if(!panel.classList.contains("open")) return;
-    
-    // Do nothing if the click happened INSIDE the panel
-    if(panel.contains(e.target)) return;
-    
-    // Do nothing if the click happened ON the radio chip (this stops the bounce!)
-    if(chip.contains(e.target)) return;
-    
-    // Otherwise, the click was purely outside. Close the panel.
-    panel.classList.remove("open");
-  });
-
+    setTimeout(function(){ try{ $("rp-search").focus(); }catch(e){} }, 60);
+  };
   /* search box */
   $("rp-search").addEventListener("input", function(){ query = this.value.trim(); render(); });
-  
-  /* grid / list toggle (safe to leave as click since it's inside the panel) */
+  /* grid / list toggle */
   $("rp-view").onclick = function(){
     viewMode = (viewMode === "grid") ? "list" : "grid";
     this.textContent = viewMode === "grid" ? "≡ LIST" : "▦ GRID";
     this.classList.toggle("on", viewMode === "grid");
     render();
   };
-
   /* click anywhere outside the box closes it — music keeps playing */
   document.addEventListener("pointerdown", function(e){
-    // Only proceed if the panel is actually open
     if(!panel.classList.contains("open")) return;
-    
-    // Do nothing if the click happened INSIDE the panel.
-    // (Clicks on the chip or cover are caught by stopPropagation above)
-    if(panel.contains(e.target)) return;
-    
-    // Otherwise, the click was outside. Close the panel.
+    if(panel.contains(e.target) || chip.contains(e.target)) return;
     panel.classList.remove("open");
   });
 
