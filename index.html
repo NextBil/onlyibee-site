@@ -117,7 +117,7 @@
   /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
   #tlbody{max-height:52vh;overflow-y:auto}
   #tlbody.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:12px}
-  .tl-tile{cursor:pointer;perspective:640px}
+  .tl-tile{cursor:pointer;perspective:640px;min-width:0}
   .tl-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;
     transform:rotateY(-18deg);transform-origin:center;transition:transform .35s cubic-bezier(.2,.7,.2,1);overflow:hidden}
   .tl-tile:hover .art{transform:rotateY(0)}
