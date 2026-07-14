@@ -155,9 +155,9 @@
     {name:"MIDNIGHT TRANSIT",by:"A late-night train, destination to…",       cover:"covers/midnight-transit.png",url:"transit/",  status:"live", item:null},
     {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live", item:null},
     /* THE GAMES — earned by playing (see the unlock ladder in badges.js / member). */
-    {name:"RUN BEEBEE!",     by:"A lyrics engine you jump through — words rain from the sky, city runs by on the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live", item:"game-runner"},
-    {name:"MIMI GUITAR RUSH",by:"Mimi dashes the guitar-neck highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", item:"game-rush"},
-    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",       cover:"covers/mimi-tiles.png", url:"tiles/",    status:"live", item:"game-tiles"},
+    {name:"RUN BEEBEE!",     by:"A lyrics engine you jump through — words rain from the sky, city runs by on the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live", item:"game-runner", earn:"EARN — feel 10 records, or beat ICS chess"},
+    {name:"MIMI GUITAR RUSH",by:"Mimi dashes the guitar-neck highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", item:"game-rush", earn:"EARN — come back on 3 different days"},
+    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",       cover:"covers/mimi-tiles.png", url:"tiles/",    status:"live", item:"game-tiles", earn:"EARN — clear a full RUSH song without dying"},
     {name:"ICS LOFI BEDROOM",by:"Chill in the ICS room, beats on loop",  cover:"covers/lofi-bedroom.png",   url:"bedroom/",   status:"live", item:"env-bedroom"},
     {name:"BEAT TAPPER", by:"Tap the crew on the beat", cover:"covers/beat-tapper.png",  url:"", status:"soon"},
     {name:"KNIGHT DUEL", by:"Swordy vs Sworda",         cover:"covers/knight-duel.png",  url:"", status:"soon"},
@@ -192,7 +192,7 @@
       +'<div class="reels"><i></i><i></i></div>'
       +(soon?'<div class="lock">SOON</div>':'')
       +(isLocked?'<div class="lockbadge">'+LOCK+'</div>':'')
-      +'<div class="bar"><div class="nm">'+g.name+'</div><div class="by">'+g.by+'</div>'
+      +'<div class="bar"><div class="nm">'+g.name+'</div><div class="by">'+((isLocked&&g.earn)?g.earn:g.by)+'</div>'
         +'<div class="brow"><span class="barcode"></span><span class="pr">'+(soon?'SOON':(isLocked?'LOCKED':'FREE'))+'</span></div></div>';
     var style=' style="'+wobbleVars(g.name)+'"';
     if(soon) return '<div class="case soon"'+style+'>'+inner+'</div>';

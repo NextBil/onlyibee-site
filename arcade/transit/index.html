@@ -24,7 +24,9 @@
   body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
     background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.55) 100%)}
 
-  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#04040a}
+  /* night wrap so the close-up car sits in atmosphere (not black bars) on portrait phones */
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(ellipse at 50% 32%,#0d0d1c,#040408 72%)}
   #stage{position:relative}
   canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   #bg{image-rendering:pixelated;image-rendering:crisp-edges}
@@ -57,14 +59,27 @@
   #zenchip:hover{color:var(--acid);border-color:var(--acid)}
   body.zen #zenchip{opacity:.25}
   body.zen #zenchip:hover{opacity:1}
+  /* VIEW toggle: close-up interior ⇄ whole-train overview */
+  #viewtog{position:fixed;top:12px;right:92px;z-index:801;font-family:var(--px);font-size:8px;
+    color:#000;background:var(--acid);border:1px solid var(--acid);padding:8px 10px;cursor:pointer}
+  #viewtog:hover{filter:brightness(1.12)}
+  body.zen #viewtog{opacity:.25}
+  #over{position:fixed;inset:0;z-index:400;display:none;image-rendering:pixelated}
+  body.trainview #over{display:block}
+  body.trainview #stage{opacity:0}
+  #milechip{position:fixed;bottom:10px;right:12px;z-index:801;font-family:var(--px);font-size:7px;
+    color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:7px 9px}
 </style>
 </head>
 <body>
 <div id="wrap"><div id="stage"><canvas id="bg"></canvas><canvas id="fx"></canvas></div></div>
+<canvas id="over"></canvas>
 <a class="back ui" href="../">◀ ROOMS</a>
 <div id="line" class="ui"><span class="lbl">MIDNIGHT LINE</span></div>
+<div id="viewtog">▦ WHOLE TRAIN</div>
 <div id="zenchip">✧ ZEN</div>
-<div id="hint" class="ui">ride the midnight line_ — tap a window to zone out · tap a passenger, they sing</div>
+<div id="milechip" class="ui">YOUR LINE · 0 mi</div>
+<div id="hint" class="ui">ride the midnight line_ — the passengers sing along on their own · tap a window to zone out</div>
 
 <script src="../../assets/player.js?v=17"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
@@ -113,8 +128,11 @@ var fx=document.getElementById('fx'),fctx=fx.getContext('2d');
 bg.width=W;bg.height=H;
 var stage=document.getElementById('stage'),S=3,FW=0,FH=0;
 function fit(){
-  var sc=Math.min(innerWidth/W,innerHeight/H);
-  var cw=Math.floor(W*sc),ch=Math.floor(H*sc);
+  /* COVER the viewport so the car fills a portrait phone (no black letterbox).
+     Portrait crops the car's far sides to a close-up of the middle seats; the
+     WHOLE-TRAIN toggle shows every car. Landscape ≈ unchanged (aspect matches). */
+  var sc=Math.max(innerWidth/W,innerHeight/H);
+  var cw=Math.ceil(W*sc),ch=Math.ceil(H*sc);
   stage.style.width=cw+'px';stage.style.height=ch+'px';
   var dpr=Math.min(2,devicePixelRatio||1);
   fx.width=FW=Math.floor(cw*dpr);fx.height=FH=Math.floor(ch*dpr);S=FW/W;
@@ -134,6 +152,7 @@ var sc1=0,sc2=0,sc3=0,platX=0;             // parallax scrolls
 var posts=[], sparks=[], bubbles=[], toasts=[];
 var strapA=[],strapV=[];for(var i=0;i<7;i++){strapA.push(0);strapV.push(0);}
 var catX=-40,catOn=false;
+var lastSung=null,singT=0;           // passengers sing the current line on their own
 
 /* passengers */
 var PASS=[];
@@ -453,6 +472,75 @@ function drawFx(now,hue){
     fctx.globalAlpha=1;fctx.textAlign='left';}
 }
 
+/* ---------- personalization: your line accumulates miles + a car number (persists) ---------- */
+var TRANSIT={miles:0,id:0};
+try{TRANSIT=JSON.parse(localStorage.getItem('ibee_transit')||'null')||{miles:0,id:0};}catch(e){TRANSIT={miles:0,id:0};}
+if(!TRANSIT.id)TRANSIT.id=1000+Math.floor(Math.random()*9000);
+function saveTransit(){try{localStorage.setItem('ibee_transit',JSON.stringify(TRANSIT));}catch(e){}}
+setInterval(saveTransit,5000);addEventListener('pagehide',saveTransit);
+function grade(mi){return mi>4000?'EXPRESS':mi>1500?'RAPID':mi>400?'LOCAL':'ROOKIE';}
+var mileChip=document.getElementById('milechip');
+setInterval(function(){mileChip.textContent='CAR '+TRANSIT.id+' · '+grade(TRANSIT.miles)+' · '+Math.floor(TRANSIT.miles).toLocaleString()+' mi';},1000);
+
+/* ---------- WHOLE-TRAIN overview — a full-screen, portrait-friendly second view ---------- */
+var viewMode='car';
+var over=document.getElementById('over'),octx=over.getContext('2d'),OS=1;
+function overFit(){var dpr=Math.min(2,devicePixelRatio||1);OS=dpr;
+  over.width=Math.floor(innerWidth*dpr);over.height=Math.floor(innerHeight*dpr);
+  over.style.width=innerWidth+'px';over.style.height=innerHeight+'px';}
+addEventListener('resize',overFit);overFit();
+document.getElementById('viewtog').onclick=function(){
+  viewMode=(viewMode==='car')?'train':'car';
+  document.body.classList.toggle('trainview',viewMode==='train');
+  this.textContent=(viewMode==='car')?'▦ WHOLE TRAIN':'▣ CLOSE-UP';
+};
+function drawWholeTrain(now){
+  var r=RAD(),playing=r&&r.playing&&r.playing(),hue=hueNow();
+  var W2=innerWidth,H2=innerHeight;
+  octx.setTransform(OS,0,0,OS,0,0);
+  var sky=octx.createLinearGradient(0,0,0,H2);
+  sky.addColorStop(0,'#05060f');sky.addColorStop(1,hsl(hue,45,8));
+  octx.fillStyle=sky;octx.fillRect(0,0,W2,H2);
+  /* rushing tunnel speed-lines */
+  for(var s=0;s<26;s++){var ly=(s/26)*H2, sp=((now*420*(0.4+LVL))+s*61)%(W2+120);
+    octx.fillStyle=hsl(hue,70,60,0.05+LVL*0.09);octx.fillRect(W2-sp,ly,64,1);}
+  var n=r&&r.count?r.count:0, cur=r&&r.current?Math.max(0,r.current()):0;
+  if(!n){octx.fillStyle='#7a7a7a';octx.font='14px "Press Start 2P"';octx.textAlign='center';
+    octx.fillText('RADIO OFF',W2/2,H2/2);octx.textAlign='left';return;}
+  var carW=Math.min(148,W2*0.44),carH=carW*0.5,gap=13,cy=H2*0.44;
+  var baseX=W2/2-carW/2-cur*(carW+gap);
+  /* rail */
+  octx.strokeStyle=hsl(hue,60,42,0.6);octx.lineWidth=2;
+  octx.beginPath();octx.moveTo(0,cy+carH+5);octx.lineTo(W2,cy+carH+5);octx.stroke();octx.lineWidth=1;
+  for(var i=0;i<n;i++){
+    var cx=baseX+i*(carW+gap); if(cx>W2+carW||cx<-carW)continue;
+    var s2=r.song(i),on=(i===cur),chue=(s2&&s2.hue!=null)?s2.hue:hue;
+    var bob=on&&playing?Math.sin(now*6)*2+LVL*4:0, cyy=cy-bob;
+    /* coupler */
+    if(i>0){octx.strokeStyle='#2a2a34';octx.beginPath();octx.moveTo(cx-gap,cyy+carH*0.6);octx.lineTo(cx,cyy+carH*0.6);octx.stroke();}
+    octx.fillStyle=hsl(chue,on?55:28,on?24:15);octx.fillRect(cx,cyy,carW,carH);
+    octx.strokeStyle=on?hsl(hue,90,62):'#2a2a34';octx.lineWidth=on?2:1;octx.strokeRect(cx,cyy,carW,carH);octx.lineWidth=1;
+    var wn=4,ww=(carW-16)/wn;
+    for(var w=0;w<wn;w++){var wx=cx+8+w*ww;
+      octx.fillStyle=on&&playing?hsl(hue,80,46,0.5+LVL*0.5):'#0c0c14';
+      octx.fillRect(wx,cyy+7,ww-5,carH*0.42);
+      if((i*7+w)%3!==0){octx.fillStyle=on?hsl(hue,30,72):'#3a3a46';
+        octx.beginPath();octx.arc(wx+(ww-5)/2,cyy+7+carH*0.30,ww*0.13,0,7);octx.fill();}
+    }
+    octx.fillStyle='#0a0a10';octx.beginPath();octx.arc(cx+carW*0.25,cyy+carH,4,0,7);octx.fill();
+    octx.beginPath();octx.arc(cx+carW*0.75,cyy+carH,4,0,7);octx.fill();
+    if(on){octx.fillStyle=hsl(hue,90,72);octx.font='9px "Press Start 2P"';octx.textAlign='center';
+      var nm=(s2&&s2.n||'').toUpperCase();octx.fillText(nm.length>16?nm.slice(0,15)+'…':nm,cx+carW/2,cyy+carH+20);octx.textAlign='left';}
+  }
+  /* HUD */
+  octx.textAlign='center';
+  octx.fillStyle=hsl(hue,90,74);octx.font='10px "Press Start 2P"';
+  octx.fillText('MIDNIGHT LINE — CAR '+TRANSIT.id,W2/2,H2*0.13);
+  octx.fillStyle='#9a9a9a';octx.font='7px "Press Start 2P"';
+  octx.fillText(grade(TRANSIT.miles)+' · '+Math.floor(TRANSIT.miles).toLocaleString()+' MI · '+n+' STOPS',W2/2,H2*0.13+16);
+  octx.textAlign='left';
+}
+
 /* ---------- main loop ---------- */
 var last=performance.now();
 function loop(nowMs){
@@ -478,6 +566,24 @@ function loop(nowMs){
     curSlug=sl;curGal=gal;
   }
   if(pendingBoard&&(mode==='station'||curSlug===null)){PASS=crewFor(gal,sl);pendingBoard=false;}
+
+  /* --- passengers SING on their own (no tap): each new lyric line, someone picks it up;
+     between lines they hum. Bubbles are capped so the car never floods. --- */
+  singT-=dt;
+  if(playing&&PASS.length&&bubbles.length<3){
+    var line=lyricNow();
+    if(line&&line!==lastSung){
+      lastSung=line;
+      var q=PASS[Math.floor(Math.random()*PASS.length)];
+      q.bob=1;bubbles.push({x:q.x,y:96,t:line,life:2.8});
+      if(PASS.length>1&&Math.random()<0.4){var q2=PASS[Math.floor(Math.random()*PASS.length)];
+        if(q2!==q){q2.bob=1;bubbles.push({x:q2.x,y:96,t:line,life:2.8});}}
+    } else if(singT<=0&&Math.random()<0.5){
+      singT=2.4+Math.random()*2.5;
+      var qh=PASS[Math.floor(Math.random()*PASS.length)];qh.bob=1;
+      bubbles.push({x:qh.x,y:96,t:['♪ hmm hm hmmm ♪','~ la la la ~','♫ ooh ♫','♪ mm-mm ♪'][Math.floor(Math.random()*4)],life:2.2});
+    }
+  }
 
   /* --- train state machine --- */
   if(mode==='cruise'){
@@ -509,6 +615,12 @@ function loop(nowMs){
     strapV[st]+=(-strapA[st]*6-strapV[st]*1.2)*dt + (Math.random()-0.5)*LVL*speed*dt*30 + PULSE*speed*dt*4;
     strapA[st]+=strapV[st]*dt*3;
   }
+
+  /* the line keeps rolling up your mileage while the train moves */
+  if(playing)TRANSIT.miles+=speed*dt*9;
+
+  /* WHOLE-TRAIN overview replaces the interior when toggled */
+  if(viewMode==='train'){ drawWholeTrain(T); return; }
 
   /* paint */
   bctx.fillStyle='#04040a';bctx.fillRect(0,0,W,H);

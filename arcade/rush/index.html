@@ -231,7 +231,8 @@ function startGame(ix){
   state='intro';introT=0;lastT=performance.now();mtn=[buildMtn(HOR+2,64,70,'rgba(140,30,255,.5)'),buildMtn(HOR+8,40,52,'rgba(255,41,117,.45)')];
   if(!rafOn){rafOn=true;requestAnimationFrame(loop);}
 }
-function resetGame(){score=0;combo=0;lives=3;level=1;gameTime=0;wordIdx=0;hitWords=[];laneF=1;targetLane=1;jumpY=0;jvy=0;jumping=false;jumps=2;
+var songCleared=false;   // did this run ride a song to its end without dying? (unlocks MIMI TILES)
+function resetGame(){score=0;combo=0;lives=3;level=1;gameTime=0;wordIdx=0;hitWords=[];laneF=1;targetLane=1;jumpY=0;jvy=0;jumping=false;jumps=2;songCleared=false;
   obs=[];orbs=[];candies=[];parts=[];invuln=0;powerT=0;candyCd=9;obCd=.7;orbCd=.4;shake=0;flash=0;lastLaneSpawn=-1;scroll=0;propScroll=0;beatPulse=0;mimiGlow=0;el('ticker').innerHTML='';updateHUD();}
 
 // ---------- input ----------
@@ -275,6 +276,13 @@ function loop(now){const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
   /* music gate: stop the radio, freeze the run */
   var _R=RAD(),_mOn=_R&&_R.playing&&_R.playing();
   if(state==='play'&&_mOn)musicSeen=true;
+  /* rode a full song to its end while still alive → unlock MIMI MUSIC TILES (the ladder) */
+  if(state==='play'&&!songCleared&&lives>0&&_R&&_R.audio&&_R.audio.duration>10&&_R.audio.currentTime>=_R.audio.duration-1.0){
+    songCleared=true;
+    try{localStorage.setItem('ibee_rush_clear','1');
+      localStorage.setItem('ibee_badge_evt',JSON.stringify({k:'rushclear',t:Date.now()}));}catch(e){}
+    showToast('SONG CLEARED! ★','#b6ff00');
+  }
   var frozen=state==='play'&&musicSeen&&!_mOn;
   if(state==='intro'){ introT+=dt; if(introT>=INTRO_DUR){state='play';lastT=now;} }
   if(state==='play'&&!frozen){

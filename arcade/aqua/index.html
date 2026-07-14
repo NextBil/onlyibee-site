@@ -130,23 +130,29 @@ function petStage(slug){
 /* stage → life phase */
 function phaseOf(st){return st<=1?'egg':st<=4?'baby':st<=7?'juvenile':st<=9?'evolved':'apex';}
 
-/* ---------- stage ---------- */
-var W=384,H=216;
+/* ---------- stage — PORTRAIT-FIRST: the whole screen is water ---------- */
+var W=204,H=440;
 var bg=document.getElementById('bg'),bctx=bg.getContext('2d');
 var fx=document.getElementById('fx'),fctx=fx.getContext('2d');
-bg.width=W;bg.height=H;
 var stage=document.getElementById('stage'),S=3,FW=0,FH=0;
+var SURF=30, GRAVEL=420;                        // GRAVEL is recomputed to the viewport in relayout()
+function relayout(){
+  /* fill the viewport: portrait = a deep water column; landscape = a wide tank */
+  if(innerHeight>=innerWidth){ W=204; H=Math.round(204*innerHeight/innerWidth); }
+  else { H=250; W=Math.round(250*innerWidth/innerHeight); }
+  W=Math.max(150,Math.min(1000,W)); H=Math.max(200,Math.min(1600,H));
+  bg.width=W;bg.height=H;
+  GRAVEL=H-18;
+}
 function fit(){
-  var sc=Math.min(innerWidth/W,innerHeight/H);
-  var cw=Math.floor(W*sc),ch=Math.floor(H*sc);
-  stage.style.width=cw+'px';stage.style.height=ch+'px';
+  relayout();
+  stage.style.width=innerWidth+'px';stage.style.height=innerHeight+'px';
   var dpr=Math.min(2,devicePixelRatio||1);
-  fx.width=FW=Math.floor(cw*dpr);fx.height=FH=Math.floor(ch*dpr);S=FW/W;
+  fx.width=FW=Math.floor(innerWidth*dpr);fx.height=FH=Math.floor(innerHeight*dpr);S=FW/W;
 }
 addEventListener('resize',fit);fit();
 function px(n){return Math.round(n)}
-
-var SURF=34, GRAVEL=196;
+function chestBox(){return {x:W-46,y:GRAVEL-12,w:26,h:12};}
 var LOW=0,LVL=0,PULSE=0,T=0;
 
 /* ---------- tank population ---------- */
@@ -155,7 +161,7 @@ function spawnSchool(slug){
   FISH=[];var sp=speciesFor(slug),rr=seedFor((slug||'x')+'school'),hue=hueNow();
   var n=sp.id==='jelly'?5:sp.id==='eel'?3:7;
   for(var i=0;i<n;i++){
-    FISH.push({sp:sp.id,x:rr()*W,y:56+rr()*110,dir:rr()<0.5?-1:1,
+    FISH.push({sp:sp.id,x:rr()*W,y:SURF+24+rr()*Math.max(60,GRAVEL-SURF-70),dir:rr()<0.5?-1:1,
       size:0.7+rr()*0.8,ph:rr()*7,hue:(hue+rr()*60-30+360)%360,
       dart:0,vy:0,flee:0,target:null});
   }
@@ -218,7 +224,8 @@ stage.addEventListener('pointerdown',function(e){
       return;
     }}
   /* treasure chest */
-  if(p.x>316&&p.x<352&&p.y>176&&p.y<GRAVEL+6){
+  var cb0=chestBox();
+  if(p.x>cb0.x-4&&p.x<cb0.x+cb0.w+4&&p.y>cb0.y-8&&p.y<GRAVEL+6){
     chestOpen=1.4;var m2=metaNow(),s2=songNow();
     tips.push({x:330,y:166,head:'TREASURE — '+(s2?s2.n:'???'),
       t:(m2&&m2.took)?('time to create: '+m2.took):'the log is sealed_ some sessions keep no clock.',life:5});
@@ -243,7 +250,7 @@ stage.addEventListener('pointerdown',function(e){
 setTimeout(function(){document.getElementById('hint').classList.add('off')},9000);
 
 /* ---------- THE PET (B MAJOR) ---------- */
-var PET={x:W/2,y:120,vx:6,vy:0,ph:0};
+var PET={x:W/2,y:H*0.42,vx:6,vy:0,ph:0};
 
 /* ============================================================
    DRAWING
@@ -274,13 +281,14 @@ function drawTank(now,hue,playing){
   bctx.stroke();bctx.lineWidth=1;
   /* god rays swaying, fed by loudness */
   if(playing){
-    for(var rI=0;rI<4;rI++){
-      var rx=50+rI*90+Math.sin(now*0.4+rI)*14;
+    var RN=Math.max(3,Math.round(W/90)),rw=W/RN;
+    for(var rI=0;rI<RN;rI++){
+      var rx=(rI+0.35)*rw+Math.sin(now*0.4+rI)*14;
       var grd=bctx.createLinearGradient(rx,SURF,rx+30,GRAVEL);
       grd.addColorStop(0,hsl(hue,80,65,0.10+LVL*0.10));grd.addColorStop(1,'transparent');
       bctx.fillStyle=grd;
-      bctx.beginPath();bctx.moveTo(rx,SURF+4);bctx.lineTo(rx+16,SURF+4);
-      bctx.lineTo(rx+52,GRAVEL);bctx.lineTo(rx+10,GRAVEL);bctx.closePath();bctx.fill();
+      bctx.beginPath();bctx.moveTo(rx,SURF+4);bctx.lineTo(rx+rw*0.3,SURF+4);
+      bctx.lineTo(rx+rw*0.6,GRAVEL);bctx.lineTo(rx+rw*0.1,GRAVEL);bctx.closePath();bctx.fill();
     }
   }
   /* back-glass kelp, swaying on the bass */
@@ -313,15 +321,15 @@ function drawTank(now,hue,playing){
     bctx.fillRect(px(gx),px(gy),3,2);
   }
 
-  /* treasure chest (opens on heavy hits) */
-  var co=Math.max(chestOpen,PULSE>0.9?0.8:0);
-  bctx.fillStyle='#3a2b16';bctx.fillRect(320,184,26,12);
-  bctx.fillStyle='#2b1f0e';bctx.fillRect(320,184,26,3);
-  bctx.save();bctx.translate(320,186);bctx.rotate(-co*0.8);
+  /* treasure chest (opens on heavy hits) — anchored bottom-right of the tank */
+  var co=Math.max(chestOpen,PULSE>0.9?0.8:0),cb=chestBox();
+  bctx.fillStyle='#3a2b16';bctx.fillRect(px(cb.x),px(cb.y),26,12);
+  bctx.fillStyle='#2b1f0e';bctx.fillRect(px(cb.x),px(cb.y),26,3);
+  bctx.save();bctx.translate(cb.x,cb.y+2);bctx.rotate(-co*0.8);
   bctx.fillStyle='#4a3820';bctx.fillRect(0,-8,26,8);
   bctx.fillStyle=hsl(50,80,55,0.9);bctx.fillRect(11,-5,4,3);
   bctx.restore();
-  if(co>0.2){bctx.fillStyle=hsl(50,90,60,co*0.5);bctx.beginPath();bctx.arc(333,182,8+co*6,0,7);bctx.fill();}
+  if(co>0.2){bctx.fillStyle=hsl(50,90,60,co*0.5);bctx.beginPath();bctx.arc(cb.x+13,cb.y-2,8+co*6,0,7);bctx.fill();}
 
   /* snail on the glass */
   snailX+=snailDir*0.05;if(snailX>W-20)snailDir=-1;if(snailX<16)snailDir=1;
@@ -431,35 +439,61 @@ function drawPet(now,hue,playing){
     bctx.fillRect(-4,-3,2,2);bctx.fillRect(2,1,2,2);bctx.fillRect(-1,5,2,2);
     if(st>=1){bctx.strokeStyle='#1b1208';bctx.beginPath();bctx.moveTo(-3,-6);bctx.lineTo(0,-2);bctx.lineTo(3,-5);bctx.stroke();} // crack
   }else{
-    var sc=ph==='baby'?0.8:ph==='juvenile'?1.3:ph==='evolved'?1.9:2.3;
-    /* body — a rounder, friendlier take on the song's species */
-    bctx.fillStyle=hsl(hue,75,55,0.18);bctx.beginPath();bctx.arc(0,0,14*sc,0,7);bctx.fill();
-    bctx.fillStyle=hsl(hue,70,50);
-    bctx.beginPath();bctx.ellipse(0,0,10*sc,7*sc,0,0,7);bctx.fill();
-    bctx.fillStyle=hsl((hue+40)%360,80,60);
-    bctx.beginPath();bctx.moveTo(-9*sc,0);bctx.lineTo(-15*sc,-5*sc);bctx.lineTo(-15*sc,5*sc);bctx.closePath();bctx.fill();
-    /* species flair */
-    if(sp.id==='shark'){bctx.fillStyle=hsl(hue,70,45);bctx.beginPath();bctx.moveTo(0,-6*sc);bctx.lineTo(3*sc,-11*sc);bctx.lineTo(5*sc,-6*sc);bctx.closePath();bctx.fill();}
-    if(sp.id==='puffer'){bctx.fillStyle=hsl(hue,90,65);for(var pk=0;pk<6;pk++){var pa=pk/6*6.283;bctx.fillRect(px(Math.cos(pa)*11*sc),px(Math.sin(pa)*8*sc),2,2);}}
-    if(sp.id==='disco')for(var dsc=-1;dsc<=1;dsc++){bctx.fillStyle=hsl((hue+180)%360,85,55,0.85);bctx.fillRect(px(dsc*4*sc),px(-6*sc),2,px(12*sc));}
-    if(sp.id==='jelly'){bctx.strokeStyle=hsl(hue,70,65,0.6);for(var jt=0;jt<3;jt++){bctx.beginPath();bctx.moveTo((jt-1)*4*sc,6*sc);bctx.quadraticCurveTo((jt-1)*4*sc+Math.sin(now*3+jt)*3,12*sc,(jt-1)*4*sc,16*sc);bctx.stroke();}}
-    /* face */
-    bctx.fillStyle='#0a0a0a';
-    bctx.fillRect(px(4*sc),px(-2.5*sc),px(2.5),px(3.5));
-    bctx.fillStyle='#fff';bctx.fillRect(px(4.6*sc),px(-2*sc),1,1);
-    bctx.fillStyle='#0a0a0a';bctx.fillRect(px(2*sc),px(2.5*sc),px(4*sc),1.5);   // smile
-    /* B MAJOR chain at evolved+ */
-    if(ph==='evolved'||ph==='apex'){
-      bctx.strokeStyle=hsl(50,85,55);bctx.beginPath();bctx.arc(0,3*sc,6*sc,0.4,2.7);bctx.stroke();
-      bctx.fillStyle=hsl(50,90,60);bctx.beginPath();bctx.arc(0,9*sc,2.4,0,7);bctx.fill();
-      bctx.fillStyle='#1b1208';bctx.font='4px monospace';bctx.fillText('B',-1.3,10.6);
+    /* ---- THE JELLYFISH: grows + gains tentacles as it evolves, pulses its bell
+       to propel, glows on the bass. egg → baby → juvenile → evolved → apex ---- */
+    var sc=ph==='baby'?0.85:ph==='juvenile'?1.35:ph==='evolved'?1.95:2.5;
+    var pulse=Math.sin(now*(playing?3.2:1.6)+PET.ph)*0.5+0.5;        // bell contraction 0..1
+    var squeeze=playing?(0.12+LOW*0.4):0.1;
+    var bw=13*sc*(1-squeeze*pulse), bh=11*sc*(1+squeeze*pulse*0.6);  // bell width/height
+    var glow=playing?(0.4+LVL*0.6):(ph==='apex'?0.4:0.2);
+    var eyeY=-3*sc;
+    /* outer bioluminescent glow */
+    bctx.fillStyle=hsl(hue,85,60,0.10+glow*0.15);bctx.beginPath();bctx.arc(0,0,bw+9,0,7);bctx.fill();
+    /* tentacles — more & longer with each life phase, swaying on the bass */
+    var TN=ph==='baby'?4:ph==='juvenile'?6:ph==='evolved'?9:12, tl=12+sc*7;
+    for(var t=0;t<TN;t++){
+      var tx=((t/(TN-1))-0.5)*bw*1.7,
+          swb=Math.sin(now*2+t*0.7+PET.ph)*(3+LOW*8)*(0.4+pulse*0.6);
+      bctx.strokeStyle=hsl((hue+(t%2?15:-10)+360)%360,75,62,0.5+glow*0.35);
+      bctx.lineWidth=Math.max(1,1.2*sc);
+      bctx.beginPath();bctx.moveTo(tx,bh*0.5);
+      bctx.quadraticCurveTo(tx+swb,bh*0.5+tl*0.55,tx+swb*1.6,bh*0.5+tl*(0.9+pulse*0.3));
+      bctx.stroke();
     }
-    /* APEX crown + trail */
+    bctx.lineWidth=1;
+    /* frilly oral arms from juvenile up */
+    if(ph!=='baby'){bctx.strokeStyle=hsl((hue+30)%360,80,68,0.6);
+      for(var oa=-1;oa<=1;oa++){bctx.beginPath();bctx.moveTo(oa*2*sc,bh*0.4);
+        bctx.quadraticCurveTo(oa*4*sc+Math.sin(now*3+oa)*2,bh*0.4+tl*0.4,oa*3*sc,bh*0.4+tl*0.65);bctx.stroke();}}
+    /* the translucent bell */
+    var bell=bctx.createRadialGradient(0,-bh*0.3,1,0,0,bw);
+    bell.addColorStop(0,hsl(hue,80,74,0.55+glow*0.3));
+    bell.addColorStop(0.7,hsl(hue,75,55,0.42));
+    bell.addColorStop(1,hsl((hue+20)%360,70,45,0.22));
+    bctx.fillStyle=bell;
+    bctx.beginPath();bctx.ellipse(0,0,bw,bh,0,3.14,0);
+    bctx.quadraticCurveTo(bw*0.6,bh*0.55,0,bh*0.34);
+    bctx.quadraticCurveTo(-bw*0.6,bh*0.55,-bw,0);bctx.fill();
+    bctx.strokeStyle=hsl(hue,90,82,0.5+glow*0.4);bctx.lineWidth=Math.max(1,sc);
+    bctx.beginPath();bctx.ellipse(0,0,bw,bh,0,3.14,0);bctx.stroke();bctx.lineWidth=1;
+    /* the B MAJOR nucleus glowing inside */
+    bctx.fillStyle=hsl((hue+40)%360,90,66,0.7+glow*0.3);
+    bctx.beginPath();bctx.arc(0,-bh*0.12,2.4*sc,0,7);bctx.fill();
+    /* cute face */
+    bctx.fillStyle='#0a0a0a';
+    bctx.fillRect(px(-3.4*sc),px(eyeY),px(1.8),px(2.4));bctx.fillRect(px(1.6*sc),px(eyeY),px(1.8),px(2.4));
+    bctx.fillStyle='#fff';bctx.fillRect(px(-3*sc),px(eyeY),1,1);bctx.fillRect(px(2*sc),px(eyeY),1,1);
+    /* B MAJOR pendant from evolved up */
+    if(ph==='evolved'||ph==='apex'){
+      bctx.fillStyle=hsl(50,90,60);bctx.beginPath();bctx.arc(0,bh*0.42,2.6,0,7);bctx.fill();
+      bctx.fillStyle='#1b1208';bctx.font='4px monospace';bctx.textAlign='center';bctx.fillText('B',0,bh*0.42-2);bctx.textAlign='left';
+    }
+    /* APEX crown + sparkle trail */
     if(ph==='apex'){
-      bctx.fillStyle=hsl(50,90,60);
-      bctx.beginPath();bctx.moveTo(-5,-8*sc);bctx.lineTo(-5,-13*sc);bctx.lineTo(-2,-9*sc);bctx.lineTo(0,-14*sc);
-      bctx.lineTo(2,-9*sc);bctx.lineTo(5,-13*sc);bctx.lineTo(5,-8*sc);bctx.closePath();bctx.fill();
-      if(Math.random()<0.3)pops.push({x:x-12*sc*PET.vx/Math.abs(PET.vx||1),y:y,vy:-4,life:0.8,hue:50});
+      bctx.fillStyle=hsl(50,90,62);
+      bctx.beginPath();bctx.moveTo(-5,-bh-2);bctx.lineTo(-5,-bh-7);bctx.lineTo(-2,-bh-3);bctx.lineTo(0,-bh-8);
+      bctx.lineTo(2,-bh-3);bctx.lineTo(5,-bh-7);bctx.lineTo(5,-bh-2);bctx.closePath();bctx.fill();
+      if(Math.random()<0.3)pops.push({x:x+(Math.random()*10-5),y:y+bh,vy:-4,life:0.8,hue:50});
     }
   }
   bctx.restore();
