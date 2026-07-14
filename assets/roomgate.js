@@ -26,8 +26,10 @@
   function ls(k){ try{return JSON.parse(localStorage.getItem(k)||"null");}catch(e){return null;} }
   function setls(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
 
-  /* ---- lock overlay ---- */
-  function lock(picked){
+  /* ---- lock overlay (3 flavours: members-only / pick-first / not-your-room) ---- */
+  var styled=false;
+  function ensureStyle(){
+    if(styled)return; styled=true;
     var css="#rgate{position:fixed;inset:0;z-index:99999;background:#050507;display:flex;flex-direction:column;"
       +"align-items:center;justify-content:center;gap:16px;text-align:center;padding:28px;font-family:'Press Start 2P',monospace;color:#e8e8e8}"
       +"#rgate::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}"
@@ -38,14 +40,32 @@
       +"#rgate a{font-family:'Press Start 2P',monospace;font-size:10px;padding:14px 16px;text-decoration:none;cursor:pointer;border:1px solid #2a2a2a;background:transparent;color:#7a7a7a}"
       +"#rgate a.go{background:#b6ff00;color:#000;border-color:#b6ff00}";
     var st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
-    var LOCK="<svg class='lk' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
-      +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/><circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
-    var ov=document.createElement("div");ov.id="rgate";
-    ov.innerHTML=LOCK+"<h2>THIS ISN'T YOUR ROOM</h2>"
-      +"<p>you chose <b style='color:#b6ff00'>"+(NAME[picked]||picked.toUpperCase())+"</b> as your room — it grows with you. you only get one.</p>"
-      +"<div class='row'><a class='go' href='../"+picked+"/'>▶ ENTER MY ROOM</a><a href='../../room/'>☺ MY PROFILE</a><a href='../'>◀ ROOMS</a></div>";
+  }
+  var LOCK="<svg class='lk' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/><circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
+  function overlay(html){
+    ensureStyle();
+    var ov=document.createElement("div");ov.id="rgate";ov.innerHTML=LOCK+html;
     function mount(){ if(document.body&&!document.getElementById("rgate"))document.body.appendChild(ov); }
     if(document.body)mount(); else document.addEventListener("DOMContentLoaded",mount);
+  }
+  /* guests: the rooms are for members only */
+  function lockMembers(){
+    overlay("<h2>MEMBERS ONLY</h2>"
+      +"<p>the rooms are for members. join free in 2 seconds, pick your room, and it grows with you every time you come back.</p>"
+      +"<div class='row'><a class='go' href='../../member/?login=1'>＋ JOIN — FREE, 2 SEC</a><a href='../'>◀ ROOMS</a></div>");
+  }
+  /* signed in but hasn't chosen a room yet */
+  function lockPick(){
+    overlay("<h2>PICK YOUR ROOM FIRST</h2>"
+      +"<p>choose your one room on your profile — aqua, terrarium or transit. it becomes yours and grows with you.</p>"
+      +"<div class='row'><a class='go' href='../../room/'>▶ CHOOSE MY ROOM</a><a href='../'>◀ ROOMS</a></div>");
+  }
+  /* signed in, but this is not the room they chose */
+  function lockMismatch(picked){
+    overlay("<h2>THIS ISN'T YOUR ROOM</h2>"
+      +"<p>you chose <b style='color:#b6ff00'>"+(NAME[picked]||picked.toUpperCase())+"</b> as your room — it grows with you. you only get one.</p>"
+      +"<div class='row'><a class='go' href='../"+picked+"/'>▶ ENTER MY ROOM</a><a href='../../room/'>☺ MY PROFILE</a><a href='../'>◀ ROOMS</a></div>");
   }
 
   /* ---- evolution sync (only for the room that is theirs) ---- */
@@ -81,24 +101,29 @@
     s.onload=cb;s.onerror=function(){cb();};document.head.appendChild(s);
   }
 
+  function startSync(server){
+    restore(server);
+    setInterval(push, 20000);
+    window.addEventListener("pagehide",push);
+    document.addEventListener("visibilitychange",function(){ if(document.hidden)push(); });
+  }
+
   loadSB(function(){
-    if(!(window.supabase&&window.supabase.createClient)) return;      // offline → just play locally
+    /* Supabase couldn't load → we can't verify membership → members-only (fail closed) */
+    if(!(window.supabase&&window.supabase.createClient)){ lockMembers(); return; }
     sb=window.supabase.createClient(SB_URL,SB_KEY);
     sb.auth.getSession().then(function(res){
       var sess=res.data.session;
-      if(!sess) return;                                                // guest → free preview, no lock/sync
+      if(!sess){ lockMembers(); return; }                              // GUESTS ARE LOCKED OUT (2026-07-13)
       var email=((sess.user&&sess.user.email)||"").toLowerCase();
       sb.rpc("my_profile").then(function(r){
         var prof=r&&r.data, picked=prof&&prof.room&&prof.room.env;
         if(picked) setls("ibee_room",picked);
-        /* owner sees everything; a member with a DIFFERENT pick is locked out */
-        if(picked && picked!==ENV && email!==OWNER){ lock(picked); return; }
-        /* this room is theirs (or not picked yet / owner) → restore + start syncing */
-        restore(prof&&prof.room_state);
-        setInterval(push, 20000);
-        window.addEventListener("pagehide",push);
-        document.addEventListener("visibilitychange",function(){ if(document.hidden)push(); });
-      }).catch(function(){});
-    }).catch(function(){});
+        if(email===OWNER){ startSync(prof&&prof.room_state); return; } // owner: full access
+        if(!picked){ lockPick(); return; }                             // signed in but hasn't chosen yet
+        if(picked!==ENV){ lockMismatch(picked); return; }              // chose a different room
+        startSync(prof&&prof.room_state);                              // this room is theirs
+      }).catch(function(){ lockMembers(); });                          // can't read profile → fail closed
+    }).catch(function(){ lockMembers(); });
   });
 })();
