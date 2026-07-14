@@ -180,6 +180,9 @@
   #englock .esteps b{color:#555;font-weight:normal}#englock .esteps b.on{color:var(--acid)}
   #englock .ego{font-family:var(--px);font-size:11px;padding:14px 18px;background:var(--acid);color:#000;text-decoration:none;margin-top:2px}
   #englock .ehint{color:var(--dim);font-size:16px}
+  #englock .egclose{font-family:var(--px);font-size:10px;padding:12px 16px;margin-top:14px;cursor:pointer;
+    background:transparent;color:var(--dim);border:1px solid var(--border)}
+  #englock .egclose:hover{color:var(--red);border-color:#3a1414}
   .engnav{display:flex;align-items:center;flex-wrap:wrap;gap:8px;position:relative;z-index:40}
   /* ===== universe search — records / albums / vibes, arcade style ===== */
   #uniseek{position:relative;flex:1;min-width:180px;margin-bottom:22px}
@@ -491,6 +494,7 @@
           <div class="esteps" id="esteps"></div>
           <a class="ego" id="egobtn" href="member/" target="_top">▶ CREATE YOUR ACCOUNT</a>
           <div class="ehint" id="eghint">…then press ► on the radio for 10 seconds_</div>
+          <button class="egclose" id="egclose" data-go="menu">✕ CLOSE — BACK TO MENU</button>
         </div>
         <canvas id="engcanvas"></canvas>
         <div class="eng-hud">

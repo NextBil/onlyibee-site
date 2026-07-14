@@ -914,6 +914,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   function showRoom(prof,mine){
     OWNERNAME=prof.username; ROOM=prof.room||{}; ISMINE=mine;
     if(!ROOM.k)ROOM={v:1,k:"attic",tiles:[],shelf:[]};
+    /* stash the picked env so the room-gate (aqua/terrarium/transit) & arcade know it fast */
+    if(mine){ try{ if(ROOM.env)localStorage.setItem("ibee_room",ROOM.env); }catch(e){} }
     var K=KINDS[ROOM.k]||KINDS.attic;
     document.title=(mine?"MY PROFILE":OWNERNAME.toUpperCase()+"'S ROOM")+" — ONLY IBEE";
     $("titlebar").style.display="";
