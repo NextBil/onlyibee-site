@@ -51,7 +51,14 @@
   #plaque .no{font-family:var(--px);font-size:7px;color:var(--dim)}
   #plaque .x{cursor:pointer;color:var(--dim);font-size:15px;padding:0 4px}
   #plaque .x:hover{color:var(--red)}
-  #plaque h3{font-family:var(--px);font-size:10px;color:#fff;padding:10px 12px 2px}
+  #pqCanvas{display:block;width:120px;height:120px;margin:10px auto 2px;image-rendering:pixelated;
+    background:radial-gradient(ellipse at 50% 40%,rgba(182,255,0,.06),#06070a 70%);border:1px solid var(--border)}
+  #plaque h3{font-family:var(--px);font-size:10px;color:#fff;padding:10px 12px 2px;text-align:center}
+  /* on phones the plaque becomes a bottom sheet so it never covers the plant you tapped */
+  @media (max-width:560px){
+    #plaque{right:0;left:0;top:auto;bottom:0;width:100%;max-height:74vh;overflow-y:auto;border-width:2px 0 0 0}
+    #pqCanvas{width:96px;height:96px}
+  }
   #plaque .latin{font-size:18px;color:var(--acid);font-style:italic;padding:0 12px 6px}
   #plaque .chips{display:flex;flex-wrap:wrap;gap:5px;padding:2px 12px 8px}
   #plaque .chip{font-family:var(--px);font-size:6px;color:#000;background:var(--acid);padding:4px 6px}
@@ -74,6 +81,7 @@
 <div id="hint">every record grows here_ — plays feed the roots · click a plant, it exhales its words</div>
 <div id="plaque">
   <div class="head"><span class="no" id="pqNo">SPECIMEN No. 00</span><span class="x" id="pqX">✕</span></div>
+  <canvas id="pqCanvas" width="120" height="120"></canvas>
   <h3 id="pqName">—</h3><div class="latin" id="pqLatin">—</div>
   <div class="chips" id="pqChips"></div>
   <div class="grow">GROWTH <span id="pqSt">0/10</span><div class="bar"><i id="pqBar" style="width:0%"></i></div></div>
@@ -83,7 +91,7 @@
 </div>
 
 <script src="../../assets/player.js?v=17"></script>
-<script src="../../assets/gate.js?v=3"></script>
+<!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="../../assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
@@ -175,36 +183,49 @@ function build(){
 }
 setInterval(build,1200);
 
-/* ---------- stage / camera ---------- */
-var W=384,H=216;
+/* ---------- stage / camera — PORTRAIT-FIRST, fills the whole screen ----------
+   The greenhouse is now a VERTICAL tower of shelves you scroll down through, so it
+   fills a phone in portrait like a mobile game (and still fills a desktop window). */
+var W=204,H=440;
 var bg=document.getElementById('bg'),bctx=bg.getContext('2d');
 var fx=document.getElementById('fx'),fctx=fx.getContext('2d');
-bg.width=W;bg.height=H;
 var stage=document.getElementById('stage'),S=3,FW=0,FH=0;
+var COLS=3, GAP=57, X0=30, ROWH=104, TOPY=58;
+function relayout(){
+  /* logical short-side fixed for crisp detail; long side matches the viewport → no letterbox */
+  if(innerHeight>=innerWidth){ W=204; H=Math.round(204*innerHeight/innerWidth); }
+  else { H=204; W=Math.round(204*innerWidth/innerHeight); }
+  W=Math.max(150,Math.min(900,W)); H=Math.max(150,Math.min(1500,H));
+  bg.width=W;bg.height=H;
+  COLS=Math.max(1,Math.round((W-X0*2)/52));       // how many pots fit across
+  GAP=(W-X0*2)/COLS;                               // spread them evenly
+}
 function fit(){
-  var sc=Math.min(innerWidth/W,innerHeight/H);
-  var cw=Math.floor(W*sc),ch=Math.floor(H*sc);
-  stage.style.width=cw+'px';stage.style.height=ch+'px';
+  relayout();
+  stage.style.width=innerWidth+'px';stage.style.height=innerHeight+'px';
   var dpr=Math.min(2,devicePixelRatio||1);
-  fx.width=FW=Math.floor(cw*dpr);fx.height=FH=Math.floor(ch*dpr);S=FW/W;
+  fx.width=FW=Math.floor(innerWidth*dpr);fx.height=FH=Math.floor(innerHeight*dpr);S=FW/W;
 }
 addEventListener('resize',fit);fit();
 function px(n){return Math.round(n)}
 
-var POT_DX=52, X0=48;
-function worldW(){return Math.max(W,X0+Math.ceil(PLANTS.length/2)*POT_DX+20)}
-var scrollX=0,scrollV=0;
-function potPos(p){return {x:X0+p.col*POT_DX-scrollX, y:p.row===0?112:176};}
+function rowsN(){return Math.ceil(PLANTS.length/COLS);}
+function worldH(){return Math.max(H,TOPY+rowsN()*ROWH+40);}
+var scrollY=0;
+function shelfY(row){return TOPY+row*ROWH+ROWH-34;}   // pot baseline near the bottom of each shelf band
+function potPos(p){var col=p.idx%COLS,row=Math.floor(p.idx/COLS);
+  return {x:X0+(col+0.5)*GAP, y:shelfY(row)-scrollY};}
 
-/* drag / wheel scroll + click */
+/* drag / wheel VERTICAL scroll + click */
 var pdown=null,dragging=false;
 function toLow(e){var r=stage.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H};}
-stage.addEventListener('pointerdown',function(e){pdown=toLow(e);pdown.sx=scrollX;dragging=false;stage.setPointerCapture(e.pointerId);});
+function clampY(v){return Math.max(0,Math.min(worldH()-H,v));}
+stage.addEventListener('pointerdown',function(e){pdown=toLow(e);pdown.sy=scrollY;dragging=false;stage.setPointerCapture(e.pointerId);});
 stage.addEventListener('pointermove',function(e){
   var p=toLow(e);
-  if(pdown){var dx=p.x-pdown.x;
-    if(Math.abs(dx)>5)dragging=true;
-    if(dragging)scrollX=Math.max(0,Math.min(worldW()-W,pdown.sx-dx));}
+  if(pdown){var dy=p.y-pdown.y;
+    if(Math.abs(dy)>5)dragging=true;
+    if(dragging)scrollY=clampY(pdown.sy-dy);}
   hover=plantAt(p);
   stage.style.cursor=hover?'pointer':(dragging?'grabbing':'grab');
 });
@@ -213,13 +234,13 @@ stage.addEventListener('pointerup',function(e){
   if(pdown&&!dragging){var pl=plantAt(p);if(pl)select(pl,true);else closePlaque();}
   pdown=null;dragging=false;
 });
-stage.addEventListener('wheel',function(e){scrollX=Math.max(0,Math.min(worldW()-W,scrollX+(e.deltaY+e.deltaX)*0.5));e.preventDefault();},{passive:false});
+stage.addEventListener('wheel',function(e){scrollY=clampY(scrollY+(e.deltaY+e.deltaX)*0.5);e.preventDefault();},{passive:false});
 var hover=null;
 function plantAt(p){
   for(var i=0;i<PLANTS.length;i++){var q=potPos(PLANTS[i]);
-    if(q.x<-30||q.x>W+30)continue;
+    if(q.y<-40||q.y>H+40)continue;
     var st=stageOf(PLANTS[i]),hgt=14+st*4.5;
-    if(Math.abs(p.x-q.x)<16&&p.y>q.y-hgt-16&&p.y<q.y+18)return PLANTS[i];}
+    if(Math.abs(p.x-q.x)<GAP*0.46&&p.y>q.y-hgt-16&&p.y<q.y+18)return PLANTS[i];}
   return null;
 }
 setTimeout(function(){document.getElementById('hint').classList.add('off')},9000);
@@ -258,7 +279,7 @@ function wordsFor(slug){var L=DB('IBEE_LYRICS');var l=L&&L[slug];if(!l||!l.lengt
 function burst(p,n){
   var q=potPos(p),ws=wordsFor(p.slug),rr=Math.random;
   for(var i=0;i<n;i++){
-    spores.push({wx:q.x+scrollX,y:q.y-10-rr()*stageOf(p)*4,vx:(rr()-0.5)*8,vy:-8-rr()*14,
+    spores.push({x:q.x+(rr()-0.5)*6,wy:(q.y+scrollY)-10-rr()*stageOf(p)*4,vx:(rr()-0.5)*8,vy:-8-rr()*14,
       t:ws?ws[Math.floor(rr()*ws.length)]:'✦',hue:p.hue,life:1,ph:rr()*7,word:!!ws});
   }
   p.twitch=1;
@@ -403,78 +424,87 @@ var LOW=0,LVL=0,PULSE=0,T=0;
 var flies=[];for(var f=0;f<8;f++)flies.push({x:Math.random()*W,y:40+Math.random()*140,p:Math.random()*7});
 
 function drawHouse(now,hue,playing){
-  /* night sky behind glass */
+  var amp=playing?(0.35+LVL*0.7):0.12;                 // the whole background breathes with the music
+  /* deep sky gradient tinted by the on-air hue */
   var sky=bctx.createLinearGradient(0,0,0,H);
-  sky.addColorStop(0,'#05040c');sky.addColorStop(1,hsl(hue,30,7));
+  sky.addColorStop(0,'#04030a');sky.addColorStop(0.55,hsl(hue,42,6));sky.addColorStop(1,hsl(hue,55,9));
   bctx.fillStyle=sky;bctx.fillRect(0,0,W,H);
-  var rr=seedFor('sky2');
-  for(var st=0;st<50;st++){bctx.fillStyle='rgba(255,255,255,'+(0.1+0.5*rr()*Math.abs(Math.sin(now+st)))+')';
-    bctx.fillRect(px(rr()*W),px(rr()*90),1,1);}
-  /* back glass panes */
-  bctx.strokeStyle='rgba(120,160,140,.14)';
-  for(var gx=0;gx<W;gx+=48){bctx.beginPath();bctx.moveTo(gx-scrollX%48,14);bctx.lineTo(gx-scrollX%48,H);bctx.stroke();}
-  bctx.beginPath();bctx.moveTo(0,96);bctx.lineTo(W,96);bctx.stroke();
-  /* roof arc + grow-lights */
-  bctx.fillStyle='#0c0c12';bctx.fillRect(0,0,W,10);
-  bctx.strokeStyle='#242430';bctx.beginPath();bctx.moveTo(0,10);bctx.lineTo(W,10);bctx.stroke();
-  for(var gl=0;gl<7;gl++){
-    var lx=28+gl*56-((scrollX*0.4)%56);
-    bctx.fillStyle='#1c1c26';bctx.fillRect(px(lx-1),10,2,7);
-    var on=playing?(0.5+LVL*0.5):0.18;
-    bctx.fillStyle=hsl(hue,90,60,on);bctx.fillRect(px(lx-4),17,8,3);
-    var cone=bctx.createRadialGradient(lx,20,2,lx,20,46);
-    cone.addColorStop(0,hsl(hue,90,60,on*0.15));cone.addColorStop(1,'transparent');
-    bctx.fillStyle=cone;bctx.fillRect(px(lx-46),14,92,80);
+  /* AURORA bands — reactive background waves that swell on the beat */
+  for(var a=0;a<3;a++){
+    bctx.strokeStyle=hsl((hue+a*28)%360,80,55,0.05+amp*0.13);
+    bctx.lineWidth=9+a*7;
+    bctx.beginPath();
+    var yy=H*0.16+a*H*0.1+Math.sin(now*0.6+a)*10;
+    for(var xx=0;xx<=W;xx+=8){var yb=yy+Math.sin(xx*0.03+now*(1.0+a*0.35))*(6+amp*26);
+      if(xx===0)bctx.moveTo(xx,yb);else bctx.lineTo(xx,yb);}
+    bctx.stroke();
   }
-  /* shelves */
-  [126,190].forEach(function(sy){
-    bctx.fillStyle='#3a2b22';bctx.fillRect(0,sy,W,5);
-    bctx.fillStyle='#241a12';bctx.fillRect(0,sy+5,W,2);
-    for(var lg=24;lg<W;lg+=96){bctx.fillStyle='#241a12';bctx.fillRect(px(lg-(scrollX%96)),sy+7,4,H);}
-  });
-  /* floor */
-  bctx.fillStyle='#0e0e14';bctx.fillRect(0,205,W,11);
+  bctx.lineWidth=1;
+  /* stars twinkling in the upper sky */
+  var rr=seedFor('sky2');
+  for(var st=0;st<44;st++){bctx.fillStyle='rgba(255,255,255,'+(0.08+0.5*rr()*Math.abs(Math.sin(now+st)))+')';
+    bctx.fillRect(px(rr()*W),px(rr()*H*0.45),1,1);}
+  /* faint vertical glass mullions */
+  bctx.strokeStyle='rgba(120,160,140,.10)';
+  for(var gx=X0;gx<W;gx+=GAP){bctx.beginPath();bctx.moveTo(px(gx),0);bctx.lineTo(px(gx),H);bctx.stroke();}
+  /* the shelves that are on screen, each with its own grow-light bar + reactive cone */
+  var rows=rowsN();
+  for(var row=0;row<rows;row++){
+    var sy=shelfY(row)-scrollY; if(sy<-40||sy>H+60)continue;
+    var ly=sy-62;                                       // grow-light strip above the shelf
+    for(var gl=0;gl<COLS;gl++){
+      var lx=X0+(gl+0.5)*GAP, on=playing?(0.4+LVL*0.6):0.16;
+      bctx.fillStyle='#1c1c26';bctx.fillRect(px(lx-1),px(ly-6),2,6);
+      bctx.fillStyle=hsl(hue,90,60,on);bctx.fillRect(px(lx-5),px(ly),10,2);
+      var cone=bctx.createRadialGradient(lx,ly+2,2,lx,ly+2,44);
+      cone.addColorStop(0,hsl(hue,90,60,on*0.16));cone.addColorStop(1,'transparent');
+      bctx.fillStyle=cone;bctx.fillRect(px(lx-44),px(ly),88,78);
+    }
+    /* the plank the pots sit on */
+    bctx.fillStyle='#3a2b22';bctx.fillRect(0,px(sy+13),W,5);
+    bctx.fillStyle='#241a12';bctx.fillRect(0,px(sy+18),W,2);
+  }
 }
 
 function drawFx(now,hue){
   fctx.clearRect(0,0,FW,FH);fctx.textBaseline='top';
   /* word spores drifting to the glass */
   for(var i=spores.length-1;i>=0;i--){var sp=spores[i];
-    sp.y+=sp.vy*0.016;sp.vy*=0.985;sp.vy-=6*0.016;
-    sp.wx+=sp.vx*0.016;sp.vx+=Math.sin(now*2+sp.ph)*0.4;
+    sp.wy+=sp.vy*0.016;sp.vy*=0.985;sp.vy-=6*0.016;
+    sp.x+=sp.vx*0.016;sp.vx+=Math.sin(now*2+sp.ph)*0.4;
     sp.life-=0.005;
-    var sxx=sp.wx-scrollX;
-    if(sp.life<=0||sp.y<12){spores.splice(i,1);continue;}
-    if(sxx<-30||sxx>W+30)continue;
+    var sxx=sp.x, syy=sp.wy-scrollY;
+    if(sp.life<=0){spores.splice(i,1);continue;}
+    if(sxx<-30||sxx>W+30||syy<-20||syy>H+20)continue;
     var a=Math.min(1,sp.life*1.5);
     if(sp.word){
       fctx.font=(5.5*S)+'px VT323';fctx.textAlign='center';
       fctx.fillStyle=hsl(sp.hue,90,70,a);
       fctx.shadowColor=hsl(sp.hue,90,60);fctx.shadowBlur=3;
-      fctx.fillText(sp.t,sxx*S,sp.y*S);fctx.shadowBlur=0;fctx.textAlign='left';
+      fctx.fillText(sp.t,sxx*S,syy*S);fctx.shadowBlur=0;fctx.textAlign='left';
     }else{
       fctx.fillStyle=hsl(sp.hue,90,70,a);
-      fctx.fillRect(sxx*S,sp.y*S,S,S);
+      fctx.fillRect(sxx*S,syy*S,S,S);
     }}
   /* nameplates under pots */
   fctx.font=(4.5*S)+'px "Press Start 2P"';fctx.textAlign='center';
   PLANTS.forEach(function(p){
-    var q=potPos(p);if(q.x<-30||q.x>W+30)return;
+    var q=potPos(p);if(q.y<-30||q.y>H+30)return;
     var r=RAD(),onAir=r&&r.playing&&r.playing()&&r.slug()===p.slug;
     var st=stageOf(p);
     fctx.fillStyle=onAir?'#b6ff00':(st>=10?hsl(50,90,60):'#5a5a5a');
     var nm=p.name.length>10?p.name.slice(0,9)+'…':p.name;
-    fctx.fillText(nm,q.x*S,(q.y+16)*S);
+    fctx.fillText(nm,q.x*S,(q.y+22)*S);
   });
   fctx.textAlign='left';
   /* hover glint */
-  if(hover){var q2=potPos(hover);
+  if(hover){var q2=potPos(hover),hw=GAP*0.46;
     fctx.strokeStyle='rgba(182,255,0,.8)';fctx.lineWidth=Math.max(1,S*0.4);
-    fctx.strokeRect((q2.x-15)*S,(q2.y-stageOf(hover)*4.5-30)*S,30*S,(stageOf(hover)*4.5+46)*S);}
-  /* fireflies */
+    fctx.strokeRect((q2.x-hw)*S,(q2.y-stageOf(hover)*4.5-30)*S,hw*2*S,(stageOf(hover)*4.5+46)*S);}
+  /* fireflies drifting through the whole tower */
   flies.forEach(function(fl){fl.x+=Math.sin(now*0.7+fl.p)*0.3;fl.y+=Math.cos(now*0.5+fl.p)*0.2;
     fctx.fillStyle=hsl(75,90,65,0.3+0.5*Math.abs(Math.sin(now*2+fl.p)));
-    fctx.fillRect(((fl.x%W+W)%W)*S,fl.y*S,S,S);});
+    fctx.fillRect(((fl.x%W+W)%W)*S,((fl.y%H+H)%H)*S,S,S);});
 }
 
 var last=performance.now(),sunToast=0;
@@ -503,6 +533,26 @@ function loop(nowMs){
     drawPlant(p,T,g,onAir);
   });
   drawFx(T,hue);
+  drawPreview();
+}
+
+/* the plaque's live plant portrait — zooms the on-canvas plant into the info window
+   (pixel-for-pixel from the bg canvas, so it's the exact same specimen, evolving live) */
+var pqC=document.getElementById('pqCanvas'),pqx=pqC.getContext('2d');
+function drawPreview(){
+  if(!SEL||!pq.classList.contains('on'))return;
+  var q=potPos(SEL),st=stageOf(SEL);
+  var sc=(0.35+st*0.062),hgt=Math.min(46,(11+st*3.4)*sc*1.35);
+  var bw=Math.max(40,GAP*0.95),bh=hgt+34,bx=q.x-bw/2,by=q.y-hgt-16;
+  pqx.imageSmoothingEnabled=false;
+  pqx.clearRect(0,0,pqC.width,pqC.height);
+  pqx.fillStyle='#06070a';pqx.fillRect(0,0,pqC.width,pqC.height);
+  if(q.y>-60&&q.y<H+60&&bx>=0&&bx+bw<=W&&by>=0){
+    pqx.drawImage(bg,bx,by,bw,bh,6,6,pqC.width-12,pqC.height-12);
+  } else {
+    pqx.fillStyle='#5a5a5a';pqx.font='8px "Press Start 2P"';pqx.textAlign='center';
+    pqx.fillText('scroll to it_',pqC.width/2,pqC.height/2);pqx.textAlign='left';
+  }
 }
 requestAnimationFrame(loop);
 </script>
