@@ -181,15 +181,18 @@
     var h=0; for(var i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
     return "--wsec:"+(4.5+(h%3))+"s;--wdel:-"+((h>>>3)%4)+"s";
   }
-  var pickedRoom=null;      // the member's chosen env (aqua/terrarium/transit) — only that one is theirs
+  var pickedRoom=null, signedIn=false, ownerAcct=false;   // the member's chosen env — only that one is theirs
   function card(g){
     var soon=g.status==="soon";
-    /* env rooms: locked if the member picked a DIFFERENT one; your pick shows YOUR ROOM */
-    var roomLocked = !!(g.env && pickedRoom && g.env!==pickedRoom);
-    var isMyRoom   = !!(g.env && pickedRoom && g.env===pickedRoom);
+    /* env rooms are MEMBERS-ONLY and EXCLUSIVE: unlocked only if it's the member's own pick
+       (or the owner). Guests + members-with-a-different-pick see it locked. */
+    var isMyRoom   = !!(g.env && (ownerAcct || (signedIn && pickedRoom===g.env)));
+    var roomLocked = !!(g.env && !isMyRoom);
     var isLocked = !soon && ((g.item && !owned[g.item]) || roomLocked);
     var tagKey = soon?"soon":(isLocked?"locked":(isMyRoom?"live":"live"));
-    var byText = roomLocked ? "you chose "+(pickedRoom.toUpperCase())+" — one room only_"
+    var byText = roomLocked ? (!signedIn ? "members only — join to pick a room_"
+                              : (pickedRoom ? "you chose "+pickedRoom.toUpperCase()+" — one room only_"
+                                            : "pick your room on your profile_"))
                : (isLocked&&g.earn ? g.earn : g.by);
     var prText = soon?"SOON":(isLocked?"LOCKED":(isMyRoom?"YOUR ROOM":"FREE"));
     var inner='<span class="spine"></span>'
@@ -203,14 +206,17 @@
         +'<div class="brow"><span class="barcode"></span><span class="pr">'+prText+'</span></div></div>';
     var style=' style="'+wobbleVars(g.name)+'"';
     if(soon) return '<div class="case soon"'+style+'>'+inner+'</div>';
-    /* a locked env room points at your profile (to enter your own room); earned games → member */
-    if(isLocked) return '<a class="case live locked" href="'+(roomLocked?'../room/':'../member/')+'"'+style+'>'+inner+'</a>';
+    /* locked env room → join (guest) or your profile (signed in); earned games → member */
+    if(isLocked) return '<a class="case live locked" href="'+(roomLocked?(signedIn?'../room/':'../member/?login=1'):'../member/')+'"'+style+'>'+inner+'</a>';
     return '<a class="case live" href="'+g.url+'"'+style+'>'+inner+'</a>';
   }
   function render(){
     var live=GAMES.filter(function(g){return g.status==="live";}),
         soon=GAMES.filter(function(g){return g.status==="soon";});
-    var unlockedCount=live.filter(function(g){return !g.item||owned[g.item];}).length;
+    var unlockedCount=live.filter(function(g){
+      if(g.env) return ownerAcct||(signedIn&&pickedRoom===g.env);   // env rooms: only your pick counts
+      return !g.item||owned[g.item];
+    }).length;
     document.getElementById("store").innerHTML=
        '<div class="shelfhead">▶ AVAILABLE NOW <span class="cnt">'+unlockedCount+'/'+live.length+' UNLOCKED</span></div>'
       +'<div class="shelf">'+live.map(card).join('')+'</div>'
@@ -232,13 +238,14 @@
     var sb=window.supabase.createClient(SB_URL,SB_KEY);
     sb.auth.getSession().then(function(res){
       var sess=res.data.session;
-      if(!sess) return;                              // not logged in → stays all-locked (except chess)
+      if(!sess) return;                              // not logged in → env rooms + games stay locked
+      signedIn=true;
       /* the owner's account: every room open, no inventory check needed */
       var isOwner=((sess.user&&sess.user.email)||'').toLowerCase()==='droguepuissance4@gmail.com';
+      ownerAcct=isOwner;
       /* which room did they pick? (env) — only that one is theirs */
       sb.rpc("my_profile").then(function(p){
         var prof=p&&p.data; pickedRoom=(prof&&prof.room&&prof.room.env)||pickedRoom;
-        if(isOwner)pickedRoom=null;                   // owner sees all rooms open
         render();
       }).catch(function(){});
       if(isOwner){ GAMES.forEach(function(g){ if(g.item) owned[g.item]=true; }); render(); return; }
