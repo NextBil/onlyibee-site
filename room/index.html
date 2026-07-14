@@ -271,6 +271,33 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .login .or{color:#555;font-family:var(--px);font-size:7px;letter-spacing:2px;margin:12px 0 8px}
 .login .msg{color:var(--dim);font-size:15px;margin-top:8px}
 
+/* ---------- COLLECTION SNIPPET strip (rotating 3D pieces) ---------- */
+.collstrip{width:100%;border:1px solid var(--border);background:rgba(12,12,14,.85);padding:10px 12px}
+.collstrip .csh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:center}
+.collstrip .csall{color:hsl(var(--hue),95%,68%);text-decoration:none;font-size:7px}
+.csrow{display:flex;gap:12px;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.csitm{flex:none;width:60px;text-align:center}
+.csitm .cs3{perspective:180px;width:44px;height:44px;margin:0 auto 5px}
+.csitm .cs3 i{display:block;width:100%;height:100%;font-style:normal;font-size:30px;line-height:44px;
+  transform-style:preserve-3d;animation:spin3d var(--d,5s) linear infinite}
+.csitm .csn{font-family:var(--px);font-size:5.5px;color:var(--dim);line-height:1.5;letter-spacing:.5px}
+.csitm.locked{opacity:.4}.csitm.locked .cs3 i{filter:grayscale(1) brightness(.5)}
+
+/* ---------- ROOM PORTAL: enter your living world ---------- */
+.roomportal{width:100%;display:flex;align-items:center;gap:14px;text-decoration:none;
+  border:2px solid hsla(var(--hue),60%,50%,.6);background:
+    radial-gradient(ellipse at 15% 50%,hsla(var(--hue),80%,35%,.28),rgba(10,10,12,.9) 70%);
+  padding:14px 16px;box-shadow:0 0 calc(14px + var(--mb,0)*26px) hsla(var(--mh,var(--hue)),90%,45%,.25)}
+.roomportal:hover{border-color:hsl(var(--hue),95%,60%)}
+.roomportal .rpico{font-size:34px;flex:none;filter:drop-shadow(0 0 8px hsla(var(--hue),90%,55%,.6));
+  transform:scale(calc(1 + var(--mb,0)*.08));transition:transform .1s linear}
+.roomportal .rptxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.roomportal .rpn{font-family:var(--px);font-size:11px;color:hsl(var(--hue),95%,72%);letter-spacing:1px;line-height:1.4}
+.roomportal .rpd{color:#b8b8b8;font-size:15px;line-height:1.3}
+.roomportal .rpgo{font-family:var(--px);font-size:9px;color:#000;background:hsl(var(--hue),95%,60%);
+  padding:11px 12px;white-space:nowrap;flex:none}
+
 /* drawer tabs (FURNITURE | COLLECTION) */
 .dtabs{display:flex;gap:8px;margin-bottom:10px}
 .dtab{font-family:var(--px);font-size:7px;padding:8px 10px;border:1px solid var(--border);background:transparent;
@@ -317,11 +344,24 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="scr"><div class="k">VAULT</div><div class="v" id="scVault">—</div><div class="sub" id="scVaultSub"></div></div>
   </div>
 
+  <!-- COLLECTION SNIPPET: a strip of the member's collectibles, rotating in 3D -->
+  <div class="collstrip crtin" id="collstrip" style="display:none">
+    <div class="csh">// MY COLLECTION_ <a href="../member/inventory/" class="csall">SEE ALL ▸</a></div>
+    <div class="csrow" id="csrow"></div>
+  </div>
+
   <div class="titlebar crtin" id="titlebar" style="display:none">
     <div class="rn" id="roomname">—</div>
     <div class="tbtns" id="tbtns"></div>
     <div class="sub" id="roomsub"></div>
   </div>
+
+  <!-- ROOM PORTAL: enter the living environment you picked (aqua / terrarium / transit) -->
+  <a class="roomportal crtin" id="roomportal" style="display:none" href="#">
+    <span class="rpico" id="rpico">🌿</span>
+    <span class="rptxt"><span class="rpn" id="rpn">YOUR ROOM</span><span class="rpd" id="rpd">enter your world_</span></span>
+    <span class="rpgo">ENTER ▸</span>
+  </a>
 
   <div id="stagewrap" class="crtin" style="display:none">
     <div id="stage">
@@ -348,12 +388,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div id="newlist"></div>
   </div>
 
-  <!-- BADGES -->
-  <div class="box crtin" id="badgebox" style="display:none">
-    <div class="h" id="badgehead">// BADGES_</div>
-    <div class="badges" id="badges"></div>
-  </div>
-
   <div class="box crtin" id="sharebox" style="display:none">
     <div class="h">// SHARE MY ROOM_</div>
     <div class="sharebar"><input id="sharelink" readonly value=""><button class="tb solid" id="sharecopy" style="border:0">COPY</button></div>
@@ -364,6 +398,12 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="h">// GUESTBOOK_</div>
     <div id="glist"><div class="cnote">loading…</div></div>
     <div id="gwritewrap"></div>
+  </div>
+
+  <!-- BADGES: at the very end of the profile (per 2026-07-13 direction) -->
+  <div class="box crtin" id="badgebox" style="display:none">
+    <div class="h" id="badgehead">// BADGES_</div>
+    <div class="badges" id="badges"></div>
   </div>
 
   <div class="ob crtin" id="ob" style="display:none"></div>
@@ -404,6 +444,22 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
      Each kind is a whole vibe: palette, a shelf, a founding relic that will never be
      obtainable again outside this kind (rare-item culture), and a starter layout. */
   var KINDS={
+    /* THE THREE ROOMS the user picks (2026-07-13) — each maps to a living environment
+       (arcade/<env>/) that grows with them. The iso room here is the decorated home;
+       env is the world they enter. */
+    aqua:{n:"AQUA BASS",env:"aqua",hue:195,fA:"#0a1622",fB:"#081019",wall:"#0c1c2a",wall2:"#081420",
+      d:"for fish-passionate music — who dropped a speaker in the ocean?",
+      items:["telescope","planet","boombox"],relic:"relic-aqua",
+      layout:[{i:"boombox",x:5,y:1,f:1},{i:"vinyl",x:1,y:2,f:0},{i:"plant",x:6,y:4,f:0}]},
+    terrarium:{n:"TERRARIUM",env:"terrarium",hue:130,fA:"#0a180e",fB:"#08120b",wall:"#0c1e12",wall2:"#09160d",
+      d:"for gardeners — watch your plant evolve…",
+      items:["cactus","fern","mushroom"],relic:"relic-terra",
+      layout:[{i:"fern",x:1,y:1,f:0},{i:"cactus",x:6,y:2,f:0},{i:"mushroom",x:2,y:4,f:1}]},
+    transit:{n:"MIDNIGHT TRANSIT",env:"transit",hue:250,fA:"#0e1020",fB:"#0a0c1a",wall:"#101228",wall2:"#0b0d1e",
+      d:"a late-night train, destination to…",
+      items:["clapper","crt","oldradio"],relic:"relic-transit",
+      layout:[{i:"crt",x:4,y:1,f:0},{i:"sofa",x:2,y:3,f:1},{i:"oldradio",x:6,y:4,f:0}]},
+    /* --- legacy kinds kept so existing rooms still render (no longer offered at pick) --- */
     garage:{n:"MIDNIGHT GARAGE",hue:190,fA:"#101820",fB:"#0c121a",wall:"#0e1a24",wall2:"#0a141c",
       d:"concrete, chrome and one bare bulb — the band practices here.",
       items:["moto","toolbox","tire"],relic:"relic-garage",
@@ -445,6 +501,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     "relic-garage":{e:"🔧",n:"FOUNDER WRENCH",rare:1},"relic-attic":{e:"🗝️",n:"ATTIC KEY",rare:1},
     "relic-vhs":{e:"📹",n:"FIRST TAPE",rare:1},"relic-moon":{e:"🌑",n:"MOON STONE",rare:1},
     "relic-cellar":{e:"🕰️",n:"CELLAR CLOCK",rare:1},"relic-green":{e:"🌱",n:"FIRST SEED",rare:1},
+    "relic-aqua":{e:"🐚",n:"FIRST SHELL",rare:1},"relic-terra":{e:"🌱",n:"FIRST SEED",rare:1},"relic-transit":{e:"🎫",n:"FIRST TICKET",rare:1},
     "press001":{e:"💿",n:"PRESSING 001",rare:1}
   };
   var BASICS=["sofa","chair","plant","lamp","tv","boombox","vinyl","guitar","books","cat","mic","headset","candle","arcade","skate","phone"];
@@ -535,8 +592,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   function starterRoom(kind){
     var K=KINDS[kind];
-    return {v:1,k:kind,tiles:JSON.parse(JSON.stringify(K.layout)),shelf:[K.relic,"press001"]};
+    return {v:1,k:kind,env:K.env||null,tiles:JSON.parse(JSON.stringify(K.layout)),shelf:[K.relic,"press001"]};
   }
+  var PICKS=["aqua","terrarium","transit"];   // the three rooms offered at sign-up (fixed, in order)
   function myItems(){                          // what the owner may place
     var K=KINDS[(ROOM&&ROOM.k)||"attic"];
     return BASICS.concat(K?K.items:[]);
@@ -588,7 +646,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     ROOM.shelf=ROOM.shelf||[]; var changed=false;
     collectionIds().forEach(function(id){ var s='inv:'+id;
       if(ROOM.shelf.indexOf(s)<0&&ROOM.shelf.length<8){ ROOM.shelf.push(s); changed=true; } });
-    renderItems(); renderDrawer(); renderStats();
+    renderItems(); renderDrawer(); renderStats(); renderCollStrip();
     if(changed){ markDirty(); toast("COLLECTION ON THE SHELF_"); }
   }
 
@@ -769,6 +827,30 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var vo=vaultOpen(); $("scVault").textContent=vo?"OPEN":"SEALED"; $("scVaultSub").textContent=vo?"discovered":"still hidden";
     $("screens").style.display="";
   }
+  /* the rotating collection snippet — owned pieces spin in colour, the rest greyed to entice */
+  var ENVICO={aqua:"🐠",terrarium:"🌿",transit:"🚈"};
+  function renderCollStrip(){
+    var owned=collectionIds(), all=Object.keys(INVMETA);
+    var list=all.filter(function(id){return owned.indexOf(id)>=0;})
+              .concat(all.filter(function(id){return owned.indexOf(id)<0;})).slice(0,8);
+    $("csrow").innerHTML=list.map(function(id,i){ var d=INVMETA[id], on=owned.indexOf(id)>=0;
+      return '<div class="csitm'+(on?'':' locked')+'" title="'+e2(d.n)+'"><div class="cs3" style="--d:'+(4.4+(i%4)*0.8)+'s"><i>'+d.e+'</i></div>'
+        +'<div class="csn">'+e2(on?d.n:'???')+'</div></div>';
+    }).join('');
+    $("collstrip").style.display= list.length? "" : "none";
+  }
+  /* the portal to the living environment the member picked (aqua / terrarium / transit) */
+  function renderPortal(){
+    var env=ROOM.env, p=$("roomportal");
+    if(!env){ p.style.display="none"; return; }
+    var K=KINDS[ROOM.k]||{};
+    p.href="../arcade/"+env+"/";
+    $("rpico").textContent=ENVICO[env]||"⌂";
+    $("rpn").textContent="YOUR ROOM · "+(K.n||env.toUpperCase());
+    $("rpd").textContent=(K.d||"enter your world_")+" — it grows with you_";
+    p.style.display="";
+  }
+
   function renderBadges(){
     var B=window.IBEE_BADGES; if(!B){ return; }
     var bst=B.state(), P=B.snapshot(), nEarn=0;
@@ -850,9 +932,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         if(navigator.share){navigator.share({title:"my room on ONLY IBEE",url:link}).catch(function(){});}
         try{navigator.clipboard.writeText(link);toast("LINK COPIED_");}catch(e){}
       };
-      renderIdentity(prof); renderStats(); renderBadges(); renderNew();
+      renderIdentity(prof); renderStats(); renderBadges(); renderNew(); renderCollStrip(); renderPortal();
     } else {
       tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY PROFILE":"✦ GET YOUR OWN ROOM")+'</a>';
+      renderPortal();   /* visitors see (and can enter) the room's world too */
     }
     $("stagewrap").style.display="";
     geom=drawRoom(ROOM.k);
@@ -897,13 +980,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }
     if(step==='pick'){
       var nm=keep;
-      /* 3 of the 6 kinds, randomized per account — every new member sees a different shelf of doors */
-      var all=Object.keys(KINDS), seed=hash((ME&&ME.user.id)||String(Date.now())), offer=[];
-      var pool=all.slice();
-      for(var i=0;i<3;i++){ var j=(seed>>> (i*5))%pool.length; offer.push(pool.splice(j,1)[0]); }
-      ob.innerHTML='<div class="bigh">CHOOSE YOUR ROOM_</div>'
-        +'<div class="cnote">hey <b style="color:var(--acid)">'+e2(nm)+'</b> — three doors opened for you (every member gets a different three). '
-        +'each room comes with a shelf and a founding relic that will never be sold_</div>'
+      /* the three rooms — AQUA BASS · TERRARIUM · MIDNIGHT TRANSIT (fixed choice, 2026-07-13) */
+      var offer=PICKS.slice();
+      ob.innerHTML='<div class="bigh">PICK YOUR ROOM_</div>'
+        +'<div class="cnote">hey <b style="color:var(--acid)">'+e2(nm)+'</b> — pick your room wisely. '
+        +'it will grow with you and the art. it lives on your profile — you\'ll come back to check on it_</div>'
         +'<div class="picks">'+offer.map(function(k,ki){var K=KINDS[k],art=miniRoomSVG(K);
           return '<button class="pick" data-k="'+k+'" style="border-color:hsla('+K.hue+',60%,45%,.6);'
             +'--pglow:hsla('+K.hue+',90%,55%,.45);--pdur:'+(6.2+ki*0.9)+'s">'
