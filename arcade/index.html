@@ -1,780 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>ONLY IBEE — music, played as a world</title>
-<meta name="description" content="Only Ibee — a genre-blending artist and a playable music console. Alternative RnB, soul and hip hop across a reactive universe, arcade games, karaoke lyrics, ICS characters and UTOPIE clothing.">
-<link rel="canonical" href="https://onlyibee.com/">
+<!-- ===== favicon (bishop 1) ===== -->
 <link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
 <link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
 <meta name="theme-color" content="#070707">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="ONLY IBEE">
-<meta property="og:title" content="ONLY IBEE — music, played as a world">
-<meta property="og:description" content="A playable music console: every page reacts to the song. Music, games, lyrics, ICS characters, UTOPIE clothing.">
-<meta property="og:url" content="https://onlyibee.com/">
 <meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
 <meta name="twitter:card" content="summary">
-<!-- structured data: tells Google this is the artist Only Ibee. Add your real social URLs to sameAs for stronger branded search. -->
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"MusicGroup","name":"Only Ibee","alternateName":"ONLYIBEE",
-"url":"https://onlyibee.com/","image":"https://onlyibee.com/assets/chess/bishop1.png",
-"genre":["Alternative RnB","Soul","Hip Hop"],
-"description":"Only Ibee — genre-blending artist and creative world: music, UTOPIE clothing, ICS characters, presented as a playable music console where every page reacts to the song.",
-"sameAs":[]}
-</script>
+<meta name="twitter:image" content="https://onlyibee.com/assets/chess/bishop1.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROOMS — ONLYIBEE</title>
+<meta name="description" content="ONLYIBEE ROOMS — creative, artistic ways to listen to music. Games and worlds starring the ICS characters.">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-<!--
-  ONLYIBEE — persistent app shell.
-  Top = section nav (fills the bar). Bottom = the radio player: song title, transport,
-  seek, + spinning LYRICS / UNIVERSE shortcuts. Music never auto-starts; the whole site
-  rides one radio and player.js's neon frame (#nf) glows around the screen edges.
--->
 <style>
-  :root{--bg:#070707;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;--pink:#ff2bd6;--cyan:#26e0ff;
-    --border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+  :root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
+    --pink:#ff2bd6;--cyan:#26e0ff;--gold:#d9b36c;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace;}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--vt);color:var(--ink)}
-  /* keep player.js's own chip + panel hidden — we draw our own bars. KEEP #nf (the glow). */
-  #radiochip,#radiopanel{display:none!important}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;overflow-x:hidden}
+  ::selection{background:var(--acid);color:#000}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.26) 0 1px,transparent 1px 3px)}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+    background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.55) 100%)}
 
-  #app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;
+    border-bottom:2px solid var(--border);font-family:var(--px);font-size:11px;position:relative;z-index:50}
+  header a{color:var(--acid);text-decoration:none}
+  header a .r{color:var(--red)}
+  header .sys{color:var(--dim);font-size:9px;text-align:right;line-height:1.6}
 
-  /* ---- top bar: nav fills the width ---- */
-  #bar{display:flex;background:#000;border-bottom:2px solid var(--border);position:relative;z-index:20}
-  #nav{display:flex;flex:1;overflow-x:auto;scrollbar-width:none;min-width:0}
-  #nav::-webkit-scrollbar{display:none}
-  #nav button{font-family:var(--px);font-size:9px;color:var(--dim);background:transparent;border:0;
-    border-right:1px solid #161616;padding:13px 11px;cursor:pointer;white-space:nowrap;flex:1 0 auto}
-  #nav button:hover{color:var(--ink)}
-  #nav button.on{color:#000;background:var(--acid)}
-  /* ---- account pill: pinned outside the scrolling nav — always reachable, anywhere on the site ---- */
-  #acct{flex:none;border-left:1px solid var(--border)}
-  #acct button{font-family:var(--px);font-size:9px;padding:13px 12px;cursor:pointer;white-space:nowrap;
-    display:flex;align-items:center;gap:6px;height:100%}
-  #acct button.login{background:var(--acid);color:#000;border:0}
-  #acct button.login:hover{background:#c9ff33}
-  #acct button.me{background:transparent;color:var(--acid);border:0}
-  #acct button.me:hover{color:#fff}
-  #acct .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 6px var(--acid);flex:none}
-  #acct svg{width:11px;height:11px;flex:none}
+  main{max-width:900px;margin:0 auto;padding:26px 18px 80px}
+  .back{font-family:var(--px);font-size:10px;color:var(--dim);text-decoration:none;display:inline-block;
+    margin-bottom:20px;border:1px solid var(--border);padding:8px 12px}
+  .back:hover{color:var(--acid);border-color:var(--acid)}
+  .scrtitle{font-family:var(--px);font-size:clamp(16px,4vw,24px);margin-bottom:6px;
+    text-shadow:0 0 16px rgba(182,255,0,.25)}
+  .scrtitle .n{color:var(--pink)}
+  .scrsub{color:var(--dim);font-size:20px;margin-bottom:26px}
 
-  /* ---- content ---- */
-  #stage{position:relative;flex:1;overflow:hidden}
-  #frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);
-    opacity:0;transition:opacity .28s ease}
-  #frame.on{opacity:1}
+  /* ---------- the shelf: each room is a retro cassette shell, PS4/Steam-tile store logic ---------- */
+  .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 16px;padding-top:6px}
+  .case{position:relative;display:block;aspect-ratio:3/4;text-decoration:none;color:var(--ink);
+    border:2px solid var(--border);border-radius:7px;background:#0c0c10;overflow:hidden;
+    transition:transform .18s,box-shadow .18s,border-color .18s;
+    animation:wobble var(--wsec,5.5s) ease-in-out var(--wdel,0s) infinite}
+  .case:hover{transform:translateY(-5px) scale(1.03);animation-play-state:paused}
+  @keyframes wobble{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+  /* cassette shell details: top ridge (label), bottom sprocket windows */
+  .case .spine{position:absolute;left:0;top:0;right:0;height:7px;z-index:3;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.13) 0 2px,transparent 2px 6px);
+    border-bottom:1px solid rgba(0,0,0,.6)}
+  .case::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
+    background:linear-gradient(115deg,rgba(255,255,255,.08) 0 10%,transparent 26%)}
+  .case .cover{position:absolute;inset:7px 0 0 0;overflow:hidden;background:#0a0a0e}
+  .case .cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .case .reels{position:absolute;left:0;right:0;bottom:52px;z-index:5;display:flex;justify-content:center;gap:14px;
+    pointer-events:none}
+  .case .reels i{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.5);
+    background:radial-gradient(circle,rgba(0,0,0,.85) 0 35%,transparent 36%);box-shadow:0 0 6px rgba(0,0,0,.7)}
+  .case .bar{position:absolute;left:0;right:0;bottom:0;z-index:5;background:rgba(0,0,0,.88);
+    border-top:2px solid var(--border);padding:9px 10px 10px}
+  .case .nm{font-family:var(--px);font-size:9px;line-height:1.5;color:var(--ink)}
+  .case .by{font-size:15px;color:var(--dim);margin-top:4px}
+  .case .tag{position:absolute;top:12px;right:8px;z-index:5;font-family:var(--px);font-size:7px;
+    padding:4px 6px;background:rgba(0,0,0,.85);display:flex;align-items:center;gap:4px}
+  .case .tag svg{width:9px;height:9px}
 
-  /* ---- bottom: track list (opens above) + player ---- */
-  #bottom{position:relative;z-index:20}
-  #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow-y:auto;
-    background:rgba(0,0,0,.97);border-top:2px solid var(--border);display:none}
-  #tracklist.open{display:block}
-  #tracklist .th{font-family:var(--px);font-size:9px;color:var(--acid);padding:12px 14px;border-bottom:1px solid var(--border);
-    display:flex;justify-content:space-between}
-  #tracklist .th .x{color:var(--dim);cursor:pointer}
-  #tracklist .tr{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;
-    color:var(--dim);font-size:19px;border-bottom:1px solid #141414}
-  /* album art: the record's picture (assets/covers/<song-name>.jpg|png) over a
-     hue-colored vinyl placeholder — no picture, no broken icon, just the vinyl */
-  #tracklist .tr .cv{width:36px;height:36px;flex:none;border-radius:4px;overflow:hidden;
-    border:1px solid #222;position:relative}
-  #tracklist .tr .cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  #tracklist .tr .ti{display:flex;flex-direction:column;min-width:0;line-height:1.15}
-  #tracklist .tr .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  #tracklist .tr .al{font-family:var(--px);font-size:7px;letter-spacing:1px;color:#565656;
-    margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  #tracklist .tr.now .al{color:#6b8f00}
-  #tracklist .tr:hover{background:#0d0d0d;color:var(--ink)}
-  #tracklist .tr.now{color:var(--acid);background:#0d1400}
-  #tracklist .tr .no{font-family:var(--px);font-size:8px;color:#555;width:24px}
-  #tracklist .tr.now .no{color:var(--acid)}
-  #tracklist .tr .rmroom{font-family:var(--px);font-size:7px;color:#000;background:var(--rt,var(--red));padding:5px 6px;flex:none}
-  #tracklist .tr.locked{opacity:.5;cursor:not-allowed}
-  #tracklist .tr.locked .cv{filter:brightness(.4) grayscale(.7)}
-  #tracklist .tr .lk{width:13px;height:13px;flex:none;color:var(--red)}
+  /* live styling per game hue */
+  .case.live{border-color:#39501a}
+  .case.live:hover{border-color:var(--acid);box-shadow:0 0 22px rgba(182,255,0,.32)}
+  .case.live .tag{color:var(--acid);border:1px solid #39501a}
+  .case.live::before{content:"▶";position:absolute;z-index:5;top:50%;left:50%;transform:translate(-50%,-60%);
+    font-size:32px;color:#000;background:rgba(182,255,0,.92);width:60px;height:60px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;
+    box-shadow:0 0 22px rgba(182,255,0,.6)}
+  .case.live:hover::before{opacity:1}
 
-  /* ---- search + grid/list toggle (GRID is the default view) ---- */
-  #tltools{display:flex;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)}
-  #tlsearch{flex:1;background:#0a0a0a;border:1px solid var(--border);color:var(--ink);font-family:var(--vt);
-    font-size:16px;padding:7px 9px;outline:none}
-  #tlsearch:focus{border-color:var(--acid)}
-  #tlsearch::placeholder{color:#555}
-  #tlview{font-family:var(--px);font-size:8px;padding:0 9px;height:31px;flex:none;background:#0e0e0e;
-    color:var(--dim);border:1px solid var(--border);cursor:pointer}
-  #tlview:hover,#tlview.on{border-color:var(--acid);color:var(--acid)}
-  #tlempty{padding:22px 14px;text-align:center;color:#555;font-family:var(--px);font-size:8px;line-height:2;display:none}
+  /* coming soon — greyed out with a SOON stamp */
+  .case.soon{pointer-events:none;border-style:dashed;filter:grayscale(1) brightness(.6);animation:none}
+  .case.soon .cover::after{content:"";position:absolute;inset:0;background:rgba(4,2,10,.5)}
+  .case.soon .tag{color:var(--ink)}
+  .case.soon .lock{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+    font-family:var(--px);font-size:18px;color:#e8e8e8;letter-spacing:2px;text-shadow:0 0 10px #000,0 3px 0 #000}
 
-  /* ---- GO TO THE ROOM: persistent pulsing button for the current special album ---- */
-  #roomband{display:none;padding:8px 14px;border-bottom:1px solid var(--border)}
-  #roomband.show{display:block}
-  #roomband button{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
-    font-family:var(--px);font-size:9px;padding:11px 10px;color:#000;background:var(--rtint,var(--red));
-    border:1px solid var(--rtint,var(--red));letter-spacing:1px;cursor:pointer;animation:roompulse 1.9s ease-in-out infinite}
-  @keyframes roompulse{0%,100%{box-shadow:0 0 6px rgba(255,80,40,.35)}50%{box-shadow:0 0 18px rgba(255,80,40,.75)}}
+  /* ---------- locked-but-owned-later rooms: fully VISIBLE (cover, name, vibe) but dimmed +
+     a flat neon padlock badge — reads like a Steam/PS4 store item you haven't unlocked yet.
+     Still clickable → funnels to member/ to redeem a pass. ---------- */
+  .case.locked{border-color:#3a1616}
+  .case.locked:hover{border-color:var(--red);box-shadow:0 0 20px rgba(255,43,43,.28);animation-play-state:paused}
+  .case.locked .cover{filter:saturate(.25) brightness(.4)}
+  .case.locked .cover::after{content:"";position:absolute;inset:0;background:rgba(20,4,4,.35)}
+  .case.locked .tag{color:var(--red);border:1px solid #3a1414}
+  .case.locked .lockbadge{position:absolute;z-index:6;top:50%;left:50%;transform:translate(-50%,-58%);
+    width:46px;height:46px;border-radius:50%;background:rgba(8,4,4,.78);border:1px solid rgba(255,43,43,.5);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(255,43,43,.35)}
+  .case.locked .lockbadge svg{width:22px;height:22px;color:var(--red);
+    filter:drop-shadow(0 0 6px rgba(255,43,43,.7))}
 
-  /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
-  #tlbody{max-height:52vh;overflow-y:auto}
-  /* minmax(0,1fr) + min-width:0: a long nowrap song name must never widen its column —
-     every cover stays the exact same square (the old 1fr let columns grow with the text) */
-  #tlbody.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:12px}
-  .tl-tile{cursor:pointer;perspective:640px;min-width:0}
-  .tl-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;
-    transform:rotateY(-18deg);transform-origin:center;transition:transform .35s cubic-bezier(.2,.7,.2,1);overflow:hidden}
-  .tl-tile:hover .art{transform:rotateY(0)}
-  .tl-tile.now .art{border-color:var(--acid);box-shadow:0 0 14px rgba(182,255,0,.4)}
-  .tl-tile .art img{width:100%;height:100%;object-fit:cover;display:block}
-  .tl-tile .gtag{position:absolute;left:0;bottom:0;right:0;padding:5px 6px;font-family:var(--vt);font-size:12px;
-    color:#d7d7d7;background:linear-gradient(0deg,rgba(0,0,0,.82),transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tl-tile .gnow{position:absolute;top:6px;left:6px;font-family:var(--px);font-size:7px;color:#000;background:var(--acid);padding:3px 4px}
-  .tl-tile .roomb{position:absolute;top:6px;right:6px;font-family:var(--px);font-size:7px;color:#000;
-    background:var(--rt,var(--red));padding:4px 5px;letter-spacing:.5px}
-  .tl-tile .nm{font-family:var(--px);font-size:8px;color:#cfcfcf;margin-top:7px;line-height:1.5;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tl-tile.now .nm{color:var(--acid)}
-  .tl-tile.locked{cursor:not-allowed}
-  .tl-tile.locked .art img{filter:brightness(.32) grayscale(.75)}
-  .tl-tile.locked .art::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.35)}
-  .tl-tile.locked .lockb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:26px;height:26px;
-    color:var(--red);filter:drop-shadow(0 0 8px rgba(255,43,43,.6))}
-  .tl-tile.locked .nm{color:#5a5a5a}
+  footer{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
+    padding:10px 18px;background:#000;border-top:2px solid var(--border);font-family:var(--px);font-size:9px;color:var(--dim)}
+  footer .a{color:var(--acid)}
 
-  #player{background:#000;border-top:2px solid var(--border);padding:8px 12px 10px;
-    display:flex;flex-direction:column;gap:7px}
-  /* row 1: album cover + song title (clickable → tracks) + time */
-  .pl-top{display:flex;align-items:center;gap:10px}
-  /* the now-playing album cover: real art over a hue-vinyl placeholder (never a broken icon) */
-  #pcover{width:38px;height:38px;flex:none;border-radius:5px;overflow:hidden;border:1px solid var(--border);
-    position:relative;background:radial-gradient(circle,#333 0 20%,#070707 22% 28%,#141414 30% 100%);cursor:pointer}
-  #pcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
-  #nowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;
-    color:var(--acid);font-family:var(--px);font-size:9px;cursor:pointer;text-align:left;padding:0}
-  #nowbtn #rt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  #nowbtn .bd{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;
-    box-shadow:0 0 8px var(--red);transform:scale(var(--b,.5));transition:transform .07s}
-  #time{font-family:var(--px);font-size:8px;color:var(--dim);flex:none}
-  /* seek */
-  #seek{position:relative;height:11px;border:1px solid var(--border);padding:2px;cursor:pointer}
-  #fill{height:100%;width:0%;background:var(--acid)}
-  /* row 2: transport + spinning lyrics/universe shortcuts */
-  .pl-row{display:flex;align-items:center;justify-content:center;gap:7px}
-  .pl-row button{font-family:var(--px);font-size:11px;width:40px;height:40px;background:#0e0e0e;color:var(--ink);
-    border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .pl-row button:hover{border-color:var(--acid);color:var(--acid)}
-  .pl-row button.main{background:var(--acid);color:#000;border-color:var(--acid)}
-  .pl-row button.tgl svg{width:19px;height:19px}
-  .pl-row button.tgl.on{background:var(--acid);color:#000;border-color:var(--acid)}
-  /* the cool rotating icons */
-  .ricon{perspective:120px}
-  .ricon svg{width:24px;height:24px}
-  .ricon.lyr svg{animation:flipY 3s linear infinite;transform-style:preserve-3d}
-  .ricon.uni svg{animation:spin 5.5s linear infinite}
-  .ricon:hover svg{filter:drop-shadow(0 0 6px rgba(182,255,0,.6))}
-  @keyframes flipY{to{transform:rotateY(360deg)}}
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  /* ---- lyrics overlay: opens straight into the dark room. Lines are tappable
-     (jump to that moment); the spinning center button flips to the INFO side —
-     meaning, context, vibe, time-to-create, BPM (from song-meta + beat-data). ---- */
-  #lyr{position:absolute;inset:0;z-index:15;display:none;flex-direction:column;pointer-events:auto;
-    background:rgba(2,2,5,.97)}
-  #lyr.open{display:flex}
-  /* the words are a real scrolling list: it follows the song, but the user can
-     grab it and scroll anywhere — after 4s untouched it eases back to the sung line */
-  #lyr .words{position:relative;flex:1;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain;
-    -webkit-mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);
-    mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent)}
-  #lyr .words::-webkit-scrollbar{display:none}
-  /* floating glyphs behind the words (Lyrics Engine look) + the now-playing header */
-  #lglyphs{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55}
-  #lyr .lnp{text-align:center;padding:22px 16px 4px;position:relative;z-index:2}
-  #lname{font-family:var(--px);font-size:clamp(18px,5.4vw,30px);letter-spacing:2px;
-    color:hsl(var(--songhue,190),95%,68%);text-shadow:0 0 22px hsla(var(--songhue,190),95%,55%,.55);
-    transform:scale(calc(1 + var(--beat,0)*0.06));transition:color .4s}
-  #lmood{color:var(--dim);font-size:19px;margin-top:9px;letter-spacing:2px}
-  #lyr .words{z-index:2}
-  #lyr .stream{text-align:center;padding:14vh 20px 22vh}
-  /* Lyrics-Engine line styling: dim by default, the sung line big + hue-glow +
-     beat-scaled, already-sung lines fade back. Tap a line to jump there. */
-  #lyr .ln{font-size:22px;line-height:1.5;color:#8a8a8a;opacity:.4;margin:14px 0;padding:0 10px;transition:all .35s ease;
-    text-shadow:0 1px 3px #000;cursor:pointer}
-  #lyr .ln:hover{opacity:.85;color:var(--ink)}
-  #lyr .ln.past{opacity:.2}
-  #lyr .ln.on{opacity:1;font-size:28px;color:hsl(var(--songhue,190),95%,72%);
-    text-shadow:0 0 18px hsla(var(--songhue,190),95%,55%,.55);
-    transform:scale(calc(1 + var(--beat,0)*0.05))}
-  #lyr .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    color:var(--dim);font-family:var(--px);font-size:10px;text-align:center;padding:24px}
-  /* ---- INFO side (the record's soul): swaps into the words' slot, bar stays put ---- */
-  #linfo{flex:1;min-height:0;overflow-y:auto;display:none;padding:26px 20px 30px;scrollbar-width:none}
-  #linfo::-webkit-scrollbar{display:none}
-  #lyr.info .words{display:none}
-  #lyr.info #linfo{display:block}
-  #linfo .ih{font-family:var(--px);font-size:13px;color:var(--acid);text-align:center;margin-bottom:12px;
-    text-shadow:0 0 14px rgba(182,255,0,.45)}
-  #linfo .ichips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
-  #linfo .ichips span{font-family:var(--px);font-size:8px;color:var(--cyan);border:1px solid #123a44;
-    padding:6px 8px;background:#061014}
-  #linfo .icard{border:1px solid var(--border);background:rgba(14,14,14,.85);padding:13px 14px;margin-bottom:12px;
-    max-width:640px;margin-left:auto;margin-right:auto}
-  #linfo .ct{font-family:var(--px);font-size:8px;color:var(--acid);margin-bottom:8px;letter-spacing:1px}
-  #linfo .cx{color:#c9c9c9;font-size:20px;line-height:1.5}
-  #linfo .cx.big{font-family:var(--px);font-size:22px;color:var(--pink);text-shadow:0 0 12px rgba(255,43,214,.4)}
-  #linfo .irow{display:flex;gap:12px;max-width:640px;margin:0 auto 12px}
-  #linfo .irow .icard{flex:1;margin:0}
-  #lyr .bottom{pointer-events:auto;background:rgba(0,0,0,.74);border-top:1px solid var(--border);
-    padding:8px 10px 10px;display:flex;flex-direction:column;gap:8px}
-  #lyr .lbar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
-  #lyr .lbar .t{font-family:var(--px);font-size:9px;color:var(--acid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38%}
-  #lyr .lbar .btns{display:flex;gap:6px;flex:none}
-  #lyr .lbar button{background:#0e0e0e;border:1px solid var(--border);color:var(--ink);cursor:pointer;
-    width:40px;height:34px;display:flex;align-items:center;justify-content:center;font-family:var(--px);font-size:11px}
-  #lyr .lbar button:hover{border-color:var(--acid);color:var(--acid)}
-  #lyr .lbar button svg{width:20px;height:20px}
-  /* full-screen button: dead center of the bar, spinning like the other ricons */
-  #lyr .lbar #lfs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-  #lyr .lbar #lfs svg{animation:spin 6s linear infinite}
-  #lyr .lbar #lfs:hover svg{filter:drop-shadow(0 0 6px rgba(182,255,0,.6))}
-  #lyr .songbox{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-  #lyr .songbox::-webkit-scrollbar{display:none}
-  #lyr .songbox button{font-family:var(--px);font-size:8px;white-space:nowrap;flex:none;
-    background:#0e0e0e;color:var(--dim);border:1px solid var(--border);padding:8px 9px;cursor:pointer}
-  #lyr .songbox button.now{color:#000;background:var(--acid);border-color:var(--acid)}
-
-  /* ---- PRESS START intro (just enters — no music autostart) ---- */
-  #enter{position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:26px;cursor:pointer;text-align:center;padding:24px;font-family:var(--px)}
-  #enter .g{color:var(--acid);font-size:clamp(24px,8vw,48px);letter-spacing:2px;text-shadow:0 0 22px rgba(182,255,0,.55)}
-  #enter .g .r{color:var(--red)}
-  #enter .t{color:var(--dim);font-size:11px;line-height:1.8}
-  #enter .s{color:var(--ink);font-size:13px;animation:bk 1.1s steps(1) infinite}
-  @keyframes bk{50%{opacity:0}}
+  /* ---------- game-store dressing ---------- */
+  .storebar{overflow:hidden;border:1px solid var(--border);background:#0a0a0e;margin:6px 0 8px;position:relative}
+  .storebar .run{display:inline-block;white-space:nowrap;font-family:var(--px);font-size:9px;padding:9px 0;animation:mq 22s linear infinite}
+  .storebar .run span{margin:0 20px;color:var(--ink)}
+  .storebar .run .r{color:var(--red)} .storebar .run .c{color:var(--acid)} .storebar .run .y{color:var(--gold)}
+  @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .shelfhead{font-family:var(--px);font-size:11px;color:var(--acid);letter-spacing:1px;margin:24px 0 12px;
+    display:flex;align-items:center;gap:12px;text-shadow:0 0 12px rgba(182,255,0,.3)}
+  .shelfhead::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--acid),transparent);opacity:.5}
+  .shelfhead.soon{color:var(--dim);text-shadow:none}
+  .shelfhead.soon::after{background:linear-gradient(90deg,var(--border),transparent)}
+  .shelfhead .cnt{font-size:8px;color:var(--dim);letter-spacing:0}
+  .ribbon{position:absolute;top:12px;left:-32px;z-index:6;transform:rotate(-38deg);background:var(--red);color:#fff;
+    font-family:var(--px);font-size:7px;padding:3px 34px;letter-spacing:1px;box-shadow:0 0 10px rgba(255,43,43,.6)}
+  .case .brow{display:flex;align-items:center;gap:8px;margin-top:7px}
+  .case .barcode{flex:1;height:12px;background-image:repeating-linear-gradient(90deg,#d8d8d8 0 1px,transparent 1px 3px,#d8d8d8 3px 4px,transparent 4px 6px,#d8d8d8 6px 9px,transparent 9px 10px);opacity:.45}
+  .case.soon .barcode{opacity:.16}
+  .case .pr{font-family:var(--px);font-size:8px;color:var(--acid);flex:none}
+  .case.soon .pr{color:#666}
 </style>
 </head>
 <body>
-<!-- crawlable content for search engines (the app is JS/canvas Google can't read).
-     Screen-reader/crawler-only: 1px + clipped, so it's in the DOM and indexable but takes
-     ZERO visible space and can never flash on screen during page transitions. -->
-<div id="seo" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap;border:0">
-  <h1>ONLY IBEE</h1>
-  <p>Only Ibee is a genre-blending artist and creative world — alternative RnB, soul and hip hop — built as a playable music console where every page reacts to the song that's playing.</p>
-  <h2>The world</h2>
-  <ul>
-    <li>Music Universe — galaxies of releases, planets you can play</li>
-    <li>Lyrics Engine — synced karaoke lyrics and the story behind each song</li>
-    <li>Arcade — rhythm games that run on the music (Run Beebee, Mimi Neon Rush, Mimi Music Tiles)</li>
-    <li>ICS — Ibee's Chess Set characters: Beebee, Mimi, Goli, Swordy, Sworda, Nannan, Abla</li>
-    <li>UTOPIE — hand-made, NFC-tagged clothing, each piece unique</li>
-    <li>IBEE TV — the video channel</li>
-  </ul>
-  <h2>Songs</h2>
-  <p>All I Need, Bounceee, Callin On U, Freestyle Sept9, Head, Lonely22, Maintenant, Mix 100, Nananannn, Obsess, Real To Me, Ride It, Right Middle, Silouhette, Strippin Down, To Our Pain, Write A Song, Yo Body, 20MZS.</p>
-  <p><a href="console.html">Enter the console</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE clothing</a></p>
-</div>
-<div id="app">
-  <div id="bar"><div id="nav"></div><div id="acct"></div></div>
+  <header>
+    <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
+    <div class="sys">ROOMS.EXE<br>insert a cartridge_</div>
+  </header>
 
-  <div id="stage">
-    <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>
-    <!-- lyrics overlay — the LYRICS ENGINE, in the shell's black room -->
-    <div id="lyr">
-      <canvas id="lglyphs"></canvas>
-      <div class="lnp"><div id="lname">LYRICS ENGINE</div><div id="lmood">press play — the words follow the music_</div></div>
-      <div class="words">
-        <div class="stream" id="lstream"></div>
-        <div class="empty" id="lempty" style="display:none">no words for this signal yet_</div>
-      </div>
-      <!-- the record's soul: meaning, context, vibe, time-to-create, BPM -->
-      <div id="linfo">
-        <div class="ih" id="liTitle">—</div>
-        <div class="ichips" id="liVibe"></div>
-        <div class="icard"><div class="ct">MEANING_</div><div class="cx" id="liMeaning">—</div></div>
-        <div class="icard"><div class="ct">CONTEXT_</div><div class="cx" id="liContext">—</div></div>
-        <div class="irow">
-          <div class="icard"><div class="ct">TIME TO CREATE</div><div class="cx" id="liTook">—</div></div>
-          <div class="icard"><div class="ct">BPM</div><div class="cx big" id="liBpm">—</div></div>
-        </div>
-      </div>
-      <div class="bottom">
-        <div class="lbar">
-          <span class="t" id="lsong">—</span>
-          <div class="btns">
-            <button id="lfs" title="the record's soul — meaning, context, vibe"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9.4" stroke="#b6ff00" stroke-width="1.5"/><circle cx="12" cy="12" r="6.2" stroke="#2a2a2a" stroke-width="1"/><circle cx="12" cy="12" r="2.6" fill="#b6ff00"/><circle cx="12" cy="12" r="1" fill="#070707"/><rect x="11.2" y="2.2" width="1.6" height="3.4" fill="#ff2b2b"/></svg></button>
-            <button id="lclose" title="close">✕</button>
-          </div>
-        </div>
-        <div class="songbox" id="lsongbox"></div>
-      </div>
-    </div>
-  </div>
+  <main>
+    <a class="back" href="../#menu">◀ CONSOLE</a>
+    <div class="scrtitle">ONLYIBEE <span class="n">ROOMS</span></div>
+    <div class="scrsub">creative, artistic ways to listen — pick a room · free play_</div>
+    <div class="storebar"><div class="run"><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span></div></div>
+    <div id="store"></div>
+  </main>
 
-  <div id="bottom">
-    <div id="tracklist">
-      <div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>
-      <div id="tltools">
-        <input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false">
-        <button id="tlview" title="grid / list view">▦ GRID</button>
-      </div>
-      <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
-      <div id="tlbody"></div>
-      <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
-    </div>
-    <div id="player">
-      <div class="pl-top">
-        <span id="pcover"><img alt="" id="pcoverimg"></span>
-        <button id="nowbtn" title="open the radio"><span class="bd"></span><span id="rt">RADIO</span></button>
-        <span id="time">0:00 / --:--</span>
-      </div>
-      <div id="seek"><div id="fill"></div></div>
-      <div class="pl-row">
-        <button id="blyr" class="ricon lyr" title="Lyrics engine">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 5 Q7 3 12 5 Q17 3 22 5 V19 Q17 17 12 19 Q7 17 2 19 Z" fill="#0e0e0e" stroke="#b6ff00" stroke-width="1.3"/>
-            <line x1="12" y1="5" x2="12" y2="19" stroke="#b6ff00" stroke-width="1.2"/>
-            <line x1="4.5" y1="8.4" x2="9.6" y2="7.7" stroke="#7a7a7a" stroke-width="1"/>
-            <line x1="4.5" y1="11" x2="9.6" y2="10.3" stroke="#7a7a7a" stroke-width="1"/>
-            <line x1="14.4" y1="7.7" x2="19.5" y2="8.4" stroke="#7a7a7a" stroke-width="1"/>
-            <line x1="14.4" y1="10.3" x2="19.5" y2="11" stroke="#7a7a7a" stroke-width="1"/>
-            <rect x="16.6" y="3.4" width="1.7" height="4.4" fill="#ff2b2b"/>
-          </svg>
-        </button>
-        <button id="rprev">◀◀</button>
-        <button id="rplay" class="main">►</button>
-        <button id="rnext">▶▶</button>
-        <button id="rshuf" class="tgl" title="aleatory — let fate pick the next record">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l10 10h4"/><path d="M3 17h4l2.5-2.5"/><path d="M14.5 9.5 17 7h4"/><path d="M18 4l3 3-3 3"/><path d="M18 14l3 3-3 3"/></svg>
-        </button>
-        <button id="buni" class="ricon uni" title="Universe — the performing planet">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="12" cy="12" rx="11" ry="4.4" fill="none" stroke="#26e0ff" stroke-width="1.4" opacity=".8"/>
-            <circle cx="12" cy="12" r="5.6" fill="#0e0e0e" stroke="#b6ff00" stroke-width="1.6"/>
-            <circle cx="10" cy="10.2" r="1.5" fill="#ff2bd6"/>
-            <circle cx="13.6" cy="13" r="1" fill="#b6ff00"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+  <footer>
+    <span class="a">♪ ONLYIBEE OS</span>
+    <span id="foot">ROOMS // select_</span>
+  </footer>
 
-<!-- PRESS START intro overlay -->
-<div id="enter">
-  <div class="g">ONLY<span class="r">IBEE</span></div>
-  <div class="t">console for art &amp; discovery_</div>
-  <div class="s">▶ PRESS START</div>
-</div>
-
-<!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
-<script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
-<!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=17"></script>
-<!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
-     document.write keeps them synchronous + in order (shell logic below reads these globals). -->
-<script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
-<script>document.write('<script src="assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
-<script>document.write('<script src="assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
-<!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
-<script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
-<!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
-<script src="assets/badges.js?v=9"></script>
 <script>
 (function(){
-  /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */
-  if(window.top !== window.self){ location.replace('console.html'+location.search+location.hash); return; }
-
-  var frame=document.getElementById('frame');
-  function R(){return window.IBEERADIO;}
-
-  /* ---- section nav (fills the bar) ---- */
-  var NAV=[
-    {n:'CONSOLE', u:'console.html#menu'},
-    {n:'ROOMS',   u:'arcade/'},
-    {n:'SHOP',    u:'console.html#shop'},
-    {n:'TV',      u:'tv/'},
-    {n:'ICS',     u:'console.html#ics'}
+  /* ===== GAMES — add a box here per room. status: "live" | "soon"; isnew:true for a NEW ribbon.
+     item: the Supabase items.id this room is gated behind (null = always free, e.g. chess). ===== */
+  var GAMES = [
+    /* THE ROOMS — free to enter, one is picked as your home room at sign-up (it grows with you). */
+    {name:"AQUA BASS",       by:"For fish-passionate music — who dropped a speaker in the ocean?", cover:"covers/aqua-bass.png",      url:"aqua/",      status:"live", item:null},
+    {name:"TERRARIUM",       by:"For gardeners — watch your plant evolve…",  cover:"covers/terrarium.png",      url:"terrarium/", status:"live", item:null},
+    {name:"MIDNIGHT TRANSIT",by:"A late-night train, destination to…",       cover:"covers/midnight-transit.png",url:"transit/",  status:"live", item:null},
+    {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live", item:null},
+    /* THE GAMES — earned by playing (see the unlock ladder in badges.js / member). */
+    {name:"RUN BEEBEE!",     by:"A lyrics engine you jump through — words rain from the sky, city runs by on the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live", item:"game-runner"},
+    {name:"MIMI GUITAR RUSH",by:"Mimi dashes the guitar-neck highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", item:"game-rush"},
+    {name:"MIMI MUSIC TILES",by:"Tap the lyric tiles on the beat",       cover:"covers/mimi-tiles.png", url:"tiles/",    status:"live", item:"game-tiles"},
+    {name:"ICS LOFI BEDROOM",by:"Chill in the ICS room, beats on loop",  cover:"covers/lofi-bedroom.png",   url:"bedroom/",   status:"live", item:"env-bedroom"},
+    {name:"BEAT TAPPER", by:"Tap the crew on the beat", cover:"covers/beat-tapper.png",  url:"", status:"soon"},
+    {name:"KNIGHT DUEL", by:"Swordy vs Sworda",         cover:"covers/knight-duel.png",  url:"", status:"soon"},
+    {name:"MEMORY",      by:"Match the collectibles",   cover:"covers/memory.png",       url:"", status:"soon"},
+    {name:"CHESS PUZZLE",by:"Mate in 1 · 2 · 3",        cover:"covers/chess-puzzle.png", url:"", status:"soon"}
   ];
-  /* (lyrics left the nav — the spinning book in the player opens the overlay) */
-  var navEl=document.getElementById('nav');
-  /* which nav label clears which notification dot when opened */
-  var NAV_TGT={SHOP:'shop',TV:'tv'};
-  NAV.forEach(function(it){var b=document.createElement('button');b.textContent=it.n;
-    b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
-    b.onclick=function(){ var tg=NAV_TGT[it.n];
-      if(tg&&window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget(tg);
-      navigate(it.u); };
-    navEl.appendChild(b);});
 
-  /* ---- account pill: LOG IN / PROFILE, reachable from every page (persistent shell) ----
-     No supabase-js load here — just reads the same localStorage key pattern Supabase writes
-     (sb-*-auth-token), same trick console.html's engine-lock uses. Same-origin iframe writes
-     (member/ signing in) fire a 'storage' event on this parent frame too. */
-  var ICO_USER="<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><circle cx='12' cy='8.4' r='3.6' fill='currentColor'/>"
-    +"<path d='M4.5 20c1-4.2 4.4-6.4 7.5-6.4s6.5 2.2 7.5 6.4' stroke='currentColor' stroke-width='2' fill='none' stroke-linecap='round'/></svg>";
-  var acctEl=document.getElementById('acct');
-  function memberSession(){ try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
-    if(/^sb-.*-auth-token$/.test(k)){ var v=localStorage.getItem(k); if(v&&v!=="null") return true; } } }catch(e){} return false; }
-  var acctOn=null;
-  function renderAcct(){
-    var on=memberSession(); if(on===acctOn) return; acctOn=on;
-    acctEl.innerHTML = on
-      ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
-      : '<button class="login" id="acctbtn">'+ICO_USER+'JOIN</button>';
-    /* profile === room now (one concept, 2026-07-13): the pill opens the member's room/profile */
-    document.getElementById('acctbtn').onclick=function(){ navigate(on?'room/':'member/?login=1'); };
-  }
-  renderAcct();
-  window.addEventListener('storage',renderAcct);
-  setInterval(renderAcct,3000);
+  /* ---- flat neon lock icon (no emoji, no spin) — used on the tag chip + the center badge ---- */
+  var LOCK="<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
+    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
 
-  function navigate(url){
-    try{lyrClose();}catch(e){}   /* moving to a section closes the lyrics room */
-    try{
-      var cur=frame.contentWindow.location, tgt=new URL(url, location.href);
-      if(cur.pathname===tgt.pathname && tgt.hash){ frame.contentWindow.location.hash=tgt.hash; sync(); return; }
-    }catch(e){}
-    frame.classList.remove('on');
-    setTimeout(function(){ frame.src=url; }, 120);
-  }
+  /* ---- ownership: who's logged in + what they own (my_inventory), same backend as member/ ---- */
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var owned={};
 
-  /* first page: ?p= (deep-link/NFC) or the console */
-  var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
-  if(/^(https?:)?\/\//i.test(p)) p='console.html#menu';
-  frame.src=p;
-  frame.addEventListener('load',function(){ frame.classList.add('on'); sync(); });
+  var TAGS={live:"▶ PLAY",soon:"SOON",locked:LOCK+" LOCKED"};
+  /* per-card wobble timing so the shelf doesn't sway in lockstep — a stable hash from the name, not Math.random() (would re-shuffle on every re-render) */
+  function wobbleVars(name){
+    var h=0; for(var i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
+    return "--wsec:"+(4.5+(h%3))+"s;--wdel:-"+((h>>>3)%4)+"s";
+  }
+  function card(g){
+    var soon=g.status==="soon";
+    var isLocked = !soon && g.item && !owned[g.item];
+    var tagKey = soon?"soon":(isLocked?"locked":"live");
+    var inner='<span class="spine"></span>'
+      +'<span class="tag">'+TAGS[tagKey]+'</span>'
+      +(g.isnew&&!isLocked?'<span class="ribbon">NEW</span>':'')
+      +'<div class="cover"><img src="'+g.cover+'" alt="'+g.name+'" loading="lazy"></div>'
+      +'<div class="reels"><i></i><i></i></div>'
+      +(soon?'<div class="lock">SOON</div>':'')
+      +(isLocked?'<div class="lockbadge">'+LOCK+'</div>':'')
+      +'<div class="bar"><div class="nm">'+g.name+'</div><div class="by">'+g.by+'</div>'
+        +'<div class="brow"><span class="barcode"></span><span class="pr">'+(soon?'SOON':(isLocked?'LOCKED':'FREE'))+'</span></div></div>';
+    var style=' style="'+wobbleVars(g.name)+'"';
+    if(soon) return '<div class="case soon"'+style+'>'+inner+'</div>';
+    if(isLocked) return '<a class="case live locked" href="../member/"'+style+'>'+inner+'</a>';
+    return '<a class="case live" href="'+g.url+'"'+style+'>'+inner+'</a>';
+  }
+  function render(){
+    var live=GAMES.filter(function(g){return g.status==="live";}),
+        soon=GAMES.filter(function(g){return g.status==="soon";});
+    var unlockedCount=live.filter(function(g){return !g.item||owned[g.item];}).length;
+    document.getElementById("store").innerHTML=
+       '<div class="shelfhead">▶ AVAILABLE NOW <span class="cnt">'+unlockedCount+'/'+live.length+' UNLOCKED</span></div>'
+      +'<div class="shelf">'+live.map(card).join('')+'</div>'
+      +'<div class="shelfhead soon">▩ COMING SOON <span class="cnt">'+soon.length+' IN DEV</span></div>'
+      +'<div class="shelf">'+soon.map(card).join('')+'</div>';
+    document.getElementById("foot").textContent = unlockedCount+"/"+live.length+" ROOMS UNLOCKED_";
+  }
+  render();                                          // paint instantly (chess free, rest shown locked)
 
-  function sync(){
-    try{
-      var l=frame.contentWindow.location, rel=(l.pathname+l.search+l.hash).replace(/^\//,'');
-      history.replaceState(null,'','?p='+encodeURIComponent(rel));
-      if(frame.contentDocument&&frame.contentDocument.title) document.title=frame.contentDocument.title;
-      var path=l.pathname.replace(/^\//,''), hash=l.hash;
-      document.querySelectorAll('#nav button').forEach(function(b,i){
-        var u=new URL(NAV[i].u, location.href);
-        b.classList.toggle('on', u.pathname.replace(/^\//,'')===path && (!u.hash||u.hash===hash));
-      });
-    }catch(e){}
+  function loadSB(cb){
+    if(window.supabase&&window.supabase.createClient) return cb();
+    var s=document.createElement("script"); s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    s.onload=cb; s.onerror=function(){cb();}; document.head.appendChild(s);
   }
-
-  /* ---- transport (no autoplay: only plays when the user acts) ---- */
-  document.getElementById('rprev').onclick=function(){var r=R();if(r)r.control.prev();};
-  document.getElementById('rnext').onclick=function(){var r=R();if(r)r.control.next();};
-  document.getElementById('rplay').onclick=function(){var r=R();if(!r)return; if(r.playing())r.control.pause(); else r.control.play(r.current()<0?0:null);};
-  /* aleatory: let fate pick the next record */
-  var rshuf=document.getElementById('rshuf');
-  rshuf.onclick=function(){var r=R();if(r&&r.toggleShuffle)r.toggleShuffle();};
-  /* spinning shortcuts */
-  document.getElementById('buni').onclick=function(){
-    if(window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget('music'); /* clear the new-music dot */
-    navigate('console.html#playing');
-  };
-
-  /* ================= LYRICS OVERLAY =================
-     Lines come from lyrics-timed.js when the song has been tap-synced in IBEE STUDIO
-     (true timestamps), else lyrics-data.js spread across the duration. Tapping a
-     line seeks the radio to that moment. The center vinyl flips to INFO — the
-     record's soul from song-meta.js + BPM from beat-data.js. */
-  var LYR=window.IBEE_LYRICS||{}, LYRT=window.IBEE_LYRICS_TIMED||{}, META=window.IBEE_META||{};
-  var lyr=document.getElementById('lyr'),lstream=document.getElementById('lstream'),
-      lempty=document.getElementById('lempty'),lsong=document.getElementById('lsong'),lsongbox=document.getElementById('lsongbox');
-  var lyrOpen=false,lyrSlug=null,lyrLines=[],lyrTimes=null,lyrActive=-1,lyrBoxN=-1;
-  /* manual scroll: the user owns the list while touching it; 4s idle → follow again */
-  var lwords=lyr.querySelector('.words'),lyrManual=0,lyrCentered=-1;
-  ['wheel','touchmove','pointerdown'].forEach(function(ev){
-    lwords.addEventListener(ev,function(){lyrManual=Date.now();lyrCentered=-1;},{passive:true});
-  });
-  function lyrCenter(){
-    var el=lstream.children[lyrActive]; if(!el)return;
-    var top=el.offsetTop+el.offsetHeight/2-lwords.clientHeight/2;
-    try{lwords.scrollTo({top:top,behavior:'smooth'});}catch(e){lwords.scrollTop=top;}
-    lyrCentered=lyrActive;
-  }
-  function esc(s){return s.replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
-  function lyrToggle(){ lyrOpen=!lyrOpen; lyr.classList.toggle('open',lyrOpen); if(lyrOpen)lyrRefresh(); }
-  function lyrClose(){ lyrOpen=false; lyr.classList.remove('open'); }
-  document.getElementById('blyr').onclick=lyrToggle;               // the book icon toggles it
-  document.getElementById('lclose').onclick=lyrClose;
-  document.getElementById('lfs').onclick=function(){ lyr.classList.toggle('info'); };
-  /* tap a line → jump to that moment in the song */
-  function lyrSeek(i){
-    var r=R();if(!r||!r.audio)return;
-    try{
-      if(lyrTimes){ r.audio.currentTime=Math.max(0,lyrTimes[i]); }
-      else{ var d=r.audio.duration||0; if(d) r.audio.currentTime=i/lyrLines.length*d; }
-      if(!r.playing())r.control.play();
-      lyrManual=0; lyrCentered=-1;   // tapping a line means: jump there AND follow again
-    }catch(e){}
-  }
-  function buildSongbox(){
-    var r=R();if(!r)return; var h='';
-    for(var i=0;i<r.count;i++){var s=r.song(i); if(s&&(LYR[s.f]||LYRT[s.f])) h+='<button data-i="'+i+'">'+esc(s.n)+'</button>';}
-    lsongbox.innerHTML=h; lyrBoxN=r.count;
-    Array.prototype.forEach.call(lsongbox.querySelectorAll('button'),function(b){
-      b.onclick=function(){var r2=R();if(r2)r2.control.play(+b.getAttribute('data-i'));};});
-  }
-  function fillInfo(slug,name){
-    var m=(slug&&META[slug])||{};
-    document.getElementById('liTitle').textContent=name||'—';
-    var vb=document.getElementById('liVibe');
-    vb.innerHTML=(m.vibe||'').split('/').map(function(v){v=v.trim();return v?'<span>'+esc(v)+'</span>':'';}).join('')
-      ||'<span>unclassified_</span>';
-    document.getElementById('liMeaning').textContent=m.meaning||'classified — the booth keeps its secrets_';
-    document.getElementById('liContext').textContent=m.context||'transmission incomplete_';
-    document.getElementById('liTook').textContent=m.took||'—';
-    var B=window.IBEE_BEAT||{},g=slug&&B[slug];
-    document.getElementById('liBpm').textContent=(g&&g.bpm)?g.bpm:'—';
-  }
-  function lyrRefresh(){
-    var r=R();if(!r)return;
-    if(lyrBoxN!==r.count)buildSongbox();
-    var slug=r.slug&&r.slug();
-    if(slug!==lyrSlug){
-      lyrSlug=slug;
-      var timed=slug&&LYRT[slug];
-      if(timed&&timed.length){ lyrLines=timed.map(function(l){return l.w;}); lyrTimes=timed.map(function(l){return l.t;}); }
-      else { lyrLines=(slug&&LYR[slug])||[]; lyrTimes=null; }
-      var s=r.song&&r.song(); lsong.textContent=s?s.n:'—';
-      var ln=document.getElementById('lname'), lm=document.getElementById('lmood');
-      if(ln) ln.textContent=s?s.n:'LYRICS ENGINE';
-      var mv=(slug&&META[slug]&&META[slug].vibe)||'';
-      if(lm) lm.textContent=mv?mv.replace(/\//g,' · '):(lyrLines.length?'the words follow the music_':'no words for this signal yet_');
-      fillInfo(slug,s?s.n:null);
-      if(lyrLines.length){ lempty.style.display='none';
-        lstream.innerHTML=lyrLines.map(function(w){return '<div class="ln">'+esc(w)+'</div>';}).join('');
-        Array.prototype.forEach.call(lstream.children,function(el,i){ el.onclick=function(){lyrSeek(i);}; });
-      } else { lempty.style.display='flex'; lstream.innerHTML=''; }
-      lyrActive=-1; lyrCentered=-1; lyrManual=0; lwords.scrollTop=0;
-    }
-    var ci=r.current();
-    Array.prototype.forEach.call(lsongbox.querySelectorAll('button'),function(b){b.classList.toggle('now',+b.getAttribute('data-i')===ci);});
-  }
-  /* Lyrics-Engine sync: light the sung line (big + hue glow + beat scale), fade the
-     lines already passed. Real timestamps when the song is tap-synced, else the plain
-     lines spread across the duration. (No karaoke gradient sweep — the /lyrics/ look.) */
-  function lyrSync(){
-    if(!lyrOpen||!lyrLines.length)return;
-    var r=R();if(!r)return;
-    var c=0,d=0; try{c=r.audio.currentTime||0;d=r.audio.duration||0;}catch(e){}
-    var idx;
-    if(lyrTimes){ idx=0; for(var k=0;k<lyrTimes.length;k++){ if(lyrTimes[k]<=c)idx=k; else break; } }
-    else { idx=d>0?Math.min(lyrLines.length-1,Math.max(0,Math.floor(c/d*lyrLines.length))):0; }
-    var kids=lstream.children;
-    if(idx!==lyrActive){
-      lyrActive=idx;
-      for(var i=0;i<kids.length;i++){ kids[i].classList.toggle('on',i===idx); kids[i].classList.toggle('past',i<idx); }
-    }
-    /* follow the song — unless the user is scrolling (or was, in the last 4s) */
-    if(lyrActive>=0&&lyrCentered!==lyrActive&&Date.now()-lyrManual>4000)lyrCenter();
-  }
-
-  var seek=document.getElementById('seek');
-  seek.addEventListener('click',function(e){var r=R();if(!r)return;
-    try{var rc=seek.getBoundingClientRect(),fr=(e.clientX-rc.left)/rc.width;
-      if(r.audio&&r.audio.duration)r.audio.currentTime=Math.max(0,Math.min(1,fr))*r.audio.duration;}catch(x){}});
-
-  /* ================= THE RADIO BROWSER (grid default + list + search) =================
-     Renders into the STATIC scaffolding (#tltools search, #roomband, #tlbody, #tlempty) —
-     it no longer overwrites #tracklist, so the header/tools/room-band stay put. GRID is the
-     default view (Spotify-style covers with a 3D sideways tilt that straightens on hover),
-     LIST is the second choice. Album name / cover / room all come from the radio bridge's
-     album(i) — the authoritative source (song objects carry .al, not .g). */
-  var tl=document.getElementById('tracklist'),
-      tlbody=document.getElementById('tlbody'),
-      tlempty=document.getElementById('tlempty'),
-      tlsearch=document.getElementById('tlsearch'),
-      tlview=document.getElementById('tlview'),
-      roomband=document.getElementById('roomband'),
-      roombtn=document.getElementById('roombtn');
-  var viewMode='list', query='', builtCount=-1;   /* LIST is the default view (2026-07-13) */
-  var LKSVG="<svg class='lk' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
-  var LKBIG="<svg class='lockb' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
-  function e3(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-  function matchQ(name,alb){ if(!query)return true; var q=query.toLowerCase();
-    return (name||'').toLowerCase().indexOf(q)>=0 || (alb||'').toLowerCase().indexOf(q)>=0; }
-  function vinyl(hue){ return 'radial-gradient(circle,hsl('+(hue||75)+',85%,55%) 0 20%,#070707 22% 28%,#161616 30% 100%)'; }
-  /* cover art: song's own picture → its ALBUM cover → legacy assets/covers/<name>.jpg|png → vinyl */
-  function coverCands(s,alb){
-    var base=(s.f||'').replace(/\.[a-z0-9]+$/i,''), rbase=(s.r||'').replace(/\.[a-z0-9]+$/i,''), c=[];
-    if(s.cover)c.push(encodeURI(s.cover));
-    if(alb&&alb.cover)c.push(encodeURI(alb.cover));
-    if(base){c.push('assets/covers/'+encodeURI(base)+'.jpg');c.push('assets/covers/'+encodeURI(base)+'.png');}
-    if(rbase&&rbase!==base)c.push('assets/covers/'+encodeURI(rbase)+'.jpg');
-    return c;
-  }
-  function imgTag(cands){ return cands.length?'<img alt="" loading="lazy" src="'+cands[0]+'" data-alt="'+cands.slice(1).join('|')+'">':''; }
-  function renderTracks(){
-    var r=R();if(!r)return;
-    tlbody.className = viewMode==='grid'?'grid':'';
-    var html='',shown=0,i,cur=r.current?r.current():-1;
-    for(i=0;i<r.count;i++){
-      var s=r.song(i)||{}, alb=r.album?r.album(i):null, aln=(alb&&alb.name)||'RARE SOUL SESSIONS';
-      if(!matchQ(s.n,aln))continue; shown++;
-      var img0=imgTag(coverCands(s,alb)), room=alb&&alb.room, tint=(alb&&alb.tint)||'#ff2b2b';
-      if(viewMode==='grid'){
-        html+='<div class="tl-tile'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
-          +'<div class="art" style="background:'+vinyl(s.hue)+'">'+img0
-          +(i===cur?'<span class="gnow">NOW</span>':'')
-          +(s.locked?LKBIG:'')
-          +(room?'<span class="roomb">ROOM</span>':'')
-          +'<span class="gtag">'+e3(aln)+'</span></div>'
-          +'<div class="nm">'+e3(s.n||'—')+'</div></div>';
-      } else {
-        html+='<div class="tr'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
-          +'<span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
-          +'<span class="cv" style="background:'+vinyl(s.hue)+'">'+img0+'</span>'
-          +'<span class="ti"><span class="tn">'+e3(s.n||'—')+'</span><span class="al">'+e3(aln)+'</span></span>'
-          +(s.locked?LKSVG:(room?'<span class="rmroom">ROOM</span>':''))
-          +'</div>';
+  loadSB(function(){
+    if(!(window.supabase&&window.supabase.createClient)) return;
+    var sb=window.supabase.createClient(SB_URL,SB_KEY);
+    sb.auth.getSession().then(function(res){
+      var sess=res.data.session;
+      if(!sess) return;                              // not logged in → stays all-locked (except chess)
+      /* the owner's account: every room open, no inventory check needed */
+      if(((sess.user&&sess.user.email)||'').toLowerCase()==='droguepuissance4@gmail.com'){
+        GAMES.forEach(function(g){ if(g.item) owned[g.item]=true; });
+        render(); return;
       }
-    }
-    /* room-only album cards (e.g. NOUVEAUX PUNK — the full experience) */
-    (r.rooms?r.rooms():[]).forEach(function(rm){
-      if(!matchQ(rm.name,rm.name))return; shown++;
-      var tint=rm.tint||'#ff2b2b', cov=rm.cover?'<img alt="" loading="lazy" src="'+encodeURI(rm.cover)+'">':'';
-      if(viewMode==='grid'){
-        html+='<div class="tl-tile" data-room="'+e3(rm.room)+'" style="--rt:'+tint+'">'
-          +'<div class="art" style="background:'+vinyl(110)+'">'+cov
-          +'<span class="roomb">ROOM</span><span class="gtag">ALBUM · THE EXPERIENCE</span></div>'
-          +'<div class="nm">'+e3(rm.name)+'</div></div>';
-      } else {
-        html+='<div class="tr" data-room="'+e3(rm.room)+'">'
-          +'<span class="no">EP</span>'
-          +'<span class="cv" style="background:'+vinyl(110)+'">'+cov+'</span>'
-          +'<span class="ti"><span class="tn">'+e3(rm.name)+'</span><span class="al">the experience · tap for the room</span></span>'
-          +'<span class="rmroom">ROOM</span></div>';
-      }
-    });
-    tlbody.innerHTML=html;
-    tlempty.style.display=shown?'none':'block';
-    builtCount=r.count;
-    /* missing picture → walk the fallback names, then keep the vinyl (never a broken icon) */
-    Array.prototype.forEach.call(tlbody.querySelectorAll('img'),function(im){
-      im.onerror=function(){ var alts=(im.dataset.alt||'').split('|').filter(Boolean);
-        if(alts.length){im.dataset.alt=alts.slice(1).join('|');im.src=alts[0];}else{im.style.display='none';} };
-    });
-    Array.prototype.forEach.call(tlbody.children,function(el){
-      var rmu=el.getAttribute('data-room');
-      if(rmu){ el.onclick=function(){ navigate(rmu); tl.classList.remove('open'); }; return; }
-      var i=+el.getAttribute('data-i');
-      el.onclick=function(){ var r2=R(); if(!r2)return; var s=r2.song(i); if(s&&s.locked)return; r2.control.play(i); };
-    });
-  }
-  function markNow(){
-    var r=R();if(!r)return; var cur=r.current();
-    Array.prototype.forEach.call(tlbody.children,function(el){
-      if(el.getAttribute('data-room'))return;
-      var on=(+el.getAttribute('data-i')===cur);
-      el.classList.toggle('now',on);
-      if(viewMode==='grid'){
-        var g=el.querySelector('.gnow');
-        if(on&&!g&&!el.classList.contains('locked')){var sp=document.createElement('span');sp.className='gnow';sp.textContent='NOW';var art=el.querySelector('.art');if(art)art.insertBefore(sp,art.firstChild);}
-        else if(!on&&g)g.remove();
-      }
-    });
-  }
-  /* GO TO THE ROOM — shows for whichever special album is on air (NOUVEAUX PUNK, 20 MIN ZA
-     SESSION, any studio album with a room). Navigates in-frame so the radio keeps playing. */
-  var lastRoomKey='';
-  function updateRoomband(){
-    var r=R();if(!r){roomband.classList.remove('show');return;}
-    var i=r.current?r.current():-1, alb=(i>=0&&r.album)?r.album(i):null;
-    var room=alb&&alb.room, key=room?(alb.name+'|'+room):'';
-    if(key===lastRoomKey)return; lastRoomKey=key;
-    if(room){ roombtn.textContent='▶ GO TO THE ROOM';
-      roomband.style.setProperty('--rtint',alb.tint||'#ff2b2b');
-      roomband.dataset.room=room; roomband.classList.add('show'); }
-    else roomband.classList.remove('show');
-  }
-  roombtn.onclick=function(){ var u=roomband.dataset.room; if(u){ navigate(u); tl.classList.remove('open'); } };
-  tlsearch.addEventListener('input',function(){ query=this.value.trim(); renderTracks(); markNow(); });
-  tlview.onclick=function(){ viewMode=(viewMode==='grid')?'list':'grid';
-    this.textContent=viewMode==='grid'?'≡ LIST':'▦ GRID';
-    this.classList.toggle('on',viewMode==='grid'); renderTracks(); markNow(); };
-  tlview.classList.toggle('on',viewMode==='grid');
-  document.getElementById('tlx').onclick=function(ev){ ev.stopPropagation(); tl.classList.remove('open'); };
-  function openTL(){ var r=R(); if(r&&builtCount!==r.count)renderTracks(); tl.classList.add('open'); updateRoomband(); markNow(); }
-  function toggleTL(){ if(tl.classList.contains('open'))tl.classList.remove('open'); else openTL(); }
-  document.getElementById('nowbtn').onclick=toggleTL;
-  /* click anywhere outside the track list closes it (music keeps playing) */
-  document.addEventListener('pointerdown',function(e){
-    if(!tl.classList.contains('open'))return;
-    var nb=document.getElementById('nowbtn'),pc=document.getElementById('pcover');
-    if(tl.contains(e.target)||nb.contains(e.target)||(pc&&pc.contains(e.target)))return;
-    tl.classList.remove('open');
+      sb.rpc("my_inventory").then(function(r){
+        (r.data||[]).forEach(function(it){ owned[it.id]=true; });
+        render();                                     // re-paint with real ownership
+      }).catch(function(){});
+    }).catch(function(){});
   });
-  /* clicks INSIDE the frame never bubble up to the shell — catch them via the
-     focus shift: when the window blurs because the iframe took focus, close. */
-  window.addEventListener('blur',function(){
-    if(tl.classList.contains('open')&&document.activeElement===frame)tl.classList.remove('open');
-  });
-  /* …and games (which preventDefault taps, so focus never shifts) post this on tap */
-  window.addEventListener('message',function(e){ if(e&&e.data==='ibee-frame-tap')tl.classList.remove('open'); });
-
-  /* ---- keep the player reflecting the one radio's state ---- */
-  var rt=document.getElementById('rt'),rplay=document.getElementById('rplay'),
-      fill=document.getElementById('fill'),timeEl=document.getElementById('time'),bd=document.querySelector('#nowbtn .bd');
-  /* the now-playing album cover in the bar: song's own art → album cover → hue vinyl */
-  var pcover=document.getElementById('pcover'),pcoverimg=document.getElementById('pcoverimg'),lastCoverI=-2;
-  pcover.onclick=toggleTL;
-  function setPcover(r,i,s){
-    var hue=(s&&s.hue!=null)?s.hue:75;
-    pcover.style.background='radial-gradient(circle,hsl('+hue+',85%,55%) 0 20%,#070707 22% 28%,#141414 30% 100%)';
-    var alb=r.album?r.album(i):null, cov=(s&&s.cover)||(alb&&alb.cover)||'';
-    if(cov){ pcoverimg.onerror=function(){pcoverimg.style.display='none';};
-      pcoverimg.style.display='block'; pcoverimg.src=cov; }
-    else pcoverimg.style.display='none';
-  }
-  function fmt(s){if(!isFinite(s))return'--:--';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
-  setInterval(function(){
-    var r=R();if(!r)return;
-    if(builtCount!==r.count)renderTracks(); /* extra records arrived — rebuild the browser */
-    var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
-    var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s); }
-    var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
-    rshuf.classList.toggle('on',!!(r.shuffled&&r.shuffled()));
-    try{bd.style.setProperty('--b',(0.45+(pl?r.beat():0)).toFixed(2));}catch(e){}
-    try{var c=r.audio.currentTime||0,d=r.audio.duration||0;
-      fill.style.width=(d?c/d*100:0)+'%'; timeEl.textContent=fmt(c)+' / '+fmt(d);}catch(e){}
-    updateRoomband();
-    if(tl.classList.contains('open'))markNow();
-    if(lyrOpen){ lyrRefresh(); lyrSync(); }
-  },350);
-  /* karaoke needs frame-accurate timing: while the overlay is open, sync every
-     animation frame (the sweep + line flips land the instant their time hits) */
-  (function lyrTick(){ requestAnimationFrame(lyrTick); if(lyrOpen) lyrSync(); })();
-
-  /* ---- floating glyphs behind the lyrics (the Lyrics Engine ambience) ----
-     Drifts up in the song's hue, faster on the beat. Only runs while the overlay
-     is open; sizes itself the first time it's shown (the canvas is 0×0 hidden). */
-  (function(){
-    var cv=document.getElementById('lglyphs'); if(!cv)return; var cx=cv.getContext('2d');
-    var GLY=['♪','♫','✦','✧','·','*'], parts=[];
-    function rs(){ cv.width=cv.clientWidth||lyr.clientWidth||window.innerWidth; cv.height=cv.clientHeight||lyr.clientHeight||window.innerHeight; }
-    function seed(){ parts=[]; for(var i=0;i<38;i++) parts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,
-      v:.2+Math.random()*.5,s:10+Math.random()*16,g:GLY[Math.floor(Math.random()*GLY.length)],o:.1+Math.random()*.25,ph:Math.random()*6.28}); }
-    (function gl(){ requestAnimationFrame(gl);
-      if(!lyr.classList.contains('open')) return;
-      if(cv.width<2||cv.height<2||Math.abs(cv.width-cv.clientWidth)>4){ rs(); seed(); }
-      var beat=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--beat'))||0;
-      var hue=getComputedStyle(document.documentElement).getPropertyValue('--songhue')||190;
-      cx.clearRect(0,0,cv.width,cv.height);
-      parts.forEach(function(p){ p.y-=p.v*(1+beat*3); p.x+=Math.sin(p.ph+=.008)*.3;
-        if(p.y<-30){p.y=cv.height+20;p.x=Math.random()*cv.width;}
-        cx.globalAlpha=Math.min(1,p.o+beat*.4); cx.fillStyle='hsl('+hue+',90%,65%)';
-        cx.font=(p.s*(1+beat*.4))+"px 'VT323'"; cx.fillText(p.g,p.x,p.y); });
-      cx.globalAlpha=1;
-    })();
-  })();
-
-  /* ---- PRESS START intro: just dismiss, do NOT start music ---- */
-  var enter=document.getElementById('enter');
-  if(enter){
-    var go=function(){enter.style.display='none';window.removeEventListener('keydown',kk);};
-    var kk=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();}};
-    enter.addEventListener('click',go);
-    window.addEventListener('keydown',kk);
-  }
 })();
 </script>
+<script src="../assets/player.js?v=17"></script>
 </body>
 </html>
