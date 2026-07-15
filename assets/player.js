@@ -51,6 +51,15 @@
     xsc.onload = function(){ addExtras(); };
     document.head.appendChild(xsc);
   }catch(e){}
+  /* cloud save: sync favourites / badges / room progress to the signed-in ACCOUNT
+     so they follow the member across devices (assets/cloudsync.js self-guards to
+     the top window; needs member/cloud-sync.sql). Loaded once here so no page needs
+     its own <script> tag — same self-loading pattern as beat-data / songs-extra. */
+  try{
+    var csc = document.createElement("script");
+    csc.src = BASE + "cloudsync.js?cb=" + Date.now();
+    document.head.appendChild(csc);
+  }catch(e){}
 
   /* ---------- albums: the cover + name every song wears, and (for specials)
      the ROOM it belongs to + the galaxy it maps to in the music universe.
