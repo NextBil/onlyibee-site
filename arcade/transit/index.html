@@ -27,6 +27,12 @@
   /* night wrap so the close-up car sits in atmosphere (not black bars) on portrait phones */
   #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;
     background:radial-gradient(ellipse at 50% 32%,#0d0d1c,#040408 72%)}
+  /* DESKTOP: reserve a top band + top-anchor the car so the LED destination sign is
+     never clipped by the window edge and the MIDNIGHT LINE strip sits above it, not
+     on it. (JS fit() switches to CONTAIN here; TOPBAND must match padding-top.) */
+  @media (min-width:900px) and (pointer:fine){
+    #wrap{align-items:flex-start;padding-top:54px}
+  }
   #stage{position:relative}
   canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   #bg{image-rendering:pixelated;image-rendering:crisp-edges}
@@ -151,17 +157,28 @@ var bg=document.getElementById('bg'),bctx=bg.getContext('2d');
 var fx=document.getElementById('fx'),fctx=fx.getContext('2d');
 bg.width=W;bg.height=H;
 var stage=document.getElementById('stage'),S=3,FW=0,FH=0;
+/* keep in sync with the #wrap top band in the desktop @media rule below */
+var TOPBAND=54;
+function isDesktop(){ try{ return matchMedia('(min-width:900px) and (pointer:fine)').matches; }catch(e){ return false; } }
 function fit(){
-  /* COVER the viewport so the car fills a portrait phone (no black letterbox).
-     Portrait crops the car's far sides to a close-up of the middle seats; the
-     WHOLE-TRAIN toggle shows every car. Landscape ≈ unchanged (aspect matches). */
-  var sc=Math.max(innerWidth/W,innerHeight/H);
+  /* PHONES → COVER the viewport so the car fills the screen (no black letterbox);
+     portrait crops the car's far sides to the middle seats, the WHOLE-TRAIN toggle
+     shows every car. DESKTOP → CONTAIN inside a top-banded area so the LED
+     destination sign at the very top of the scene is never cropped off by the
+     window edge, and the MIDNIGHT LINE strip sits in the band ABOVE the car
+     instead of on top of the sign. The #wrap night gradient fills the surround. */
+  var desk=isDesktop(), pad=desk?TOPBAND:0;
+  var availH=Math.max(1,innerHeight-pad);
+  var sc=desk ? Math.min(innerWidth/W, availH/H)      // contain: whole car (+ its top sign) always visible
+              : Math.max(innerWidth/W, innerHeight/H); // cover: fills phones, unchanged
   var cw=Math.ceil(W*sc),ch=Math.ceil(H*sc);
   stage.style.width=cw+'px';stage.style.height=ch+'px';
   var dpr=Math.min(2,devicePixelRatio||1);
   fx.width=FW=Math.floor(cw*dpr);fx.height=FH=Math.floor(ch*dpr);S=FW/W;
 }
-addEventListener('resize',fit);fit();
+addEventListener('resize',fit);
+try{ matchMedia('(min-width:900px) and (pointer:fine)').addEventListener('change',fit); }catch(e){}
+fit();
 function px(n){return Math.round(n)}
 function hsl(h,s,l,a){return 'hsla('+h+','+s+'%,'+l+'%,'+(a==null?1:a)+')'}
 function rect(x,y,w,h,c){bctx.fillStyle=c;bctx.fillRect(px(x),px(y),px(w),px(h))}
