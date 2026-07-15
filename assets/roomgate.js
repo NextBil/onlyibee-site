@@ -120,9 +120,14 @@
         var prof=r&&r.data, picked=prof&&prof.room&&prof.room.env;
         if(picked) setls("ibee_room",picked);
         if(email===OWNER){ startSync(prof&&prof.room_state); return; } // owner: full access
-        if(!picked){ lockPick(); return; }                             // signed in but hasn't chosen yet
-        if(picked!==ENV){ lockMismatch(picked); return; }              // chose a different room
-        startSync(prof&&prof.room_state);                              // this room is theirs
+        if(picked===ENV){ startSync(prof&&prof.room_state); return; }  // this room is theirs
+        /* not their picked room — but an ARCADE PASS (member/passes.sql) may have
+           put this env in their inventory; owning env-<ENV> opens the door too */
+        sb.rpc("owns",{item:"env-"+ENV}).then(function(o){
+          if(o&&o.data===true){ startSync(prof&&prof.room_state); return; }
+          if(!picked){ lockPick(); return; }                           // signed in but hasn't chosen yet
+          lockMismatch(picked);                                        // chose a different room
+        }).catch(function(){ picked?lockMismatch(picked):lockPick(); });
       }).catch(function(){ lockMembers(); });                          // can't read profile → fail closed
     }).catch(function(){ lockMembers(); });
   });
