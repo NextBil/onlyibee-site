@@ -202,6 +202,17 @@
   +".rp-tile .roomb{position:absolute;top:6px;right:6px;z-index:2;font-family:'Press Start 2P',monospace;font-size:7px;"
   +"color:#000;background:var(--rt,#ff2b2b);padding:4px 5px;letter-spacing:.5px}"
   +"#rp-empty{padding:22px 12px;text-align:center;color:#5a5a5a;font-family:'Press Start 2P',monospace;font-size:8px;line-height:2;display:none}"
+  /* ----- favourites: hearts on every song + the ♥ filter ----- */
+  +".rp-row .fv{flex:none;font-size:16px;line-height:1;color:#3a3a3a;cursor:pointer;padding:3px 5px}"
+  +".rp-row .fv:hover{color:#ff2b6b}"
+  +".rp-row .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.6)}"
+  +".rp-tile .fv{position:absolute;right:5px;bottom:26px;z-index:3;font-size:16px;line-height:1;"
+  +"color:rgba(255,255,255,.45);cursor:pointer;text-shadow:0 1px 4px #000;padding:3px}"
+  +".rp-tile .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.8)}"
+  +"#rp-favtgl{font-family:'Press Start 2P',monospace;font-size:10px;padding:0 9px;height:33px;flex:none;"
+  +"background:#0e0e0e;color:#7a7a7a;border:1px solid #2a2a2a;cursor:pointer}"
+  +"#rp-favtgl:hover,#rp-favtgl.on{border-color:#ff2b6b;color:#ff2b6b}"
+  +"#rp-favb.on{color:#ff2b6b;border-color:#ff2b6b}"
   ;
   var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
@@ -232,12 +243,15 @@
     +'    <button id="rp-play" class="main">►</button>'
     +'    <button id="rp-next">▶▶</button>'
     +'    <button id="rp-shuf" title="aleatory — let fate pick"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l10 10h4"/><path d="M3 17h4l2.5-2.5"/><path d="M14.5 9.5 17 7h4"/><path d="M18 4l3 3-3 3"/><path d="M18 14l3 3-3 3"/></svg></button>'
+    +'    <button id="rp-favb" title="save to my favourites">♡</button>'
+    +'    <button id="rp-share" title="share a link to this song">⤴</button>'
     +'    <button id="rp-lyr" title="LYRICS ENGINE"><img alt="lyrics" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 16 16\'%3E%3Cpath d=\'M1 3 Q4.5 1.4 8 3 Q11.5 1.4 15 3 V13 Q11.5 11.4 8 13 Q4.5 11.4 1 13 Z\' fill=\'%23b6ff00\' stroke=\'%23223300\' stroke-width=\'.7\'/%3E%3Cline x1=\'8\' y1=\'3\' x2=\'8\' y2=\'13\' stroke=\'%23223300\' stroke-width=\'.9\'/%3E%3Cline x1=\'2.8\' y1=\'5\' x2=\'6.4\' y2=\'4.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'7\' x2=\'6.4\' y2=\'6.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'2.8\' y1=\'9\' x2=\'6.4\' y2=\'8.6\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'4.6\' x2=\'13.2\' y2=\'5\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Cline x1=\'9.6\' y1=\'6.6\' x2=\'13.2\' y2=\'7\' stroke=\'%23223300\' stroke-width=\'.6\'/%3E%3Crect x=\'11\' y=\'2\' width=\'1.6\' height=\'4.4\' fill=\'%23ff2b2b\'/%3E%3C/svg%3E"></button>'
     +'  </div>'
     +'  <div id="rp-room"></div>'
     +'</div>'
     +'<div id="rp-tools">'
     +'  <input id="rp-search" type="text" placeholder="search songs & albums_" autocomplete="off" spellcheck="false">'
+    +'  <button id="rp-favtgl" title="my favourites only">♥</button>'
     +'  <button id="rp-view" title="grid / list view">▦ GRID</button>'
     +'</div>'
     +'<div id="rp-list"></div>'
@@ -263,9 +277,16 @@
       +'onerror="this.onerror=null;this.src=\''+fallbackCover(hue)+'\'">';
   }
 
+  /* ---------- favourites: hearts saved on this device (ibee_favs = {slug:1}) ---------- */
+  function favs(){ try{ return JSON.parse(localStorage.getItem("ibee_favs")||"{}")||{}; }catch(e){ return {}; } }
+  function isFav(slug){ return !!favs()[slug]; }
+  function setFav(slug,on){ var f=favs(); if(on)f[slug]=1; else delete f[slug];
+    try{ localStorage.setItem("ibee_favs",JSON.stringify(f)); }catch(e){} }
+
   /* ===================== LIST + GRID RENDERING ===================== */
   var viewMode = "list";   // "list" | "grid"
   var query = "";
+  var favOnly = false;     // ♥ filter: only the songs you saved
 
   function matches(name, albName){
     if(!query) return true;
@@ -280,6 +301,7 @@
       for(i=0;i<SONGS.length;i++){
         var s = SONGS[i], al = album(s.al);
         if(!matches(s.n, al.name)) continue;
+        if(favOnly && !isFav(s.f)) continue;
         shown++;
         var padc = al.pad ? " pad" : "";
         html += '<div class="rp-tile'+(i===cur?" now":"")+(s.locked?" locked":"")+'" data-i="'+i+'"'
@@ -288,6 +310,7 @@
           + (i===cur?'<span class="gnow">NOW</span>':'')
           + (s.locked?LOCK_BIG:'')
           + (al.room?'<span class="roomb">ROOM</span>':'')
+          + '<span class="fv'+(isFav(s.f)?" on":"")+'" data-fv="'+i+'" title="favourite">♥</span>'
           + '<span class="gtag">'+esc(al.name)+'</span></div>'
           + '<div class="nm">'+esc(s.n)+'</div></div>';
       }
@@ -295,6 +318,7 @@
       ROOMS.forEach(function(r){
         var al = album(r.al);
         if(!matches(al.name, al.name)) return;
+        if(favOnly) return;
         shown++;
         html += '<div class="rp-tile" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
           + '<div class="art'+(al.pad?" pad":"")+'">'+coverImg("", al.cover, 110)
@@ -306,18 +330,21 @@
       for(i=0;i<SONGS.length;i++){
         var s2 = SONGS[i], al2 = album(s2.al);
         if(!matches(s2.n, al2.name)) continue;
+        if(favOnly && !isFav(s2.f)) continue;
         shown++;
         html += '<div class="rp-row'+(i===cur?" now":"")+(s2.locked?" locked":"")+'" data-i="'+i+'"'
           + (al2.room?' style="--rt:'+(al2.tint||"#ff2b2b")+'"':'')+'>'
           + '<span class="no">'+String(i+1).padStart(2,"0")+'</span>'
           + coverImg("rc", songCover(s2), s2.hue)
           + '<span class="rt"><span class="rn">'+esc(s2.n)+'</span><span class="ra">'+esc(al2.name)+'</span></span>'
+          + '<span class="fv'+(isFav(s2.f)?" on":"")+'" data-fv="'+i+'" title="favourite">♥</span>'
           + (s2.locked?LOCK_SVG:(al2.room?'<span class="rmroom">ROOM</span>':''))
           + '</div>';
       }
       ROOMS.forEach(function(r){
         var al = album(r.al);
         if(!matches(al.name, al.name)) return;
+        if(favOnly) return;
         shown++;
         html += '<div class="rp-row" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
           + '<span class="no">EP</span>'
@@ -327,6 +354,7 @@
       });
     }
     list.innerHTML = html;
+    $("rp-empty").innerHTML = (favOnly && !query) ? "NO FAVOURITES YET_<br>TAP ♥ ON A SONG" : "NO SIGNALS_<br>TRY ANOTHER WORD";
     $("rp-empty").style.display = shown ? "none" : "block";
     bindRows();
   }
@@ -341,6 +369,17 @@
         var s = SONGS[i];
         if(s && s.locked){ return; }   // locked → not playable
         play(i); openPanel();
+      };
+    });
+    /* the hearts: toggle without playing the row */
+    Array.prototype.forEach.call(list.querySelectorAll(".fv"), function(el){
+      el.onclick = function(ev){
+        ev.stopPropagation();
+        var i = +el.getAttribute("data-fv"), s = SONGS[i]; if(!s) return;
+        var on = !isFav(s.f); setFav(s.f, on);
+        el.classList.toggle("on", on);
+        if(i === cur) paintFav();
+        if(favOnly && !on) render();   // un-hearted inside the ♥ filter → it leaves the list
       };
     });
   }
@@ -410,6 +449,22 @@
     cov.style.padding = al.pad ? "6px" : "0";
     cov.style.background = al.pad ? "radial-gradient(circle at 50% 40%,#241207,#0a0604)" : "#111";
     paintRoomBtn(al);
+    paintFav();
+  }
+  function paintFav(){
+    var b = $("rp-favb"); if(!b) return;
+    var on = cur >= 0 && isFav(SONGS[cur].f);
+    b.textContent = on ? "♥" : "♡";
+    b.classList.toggle("on", on);
+  }
+  /* a song's shareable address: the site root adopts ?s=<slug> and plays it */
+  function songLink(s){ return ROOT + "?s=" + encodeURIComponent(s.f.replace(/\.mp3$/i,"")); }
+  function shareSong(s, btn){
+    var url = songLink(s);
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(url); }catch(e){}
+    if(navigator.share){ navigator.share({title:s.n+" — ONLY IBEE", url:url}).catch(function(){}); }
+    if(btn){ var t = btn.textContent; btn.textContent = "✓"; btn.title = "link copied_";
+      setTimeout(function(){ btn.textContent = t; }, 1400); }
   }
   function paintRoomBtn(al){
     var box = $("rp-room");
@@ -518,6 +573,12 @@
   $("rp-prev").onclick = function(){ play(prevIndex()); };
   $("rp-next").onclick = function(){ play(nextIndex()); };
   $("rp-shuf").onclick = function(){ setShuffle(!shuffle); };
+  $("rp-favb").onclick = function(){
+    if(cur < 0) return;
+    setFav(SONGS[cur].f, !isFav(SONGS[cur].f));
+    paintFav(); render();
+  };
+  $("rp-share").onclick = function(){ if(cur >= 0) shareSong(SONGS[cur], this); };
   /* the LYRICS ENGINE now lives as the shell's lyrics overlay (opened by the book
      icon in the shell player). This standalone panel button just returns to the
      shell, where that overlay is available. */
@@ -581,6 +642,12 @@
   };
   /* search box */
   $("rp-search").addEventListener("input", function(){ query = this.value.trim(); render(); });
+  /* ♥ filter: only the songs you saved */
+  $("rp-favtgl").onclick = function(){
+    favOnly = !favOnly;
+    this.classList.toggle("on", favOnly);
+    render();
+  };
   /* grid / list toggle */
   $("rp-view").onclick = function(){
     viewMode = (viewMode === "grid") ? "list" : "grid";
@@ -730,6 +797,33 @@
   }
   restoreState();
 
+  /* ---------- shared song links ----------
+     A friend's link looks like <site>/?s=<slug> (made by the SHARE buttons). When the
+     radio boots on a page whose URL carries ?s=, that record is adopted and played —
+     if the browser blocks un-tapped audio, the very first interaction starts it
+     (same kick trick as restoreState). Extras are retried after songs-extra.js lands. */
+  var DEEP = (function(){
+    try{ var m = /[?&]s=([^&]+)/.exec(location.search); return m ? decodeURIComponent(m[1]).toLowerCase() : null; }catch(e){ return null; }
+  })();
+  function tryDeepLink(){
+    if(!DEEP) return;
+    for(var i=0;i<SONGS.length;i++){
+      var f = (SONGS[i].f||"").toLowerCase();
+      if(f !== DEEP && f.replace(/\.mp3$/,"") !== DEEP) continue;
+      DEEP = null;
+      if(SONGS[i].locked) return;                    // a locked record never leaks
+      play(i, 0);                                    // shared links beat the saved state
+      var kickEvents = ["pointerdown","touchstart","mousedown","keydown","click"];
+      var kick = function(){
+        if(audio.paused && cur >= 0) play(cur);
+        kickEvents.forEach(function(ev){ document.removeEventListener(ev, kick, true); });
+      };
+      kickEvents.forEach(function(ev){ document.addEventListener(ev, kick, true); });
+      return;
+    }
+  }
+  tryDeepLink();
+
   /* ---------- merge the studio's extra records into the live radio ----------
      Runs when assets/songs-extra.js arrives (see the self-loader up top).
      Additive: dedupes by filename so built-in songs are never touched; new
@@ -767,6 +861,7 @@
         window.IBEERADIO.count = SONGS.length;
         render();
         restoreState();   // no-op unless the saved song needed the longer list
+        tryDeepLink();    // a shared link to a studio-pressed record resolves now
       }
     }catch(e){}
   }
