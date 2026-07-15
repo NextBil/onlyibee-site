@@ -47,7 +47,7 @@
 <div id="wrap"><div id="stage"><canvas id="bg"></canvas><canvas id="fx"></canvas></div></div>
 <a class="back" href="../">◀ ROOMS</a>
 <div id="np"><span class="dot" id="npdot"></span><span id="npname">RADIO OFF — TAP THE TANK</span></div>
-<div id="hint">the record is water_ — tap the glass, feed the fish, raise your B MAJOR pet</div>
+<div id="hint">your egg hatches as the music plays_ — feed it, pet it, explore the tank: it evolves 5 times</div>
 
 <script src="../../assets/player.js?v=17"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
@@ -116,20 +116,42 @@ var GARDEN={sun:{}};
 try{GARDEN=JSON.parse(localStorage.getItem('ibee_garden')||'{"sun":{}}')||{sun:{}};if(!GARDEN.sun)GARDEN.sun={};}catch(e){GARDEN={sun:{}};}
 function saveGarden(){try{localStorage.setItem('ibee_garden',JSON.stringify(GARDEN))}catch(e){}}
 setInterval(saveGarden,5000);addEventListener('pagehide',saveGarden);
-var SUN_PER_STAGE=75;
-function petStage(slug){
-  var r=RAD(),idx=r&&r.indexBySlug?r.indexBySlug(slug):-1;
-  var plays=0;
+/* ============ THE PET — ONE pet, simple to understand ============
+   It starts as an EGG that hatches FAST, becomes a BABY JELLY, then grows
+   through 5 evolutions. XP comes from your listening habits (time on air)
+   and your actions in the tank (feeding, petting, exploring). Persists. */
+var APET={xp:0};
+try{APET=JSON.parse(localStorage.getItem('ibee_aquapet')||'null')||{xp:0};}catch(e){APET={xp:0};}
+if(!(APET.xp>0)){ /* first visit: credit the listening you've already done */
   try{
-    var sav=JSON.parse(localStorage.getItem('ibee_sav')||'{}'),pl=sav.plays||{};
-    var id= idx>=0&&idx<18 ? ('s'+String(idx+1).padStart(2,'0')) : null;
-    plays=(id&&pl[id]||0)+(pl[slug]||0);
+    var _sav=JSON.parse(localStorage.getItem('ibee_sav')||'{}'),_pl=_sav.plays||{},_tp=0;
+    Object.keys(_pl).forEach(function(k){_tp+=(+_pl[k]||0);});
+    var _ts=0;Object.keys(GARDEN.sun||{}).forEach(function(k){_ts+=(+GARDEN.sun[k]||0);});
+    APET.xp=Math.min(300,_tp*4+Math.floor(_ts/6));
   }catch(e){}
-  var sun=GARDEN.sun[slug]||0;
-  return Math.min(10, plays + Math.floor(sun/SUN_PER_STAGE));
 }
-/* stage → life phase */
-function phaseOf(st){return st<=1?'egg':st<=4?'baby':st<=7?'juvenile':st<=9?'evolved':'apex';}
+function saveAPet(){try{localStorage.setItem('ibee_aquapet',JSON.stringify(APET))}catch(e){}}
+setInterval(saveAPet,5000);addEventListener('pagehide',saveAPet);
+/* the ladder: EGG hatches fast, then 5 evolutions */
+var PHASES=[
+  {id:'egg',     n:'EGG',          at:0,    tip:'play music — it hatches fast_'},
+  {id:'baby',    n:'BABY JELLY',   at:6,    tip:'listen + feed it to grow_'},
+  {id:'juvenile',n:'JUVENILE',     at:60,   tip:'keep the records spinning_'},
+  {id:'teen',    n:'TEEN JELLY',   at:180,  tip:'pet it · feed it · open the chest_'},
+  {id:'evolved', n:'EVOLVED',      at:400,  tip:'almost legendary_'},
+  {id:'apex',    n:'APEX',         at:750,  tip:'one more push to MYTHIC_'},
+  {id:'mythic',  n:'MYTHIC ✦',     at:1200, tip:'the tank bows to it_'}
+];
+function phaseIdx(){var i=0;for(var k=0;k<PHASES.length;k++)if(APET.xp>=PHASES[k].at)i=k;return i;}
+function phaseNow(){return PHASES[phaseIdx()];}
+function gainXP(n){
+  var was=phaseIdx();APET.xp+=n;
+  if(phaseIdx()>was){var P=PHASES[phaseIdx()];
+    petSay='✦ EVOLVED → '+P.n+' ✦';petSayT=4;petTrick=1;
+    for(var i2=0;i2<16;i2++)pops.push({x:PET.x+(Math.random()*34-17),y:PET.y+Math.random()*10,vy:-10-Math.random()*22,life:1,hue:50});
+    saveAPet();
+  }
+}
 
 /* ---------- stage — PORTRAIT-FIRST: the whole screen is water ---------- */
 var W=204,H=440;
@@ -208,17 +230,18 @@ function loreLine(){
 stage.addEventListener('pointerdown',function(e){
   var p=toLow(e),r=RAD(),playing=r&&r.playing&&r.playing();
   if(!playing){ if(r)r.control.play(); ripples.push({x:p.x,y:p.y,r:2,life:1}); return; }
-  /* pet? */
+  /* pet? (petting = XP — the egg loves it too) */
   if(PET&&Math.abs(p.x-PET.x)<20&&Math.abs(p.y-PET.y)<18){
-    petTrick=1;
+    petTrick=1;gainXP(4);
     for(var h=0;h<3;h++)hearts.push({x:PET.x+(Math.random()*16-8),y:PET.y-10,vy:-10-Math.random()*6,life:1,ch:'♥'});
-    var m=metaNow();petSay=(m&&m.vibe)?('~ '+m.vibe+' ~'):'~ blub_ ~';petSayT=3;
+    if(phaseNow().id==='egg'){petSay='~ it wiggles_ ~';petSayT=3;}
+    else{var m=metaNow();petSay=(m&&m.vibe)?('~ '+m.vibe+' ~'):'~ blub_ ~';petSayT=3;}
     return;
   }
   /* fish? → lore tooltip + flee */
   for(var i=0;i<FISH.length;i++){var f=FISH[i];
     if(Math.abs(p.x-f.x)<12*f.size+4&&Math.abs(p.y-f.y)<9*f.size+4){
-      f.flee=1;f.dart=0.7;
+      f.flee=1;f.dart=0.7;gainXP(1);
       var lore=loreLine();
       tips.push({x:f.x,y:f.y-14,t:lore||'this one hasn\'t told its story yet_',
         head:SPECIES.filter(function(s){return s.id===f.sp})[0].name+' No.'+(i+1),life:4.5});
@@ -227,7 +250,7 @@ stage.addEventListener('pointerdown',function(e){
   /* treasure chest */
   var cb0=chestBox();
   if(p.x>cb0.x-4&&p.x<cb0.x+cb0.w+4&&p.y>cb0.y-8&&p.y<GRAVEL+6){
-    chestOpen=1.4;var m2=metaNow(),s2=songNow();
+    chestOpen=1.4;gainXP(2);var m2=metaNow(),s2=songNow();
     tips.push({x:330,y:166,head:'TREASURE — '+(s2?s2.n:'???'),
       t:(m2&&m2.took)?('time to create: '+m2.took):'the log is sealed_ some sessions keep no clock.',life:5});
     for(var b=0;b<10;b++)pops.push({x:326+Math.random()*12,y:186,vy:-20-Math.random()*20,life:1,hue:50});
@@ -244,9 +267,9 @@ stage.addEventListener('pointerdown',function(e){
     ripples.push({x:p.x,y:SURF,r:2,life:1,flat:true});
     return;
   }
-  /* open water → glass ripple + food pellet (fish chase it) */
+  /* open water → glass ripple + food pellet (fish chase it, feeding = XP) */
   ripples.push({x:p.x,y:p.y,r:2,life:1});
-  if(p.y<GRAVEL-8)pellets.push({x:p.x,y:Math.min(p.y,SURF+8),vy:6});
+  if(p.y<GRAVEL-8){pellets.push({x:p.x,y:Math.min(p.y,SURF+8),vy:6});gainXP(1);}
 });
 setTimeout(function(){document.getElementById('hint').classList.add('off')},9000);
 
@@ -413,7 +436,7 @@ function updFish(f,dt,g,playing){
     var best=null,bd=1e9;
     pellets.forEach(function(pe){var d2=(pe.x-f.x)*(pe.x-f.x)+(pe.y-f.y)*(pe.y-f.y);if(d2<bd){bd=d2;best=pe;}});
     if(best&&bd<9000){f.dir=best.x>f.x?1:-1;f.vy=(best.y>f.y?1:-1)*10;
-      if(bd<40){best.eaten=true;hearts.push({x:f.x,y:f.y-6,vy:-8,life:1,ch:'♪'});}}
+      if(bd<40){best.eaten=true;gainXP(1);hearts.push({x:f.x,y:f.y-6,vy:-8,life:1,ch:'♪'});}}
   }
   f.x+=f.dir*v*dt*(f.flee>0?2.5:1);
   f.y+=Math.sin(T*1.5+f.ph)*4*dt+(f.vy||0)*dt;
@@ -426,8 +449,7 @@ function updFish(f,dt,g,playing){
 
 /* ---------- the pet ---------- */
 function drawPet(now,hue,playing){
-  var slug=slugNow(),st=slug?petStage(slug):0,ph=phaseOf(st);
-  var sp=slug?speciesFor(slug):SPECIES[1];
+  var ph=phaseNow().id;
   var x=PET.x,y=PET.y+Math.sin(now*2)*2+(playing?-PULSE*4:0);
   var trick=petTrick*6.283;
   bctx.save();bctx.translate(x,y);
@@ -438,20 +460,20 @@ function drawPet(now,hue,playing){
     bctx.fillStyle=hsl(hue,40,80);bctx.beginPath();bctx.ellipse(0,0,8,10,0,0,7);bctx.fill();
     bctx.fillStyle=hsl(hue,70,55);
     bctx.fillRect(-4,-3,2,2);bctx.fillRect(2,1,2,2);bctx.fillRect(-1,5,2,2);
-    if(st>=1){bctx.strokeStyle='#1b1208';bctx.beginPath();bctx.moveTo(-3,-6);bctx.lineTo(0,-2);bctx.lineTo(3,-5);bctx.stroke();} // crack
+    if(APET.xp>=3){bctx.strokeStyle='#1b1208';bctx.beginPath();bctx.moveTo(-3,-6);bctx.lineTo(0,-2);bctx.lineTo(3,-5);bctx.stroke();} // crack — almost there
   }else{
-    /* ---- THE JELLYFISH: grows + gains tentacles as it evolves, pulses its bell
-       to propel, glows on the bass. egg → baby → juvenile → evolved → apex ---- */
-    var sc=ph==='baby'?0.85:ph==='juvenile'?1.35:ph==='evolved'?1.95:2.5;
+    /* ---- THE JELLYFISH: grows + gains tentacles with every evolution, pulses its
+       bell to propel, glows on the bass. egg → baby → juvenile → teen → evolved → apex → mythic ---- */
+    var sc={baby:0.85,juvenile:1.35,teen:1.65,evolved:1.95,apex:2.5,mythic:3.0}[ph]||1;
     var pulse=Math.sin(now*(playing?3.2:1.6)+PET.ph)*0.5+0.5;        // bell contraction 0..1
     var squeeze=playing?(0.12+LOW*0.4):0.1;
     var bw=13*sc*(1-squeeze*pulse), bh=11*sc*(1+squeeze*pulse*0.6);  // bell width/height
-    var glow=playing?(0.4+LVL*0.6):(ph==='apex'?0.4:0.2);
+    var glow=playing?(0.4+LVL*0.6):((ph==='apex'||ph==='mythic')?0.4:0.2);
     var eyeY=-3*sc;
     /* outer bioluminescent glow */
     bctx.fillStyle=hsl(hue,85,60,0.10+glow*0.15);bctx.beginPath();bctx.arc(0,0,bw+9,0,7);bctx.fill();
     /* tentacles — more & longer with each life phase, swaying on the bass */
-    var TN=ph==='baby'?4:ph==='juvenile'?6:ph==='evolved'?9:12, tl=12+sc*7;
+    var TN={baby:4,juvenile:6,teen:8,evolved:10,apex:12,mythic:14}[ph]||4, tl=12+sc*7;
     for(var t=0;t<TN;t++){
       var tx=((t/(TN-1))-0.5)*bw*1.7,
           swb=Math.sin(now*2+t*0.7+PET.ph)*(3+LOW*8)*(0.4+pulse*0.6);
@@ -485,22 +507,27 @@ function drawPet(now,hue,playing){
     bctx.fillRect(px(-3.4*sc),px(eyeY),px(1.8),px(2.4));bctx.fillRect(px(1.6*sc),px(eyeY),px(1.8),px(2.4));
     bctx.fillStyle='#fff';bctx.fillRect(px(-3*sc),px(eyeY),1,1);bctx.fillRect(px(2*sc),px(eyeY),1,1);
     /* B MAJOR pendant from evolved up */
-    if(ph==='evolved'||ph==='apex'){
+    if(ph==='evolved'||ph==='apex'||ph==='mythic'){
       bctx.fillStyle=hsl(50,90,60);bctx.beginPath();bctx.arc(0,bh*0.42,2.6,0,7);bctx.fill();
       bctx.fillStyle='#1b1208';bctx.font='4px monospace';bctx.textAlign='center';bctx.fillText('B',0,bh*0.42-2);bctx.textAlign='left';
     }
-    /* APEX crown + sparkle trail */
-    if(ph==='apex'){
+    /* APEX+ crown + sparkle trail */
+    if(ph==='apex'||ph==='mythic'){
       bctx.fillStyle=hsl(50,90,62);
       bctx.beginPath();bctx.moveTo(-5,-bh-2);bctx.lineTo(-5,-bh-7);bctx.lineTo(-2,-bh-3);bctx.lineTo(0,-bh-8);
       bctx.lineTo(2,-bh-3);bctx.lineTo(5,-bh-7);bctx.lineTo(5,-bh-2);bctx.closePath();bctx.fill();
       if(Math.random()<0.3)pops.push({x:x+(Math.random()*10-5),y:y+bh,vy:-4,life:0.8,hue:50});
     }
+    /* MYTHIC halo ring */
+    if(ph==='mythic'){
+      bctx.strokeStyle=hsl(50,95,70,0.5+glow*0.4);bctx.lineWidth=1.5;
+      bctx.beginPath();bctx.ellipse(0,-bh-12,10,3,0,0,7);bctx.stroke();bctx.lineWidth=1;
+    }
   }
   bctx.restore();
 }
 function updPet(dt,g,playing){
-  var slug=slugNow(),ph=phaseOf(slug?petStage(slug):0);
+  var ph=phaseNow().id;
   if(ph==='egg'){PET.x+=(W/2-PET.x)*dt;PET.y+=((GRAVEL-14)-PET.y)*dt*2;return;} // egg rests on gravel
   var bpm=(g&&g.bpm)||100;
   PET.x+=PET.vx*dt*(1+(playing?LVL:0));
@@ -569,6 +596,20 @@ function drawFx(now,hue,playing){
     fctx.fillText('PRESS ▶ — FEED THE WATER',FW/2,(SURF+18)*S);
     fctx.textAlign='left';
   }
+  /* ---- PET GROWTH METER (always on, bottom-left) — so growth is obvious ---- */
+  (function(){
+    var i=phaseIdx(),P=PHASES[i],N=PHASES[i+1];
+    var frac=N?Math.max(0,Math.min(1,(APET.xp-P.at)/(N.at-P.at))):1;
+    var bx=6*S,bw=74*S,by=FH-9*S;
+    fctx.font=(4.6*S)+'px "Press Start 2P"';
+    fctx.fillStyle='rgba(182,255,0,.9)';
+    fctx.fillText('PET: '+P.n,bx,FH-21*S);
+    fctx.font=(5.6*S)+'px VT323';fctx.fillStyle='rgba(170,190,170,.85)';
+    fctx.fillText(N?('next: '+N.n+' · '+P.tip):P.tip,bx,FH-15.5*S);
+    fctx.fillStyle='rgba(0,0,0,.65)';fctx.fillRect(bx,by,bw,4*S);
+    fctx.fillStyle='#b6ff00';fctx.fillRect(bx,by,bw*frac,4*S);
+    fctx.strokeStyle='rgba(182,255,0,.5)';fctx.strokeRect(bx,by,bw,4*S);
+  })();
 }
 
 /* ---------- now-playing chip ---------- */
@@ -576,8 +617,7 @@ var npName=document.getElementById('npname'),npDot=document.getElementById('npdo
 setInterval(function(){
   var r=RAD(),s=songNow();
   if(r&&r.playing&&r.playing()&&s){
-    var st=petStage(r.slug());
-    npName.textContent='ON AIR — '+s.n+' · PET LV '+st+'/10';
+    npName.textContent='ON AIR — '+s.n+' · PET: '+phaseNow().n;
     npDot.style.background=hsl(hueNow(),85,55);
   }
   else if(s){npName.textContent='PAUSED — '+s.n;npDot.style.background='#444';}
@@ -585,7 +625,7 @@ setInterval(function(){
 },700);
 
 /* ---------- main loop ---------- */
-var last=performance.now();
+var last=performance.now(),xpAcc=0;
 function loop(nowMs){
   requestAnimationFrame(loop);
   var dt=Math.min(0.05,(nowMs-last)/1000);last=nowMs;T+=dt;
@@ -606,8 +646,10 @@ function loop(nowMs){
     PET.vx=(Math.random()<0.5?-1:1)*(6+Math.random()*6);}
   if(!FISH.length&&playing)spawnSchool(sl);
 
-  /* photosynthesis for the pet: listening = sunlight (shared with the terrarium) */
+  /* photosynthesis: listening = sunlight (shared with the terrarium) */
   if(playing&&sl)GARDEN.sun[sl]=(GARDEN.sun[sl]||0)+dt;
+  /* listening habits feed the pet: +1 XP every 2s on air (egg hatches in ~12s) */
+  if(playing){xpAcc+=dt;if(xpAcc>=2){xpAcc-=2;gainXP(1);}}
 
   lyricPlan();
   drawTank(T,hue,playing);
