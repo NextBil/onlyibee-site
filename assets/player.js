@@ -824,6 +824,65 @@
   }
   tryDeepLink();
 
+  /* ---------- VIP welcome: a special hello for special people ----------
+     Site-wide (player.js runs on every page's top window). When a VIP's session
+     appears, a brief neon overlay says their line — once per visit; logging out
+     and back in says it again. Member grants live in member/vip.sql. */
+  var VIPS = { "najwa.barton@outlook.com": "welcome babe" };
+  function sessEmail(){
+    try{
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(/^sb-.*-auth-token$/.test(k)){
+          var v=JSON.parse(localStorage.getItem(k)||"null");
+          var em=(v&&((v.user&&v.user.email)||(v.currentSession&&v.currentSession.user&&v.currentSession.user.email)))||"";
+          return String(em).toLowerCase();
+        }
+      }
+    }catch(e){}
+    return "";
+  }
+  function vipGreet(msg){
+    if(document.getElementById("vipwelcome")) return;
+    var st2=document.createElement("style");
+    st2.textContent=
+      "#vipwelcome{position:fixed;inset:0;z-index:99980;display:flex;flex-direction:column;align-items:center;"
+      +"justify-content:center;gap:18px;background:rgba(2,2,6,.86);pointer-events:none;opacity:0;transition:opacity .5s}"
+      +"#vipwelcome.on{opacity:1}"
+      +"#vipwelcome::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.3) 0 1px,transparent 1px 3px)}"
+      +"#vipwelcome .vh{font-size:44px;line-height:1;color:#ff2b6b;text-shadow:0 0 22px rgba(255,43,107,.9);"
+      +"animation:vipbeat 1s ease-in-out infinite}"
+      +"@keyframes vipbeat{0%,100%{transform:scale(1)}30%{transform:scale(1.22)}45%{transform:scale(1.06)}60%{transform:scale(1.18)}}"
+      +"#vipwelcome .vm{font-family:'Press Start 2P',monospace;font-size:clamp(15px,4.6vw,26px);color:#fff;"
+      +"letter-spacing:3px;text-shadow:0 0 18px rgba(255,43,107,.85),0 0 40px rgba(255,43,107,.5)}"
+      +"#vipwelcome .fh{position:absolute;bottom:-40px;color:#ff2b6b;opacity:.75;animation:vipfloat linear infinite}"
+      +"@keyframes vipfloat{to{transform:translateY(-110vh) rotate(24deg);opacity:0}}";
+    document.head.appendChild(st2);
+    var ov=document.createElement("div"); ov.id="vipwelcome";
+    var hearts="";
+    for(var h=0;h<10;h++){
+      hearts+="<span class='fh' style='left:"+(4+Math.random()*92)+"%;font-size:"+(13+Math.random()*20)+"px;"
+        +"animation-duration:"+(3.4+Math.random()*3)+"s;animation-delay:"+(Math.random()*1.6)+"s'>♥</span>";
+    }
+    ov.innerHTML=hearts+"<div class='vh'>♥</div><div class='vm'>"+esc(msg)+"</div>";
+    document.body.appendChild(ov);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){ov.classList.add("on");});});
+    setTimeout(function(){ ov.classList.remove("on"); setTimeout(function(){ov.remove();},600); },3400);
+  }
+  setInterval(function(){
+    var em=sessEmail();
+    if(!em){ try{ sessionStorage.removeItem("ibee_vip_hi"); }catch(e){} return; }   // logged out → next login greets again
+    var msg=VIPS[em]; if(!msg) return;
+    /* the shell's PRESS START curtain sits above everything — wait until it's gone */
+    var en=document.getElementById("enter");
+    if(en && en.style.display!=="none" && en.offsetParent!==null) return;
+    try{
+      if(sessionStorage.getItem("ibee_vip_hi")===em) return;
+      sessionStorage.setItem("ibee_vip_hi",em);
+    }catch(e){ return; }
+    vipGreet(msg);
+  },2500);
+
   /* ---------- merge the studio's extra records into the live radio ----------
      Runs when assets/songs-extra.js arrives (see the self-loader up top).
      Additive: dedupes by filename so built-in songs are never touched; new
