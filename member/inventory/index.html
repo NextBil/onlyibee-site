@@ -71,15 +71,22 @@ h1{font-family:var(--px);font-size:clamp(15px,5vw,24px);color:var(--acid);letter
 .msg{color:var(--dim);font-size:16px;margin-top:8px}
 .sess{text-align:center;color:var(--dim);font-size:15px;margin-bottom:16px}
 .sess a{color:var(--acid)}
+/* back to the profile — always lands on YOUR annex (history.back when we came from it,
+   so the exact same profile page + params are restored) */
+.backbtn{display:inline-block;font-family:var(--px);font-size:8px;color:var(--acid);
+  border:1px solid var(--acid);padding:10px 12px;text-decoration:none;letter-spacing:1px;margin-bottom:14px}
+.backbtn:hover{background:#131a00}
+.backbtn:active{transform:translateY(2px)}
 footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:var(--dim)}
 </style>
 </head>
 <body>
 <header>
   <a href="../../#menu">ONLY<span class="r">IBEE</span> OS</a>
-  <span><a href="../profile/" style="color:var(--acid);text-decoration:none">☺ PROFILE</a> · COLLECTION.SYS</span>
+  <span><a href="../../room/" style="color:var(--acid);text-decoration:none">☺ PROFILE</a> · COLLECTION.SYS</span>
 </header>
 <main>
+  <a class="backbtn" id="backprof" href="../../room/">◀ BACK TO MY PROFILE</a>
   <h1>MY COLLECTION</h1>
   <div class="progress" id="prog">SYNCING THE VAULT…</div>
   <div class="pbar"><i id="pfill"></i></div>
@@ -210,8 +217,19 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   }
   sb.auth.onAuthStateChange(function(){ boot(); });
   boot();
+
+  /* BACK TO MY PROFILE: when we arrived FROM the profile, real history.back() restores
+     the exact same profile page (same URL + params) instead of a fresh load; any other
+     entry path just follows the link to /room/ (which is always YOUR profile). */
+  $("backprof").addEventListener("click",function(e){
+    try{
+      if(document.referrer && /\/room\//.test(document.referrer) && history.length>1){
+        e.preventDefault(); history.back();
+      }
+    }catch(err){}
+  });
 })();
 </script>
-<script src="../../assets/player.js?v=17"></script>
+<script src="../../assets/player.js?v=18"></script>
 </body>
 </html>
