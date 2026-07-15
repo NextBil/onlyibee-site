@@ -37,16 +37,26 @@
     font-family:var(--px);font-size:8px;color:var(--dim);background:rgba(0,0,0,.7);
     border:1px solid var(--border);padding:8px 12px;white-space:nowrap}
   #title b{color:var(--acid);font-weight:normal}
-  #hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:800;
+  #hint{position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:800;
     color:var(--dim);font-size:17px;text-align:center;background:rgba(0,0,0,.55);
     padding:2px 12px;border:1px solid #161616;pointer-events:none;transition:opacity .8s;white-space:nowrap}
   #hint.off{opacity:0}
+  /* VIEW toggle: greenhouse ⇄ the GARDEN (zoomed-out hillside) — at the bottom */
+  #viewtog{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:801;font-family:var(--px);font-size:8px;
+    color:#000;background:var(--acid);border:1px solid var(--acid);padding:10px 14px;cursor:pointer;transition:opacity .3s}
+  #viewtog:hover{filter:brightness(1.12)}
+  #over{position:fixed;inset:0;z-index:400;display:none;cursor:pointer}
+  body.gardenview #over{display:block}
+  body.gardenview #stage{opacity:0}
+  body.gardenview #hint{opacity:0}
 
-  /* museum plaque */
+  /* museum plaque — NEVER taller than the screen, scrolls inside, never clips its text */
   #plaque{position:fixed;right:12px;top:56px;z-index:820;width:min(300px,86vw);
     background:rgba(8,10,4,.96);border:2px solid var(--border);display:none;
-    box-shadow:0 0 22px rgba(0,0,0,.6)}
+    box-shadow:0 0 22px rgba(0,0,0,.6);max-height:calc(100vh - 70px);overflow-y:auto;scrollbar-width:thin}
   #plaque.on{display:block}
+  body.plaque-open #hint{opacity:0}       /* the sheet must not sit on top of the hint text */
+  body.plaque-open #viewtog{opacity:0;pointer-events:none}
   #plaque .head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;align-items:center}
   #plaque .no{font-family:var(--px);font-size:7px;color:var(--dim)}
   #plaque .x{cursor:pointer;color:var(--dim);font-size:15px;padding:0 4px}
@@ -54,10 +64,15 @@
   #pqCanvas{display:block;width:120px;height:120px;margin:10px auto 2px;image-rendering:pixelated;
     background:radial-gradient(ellipse at 50% 40%,rgba(182,255,0,.06),#06070a 70%);border:1px solid var(--border)}
   #plaque h3{font-family:var(--px);font-size:10px;color:#fff;padding:10px 12px 2px;text-align:center}
-  /* on phones the plaque becomes a bottom sheet so it never covers the plant you tapped */
+  /* on phones the plaque becomes a bottom sheet (60vh max) and the garden auto-scrolls
+     so the plant you tapped stays visible ABOVE it — nothing gets hidden */
   @media (max-width:560px){
-    #plaque{right:0;left:0;top:auto;bottom:0;width:100%;max-height:74vh;overflow-y:auto;border-width:2px 0 0 0}
-    #pqCanvas{width:96px;height:96px}
+    #plaque{right:0;left:0;top:auto;bottom:0;width:100%;max-height:60vh;border-width:2px 0 0 0}
+    #pqCanvas{width:84px;height:84px;margin:8px auto 0}
+    #plaque h3{padding-top:6px}
+    #title{top:auto;bottom:56px;font-size:7px;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
+    body.plaque-open #title{opacity:0}
+    #hint{bottom:96px;white-space:normal;max-width:92vw}
   }
   #plaque .latin{font-size:18px;color:var(--acid);font-style:italic;padding:0 12px 6px}
   #plaque .chips{display:flex;flex-wrap:wrap;gap:5px;padding:2px 12px 8px}
@@ -66,7 +81,7 @@
   #plaque .grow{padding:0 12px 8px;font-size:17px;color:var(--dim)}
   #plaque .bar{height:10px;border:1px solid var(--border);margin-top:3px;padding:1px}
   #plaque .bar i{display:block;height:100%;background:var(--acid);box-shadow:0 0 8px rgba(182,255,0,.5)}
-  #plaque .story{padding:0 12px 10px;font-size:18px;line-height:1.2;color:#cfe8c0;max-height:110px;overflow-y:auto}
+  #plaque .story{padding:0 12px 10px;font-size:18px;line-height:1.25;color:#cfe8c0}  /* full story, plaque itself scrolls */
   #plaque .act{display:flex;gap:8px;padding:0 12px 12px}
   #plaque button{font-family:var(--px);font-size:8px;flex:1;padding:9px 0;cursor:pointer;
     background:var(--acid);color:#000;border:1px solid var(--acid)}
@@ -76,9 +91,11 @@
 </head>
 <body>
 <div id="wrap"><div id="stage"><canvas id="bg"></canvas><canvas id="fx"></canvas></div></div>
+<canvas id="over"></canvas>
 <a class="back" href="../">◀ ROOMS</a>
 <div id="title">SYNTH-BOTANICAL TERRARIUM · <b id="tcount">--</b> SPECIMENS</div>
-<div id="hint">every record grows here_ — plays feed the roots · click a plant, it exhales its words</div>
+<div id="viewtog">✿ THE GARDEN</div>
+<div id="hint">every record grows here_ — tap a plant for its story · tap its POT to water it · ✿ opens the garden</div>
 <div id="plaque">
   <div class="head"><span class="no" id="pqNo">SPECIMEN No. 00</span><span class="x" id="pqX">✕</span></div>
   <canvas id="pqCanvas" width="120" height="120"></canvas>
@@ -232,9 +249,26 @@ stage.addEventListener('pointermove',function(e){
 });
 stage.addEventListener('pointerup',function(e){
   var p=toLow(e);
-  if(pdown&&!dragging){var pl=plantAt(p);if(pl)select(pl,true);else closePlaque();}
+  if(pdown&&!dragging){
+    var pl=plantAt(p);
+    if(pl){
+      var q=potPos(pl);
+      if(p.y>q.y-2)water(pl);        // tap the POT → water it (a real action, +sunlight)
+      else select(pl,true);          // tap the PLANT → its plaque
+    } else closePlaque();
+  }
   pdown=null;dragging=false;
 });
+/* watering: a splash of sunlight — droplets fall, the plant twitches, growth advances */
+var drops=[];
+function water(p){
+  var q=potPos(p);
+  GARDEN.sun[p.slug]=(GARDEN.sun[p.slug]||0)+3;      // +3 listened-seconds worth of light
+  for(var i=0;i<9;i++)drops.push({x:q.x+(Math.random()-0.5)*14,wy:(q.y+scrollY)-26-Math.random()*8,
+    vy:4+Math.random()*10,life:0.9,hue:200});
+  p.twitch=1;burst(p,2);
+  if(SEL===p)select(p);                               // live-refresh the plaque numbers
+}
 stage.addEventListener('wheel',function(e){scrollY=clampY(scrollY+(e.deltaY+e.deltaX)*0.5);e.preventDefault();},{passive:false});
 var hover=null;
 function plantAt(p){
@@ -265,10 +299,16 @@ function select(p,spore){
   if(meta.took){var c3=document.createElement('span');c3.className='chip alt';c3.textContent='TOOK: '+meta.took;chips.appendChild(c3);}
   document.getElementById('pqSun').innerHTML='sunlight to next stage: '+Math.round(sunProg(p)*100)+'%'+(st>=10?' — fully evolved_':'');
   document.getElementById('pqStory').textContent=meta.meaning||'this specimen hasn\'t told its story yet_';
-  pq.classList.add('on');
+  pq.classList.add('on');document.body.classList.add('plaque-open');
+  /* phones: the plaque is a bottom sheet — scroll the garden so the tapped plant
+     stays visible ABOVE it (the window must never hide what you tapped) */
+  if(innerWidth<=560){
+    var row=Math.floor(p.idx/COLS);
+    scrollY=clampY(shelfY(row)-H*0.24);
+  }
   if(spore)burst(p,6);
 }
-function closePlaque(){pq.classList.remove('on');SEL=null;}
+function closePlaque(){pq.classList.remove('on');document.body.classList.remove('plaque-open');SEL=null;}
 document.getElementById('pqX').onclick=closePlaque;
 document.getElementById('pqPlay').onclick=function(){var r=RAD();if(r&&SEL)r.control.play(SEL.idx);};
 document.getElementById('pqSpore').onclick=function(){if(SEL)burst(SEL,10);};
@@ -487,6 +527,12 @@ function drawFx(now,hue){
       fctx.fillStyle=hsl(sp.hue,90,70,a);
       fctx.fillRect(sxx*S,syy*S,S,S);
     }}
+  /* watering droplets */
+  for(var dr=drops.length-1;dr>=0;dr--){var dp=drops[dr];
+    dp.wy+=dp.vy*0.016*10;dp.vy+=8*0.016;dp.life-=0.02;
+    if(dp.life<=0){drops.splice(dr,1);continue;}
+    fctx.fillStyle=hsl(200,85,70,Math.min(1,dp.life*1.4));
+    fctx.fillRect(dp.x*S,(dp.wy-scrollY)*S,S,S*1.6);}
   /* nameplates under pots */
   fctx.font=(4.5*S)+'px "Press Start 2P"';fctx.textAlign='center';
   PLANTS.forEach(function(p){
@@ -508,6 +554,183 @@ function drawFx(now,hue){
     fctx.fillRect(((fl.x%W+W)%W)*S,((fl.y%H+H)%H)*S,S,S);});
 }
 
+/* ============================================================
+   THE GARDEN — the zoomed-out second view. Every record is a
+   plant on a moonlit hillside; the aurora rolls to the groove,
+   the on-air specimen stands in a beam of light. Tap any plant
+   to play its record. A beautiful place to just watch.
+   ============================================================ */
+var viewMode='house';
+var over=document.getElementById('over'),octx=over.getContext('2d'),OS=1;
+function overFit(){var dpr=Math.min(2,devicePixelRatio||1);OS=dpr;
+  over.width=Math.floor(innerWidth*dpr);over.height=Math.floor(innerHeight*dpr);
+  over.style.width=innerWidth+'px';over.style.height=innerHeight+'px';}
+addEventListener('resize',overFit);overFit();
+document.getElementById('viewtog').onclick=function(){
+  viewMode=(viewMode==='house')?'garden':'house';
+  document.body.classList.toggle('gardenview',viewMode==='garden');
+  this.textContent=(viewMode==='house')?'✿ THE GARDEN':'▣ GREENHOUSE';
+  closePlaque();
+};
+var gRects=[],gSpores=[];
+function hillY(h,x,W2,H2,now){   // h: 0=back 1=mid 2=front
+  var base=[0.56,0.70,0.85][h]*H2;
+  return base+Math.sin(x*0.004+h*2.1)*H2*0.03+Math.sin(x*0.011+h)*H2*0.012
+    +Math.sin(now*0.7+h)*(LVL*H2*0.006);
+}
+function drawMiniPlant(p,x,y,st,on,now){
+  var hgt=(7+st*2.2)*(on?1.15+LOW*0.25:1), hue=p.hue;
+  var sw=Math.sin(now*1.4+p.idx)*(on?2.5+LVL*4:1);
+  octx.save();octx.translate(x,y);
+  if(on){ /* the beam of light */
+    var bm=octx.createLinearGradient(0,-hgt-160,0,0);
+    bm.addColorStop(0,hsl(hue,90,70,0));bm.addColorStop(1,hsl(hue,90,60,0.16+LVL*0.14));
+    octx.fillStyle=bm;
+    octx.beginPath();octx.moveTo(-6,-hgt-160);octx.lineTo(6,-hgt-160);
+    octx.lineTo(hgt*0.9,2);octx.lineTo(-hgt*0.9,2);octx.closePath();octx.fill();
+  }
+  var id=p.sp.id;
+  if(id==='cactus'){
+    octx.fillStyle=hsl(hue,55,on?38:26);
+    octx.fillRect(-2,-hgt,4,hgt);
+    if(st>=3)octx.fillRect(-6,-hgt*0.6,3,hgt*0.28);
+    if(st>=5)octx.fillRect(3,-hgt*0.75,3,hgt*0.33);
+  }else if(id==='willow'){
+    octx.strokeStyle=hsl(hue,50,on?36:24);octx.lineWidth=2;
+    octx.beginPath();octx.moveTo(0,0);octx.lineTo(0,-hgt);octx.stroke();
+    for(var d=-2;d<=2;d++){octx.lineWidth=1;
+      octx.beginPath();octx.moveTo(0,-hgt);
+      octx.quadraticCurveTo(d*4+sw,-hgt*0.5,d*5+sw,-hgt*0.15);octx.stroke();}
+  }else if(id==='shroom'){
+    octx.fillStyle='#cfc9b4';octx.fillRect(-1.5,-hgt*0.7,3,hgt*0.7);
+    octx.fillStyle=hsl(hue,60,on?46:32);
+    octx.beginPath();octx.ellipse(0,-hgt*0.7,4+st*0.8,(4+st*0.8)*0.55,0,3.14,0);octx.fill();
+  }else if(id==='sun'){
+    octx.strokeStyle=hsl(hue,50,on?36:26);octx.lineWidth=1.6;
+    octx.beginPath();octx.moveTo(0,0);octx.quadraticCurveTo(sw,-hgt*0.6,sw*0.5,-hgt);octx.stroke();
+    octx.fillStyle=hsl(hue,90,on?62:44,0.95);
+    octx.beginPath();octx.arc(sw*0.5,-hgt,2.5+st*0.55,0,7);octx.fill();
+    octx.fillStyle='#1b1208';octx.beginPath();octx.arc(sw*0.5,-hgt,(2.5+st*0.55)*0.45,0,7);octx.fill();
+  }else if(id==='void'){
+    octx.strokeStyle=hsl((hue+250)%360,40,on?36:24);octx.lineWidth=1.6;
+    octx.beginPath();octx.moveTo(0,0);octx.quadraticCurveTo(sw,-hgt*0.5,0,-hgt);octx.stroke();
+    octx.fillStyle='#08060e';octx.beginPath();octx.arc(0,-hgt-2,2+st*0.5,0,7);octx.fill();
+    octx.strokeStyle=hsl((hue+280)%360,80,60,on?0.9:0.4);
+    octx.beginPath();octx.arc(0,-hgt-2,2+st*0.5,0,7);octx.stroke();
+  }else if(id==='vine'){
+    octx.strokeStyle=hsl(hue,55,on?38:26);octx.lineWidth=1.6;
+    octx.beginPath();octx.moveTo(0,0);
+    octx.quadraticCurveTo(4+sw,-hgt*0.4,-3+sw,-hgt*0.7);
+    octx.quadraticCurveTo(-6+sw,-hgt*0.9,2+sw,-hgt);octx.stroke();
+    octx.fillStyle=hsl(hue,70,on?52:36,0.9);
+    for(var vl=0;vl<Math.min(6,st);vl++)octx.fillRect((Math.sin(vl*2.7)*5)+sw*0.5-1,-hgt*(0.3+vl*0.12),2,2);
+  }else{ /* fern */
+    for(var f2=-2;f2<=2;f2++){
+      octx.strokeStyle=hsl(hue,65,on?40:28);octx.lineWidth=1.4;
+      octx.beginPath();octx.moveTo(0,0);
+      octx.quadraticCurveTo(f2*5+sw,-hgt*0.55,f2*7+sw,-hgt*(0.75+Math.abs(f2)*-0.08));octx.stroke();}
+  }
+  octx.lineWidth=1;
+  /* radiant (fully evolved) halo */
+  if(st>=10){octx.strokeStyle=hsl(50,90,62,0.35+0.2*Math.sin(now*2+p.idx));
+    octx.beginPath();octx.arc(0,-hgt*0.6,hgt*0.7,0,7);octx.stroke();}
+  octx.restore();
+}
+function drawGarden(now){
+  var r=RAD(),playing=r&&r.playing&&r.playing();
+  var hue=playing?((r.song()&&r.song().hue)||120):120;
+  var W2=innerWidth,H2=innerHeight;
+  octx.setTransform(OS,0,0,OS,0,0);
+  /* night sky */
+  var sky=octx.createLinearGradient(0,0,0,H2);
+  sky.addColorStop(0,'#03040a');sky.addColorStop(0.55,hsl(hue,40,7));sky.addColorStop(1,hsl(hue,45,10));
+  octx.fillStyle=sky;octx.fillRect(0,0,W2,H2);
+  /* aurora — swells on the groove */
+  var amp=playing?(0.4+LVL*0.8):0.15;
+  for(var a=0;a<4;a++){
+    octx.strokeStyle=hsl((hue+a*24)%360,85,58,0.05+amp*0.11);
+    octx.lineWidth=16+a*10;
+    octx.beginPath();
+    var yy=H2*0.12+a*H2*0.07+Math.sin(now*0.5+a)*14;
+    for(var xx=0;xx<=W2;xx+=16){var yb=yy+Math.sin(xx*0.006+now*(0.8+a*0.3))*(10+amp*40);
+      xx===0?octx.moveTo(xx,yb):octx.lineTo(xx,yb);}
+    octx.stroke();
+  }
+  octx.lineWidth=1;
+  /* stars + a soft moon breathing with the level */
+  var rs=seedFor('gsky');
+  for(var st2=0;st2<80;st2++){octx.fillStyle='rgba(255,255,255,'+(0.06+0.5*rs()*Math.abs(Math.sin(now+st2)))+')';
+    octx.fillRect(rs()*W2,rs()*H2*0.45,2,2);}
+  octx.fillStyle=hsl(hue,50,86,0.9);octx.beginPath();octx.arc(W2*0.82,H2*0.14,18+LVL*3,0,7);octx.fill();
+  octx.fillStyle=hsl(hue,70,60,0.10+LVL*0.10);octx.beginPath();octx.arc(W2*0.82,H2*0.14,36+LVL*8,0,7);octx.fill();
+  /* three moonlit hills, back to front, rim-lit by the music */
+  for(var h=0;h<3;h++){
+    octx.beginPath();octx.moveTo(0,H2);
+    for(var hx=0;hx<=W2;hx+=10)octx.lineTo(hx,hillY(h,hx,W2,H2,now));
+    octx.lineTo(W2,H2);octx.closePath();
+    octx.fillStyle=hsl((hue+100)%360,30,[7,9,12][h]);
+    octx.fill();
+    octx.strokeStyle=hsl(hue,70,50,0.10+amp*0.12);octx.lineWidth=1.5;
+    octx.beginPath();
+    for(var hx2=0;hx2<=W2;hx2+=10){var hy2=hillY(h,hx2,W2,H2,now);
+      hx2===0?octx.moveTo(hx2,hy2):octx.lineTo(hx2,hy2);}
+    octx.stroke();octx.lineWidth=1;
+  }
+  /* the plants across the hills — every record lives here */
+  gRects=[];
+  var n=PLANTS.length,slugOn=playing?r.slug():null;
+  var perHill=Math.ceil(n/3)||1;
+  for(var i=0;i<n;i++){
+    var p=PLANTS[i],hi=i%3,ti=(Math.floor(i/3)+0.5)/perHill;
+    var gx=ti*W2*0.94+W2*0.03+(seedFor(p.slug)()*30-15);
+    var gy=hillY(hi,gx,W2,H2,now)+2;
+    var st=stageOf(p),on=slugOn===p.slug;
+    drawMiniPlant(p,gx,gy,st,on,now);
+    var hgt=(7+st*2.2)*1.3+8;
+    gRects.push({p:p,x:gx-14,y:gy-hgt-8,w:28,h:hgt+14});
+    if(on){
+      octx.font='8px "Press Start 2P"';octx.textAlign='center';
+      octx.fillStyle=hsl(hue,90,72);
+      var nm=p.name.length>18?p.name.slice(0,17)+'…':p.name;
+      octx.fillText(nm,Math.max(60,Math.min(W2-60,gx)),gy+16);octx.textAlign='left';
+      if(PULSE>0.9&&Math.random()<0.6)gSpores.push({x:gx,y:gy-hgt,vx:(Math.random()-0.5)*20,vy:-16-Math.random()*22,life:1,hue:hue});
+    }
+  }
+  /* spores rising into the aurora */
+  for(var gs=gSpores.length-1;gs>=0;gs--){var k=gSpores[gs];
+    k.x+=k.vx*0.016;k.y+=k.vy*0.016;k.vy*=0.99;k.life-=0.008;
+    if(k.life<=0){gSpores.splice(gs,1);continue;}
+    octx.fillStyle=hsl(k.hue,90,70,Math.min(1,k.life*1.4));
+    octx.fillRect(k.x,k.y,2,2);}
+  /* fireflies wandering the meadow */
+  flies.forEach(function(fl,fi){
+    var fx2=((fl.x*4+now*6+fi*40)%(W2+40))-20, fy2=H2*0.55+((fl.y*2)%(H2*0.4))+Math.sin(now*1.3+fi)*8;
+    octx.fillStyle=hsl(75,90,65,0.25+0.5*Math.abs(Math.sin(now*2+fl.p)));
+    octx.fillRect(fx2,fy2,2,2);});
+  /* HUD */
+  var rad=PLANTS.filter(function(p){return stageOf(p)>=10}).length;
+  octx.textAlign='center';
+  octx.fillStyle=hsl(hue,90,74);octx.font='10px "Press Start 2P"';
+  octx.fillText('THE GARDEN',W2/2,H2*0.05);
+  octx.fillStyle='#9a9a9a';octx.font='7px "Press Start 2P"';
+  octx.fillText(n+' SPECIMENS · '+rad+' RADIANT · TAP A PLANT TO PLAY ITS RECORD',W2/2,H2*0.05+16);
+  octx.textAlign='left';
+}
+/* tap a plant in the garden → play its record */
+over.addEventListener('pointerdown',function(e){
+  if(viewMode!=='garden')return;
+  var x=e.clientX,y=e.clientY,r=RAD();if(!r)return;
+  var best=null,bd=1e9;
+  for(var i=0;i<gRects.length;i++){var c=gRects[i];
+    if(x>=c.x-6&&x<=c.x+c.w+6&&y>=c.y-6&&y<=c.y+c.h+6){
+      var d=Math.pow(x-(c.x+c.w/2),2)+Math.pow(y-(c.y+c.h/2),2);
+      if(d<bd){bd=d;best=c;}
+    }}
+  if(best){r.control.play(best.p.idx);
+    for(var s2=0;s2<10;s2++)gSpores.push({x:best.x+best.w/2,y:best.y+best.h/2,
+      vx:(Math.random()-0.5)*40,vy:-20-Math.random()*30,life:1,hue:best.p.hue});}
+});
+
 var last=performance.now(),sunToast=0;
 function loop(nowMs){
   requestAnimationFrame(loop);
@@ -527,6 +750,9 @@ function loop(nowMs){
       if(pl){burst(pl,12);if(SEL===pl)select(pl);}
     }
   }
+
+  /* the zoomed-out GARDEN replaces the greenhouse while toggled */
+  if(viewMode==='garden'){drawGarden(T);return;}
 
   drawHouse(T,hue,playing);
   PLANTS.forEach(function(p){
