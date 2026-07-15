@@ -150,9 +150,9 @@
      item: the Supabase items.id this room is gated behind (null = always free, e.g. chess). ===== */
   var GAMES = [
     /* THE ROOMS — you pick ONE at sign-up (env) and only that one is yours; it grows with you. */
-    {name:"AQUA BASS",       by:"For fish-passionate music — who dropped a speaker in the ocean?", cover:"covers/aqua-bass.png",      url:"aqua/",      status:"live", item:null, env:"aqua"},
-    {name:"TERRARIUM",       by:"For gardeners — watch your plant evolve…",  cover:"covers/terrarium.png",      url:"terrarium/", status:"live", item:null, env:"terrarium"},
-    {name:"MIDNIGHT TRANSIT",by:"A late-night train, destination to…",       cover:"covers/midnight-transit.png",url:"transit/",  status:"live", item:null, env:"transit"},
+    {name:"AQUA BASS",       by:"For fish-passionate music — who dropped a speaker in the ocean?", cover:"covers/aqua-bass.png",      url:"aqua/",      status:"live", item:"env-aqua", env:"aqua"},
+    {name:"TERRARIUM",       by:"For gardeners — watch your plant evolve…",  cover:"covers/terrarium.png",      url:"terrarium/", status:"live", item:"env-terrarium", env:"terrarium"},
+    {name:"MIDNIGHT TRANSIT",by:"A late-night train, destination to…",       cover:"covers/midnight-transit.png",url:"transit/",  status:"live", item:"env-transit", env:"transit"},
     {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live", item:null},
     /* THE GAMES — earned by playing (see the unlock ladder in badges.js / member). */
     {name:"RUN BEEBEE!",     by:"A lyrics engine you jump through — words rain from the sky, city runs by on the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live", item:"game-runner", earn:"EARN — feel 10 records, or beat ICS chess"},
@@ -184,17 +184,18 @@
   var pickedRoom=null, signedIn=false, ownerAcct=false;   // the member's chosen env — only that one is theirs
   function card(g){
     var soon=g.status==="soon";
-    /* env rooms are MEMBERS-ONLY and EXCLUSIVE: unlocked only if it's the member's own pick
-       (or the owner). Guests + members-with-a-different-pick see it locked. */
+    /* env rooms are MEMBERS-ONLY: open if it's the member's own pick, the owner, OR an
+       ARCADE PASS put env-<room> in their inventory (passes open EVERY room). */
     var isMyRoom   = !!(g.env && (ownerAcct || (signedIn && pickedRoom===g.env)));
-    var roomLocked = !!(g.env && !isMyRoom);
-    var isLocked = !soon && ((g.item && !owned[g.item]) || roomLocked);
-    var tagKey = soon?"soon":(isLocked?"locked":(isMyRoom?"live":"live"));
+    var passRoom   = !!(g.env && g.item && owned[g.item]);
+    var roomLocked = !!(g.env && !isMyRoom && !passRoom);
+    var isLocked = !soon && (g.env ? roomLocked : (g.item && !owned[g.item]));
+    var tagKey = soon?"soon":(isLocked?"locked":"live");
     var byText = roomLocked ? (!signedIn ? "members only — join to pick a room_"
                               : (pickedRoom ? "you chose "+pickedRoom.toUpperCase()+" — one room only_"
                                             : "pick your room on your profile_"))
                : (isLocked&&g.earn ? g.earn : g.by);
-    var prText = soon?"SOON":(isLocked?"LOCKED":(isMyRoom?"YOUR ROOM":"FREE"));
+    var prText = soon?"SOON":(isLocked?"LOCKED":(isMyRoom?"YOUR ROOM":(passRoom?"PASS":"FREE")));
     var inner='<span class="spine"></span>'
       +'<span class="tag">'+TAGS[tagKey]+'</span>'
       +((g.isnew&&!isLocked)||isMyRoom?'<span class="ribbon">'+(isMyRoom?'YOURS':'NEW')+'</span>':'')
@@ -214,7 +215,7 @@
     var live=GAMES.filter(function(g){return g.status==="live";}),
         soon=GAMES.filter(function(g){return g.status==="soon";});
     function isUnlocked(g){
-      if(g.env) return ownerAcct||(signedIn&&pickedRoom===g.env);   // env rooms: only your pick counts
+      if(g.env) return ownerAcct||(signedIn&&pickedRoom===g.env)||!!(g.item&&owned[g.item]); // your pick OR a pass
       return !g.item||owned[g.item];
     }
     /* unlocked rooms shelve FIRST (stable: original order kept within each group) */
