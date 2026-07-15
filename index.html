@@ -442,6 +442,8 @@
   /* first page: ?p= (deep-link/NFC) or the console */
   var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
   if(/^(https?:)?\/\//i.test(p)) p='console.html#menu';
+  /* profile === room (one page): old member/profile links land straight on room/ */
+  p=p.replace(/^\/?member\/profile\/?(index\.html)?/i,'room/');
   frame.src=p;
   frame.addEventListener('load',function(){ frame.classList.add('on'); sync(); });
 

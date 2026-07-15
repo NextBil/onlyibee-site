@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>MY PROFILE — ONLY IBEE</title>
-<meta name="description" content="Your profile on the ONLY IBEE frequency — your room, your collection, your badges. Arrange it, share it, let friends sign the guestbook.">
+<meta name="description" content="Your profile on the ONLY IBEE frequency — your room. Arrange it and share it.">
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
@@ -119,19 +119,6 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:14px 16px;text-align:left}
 .box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
 .cnote{color:var(--dim);font-size:16px;line-height:1.45}
-.gnote{display:flex;gap:9px;align-items:flex-start;border:1px solid #232323;border-left:3px solid hsla(var(--hue),60%,50%,.8);
-  background:#0b0b0d;padding:8px 10px;margin-bottom:8px}
-.gnote .who{font-family:var(--px);font-size:7px;color:hsl(var(--hue),95%,70%);letter-spacing:1px}
-.gnote .when{color:#555;font-size:12px;margin-left:6px}
-.gnote .m{color:#c9c9c9;font-size:17px;line-height:1.35;margin-top:4px;word-break:break-word}
-.gnote .gx{margin-left:auto;flex:none;color:var(--red);cursor:pointer;font-family:var(--px);font-size:9px;padding:4px 6px;
-  border:1px solid #3a1414;display:none}
-.gnote .gx.on{display:block}
-.gwrite{display:flex;gap:8px;margin-top:10px}
-.gwrite input{flex:1;background:#050505;border:1px solid var(--border);color:var(--acid);
-  font-family:var(--vt);font-size:17px;padding:10px;min-width:0}
-.gwrite input:focus{outline:none;border-color:var(--acid)}
-.gwrite button{font-family:var(--px);font-size:8px;padding:0 13px;background:var(--acid);color:#000;border:0;cursor:pointer}
 .sharebar{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
 .sharebar input{flex:1;min-width:150px;background:#050505;border:1px solid var(--border);color:var(--acid);
   font-family:var(--vt);font-size:16px;padding:10px}
@@ -194,71 +181,6 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .avpick img.sel{border-color:var(--acid);box-shadow:0 0 10px rgba(182,255,0,.5)}
 .avpick img:hover{border-color:var(--ink)}
 
-/* ---------- STAT SCREENS: a row of little readouts that pulse to the groove ---------- */
-/* collection = a full-width hero screen; PLAYS / BADGES / VAULT tidy underneath */
-.screens{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%}
-.scr{border:1px solid var(--border);background:#080808;padding:11px 8px;text-align:center;position:relative;overflow:hidden}
-.scr::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:hsl(var(--mh,var(--hue)),95%,55%);
-  opacity:calc(.25 + var(--mb,0)*.75);box-shadow:0 0 calc(3px + var(--mb,0)*8px) hsl(var(--mh,var(--hue)),95%,55%)}
-.scr.hero{border-color:hsla(var(--hue),60%,50%,.7);grid-column:1 / -1;
-  background:linear-gradient(180deg,hsla(var(--hue),70%,30%,.12),#080808)}
-.scr .k{font-family:var(--px);font-size:6.5px;color:var(--dim);letter-spacing:1px}
-.scr.hero .k{font-size:8px;color:hsl(var(--hue),95%,68%)}
-.scr .v{font-family:var(--px);font-size:14px;color:hsl(var(--hue),95%,72%);margin-top:8px;
-  text-shadow:0 0 calc(4px + var(--mb,0)*10px) hsla(var(--mh,var(--hue)),95%,55%,.5)}
-.scr.hero .v{font-size:22px;margin-top:10px}
-.scr .sub{color:var(--dim);font-size:12px;margin-top:4px}
-
-/* ---------- BADGES ---------- */
-.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:9px}
-.badge{border:1px solid var(--border);padding:11px 7px;text-align:center;position:relative;cursor:pointer}
-.badge:hover{border-color:#3a3a3a}
-.badge.hush{cursor:default}
-.badge.hush .bi{filter:none;opacity:.5}
-.badge .bi{font-size:23px;line-height:1;filter:grayscale(1) brightness(.5)}
-.badge.on .bi{filter:none}
-.badge.on{border-color:hsla(var(--hue),60%,50%,.7);box-shadow:0 0 12px hsla(var(--hue),90%,45%,.18)}
-.bimg{width:1em;height:1em;object-fit:contain;display:inline-block;vertical-align:middle}
-.badge .bi .bimg{width:26px;height:26px}
-.badge .bn{font-family:var(--px);font-size:6.5px;color:var(--dim);letter-spacing:1px;margin-top:7px;line-height:1.6}
-.badge.on .bn{color:hsl(var(--hue),95%,72%)}
-.badge.hush .bn{color:#3a3a3a}
-.badge .bt{color:var(--dim);font-size:12px;margin-top:4px}
-/* "you just won" feed */
-.newbox{border-color:#3a2f10}
-.newbox .h{display:flex;justify-content:space-between;align-items:center;color:var(--gold)}
-.newbox .nclear{color:var(--dim);font-size:8px;cursor:pointer;padding:5px 7px;border:1px solid var(--border)}
-.newbox .nclear:hover{color:var(--red);border-color:#3a1414}
-#newlist{max-height:220px;overflow-y:auto;scrollbar-width:thin}
-.newrow{display:flex;align-items:center;gap:9px;padding:7px 9px;margin-bottom:7px;
-  border:1px solid #2f2f2f;border-left:3px solid var(--acid);background:#0b0b0d}
-.newrow:last-child{margin-bottom:0}
-.newrow.gold{border-left-color:var(--gold)}.newrow.news{border-left-color:var(--cyan)}
-.newrow .ni{font-size:16px;flex:none}.newrow .ni .bimg{width:26px;height:26px}
-.newrow .nt{flex:1;min-width:0}
-.newrow .ntag{font-family:var(--px);font-size:6px;letter-spacing:1px;color:var(--gold)}
-.newrow.news .ntag{color:var(--cyan)}
-.newrow .nn{font-family:var(--px);font-size:7px;color:var(--acid);line-height:1.5;margin-top:4px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.newrow.gold .nn{color:var(--gold)}
-.newrow .nd{color:#9a9a9a;font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.newrow .nx{flex:none;width:28px;height:28px;border:1px solid #3a1414;background:rgba(255,43,43,.08);
-  color:var(--red);font-family:var(--px);font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:4px}
-.newrow .nx:hover{background:var(--red);color:#000}
-/* badge modal */
-.bmodal{position:fixed;inset:0;z-index:8500;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);padding:20px}
-.bmodal.open{display:flex}
-.bcard{max-width:360px;width:100%;border:2px solid var(--border);background:#0b0b0d;padding:22px 18px;text-align:center;position:relative}
-.bcard .bic{font-size:42px}.bcard .bic .bimg{width:48px;height:48px}
-.bcard .bnm{font-family:var(--px);font-size:11px;color:var(--acid);margin-top:12px;line-height:1.7}
-.bcard.gold .bnm{color:var(--gold)}.bcard.secret .bnm{color:var(--pink)}
-.bcard .bst{font-family:var(--px);font-size:7px;margin-top:9px;color:var(--dim)}
-.bcard .bst.on{color:var(--acid)}
-.bcard .bpanel{margin-top:12px;border:1px solid var(--border);padding:10px 11px;text-align:left}
-.bcard .bpanel .pt{font-family:var(--px);font-size:7px;color:var(--cyan);margin-bottom:6px}
-.bcard .bpanel .px2{color:#c9c9c9;font-size:16px;line-height:1.45}
-.bcard .bclose{position:absolute;top:8px;right:8px;font-family:var(--px);font-size:10px;color:#555;cursor:pointer;background:0;border:0}
-
 /* ---------- LOGIN / JOIN box (logged out) ---------- */
 .login{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.92);padding:18px 16px;text-align:center}
 .login .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px}
@@ -270,33 +192,6 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .login button.ghost{background:transparent;color:var(--acid);border:1px solid var(--acid);margin-top:8px}
 .login .or{color:#555;font-family:var(--px);font-size:7px;letter-spacing:2px;margin:12px 0 8px}
 .login .msg{color:var(--dim);font-size:15px;margin-top:8px}
-
-/* ---------- COLLECTION SNIPPET strip (rotating 3D pieces) ---------- */
-.collstrip{width:100%;border:1px solid var(--border);background:rgba(12,12,14,.85);padding:10px 12px}
-.collstrip .csh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:8px;
-  display:flex;justify-content:space-between;align-items:center}
-.collstrip .csall{color:hsl(var(--hue),95%,68%);text-decoration:none;font-size:7px}
-.csrow{display:flex;gap:12px;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
-.csitm{flex:none;width:60px;text-align:center}
-.csitm .cs3{perspective:180px;width:44px;height:44px;margin:0 auto 5px}
-.csitm .cs3 i{display:block;width:100%;height:100%;font-style:normal;font-size:30px;line-height:44px;
-  transform-style:preserve-3d;animation:spin3d var(--d,5s) linear infinite}
-.csitm .csn{font-family:var(--px);font-size:5.5px;color:var(--dim);line-height:1.5;letter-spacing:.5px}
-.csitm.locked{opacity:.4}.csitm.locked .cs3 i{filter:grayscale(1) brightness(.5)}
-
-/* ---------- ROOM PORTAL: enter your living world ---------- */
-.roomportal{width:100%;display:flex;align-items:center;gap:14px;text-decoration:none;
-  border:2px solid hsla(var(--hue),60%,50%,.6);background:
-    radial-gradient(ellipse at 15% 50%,hsla(var(--hue),80%,35%,.28),rgba(10,10,12,.9) 70%);
-  padding:14px 16px;box-shadow:0 0 calc(14px + var(--mb,0)*26px) hsla(var(--mh,var(--hue)),90%,45%,.25)}
-.roomportal:hover{border-color:hsl(var(--hue),95%,60%)}
-.roomportal .rpico{font-size:34px;flex:none;filter:drop-shadow(0 0 8px hsla(var(--hue),90%,55%,.6));
-  transform:scale(calc(1 + var(--mb,0)*.08));transition:transform .1s linear}
-.roomportal .rptxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
-.roomportal .rpn{font-family:var(--px);font-size:11px;color:hsl(var(--hue),95%,72%);letter-spacing:1px;line-height:1.4}
-.roomportal .rpd{color:#b8b8b8;font-size:15px;line-height:1.3}
-.roomportal .rpgo{font-family:var(--px);font-size:9px;color:#000;background:hsl(var(--hue),95%,60%);
-  padding:11px 12px;white-space:nowrap;flex:none}
 
 /* drawer tabs (FURNITURE | COLLECTION) */
 .dtabs{display:flex;gap:8px;margin-bottom:10px}
@@ -336,32 +231,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </div>
   <div class="avpick crtin" id="avpick"></div>
 
-  <!-- STAT SCREENS: collection (hero) + plays + badges + vault, all pulsing to the groove -->
-  <div class="screens crtin" id="screens" style="display:none">
-    <div class="scr hero"><div class="k">COLLECTION</div><div class="v" id="scColl">—</div><div class="sub">items owned</div></div>
-    <div class="scr"><div class="k">PLAYS</div><div class="v" id="scPlays">—</div><div class="sub">songs played</div></div>
-    <div class="scr"><div class="k">BADGES</div><div class="v" id="scBadges">—</div><div class="sub">earned</div></div>
-    <div class="scr"><div class="k">VAULT</div><div class="v" id="scVault">—</div><div class="sub" id="scVaultSub"></div></div>
-  </div>
-
-  <!-- COLLECTION SNIPPET: a strip of the member's collectibles, rotating in 3D -->
-  <div class="collstrip crtin" id="collstrip" style="display:none">
-    <div class="csh">// MY COLLECTION_ <a href="../member/inventory/" class="csall">SEE ALL ▸</a></div>
-    <div class="csrow" id="csrow"></div>
-  </div>
-
   <div class="titlebar crtin" id="titlebar" style="display:none">
     <div class="rn" id="roomname">—</div>
     <div class="tbtns" id="tbtns"></div>
     <div class="sub" id="roomsub"></div>
   </div>
-
-  <!-- ROOM PORTAL: enter the living environment you picked (aqua / terrarium / transit) -->
-  <a class="roomportal crtin" id="roomportal" style="display:none" href="#">
-    <span class="rpico" id="rpico">🌿</span>
-    <span class="rptxt"><span class="rpn" id="rpn">YOUR ROOM</span><span class="rpd" id="rpd">enter your world_</span></span>
-    <span class="rpgo">ENTER ▸</span>
-  </a>
 
   <div id="stagewrap" class="crtin" style="display:none">
     <div id="stage">
@@ -382,51 +256,19 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="drawhint" id="drawhint">tap an item, then tap a floor tile to place it. tap a placed item to turn or remove it.</div>
   </div>
 
-  <!-- YOU JUST WON feed (badges + news) -->
-  <div class="box crtin newbox" id="newbox" style="display:none">
-    <div class="h"><span>🎉 YOU JUST WON_</span><span class="nclear" id="nclear">CLEAR ALL ✕</span></div>
-    <div id="newlist"></div>
-  </div>
-
   <div class="box crtin" id="sharebox" style="display:none">
     <div class="h">// SHARE MY ROOM_</div>
     <div class="sharebar"><input id="sharelink" readonly value=""><button class="tb solid" id="sharecopy" style="border:0">COPY</button></div>
     <div class="cnote" style="margin-top:8px">anyone with this link can visit — only you can move the furniture_</div>
   </div>
 
-  <div class="box crtin" id="gbook" style="display:none">
-    <div class="h">// GUESTBOOK_</div>
-    <div id="glist"><div class="cnote">loading…</div></div>
-    <div id="gwritewrap"></div>
-  </div>
-
-  <!-- BADGES: at the very end of the profile (per 2026-07-13 direction) -->
-  <div class="box crtin" id="badgebox" style="display:none">
-    <div class="h" id="badgehead">// BADGES_</div>
-    <div class="badges" id="badges"></div>
-  </div>
-
   <div class="ob crtin" id="ob" style="display:none"></div>
 </main>
-
-<!-- badge window -->
-<div class="bmodal" id="bmodal">
-  <div class="bcard" id="bcard">
-    <button class="bclose" id="bclose">✕</button>
-    <div class="bic" id="bmic">🏆</div>
-    <div class="bnm" id="bmnm">—</div>
-    <div class="bst" id="bmst">—</div>
-    <div class="bpanel"><div class="pt" id="bmtt">// THE TASK_</div><div class="px2" id="bmtask">—</div></div>
-    <div class="bpanel" id="bmwhybox" style="display:none"><div class="pt">// WHY YOU GOT IT_</div><div class="px2" id="bmwhy">—</div></div>
-  </div>
-</div>
 
 <footer>© ONLYIBEE — THE FREQUENCY</footer>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>document.write('<script src="../assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
-<script src="../assets/badges.js?v=9"></script>
 <script>
 (function(){
   "use strict";
@@ -646,7 +488,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     ROOM.shelf=ROOM.shelf||[]; var changed=false;
     collectionIds().forEach(function(id){ var s='inv:'+id;
       if(ROOM.shelf.indexOf(s)<0&&ROOM.shelf.length<8){ ROOM.shelf.push(s); changed=true; } });
-    renderItems(); renderDrawer(); renderStats(); renderCollStrip();
+    renderItems(); renderDrawer();
     if(changed){ markDirty(); toast("COLLECTION ON THE SHELF_"); }
   }
 
@@ -750,44 +592,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     else { b.disabled=false; b.textContent="▣ SAVE ROOM"; toast("✕ COULD NOT SAVE"); }
   }
 
-  /* ================= guestbook ================= */
-  async function loadGuestbook(name){
-    $("gbook").style.display="";
-    var notes=await rpc('get_guestbook',{name:name});
-    if(!Array.isArray(notes)){ $("glist").innerHTML='<div class="cnote">guestbook offline_</div>'; return; }
-    $("glist").innerHTML = notes.length ? notes.map(function(g){
-      var when=new Date(g.at).toLocaleDateString(undefined,{month:'short',day:'numeric'});
-      return '<div class="gnote" data-id="'+g.id+'"><div style="flex:1;min-width:0">'
-        +'<span class="who">'+e2(g.who).toUpperCase()+'</span><span class="when">'+when+'</span>'
-        +'<div class="m">'+e2(g.msg)+'</div></div>'
-        +'<div class="gx'+(ISMINE?' on':'')+'" title="remove">✕</div></div>';
-    }).join('') : '<div class="cnote">no notes yet — the ink is still fresh_</div>';
-    Array.prototype.forEach.call($("glist").querySelectorAll(".gx.on"),function(x){
-      x.onclick=async function(){
-        var id=+x.parentNode.getAttribute("data-id");
-        var r=await rpc('erase_note',{note_id:id});
-        if(r&&r.status==='ok'){ x.parentNode.remove(); }
-      };
-    });
-    /* the write bar: signed-in visitors (and the owner) can sign */
-    var ww=$("gwritewrap");
-    if(ME){
-      ww.innerHTML='<div class="gwrite"><input id="gmsg" maxlength="140" placeholder="leave a note (140 max)_"><button id="gsend">SIGN</button></div>';
-      $("gsend").onclick=async function(){
-        var m=($("gmsg").value||'').trim(); if(!m)return;
-        $("gsend").disabled=true;
-        var r=await rpc('sign_guestbook',{name:name,note:m});
-        $("gsend").disabled=false;
-        if(r&&r.status==='ok'){ $("gmsg").value=''; toast("SIGNED_"); loadGuestbook(name); }
-        else if(r&&r.status==='slow_down') toast("EASY — 5 NOTES A DAY_");
-        else toast("✕ COULD NOT SIGN");
-      };
-      $("gmsg").addEventListener("keydown",function(e){ if(e.key==="Enter")$("gsend").click(); });
-    } else {
-      ww.innerHTML='<div class="cnote" style="margin-top:8px"><a href="../member/?login=1" style="color:var(--acid)">join the frequency</a> to sign the guestbook_</div>';
-    }
-  }
-
   /* ================= the mimi avatar (device-local, shared key ibee_avatar) ================= */
   var AV_N=12;
   function avSrc(i){ return "../assets/img/avatars/mimi-"+(i<10?"0":"")+i+".png"; }
@@ -803,11 +607,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("av").onclick=function(){ $("avpick").classList.toggle("open"); };
   })();
 
-  /* ================= identity + stats + badges (own profile) ================= */
-  function playsCount(){ try{ var p=(JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}).plays||{},t=0;
-    Object.keys(p).forEach(function(k){t+=(+p[k]||0);}); return t; }catch(e){ return 0; } }
-  function vaultOpen(){ try{ return !!(JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}).vault; }catch(e){ return false; } }
-
+  /* ================= identity (own profile) ================= */
   function renderIdentity(prof){
     var uid=(ME&&ME.user&&ME.user.id)||OWNERNAME;
     var codename=NAMES[hash(uid+"n")%NAMES.length]+" #"+(1000+(hash(uid+"x")%9000));
@@ -819,97 +619,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("idband").style.display=""; avPaint();
     $("logout").onclick=function(ev){ ev.preventDefault(); if(sb)sb.auth.signOut().then(function(){location.reload();}); };
   }
-  function renderStats(){
-    $("scColl").textContent=OWNED.length? (OWNED.length+" pcs") : "0";
-    $("scPlays").textContent=playsCount().toLocaleString();
-    var B=window.IBEE_BADGES, ne=0; if(B){ var st=B.state(); ne=Object.keys(st.earned||{}).length; }
-    $("scBadges").textContent=B? (ne+" / "+B.defs.length) : "—";
-    var vo=vaultOpen(); $("scVault").textContent=vo?"OPEN":"SEALED"; $("scVaultSub").textContent=vo?"discovered":"still hidden";
-    $("screens").style.display="";
-  }
-  /* the rotating collection snippet — owned pieces spin in colour, the rest greyed to entice */
-  var ENVICO={aqua:"🐠",terrarium:"🌿",transit:"🚈"};
-  function renderCollStrip(){
-    var owned=collectionIds(), all=Object.keys(INVMETA);
-    var list=all.filter(function(id){return owned.indexOf(id)>=0;})
-              .concat(all.filter(function(id){return owned.indexOf(id)<0;})).slice(0,8);
-    $("csrow").innerHTML=list.map(function(id,i){ var d=INVMETA[id], on=owned.indexOf(id)>=0;
-      return '<div class="csitm'+(on?'':' locked')+'" title="'+e2(d.n)+'"><div class="cs3" style="--d:'+(4.4+(i%4)*0.8)+'s"><i>'+d.e+'</i></div>'
-        +'<div class="csn">'+e2(on?d.n:'???')+'</div></div>';
-    }).join('');
-    $("collstrip").style.display= list.length? "" : "none";
-  }
-  /* the portal to the living environment the member picked (aqua / terrarium / transit) */
-  function renderPortal(){
-    var env=ROOM.env, p=$("roomportal");
-    if(!env){ p.style.display="none"; return; }
-    var K=KINDS[ROOM.k]||{};
-    p.href="../arcade/"+env+"/";
-    $("rpico").textContent=ENVICO[env]||"⌂";
-    $("rpn").textContent="YOUR ROOM · "+(K.n||env.toUpperCase());
-    $("rpd").textContent=(K.d||"enter your world_")+" — it grows with you_";
-    p.style.display="";
-  }
-
-  function renderBadges(){
-    var B=window.IBEE_BADGES; if(!B){ return; }
-    var bst=B.state(), P=B.snapshot(), nEarn=0;
-    $("badges").innerHTML=B.defs.map(function(d){
-      var on=!!bst.earned[d.id]; if(on)nEarn++; var hush=d.secret&&!on;
-      var sub=on ? new Date(bst.earned[d.id]).toLocaleDateString(undefined,{month:'short',day:'numeric'})
-                 : (hush?"hidden_":(d.pr?d.pr(P):d.d));
-      return '<div class="badge'+(on?' on':'')+(hush?' hush':'')+'" data-id="'+e2(d.id)+'">'
-        +'<div class="bi">'+(hush?'❓':(B.icoHTML?B.icoHTML(d):d.ico))+'</div>'
-        +'<div class="bn">'+(hush?'???':e2(d.n))+'</div><div class="bt">'+e2(sub)+'</div></div>';
-    }).join('');
-    $("badgehead").textContent="// BADGES_ "+nEarn+" / "+B.defs.length;
-    Array.prototype.forEach.call($("badges").querySelectorAll(".badge"),function(el){
-      el.onclick=function(){ var id=el.getAttribute("data-id"),d=null;
-        B.defs.forEach(function(x){ if(x.id===id)d=x; }); if(!d)return;
-        var on=!!bst.earned[d.id]; if(d.secret&&!on)return; openBadge(d,on,bst.earned[d.id],P); };
-    });
-    $("badgebox").style.display="";
-  }
-  function openBadge(d,on,ts,P){
-    var card=$("bcard"); card.className="bcard"+(d.gold?" gold":"")+(d.secret?" secret":"");
-    var B=window.IBEE_BADGES;
-    $("bmic").innerHTML=(B&&B.icoHTML)?B.icoHTML(d):d.ico;
-    $("bmnm").textContent=d.n2||d.n;
-    var st=$("bmst");
-    if(on){ st.className="bst on"; st.textContent="✓ EARNED · "+new Date(ts).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
-    else { st.className="bst"; st.textContent="○ NOT EARNED YET"; }
-    $("bmtt").textContent=d.secret?"// THE RULE_":"// THE TASK_";
-    $("bmtask").textContent=d.d+((!on&&d.pr&&P)?("  ·  "+d.pr(P)):"");
-    var wb=$("bmwhybox");
-    if(d.secret&&on&&d.why){ wb.style.display=""; $("bmwhy").textContent=d.why; } else wb.style.display="none";
-    $("bmodal").classList.add("open");
-  }
-  $("bclose").onclick=function(){ $("bmodal").classList.remove("open"); };
-  $("bmodal").addEventListener("click",function(e){ if(e.target===$("bmodal"))$("bmodal").classList.remove("open"); });
-
-  /* the "YOU JUST WON" feed — badges + unread news, each a deletable box (badges.js inbox) */
-  var TAGLABEL={drop:"NEW DROP",merch:"NEW MERCH",shop:"IN THE SHOP",video:"NEW VIDEO",channel:"NEW CHANNEL",
-    tv:"ON IBEE TV",song:"NEW SONG",galaxy:"NEW GALAXY",music:"NEW MUSIC",news:"NEWS",note:"NOTE",info:"INFO",collection:"COLLECTION",item:"ITEM"};
-  function renderNew(){
-    var B=window.IBEE_BADGES, box=$("newbox"); if(!B||!B.inbox){ box.style.display="none"; return; }
-    var items=B.inbox(); if(!items.length){ box.style.display="none"; return; }
-    box.style.display="";
-    $("newlist").innerHTML=items.map(function(x){
-      var isBadge=(x.kind==="badge"), gold=isBadge&&x.def&&x.def.gold;
-      var when=new Date(x.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
-      var cls="newrow"+(gold?" gold":(isBadge?"":" news"));
-      var tag= isBadge ? (gold?"⭐ TROPHY UNLOCKED":"🏆 BADGE WON") : ("📣 "+(TAGLABEL[x.type]||"NEWS"));
-      return '<div class="'+cls+'" data-id="'+e2(x.id)+'"><div class="ni">'+((B.icoHTML)?B.icoHTML(x):e2(x.icon))+'</div>'
-        +'<div class="nt"><div class="ntag">'+tag+'</div><div class="nn">'+e2(x.n)+'</div>'
-        +(x.d?'<div class="nd">'+e2(x.d)+'</div>':'')+'<div class="nd" style="color:#555">'+when+'</div></div>'
-        +'<div class="nx" title="delete">✕</div></div>';
-    }).join('');
-    Array.prototype.forEach.call($("newlist").querySelectorAll(".nx"),function(x){
-      x.onclick=function(){ B.markSeen(x.parentNode.getAttribute("data-id")); renderNew(); renderBadges(); renderStats(); };
-    });
-  }
-  $("nclear").onclick=function(){ if(window.IBEE_BADGES){ window.IBEE_BADGES.markSeen(null); renderNew(); renderBadges(); } };
-
   /* ================= views ================= */
   function showRoom(prof,mine){
     OWNERNAME=prof.username; ROOM=prof.room||{}; ISMINE=mine;
@@ -934,10 +643,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         if(navigator.share){navigator.share({title:"my room on ONLY IBEE",url:link}).catch(function(){});}
         try{navigator.clipboard.writeText(link);toast("LINK COPIED_");}catch(e){}
       };
-      renderIdentity(prof); renderStats(); renderBadges(); renderNew(); renderCollStrip(); renderPortal();
+      renderIdentity(prof);
     } else {
       tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY PROFILE":"✦ GET YOUR OWN ROOM")+'</a>';
-      renderPortal();   /* visitors see (and can enter) the room's world too */
     }
     $("stagewrap").style.display="";
     geom=drawRoom(ROOM.k);
@@ -945,7 +653,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     renderItems();
     if(mine){ document.body.classList.add("edit"); renderDrawer(); loadCollection(); }
     $("stage").onclick=stageClick;
-    loadGuestbook(OWNERNAME);
   }
 
   /* ---------- onboarding: nickname + pick 1 of 3 randomized starter rooms ---------- */

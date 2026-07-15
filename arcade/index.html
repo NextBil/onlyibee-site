@@ -213,10 +213,15 @@
   function render(){
     var live=GAMES.filter(function(g){return g.status==="live";}),
         soon=GAMES.filter(function(g){return g.status==="soon";});
-    var unlockedCount=live.filter(function(g){
+    function isUnlocked(g){
       if(g.env) return ownerAcct||(signedIn&&pickedRoom===g.env);   // env rooms: only your pick counts
       return !g.item||owned[g.item];
-    }).length;
+    }
+    /* unlocked rooms shelve FIRST (stable: original order kept within each group) */
+    live=live.map(function(g,i){return {g:g,i:i};})
+      .sort(function(a,b){ return (isUnlocked(b.g)?1:0)-(isUnlocked(a.g)?1:0) || a.i-b.i; })
+      .map(function(x){return x.g;});
+    var unlockedCount=live.filter(isUnlocked).length;
     document.getElementById("store").innerHTML=
        '<div class="shelfhead">▶ AVAILABLE NOW <span class="cnt">'+unlockedCount+'/'+live.length+' UNLOCKED</span></div>'
       +'<div class="shelf">'+live.map(card).join('')+'</div>'
