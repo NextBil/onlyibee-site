@@ -109,7 +109,7 @@
 
 <script src="../../assets/player.js?v=17"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
-<script src="../../assets/roomgate.js?v=1"></script>
+<script src="../../assets/roomgate.js?v=2"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="../../assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
@@ -142,6 +142,130 @@ function groove(){
 function impEdge(gv){ if(!gv||gv.i<0) return false; if(gv.i===_impI) return false; _impI=gv.i; return gv.imp>=0.55; }
 function seedFor(s){var h=2166136261;s=s||'';for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return function(){h^=h<<13;h^=h>>>17;h^=h<<5;return ((h>>>0)%1000)/1000;};}
 function hsl(h,s,l,a){return 'hsla('+h+','+s+'%,'+l+'%,'+(a==null?1:a)+')'}
+
+/* ============ ROOM THEMES (2026-07-15) — same logic as the transit theme engine ============
+   NOUVEAUX PUNK on air → punk-halloween night: ember sky, rolling smoke, bats,
+   a jack-o-lantern moon, a neon guitar glowing on the hillside, thunder on the hits.
+   DROP IT on air → "Najwa u da best": pink love sky, hearts floating everywhere,
+   big 3D-spinning hearts, the dedication glowing across the sky. Fades in/out. */
+function themeSongNow(){var r=RAD();try{return r&&r.playing&&r.playing()&&r.song&&r.song()||null}catch(e){return null}}
+var THN=null,THF=0,thBats=[],thHearts=[],thSpin=[],thBolt=null,thLTN=0,thSmoke=[];
+for(var ts=0;ts<6;ts++)thSmoke.push({x:Math.random(),y:0.48+Math.random()*0.42,s:0.5+Math.random(),v:0.008+Math.random()*0.02});
+function themeTick(dt){
+  dt=Math.max(0,dt);THF=Math.max(0,Math.min(1,THF));
+  var s=themeSongNow();
+  var want=s?(s.f==='drop-it.mp3'?'najwa':(s.g==='np'?'punk':null)):null;
+  if(want!==THN){THF-=dt*1.6;if(THF<=0){THF=0;THN=want;}}
+  else if(THN)THF=Math.min(1,THF+dt*0.7);
+  if(THN==='punk'&&THF>0){
+    if(thBats.length<8&&Math.random()<0.03)thBats.push({x:-0.06,y:0.04+Math.random()*0.3,s:0.5+Math.random(),v:0.03+Math.random()*0.05,ph:Math.random()*7});
+    for(var i=thBats.length-1;i>=0;i--){thBats[i].x+=thBats[i].v*dt;if(thBats[i].x>1.06)thBats.splice(i,1);}
+    if(PULSE>0.9&&thLTN<0.15&&Math.random()<0.5){thLTN=1;
+      thBolt=[];var bx=0.15+Math.random()*0.7,by=0;thBolt.push([bx,by]);
+      while(by<0.4){bx+=(Math.random()-0.5)*0.07;by+=0.05+Math.random()*0.06;thBolt.push([bx,by]);}}
+    thLTN*=Math.pow(0.02,dt);
+  }else{thBats.length=0;thLTN=0;}
+  if(THN==='najwa'&&THF>0){
+    while(thHearts.length<30)thHearts.push({x:Math.random(),y:Math.random()*1.1,s:0.4+Math.random()*1.1,v:0.02+Math.random()*0.05,ph:Math.random()*7,h:325+Math.random()*30});
+    thHearts.forEach(function(hh){hh.y-=hh.v*dt;hh.x+=Math.sin(T*1.2+hh.ph)*0.0006;if(hh.y<-0.05){hh.y=1.05;hh.x=Math.random();}});
+    while(thSpin.length<3)thSpin.push({x:0.2+thSpin.length*0.3,y:0.10+Math.random()*0.12,rot:Math.random()*7,vr:1.2+Math.random()*1.2,s:0.5+Math.random()*0.6});
+    thSpin.forEach(function(sp){sp.rot+=sp.vr*dt*(1+PULSE*2);});
+  }else{thHearts.length=0;thSpin.length=0;}
+}
+function drawThemeHeart(ctx,x,y,s,a,hue,rot){
+  ctx.save();ctx.translate(x,y);
+  if(rot!=null)ctx.scale(Math.cos(rot),1);           /* pseudo-3D spin around the vertical axis */
+  ctx.fillStyle=hsl(hue,90,64,a);
+  ctx.shadowColor=hsl(hue,90,60);ctx.shadowBlur=rot!=null?10:4;
+  ctx.beginPath();
+  ctx.moveTo(0,s*0.6);
+  ctx.bezierCurveTo(-s*1.1,-s*0.3,-s*0.45,-s,0,-s*0.35);
+  ctx.bezierCurveTo(s*0.45,-s,s*1.1,-s*0.3,0,s*0.6);
+  ctx.fill();ctx.shadowBlur=0;ctx.restore();
+}
+function drawThemeGuitar(ctx,x,y,sc,a){
+  if(a<=0.02)return;
+  ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.rotate(-0.12+Math.sin(T*0.8)*0.04);
+  var gg2=ctx.createRadialGradient(0,4,2,0,4,30);                         /* soft glow halo */
+  gg2.addColorStop(0,hsl(350,95,60,a*0.22));gg2.addColorStop(1,'rgba(255,0,60,0)');
+  ctx.fillStyle=gg2;ctx.beginPath();ctx.arc(0,4,30,0,7);ctx.fill();
+  ctx.strokeStyle=hsl(96,95,60,a);ctx.lineWidth=2.4;
+  ctx.beginPath();ctx.moveTo(-5,13);ctx.lineTo(9,-4);ctx.stroke();        /* neck */
+  ctx.fillStyle=hsl(96,95,60,a*0.9);ctx.fillRect(8,-9,6,6);               /* headstock */
+  ctx.fillStyle=hsl(350,95,55,a*(0.75+PULSE*0.25));                       /* body pumps on the hits */
+  ctx.beginPath();ctx.arc(-6,14,6,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(-2,10,4.6,0,7);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,'+(a*0.8)+')';ctx.fillRect(-8,12,4,4);        /* pickup */
+  ctx.strokeStyle='rgba(255,255,255,'+(a*0.7)+')';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(-6,12);ctx.lineTo(9,-5);ctx.stroke();        /* string */
+  ctx.restore();ctx.lineWidth=1;
+}
+/* the sky layer: colour wash + moon + flyers + thunder + the dedication */
+function drawThemeSky(ctx,w,h,skyF,textY){
+  if(THF<=0.02||!THN)return;
+  var A=THF;
+  if(THN==='punk'){
+    var g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,'rgba(12,4,22,'+(0.72*A)+')');g.addColorStop(0.6,'rgba(40,10,30,'+(0.58*A)+')');g.addColorStop(1,'rgba(70,22,8,'+(0.42*A)+')');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    /* jack-o-lantern moon */
+    var mx=w*0.82,my=h*0.11,mr=Math.max(9,w*0.035);
+    ctx.fillStyle=hsl(26,95,54,A);ctx.beginPath();ctx.arc(mx,my,mr,0,7);ctx.fill();
+    ctx.fillStyle=hsl(26,95,60,A*(0.14+LVL*0.2));ctx.beginPath();ctx.arc(mx,my,mr*1.9,0,7);ctx.fill();
+    ctx.fillStyle='rgba(20,5,0,'+A+')';
+    ctx.beginPath();ctx.moveTo(mx-mr*0.6,my-mr*0.05);ctx.lineTo(mx-mr*0.15,my-mr*0.05);ctx.lineTo(mx-mr*0.37,my-mr*0.45);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(mx+mr*0.15,my-mr*0.05);ctx.lineTo(mx+mr*0.6,my-mr*0.05);ctx.lineTo(mx+mr*0.37,my-mr*0.45);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(mx-mr*0.55,my+mr*0.32);ctx.lineTo(mx+mr*0.55,my+mr*0.32);ctx.lineTo(mx+mr*0.3,my+mr*0.6);
+    ctx.lineTo(mx+mr*0.1,my+mr*0.36);ctx.lineTo(mx-mr*0.1,my+mr*0.6);ctx.lineTo(mx-mr*0.3,my+mr*0.36);ctx.closePath();ctx.fill();
+    /* bats crossing */
+    ctx.fillStyle='rgba(8,3,14,'+Math.min(1,A*1.3)+')';
+    thBats.forEach(function(b){var bx=b.x*w,by=b.y*h*skyF+Math.sin(T*3+b.ph)*6,wf=Math.sin(T*11+b.ph)*5*b.s;
+      var u=Math.max(2,w*0.006)*b.s;
+      ctx.fillRect(bx-u,by-u*0.6,u*2.2,u*1.2);
+      ctx.beginPath();ctx.moveTo(bx-u*0.5,by);ctx.lineTo(bx-u*4,by-wf);ctx.lineTo(bx-u*1.4,by+u*0.7);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(bx+u*0.5,by);ctx.lineTo(bx+u*4,by-wf);ctx.lineTo(bx+u*1.4,by+u*0.7);ctx.closePath();ctx.fill();});
+    /* thunder */
+    if(thLTN>0.03){
+      ctx.fillStyle='rgba(215,195,255,'+(thLTN*0.15*A)+')';ctx.fillRect(0,0,w,h*skyF);
+      if(thBolt){ctx.strokeStyle='rgba(228,210,255,'+(thLTN*A)+')';ctx.lineWidth=Math.max(1.2,w*0.004);
+        ctx.beginPath();thBolt.forEach(function(p,i){i?ctx.lineTo(p[0]*w,p[1]*h):ctx.moveTo(p[0]*w,p[1]*h);});ctx.stroke();ctx.lineWidth=1;}
+    }
+  }else if(THN==='najwa'){
+    var g2=ctx.createLinearGradient(0,0,0,h);
+    g2.addColorStop(0,'rgba(58,8,40,'+(0.6*A)+')');g2.addColorStop(0.55,'rgba(120,26,80,'+(0.4*A)+')');g2.addColorStop(1,'rgba(255,110,170,'+(0.15*A)+')');
+    ctx.fillStyle=g2;ctx.fillRect(0,0,w,h);
+    var u2=Math.max(2.4,w*0.008);
+    /* hearts everywhere in the sky */
+    thHearts.forEach(function(hh){
+      drawThemeHeart(ctx,hh.x*w,hh.y*h*skyF,u2*hh.s*2.2,(0.3+0.45*Math.abs(Math.sin(T*2+hh.ph)))*A,hh.h);});
+    /* the big spinning 3D hearts */
+    thSpin.forEach(function(sp){
+      drawThemeHeart(ctx,sp.x*w,sp.y*h,u2*6.5*sp.s*(1+PULSE*0.25),0.9*A,335,sp.rot);});
+    /* the dedication, glowing + gently breathing */
+    var fs=Math.max(8,w*0.045)*(1+0.04*Math.sin(T*2.2));
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=fs+'px "Press Start 2P"';
+    ctx.fillStyle=hsl(335,95,72,A*(0.75+PULSE*0.25));
+    ctx.shadowColor=hsl(335,95,60);ctx.shadowBlur=16;
+    ctx.fillText('Najwa u da best',w/2,textY!=null?textY:h*0.07);
+    ctx.font=(fs*0.6)+'px VT323';ctx.shadowBlur=8;
+    ctx.fillStyle=hsl(335,90,80,A*0.8);
+    ctx.fillText('♥ ♥ ♥',w/2,(textY!=null?textY:h*0.07)+fs*1.4);
+    ctx.shadowBlur=0;ctx.restore();
+  }
+}
+/* the front layer: rolling smoke + the hillside neon guitar (punk only) */
+function drawThemeFront(ctx,w,h,gx,gy,gsc){
+  if(THF<=0.02||THN!=='punk')return;
+  drawThemeGuitar(ctx,gx,gy,gsc,THF*(0.55+LVL*0.45));
+  for(var i=0;i<thSmoke.length;i++){var sm=thSmoke[i];
+    var sx=((sm.x+T*sm.v)%1.3-0.15)*w, sy=sm.y*h+Math.sin(T*0.5+i)*h*0.01;
+    var rr2=w*0.16*sm.s;
+    var gg=ctx.createRadialGradient(sx,sy,rr2*0.1,sx,sy,rr2);
+    gg.addColorStop(0,'rgba(150,120,180,'+(0.11*THF)+')');gg.addColorStop(1,'rgba(150,120,180,0)');
+    ctx.fillStyle=gg;ctx.beginPath();ctx.ellipse(sx,sy,rr2,rr2*0.35,0,0,7);ctx.fill();
+  }
+}
 
 /* ---------- growth persistence ---------- */
 /* the same plays that grow the planets grow the plants (ibee_sav, read-only), */
@@ -485,6 +609,8 @@ function drawHouse(now,hue,playing){
   var rr=seedFor('sky2');
   for(var st=0;st<44;st++){bctx.fillStyle='rgba(255,255,255,'+(0.08+0.5*rr()*Math.abs(Math.sin(now+st)))+')';
     bctx.fillRect(px(rr()*W),px(rr()*H*0.45),1,1);}
+  /* themed night (punk halloween / najwa pink) washes the whole greenhouse */
+  drawThemeSky(bctx,W,H,0.5,H*0.055);
   /* faint vertical glass mullions */
   bctx.strokeStyle='rgba(120,160,140,.10)';
   for(var gx=X0;gx<W;gx+=GAP){bctx.beginPath();bctx.moveTo(px(gx),0);bctx.lineTo(px(gx),H);bctx.stroke();}
@@ -505,6 +631,8 @@ function drawHouse(now,hue,playing){
     bctx.fillStyle='#3a2b22';bctx.fillRect(0,px(sy+13),W,5);
     bctx.fillStyle='#241a12';bctx.fillRect(0,px(sy+18),W,2);
   }
+  /* punk: smoke drifting between the shelves + a neon guitar up in the glass */
+  drawThemeFront(bctx,W,H,W*0.8,34,0.8);
 }
 
 function drawFx(now,hue){
@@ -663,6 +791,8 @@ function drawGarden(now){
     octx.fillRect(rs()*W2,rs()*H2*0.45,2,2);}
   octx.fillStyle=hsl(hue,50,86,0.9);octx.beginPath();octx.arc(W2*0.82,H2*0.14,18+LVL*3,0,7);octx.fill();
   octx.fillStyle=hsl(hue,70,60,0.10+LVL*0.10);octx.beginPath();octx.arc(W2*0.82,H2*0.14,36+LVL*8,0,7);octx.fill();
+  /* themed landscape night — punk halloween / najwa pink love */
+  drawThemeSky(octx,W2,H2,0.5,H2*0.16);
   /* three moonlit hills, back to front, rim-lit by the music */
   for(var h=0;h<3;h++){
     octx.beginPath();octx.moveTo(0,H2);
@@ -676,6 +806,8 @@ function drawGarden(now){
       hx2===0?octx.moveTo(hx2,hy2):octx.lineTo(hx2,hy2);}
     octx.stroke();octx.lineWidth=1;
   }
+  /* punk: fog rolling over the hills + the neon guitar planted on the ridge */
+  drawThemeFront(octx,W2,H2,W2*0.14,hillY(0,W2*0.14,W2,H2,now)-14,Math.max(1.4,W2*0.0032));
   /* the plants across the hills — every record lives here */
   gRects=[];
   var n=PLANTS.length,slugOn=playing?r.slug():null;
@@ -740,6 +872,7 @@ function loop(nowMs){
   if(g){LOW+=(g.low-LOW)*0.25;LVL+=(g.lvl-LVL)*0.2;if(impEdge(g))PULSE=1;}
   else{LOW*=0.94;LVL*=0.94;}
   PULSE*=0.88;
+  themeTick(dt);
 
   /* photosynthesis: listening feeds the on-air plant */
   if(playing&&r.slug()){

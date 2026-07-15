@@ -41,17 +41,27 @@
     color:var(--dim);font-size:17px;text-align:center;background:rgba(0,0,0,.55);
     padding:2px 12px;border:1px solid #161616;pointer-events:none;transition:opacity .8s;white-space:nowrap}
   #hint.off{opacity:0}
+  /* VIEW toggle: inside the tank ⇄ THE SURFACE (zoomed-out open water) */
+  #viewtog{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:801;font-family:var(--px);font-size:8px;
+    color:#000;background:var(--acid);border:1px solid var(--acid);padding:10px 14px;cursor:pointer;transition:opacity .3s}
+  #viewtog:hover{filter:brightness(1.12)}
+  #over{position:fixed;inset:0;z-index:400;display:none;cursor:pointer}
+  body.oceanview #over{display:block}
+  body.oceanview #stage{opacity:0}
+  body.oceanview #hint{opacity:0}
 </style>
 </head>
 <body>
 <div id="wrap"><div id="stage"><canvas id="bg"></canvas><canvas id="fx"></canvas></div></div>
+<canvas id="over"></canvas>
 <a class="back" href="../">◀ ROOMS</a>
+<div id="viewtog">🌊 THE SURFACE</div>
 <div id="np"><span class="dot" id="npdot"></span><span id="npname">RADIO OFF — TAP THE TANK</span></div>
 <div id="hint">your egg hatches as the music plays_ — feed it, pet it, explore the tank: it evolves 5 times</div>
 
 <script src="../../assets/player.js?v=17"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
-<script src="../../assets/roomgate.js?v=1"></script>
+<script src="../../assets/roomgate.js?v=2"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="../../assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="../../assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
@@ -89,6 +99,99 @@ function groove(){
 function impEdge(gv){ if(!gv||gv.i<0) return false; if(gv.i===_impI) return false; _impI=gv.i; return gv.imp>=0.55; }
 function seedFor(s){var h=2166136261;s=s||'';for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return function(){h^=h<<13;h^=h>>>17;h^=h<<5;return ((h>>>0)%1000)/1000;};}
 function hsl(h,s,l,a){return 'hsla('+h+','+s+'%,'+l+'%,'+(a==null?1:a)+')'}
+
+/* ============ ROOM THEMES (2026-07-15) — same logic as the transit theme engine ============
+   NOUVEAUX PUNK on air → dark emo storm: black-purple water, blood-orange
+   jack-o-lantern moon, bats, rain and thunder over the open water.
+   DROP IT on air → "Najwa u da best": pink love sky, hearts everywhere,
+   big 3D-spinning hearts, the dedication glowing. Fades in/out. */
+var THN=null,THF=0,thBats=[],thHearts=[],thSpin=[],thBolt=null,thLTN=0;
+function themeTick(dt){
+  dt=Math.max(0,dt);THF=Math.max(0,Math.min(1,THF));
+  var s=songNow(),r0=RAD(),onair=r0&&r0.playing&&r0.playing();
+  var want=(onair&&s)?(s.f==='drop-it.mp3'?'najwa':(s.g==='np'?'punk':null)):null;
+  if(want!==THN){THF-=dt*1.6;if(THF<=0){THF=0;THN=want;}}
+  else if(THN)THF=Math.min(1,THF+dt*0.7);
+  if(THN==='punk'&&THF>0){
+    if(thBats.length<8&&Math.random()<0.03)thBats.push({x:-0.06,y:0.04+Math.random()*0.28,s:0.5+Math.random(),v:0.03+Math.random()*0.05,ph:Math.random()*7});
+    for(var i=thBats.length-1;i>=0;i--){thBats[i].x+=thBats[i].v*dt;if(thBats[i].x>1.06)thBats.splice(i,1);}
+    if(PULSE>0.9&&thLTN<0.15&&Math.random()<0.5){thLTN=1;
+      thBolt=[];var bx=0.15+Math.random()*0.7,by=0;thBolt.push([bx,by]);
+      while(by<0.38){bx+=(Math.random()-0.5)*0.07;by+=0.05+Math.random()*0.06;thBolt.push([bx,by]);}}
+    thLTN*=Math.pow(0.02,dt);
+  }else{thBats.length=0;thLTN=0;}
+  if(THN==='najwa'&&THF>0){
+    while(thHearts.length<30)thHearts.push({x:Math.random(),y:Math.random()*1.1,s:0.4+Math.random()*1.1,v:0.02+Math.random()*0.05,ph:Math.random()*7,h:325+Math.random()*30});
+    thHearts.forEach(function(hh){hh.y-=hh.v*dt;hh.x+=Math.sin(T*1.2+hh.ph)*0.0006;if(hh.y<-0.05){hh.y=1.05;hh.x=Math.random();}});
+    while(thSpin.length<3)thSpin.push({x:0.2+thSpin.length*0.3,y:0.10+Math.random()*0.12,rot:Math.random()*7,vr:1.2+Math.random()*1.2,s:0.5+Math.random()*0.6});
+    thSpin.forEach(function(sp){sp.rot+=sp.vr*dt*(1+PULSE*2);});
+  }else{thHearts.length=0;thSpin.length=0;}
+}
+function drawThemeHeart(ctx,x,y,s,a,hue,rot){
+  ctx.save();ctx.translate(x,y);
+  if(rot!=null)ctx.scale(Math.cos(rot),1);           /* pseudo-3D spin around the vertical axis */
+  ctx.fillStyle=hsl(hue,90,64,a);
+  ctx.shadowColor=hsl(hue,90,60);ctx.shadowBlur=rot!=null?10:4;
+  ctx.beginPath();
+  ctx.moveTo(0,s*0.6);
+  ctx.bezierCurveTo(-s*1.1,-s*0.3,-s*0.45,-s,0,-s*0.35);
+  ctx.bezierCurveTo(s*0.45,-s,s*1.1,-s*0.3,0,s*0.6);
+  ctx.fill();ctx.shadowBlur=0;ctx.restore();
+}
+/* sky-and-mood layer shared by the tank and the open-water view */
+function drawThemeSky(ctx,w,h,skyF,textY){
+  if(THF<=0.02||!THN)return;
+  var A=THF;
+  if(THN==='punk'){
+    var g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,'rgba(10,3,20,'+(0.72*A)+')');g.addColorStop(0.6,'rgba(34,8,32,'+(0.55*A)+')');g.addColorStop(1,'rgba(20,6,26,'+(0.45*A)+')');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    /* blood jack-o-lantern moon */
+    var mx=w*0.78,my=h*0.13,mr=Math.max(9,w*0.035);
+    ctx.fillStyle=hsl(16,95,48,A);ctx.beginPath();ctx.arc(mx,my,mr,0,7);ctx.fill();
+    ctx.fillStyle=hsl(16,95,55,A*(0.14+LVL*0.2));ctx.beginPath();ctx.arc(mx,my,mr*1.9,0,7);ctx.fill();
+    ctx.fillStyle='rgba(16,3,0,'+A+')';
+    ctx.beginPath();ctx.moveTo(mx-mr*0.6,my-mr*0.05);ctx.lineTo(mx-mr*0.15,my-mr*0.05);ctx.lineTo(mx-mr*0.37,my-mr*0.45);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(mx+mr*0.15,my-mr*0.05);ctx.lineTo(mx+mr*0.6,my-mr*0.05);ctx.lineTo(mx+mr*0.37,my-mr*0.45);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(mx-mr*0.55,my+mr*0.32);ctx.lineTo(mx+mr*0.55,my+mr*0.32);ctx.lineTo(mx+mr*0.3,my+mr*0.6);
+    ctx.lineTo(mx+mr*0.1,my+mr*0.36);ctx.lineTo(mx-mr*0.1,my+mr*0.6);ctx.lineTo(mx-mr*0.3,my+mr*0.36);ctx.closePath();ctx.fill();
+    /* bats crossing */
+    ctx.fillStyle='rgba(8,3,14,'+Math.min(1,A*1.3)+')';
+    thBats.forEach(function(b){var bx=b.x*w,by=b.y*h*skyF+Math.sin(T*3+b.ph)*6,wf=Math.sin(T*11+b.ph)*5*b.s;
+      var u=Math.max(2,w*0.006)*b.s;
+      ctx.fillRect(bx-u,by-u*0.6,u*2.2,u*1.2);
+      ctx.beginPath();ctx.moveTo(bx-u*0.5,by);ctx.lineTo(bx-u*4,by-wf);ctx.lineTo(bx-u*1.4,by+u*0.7);ctx.closePath();ctx.fill();
+      ctx.beginPath();ctx.moveTo(bx+u*0.5,by);ctx.lineTo(bx+u*4,by-wf);ctx.lineTo(bx+u*1.4,by+u*0.7);ctx.closePath();ctx.fill();});
+    /* thunder */
+    if(thLTN>0.03){
+      ctx.fillStyle='rgba(215,195,255,'+(thLTN*0.15*A)+')';ctx.fillRect(0,0,w,h*skyF);
+      if(thBolt){ctx.strokeStyle='rgba(228,210,255,'+(thLTN*A)+')';ctx.lineWidth=Math.max(1.2,w*0.004);
+        ctx.beginPath();thBolt.forEach(function(p,i){i?ctx.lineTo(p[0]*w,p[1]*h):ctx.moveTo(p[0]*w,p[1]*h);});ctx.stroke();ctx.lineWidth=1;}
+    }
+  }else if(THN==='najwa'){
+    var g2=ctx.createLinearGradient(0,0,0,h);
+    g2.addColorStop(0,'rgba(58,8,40,'+(0.6*A)+')');g2.addColorStop(0.55,'rgba(120,26,80,'+(0.38*A)+')');g2.addColorStop(1,'rgba(255,110,170,'+(0.14*A)+')');
+    ctx.fillStyle=g2;ctx.fillRect(0,0,w,h);
+    var u2=Math.max(2.4,w*0.008);
+    /* hearts everywhere in the sky */
+    thHearts.forEach(function(hh){
+      drawThemeHeart(ctx,hh.x*w,hh.y*h*skyF,u2*hh.s*2.2,(0.3+0.45*Math.abs(Math.sin(T*2+hh.ph)))*A,hh.h);});
+    /* the big spinning 3D hearts */
+    thSpin.forEach(function(sp){
+      drawThemeHeart(ctx,sp.x*w,sp.y*h,u2*6.5*sp.s*(1+PULSE*0.25),0.9*A,335,sp.rot);});
+    /* the dedication, glowing + gently breathing */
+    var fs=Math.max(8,w*0.045)*(1+0.04*Math.sin(T*2.2));
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=fs+'px "Press Start 2P"';
+    ctx.fillStyle=hsl(335,95,72,A*(0.75+PULSE*0.25));
+    ctx.shadowColor=hsl(335,95,60);ctx.shadowBlur=16;
+    ctx.fillText('Najwa u da best',w/2,textY!=null?textY:h*0.07);
+    ctx.font=(fs*0.6)+'px VT323';ctx.shadowBlur=8;
+    ctx.fillStyle=hsl(335,90,80,A*0.8);
+    ctx.fillText('♥ ♥ ♥',w/2,(textY!=null?textY:h*0.07)+fs*1.4);
+    ctx.shadowBlur=0;ctx.restore();
+  }
+}
 
 function slugNow(){var r=RAD();return r&&r.slug&&r.slug()||null}
 function songNow(){var r=RAD();try{return r&&r.song&&r.song()||null}catch(e){return null}}
@@ -372,6 +475,22 @@ function drawTank(now,hue,playing){
   bctx.strokeStyle='rgba(200,230,255,.75)';
   bctx.beginPath();bctx.arc(55,GRAVEL-30-db,9,0,7);bctx.stroke();            // helmet dome
   if(playing&&Math.random()<0.02+PULSE*0.1)pops.push({x:60,y:GRAVEL-38,vy:-14,life:1,hue:hue});
+
+  /* ---- THEMED WATER — punk = dark emo depths · drop it = Najwa pink love ---- */
+  if(THF>0.02&&THN==='punk'){
+    var twp=bctx.createLinearGradient(0,0,0,H);
+    twp.addColorStop(0,'rgba(10,3,20,'+(0.5*THF)+')');twp.addColorStop(1,'rgba(24,4,30,'+(0.42*THF)+')');
+    bctx.fillStyle=twp;bctx.fillRect(0,0,W,H);
+    if(thLTN>0.03){bctx.fillStyle='rgba(190,170,255,'+(thLTN*0.12*THF)+')';bctx.fillRect(0,SURF,W,H-SURF);}
+  }else if(THF>0.02&&THN==='najwa'){
+    bctx.fillStyle='rgba(255,110,170,'+(0.10*THF)+')';bctx.fillRect(0,0,W,H);
+    thHearts.forEach(function(hh,i){if(i%2)
+      drawThemeHeart(bctx,hh.x*W,SURF+hh.y*(GRAVEL-SURF),2+hh.s*3,(0.25+0.35*Math.abs(Math.sin(T*2+hh.ph)))*THF,hh.h);});
+    bctx.save();bctx.textAlign='center';bctx.font='9px "Press Start 2P"';
+    bctx.fillStyle=hsl(335,95,74,THF*(0.5+PULSE*0.3));
+    bctx.shadowColor=hsl(335,95,60);bctx.shadowBlur=6;
+    bctx.fillText('Najwa u da best',W/2,SURF+18);bctx.shadowBlur=0;bctx.restore();
+  }
 }
 
 /* ---------- fish ---------- */
@@ -612,6 +731,151 @@ function drawFx(now,hue,playing){
   })();
 }
 
+/* ============================================================
+   THE SURFACE — the zoomed-out second view: the same music,
+   seen from ABOVE the water at night. The swell is the bass,
+   the school leaps on real hits, your pet glows beneath the
+   waves, the moon skips the record, the sky answers your taps.
+   Punk records turn it into an emo storm (rain, bats, thunder,
+   blood moon); DROP IT floods it with Najwa's pink hearts.
+   ============================================================ */
+var viewMode='tank';
+var over=document.getElementById('over'),octx=over.getContext('2d'),OS=1;
+function overFit(){var dpr=Math.min(2,devicePixelRatio||1);OS=dpr;
+  over.width=Math.floor(innerWidth*dpr);over.height=Math.floor(innerHeight*dpr);
+  over.style.width=innerWidth+'px';over.style.height=innerHeight+'px';}
+addEventListener('resize',overFit);overFit();
+document.getElementById('viewtog').onclick=function(){
+  viewMode=(viewMode==='tank')?'ocean':'tank';
+  document.body.classList.toggle('oceanview',viewMode==='ocean');
+  this.textContent=(viewMode==='tank')?'🌊 THE SURFACE':'▦ BACK TO THE TANK';
+};
+var leaps=[],oSplash=[],shoots=[],petO={x:0.3,dir:1},lastO=0;
+function horizonY(){return innerHeight*0.55;}
+function waveY(x,L,now){
+  var amp=(3+LOW*22)*(1+L*0.35);
+  return horizonY()+L*innerHeight*0.10
+    +Math.sin(x*0.008+now*(1.1+L*0.5))*amp
+    +Math.sin(x*0.021-now*(0.7+L*0.3))*amp*0.5;
+}
+function spawnLeap(x){
+  if(leaps.length>7)return;
+  var sp=speciesFor(slugNow());
+  leaps.push({x:x!=null?x:Math.random()*innerWidth,y:horizonY()+30,
+    vx:(Math.random()<0.5?-1:1)*(60+Math.random()*120),
+    vy:-(240+Math.random()*220)*(0.75+LVL*0.5),
+    sp:sp.id,hue:(hueNow()+Math.random()*40-20+360)%360,s:0.8+Math.random()*1.2});
+}
+function oSplashAt(x,y,n,hue){
+  for(var i=0;i<n;i++)oSplash.push({x:x+(Math.random()-0.5)*20,y:y,
+    vx:(Math.random()-0.5)*140,vy:-(80+Math.random()*180),life:0.7+Math.random()*0.5,hue:hue});
+}
+function drawOcean(now){
+  var r=RAD(),playing=r&&r.playing&&r.playing();
+  var hue=playing?hueNow():210;
+  /* the whole seascape leans into the theme: punk = cold violet, najwa = pink */
+  if(THN==='punk')hue=Math.round(hue+(268-hue)*THF);
+  else if(THN==='najwa')hue=Math.round(hue+(330-hue)*THF);
+  var W2=innerWidth,H2=innerHeight,hor=horizonY();
+  var dt=Math.max(0,Math.min(0.05,now-lastO));lastO=now;
+  octx.setTransform(OS,0,0,OS,0,0);
+  /* night sky */
+  var sky=octx.createLinearGradient(0,0,0,hor);
+  sky.addColorStop(0,'#03040a');sky.addColorStop(1,hsl(hue,45,playing?11:6));
+  octx.fillStyle=sky;octx.fillRect(0,0,W2,hor+2);
+  var rs=seedFor('osky');
+  for(var st=0;st<70;st++){octx.fillStyle='rgba(255,255,255,'+(0.06+0.5*rs()*Math.abs(Math.sin(now+st)))+')';
+    octx.fillRect(rs()*W2,rs()*hor*0.9,2,2);}
+  /* clouds drifting */
+  for(var cl=0;cl<4;cl++){var cx=((now*8*(1+cl*0.3)+cl*W2*0.31)%(W2+240))-120,cy=hor*0.2+cl*hor*0.16;
+    octx.fillStyle='rgba(140,150,190,'+(0.05+LVL*0.03)+')';
+    octx.beginPath();octx.ellipse(cx,cy,90+cl*20,16+cl*3,0,0,7);octx.fill();}
+  /* the moon — tap it to change the record */
+  var mx=W2*0.78,my=H2*0.16,mr=20+LVL*6;
+  octx.fillStyle=hsl(hue,45,86,0.95);octx.beginPath();octx.arc(mx,my,mr,0,7);octx.fill();
+  octx.fillStyle=hsl(hue,70,60,0.10+LVL*0.12);octx.beginPath();octx.arc(mx,my,mr*2,0,7);octx.fill();
+  /* themed sky (punk storm / najwa love) paints over the calm night */
+  drawThemeSky(octx,W2,H2,0.52,H2*0.10);
+  /* moon glitter lane on the swell */
+  for(var gl=0;gl<26;gl++){var gy=hor+8+gl*(H2-hor)*0.035,gw=(6+gl*1.3)*(1+LOW);
+    octx.fillStyle=hsl(THN==='punk'&&THF>0.5?16:hue,80,70,(0.16+LOW*0.25)*Math.abs(Math.sin(now*3+gl*1.7)));
+    octx.fillRect(mx-gw/2+Math.sin(now*2+gl)*8,gy,gw,2);}
+  /* your pet glowing beneath the waves */
+  petO.x+=petO.dir*dt*0.02*(1+LVL);if(petO.x>0.8)petO.dir=-1;if(petO.x<0.2)petO.dir=1;
+  var pxx=petO.x*W2,pyy=hor+(H2-hor)*0.4+Math.sin(now*1.4)*10;
+  var pg=octx.createRadialGradient(pxx,pyy,4,pxx,pyy,70+LVL*40);
+  pg.addColorStop(0,hsl(hue,90,65,0.4+LVL*0.3));pg.addColorStop(1,'transparent');
+  octx.fillStyle=pg;octx.beginPath();octx.arc(pxx,pyy,70+LVL*40,0,7);octx.fill();
+  octx.fillStyle=hsl(hue,80,72,0.5);
+  octx.beginPath();octx.ellipse(pxx,pyy,16,12,0,3.14,0);octx.fill();
+  /* the swell — three layers riding the bass */
+  for(var L=0;L<3;L++){
+    octx.beginPath();octx.moveTo(0,H2);
+    for(var wx=0;wx<=W2;wx+=12)octx.lineTo(wx,waveY(wx,L,now));
+    octx.lineTo(W2,H2);octx.closePath();
+    octx.fillStyle=hsl(hue,60,(playing?13:6)-L*2.5);octx.fill();
+    octx.strokeStyle=hsl(hue,75,55,0.18+LOW*0.4);octx.lineWidth=1.5;
+    octx.beginPath();
+    for(var wx2=0;wx2<=W2;wx2+=12){var wy2=waveY(wx2,L,now);
+      wx2===0?octx.moveTo(wx2,wy2):octx.lineTo(wx2,wy2);}
+    octx.stroke();octx.lineWidth=1;
+  }
+  /* the school leaps on real hits */
+  if(playing&&PULSE>0.92&&Math.random()<0.5)spawnLeap();
+  for(var li=leaps.length-1;li>=0;li--){var f=leaps[li];
+    f.x+=f.vx*dt;f.y+=f.vy*dt;f.vy+=560*dt;
+    var wl=waveY(f.x,0,now);
+    if(f.vy>0&&f.y>wl+10){oSplashAt(f.x,wl,10,f.hue);leaps.splice(li,1);continue;}
+    octx.save();octx.translate(f.x,f.y);octx.rotate(Math.atan2(f.vy,f.vx)*(f.vx<0?-0.4:0.4));
+    if(f.sp==='jelly'){octx.fillStyle=hsl(f.hue,70,60,0.8);
+      octx.beginPath();octx.ellipse(0,0,9*f.s,7*f.s,0,3.14,0);octx.fill();}
+    else{octx.fillStyle=hsl(f.hue,70,52,0.95);
+      octx.beginPath();octx.ellipse(0,0,11*f.s,5*f.s,0,0,7);octx.fill();
+      octx.beginPath();octx.moveTo(-9*f.s,0);octx.lineTo(-15*f.s,-5*f.s);octx.lineTo(-15*f.s,5*f.s);octx.closePath();octx.fill();
+      octx.fillStyle='#fff';octx.fillRect(5*f.s,-2,2.5,2.5);}
+    octx.restore();
+    /* sparkle trail on the way up */
+    if(f.vy<0&&Math.random()<0.4)oSplash.push({x:f.x,y:f.y,vx:0,vy:20,life:0.4,hue:f.hue});
+  }
+  /* splashes */
+  for(var si=oSplash.length-1;si>=0;si--){var sd=oSplash[si];
+    sd.x+=sd.vx*dt;sd.y+=sd.vy*dt;sd.vy+=420*dt;sd.life-=dt*1.6;
+    if(sd.life<=0){oSplash.splice(si,1);continue;}
+    octx.fillStyle=hsl(sd.hue,80,72,Math.min(1,sd.life*1.6));
+    octx.fillRect(sd.x,sd.y,3,3);}
+  /* shooting stars (tap the sky) */
+  for(var sh=shoots.length-1;sh>=0;sh--){var ss=shoots[sh];
+    ss.x+=ss.vx*dt;ss.y+=ss.vy*dt;ss.life-=dt;
+    if(ss.life<=0||ss.y>hor){shoots.splice(sh,1);continue;}
+    octx.strokeStyle='rgba(255,255,255,'+Math.min(1,ss.life*2)+')';octx.lineWidth=2;
+    octx.beginPath();octx.moveTo(ss.x,ss.y);octx.lineTo(ss.x-ss.vx*0.09,ss.y-ss.vy*0.09);octx.stroke();octx.lineWidth=1;}
+  /* punk storm: rain streaking down */
+  if(THF>0.05&&THN==='punk'){
+    octx.strokeStyle='rgba(160,150,210,'+(0.22*THF)+')';
+    var rr2=seedFor('rain'+Math.floor(now*9));
+    for(var rn=0;rn<Math.floor(60*THF);rn++){var rx=rr2()*W2,ry=rr2()*H2;
+      octx.beginPath();octx.moveTo(rx,ry);octx.lineTo(rx-6,ry+16);octx.stroke();}
+  }
+  /* HUD */
+  var s2=songNow();
+  octx.textAlign='center';
+  octx.fillStyle=hsl(THN==='najwa'&&THF>0.5?335:hue,90,74);octx.font='10px "Press Start 2P"';
+  octx.fillText('THE OPEN WATER',W2/2,H2*0.045);
+  octx.fillStyle='#9a9a9a';octx.font='7px "Press Start 2P"';
+  octx.fillText(playing?(s2?('ON AIR — '+s2.n):'')+'  ·  TAP THE SEA · THE MOON SKIPS THE RECORD'
+                       :'PRESS ANYWHERE — FEED THE OCEAN',W2/2,H2*0.045+16);
+  octx.textAlign='left';
+}
+over.addEventListener('pointerdown',function(e){
+  if(viewMode!=='ocean')return;
+  var x=e.clientX,y=e.clientY,r=RAD(),playing=r&&r.playing&&r.playing();
+  if(!playing){if(r)r.control.play();oSplashAt(x,Math.max(y,horizonY()),8,hueNow());return;}
+  var mx=innerWidth*0.78,my=innerHeight*0.16;
+  if(Math.hypot(x-mx,y-my)<46){r.control.next();oSplashAt(mx,my,14,50);return;}   /* the moon skips */
+  if(y<horizonY()){shoots.push({x:x,y:y,vx:220+Math.random()*160,vy:130+Math.random()*90,life:1.2});return;}
+  oSplashAt(x,waveY(x,0,T),12,hueNow());spawnLeap(x);gainXP(1);
+});
+
 /* ---------- now-playing chip ---------- */
 var npName=document.getElementById('npname'),npDot=document.getElementById('npdot');
 setInterval(function(){
@@ -638,6 +902,7 @@ function loop(nowMs){
     }}
   else{LOW*=0.94;LVL*=0.94;}
   PULSE*=0.88;
+  themeTick(dt);
   chestOpen=Math.max(0,chestOpen-dt);
 
   /* song change → new ecosystem */
@@ -650,6 +915,9 @@ function loop(nowMs){
   if(playing&&sl)GARDEN.sun[sl]=(GARDEN.sun[sl]||0)+dt;
   /* listening habits feed the pet: +1 XP every 2s on air (egg hatches in ~12s) */
   if(playing){xpAcc+=dt;if(xpAcc>=2){xpAcc-=2;gainXP(1);}}
+
+  /* the zoomed-out OPEN WATER replaces the tank while toggled */
+  if(viewMode==='ocean'){drawOcean(T);return;}
 
   lyricPlan();
   drawTank(T,hue,playing);

@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070707">
+<meta name="robots" content="noindex">
+<title>FREE ARCADE PASS — ONLYIBEE</title>
+<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<!--
+  ARCADE PASS redemption — /arcade/pass/?c=CODE
+  Mint codes with tools/pass-minter.html (backend: member/passes.sql).
+  valid code → loot preview (every room + game) + join/log-in →
+  redeem_pass() → CONGRATS screen with everything earned.
+-->
+<style>
+:root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
+  --gold:#ffd60a;--pink:#ff5e9e;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
+  border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:5}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:640px;padding:22px 16px 60px;display:flex;flex-direction:column;gap:14px;
+  position:relative;z-index:2;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+.hero{text-align:center;padding:8px 0 2px}
+.hero .tag{font-family:var(--px);font-size:8px;color:#000;background:var(--gold);display:inline-block;padding:6px 10px;letter-spacing:1px}
+.hero h1{font-family:var(--px);font-size:15px;color:var(--acid);line-height:1.8;margin-top:12px;
+  text-shadow:0 0 18px rgba(182,255,0,.45)}
+.hero p{color:var(--dim);line-height:1.4;max-width:480px;margin:8px auto 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.it{border:2px solid var(--border);background:var(--panel);position:relative;overflow:hidden}
+.it img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;filter:saturate(1.05)}
+.it .nm{font-family:var(--px);font-size:7px;padding:8px 8px 3px;line-height:1.5}
+.it .ty{font-family:var(--px);font-size:6px;color:var(--dim);padding:0 8px 8px}
+.it .rar{position:absolute;top:6px;right:6px;font-family:var(--px);font-size:6px;padding:3px 5px;background:#000c;color:var(--dim)}
+.it .rar.rare{color:#26e0ff}.it .rar.epic{color:#c470ff}.it .rar.legendary{color:var(--gold)}
+.it.won{border-color:var(--acid);animation:popin .5s cubic-bezier(.2,1.6,.4,1) backwards}
+.it.won .ck{position:absolute;top:6px;left:6px;font-family:var(--px);font-size:8px;color:#000;background:var(--acid);padding:3px 5px}
+@keyframes popin{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+.card{border:2px solid var(--border);background:rgba(14,14,14,.92);padding:16px 18px}
+.card .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:12px;letter-spacing:1px}
+.f{margin-bottom:10px}
+.f label{display:block;font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:5px}
+.f input{width:100%;background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:10px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--px);font-size:10px;
+  padding:15px 16px;width:100%;border:0;cursor:pointer;background:var(--acid);color:#000;margin-bottom:10px;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--acid);border:1px solid var(--acid)}
+.btn:active{transform:translateY(2px)}
+#msg{color:var(--red);font-size:17px;min-height:22px;text-align:center}
+.big{font-family:var(--px);font-size:14px;color:var(--acid);text-shadow:0 0 16px rgba(182,255,0,.5);
+  line-height:2;text-align:center}
+.dimtxt{color:var(--dim);text-align:center;line-height:1.4}
+.dead{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;text-align:center;padding:40px 0}
+.dead p{font-family:var(--vt);font-size:19px;color:var(--dim);margin-top:10px;line-height:1.4}
+footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+/* confetti canvas above everything but under the scanlines */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:8000}
+</style>
+</head>
+<body>
+<header><a href="../../console.html#menu">ONLY<span class="r">IBEE</span> OS</a><span>PASS.SYS</span></header>
+<canvas id="confetti"></canvas>
+<main id="main"><div class="dimtxt" style="padding:60px 0">checking your pass…</div></main>
+<footer>© ONLYIBEE — UTOPIE™</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var sb=window.supabase.createClient(SB_URL,SB_KEY);
+  var CODE=((new RegExp("[?&]c=([^&]+)").exec(location.search)||[])[1]||"").toUpperCase();
+
+  /* the loot catalog (mirrors member/setup.sql items) with its cover art */
+  var LOOT=[
+    {id:'env-aqua',     n:'AQUA BASS',        ty:'ROOM', rar:'rare',  img:'../covers/aqua-bass.png',       go:'../aqua/'},
+    {id:'env-terrarium',n:'SYNTH TERRARIUM',  ty:'ROOM', rar:'epic',  img:'../covers/terrarium.png',       go:'../terrarium/'},
+    {id:'env-transit',  n:'MIDNIGHT TRANSIT', ty:'ROOM', rar:'epic',  img:'../covers/midnight-transit.png',go:'../transit/'},
+    {id:'env-bedroom',  n:'ICS LOFI BEDROOM', ty:'ROOM', rar:'rare',  img:'../covers/lofi-bedroom.png',    go:'../bedroom/'},
+    {id:'game-runner',  n:'RUN BEEBEE',       ty:'GAME', rar:'common',img:'../covers/neon-run.png',        go:'../runner/'},
+    {id:'game-rush',    n:'MIMI GUITAR RUSH', ty:'GAME', rar:'common',img:'../covers/mimi-rush.png',       go:'../rush/'},
+    {id:'game-tiles',   n:'MIMI MUSIC TILES', ty:'GAME', rar:'common',img:'../covers/mimi-tiles.png',      go:'../tiles/'}
+  ];
+  function gridHTML(won){
+    return '<div class="grid">'+LOOT.map(function(it,i){
+      return '<div class="it'+(won?' won':'')+'" style="animation-delay:'+(i*90)+'ms">'
+        +(won?'<span class="ck">✓</span>':'')
+        +'<span class="rar '+it.rar+'">'+it.rar.toUpperCase()+'</span>'
+        +'<img src="'+it.img+'" alt="'+e2(it.n)+'" loading="lazy">'
+        +'<div class="nm">'+e2(it.n)+'</div><div class="ty">'+it.ty+'</div></div>';
+    }).join('')+'</div>';
+  }
+
+  function dead(title,body){
+    $("main").innerHTML='<div class="dead">✕ '+title+'<p>'+body+'</p>'
+      +'<a class="btn ghost" style="max-width:280px;margin:22px auto 0" href="../">◀ THE ARCADE</a></div>';
+  }
+
+  /* ---------- screens ---------- */
+  function preview(status){
+    var seats=status.seats_left!=null?status.seats_left:1;
+    $("main").innerHTML=
+      '<div class="hero"><span class="tag">🎟 FREE PASS</span>'
+      +'<h1>FREE LINK FOR<br>THE ARCADE_</h1>'
+      +'<p>someone gifted you the whole thing — <b style="color:var(--ink)">every room and every game</b> below unlocks on your account the second you join. free, 2 seconds.'
+      +(seats>1?' ('+seats+' seats left on this pass)':'')+'</p></div>'
+      +gridHTML(false)
+      +'<div class="card" id="authcard"><div class="h">// CLAIM IT_ (join free or log in)</div>'
+      +'<div class="f"><label>EMAIL</label><input id="f_em" type="email" inputmode="email" autocomplete="email"></div>'
+      +'<div class="f"><label>PASSWORD</label><input id="f_pw" type="password" autocomplete="new-password" placeholder="6+ characters"></div>'
+      +'<button class="btn" id="join">🎟 CLAIM MY PASS — JOIN FREE</button>'
+      +'<button class="btn ghost" id="login">▶ LOG IN (already a member)</button>'
+      +'<div id="msg"></div></div>';
+    $("f_pw").addEventListener("keydown",function(e){if(e.key==="Enter")$("join").click();});
+    function creds(){
+      var em=($("f_em").value||"").trim(),pw=$("f_pw").value||"";
+      if(!/.+@.+\..+/.test(em)){$("msg").textContent="✕ a real email_";return null;}
+      if(pw.length<6){$("msg").textContent="✕ 6+ characters for the password_";return null;}
+      $("msg").textContent="";return {em:em,pw:pw};
+    }
+    function lock(b){$("join").disabled=b;$("login").disabled=b;}
+    $("join").onclick=async function(){
+      var v=creds();if(!v)return;lock(true);$("msg").textContent="creating your account…";
+      var su=await sb.auth.signUp({email:v.em,password:v.pw});
+      if(su.error&&!/already/i.test(su.error.message)){$("msg").textContent="✕ "+su.error.message;lock(false);return;}
+      var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+      if(si.error){
+        $("msg").textContent=/confirm/i.test(si.error.message)
+          ?"✉ check your email to confirm, then reopen this link_"
+          :"✕ that email already has an account — try LOG IN_";
+        lock(false);return;
+      }
+      redeem();
+    };
+    $("login").onclick=async function(){
+      var v=creds();if(!v)return;lock(true);$("msg").textContent="…";
+      var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+      if(si.error){$("msg").textContent=/confirm/i.test(si.error.message)?"✉ confirm your email first_":"✕ wrong email or password_";lock(false);return;}
+      redeem();
+    };
+  }
+
+  function congrats(already){
+    $("main").innerHTML=
+      '<div class="hero"><span class="tag" style="background:var(--acid)">✓ REDEEMED</span>'
+      +'<h1>CONGRATS_<br>THE ARCADE IS YOURS</h1>'
+      +'<p>'+(already?'this pass was already on your account — everything below is yours.'
+        :'all of it just landed on your account — every room grows with you every time you come back.')+'</p></div>'
+      +gridHTML(true)
+      +'<a class="btn" style="margin-top:6px" href="../">▶ ENTER THE ARCADE</a>'
+      +'<a class="btn ghost" href="../../room/">☺ SET UP MY ROOM & NICKNAME</a>';
+    if(!already)confetti();
+  }
+
+  async function redeem(){
+    $("msg")&&($("msg").textContent="unlocking everything…");
+    try{
+      var r=await sb.rpc("redeem_pass",{pass_code:CODE});
+      if(r.error){$("msg").textContent="✕ hiccup — try again_";return;}
+      var st=(r.data&&r.data.status)||"";
+      if(st==="granted")return congrats(false);
+      if(st==="owned")return congrats(true);
+      if(st==="used")return dead("PASS ALL USED UP_","every seat on this pass was claimed already. ask for a fresh link_");
+      dead("INVALID PASS_","this link doesn't match any pass. check the full link made it to you_");
+    }catch(e){$("msg")&&($("msg").textContent="✕ network hiccup — try again_");}
+  }
+
+  /* ---------- confetti (acid + gold + pink pixels) ---------- */
+  function confetti(){
+    var c=$("confetti"),x=c.getContext("2d");
+    c.width=innerWidth;c.height=innerHeight;
+    var P=[],cols=["#b6ff00","#ffd60a","#ff5e9e","#26e0ff"];
+    for(var i=0;i<120;i++)P.push({x:Math.random()*c.width,y:-20-Math.random()*c.height*0.5,
+      vx:(Math.random()-0.5)*60,vy:60+Math.random()*160,s:3+Math.random()*5,
+      col:cols[i%cols.length],rot:Math.random()*7,vr:(Math.random()-0.5)*6});
+    var t0=performance.now();
+    (function tick(now){
+      var dt=Math.min(0.04,(now-t0)/1000);t0=now;
+      x.clearRect(0,0,c.width,c.height);var alive=false;
+      P.forEach(function(p){
+        p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=60*dt;p.rot+=p.vr*dt;
+        if(p.y<c.height+20){alive=true;
+          x.save();x.translate(p.x,p.y);x.rotate(p.rot);
+          x.fillStyle=p.col;x.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6);x.restore();}
+      });
+      if(alive)requestAnimationFrame(tick);else x.clearRect(0,0,c.width,c.height);
+    })(t0);
+  }
+
+  /* ---------- boot ---------- */
+  (async function(){
+    if(!CODE)return dead("NO PASS IN THE LINK_","the link should end with ?c=YOUR-CODE.");
+    try{
+      var st=await sb.rpc("pass_status",{pass_code:CODE});
+      if(st.error)return dead("CAN'T CHECK THE PASS_","the backend isn't reachable (or member/passes.sql hasn't been run). try again in a minute_");
+      var s=(st.data&&st.data.status)||"invalid";
+      var sess=(await sb.auth.getSession()).data.session;
+      if(s==="owned")return congrats(true);
+      if(s==="used")return dead("PASS ALL USED UP_","every seat on this pass was claimed already. ask for a fresh link_");
+      if(s!=="valid")return dead("INVALID PASS_","this link doesn't match any pass. check the full link made it to you_");
+      if(sess){
+        /* signed in already → preview + one-tap claim */
+        $("main").innerHTML=
+          '<div class="hero"><span class="tag">🎟 FREE PASS</span><h1>FREE LINK FOR<br>THE ARCADE_</h1>'
+          +'<p>you\'re signed in as <b style="color:var(--ink)">'+e2(sess.user.email)+'</b> — one tap and all of this is yours.</p></div>'
+          +gridHTML(false)
+          +'<button class="btn" id="claim" style="margin-top:6px">🎟 CLAIM IT ALL</button><div id="msg"></div>';
+        $("claim").onclick=function(){this.disabled=true;redeem();};
+      } else preview(st.data);
+    }catch(e){dead("NETWORK HICCUP_","couldn't reach the server. try again_");}
+  })();
+})();
+</script>
+</body>
+</html>
