@@ -34,7 +34,8 @@
 
   .ui{transition:opacity .6s}
   body.zen .ui{opacity:0;pointer-events:none}
-  .back{position:fixed;top:12px;left:12px;z-index:800;font-family:var(--px);font-size:9px;
+  .back{position:fixed;top:calc(12px + env(safe-area-inset-top));left:calc(12px + env(safe-area-inset-left));
+    z-index:800;font-family:var(--px);font-size:9px;
     color:var(--dim);text-decoration:none;border:1px solid var(--border);background:rgba(0,0,0,.7);padding:8px 10px}
   .back:hover{color:var(--acid);border-color:var(--acid)}
   #hint{position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:800;
@@ -55,7 +56,8 @@
   #line .stop:hover{border-color:var(--acid)}
   #line .stop.now{border-color:var(--acid);box-shadow:0 0 8px var(--acid);animation:pulse 1s ease-in-out infinite}
   @keyframes pulse{50%{transform:scale(1.45)}}
-  #zenchip{position:fixed;top:12px;right:12px;z-index:801;font-family:var(--px);font-size:8px;
+  #zenchip{position:fixed;top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+    z-index:801;font-family:var(--px);font-size:8px;
     color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:8px 10px;cursor:pointer}
   #zenchip:hover{color:var(--acid);border-color:var(--acid)}
   body.zen #zenchip{opacity:.25}
@@ -71,15 +73,22 @@
   #milechip{position:fixed;bottom:12px;left:12px;z-index:801;font-family:var(--px);font-size:7px;
     color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:7px 9px;cursor:pointer}
   #milechip:hover{color:var(--acid);border-color:var(--acid)}
-  /* ===== PORTRAIT / PHONES: nothing may superpose =====
+  /* ===== PHONES — nothing may superpose, nothing hides under the browser =====
+     Fires for narrow PORTRAIT phones (max-width) AND short LANDSCAPE phones
+     (max-height) — in landscape the viewport is wider than 640px, so the old
+     width-only rule never triggered and the MIDNIGHT LINE stayed pinned to the
+     top, overlapping the corner chips and slipping under the URL bar / notch.
+     Everything drops to the bottom, offset by the safe-area insets.
      row 1 (very bottom): the MIDNIGHT LINE strip, full width
      row 2 (above it):    CAR chip (left) + WHOLE TRAIN (right)
      row 3:               the hint */
-  @media(max-width:640px){
-    #line{top:auto;bottom:10px;max-width:94vw}
-    #viewtog{left:auto;right:12px;bottom:56px;transform:none}
-    #milechip{bottom:56px}
-    #hint{bottom:100px}
+  @media(max-width:640px),(max-height:560px){
+    #line{top:auto;bottom:calc(10px + env(safe-area-inset-bottom));
+      max-width:calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right))}
+    #viewtog{left:auto;right:calc(12px + env(safe-area-inset-right));
+      bottom:calc(56px + env(safe-area-inset-bottom));transform:none}
+    #milechip{left:calc(12px + env(safe-area-inset-left));bottom:calc(56px + env(safe-area-inset-bottom))}
+    #hint{bottom:calc(100px + env(safe-area-inset-bottom))}
   }
 </style>
 </head>
@@ -93,7 +102,7 @@
 <div id="milechip" class="ui" title="tap to name your car">YOUR LINE · 0 mi</div>
 <div id="hint" class="ui">ride the midnight line_ — tap a window to zone out · tap the seats to re-trim · tap the charm for a little magic · name your car below-left</div>
 
-<script src="../../assets/player.js?v=17"></script>
+<script src="../../assets/player.js?v=20"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
 <script src="../../assets/roomgate.js?v=2"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
