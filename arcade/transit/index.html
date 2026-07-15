@@ -45,7 +45,8 @@
   /* THE LINE — the whole radio playlist as a subway map */
   #line{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:800;
     display:flex;align-items:center;gap:0;background:rgba(0,0,0,.72);
-    border:1px solid var(--border);padding:9px 14px;max-width:88vw;overflow-x:auto;scrollbar-width:none}
+    border:1px solid var(--border);padding:9px 14px;overflow-x:auto;scrollbar-width:none;
+    max-width:calc(100vw - 210px)}   /* stay clear of ◀ ROOMS (left) and ✧ ZEN (right) */
   #line::-webkit-scrollbar{display:none}
   #line .lbl{font-family:var(--px);font-size:7px;color:var(--dim);margin-right:10px;white-space:nowrap}
   #line .seg{width:14px;height:2px;background:#333;flex:none}
@@ -70,6 +71,16 @@
   #milechip{position:fixed;bottom:12px;left:12px;z-index:801;font-family:var(--px);font-size:7px;
     color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:7px 9px;cursor:pointer}
   #milechip:hover{color:var(--acid);border-color:var(--acid)}
+  /* ===== PORTRAIT / PHONES: nothing may superpose =====
+     row 1 (very bottom): the MIDNIGHT LINE strip, full width
+     row 2 (above it):    CAR chip (left) + WHOLE TRAIN (right)
+     row 3:               the hint */
+  @media(max-width:640px){
+    #line{top:auto;bottom:10px;max-width:94vw}
+    #viewtog{left:auto;right:12px;bottom:56px;transform:none}
+    #milechip{bottom:56px}
+    #hint{bottom:100px}
+  }
 </style>
 </head>
 <body>
@@ -88,6 +99,8 @@
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="../../assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="../../assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
+<!-- optional city themes per album/song — safe to be missing. Schema: tools/TRANSIT-THEME-GUIDE.md -->
+<script>document.write('<script src="../../assets/transit-themes.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
 "use strict";
 /* ============================================================
@@ -156,7 +169,59 @@ var strapA=[],strapV=[];for(var i=0;i<7;i++){strapA.push(0);strapV.push(0);}
 var catX=-40,catOn=false;
 var lastSung=null,singT=0;           // passengers sing the current line on their own
 
-/* halloween punk layer (NOUVEAUX PUNK on air) + magic bits */
+/* ============ THEME ENGINE — skins the city per album / per song ============
+   Themes load from assets/transit-themes.js (OPTIONAL — the room runs fine without it):
+     window.IBEE_TRANSIT_THEMES = { "album:<galaxyId>": {...}, "song:<file.mp3>": {...} }
+   Every field is validated with a fallback below, so a broken/half-written theme
+   can NEVER crash the room — bad values just snap back to defaults.
+   Full schema + an AI prompt template: tools/TRANSIT-THEME-GUIDE.md */
+function hex2rgb(v,d){
+  if(typeof v!=='string')return d;
+  var m=v.trim().match(/^#([0-9a-f]{6})$/i);if(!m)return d;
+  var n=parseInt(m[1],16);return (n>>16&255)+','+(n>>8&255)+','+(n&255);
+}
+function safeTheme(t){
+  if(!t||typeof t!=='object')return null;
+  function num(v,d,lo,hi){v=+v;return isFinite(v)?Math.min(hi,Math.max(lo,v)):d;}
+  function pick(v,list,d){return list.indexOf(v)>=0?v:d;}
+  function str(v,d,n){return typeof v==='string'?v.slice(0,n||80):d;}
+  return {
+    name:      str(t.name,'CUSTOM LINE',26).toUpperCase(),
+    skyTop:    hex2rgb(t.skyTop,'12,4,22'),      // rgb triplets, ready for rgba()
+    skyMid:    hex2rgb(t.skyMid,'34,8,30'),
+    skyLow:    hex2rgb(t.skyLow,'66,20,8'),
+    skyAlpha:  num(t.skyAlpha,0.8,0,0.95),
+    moonHue:   num(t.moonHue,26,0,360),
+    moonFace:  pick(t.moonFace,['none','pumpkin','skull','crescent'],'none'),
+    windowHue: num(t.windowHue,45,0,360),
+    flyers:    pick(t.flyers,['none','bats','ghosts','birds','hearts'],'none'),
+    lightning: !!t.lightning,
+    fogAlpha:  num(t.fogAlpha,0,0,0.12),
+    fogHue:    num(t.fogHue,270,0,360),
+    roofSign:  pick(t.roofSign,['bars','guitar'],'bars'),
+    prop:      pick(t.prop,['none','pumpkin','lantern'],'none'),
+    led:       str(t.led,'',70),
+    moteHue:   num(t.moteHue,-1,-1,360),         // -1 = motes follow the song's hue
+    bgText:    str(t.bgText,'',26)               // faint message written across the sky
+  };
+}
+/* built-in: NOUVEAUX PUNK = halloween punk night (a theme file can override it) */
+var BUILTIN_THEMES={'album:np':{name:'☠ PUNK NIGHT LINE',skyTop:'#0c0416',skyMid:'#22081e',skyLow:'#42140a',
+  skyAlpha:0.85,moonHue:26,moonFace:'pumpkin',windowHue:20,flyers:'bats',lightning:true,
+  fogAlpha:0.05,fogHue:270,roofSign:'guitar',prop:'pumpkin',
+  led:'☠ NOUVEAUX PUNK NIGHT SERVICE  ⟶  NOW SHREDDING: ',moteHue:24}};
+var TH=null,_thKey=null;
+function themeTick(){
+  var key=null,raw=null,slug=slugNow(),gal=galNow();
+  try{
+    var U=DB('IBEE_TRANSIT_THEMES');U=(U&&typeof U==='object')?U:{};
+    if(slug&&U['song:'+slug]){key='song:'+slug;raw=U[key];}
+    else if(U['album:'+gal]){key='album:'+gal;raw=U[key];}
+    else if(BUILTIN_THEMES['album:'+gal]){key='builtin:'+gal;raw=BUILTIN_THEMES['album:'+gal];}
+  }catch(e){key=null;raw=null;}
+  if(key!==_thKey){_thKey=key;try{TH=raw?safeTheme(raw):null;}catch(e){TH=null;}}
+}
+/* theme layer state (HALLO = theme intensity, fades 0..1) + magic bits */
 var HALLO=0, LTN=0, BOLT=null, bats=[];
 var chA=0,chV=0, SPK=[];             // the hanging charm + its sparkles
 var CHARMS=['LUCKY STAR','LIL MOON','THUNDER BOLT','PUNK SKULL'];
@@ -282,37 +347,68 @@ function drawCity(now,hue){
   bctx.fillStyle=hsl(hue,60,80,0.9);bctx.beginPath();bctx.arc(mx,44,7,0,7);bctx.fill();
   bctx.fillStyle=hsl(hue,70,60,0.08+LVL*0.1);bctx.beginPath();bctx.arc(mx,44,14,0,7);bctx.fill();
 
-  /* ---- HALLOWEEN PUNK NIGHT (NOUVEAUX PUNK on air) — the sky turns, the moon grins ---- */
-  if(HALLO>0.02){
+  /* ---- THEMED NIGHT (driven by the active theme — np ships halloween punk built-in) ---- */
+  if(HALLO>0.02&&TH){
     var hg=bctx.createLinearGradient(0,26,0,118);
-    hg.addColorStop(0,'rgba(12,4,22,'+(0.85*HALLO)+')');
-    hg.addColorStop(0.65,'rgba(34,8,30,'+(0.8*HALLO)+')');
-    hg.addColorStop(1,'rgba(66,20,8,'+(0.7*HALLO)+')');
+    hg.addColorStop(0,'rgba('+TH.skyTop+','+(TH.skyAlpha*HALLO)+')');
+    hg.addColorStop(0.65,'rgba('+TH.skyMid+','+(TH.skyAlpha*0.94*HALLO)+')');
+    hg.addColorStop(1,'rgba('+TH.skyLow+','+(TH.skyAlpha*0.82*HALLO)+')');
     bctx.fillStyle=hg;bctx.fillRect(0,26,W,92);
-    /* jack-o-moon */
-    bctx.fillStyle=hsl(26,95,52,HALLO);bctx.beginPath();bctx.arc(mx,44,9,0,7);bctx.fill();
-    bctx.fillStyle=hsl(26,95,60,HALLO*(0.12+LVL*0.15));bctx.beginPath();bctx.arc(mx,44,17,0,7);bctx.fill();
-    bctx.fillStyle='rgba(30,74,18,'+HALLO+')';bctx.fillRect(px(mx-1),33,3,4);   // stem
-    bctx.fillStyle='rgba(16,4,0,'+HALLO+')';
-    bctx.beginPath();bctx.moveTo(mx-6,43);bctx.lineTo(mx-2,43);bctx.lineTo(mx-4,39);bctx.closePath();bctx.fill();
-    bctx.beginPath();bctx.moveTo(mx+2,43);bctx.lineTo(mx+6,43);bctx.lineTo(mx+4,39);bctx.closePath();bctx.fill();
-    bctx.beginPath();bctx.moveTo(mx-5,47);bctx.lineTo(mx+5,47);bctx.lineTo(mx+3,49);bctx.lineTo(mx+1,47.5);
-    bctx.lineTo(mx-1,49);bctx.lineTo(mx-3,47.5);bctx.closePath();bctx.fill();
-    /* bats crossing the sky */
+    /* the theme's moon */
+    bctx.fillStyle=hsl(TH.moonHue,95,52,HALLO);bctx.beginPath();bctx.arc(mx,44,9,0,7);bctx.fill();
+    bctx.fillStyle=hsl(TH.moonHue,95,60,HALLO*(0.12+LVL*0.15));bctx.beginPath();bctx.arc(mx,44,17,0,7);bctx.fill();
+    if(TH.moonFace==='pumpkin'){
+      bctx.fillStyle='rgba(30,74,18,'+HALLO+')';bctx.fillRect(px(mx-1),33,3,4);   // stem
+      bctx.fillStyle='rgba(16,4,0,'+HALLO+')';
+      bctx.beginPath();bctx.moveTo(mx-6,43);bctx.lineTo(mx-2,43);bctx.lineTo(mx-4,39);bctx.closePath();bctx.fill();
+      bctx.beginPath();bctx.moveTo(mx+2,43);bctx.lineTo(mx+6,43);bctx.lineTo(mx+4,39);bctx.closePath();bctx.fill();
+      bctx.beginPath();bctx.moveTo(mx-5,47);bctx.lineTo(mx+5,47);bctx.lineTo(mx+3,49);bctx.lineTo(mx+1,47.5);
+      bctx.lineTo(mx-1,49);bctx.lineTo(mx-3,47.5);bctx.closePath();bctx.fill();
+    }else if(TH.moonFace==='skull'){
+      bctx.fillStyle='rgba(16,4,0,'+HALLO+')';
+      bctx.fillRect(px(mx-5),40,3,3);bctx.fillRect(px(mx+2),40,3,3);
+      bctx.fillRect(px(mx-1),44,2,2);bctx.fillRect(px(mx-4),48,8,1);
+      bctx.fillRect(px(mx-3),48,1,2);bctx.fillRect(px(mx),48,1,2);bctx.fillRect(px(mx+3),48,1,2);
+    }else if(TH.moonFace==='crescent'){
+      bctx.fillStyle='rgba('+TH.skyTop+','+(0.92*HALLO)+')';
+      bctx.beginPath();bctx.arc(mx+4,42,8,0,7);bctx.fill();
+    }
+    /* flyers crossing the sky */
     bats.forEach(function(b){var wf=Math.sin(T*11+b.ph)*3*b.s;
-      bctx.fillStyle='rgba(10,4,16,'+Math.min(1,HALLO*1.2)+')';
-      bctx.fillRect(px(b.x-1),px(b.y-1),3,2);
-      bctx.beginPath();bctx.moveTo(b.x-1,b.y);bctx.lineTo(b.x-6*b.s,b.y-wf);bctx.lineTo(b.x-2,b.y+1);bctx.closePath();bctx.fill();
-      bctx.beginPath();bctx.moveTo(b.x+2,b.y);bctx.lineTo(b.x+7*b.s,b.y-wf);bctx.lineTo(b.x+3,b.y+1);bctx.closePath();bctx.fill();
+      if(TH.flyers==='ghosts'){
+        bctx.fillStyle='rgba(230,230,245,'+(0.4*HALLO)+')';
+        bctx.beginPath();bctx.arc(b.x,b.y,3*b.s,3.14,0);
+        bctx.lineTo(b.x+3*b.s,b.y+4);bctx.lineTo(b.x+1.5*b.s,b.y+3+wf*0.3);bctx.lineTo(b.x,b.y+4);
+        bctx.lineTo(b.x-1.5*b.s,b.y+3-wf*0.3);bctx.lineTo(b.x-3*b.s,b.y+4);bctx.closePath();bctx.fill();
+        bctx.fillStyle='rgba(10,10,20,'+(0.6*HALLO)+')';
+        bctx.fillRect(px(b.x-1.5),px(b.y-1),1,1);bctx.fillRect(px(b.x+0.5),px(b.y-1),1,1);
+      }else if(TH.flyers==='birds'){
+        bctx.strokeStyle='rgba(10,8,14,'+Math.min(1,HALLO*1.2)+')';
+        bctx.beginPath();bctx.moveTo(b.x-5*b.s,b.y-wf*0.6);bctx.quadraticCurveTo(b.x-2,b.y+1,b.x,b.y);
+        bctx.quadraticCurveTo(b.x+2,b.y+1,b.x+5*b.s,b.y-wf*0.6);bctx.stroke();
+      }else if(TH.flyers==='hearts'){
+        var hhs=b.s*2.2,hhy=b.y+Math.sin(T*3+b.ph)*1.5;
+        bctx.fillStyle=hsl(335,90,66,(0.5+0.3*Math.sin(T*4+b.ph))*HALLO);
+        bctx.beginPath();
+        bctx.arc(b.x-hhs*0.5,hhy,hhs*0.58,0,7);bctx.arc(b.x+hhs*0.5,hhy,hhs*0.58,0,7);bctx.fill();
+        bctx.beginPath();bctx.moveTo(b.x-hhs*1.05,hhy+0.3);bctx.lineTo(b.x+hhs*1.05,hhy+0.3);
+        bctx.lineTo(b.x,hhy+hhs*1.55);bctx.closePath();bctx.fill();
+      }else{ /* bats */
+        bctx.fillStyle='rgba(10,4,16,'+Math.min(1,HALLO*1.2)+')';
+        bctx.fillRect(px(b.x-1),px(b.y-1),3,2);
+        bctx.beginPath();bctx.moveTo(b.x-1,b.y);bctx.lineTo(b.x-6*b.s,b.y-wf);bctx.lineTo(b.x-2,b.y+1);bctx.closePath();bctx.fill();
+        bctx.beginPath();bctx.moveTo(b.x+2,b.y);bctx.lineTo(b.x+7*b.s,b.y-wf);bctx.lineTo(b.x+3,b.y+1);bctx.closePath();bctx.fill();
+      }
     });
-    /* punk thunder */
-    if(LTN>0.02){
+    /* thunder */
+    if(TH.lightning&&LTN>0.02){
       bctx.fillStyle='rgba(210,190,255,'+(LTN*0.16*HALLO)+')';bctx.fillRect(0,26,W,92);
       if(BOLT){bctx.strokeStyle='rgba(225,205,255,'+(LTN*HALLO)+')';bctx.lineWidth=1.5;
         bctx.beginPath();BOLT.forEach(function(pt,pi){pi?bctx.lineTo(pt[0],pt[1]):bctx.moveTo(pt[0],pt[1]);});bctx.stroke();
         bctx.lineWidth=1;}
     }
   }
+  var wh=TH?45+(TH.windowHue-45)*HALLO:45;   // city window colour drifts with the theme
 
   /* far skyline */
   var rb=seedFor('far');var bwSum=0;
@@ -321,7 +417,7 @@ function drawCity(now,hue){
     var bx=(bwSum-sc1)%(W+340);if(bx<-40)bx+=W+340;bwSum+=bw+2;
     bctx.fillStyle=hsl((hue+230)%360,25,7);bctx.fillRect(px(bx),px(118-bh),px(bw),px(bh));
     for(var wy=4;wy<bh-3;wy+=5)for(var wx=2;wx<bw-2;wx+=4){
-      if(rb()<0.28){bctx.fillStyle=hsl(45-25*HALLO,70+20*HALLO,50,0.5);bctx.fillRect(px(bx+wx),px(118-bh+wy),1,1);}}
+      if(rb()<0.28){bctx.fillStyle=hsl(wh,70+20*HALLO,50,0.5);bctx.fillRect(px(bx+wx),px(118-bh+wy),1,1);}}
   }
   /* mid buildings + neon */
   var rm=seedFor('mid');var mSum=0;
@@ -331,7 +427,7 @@ function drawCity(now,hue){
     bctx.fillStyle=hsl((hue+250)%360,28,10);bctx.fillRect(px(mx2),px(118-mh),px(mw),px(mh));
     bctx.fillStyle='rgba(0,0,0,.3)';bctx.fillRect(px(mx2+mw-4),px(118-mh),4,px(mh));
     for(var my=4;my<mh-4;my+=6)for(var mw2=3;mw2<mw-3;mw2+=5){
-      if(rm()<0.34){bctx.fillStyle=rm()<0.12?hsl(hue,90,60,0.85):hsl(45-25*HALLO,75,55,0.6);
+      if(rm()<0.34){bctx.fillStyle=rm()<0.12?hsl(hue,90,60,0.85):hsl(wh,75,55,0.6);
         bctx.fillRect(px(mx2+mw2),px(118-mh+my),2,3);}}
     /* neon sign — flickers with the loudness */
     if(rm()<0.6){
@@ -343,15 +439,15 @@ function drawCity(now,hue){
       bctx.fillStyle=hsl(nh,95,70,flick*0.25);
       bctx.fillRect(px(mx2+1),px(sy2-2),px(mw-2),8);
     }
-    /* punk night: some rooftops grow a neon GUITAR sign */
+    /* themed rooftops can grow a neon GUITAR sign */
     var gsel=rm();
-    if(HALLO>0.35&&gsel<0.5&&mh>44)
+    if(HALLO>0.35&&TH&&TH.roofSign==='guitar'&&gsel<0.5&&mh>44)
       drawGuitarNeon(mx2+mw/2,118-mh+12,HALLO*(0.55+LVL*0.45));
   }
-  /* rolling graveyard fog on punk nights */
-  if(HALLO>0.1){
+  /* rolling fog when the theme calls for it */
+  if(HALLO>0.1&&TH&&TH.fogAlpha>0){
     for(var f=0;f<4;f++){var fgx=((T*5+f*110)%(W+180))-90;
-      bctx.fillStyle='rgba(150,130,175,'+(0.045*HALLO)+')';
+      bctx.fillStyle=hsl(TH.fogHue,20,62,TH.fogAlpha*HALLO);
       bctx.beginPath();bctx.ellipse(fgx,112,58,7,0,0,7);bctx.fill();}
   }
   /* near lamp posts — spawned ONLY by real hits (imp) */
@@ -383,13 +479,21 @@ function drawCity(now,hue){
     /* station sign */
     bctx.fillStyle='#0a0a12';bctx.fillRect(120,44,144,18);
     bctx.strokeStyle=hsl(hueNow(),80,55);bctx.strokeRect(120.5,44.5,143,17);
-    /* punk night: jack-o-lanterns glowing on the platform */
-    if(HALLO>0.3){[96,286].forEach(function(jx){
-      bctx.fillStyle=hsl(26,90,50,pa*HALLO);bctx.beginPath();bctx.arc(jx,92,4,0,7);bctx.fill();
-      bctx.fillStyle='rgba(30,74,18,'+(pa*HALLO)+')';bctx.fillRect(px(jx-1),86,2,3);
-      bctx.fillStyle='rgba(12,3,0,'+(pa*HALLO)+')';
-      bctx.fillRect(px(jx-3),90,2,2);bctx.fillRect(px(jx+1),90,2,2);bctx.fillRect(px(jx-2),93,4,1);
-      bctx.fillStyle=hsl(26,95,60,pa*HALLO*(0.12+PULSE*0.2));bctx.beginPath();bctx.arc(jx,92,9,0,7);bctx.fill();
+    /* themed props glowing on the platform */
+    if(HALLO>0.3&&TH&&TH.prop!=='none'){[96,286].forEach(function(jx){
+      if(TH.prop==='pumpkin'){
+        bctx.fillStyle=hsl(26,90,50,pa*HALLO);bctx.beginPath();bctx.arc(jx,92,4,0,7);bctx.fill();
+        bctx.fillStyle='rgba(30,74,18,'+(pa*HALLO)+')';bctx.fillRect(px(jx-1),86,2,3);
+        bctx.fillStyle='rgba(12,3,0,'+(pa*HALLO)+')';
+        bctx.fillRect(px(jx-3),90,2,2);bctx.fillRect(px(jx+1),90,2,2);bctx.fillRect(px(jx-2),93,4,1);
+        bctx.fillStyle=hsl(26,95,60,pa*HALLO*(0.12+PULSE*0.2));bctx.beginPath();bctx.arc(jx,92,9,0,7);bctx.fill();
+      }else{ /* paper lantern */
+        bctx.strokeStyle='rgba(60,60,70,'+(pa*HALLO)+')';
+        bctx.beginPath();bctx.moveTo(jx,84);bctx.lineTo(jx,88);bctx.stroke();
+        bctx.fillStyle=hsl(TH.windowHue,90,55,pa*HALLO);bctx.fillRect(px(jx-3),88,6,7);
+        bctx.fillStyle=hsl(TH.windowHue,95,65,pa*HALLO*(0.14+PULSE*0.2));
+        bctx.beginPath();bctx.arc(jx,91,8,0,7);bctx.fill();
+      }
     });}
     bctx.globalAlpha=1;
   }
@@ -423,7 +527,7 @@ function drawCharm(x,hue){
   bctx.strokeStyle='#6a6a78';bctx.beginPath();bctx.moveTo(0,0);bctx.lineTo(0,13);bctx.stroke();
   var ch=TRANSIT.charm%4;
   /* soft magic halo, breathing with the beat */
-  bctx.fillStyle=hsl(HALLO>0.5?26:hue,90,60,0.10+PULSE*0.22);
+  bctx.fillStyle=hsl((HALLO>0.5&&TH&&TH.moteHue>=0)?TH.moteHue:hue,90,60,0.10+PULSE*0.22);
   bctx.beginPath();bctx.arc(0,17,8,0,7);bctx.fill();
   if(ch===0){        // lucky star
     bctx.fillStyle=hsl(52,95,64,0.95);
@@ -548,8 +652,16 @@ function drawFx(now,hue){
   fctx.clearRect(0,0,FW,FH);
   var r=RAD(),s=songNow(),playing=r&&r.playing&&r.playing();
   fctx.textBaseline='top';
+  /* the theme's sky message, glowing softly behind the city (visible through the windows) */
+  if(HALLO>0.1&&TH&&TH.bgText){
+    fctx.font=(15*S)+'px VT323';fctx.textAlign='center';
+    fctx.fillStyle=hsl(TH.moteHue>=0?TH.moteHue:hue,90,70,HALLO*(0.10+PULSE*0.08));
+    fctx.shadowColor=hsl(TH.moteHue>=0?TH.moteHue:hue,90,60);fctx.shadowBlur=6;
+    fctx.fillText(TH.bgText,FW/2,52*S);
+    fctx.shadowBlur=0;fctx.textAlign='left';
+  }
   /* LED destination sign */
-  var led = playing&&s ? ((HALLO>0.5?'☠  NOUVEAUX PUNK NIGHT SERVICE  ⟶  NOW SHREDDING: ':'◈  MIDNIGHT LINE  ⟶  NOW ARRIVING: ')
+  var led = playing&&s ? (((HALLO>0.5&&TH&&TH.led)?TH.led:'◈  MIDNIGHT LINE  ⟶  NOW ARRIVING: ')
                           +s.n+'   ·   ALBUM: '+(GALNAME[galNow()]||galNow().toUpperCase())
                           +(TRANSIT.name?('   ·   YOUR CAR: '+TRANSIT.name.toUpperCase()):'')+'   ')
                        : '◈  MIDNIGHT LINE  ⟶  SERVICE SUSPENDED — PRESS ▶ TO DEPART   ';
@@ -659,43 +771,83 @@ function drawWholeTrain(now){
   var r=RAD(),playing=r&&r.playing&&r.playing(),hue=hueNow();
   var W2=innerWidth,H2=innerHeight;
   octx.setTransform(OS,0,0,OS,0,0);
-  /* --- sky (turns halloween-punk when NP is on air) --- */
+  /* --- sky (the active theme fades over it) --- */
   var sky=octx.createLinearGradient(0,0,0,H2);
-  if(HALLO>0.5){sky.addColorStop(0,'#0c0416');sky.addColorStop(0.6,'#22081e');sky.addColorStop(1,'#3e1406');}
-  else{sky.addColorStop(0,'#05060f');sky.addColorStop(1,hsl(hue,45,8));}
+  sky.addColorStop(0,'#05060f');sky.addColorStop(1,hsl(hue,45,8));
   octx.fillStyle=sky;octx.fillRect(0,0,W2,H2);
+  if(HALLO>0.02&&TH){var tg=octx.createLinearGradient(0,0,0,H2);
+    tg.addColorStop(0,'rgba('+TH.skyTop+','+(TH.skyAlpha*HALLO)+')');
+    tg.addColorStop(0.6,'rgba('+TH.skyMid+','+(TH.skyAlpha*0.94*HALLO)+')');
+    tg.addColorStop(1,'rgba('+TH.skyLow+','+(TH.skyAlpha*0.82*HALLO)+')');
+    octx.fillStyle=tg;octx.fillRect(0,0,W2,H2);}
+  var wh=TH?45+(TH.windowHue-45)*HALLO:45;
   var rs=seedFor('osky');
   for(var st=0;st<70;st++){var sxx=(rs()*W2*2-trainSc*0.04)%W2;if(sxx<0)sxx+=W2;
     octx.fillStyle='rgba(255,255,255,'+(0.08+0.4*rs())+')';octx.fillRect(sxx,rs()*H2*0.34,2,2);}
-  /* moon / jack-o-moon */
+  /* moon — the theme decides its colour and face */
   var mx=W2*0.78,my=H2*0.13;
-  if(HALLO>0.3){
-    octx.fillStyle=hsl(26,95,52,HALLO);octx.beginPath();octx.arc(mx,my,24,0,7);octx.fill();
-    octx.fillStyle=hsl(26,95,60,HALLO*0.14);octx.beginPath();octx.arc(mx,my,42,0,7);octx.fill();
-    octx.fillStyle='rgba(30,74,18,'+HALLO+')';octx.fillRect(mx-3,my-30,6,8);
-    octx.fillStyle='rgba(16,4,0,'+HALLO+')';
-    octx.beginPath();octx.moveTo(mx-14,my-2);octx.lineTo(mx-4,my-2);octx.lineTo(mx-9,my-11);octx.closePath();octx.fill();
-    octx.beginPath();octx.moveTo(mx+4,my-2);octx.lineTo(mx+14,my-2);octx.lineTo(mx+9,my-11);octx.closePath();octx.fill();
-    octx.beginPath();octx.moveTo(mx-12,my+7);octx.lineTo(mx+12,my+7);octx.lineTo(mx+8,my+12);octx.lineTo(mx+4,my+8);
-    octx.lineTo(mx,my+12);octx.lineTo(mx-4,my+8);octx.lineTo(mx-8,my+12);octx.closePath();octx.fill();
+  if(HALLO>0.3&&TH){
+    octx.fillStyle=hsl(TH.moonHue,95,52,HALLO);octx.beginPath();octx.arc(mx,my,24,0,7);octx.fill();
+    octx.fillStyle=hsl(TH.moonHue,95,60,HALLO*0.14);octx.beginPath();octx.arc(mx,my,42,0,7);octx.fill();
+    if(TH.moonFace==='pumpkin'){
+      octx.fillStyle='rgba(30,74,18,'+HALLO+')';octx.fillRect(mx-3,my-30,6,8);
+      octx.fillStyle='rgba(16,4,0,'+HALLO+')';
+      octx.beginPath();octx.moveTo(mx-14,my-2);octx.lineTo(mx-4,my-2);octx.lineTo(mx-9,my-11);octx.closePath();octx.fill();
+      octx.beginPath();octx.moveTo(mx+4,my-2);octx.lineTo(mx+14,my-2);octx.lineTo(mx+9,my-11);octx.closePath();octx.fill();
+      octx.beginPath();octx.moveTo(mx-12,my+7);octx.lineTo(mx+12,my+7);octx.lineTo(mx+8,my+12);octx.lineTo(mx+4,my+8);
+      octx.lineTo(mx,my+12);octx.lineTo(mx-4,my+8);octx.lineTo(mx-8,my+12);octx.closePath();octx.fill();
+    }else if(TH.moonFace==='skull'){
+      octx.fillStyle='rgba(16,4,0,'+HALLO+')';
+      octx.fillRect(mx-12,my-8,7,7);octx.fillRect(mx+5,my-8,7,7);octx.fillRect(mx-2,my+1,4,5);
+      octx.fillRect(mx-10,my+11,20,2);
+      octx.fillRect(mx-7,my+11,2,5);octx.fillRect(mx-1,my+11,2,5);octx.fillRect(mx+5,my+11,2,5);
+    }else if(TH.moonFace==='crescent'){
+      octx.fillStyle='rgba('+TH.skyTop+','+(0.92*HALLO)+')';
+      octx.beginPath();octx.arc(mx+10,my-5,21,0,7);octx.fill();
+    }
   }else{
     octx.fillStyle=hsl(hue,55,85,0.9);octx.beginPath();octx.arc(mx,my,16,0,7);octx.fill();
     octx.fillStyle=hsl(hue,70,60,0.1+LVL*0.1);octx.beginPath();octx.arc(mx,my,30,0,7);octx.fill();
   }
-  /* bats (shared flock, mapped up) */
-  if(HALLO>0.2)bats.forEach(function(b){
+  /* flyers (shared flock, mapped up) */
+  if(HALLO>0.2&&TH)bats.forEach(function(b){
     var bx2=b.x/W*W2,by2=b.y/118*H2*0.34,bs=b.s*3,wf=Math.sin(T*11+b.ph)*3*bs;
-    octx.fillStyle='rgba(10,4,16,'+Math.min(1,HALLO*1.2)+')';
-    octx.fillRect(bx2-2,by2-2,5,4);
-    octx.beginPath();octx.moveTo(bx2-2,by2);octx.lineTo(bx2-4*bs,by2-wf);octx.lineTo(bx2-1,by2+2);octx.closePath();octx.fill();
-    octx.beginPath();octx.moveTo(bx2+3,by2);octx.lineTo(bx2+5*bs,by2-wf);octx.lineTo(bx2+2,by2+2);octx.closePath();octx.fill();
+    if(TH.flyers==='ghosts'){
+      octx.fillStyle='rgba(230,230,245,'+(0.4*HALLO)+')';
+      octx.beginPath();octx.arc(bx2,by2,3*bs,3.14,0);
+      octx.lineTo(bx2+3*bs,by2+4*bs);octx.lineTo(bx2,by2+3*bs+wf*0.2);octx.lineTo(bx2-3*bs,by2+4*bs);
+      octx.closePath();octx.fill();
+    }else if(TH.flyers==='birds'){
+      octx.strokeStyle='rgba(10,8,14,'+Math.min(1,HALLO*1.2)+')';octx.lineWidth=2;
+      octx.beginPath();octx.moveTo(bx2-4*bs,by2-wf*0.5);octx.quadraticCurveTo(bx2-1,by2+2,bx2,by2);
+      octx.quadraticCurveTo(bx2+1,by2+2,bx2+4*bs,by2-wf*0.5);octx.stroke();octx.lineWidth=1;
+    }else if(TH.flyers==='hearts'){
+      var hh2=bs*2,hy2=by2+Math.sin(T*3+b.ph)*4;
+      octx.fillStyle=hsl(335,90,66,(0.5+0.3*Math.sin(T*4+b.ph))*HALLO);
+      octx.beginPath();
+      octx.arc(bx2-hh2*0.5,hy2,hh2*0.58,0,7);octx.arc(bx2+hh2*0.5,hy2,hh2*0.58,0,7);octx.fill();
+      octx.beginPath();octx.moveTo(bx2-hh2*1.05,hy2+0.5);octx.lineTo(bx2+hh2*1.05,hy2+0.5);
+      octx.lineTo(bx2,hy2+hh2*1.55);octx.closePath();octx.fill();
+    }else{
+      octx.fillStyle='rgba(10,4,16,'+Math.min(1,HALLO*1.2)+')';
+      octx.fillRect(bx2-2,by2-2,5,4);
+      octx.beginPath();octx.moveTo(bx2-2,by2);octx.lineTo(bx2-4*bs,by2-wf);octx.lineTo(bx2-1,by2+2);octx.closePath();octx.fill();
+      octx.beginPath();octx.moveTo(bx2+3,by2);octx.lineTo(bx2+5*bs,by2-wf);octx.lineTo(bx2+2,by2+2);octx.closePath();octx.fill();
+    }
   });
   /* lightning */
-  if(HALLO>0.3&&LTN>0.02){
+  if(HALLO>0.3&&TH&&TH.lightning&&LTN>0.02){
     octx.fillStyle='rgba(210,190,255,'+(LTN*0.15*HALLO)+')';octx.fillRect(0,0,W2,H2*0.62);
     if(BOLT){octx.strokeStyle='rgba(225,205,255,'+(LTN*HALLO)+')';octx.lineWidth=2;octx.beginPath();
       BOLT.forEach(function(pt,pi){var X=pt[0]/W*W2,Y=(pt[1]-26)/92*H2*0.5;pi?octx.lineTo(X,Y):octx.moveTo(X,Y);});
       octx.stroke();octx.lineWidth=1;}
+  }
+  /* the theme's sky message, huge and faint behind the skyline */
+  if(HALLO>0.1&&TH&&TH.bgText){
+    octx.font=Math.round(Math.min(34,W2/(TH.bgText.length*0.72)))+'px "Press Start 2P"';
+    octx.textAlign='center';
+    octx.fillStyle=hsl(TH.moteHue>=0?TH.moteHue:hue,90,70,HALLO*(0.10+LVL*0.08));
+    octx.fillText(TH.bgText,W2/2,H2*0.3);octx.textAlign='left';
   }
   /* --- the city rolling behind the train --- */
   var horizon=H2*0.62;
@@ -703,35 +855,35 @@ function drawWholeTrain(now){
   for(var b=0;b<30;b++){
     var bw=30+rb()*70,bh=40+rb()*H2*0.28;
     var bx=(sum-trainSc*0.25)%(W2+900);if(bx<-120)bx+=W2+900;sum+=bw+6;
-    octx.fillStyle=HALLO>0.5?'rgba(18,7,22,.92)':hsl((hue+230)%360,25,7);
+    octx.fillStyle=HALLO>0.5&&TH?'rgba('+TH.skyTop+',.92)':hsl((hue+230)%360,25,7);
     octx.fillRect(bx,horizon-bh,bw,bh);
     for(var wy=8;wy<bh-6;wy+=14)for(var wx=5;wx<bw-5;wx+=11){
-      if(rb()<0.26){octx.fillStyle=hsl(45-25*HALLO,70+20*HALLO,50,0.5);octx.fillRect(bx+wx,horizon-bh+wy,3,4);}}
+      if(rb()<0.26){octx.fillStyle=hsl(wh,70+20*HALLO,50,0.5);octx.fillRect(bx+wx,horizon-bh+wy,3,4);}}
   }
   var rm=seedFor('omid');sum=0;
   for(var m=0;m<18;m++){
     var mw=50+rm()*90,mh=60+rm()*H2*0.34;
     var mx2=(sum-trainSc*0.6)%(W2+1100);if(mx2<-160)mx2+=W2+1100;sum+=mw+14;
-    octx.fillStyle=HALLO>0.5?'#150a1e':hsl((hue+250)%360,28,10);
+    octx.fillStyle=HALLO>0.5&&TH?'rgba('+TH.skyMid+',.9)':hsl((hue+250)%360,28,10);
     octx.fillRect(mx2,horizon-mh,mw,mh);
     octx.fillStyle='rgba(0,0,0,.3)';octx.fillRect(mx2+mw-8,horizon-mh,8,mh);
     for(var my2=10;my2<mh-8;my2+=16)for(var mw2=7;mw2<mw-7;mw2+=13){
-      if(rm()<0.3){octx.fillStyle=rm()<0.12?hsl(hue,90,60,0.8):hsl(45-25*HALLO,75,55,0.55);
+      if(rm()<0.3){octx.fillStyle=rm()<0.12?hsl(hue,90,60,0.8):hsl(wh,75,55,0.55);
         octx.fillRect(mx2+mw2,horizon-mh+my2,4,6);}}
-    if(rm()<0.55){                                          /* rooftop neon: bar, or a guitar on punk nights */
+    if(rm()<0.55){                                          /* rooftop neon: bar, or the theme's guitar */
       var nh2=(rm()<0.5?hue:(hue+180)%360),fl2=0.5+LVL*0.5;
       var g2=rm();
-      if(HALLO>0.35&&g2<0.5)oGuitar(mx2+mw/2,horizon-mh+26,1.6,HALLO*fl2);
+      if(HALLO>0.35&&TH&&TH.roofSign==='guitar'&&g2<0.5)oGuitar(mx2+mw/2,horizon-mh+26,1.6,HALLO*fl2);
       else{octx.fillStyle=hsl(nh2,95,58,fl2);octx.fillRect(mx2+6,horizon-mh+8,mw-12,6);
         octx.fillStyle=hsl(nh2,95,70,fl2*0.2);octx.fillRect(mx2+2,horizon-mh+4,mw-4,14);}
     }
   }
-  /* fog band on punk nights */
-  if(HALLO>0.1)for(var f=0;f<5;f++){var fgx=((now*24+f*260)%(W2+400))-200;
-    octx.fillStyle='rgba(150,130,175,'+(0.05*HALLO)+')';
+  /* fog band when the theme calls for it */
+  if(HALLO>0.1&&TH&&TH.fogAlpha>0)for(var f=0;f<5;f++){var fgx=((now*24+f*260)%(W2+400))-200;
+    octx.fillStyle=hsl(TH.fogHue,20,62,TH.fogAlpha*1.1*HALLO);
     octx.beginPath();octx.ellipse(fgx,horizon-8,130,16,0,0,7);octx.fill();}
   /* ground + track bed */
-  octx.fillStyle=HALLO>0.5?'#120615':'#0a0a12';octx.fillRect(0,horizon,W2,H2-horizon);
+  octx.fillStyle=HALLO>0.5&&TH?'rgb('+TH.skyTop+')':'#0a0a12';octx.fillRect(0,horizon,W2,H2-horizon);
   var railY=Math.min(H2*0.8,horizon+H2*0.17);
   for(var k=0;k<Math.ceil(W2/46)+2;k++){var slx=(k*46-(trainSc*1.6)%46);
     octx.fillStyle='#141420';octx.fillRect(slx,railY+9,26,5);}
@@ -805,7 +957,7 @@ function drawWholeTrain(now){
   /* HUD */
   octx.textAlign='center';
   octx.fillStyle=hsl(hue,90,74);octx.font='10px "Press Start 2P"';
-  octx.fillText((HALLO>0.5?'☠ PUNK NIGHT LINE — ':'MIDNIGHT LINE — ')+carName().toUpperCase(),W2/2,H2*0.06);
+  octx.fillText(((HALLO>0.5&&TH)?TH.name+' — ':'MIDNIGHT LINE — ')+carName().toUpperCase(),W2/2,H2*0.06);
   octx.fillStyle='#9a9a9a';octx.font='7px "Press Start 2P"';
   octx.fillText(grade(TRANSIT.miles)+' · '+Math.floor(TRANSIT.miles).toLocaleString()+' MI · '+n+' STOPS · TAP A CAR TO RIDE IT',W2/2,H2*0.06+16);
   octx.textAlign='left';
@@ -845,19 +997,24 @@ function loop(nowMs){
     if(impEdge(g)){PULSE=1;
       posts.push({x:W+20,v:5.5+speed*4});
       if(g.imp>0.8&&Math.random()<0.5)sparks.push({life:0.3});
-      if(HALLO>0.4&&Math.random()<0.45){LTN=1;BOLT=makeBolt();}   // punk thunder on the hits
+      if(HALLO>0.4&&TH&&TH.lightning&&Math.random()<0.45){LTN=1;BOLT=makeBolt();}   // thunder on the hits
     }}
   else{LOW*=0.94;LVL*=0.94;}
   PULSE*=0.88;LTN*=0.86;HORN*=0.9;
   tunnelT=Math.max(0,tunnelT-dt*0.5);
 
-  /* the halloween punk city fades in while NOUVEAUX PUNK is on air */
-  HALLO+=(((galNow()==='np'&&playing)?1:0)-HALLO)*Math.min(1,dt*1.2);
-  if(HALLO>0.2){
-    if(bats.length<6&&Math.random()<0.02)
-      bats.push({x:W+14,y:30+Math.random()*44,v:14+Math.random()*24,ph:Math.random()*6,s:0.7+Math.random()*0.8});
-    for(var bi=bats.length-1;bi>=0;bi--){bats[bi].x-=bats[bi].v*dt;if(bats[bi].x<-16)bats.splice(bi,1);}
-  } else bats.length=0;
+  /* the themed city fades in while a themed record is on air (np = built-in halloween punk) */
+  themeTick();
+  HALLO+=(((TH&&playing)?1:0)-HALLO)*Math.min(1,dt*1.2);
+  if(HALLO>0.2&&TH&&TH.flyers!=='none'){
+    var hrt=TH.flyers==='hearts';                 // hearts everywhere: more of them, they rise
+    if(bats.length<(hrt?12:6)&&Math.random()<(hrt?0.07:0.02))
+      bats.push({x:W+14,y:30+Math.random()*(hrt?62:44),v:(hrt?8:14)+Math.random()*(hrt?14:24),ph:Math.random()*6,s:0.7+Math.random()*0.8});
+  }
+  for(var bi=bats.length-1;bi>=0;bi--){bats[bi].x-=bats[bi].v*dt;
+    if(TH&&TH.flyers==='hearts')bats[bi].y-=dt*4;
+    if(bats[bi].x<-16||bats[bi].y<26)bats.splice(bi,1);}
+  if(HALLO<=0.05)bats.length=0;
 
   /* charm swing (same spring as the straps) + the driving train's wheels/scenery */
   chV+=(-chA*5-chV*1.1)*dt+(Math.random()-0.5)*LVL*speed*dt*30+PULSE*speed*dt*4;
@@ -939,9 +1096,10 @@ function loop(nowMs){
     m.x+=Math.sin(T*0.6+m.p)*0.07;m.y+=Math.cos(T*0.5+m.p*1.3)*0.05-LVL*0.03;
     if(m.y<32)m.y=150;if(m.y>152)m.y=34;if(m.x<58)m.x=326;if(m.x>326)m.x=58;
     var ma=(0.10+0.30*(0.5+0.5*Math.sin(T*2+m.p)))*(0.5+PULSE*0.8);
-    bctx.fillStyle=HALLO>0.5?hsl(24,95,60,ma):hsl(hue,95,72,ma);
+    var mhh=(HALLO>0.5&&TH&&TH.moteHue>=0)?TH.moteHue:hue;
+    bctx.fillStyle=hsl(mhh,95,HALLO>0.5?60:72,ma);
     bctx.fillRect(px(m.x),px(m.y),1,1);
-    if(PULSE>0.5){bctx.fillStyle=HALLO>0.5?hsl(24,95,70,ma*0.5):hsl(hue,95,82,ma*0.5);
+    if(PULSE>0.5){bctx.fillStyle=hsl(mhh,95,82,ma*0.5);
       bctx.fillRect(px(m.x)-1,px(m.y)-1,3,3);}
   }
   PASS.forEach(function(p){drawPassenger(p,T,hue)});
