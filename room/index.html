@@ -94,6 +94,35 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .chip.txt input:focus{outline:none;border-color:var(--acid)}
 .drawhint{color:var(--dim);font-size:15px;margin-top:8px}
 
+/* ---------- notifications: the small signal feed at the top of the profile ---------- */
+#notifs{width:100%;border:1px solid var(--border);background:rgba(10,10,12,.92);padding:8px 10px 4px}
+#notifs .nh{display:flex;justify-content:space-between;align-items:center;font-family:var(--px);
+  font-size:7px;color:var(--acid);letter-spacing:1px;padding-bottom:7px}
+#notifs .nh .clr{color:var(--dim);cursor:pointer}#notifs .nh .clr:hover{color:var(--red)}
+.nrow{display:flex;gap:9px;align-items:center;padding:6px 2px;border-top:1px solid #161616}
+.nrow.lnk{cursor:pointer}.nrow.lnk:hover{background:#101010}
+.nrow .ni{font-size:16px;flex:none;width:22px;text-align:center;line-height:1}
+.nrow .ni .bimg{width:17px;height:17px;object-fit:contain;vertical-align:middle}
+.nrow .nb{flex:1;min-width:0}
+.nrow .nt{display:block;font-family:var(--px);font-size:6.5px;color:var(--ink);letter-spacing:.5px;line-height:1.7}
+.nrow .nt .nw{color:#555}
+.nrow .nd{display:block;color:var(--dim);font-size:14px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nrow .nx{flex:none;color:#555;font-family:var(--px);font-size:8px;cursor:pointer;padding:5px}
+.nrow .nx:hover{color:var(--red)}
+
+/* ---------- badges: the trophy shelf ---------- */
+#bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px}
+.bslot{border:1px solid var(--border);background:#0a0a0c;padding:11px 8px 10px;text-align:center;opacity:.5}
+.bslot.got{opacity:1;border-color:rgba(182,255,0,.5);box-shadow:0 0 10px rgba(182,255,0,.14)}
+.bslot.got.gold{border-color:rgba(255,214,10,.65);box-shadow:0 0 12px rgba(255,214,10,.22)}
+.bslot .bic{font-size:26px;line-height:1.25;filter:grayscale(1) brightness(.7)}
+.bslot.got .bic{filter:none}
+.bslot .bic .bimg{width:28px;height:28px;object-fit:contain;vertical-align:middle}
+.bslot .bnm{font-family:var(--px);font-size:7px;color:var(--ink);margin-top:8px;line-height:1.7;letter-spacing:.5px}
+.bslot.got.gold .bnm{color:var(--gold)}
+.bslot .bds{color:var(--dim);font-size:13px;line-height:1.3;margin-top:4px;min-height:17px}
+.bslot .bts{font-family:var(--px);font-size:6px;color:var(--acid);margin-top:7px;letter-spacing:.5px}
+
 /* ---------- boxes ---------- */
 .box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:14px 16px;text-align:left}
 .box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
@@ -188,6 +217,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <!-- logged out: the login / join box -->
   <div id="loginbox" style="width:100%"></div>
 
+  <!-- notifications: unread signals (badges earned + news), small, members only -->
+  <div id="notifs" class="crtin" style="display:none"></div>
+
   <!-- IDENTITY BAND: avatar + name + rank + logout (own profile) -->
   <div class="idband crtin" id="idband" style="display:none">
     <img class="av" id="av" src="../assets/img/avatars/mimi-00.png" alt="your avatar" title="tap to change your avatar">
@@ -222,6 +254,12 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="drawhint" id="drawhint">tap a chip to re-style your annex — then SAVE. it follows you (and your visitors see it).</div>
   </div>
 
+  <!-- badges: the trophy shelf (rendered from assets/badges.js, owner only) -->
+  <div class="box crtin" id="badgebox" style="display:none">
+    <div class="h" id="bhead">// BADGES_</div>
+    <div id="bgrid"></div>
+  </div>
+
   <div class="box crtin" id="sharebox" style="display:none">
     <div class="h">// SHARE MY ANNEX_</div>
     <div class="sharebar"><input id="sharelink" readonly value=""><button class="tb solid" id="sharecopy" style="border:0">COPY</button></div>
@@ -235,6 +273,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- the news feed + badge catalog + unread inbox (framed copy = catalog only; the shell tracks) -->
+<script>document.write('<script src="../assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="../assets/badges.js?v=9"></script>
 <script>
 (function(){
   "use strict";
@@ -844,6 +885,60 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("av").onclick=function(){ $("avpick").classList.toggle("open"); };
   })();
 
+  /* ================= notifications (top of the profile, members only) =================
+     Unread signals from assets/badges.js's inbox: badges just earned + typed news.
+     Tap a row → mark it seen (and follow its link if it has one); CLEAR ALL wipes it.
+     The shell's red count dots read the same seen-ledger, so they update too. */
+  function renderNotifs(){
+    var B=window.IBEE_BADGES, box=$("notifs");
+    if(!B||!box||!ISMINE){ if(box)box.style.display="none"; return; }
+    var items=B.inbox().slice(0,8);
+    if(!items.length){ box.style.display="none"; return; }
+    var h='<div class="nh"><span>// SIGNALS_ ('+items.length+')</span><span class="clr" id="nclear">CLEAR ALL ✕</span></div>';
+    items.forEach(function(it,ix){
+      var when=it.ts?new Date(it.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'}):"";
+      h+='<div class="nrow'+(it.link?' lnk':'')+'" data-nix="'+ix+'">'
+        +'<span class="ni">'+B.icoHTML(it)+'</span>'
+        +'<span class="nb"><span class="nt">'+e2(it.n)+(when?' <span class="nw">· '+when+'</span>':'')+'</span>'
+        +'<span class="nd">'+e2(it.d||'')+'</span></span>'
+        +'<span class="nx" data-nx="'+ix+'" title="dismiss">✕</span></div>';
+    });
+    box.innerHTML=h; box.style.display="";
+    $("nclear").onclick=function(){ B.markSeen(); renderNotifs(); };
+    Array.prototype.forEach.call(box.querySelectorAll('.nx'),function(x){
+      x.onclick=function(ev){ ev.stopPropagation();
+        var it=items[+x.getAttribute('data-nx')]; if(it)B.markSeen(it.id); renderNotifs(); };
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('.nrow.lnk'),function(r){
+      r.onclick=function(){
+        var it=items[+r.getAttribute('data-nix')]; if(!it)return;
+        B.markSeen(it.id);
+        var l=it.link||""; if(!l){ renderNotifs(); return; }
+        location.href=/^(https?:)?\/\//i.test(l)||l.charAt(0)==='/'?l:'../'+l;   /* news links are site-root paths */
+      };
+    });
+  }
+
+  /* ================= badges: the trophy shelf (after MAKE IT YOURS) ================= */
+  function renderBadges(){
+    var B=window.IBEE_BADGES, box=$("badgebox");
+    if(!B||!box||!ISMINE){ if(box)box.style.display="none"; return; }
+    var st=B.state(), P=B.snapshot(), got=0, h='';
+    B.defs.forEach(function(d){
+      var own=!!st.earned[d.id]; if(own)got++;
+      var secret=d.secret&&!own, prog='';
+      if(!own&&!secret&&d.pr){ try{ prog=d.pr(P); }catch(e){} }
+      h+='<div class="bslot'+(own?' got':'')+(d.gold?' gold':'')+'">'
+        +'<div class="bic">'+(secret?'❓':B.icoHTML(d))+'</div>'
+        +'<div class="bnm">'+(secret?'???':e2(d.n2||d.n))+'</div>'
+        +'<div class="bds">'+(secret?'a secret badge — it finds you_':e2(own?d.d:(prog||d.d)))+'</div>'
+        +(own?'<div class="bts">✓ '+new Date(st.earned[d.id]).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})+'</div>':'')
+        +'</div>';
+    });
+    $("bhead").textContent='// BADGES_ '+got+' / '+B.defs.length;
+    $("bgrid").innerHTML=h; box.style.display="";
+  }
+
   /* ================= identity ================= */
   async function loadCollection(){
     OWNED=[];
@@ -895,6 +990,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       loadCollection().then(function(){ renderIdentity(prof); });
       renderChips();
       snapshotStats();
+      renderNotifs();
+      renderBadges();
+      setInterval(function(){ renderBadges(); },8000);   /* badges earned while listening show up live */
     } else {
       tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY PROFILE":"✦ GET YOUR OWN ANNEX")+'</a>';
     }
@@ -1060,6 +1158,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   window.addEventListener("beforeunload",function(e){ if(DIRTY){e.preventDefault();e.returnValue="";} });
 })();
 </script>
-<script src="../assets/player.js?v=17"></script>
+<script src="../assets/player.js?v=18"></script>
 </body>
 </html>

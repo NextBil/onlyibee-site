@@ -104,6 +104,16 @@
   #tlview{font-family:var(--px);font-size:8px;padding:0 9px;height:31px;flex:none;background:#0e0e0e;
     color:var(--dim);border:1px solid var(--border);cursor:pointer}
   #tlview:hover,#tlview.on{border-color:var(--acid);color:var(--acid)}
+  /* ♥ favourites filter + the hearts on every song */
+  #tlfav{font-family:var(--px);font-size:10px;padding:0 9px;height:31px;flex:none;background:#0e0e0e;
+    color:var(--dim);border:1px solid var(--border);cursor:pointer}
+  #tlfav:hover,#tlfav.on{border-color:#ff2b6b;color:#ff2b6b}
+  #tracklist .tr .fv{flex:none;font-size:17px;line-height:1;color:#3a3a3a;cursor:pointer;padding:3px 5px}
+  #tracklist .tr .fv:hover{color:#ff2b6b}
+  #tracklist .tr .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.6)}
+  .tl-tile .fv{position:absolute;right:5px;bottom:24px;z-index:3;font-size:16px;line-height:1;
+    color:rgba(255,255,255,.45);cursor:pointer;text-shadow:0 1px 4px #000;padding:3px}
+  .tl-tile .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.8)}
   #tlempty{padding:22px 14px;text-align:center;color:#555;font-family:var(--px);font-size:8px;line-height:2;display:none}
 
   /* ---- GO TO THE ROOM: persistent pulsing button for the current special album ---- */
@@ -314,6 +324,7 @@
       <div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>
       <div id="tltools">
         <input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false">
+        <button id="tlfav" title="my favourites only">♥</button>
         <button id="tlview" title="grid / list view">▦ GRID</button>
       </div>
       <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
@@ -345,6 +356,9 @@
         <button id="rshuf" class="tgl" title="aleatory — let fate pick the next record">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4l10 10h4"/><path d="M3 17h4l2.5-2.5"/><path d="M14.5 9.5 17 7h4"/><path d="M18 4l3 3-3 3"/><path d="M18 14l3 3-3 3"/></svg>
         </button>
+        <button id="bshare" title="share a link to this song">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 13v6h14v-6"/></svg>
+        </button>
         <button id="buni" class="ricon uni" title="Universe — the performing planet">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="12" cy="12" rx="11" ry="4.4" fill="none" stroke="#26e0ff" stroke-width="1.4" opacity=".8"/>
@@ -368,7 +382,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=17"></script>
+<script src="assets/player.js?v=18"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -590,6 +604,12 @@
       roomband=document.getElementById('roomband'),
       roombtn=document.getElementById('roombtn');
   var viewMode='list', query='', builtCount=-1;   /* LIST is the default view (2026-07-13) */
+  var favOnly=false;                              /* ♥ filter: only the saved songs */
+  /* favourites — same device-local store as the standalone radio (ibee_favs = {slug:1}) */
+  function favs(){ try{ return JSON.parse(localStorage.getItem('ibee_favs')||'{}')||{}; }catch(e){ return {}; } }
+  function isFav(slug){ return !!favs()[slug]; }
+  function setFav(slug,on){ var f=favs(); if(on)f[slug]=1; else delete f[slug];
+    try{ localStorage.setItem('ibee_favs',JSON.stringify(f)); }catch(e){} }
   var LKSVG="<svg class='lk' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
   var LKBIG="<svg class='lockb' viewBox='0 0 24 24' fill='currentColor'><rect x='5' y='11' width='14' height='9' rx='1.5'/><path d='M8 11V8a4 4 0 0 1 8 0v3' fill='none' stroke='currentColor' stroke-width='2'/></svg>";
   function e3(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
@@ -612,14 +632,18 @@
     var html='',shown=0,i,cur=r.current?r.current():-1;
     for(i=0;i<r.count;i++){
       var s=r.song(i)||{}, alb=r.album?r.album(i):null, aln=(alb&&alb.name)||'RARE SOUL SESSIONS';
-      if(!matchQ(s.n,aln))continue; shown++;
+      if(!matchQ(s.n,aln))continue;
+      if(favOnly&&!isFav(s.f))continue;
+      shown++;
       var img0=imgTag(coverCands(s,alb)), room=alb&&alb.room, tint=(alb&&alb.tint)||'#ff2b2b';
+      var fv='<span class="fv'+(isFav(s.f)?' on':'')+'" data-fv="'+i+'" title="favourite">♥</span>';
       if(viewMode==='grid'){
         html+='<div class="tl-tile'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
           +'<div class="art" style="background:'+vinyl(s.hue)+'">'+img0
           +(i===cur?'<span class="gnow">NOW</span>':'')
           +(s.locked?LKBIG:'')
           +(room?'<span class="roomb">ROOM</span>':'')
+          +fv
           +'<span class="gtag">'+e3(aln)+'</span></div>'
           +'<div class="nm">'+e3(s.n||'—')+'</div></div>';
       } else {
@@ -627,13 +651,16 @@
           +'<span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
           +'<span class="cv" style="background:'+vinyl(s.hue)+'">'+img0+'</span>'
           +'<span class="ti"><span class="tn">'+e3(s.n||'—')+'</span><span class="al">'+e3(aln)+'</span></span>'
+          +fv
           +(s.locked?LKSVG:(room?'<span class="rmroom">ROOM</span>':''))
           +'</div>';
       }
     }
     /* room-only album cards (e.g. NOUVEAUX PUNK — the full experience) */
     (r.rooms?r.rooms():[]).forEach(function(rm){
-      if(!matchQ(rm.name,rm.name))return; shown++;
+      if(!matchQ(rm.name,rm.name))return;
+      if(favOnly)return;
+      shown++;
       var tint=rm.tint||'#ff2b2b', cov=rm.cover?'<img alt="" loading="lazy" src="'+encodeURI(rm.cover)+'">':'';
       if(viewMode==='grid'){
         html+='<div class="tl-tile" data-room="'+e3(rm.room)+'" style="--rt:'+tint+'">'
@@ -649,6 +676,7 @@
       }
     });
     tlbody.innerHTML=html;
+    tlempty.innerHTML=(favOnly&&!query)?'NO FAVOURITES YET_<br>TAP ♥ ON A SONG':'NO SIGNALS_<br>TRY ANOTHER WORD';
     tlempty.style.display=shown?'none':'block';
     builtCount=r.count;
     /* missing picture → walk the fallback names, then keep the vinyl (never a broken icon) */
@@ -661,6 +689,17 @@
       if(rmu){ el.onclick=function(){ navigate(rmu); tl.classList.remove('open'); }; return; }
       var i=+el.getAttribute('data-i');
       el.onclick=function(){ var r2=R(); if(!r2)return; var s=r2.song(i); if(s&&s.locked)return; r2.control.play(i); };
+    });
+    /* the hearts: toggle without playing the row */
+    Array.prototype.forEach.call(tlbody.querySelectorAll('.fv'),function(el){
+      el.onclick=function(ev){
+        ev.stopPropagation();
+        var r2=R(); if(!r2)return;
+        var s=r2.song(+el.getAttribute('data-fv')); if(!s)return;
+        var on=!isFav(s.f); setFav(s.f,on);
+        el.classList.toggle('on',on);
+        if(favOnly&&!on)renderTracks();   // un-hearted inside the ♥ filter → it leaves the list
+      };
     });
   }
   function markNow(){
@@ -691,6 +730,18 @@
   }
   roombtn.onclick=function(){ var u=roomband.dataset.room; if(u){ navigate(u); tl.classList.remove('open'); } };
   tlsearch.addEventListener('input',function(){ query=this.value.trim(); renderTracks(); markNow(); });
+  document.getElementById('tlfav').onclick=function(){
+    favOnly=!favOnly; this.classList.toggle('on',favOnly); renderTracks(); markNow(); };
+  /* SHARE: a link to the current record — <site>/?s=<slug>; opening it plays the song.
+     Copies to the clipboard and offers the native share sheet where there is one. */
+  document.getElementById('bshare').onclick=function(){
+    var r=R(); if(!r)return; var s=r.song&&r.song(); if(!s||!s.f)return;
+    var url=location.origin+location.pathname.replace(/[^/]*$/,'')+'?s='+encodeURIComponent(s.f.replace(/\.mp3$/i,''));
+    try{ if(navigator.clipboard)navigator.clipboard.writeText(url); }catch(e){}
+    if(navigator.share){ navigator.share({title:s.n+' — ONLY IBEE',url:url}).catch(function(){}); }
+    var b=this,keep=b.innerHTML; b.innerHTML='✓'; b.style.color='#b6ff00';
+    setTimeout(function(){ b.innerHTML=keep; b.style.color=''; },1400);
+  };
   tlview.onclick=function(){ viewMode=(viewMode==='grid')?'list':'grid';
     this.textContent=viewMode==='grid'?'≡ LIST':'▦ GRID';
     this.classList.toggle('on',viewMode==='grid'); renderTracks(); markNow(); };
