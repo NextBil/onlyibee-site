@@ -7,9 +7,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <title>MY PROFILE — ONLY IBEE</title>
-<meta name="description" content="Your profile on the ONLY IBEE frequency — your room. Arrange it and share it.">
+<meta name="description" content="Your profile on the ONLY IBEE frequency — your annex. A personal slice of your room.">
 <meta name="robots" content="noindex">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<!--
+  THE ANNEX (2026-07-15) — replaced the old iso furniture room.
+  Every member's profile now shows a PERSONAL SLICE of the room they picked:
+    transit   → PRIVATE CAR №  (your own car on the midnight line)
+    terrarium → THE CONSERVATORY (your private glass alcove, your top plants)
+    aqua      → THE COVE (your own water, your pet lives here)
+  It is a live pixel canvas (same engine style as the env rooms), reads the
+  radio groove, pulls the member's REAL progression (miles / sunlight / pet XP),
+  is customizable (cfg saved in profiles.room via save_room — member/room.sql
+  unchanged), and has a glowing door into the real room.
+  Old v1 rooms ({tiles,shelf}) migrate automatically to v2 on first open.
+-->
 <style>
 :root{
   --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
@@ -34,7 +46,7 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .crtin{animation:crtin .35s ease-out}
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
 
-/* ---------- room title bar ---------- */
+/* ---------- title bar ---------- */
 .titlebar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .titlebar .rn{font-family:var(--px);font-size:clamp(11px,3.4vw,15px);color:hsl(var(--hue),95%,70%);
   text-shadow:0 0 14px hsla(var(--hue),95%,55%,.5);letter-spacing:1px;line-height:1.5}
@@ -43,79 +55,46 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .tb{font-family:var(--px);font-size:8px;padding:10px 12px;background:transparent;color:var(--acid);
   border:1px solid var(--acid);cursor:pointer;text-decoration:none;letter-spacing:1px}
 .tb.solid{background:var(--acid);color:#000}
-.tb.red{color:var(--red);border-color:#3a1414}
 .tb:active{transform:translateY(2px)}
 .tb:disabled{opacity:.4;cursor:default}
 
-/* ---------- the room stage ---------- */
-#stagewrap{width:100%;border:2px solid var(--border);background:
-  radial-gradient(ellipse at 50% 0%,hsla(var(--hue),70%,30%,.2),transparent 60%),#0a0a0c;
-  position:relative;overflow:hidden}
-#stage{position:relative;margin:0 auto;transform-origin:top center}
-#roomsvg{display:block}
-#itemlayer{position:absolute;inset:0}
-.itm{position:absolute;transform:translate(-50%,-92%);cursor:default;line-height:1;
-  filter:drop-shadow(0 6px 5px rgba(0,0,0,.55));transition:transform .12s;user-select:none;-webkit-user-select:none}
-.itm .g{display:block;font-size:34px;
-  transform:scaleX(var(--fx,1)) translateY(calc(var(--mb,0)*-3.5px)) scale(calc(1 + var(--mb,0)*.03));
-  transition:transform .1s linear}
-.itm.f2 .g,.itm.f3 .g{filter:brightness(.85)}
-.itm.sel{outline:2px dashed var(--acid);outline-offset:3px}
-.edit .itm{cursor:pointer}
-.tilehint{position:absolute;width:0;height:0;pointer-events:none}
-/* shelf items: the member's collection, spinning in 3D on the plank */
-.shitm{position:absolute;transform:translate(-50%,-100%);line-height:1;user-select:none;-webkit-user-select:none;
-  filter:drop-shadow(0 3px 3px rgba(0,0,0,.6))}
-.shitm .sp{perspective:220px;width:26px;height:26px;display:block;
-  transform:translateY(calc(var(--mb,0)*-2px))}
-.shitm .s3{width:100%;height:100%;position:relative;transform-style:preserve-3d;
-  animation:spin3d var(--sdur,6s) linear infinite;animation-delay:var(--sdel,0s)}
-.shitm .s3 .f,.shitm .s3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  display:flex;align-items:center;justify-content:center;font-size:20px}
-.shitm .s3 .b{transform:rotateY(180deg);filter:brightness(.55)}
-@keyframes spin3d{from{transform:rotateX(6deg) rotateY(0)}to{transform:rotateX(6deg) rotateY(360deg)}}
-/* floating hue glyphs while the radio plays */
-.gly{position:absolute;font-size:15px;pointer-events:none;color:hsl(var(--mh,75),95%,68%);
-  text-shadow:0 0 8px hsla(var(--mh,75),95%,55%,.7);animation:glyup 3.4s ease-out forwards;z-index:40}
-@keyframes glyup{0%{opacity:0;transform:translateY(0) scale(.7)}12%{opacity:.95}
-  100%{opacity:0;transform:translateY(-110px) scale(1.15) rotate(14deg)}}
-/* the SVG wall gear: baseboards + eq bars + stat screen breathe with the beat */
-#roomsvg line.bb{stroke-opacity:calc(.35 + var(--mb,0)*.65)}
-#roomsvg rect.eqb{fill:hsl(var(--mh,75),95%,60%);transition:height .09s linear,y .09s linear}
-#roomsvg .scrbox{filter:drop-shadow(0 0 calc(3px + var(--mb,0)*7px) hsla(var(--mh,75),95%,55%,.55))}
-#roomsvg text{font-family:var(--px);letter-spacing:.5px}
-#roomsvg text.scr-t{fill:hsl(var(--mh,75),95%,72%)}
-#roomsvg text.scr-d{fill:#9a9a9a;font-family:var(--vt)}
-/* now-playing plaque on the wall */
-#npline{position:absolute;font-family:var(--px);font-size:7px;color:hsl(var(--mh,75),95%,70%);
-  letter-spacing:1px;text-shadow:0 0 8px hsla(var(--mh,75),95%,55%,.6);white-space:nowrap;overflow:hidden;
-  transform:translateX(-50%);text-align:center;max-width:200px;text-overflow:ellipsis}
+/* ---------- THE ANNEX stage: two canvases, exactly like the env rooms ---------- */
+#stagewrap{width:100%;border:2px solid hsla(var(--hue),60%,45%,.55);background:#050507;
+  position:relative;overflow:hidden;box-shadow:0 0 calc(14px + var(--mb,0)*26px) hsla(var(--mh,var(--hue)),90%,45%,.18)}
+#stage{position:relative;width:100%}
+#axbg,#axfx{display:block;width:100%;height:auto}
+#axbg{image-rendering:pixelated;image-rendering:crisp-edges}
+#axfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#enterbtn{position:absolute;right:10px;bottom:10px;z-index:20;font-family:var(--px);font-size:8px;
+  padding:11px 13px;background:var(--acid);color:#000;text-decoration:none;letter-spacing:1px;
+  box-shadow:0 0 calc(6px + var(--mb,0)*14px) rgba(182,255,0,.55)}
+#enterbtn:active{transform:translateY(2px)}
 
-/* ---------- selected-item popup ---------- */
-#itmpop{position:absolute;z-index:60;display:none;gap:6px;background:#0b0b0d;border:1px solid var(--border);
-  padding:6px;transform:translate(-50%,-130%)}
-#itmpop button{font-family:var(--px);font-size:8px;padding:8px 9px;background:transparent;border:1px solid var(--acid);
-  color:var(--acid);cursor:pointer}
-#itmpop button.rm{color:var(--red);border-color:#3a1414}
-#itmpop.open{display:flex}
+/* ---------- stat tiles: the summary of the whole room ---------- */
+.statrow{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{border:1px solid var(--border);background:rgba(10,10,12,.9);padding:10px 8px;text-align:center}
+.stat .v{font-family:var(--px);font-size:clamp(10px,3vw,13px);color:hsl(var(--hue),95%,70%);
+  text-shadow:0 0 10px hsla(var(--hue),95%,55%,.45);line-height:1.4;word-break:break-word}
+.stat .l{font-family:var(--px);font-size:6px;color:var(--dim);letter-spacing:1px;margin-top:6px;line-height:1.6}
 
-/* ---------- item drawer (owner edit) ---------- */
-#drawer{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.92);padding:12px;display:none}
-#drawer.open{display:block}
-#drawer .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px;
-  display:flex;justify-content:space-between;align-items:center}
-#drawer .h .cnt{color:var(--dim);font-size:8px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
-.chip{flex:none;width:64px;border:1px solid var(--border);background:#0a0a0c;padding:8px 4px 6px;text-align:center;cursor:pointer}
+/* ---------- customize panel (owner only) ---------- */
+#custom{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.92);padding:12px;display:none}
+#custom.open{display:block}
+#custom .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;align-items:stretch}
+.chip{flex:none;min-width:74px;border:1px solid var(--border);background:#0a0a0c;padding:9px 8px 7px;
+  text-align:center;cursor:pointer}
 .chip:hover{border-color:#3a3a3a}
-.chip.sel{border-color:var(--acid);box-shadow:0 0 12px rgba(182,255,0,.35)}
-.chip .ce{font-size:24px;line-height:1.2}
-.chip .cn{font-family:var(--px);font-size:5.5px;color:var(--dim);margin-top:5px;line-height:1.5;letter-spacing:.5px}
-.chip.rare .cn{color:var(--gold)}
-.chip.rare{border-color:#4a3a12}
+.chip .ce{font-size:22px;line-height:1.25;min-height:26px}
+.chip .sw{display:inline-block;width:22px;height:22px;border:1px solid #000;border-radius:3px}
+.chip .cn{font-family:var(--px);font-size:5.5px;color:var(--dim);margin-top:6px;line-height:1.6;letter-spacing:.5px}
+.chip.txt{cursor:default}
+.chip.txt input{width:110px;background:#050505;border:1px solid var(--border);color:var(--acid);
+  font-family:var(--px);font-size:8px;padding:7px 6px;text-align:center;letter-spacing:1px}
+.chip.txt input:focus{outline:none;border-color:var(--acid)}
 .drawhint{color:var(--dim);font-size:15px;margin-top:8px}
 
-/* ---------- boxes (guestbook / share / info) ---------- */
+/* ---------- boxes ---------- */
 .box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:14px 16px;text-align:left}
 .box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
 .cnote{color:var(--dim);font-size:16px;line-height:1.45}
@@ -123,7 +102,7 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .sharebar input{flex:1;min-width:150px;background:#050505;border:1px solid var(--border);color:var(--acid);
   font-family:var(--vt);font-size:16px;padding:10px}
 
-/* ---------- onboarding: nickname + pick 1 of 3 starter rooms ---------- */
+/* ---------- onboarding: nickname + pick 1 of 3 starter rooms (unchanged) ---------- */
 .ob{width:100%;text-align:center}
 .ob .bigh{font-family:var(--px);font-size:clamp(11px,3.4vw,14px);color:var(--acid);letter-spacing:2px;line-height:1.7;margin:8px 0 4px}
 .nick{display:flex;flex-direction:column;gap:9px;max-width:380px;margin:12px auto 0}
@@ -138,7 +117,6 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
   font-family:var(--vt);color:var(--ink);transition:.18s;display:flex;flex-direction:column;align-items:center}
 .pick:hover{transform:translateY(-3px);outline:none}
 .pick:disabled{opacity:.4;cursor:default;transform:none}
-/* the pick renders as a little rotating 3D room (same spin trick as everywhere on the site) */
 .pick .proom{perspective:520px;width:132px;height:92px;margin:2px auto 8px;position:relative}
 .pick .proom::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);
   width:78px;height:12px;border-radius:50%;background:radial-gradient(ellipse,var(--pglow,rgba(182,255,0,.4)),transparent 70%);
@@ -146,6 +124,7 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 @keyframes pedpulse{0%,100%{transform:translateX(-50%) scaleX(1);opacity:.85}50%{transform:translateX(-50%) scaleX(.72);opacity:.4}}
 .pick .part3{width:100%;height:100%;position:relative;transform-style:preserve-3d;
   animation:spin3d var(--pdur,7s) linear infinite}
+@keyframes spin3d{from{transform:rotateX(6deg) rotateY(0)}to{transform:rotateX(6deg) rotateY(360deg)}}
 .pick .part3 .f,.pick .part3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .pick .part3 .b{transform:rotateY(180deg);filter:brightness(.5)}
 .pick .part3 svg{width:100%;height:100%}
@@ -156,7 +135,7 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .pick:hover .pt{color:var(--acid)}
 .msg{color:var(--dim);font-size:16px;margin-top:10px;min-height:20px}
 
-/* ---------- IDENTITY BAND: the nameplate — the profile flattened onto the room ---------- */
+/* ---------- IDENTITY BAND ---------- */
 .idband{width:100%;display:flex;align-items:center;gap:14px;border:2px solid hsla(var(--hue),60%,45%,.55);
   background:linear-gradient(180deg,hsla(var(--hue),70%,30%,.14),rgba(10,10,12,.92));padding:14px 16px;
   box-shadow:0 0 calc(18px + var(--mb,0)*30px) hsla(var(--mh,var(--hue)),90%,45%,.22),inset 0 0 40px rgba(0,0,0,.5);position:relative}
@@ -173,7 +152,6 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .idband .logout{font-family:var(--px);font-size:7px;color:var(--dim);cursor:pointer;text-decoration:none;
   border:1px solid var(--border);padding:8px 9px;align-self:flex-start;white-space:nowrap}
 .idband .logout:hover{color:var(--red);border-color:#3a1414}
-/* avatar picker drops under the band */
 .avpick{width:100%;border:1px solid var(--border);background:rgba(14,14,14,.92);padding:12px;
   display:none;flex-wrap:wrap;gap:9px;justify-content:center}
 .avpick.open{display:flex}
@@ -181,7 +159,7 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .avpick img.sel{border-color:var(--acid);box-shadow:0 0 10px rgba(182,255,0,.5)}
 .avpick img:hover{border-color:var(--ink)}
 
-/* ---------- LOGIN / JOIN box (logged out) ---------- */
+/* ---------- LOGIN / JOIN box ---------- */
 .login{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.92);padding:18px 16px;text-align:center}
 .login .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px}
 .login p{color:#bdbdbd;font-size:17px;line-height:1.5;margin-bottom:12px}
@@ -192,15 +170,6 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .login button.ghost{background:transparent;color:var(--acid);border:1px solid var(--acid);margin-top:8px}
 .login .or{color:#555;font-family:var(--px);font-size:7px;letter-spacing:2px;margin:12px 0 8px}
 .login .msg{color:var(--dim);font-size:15px;margin-top:8px}
-
-/* drawer tabs (FURNITURE | COLLECTION) */
-.dtabs{display:flex;gap:8px;margin-bottom:10px}
-.dtab{font-family:var(--px);font-size:7px;padding:8px 10px;border:1px solid var(--border);background:transparent;
-  color:var(--dim);cursor:pointer;letter-spacing:1px}
-.dtab.on{color:#000;background:var(--acid);border-color:var(--acid)}
-.chip.coll{border-color:hsla(var(--hue),60%,45%,.6)}
-.chip.coll .cn{color:hsl(var(--hue),95%,70%)}
-.chip .ce .mini3{display:inline-block;animation:spin3d 5s linear infinite;transform-style:preserve-3d}
 
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--acid);
   color:var(--acid);font-family:var(--px);font-size:9px;padding:10px 16px;z-index:9500;opacity:0;transition:.2s;pointer-events:none}
@@ -237,29 +206,26 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="sub" id="roomsub"></div>
   </div>
 
+  <!-- THE ANNEX: your personal slice of your room -->
   <div id="stagewrap" class="crtin" style="display:none">
     <div id="stage">
-      <div id="roomsvg"></div>
-      <div id="itemlayer"></div>
-      <div id="npline"></div>
-      <div id="itmpop"><button id="poprot">↻ TURN</button><button id="poprm" class="rm">✕ REMOVE</button></div>
+      <canvas id="axbg" width="384" height="216"></canvas>
+      <canvas id="axfx"></canvas>
+      <a id="enterbtn" href="#">▶ ENTER</a>
     </div>
   </div>
+  <div class="statrow crtin" id="statrow" style="display:none"></div>
 
-  <div id="drawer" class="crtin">
-    <div class="h"><span>// ARRANGE_</span><span class="cnt" id="itmcnt"></span></div>
-    <div class="dtabs">
-      <button class="dtab on" id="tabFurn" data-tab="furn">FURNITURE</button>
-      <button class="dtab" id="tabColl" data-tab="coll">MY COLLECTION</button>
-    </div>
+  <div id="custom" class="crtin">
+    <div class="h">// MAKE IT YOURS_</div>
     <div class="chips" id="chips"></div>
-    <div class="drawhint" id="drawhint">tap an item, then tap a floor tile to place it. tap a placed item to turn or remove it.</div>
+    <div class="drawhint" id="drawhint">tap a chip to re-style your annex — then SAVE. it follows you (and your visitors see it).</div>
   </div>
 
   <div class="box crtin" id="sharebox" style="display:none">
-    <div class="h">// SHARE MY ROOM_</div>
+    <div class="h">// SHARE MY ANNEX_</div>
     <div class="sharebar"><input id="sharelink" readonly value=""><button class="tb solid" id="sharecopy" style="border:0">COPY</button></div>
-    <div class="cnote" style="margin-top:8px">anyone with this link can visit — only you can move the furniture_</div>
+    <div class="cnote" style="margin-top:8px">anyone with this link can visit — only you can re-style it_</div>
   </div>
 
   <div class="ob crtin" id="ob" style="display:none"></div>
@@ -280,150 +246,33 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
   function param(n){var m=new RegExp("[?&]"+n+"=([^&]+)").exec(location.search);return m?decodeURIComponent(m[1]):"";}
   function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0);}
+  function hsl(h,s,l,a){return 'hsla('+h+','+s+'%,'+l+'%,'+(a==null?1:a)+')';}
+  function ls(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
   async function rpc(fn,args){ if(!sb)return{status:'error',error:'offline'}; var r=await sb.rpc(fn,args); return r.error?{status:'error',error:r.error.message}:r.data; }
 
-  /* ================= THE ROOM KINDS — the randomized starter pool =================
-     Each kind is a whole vibe: palette, a shelf, a founding relic that will never be
-     obtainable again outside this kind (rare-item culture), and a starter layout. */
+  /* ================= THE THREE ROOMS (+ legacy kind → env mapping) ================= */
   var KINDS={
-    /* THE THREE ROOMS the user picks (2026-07-13) — each maps to a living environment
-       (arcade/<env>/) that grows with them. The iso room here is the decorated home;
-       env is the world they enter. */
-    aqua:{n:"AQUA BASS",env:"aqua",hue:195,fA:"#0a1622",fB:"#081019",wall:"#0c1c2a",wall2:"#081420",
-      d:"for fish-passionate music — who dropped a speaker in the ocean?",
-      items:["telescope","planet","boombox"],relic:"relic-aqua",
-      layout:[{i:"boombox",x:5,y:1,f:1},{i:"vinyl",x:1,y:2,f:0},{i:"plant",x:6,y:4,f:0}]},
-    terrarium:{n:"TERRARIUM",env:"terrarium",hue:130,fA:"#0a180e",fB:"#08120b",wall:"#0c1e12",wall2:"#09160d",
-      d:"for gardeners — watch your plant evolve…",
-      items:["cactus","fern","mushroom"],relic:"relic-terra",
-      layout:[{i:"fern",x:1,y:1,f:0},{i:"cactus",x:6,y:2,f:0},{i:"mushroom",x:2,y:4,f:1}]},
-    transit:{n:"MIDNIGHT TRANSIT",env:"transit",hue:250,fA:"#0e1020",fB:"#0a0c1a",wall:"#101228",wall2:"#0b0d1e",
-      d:"a late-night train, destination to…",
-      items:["clapper","crt","oldradio"],relic:"relic-transit",
-      layout:[{i:"crt",x:4,y:1,f:0},{i:"sofa",x:2,y:3,f:1},{i:"oldradio",x:6,y:4,f:0}]},
-    /* --- legacy kinds kept so existing rooms still render (no longer offered at pick) --- */
-    garage:{n:"MIDNIGHT GARAGE",hue:190,fA:"#101820",fB:"#0c121a",wall:"#0e1a24",wall2:"#0a141c",
-      d:"concrete, chrome and one bare bulb — the band practices here.",
-      items:["moto","toolbox","tire"],relic:"relic-garage",
-      layout:[{i:"moto",x:5,y:1,f:1},{i:"boombox",x:1,y:2,f:0},{i:"toolbox",x:6,y:4,f:0}]},
-    attic:{n:"ACID ATTIC",hue:88,fA:"#141a0a",fB:"#0f1408",wall:"#161d0c",wall2:"#101507",
-      d:"dust, crates and green light through the roof window.",
-      items:["crate","mirror","violin"],relic:"relic-attic",
-      layout:[{i:"crate",x:1,y:1,f:0},{i:"lamp",x:6,y:1,f:0},{i:"books",x:2,y:4,f:1}]},
-    vhs:{n:"VHS DEN",hue:300,fA:"#180f1c",fB:"#120b16",wall:"#1c1022",wall2:"#150c1a",
-      d:"a shrine of static — tapes, tube screens, magenta glow.",
-      items:["vhs","crt","clapper"],relic:"relic-vhs",
-      layout:[{i:"crt",x:4,y:1,f:0},{i:"sofa",x:2,y:3,f:1},{i:"vhs",x:6,y:4,f:0}]},
-    moon:{n:"MOON LOBBY",hue:220,fA:"#0e1220",fB:"#0a0e1a",wall:"#101528",wall2:"#0b101e",
-      d:"quiet, blue, weightless — a waiting room for the night side.",
-      items:["telescope","planet","moonlamp"],relic:"relic-moon",
-      layout:[{i:"telescope",x:6,y:1,f:1},{i:"plant",x:1,y:2,f:0},{i:"moonlamp",x:3,y:4,f:0}]},
-    cellar:{n:"TAPE CELLAR",hue:40,fA:"#1a140a",fB:"#141008",wall:"#1e180c",wall2:"#171208",
-      d:"warm dust and analog gold — everything down here still spins.",
-      items:["barrel","oldradio","drum"],relic:"relic-cellar",
-      layout:[{i:"barrel",x:1,y:1,f:0},{i:"oldradio",x:5,y:2,f:1},{i:"drum",x:3,y:4,f:0}]},
-    green:{n:"NEON GREENHOUSE",hue:130,fA:"#0a180e",fB:"#08120b",wall:"#0c1e12",wall2:"#09160d",
-      d:"plants that grow to the bass — a garden wired to the radio.",
-      items:["cactus","fern","mushroom"],relic:"relic-green",
-      layout:[{i:"fern",x:1,y:1,f:0},{i:"cactus",x:6,y:2,f:0},{i:"mushroom",x:2,y:4,f:1}]}
+    aqua:{n:"AQUA BASS",env:"aqua",hue:195,d:"for fish-passionate music — who dropped a speaker in the ocean?"},
+    terrarium:{n:"TERRARIUM",env:"terrarium",hue:130,d:"for gardeners — watch your plant evolve…"},
+    transit:{n:"MIDNIGHT TRANSIT",env:"transit",hue:250,d:"a late-night train, destination to…"}
   };
-  /* the furniture catalog — everyone gets BASICS; your kind adds its exclusives + relic */
-  var ITEMS={
-    sofa:{e:"🛋️",n:"SOFA"},chair:{e:"🪑",n:"CHAIR"},plant:{e:"🪴",n:"PLANT"},lamp:{e:"💡",n:"BULB"},
-    tv:{e:"📺",n:"TV"},boombox:{e:"📻",n:"BOOMBOX"},vinyl:{e:"💿",n:"RECORD"},guitar:{e:"🎸",n:"GUITAR"},
-    books:{e:"📚",n:"BOOKS"},cat:{e:"🐈‍⬛",n:"CAT"},mic:{e:"🎤",n:"MIC"},headset:{e:"🎧",n:"PHONES"},
-    candle:{e:"🕯️",n:"CANDLE"},arcade:{e:"🕹️",n:"ARCADE"},skate:{e:"🛹",n:"SKATE"},phone:{e:"☎️",n:"PHONE"},
-    moto:{e:"🏍️",n:"MOTO"},toolbox:{e:"🧰",n:"TOOLBOX"},tire:{e:"🛞",n:"TIRE"},
-    crate:{e:"📦",n:"CRATE"},mirror:{e:"🪞",n:"MIRROR"},violin:{e:"🎻",n:"VIOLIN"},
-    vhs:{e:"📼",n:"VHS"},crt:{e:"🖥️",n:"CRT"},clapper:{e:"🎬",n:"CLAPPER"},
-    telescope:{e:"🔭",n:"SCOPE"},planet:{e:"🪐",n:"PLANET"},moonlamp:{e:"🌙",n:"MOON LMP"},
-    barrel:{e:"🛢️",n:"BARREL"},oldradio:{e:"📟",n:"RADIO"},drum:{e:"🥁",n:"DRUM"},
-    cactus:{e:"🌵",n:"CACTUS"},fern:{e:"🌿",n:"FERN"},mushroom:{e:"🍄",n:"SHROOM"},
-    /* founding relics — shelf-born, one per room kind, never sold again */
-    "relic-garage":{e:"🔧",n:"FOUNDER WRENCH",rare:1},"relic-attic":{e:"🗝️",n:"ATTIC KEY",rare:1},
-    "relic-vhs":{e:"📹",n:"FIRST TAPE",rare:1},"relic-moon":{e:"🌑",n:"MOON STONE",rare:1},
-    "relic-cellar":{e:"🕰️",n:"CELLAR CLOCK",rare:1},"relic-green":{e:"🌱",n:"FIRST SEED",rare:1},
-    "relic-aqua":{e:"🐚",n:"FIRST SHELL",rare:1},"relic-terra":{e:"🌱",n:"FIRST SEED",rare:1},"relic-transit":{e:"🎫",n:"FIRST TICKET",rare:1},
-    "press001":{e:"💿",n:"PRESSING 001",rare:1}
-  };
-  var BASICS=["sofa","chair","plant","lamp","tv","boombox","vinyl","guitar","books","cat","mic","headset","candle","arcade","skate","phone"];
-  var MAXITEMS=40;
-  /* the collection on the shelf: Supabase inventory items shown as 'inv:<id>' shelf entries */
-  var INVMETA={
-    "game-runner":{e:"🐝",n:"RUN BEEBEE"},"game-rush":{e:"🎸",n:"MIMI GUITAR RUSH"},
-    "game-tiles":{e:"💾",n:"MIMI MUSIC TILES"},"env-aqua":{e:"🐠",n:"AQUA BASS"},
-    "env-bedroom":{e:"🛏️",n:"ICS LOFI BEDROOM"},"env-terrarium":{e:"🦎",n:"SYNTH TERRARIUM"},
-    "env-transit":{e:"🚈",n:"MIDNIGHT TRANSIT"},"universe-engine":{e:"💠",n:"UNIVERSE ENGINE"}
-  };
-  function shelfMeta(id){
-    if(id&&id.indexOf("inv:")===0) return INVMETA[id.slice(4)]||{e:"✦",n:id.slice(4).toUpperCase()};
-    return ITEMS[id];
-  }
-
-  /* ================= iso projection ================= */
-  var GX=8,GY=6,TW=64,TH=32,WH=88;                 // grid, tile size, wall height
-  var W=(GX+GY)*TW/2, H=WH+(GX+GY)*TH/2+30, OX=W/2, OY=WH+6;
-  function px(x,y){return OX+(x-y)*TW/2;}
-  function py(x,y){return OY+(x+y)*TH/2;}
-  function unproject(mx,my){
-    var a=(mx-OX)/(TW/2), b=(my-OY-TH/2)/(TH/2);   // -TH/2: aim at tile centers
-    return {x:Math.round((a+b)/2), y:Math.round((b-a)/2)};
-  }
-
-  /* the room shell drawn as one inline SVG: two walls, a window, the shelf, the floor grid */
-  function drawRoom(kind){
-    var K=KINDS[kind]||KINDS.attic;
-    document.documentElement.style.setProperty("--hue",K.hue);
-    var s='<svg id="rsvg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
-    /* left wall (along the y axis edge) + right wall (along the x axis edge) */
-    s+='<polygon points="'+px(0,0)+','+(py(0,0)-WH)+' '+px(0,GY)+','+(py(0,GY)-WH)+' '+px(0,GY)+','+py(0,GY)+' '+px(0,0)+','+py(0,0)+'" fill="'+K.wall+'" stroke="#000" stroke-width="1"/>';
-    s+='<polygon points="'+px(0,0)+','+(py(0,0)-WH)+' '+px(GX,0)+','+(py(GX,0)-WH)+' '+px(GX,0)+','+py(GX,0)+' '+px(0,0)+','+py(0,0)+'" fill="'+K.wall2+'" stroke="#000" stroke-width="1"/>';
-    /* baseboard glow lines where walls meet floor — class bb breathes with --mb */
-    s+='<line class="bb" x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(0,GY)+'" y2="'+py(0,GY)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6"/>';
-    s+='<line class="bb" x1="'+px(0,0)+'" y1="'+py(0,0)+'" x2="'+px(GX,0)+'" y2="'+py(GX,0)+'" stroke="hsl('+K.hue+',95%,55%)" stroke-width="1.6"/>';
-    /* the window on the left wall — the sky lives in the song's hue (CSS var --mh) */
-    var wx1=px(0,0.5),wy1=py(0,0.5)-WH+10,wx2=px(0,2.5),wy2=py(0,2.5)-WH+10;
-    s+='<polygon points="'+wx1+','+wy1+' '+wx2+','+wy2+' '+wx2+','+(wy2+30)+' '+wx1+','+(wy1+30)+'" fill="hsl(var(--mh,'+K.hue+'),70%,22%)" stroke="hsl(var(--mh,'+K.hue+'),95%,60%)" stroke-width="1.5"><animate attributeName="opacity" values="1;.85;1" dur="4s" repeatCount="indefinite"/></polygon>';
-    s+='<circle cx="'+((wx1+wx2)/2)+'" cy="'+((wy1+wy2)/2+11)+'" r="4" fill="hsl(var(--mh,'+K.hue+'),95%,75%)" opacity=".9"/>';
-    /* the EQUALIZER on the left wall — 9 LED bars that dance to the groove (heights set in the music loop) */
-    for(var q=0;q<9;q++){
-      var yy=3.0+q*0.3, bx=px(0,yy), base=py(0,yy)-WH+62;
-      s+='<rect class="eqb" data-base="'+base+'" x="'+(bx-3)+'" y="'+(base-4)+'" width="6" height="4" rx="1" opacity=".9"/>';
-    }
-    /* the STAT SCREEN on the right wall — skewed onto the wall plane, filled by the music loop */
-    var scx=px(2.3,0), scy=py(2.3,0)-WH+2, scw=120, sch=27;
-    s+='<g class="scrbox" transform="translate('+scx+','+scy+') skewY(26.565)">'
-      +'<rect x="0" y="0" width="'+scw+'" height="'+sch+'" fill="#050505" stroke="hsl(var(--mh,'+K.hue+'),80%,55%)" stroke-width="1.2"/>'
-      +'<circle id="scrLed" cx="'+(scw-7)+'" cy="6.5" r="2.2" fill="#3a3a3a"/>'
-      +'<text id="scrOwner" x="5" y="8.5" font-size="4.5" class="scr-t">ROOM.SYS_</text>'
-      +'<text id="scrSong" x="5" y="16.5" font-size="5" fill="#e8e8e8">RADIO OFF_</text>'
-      +'<text id="scrMeta" x="5" y="24.5" font-size="6.5" class="scr-d">tap ► on the radio_</text>'
-      +'</g>';
-    /* the SHELF on the right wall — the collection lives here, spinning */
-    var sx1=px(2.2,0),sy1=py(2.2,0)-WH+64,sx2=px(7.2,0),sy2=py(7.2,0)-WH+64;
-    s+='<polygon points="'+sx1+','+sy1+' '+sx2+','+sy2+' '+(sx2)+','+(sy2+6)+' '+(sx1)+','+(sy1+6)+'" fill="#241c10" stroke="hsl('+K.hue+',60%,45%)" stroke-width="1"/>';
-    /* floor tiles */
-    for(var y=0;y<GY;y++)for(var x=0;x<GX;x++){
-      var cx=px(x,y),cy=py(x,y),f=((x+y)%2===0)?K.fA:K.fB;
-      s+='<polygon class="tile" data-x="'+x+'" data-y="'+y+'" points="'
-        +cx+','+cy+' '+(cx+TW/2)+','+(cy+TH/2)+' '+cx+','+(cy+TH)+' '+(cx-TW/2)+','+(cy+TH/2)
-        +'" fill="'+f+'" stroke="hsla('+K.hue+',80%,55%,calc(.12 + var(--mb,0)*.4))" stroke-width="1"/>';
-    }
-    s+='</svg>';
-    $("roomsvg").innerHTML=s;
-    /* now-playing plaque position: centered on the right wall, under the shelf */
-    var np=$("npline"); np.style.left=((sx1+sx2)/2)+"px"; np.style.top=(((sy1+sy2)/2)+26)+"px";
-    return {shelf:{x1:sx1,y1:sy1,x2:sx2,y2:sy2}};
+  var LEGACY2ENV={garage:"transit",attic:"terrarium",vhs:"transit",moon:"transit",cellar:"transit",green:"terrarium"};
+  var PICKS=["aqua","terrarium","transit"];
+  function starterRoom(kind){ return {v:2,k:kind,env:KINDS[kind].env,cfg:{},stats:{}}; }
+  /* v1 rooms (iso furniture) → v2 annex. legacy kinds get the closest env. */
+  function migrate(room){
+    if(room&&room.v===2&&KINDS[room.k])return room;
+    var k=(room&&room.k)||"transit";
+    if(!KINDS[k])k=LEGACY2ENV[k]||"transit";
+    return {v:2,k:k,env:KINDS[k].env,cfg:{},stats:(room&&room.stats)||{}};
   }
 
   /* ================= state ================= */
   var visiting=(param("u")||"").toLowerCase().trim();
-  var ME=null, MYPROF=null;                    // session, my profile
+  var ME=null, MYPROF=null;
   var ROOM=null, OWNERNAME="", ISMINE=false, DIRTY=false;
-  var geom=null, selTileItem=null, selChip=null;
-  var OWNED=[], drawerTab='furn';              // the member's collection + which drawer tab is open
+  var OWNED=[];
 
-  /* ---- profile identity (same codename/rank scheme as the old profile page) ---- */
   var NAMES=["RED NOMAD","NEON STRAY","VOID RUNNER","STATIC GHOST","ACID SAINT","MIDNIGHT FOX",
     "CHROME WOLF","PIXEL SHAMAN","ROGUE SIGNAL","VELVET RIOT","GLASS TIGER","ECHO BANDIT",
     "SOLAR STRAY","NIGHT MARROW","CRIMSON DRIFT","LUCID FIEND","OFFGRID KING","FERAL BLOOM",
@@ -432,167 +281,555 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var RANKS=[{n:"INITIATE"},{n:"OPERATIVE"},{n:"ELITE"},{n:"LEGEND"}];
   var OWNER_EMAIL="droguepuissance4@gmail.com";
 
-  function starterRoom(kind){
-    var K=KINDS[kind];
-    return {v:1,k:kind,env:K.env||null,tiles:JSON.parse(JSON.stringify(K.layout)),shelf:[K.relic,"press001"]};
-  }
-  var PICKS=["aqua","terrarium","transit"];   // the three rooms offered at sign-up (fixed, in order)
-  function myItems(){                          // what the owner may place
-    var K=KINDS[(ROOM&&ROOM.k)||"attic"];
-    return BASICS.concat(K?K.items:[]);
+  function markDirty(){ DIRTY=true; var b=$("savebtn"); if(b){b.disabled=false;b.textContent="▣ SAVE ANNEX";} }
+  async function saveRoom(quiet){
+    var b=$("savebtn");
+    if(!quiet&&b){ b.disabled=true; b.textContent="SAVING…"; }
+    var r=await rpc('save_room',{r:ROOM});
+    if(r&&r.status==='ok'){ DIRTY=false; if(!quiet&&b){ b.textContent="✓ SAVED"; toast("ANNEX SAVED_"); } }
+    else if(!quiet&&b){ b.disabled=false; b.textContent="▣ SAVE ANNEX"; toast("✕ COULD NOT SAVE"); }
   }
 
-  /* ================= render the placed items ================= */
-  function renderItems(){
-    var lay=$("itemlayer"), html="";
-    (ROOM.tiles||[]).forEach(function(t,idx){
-      var isColl=(t.i&&t.i.indexOf("inv:")===0), d=shelfMeta(t.i); if(!d)return;
-      var flip=(t.f%2===1)?-1:1;
-      /* collection trophies spin in place (3D flip) so they read as prized display pieces */
-      var glyph=isColl
-        ? '<span class="g" style="perspective:120px"><span class="s3" style="display:inline-block;transform-style:preserve-3d;animation:spin3d 5s linear infinite">'+d.e+'</span></span>'
-        : '<span class="g">'+d.e+'</span>';
-      html+='<div class="itm f'+(t.f||0)+'" data-idx="'+idx+'" title="'+e2(d.n)+'" style="left:'+px(t.x,t.y)+'px;top:'+(py(t.x,t.y)+TH/2+10)+'px;z-index:'+(10+t.x+t.y)+';--fx:'+flip+'">'
-        +glyph+'</div>';
+  /* ================= the member's REAL progression (fuel for the annex) =================
+     Owner: read live localStorage. Visitor: read the snapshot stashed in room.stats. */
+  function playsTotal(){ try{ var p=(ls("ibee_sav")||{}).plays||{},t=0;
+    Object.keys(p).forEach(function(k){t+=(+p[k]||0);}); return t; }catch(e){ return 0; } }
+  var PET_PHASES=[["EGG",0],["BABY JELLY",6],["JUVENILE",60],["TEEN JELLY",180],["EVOLVED",400],["APEX",750],["MYTHIC ✦",1200]];
+  function petPhase(xp){ var i=0; for(var k=0;k<PET_PHASES.length;k++) if(xp>=PET_PHASES[k][1]) i=k; return i; }
+  function liveStats(env){
+    var s={plays:playsTotal()};
+    if(env==='transit'){ var t=ls("ibee_transit")||{}; s.miles=Math.round(t.miles||0); s.car=(t.name||"").slice(0,14); }
+    if(env==='terrarium'){
+      var g=(ls("ibee_garden")||{}).sun||{}, keys=Object.keys(g), tot=0, rad=0, top=[];
+      keys.forEach(function(k){ var v=+g[k]||0; tot+=v; if(Math.floor(v/75)>=10)rad++; top.push([k,v]); });
+      top.sort(function(a,b){return b[1]-a[1];});
+      s.plants=keys.length; s.sunmin=Math.round(tot/60); s.radiant=rad;
+      s.top=top.slice(0,3).map(function(x){return {slug:x[0],sun:Math.round(x[1])};});
+    }
+    if(env==='aqua'){ var p=ls("ibee_aquapet")||{}; s.xp=Math.round(p.xp||0); s.phase=petPhase(s.xp); }
+    return s;
+  }
+  function statsFor(env){ return ISMINE?liveStats(env):((ROOM&&ROOM.stats)||{}); }
+
+  /* ================= radio bridge (player.js) ================= */
+  function RAD(){ return window.IBEERADIO||null; }
+  function grooveNow(){
+    var r=RAD(),on=false,b=0,l=0,hue=null,nm="";
+    try{ if(r&&r.playing&&r.playing()){ on=true; b=r.beat?r.beat()||0:0; l=r.level?r.level()||0:0;
+      var s=r.song&&r.song(); if(s){ if(s.hue!=null)hue=s.hue; nm=s.n||""; } } }catch(e){}
+    return {on:on,b:b,l:l,hue:hue,nm:nm};
+  }
+
+  /* ============================================================
+     THE ANNEX ENGINE — one pixel stage, three worlds.
+     axbg: 384×216 low-res pixel canvas. axfx: hi-res text layer.
+     Every scene reads: ROOM.cfg (your style), statsFor(env) (your
+     progression), grooveNow() (the live record). Tap = play with it.
+     ============================================================ */
+  var AW=384,AH=216;
+  var axbg=$("axbg"),actx=axbg.getContext("2d");
+  var axfx=$("axfx"),fctx=axfx.getContext("2d"),FS=2;
+  var T=0,lastT=0,BEAT=0,LVL=0,HUE=75,ONAIR=false,SONG="";
+  var sparks=[],glyphs=[],drops=[],pellets=[],hearts=[],running=false;
+  function axFit(){
+    var w=$("stagewrap").clientWidth||680;
+    var dpr=Math.min(2,devicePixelRatio||1);
+    axfx.width=Math.floor(w*dpr); axfx.height=Math.floor(w*AH/AW*dpr);
+    FS=axfx.width/AW;
+  }
+  window.addEventListener("resize",axFit);
+  function seedFor(s){var h=2166136261;s=s||'';for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+    return function(){h^=h<<13;h^=h>>>17;h^=h<<5;return ((h>>>0)%1000)/1000;};}
+  function pxr(n){return Math.round(n);}
+
+  /* ---- customization slots per env (cfg keys, cycled by the chips) ---- */
+  var TRIMS=[-1,300,190,120,28,0,260];                       // -1 = follow the song
+  var CHARMS=["LUCKY STAR","LIL MOON","THUNDER BOLT","PUNK SKULL"];
+  var GLAZES=[18,130,195,300,45,0];                          // pot glaze hues
+  var GRAVELS=[260,195,130,45,330,0];                        // gravel hues
+  var AXDEF={
+    transit:{trim:0,charm:0,dest:""},
+    terrarium:{glaze:0,lights:1},
+    aqua:{gravel:0,shells:1,petname:""}
+  };
+  function cfg(){ var d=AXDEF[ROOM.env]||{},c=ROOM.cfg||{},o={},k;
+    for(k in d)o[k]=(c[k]!=null?c[k]:d[k]); return o; }
+
+  /* ================= SCENE: PRIVATE CAR (transit) ================= */
+  function drawTransit(){
+    var C=cfg(),S=statsFor('transit'),hue=ONAIR&&HUE!=null?HUE:250;
+    /* ceiling + LED box */
+    actx.fillStyle='#14141c';actx.fillRect(0,0,AW,26);
+    actx.fillStyle='#050508';actx.fillRect(70,5,244,16);
+    actx.strokeStyle='#2c2c38';actx.strokeRect(70.5,5.5,243,15);
+    /* handrail */
+    actx.fillStyle='#3d3d49';actx.fillRect(20,26,AW-60,2);
+    /* the window band: your own stretch of the midnight city */
+    var wx=16,wy=36,ww=308,wh=84;
+    var sky=actx.createLinearGradient(0,wy,0,wy+wh);
+    sky.addColorStop(0,hsl((hue+220)%360,50,7));sky.addColorStop(0.7,hsl(hue,45,12));sky.addColorStop(1,hsl(hue,55,16));
+    actx.fillStyle=sky;actx.fillRect(wx,wy,ww,wh);
+    var rr=seedFor('sky');
+    for(var st=0;st<24;st++){actx.fillStyle='rgba(255,255,255,'+(0.15+0.5*rr())+')';
+      actx.fillRect(pxr(wx+rr()*ww),pxr(wy+2+rr()*30),1,1);}
+    var mx=wx+((260-T*4)%(ww+60)); if(mx<wx-30)mx+=ww+60;
+    actx.fillStyle=hsl(hue,60,80,0.9);actx.beginPath();actx.arc(mx,wy+16,6,0,7);actx.fill();
+    /* two parallax skylines rolling past */
+    var sp=ONAIR?(14+LVL*46):5;
+    [[0.4,26,7],[1,16,10]].forEach(function(Lr,li){
+      var rb=seedFor('bld'+li),sum=0;
+      for(var b=0;b<26;b++){
+        var bw=12+rb()*20,bh=14+rb()*(li?40:26);
+        var bx=wx+((sum-T*sp*Lr[0])%(ww+300)); if(bx<wx-40)bx+=ww+300; sum+=bw+3;
+        if(bx>wx+ww)continue;
+        actx.fillStyle=hsl((hue+230)%360,Lr[2]+15,Lr[2]);
+        actx.fillRect(pxr(bx),pxr(wy+wh-bh),pxr(Math.min(bw,wx+ww-bx)),pxr(bh));
+        for(var wyy=3;wyy<bh-3;wyy+=5)for(var wxx=2;wxx<bw-2;wxx+=4)
+          if(rb()<0.25&&bx+wxx<wx+ww){actx.fillStyle=hsl(45,80,55,0.5+LVL*0.3);actx.fillRect(pxr(bx+wxx),pxr(wy+wh-bh+wyy),1,1);}
+      }
     });
-    /* shelf items along the plank — every one spins in 3D (relics + the collection) */
-    var sh=(ROOM.shelf||[]).slice(0,8);
-    if(geom&&sh.length){
-      sh.forEach(function(id,i){
-        var d=shelfMeta(id); if(!d)return;
-        var f=(i+1)/(sh.length+1);
-        var sx=geom.shelf.x1+(geom.shelf.x2-geom.shelf.x1)*f, sy=geom.shelf.y1+(geom.shelf.y2-geom.shelf.y1)*f;
-        html+='<div class="shitm" title="'+e2(d.n)+'" style="left:'+sx+'px;top:'+sy+'px;z-index:5;--sdur:'+(5.2+(i%4)*0.9)+'s;--sdel:-'+(i*0.7)+'s">'
-          +'<span class="sp"><span class="s3"><span class="f">'+d.e+'</span><span class="b">'+d.e+'</span></span></span></div>';
-      });
+    /* window frame: 3 panes */
+    actx.strokeStyle='#242430';actx.lineWidth=3;
+    [0,1,2].forEach(function(i){actx.strokeRect(wx+0.5+i*(ww/3),wy+0.5,ww/3,wh);});
+    actx.lineWidth=1;
+    drawCharm(300,C.charm,hue);          /* your charm hangs in front of the glass */
+    /* wall + hue trim + bench in YOUR colour */
+    actx.fillStyle='#181822';actx.fillRect(0,120,AW,32);
+    var th=TRIMS[C.trim%TRIMS.length]; th=th<0?hue:th;
+    actx.fillStyle=hsl(th,40,22,0.5+BEAT*0.5);actx.fillRect(0,120,AW,2);
+    actx.fillStyle=hsl(th,30,21);actx.fillRect(20,152,AW-90,8);
+    actx.fillStyle=hsl(th,24,16);actx.fillRect(20,160,AW-90,16);
+    for(var sd=0;sd<7;sd++){actx.fillStyle='rgba(0,0,0,.3)';actx.fillRect(pxr(26+sd*46),152,2,24);}
+    /* YOU, riding your own car (headphones on, nodding to the record) */
+    var bob=ONAIR?Math.max(0,Math.sin(T*3.1))*BEAT*3:0, hx2=120,hy=126-bob;
+    actx.fillStyle='#15151d';actx.fillRect(hx2-7,164,5,12);actx.fillRect(hx2+2,164,5,12);
+    actx.fillStyle=hsl(th,45,26);actx.fillRect(hx2-8,140,17,20);
+    actx.fillStyle='#e8c39e';actx.fillRect(hx2-6,pxr(hy),13,14);
+    actx.fillStyle='#0a0a0a';actx.fillRect(hx2-3,pxr(hy+5),2,2);actx.fillRect(hx2+3,pxr(hy+5),2,2);
+    actx.fillStyle='#14100c';actx.fillRect(hx2-6,pxr(hy-3),13,5);
+    actx.strokeStyle=hsl(hue,85,55);actx.lineWidth=2;
+    actx.beginPath();actx.arc(hx2,hy+5,9,3.3,6.1);actx.stroke();actx.lineWidth=1;
+    actx.fillStyle=hsl(hue,85,45);actx.fillRect(hx2-9,pxr(hy+3),3,6);actx.fillRect(hx2+7,pxr(hy+3),3,6);
+    /* the door out — glows: it leads to the REAL midnight line */
+    actx.fillStyle='#14141c';actx.fillRect(330,26,46,150);
+    actx.fillStyle='#20202c';actx.fillRect(334,32,38,138);
+    actx.fillStyle='#0a0f14';actx.fillRect(338,40,30,52);
+    actx.fillStyle=hsl(96,95,60,0.5+BEAT*0.5);actx.fillRect(338,96,30,3);
+    actx.strokeStyle=hsl(96,95,60,0.35+BEAT*0.4);actx.strokeRect(334.5,32.5,37,137);
+    /* floor */
+    actx.fillStyle='#12121a';actx.fillRect(0,176,AW,40);
+    actx.fillStyle=hsl(hue,60,45,0.05+LVL*0.1);actx.fillRect(0,176,AW,40);
+    actx.fillStyle='rgba(214,178,40,.45)';actx.fillRect(330,178,46,4);
+  }
+  /* the hanging charm (same 4 as the real car) */
+  function drawCharm(x,ch,hue){
+    var sw2=Math.sin(T*1.3)*0.14+BEAT*0.1;
+    actx.save();actx.translate(x,28);actx.rotate(sw2);
+    actx.strokeStyle='#6a6a78';actx.beginPath();actx.moveTo(0,0);actx.lineTo(0,13);actx.stroke();
+    actx.fillStyle=hsl(hue,90,60,0.10+BEAT*0.22);
+    actx.beginPath();actx.arc(0,17,8,0,7);actx.fill();
+    ch=ch%4;
+    if(ch===0){ actx.fillStyle=hsl(52,95,64,0.95);
+      actx.save();actx.translate(0,17);actx.rotate(0.79);actx.fillRect(-3,-3,6,6);actx.restore();
+      actx.fillRect(-1,13,2,8);actx.fillRect(-4,16,8,2);
+    }else if(ch===1){ actx.strokeStyle=hsl(200,80,82,0.95);actx.lineWidth=2.4;
+      actx.beginPath();actx.arc(0,17,4,0.7,4.3);actx.stroke();actx.lineWidth=1;
+    }else if(ch===2){ actx.fillStyle=hsl(96,95,60,0.95);
+      actx.beginPath();actx.moveTo(1,12);actx.lineTo(-3,18);actx.lineTo(0,18);actx.lineTo(-1,23);actx.lineTo(3,17);actx.lineTo(0,17);actx.closePath();actx.fill();
+    }else{ actx.fillStyle='#e8e8f2';actx.fillRect(-3,13,7,6);actx.fillRect(-2,19,5,2);
+      actx.fillStyle='#0a0a0a';actx.fillRect(-2,15,2,2);actx.fillRect(1,15,2,2); }
+    actx.restore();
+  }
+
+  /* ================= SCENE: THE CONSERVATORY (terrarium) ================= */
+  function drawTerrarium(){
+    var C=cfg(),S=statsFor('terrarium'),hue=ONAIR&&HUE!=null?HUE:130;
+    var sky=actx.createLinearGradient(0,0,0,AH);
+    sky.addColorStop(0,'#04030a');sky.addColorStop(0.55,hsl(hue,42,6));sky.addColorStop(1,hsl(hue,55,9));
+    actx.fillStyle=sky;actx.fillRect(0,0,AW,AH);
+    var amp=ONAIR?(0.35+LVL*0.7):0.12;
+    for(var a=0;a<3;a++){
+      actx.strokeStyle=hsl((hue+a*28)%360,80,55,0.05+amp*0.13);actx.lineWidth=8+a*6;
+      actx.beginPath();
+      var yy=30+a*22+Math.sin(T*0.6+a)*8;
+      for(var xx=0;xx<=AW;xx+=8){var yb=yy+Math.sin(xx*0.03+T*(1.0+a*0.35))*(5+amp*20);
+        xx===0?actx.moveTo(xx,yb):actx.lineTo(xx,yb);}
+      actx.stroke();
     }
-    lay.innerHTML=html;
-    $("itmcnt").textContent=(ROOM.tiles||[]).length+" / "+MAXITEMS+" placed";
-    if(ISMINE){
-      Array.prototype.forEach.call(lay.querySelectorAll(".itm"),function(el){
-        el.onclick=function(ev){ ev.stopPropagation(); selectItem(+el.getAttribute("data-idx"), el); };
-      });
-    }
-  }
-
-  /* read the member's real collection (same rpc as member/inventory/) into OWNED, auto-seed
-     any NEW piece onto the shelf, refresh the drawer + stat screens. The collection is the
-     profile's main attraction, so it drives the COLLECTION stat + the drawer's second shelf. */
-  async function loadCollection(){
-    if(!sb||!ISMINE)return;
-    OWNED=[];
-    try{ var r=await sb.rpc('my_inventory'); (r.data||[]).forEach(function(it){ if(INVMETA[it.id]) OWNED.push(it.id); }); }catch(e){}
-    var isOwner=(((ME&&ME.user&&ME.user.email)||'').toLowerCase()===OWNER_EMAIL);
-    if(isOwner){ Object.keys(INVMETA).forEach(function(id){ if(id!=='universe-engine'&&OWNED.indexOf(id)<0)OWNED.push(id); }); }
-    /* auto-place newly-owned pieces on the shelf (up to 8) so the collection always shows */
-    ROOM.shelf=ROOM.shelf||[]; var changed=false;
-    collectionIds().forEach(function(id){ var s='inv:'+id;
-      if(ROOM.shelf.indexOf(s)<0&&ROOM.shelf.length<8){ ROOM.shelf.push(s); changed=true; } });
-    renderItems(); renderDrawer();
-    if(changed){ markDirty(); toast("COLLECTION ON THE SHELF_"); }
-  }
-
-  /* fit the fixed-size stage into the panel width — scales UP on laptops, down on phones */
-  function fitStage(){
-    var wrap=$("stagewrap"), st=$("stage");
-    var avail=wrap.clientWidth-8, sc=Math.min(1.55,avail/W);
-    st.style.width=W+"px"; st.style.height=(H*sc)+"px"; st.style.margin="0";
-    /* origin top-left + explicit translate: center the SCALED room, not the layout box
-       (origin:center left the room clipped right on phones where sc<1) */
-    st.style.transformOrigin="top left";
-    st.style.transform="translateX("+Math.max(0,(avail-W*sc)/2+4)+"px) scale("+sc+")";
-    st.dataset.sc=sc;
-  }
-  window.addEventListener("resize",fitStage);
-
-  /* ================= owner editing ================= */
-  function selectItem(idx,el){
-    selTileItem=idx;
-    Array.prototype.forEach.call(document.querySelectorAll(".itm"),function(x){x.classList.remove("sel");});
-    el.classList.add("sel");
-    var pop=$("itmpop"); pop.style.left=el.style.left; pop.style.top=el.style.top; pop.classList.add("open");
-  }
-  function unselect(){ selTileItem=null; $("itmpop").classList.remove("open");
-    Array.prototype.forEach.call(document.querySelectorAll(".itm"),function(x){x.classList.remove("sel");}); }
-  $("poprot").onclick=function(ev){ ev.stopPropagation();
-    if(selTileItem==null)return; var t=ROOM.tiles[selTileItem]; t.f=((t.f||0)+1)%4;
-    markDirty(); renderItems(); unselect(); };
-  $("poprm").onclick=function(ev){ ev.stopPropagation();
-    if(selTileItem==null)return; ROOM.tiles.splice(selTileItem,1);
-    markDirty(); renderItems(); unselect(); };
-
-  function stageClick(ev){
-    if(!ISMINE)return;
-    unselect();
-    if(!selChip)return;
-    var st=$("stage"), r=st.getBoundingClientRect(), sc=+st.dataset.sc||1;
-    var mx=(ev.clientX-r.left)/sc, my=(ev.clientY-r.top)/sc;
-    var t=unproject(mx,my);
-    if(t.x<0||t.x>=GX||t.y<0||t.y>=GY)return;
-    if((ROOM.tiles||[]).length>=MAXITEMS){toast("ROOM FULL_");return;}
-    for(var i=0;i<ROOM.tiles.length;i++)if(ROOM.tiles[i].x===t.x&&ROOM.tiles[i].y===t.y){toast("TILE TAKEN_");return;}
-    ROOM.tiles.push({i:selChip,x:t.x,y:t.y,f:0});
-    markDirty(); renderItems();
-  }
-  function markDirty(){ DIRTY=true; var b=$("savebtn"); if(b){b.disabled=false;b.textContent="▣ SAVE ROOM";} }
-
-  /* the drawer has two shelves: FURNITURE (basics + room-exclusives) and MY COLLECTION
-     (the member's owned games/environments/engine, placeable as display trophies). */
-  function renderDrawer(){
-    var html="", K=KINDS[ROOM.k]||KINDS.attic;
-    if(drawerTab==='furn'){
-      $("drawhint").textContent="tap an item, then tap a floor tile to place it. tap a placed item to turn or remove it.";
-      html=myItems().map(function(id){
-        var d=ITEMS[id], ex=(K.items.indexOf(id)>=0);
-        return '<div class="chip'+(ex?' rare':'')+'" data-id="'+id+'"><div class="ce">'+d.e+'</div><div class="cn">'+e2(d.n)+(ex?'<br>ROOM EXCL.':'')+'</div></div>';
-      }).join('');
-    } else {
-      var coll=collectionIds();
-      if(!coll.length){
-        $("drawhint").textContent="unlock rooms & the engine and they show up here to display in your room.";
-        html='<div class="drawhint" style="padding:6px 2px">no collectibles yet — <a href="../arcade/" style="color:var(--acid)">unlock a room</a> or play 10s of music to earn the engine_</div>';
-      } else {
-        $("drawhint").textContent="your collection — tap a piece, then a floor tile, to display it as a trophy in your room.";
-        html=coll.map(function(id){ var d=INVMETA[id]||{e:"✦",n:id.toUpperCase()};
-          return '<div class="chip coll" data-id="inv:'+id+'"><div class="ce">'+d.e+'</div><div class="cn">'+e2(d.n)+'</div></div>';
-        }).join('');
+    actx.lineWidth=1;
+    var rr=seedFor('csky');
+    for(var st=0;st<30;st++){actx.fillStyle='rgba(255,255,255,'+(0.08+0.5*rr()*Math.abs(Math.sin(T+st)))+')';
+      actx.fillRect(pxr(rr()*AW),pxr(rr()*90),1,1);}
+    /* your glass dome */
+    actx.strokeStyle='rgba(140,200,170,.22)';actx.lineWidth=2;
+    actx.beginPath();actx.moveTo(26,200);actx.quadraticCurveTo(26,34,192,30);actx.quadraticCurveTo(358,34,358,200);actx.stroke();
+    actx.lineWidth=1;
+    for(var m=1;m<4;m++){actx.strokeStyle='rgba(140,200,170,.10)';
+      actx.beginPath();actx.moveTo(26+m*83,200);actx.lineTo(26+m*83,32);actx.stroke();}
+    /* festoon lights along the dome (toggleable) */
+    if(C.lights){
+      for(var fl2=0;fl2<9;fl2++){var lx=48+fl2*36,ly=52+Math.sin(fl2*0.8)*6+Math.abs(Math.sin(fl2*2.2))*8;
+        actx.strokeStyle='rgba(70,80,70,.5)';
+        if(fl2<8){actx.beginPath();actx.moveTo(lx,ly);actx.quadraticCurveTo(lx+18,ly+9,lx+36,52+Math.sin((fl2+1)*0.8)*6+Math.abs(Math.sin((fl2+1)*2.2))*8);actx.stroke();}
+        var on=ONAIR?(0.5+0.5*Math.abs(Math.sin(T*2.4+fl2*1.3))*(0.4+LVL)):0.25;
+        actx.fillStyle=hsl((hue+fl2*24)%360,90,60,Math.min(1,on));
+        actx.beginPath();actx.arc(lx,ly+3,2.2,0,7);actx.fill();
+        actx.fillStyle=hsl((hue+fl2*24)%360,90,60,Math.min(0.35,on*0.3));
+        actx.beginPath();actx.arc(lx,ly+3,5,0,7);actx.fill();
       }
     }
+    /* the shelf with YOUR top-grown specimens */
+    actx.fillStyle='#3a2b22';actx.fillRect(40,168,AW-110,5);
+    actx.fillStyle='#241a12';actx.fillRect(40,173,AW-110,2);
+    var glz=GLAZES[C.glaze%GLAZES.length];
+    var top=(S.top&&S.top.length)?S.top:[{slug:'first-seed',sun:0}];
+    for(var p=0;p<3;p++){
+      var pd=top[p], x=92+p*82, y=168;
+      var stg=pd?Math.min(10,Math.floor((pd.sun||0)/75)+1):0;
+      /* glazed pot */
+      actx.fillStyle=hsl(glz,45,26);actx.fillRect(x-9,y-8,18,4);
+      actx.fillStyle=hsl(glz,50,19);
+      actx.beginPath();actx.moveTo(x-8,y-4);actx.lineTo(x+8,y-4);actx.lineTo(x+6,y+8);actx.lineTo(x-6,y+8);actx.fill();
+      actx.fillStyle='#1b1208';actx.fillRect(x-6,y-7,12,2);
+      if(!pd){continue;}
+      /* the plant: seeded silhouette grows with its real sunlight */
+      var rp=seedFor(pd.slug),hgt=8+stg*3.2,phue=(hue+rp()*120-60+360)%360;
+      var swy=Math.sin(T*0.9+p)*1.4*(0.3+(ONAIR?LVL*2:0.2))+(twitch[p]||0)*Math.sin(T*22)*2;
+      actx.save();actx.translate(x,y-8);actx.rotate(swy*0.02);
+      actx.strokeStyle=hsl(phue,60,30);actx.lineWidth=2;
+      actx.beginPath();actx.moveTo(0,0);actx.quadraticCurveTo(swy,-hgt*0.6,swy*0.5,-hgt);actx.stroke();actx.lineWidth=1;
+      var fr=2+Math.floor(stg*0.7);
+      for(var f=0;f<fr;f++){
+        var ang=-1.57+(f/(Math.max(1,fr-1))-0.5)*1.6,ln=hgt*(0.5+rp()*0.5);
+        actx.strokeStyle=hsl(phue,65,32+f*2);
+        actx.beginPath();actx.moveTo(0,-hgt*0.2);
+        actx.quadraticCurveTo(Math.cos(ang)*ln*0.5,-hgt*0.2+Math.sin(ang)*ln*0.6,Math.cos(ang)*ln,-hgt*0.2+Math.sin(ang)*ln);
+        actx.stroke();
+        actx.fillStyle=hsl(phue,75,50,(ONAIR?0.5+LVL*0.5:0.3));
+        actx.fillRect(pxr(Math.cos(ang)*ln)-1,pxr(-hgt*0.2+Math.sin(ang)*ln)-1,2,2);
+      }
+      if(stg>=10){actx.strokeStyle=hsl(50,90,60,0.3+0.2*Math.sin(T*2));
+        actx.beginPath();actx.arc(0,-hgt*0.6,hgt*0.62,0,7);actx.stroke();}
+      actx.restore();
+      if(twitch[p])twitch[p]*=0.9;
+    }
+    /* moss floor + fireflies */
+    actx.fillStyle='#0a180e';actx.fillRect(0,200,AW,16);
+    actx.fillStyle=hsl(hue,50,25,0.25+LVL*0.2);actx.fillRect(0,200,AW,2);
+    flies.forEach(function(fl3,fi){
+      var fx3=((fl3.x+T*3*(fi%2?1:-1))%AW+AW)%AW, fy3=90+((fl3.y+Math.sin(T*1.2+fi)*6)%100+100)%100;
+      actx.fillStyle=hsl(75,90,65,0.25+0.5*Math.abs(Math.sin(T*2+fl3.p)));
+      actx.fillRect(pxr(fx3),pxr(fy3),1,1);});
+  }
+  var twitch=[0,0,0];
+  var flies=[];for(var f0=0;f0<8;f0++)flies.push({x:Math.random()*AW,y:Math.random()*90,p:Math.random()*7});
+
+  /* ================= SCENE: THE COVE (aqua) ================= */
+  var PETX=AW/2,PETVX=8;
+  function drawAqua(){
+    var C=cfg(),S=statsFor('aqua'),hue=ONAIR&&HUE!=null?HUE:195;
+    /* the dark room + hood lamp */
+    actx.fillStyle='#050508';actx.fillRect(0,0,AW,AH);
+    actx.fillStyle='#101018';actx.fillRect(0,0,AW,10);
+    actx.fillStyle=hsl(hue,80,55,ONAIR?0.5+LVL*0.5:0.12);actx.fillRect(16,8,AW-32,3);
+    /* water with a living surface */
+    var SURF=26;
+    actx.beginPath();actx.moveTo(0,SURF);
+    for(var x=0;x<=AW;x+=6)actx.lineTo(x,SURF+Math.sin(x*0.05+T*1.6)*(1+LVL*4)+Math.sin(x*0.11-T*2.3)*(0.6+LVL*2));
+    actx.lineTo(AW,AH);actx.lineTo(0,AH);actx.closePath();
+    var wg=actx.createLinearGradient(0,SURF,0,AH);
+    wg.addColorStop(0,hsl(hue,55,ONAIR?20:9));wg.addColorStop(0.6,hsl(hue,60,ONAIR?12:6));wg.addColorStop(1,hsl((hue+20)%360,60,ONAIR?7:4));
+    actx.fillStyle=wg;actx.fill();
+    actx.strokeStyle=hsl(hue,80,70,0.5+LVL*0.5);actx.lineWidth=1.5;
+    actx.beginPath();actx.moveTo(0,SURF);
+    for(var x2=0;x2<=AW;x2+=6)actx.lineTo(x2,SURF+Math.sin(x2*0.05+T*1.6)*(1+LVL*4));
+    actx.stroke();actx.lineWidth=1;
+    /* god rays */
+    if(ONAIR)for(var rI=0;rI<4;rI++){
+      var rx=(rI+0.35)*(AW/4)+Math.sin(T*0.4+rI)*12;
+      var grd=actx.createLinearGradient(rx,SURF,rx+26,AH-20);
+      grd.addColorStop(0,hsl(hue,80,65,0.08+LVL*0.08));grd.addColorStop(1,'transparent');
+      actx.fillStyle=grd;
+      actx.beginPath();actx.moveTo(rx,SURF+4);actx.lineTo(rx+26,SURF+4);
+      actx.lineTo(rx+52,AH-18);actx.lineTo(rx+8,AH-18);actx.closePath();actx.fill();
+    }
+    /* kelp swaying on the bass */
+    var rk=seedFor('ckelp');
+    for(var k=0;k<5;k++){
+      var kx=30+rk()*(AW-70),kh=36+rk()*54;
+      actx.strokeStyle=hsl((hue+90)%360,45,14+rk()*8);actx.lineWidth=2.5;
+      actx.beginPath();actx.moveTo(kx,AH-18);
+      for(var s2=1;s2<=6;s2++){var sway=Math.sin(T*(0.8+LVL*2)+k+s2*0.7)*(1.5+LVL*5)*(s2/6);
+        actx.lineTo(kx+sway,AH-18-kh*s2/6);}
+      actx.stroke();
+    }
+    actx.lineWidth=1;
+    /* YOUR gravel colour (glints with the groove) + glow shells */
+    actx.fillStyle='#0d0b12';actx.fillRect(0,AH-18,AW,18);
+    var gvh=GRAVELS[C.gravel%GRAVELS.length],rg=seedFor('cgravel');
+    for(var g2=0;g2<60;g2++){
+      var gx=g2*6.5+rg()*3,gy=AH-17+rg()*12;
+      var en=g2%3===0?BEAT:g2%3===1?LVL:0.2;
+      actx.fillStyle=ONAIR&&en>0.15?hsl((gvh+g2%3*20)%360,70,25+en*45,0.9):hsl(gvh,20,14+rg()*8);
+      actx.fillRect(pxr(gx),pxr(gy),3,2);
+    }
+    if(C.shells)for(var sh2=0;sh2<3;sh2++){var shx=60+sh2*120;
+      actx.fillStyle=hsl((hue+180)%360,70,55,0.5+0.4*Math.abs(Math.sin(T*1.6+sh2*2)));
+      actx.beginPath();actx.arc(shx,AH-20,3,3.14,0);actx.fill();
+      actx.fillStyle=hsl((hue+180)%360,70,60,0.12);
+      actx.beginPath();actx.arc(shx,AH-20,8,0,7);actx.fill();}
+    /* YOUR PET — the same jelly, phase from your real XP */
+    var ph=PET_PHASES[S.phase!=null?S.phase:petPhase((S.xp||0))][0];
+    var idx=S.phase!=null?S.phase:petPhase(S.xp||0);
+    PETX+=PETVX*0.016*(1+(ONAIR?LVL:0)); if(PETX>AW-70)PETVX=-Math.abs(PETVX); if(PETX<70)PETVX=Math.abs(PETVX);
+    var py2=100+Math.sin(T*1.4)*8-(ONAIR?BEAT*5:0);
+    if(idx===0){ /* still an egg on the gravel */
+      actx.fillStyle=hsl(hue,40,80);actx.beginPath();actx.ellipse(PETX,AH-26,8,10,0,0,7);actx.fill();
+      actx.fillStyle=hsl(hue,70,55);actx.fillRect(pxr(PETX-4),AH-29,2,2);actx.fillRect(pxr(PETX+2),AH-25,2,2);
+    } else {
+      var sc=[0,0.85,1.35,1.65,1.95,2.5,3.0][idx]||1;
+      var pulse=Math.sin(T*(ONAIR?3.2:1.6))*0.5+0.5, squeeze=ONAIR?(0.12+LVL*0.4):0.1;
+      var bw=11*sc*(1-squeeze*pulse), bh=9*sc*(1+squeeze*pulse*0.6);
+      var glow=ONAIR?(0.4+LVL*0.6):0.25;
+      actx.fillStyle=hsl(hue,85,60,0.10+glow*0.15);actx.beginPath();actx.arc(PETX,py2,bw+8,0,7);actx.fill();
+      var TN=[0,4,6,8,10,12,14][idx]||4, tl=10+sc*6;
+      for(var t2=0;t2<TN;t2++){
+        var tx=((t2/(TN-1))-0.5)*bw*1.7, swb=Math.sin(T*2+t2*0.7)*(3+LVL*7)*(0.4+pulse*0.6);
+        actx.strokeStyle=hsl((hue+(t2%2?15:-10)+360)%360,75,62,0.5+glow*0.35);
+        actx.lineWidth=Math.max(1,1.1*sc);
+        actx.beginPath();actx.moveTo(PETX+tx,py2+bh*0.5);
+        actx.quadraticCurveTo(PETX+tx+swb,py2+bh*0.5+tl*0.55,PETX+tx+swb*1.6,py2+bh*0.5+tl*(0.9+pulse*0.3));
+        actx.stroke();
+      }
+      actx.lineWidth=1;
+      var bell=actx.createRadialGradient(PETX,py2-bh*0.3,1,PETX,py2,bw);
+      bell.addColorStop(0,hsl(hue,80,74,0.55+glow*0.3));bell.addColorStop(0.7,hsl(hue,75,55,0.42));bell.addColorStop(1,hsl((hue+20)%360,70,45,0.22));
+      actx.fillStyle=bell;
+      actx.beginPath();actx.ellipse(PETX,py2,bw,bh,0,3.14,0);
+      actx.quadraticCurveTo(PETX+bw*0.6,py2+bh*0.55,PETX,py2+bh*0.34);
+      actx.quadraticCurveTo(PETX-bw*0.6,py2+bh*0.55,PETX-bw,py2);actx.fill();
+      actx.strokeStyle=hsl(hue,90,82,0.5+glow*0.4);actx.beginPath();actx.ellipse(PETX,py2,bw,bh,0,3.14,0);actx.stroke();
+      actx.fillStyle='#0a0a0a';
+      actx.fillRect(pxr(PETX-3*sc),pxr(py2-3*sc),2,2.4);actx.fillRect(pxr(PETX+1.6*sc),pxr(py2-3*sc),2,2.4);
+      if(idx>=5){ actx.fillStyle=hsl(50,90,62);
+        actx.beginPath();actx.moveTo(PETX-5,py2-bh-2);actx.lineTo(PETX-5,py2-bh-7);actx.lineTo(PETX-2,py2-bh-3);
+        actx.lineTo(PETX,py2-bh-8);actx.lineTo(PETX+2,py2-bh-3);actx.lineTo(PETX+5,py2-bh-7);actx.lineTo(PETX+5,py2-bh-2);actx.closePath();actx.fill(); }
+    }
+    /* ambient bubbles */
+    if(ONAIR&&Math.random()<0.05)sparks.push({x:Math.random()*AW,y:AH-22,vx:0,vy:-14-Math.random()*10,life:0.9,h:hue,px:1});
+    /* glass frame */
+    actx.strokeStyle='rgba(180,220,235,.14)';actx.strokeRect(1.5,11.5,AW-3,AH-13);
+  }
+
+  /* ================= shared particles + fx text ================= */
+  function drawParticles(dt){
+    for(var i=sparks.length-1;i>=0;i--){var sp=sparks[i];
+      sp.x+=(sp.vx||0)*dt;sp.y+=sp.vy*dt;sp.vy+=(sp.g||0)*dt;sp.life-=dt*1.2;
+      if(sp.life<=0){sparks.splice(i,1);continue;}
+      actx.fillStyle=hsl(sp.h,90,70,Math.min(1,sp.life*1.4));
+      actx.fillRect(pxr(sp.x),pxr(sp.y),sp.px||2,sp.px||2);}
+    for(var d2=drops.length-1;d2>=0;d2--){var dp=drops[d2];
+      dp.y+=dp.vy*dt*10;dp.vy+=8*dt;dp.life-=dt*1.4;
+      if(dp.life<=0){drops.splice(d2,1);continue;}
+      actx.fillStyle=hsl(200,85,70,Math.min(1,dp.life*1.4));
+      actx.fillRect(pxr(dp.x),pxr(dp.y),1,2);}
+    for(var p2=pellets.length-1;p2>=0;p2--){var pl=pellets[p2];
+      pl.y+=pl.vy*dt;pl.vy=Math.min(16,pl.vy+9*dt);
+      if(pl.y>AH-20){pellets.splice(p2,1);continue;}
+      /* the pet drifts toward food */
+      if(Math.abs(pl.x-PETX)>6)PETVX=(pl.x>PETX?1:-1)*Math.abs(PETVX);
+      if(Math.abs(pl.x-PETX)<14&&Math.abs(pl.y-100)<24){pellets.splice(p2,1);
+        hearts.push({x:PETX,y:88,vy:-10,life:1});continue;}
+      actx.fillStyle=hsl(35,70,55);actx.fillRect(pxr(pl.x),pxr(pl.y),2,2);}
+  }
+  function drawFxText(){
+    fctx.clearRect(0,0,axfx.width,axfx.height);fctx.textBaseline='top';
+    var S=statsFor(ROOM.env),C=cfg();
+    /* hearts (aqua feeding) */
+    for(var h2=hearts.length-1;h2>=0;h2--){var hp=hearts[h2];
+      hp.y+=hp.vy*0.016;hp.vy*=0.97;hp.life-=0.012;
+      if(hp.life<=0){hearts.splice(h2,1);continue;}
+      fctx.font=(6*FS)+'px VT323';fctx.fillStyle='rgba(255,80,110,'+hp.life+')';
+      fctx.fillText('♥',hp.x*FS,hp.y*FS);}
+    /* floating glyphs while the record spins */
+    for(var g3=glyphs.length-1;g3>=0;g3--){var gl=glyphs[g3];
+      gl.y-=0.35;gl.life-=0.008;
+      if(gl.life<=0){glyphs.splice(g3,1);continue;}
+      fctx.font=(7*FS)+'px VT323';fctx.fillStyle=hsl(gl.h,90,68,Math.min(1,gl.life*1.3));
+      fctx.fillText(gl.t,gl.x*FS,gl.y*FS);}
+    fctx.textAlign='center';
+    if(ROOM.env==='transit'){
+      /* the LED strip: your name, your miles, your destination */
+      var dest=(C.dest||'').trim();
+      var led='◈ PRIVATE CAR — '+(OWNERNAME||'YOU').toUpperCase()+' · '+((S.miles||0).toLocaleString())+' MI'
+        +(dest?(' · DEST: '+dest.toUpperCase()):'')+(ONAIR?(' · ♪ '+SONG.toUpperCase()):' · RADIO OFF')+'   ';
+      fctx.save();fctx.beginPath();fctx.rect(72*FS,6*FS,240*FS,14*FS);fctx.clip();
+      fctx.font=(8*FS)+'px VT323';fctx.textAlign='left';
+      fctx.fillStyle=hsl(ONAIR?HUE:250,95,60);fctx.shadowColor=hsl(ONAIR?HUE:250,95,55);fctx.shadowBlur=3;
+      var lw=fctx.measureText(led).width,off=(T*34*FS)%lw;
+      fctx.fillText(led,72*FS-off,8.5*FS);fctx.fillText(led,72*FS-off+lw,8.5*FS);
+      fctx.shadowBlur=0;fctx.restore();fctx.textAlign='center';
+      fctx.font=(5*FS)+'px "Press Start 2P"';fctx.fillStyle='#7a7a7a';
+      fctx.fillText('tap the seats · tap the charm_',AW*0.40*FS,204*FS);
+    }
+    if(ROOM.env==='terrarium'){
+      fctx.font=(5.5*FS)+'px "Press Start 2P"';
+      fctx.fillStyle=hsl(ONAIR?HUE:130,95,70);fctx.shadowColor=hsl(ONAIR?HUE:130,95,55);fctx.shadowBlur=4;
+      fctx.fillText((OWNERNAME||'YOUR').toUpperCase()+"'S CONSERVATORY",AW/2*FS,14*FS);
+      fctx.shadowBlur=0;
+      var top=(S.top&&S.top.length)?S.top:[];
+      fctx.font=(4.2*FS)+'px "Press Start 2P"';
+      for(var p3=0;p3<Math.min(3,top.length);p3++){
+        var nm2=top[p3].slug.replace('.mp3','').replace(/-/g,' ').toUpperCase();
+        fctx.fillStyle='#8a8a8a';
+        fctx.fillText(nm2.length>13?nm2.slice(0,12)+'…':nm2,(92+p3*82)*FS,182*FS);
+      }
+      fctx.font=(5*FS)+'px "Press Start 2P"';fctx.fillStyle='#7a7a7a';
+      fctx.fillText('your top records grow here · tap a pot to water_',AW*0.40*FS,204*FS);
+    }
+    if(ROOM.env==='aqua'){
+      var idx=S.phase!=null?S.phase:petPhase(S.xp||0);
+      var pname=(C.petname||'').trim();
+      fctx.font=(5.5*FS)+'px "Press Start 2P"';
+      fctx.fillStyle=hsl(ONAIR?HUE:195,95,70);fctx.shadowColor=hsl(ONAIR?HUE:195,95,55);fctx.shadowBlur=4;
+      fctx.fillText((pname?pname.toUpperCase()+' · ':'')+PET_PHASES[idx][0],PETX*FS,(idx===0?(AH-46):72)*FS);
+      fctx.shadowBlur=0;
+      fctx.font=(5*FS)+'px "Press Start 2P"';fctx.fillStyle='#7a7a7a';
+      fctx.fillText('tap the water to feed your pet_',AW*0.40*FS,204*FS);
+    }
+    if(!ONAIR){
+      fctx.font=(6*FS)+'px "Press Start 2P"';
+      fctx.fillStyle='rgba(182,255,0,'+(0.5+0.4*Math.sin(T*2.5))+')';
+      fctx.fillText('PRESS ▶ ON THE RADIO — THE ANNEX WAKES UP',AW/2*FS,(AH*0.44)*FS);
+    }
+    fctx.textAlign='left';
+  }
+
+  /* ================= interaction (owner AND visitors can play; only owners re-style) ================= */
+  function stageTap(ev){
+    var st=$("stage"),r=st.getBoundingClientRect();
+    var x=(ev.clientX-r.left)/r.width*AW, y=(ev.clientY-r.top)/r.height*AH;
+    var hue=ONAIR&&HUE!=null?HUE:250;
+    if(ROOM.env==='transit'){
+      if(Math.abs(x-300)<12&&y>24&&y<48){ /* the charm: sparkle + (owner) swap */
+        for(var s3=0;s3<14;s3++)sparks.push({x:300,y:44,vx:(Math.random()-0.5)*60,vy:-15-Math.random()*50,g:60,life:1,h:(52+Math.random()*40)|0});
+        if(ISMINE){ ROOM.cfg=cfg(); ROOM.cfg.charm=(ROOM.cfg.charm+1)%4; markDirty(); renderChips(); toast('✦ '+CHARMS[ROOM.cfg.charm]+' equipped_'); }
+        return;
+      }
+      if(y>146&&y<178&&x>20&&x<300){ /* the bench: cycle YOUR trim */
+        if(ISMINE){ ROOM.cfg=cfg(); ROOM.cfg.trim=(ROOM.cfg.trim+1)%TRIMS.length; markDirty(); renderChips();
+          toast(TRIMS[ROOM.cfg.trim]<0?'seats follow the song_':'seat trim re-upholstered_'); }
+        return;
+      }
+      if(x>330){ location.href='../arcade/transit/'; return; }         /* the door is real */
+      glyphs.push({x:x,y:y,t:'♪',life:1,h:hue});
+    }
+    if(ROOM.env==='terrarium'){
+      for(var p4=0;p4<3;p4++){ var px4=92+p4*82;
+        if(Math.abs(x-px4)<26&&y>110&&y<184){ twitch[p4]=1;
+          for(var d3=0;d3<8;d3++)drops.push({x:px4+(Math.random()-0.5)*14,y:120+Math.random()*10,vy:3+Math.random()*8,life:1});
+          return; } }
+      glyphs.push({x:x,y:y,t:'✦',life:1,h:hue});
+    }
+    if(ROOM.env==='aqua'){
+      if(y>34&&y<AH-22){ pellets.push({x:x,y:Math.min(y,40),vy:6}); return; }
+      glyphs.push({x:x,y:y,t:'♫',life:1,h:hue});
+    }
+  }
+
+  /* ================= the annex loop ================= */
+  function axLoop(now){
+    if(!running)return;
+    requestAnimationFrame(axLoop);
+    var dt=Math.max(0,Math.min(0.05,(now-lastT)/1000));lastT=now;T+=dt;
+    var g=grooveNow();
+    ONAIR=g.on; SONG=g.nm||"";
+    BEAT+=( (g.b||0)-BEAT)*0.3; LVL+=((g.l||0)-LVL)*0.25;
+    if(g.hue!=null)HUE=g.hue;
+    if(ROOM.env==='transit')drawTransit();
+    else if(ROOM.env==='terrarium')drawTerrarium();
+    else drawAqua();
+    drawParticles(dt);
+    if(ONAIR&&glyphs.length<6&&Math.random()<0.04)
+      glyphs.push({x:20+Math.random()*(AW-40),y:AH*0.7,t:['♪','♫','✦'][(Math.random()*3)|0],life:1,h:HUE});
+    drawFxText();
+    /* mirror the groove onto the page chrome (idband glow) */
+    document.documentElement.style.setProperty('--mb',BEAT.toFixed(3));
+    if(ONAIR)document.documentElement.style.setProperty('--mh',HUE);
+    else document.documentElement.style.removeProperty('--mh');
+  }
+  window.__ax=function(t){ axLoop(t); };       /* dev harness: pump frames when rAF sleeps */
+
+  /* ================= customize chips ================= */
+  function renderChips(){
+    if(!ISMINE)return;
+    var C=cfg(),html='';
+    function swatch(h){return '<span class="sw" style="background:'+(h<0?'linear-gradient(90deg,#f0f,#0ff,#ff0)':hsl(h,70,45))+'"></span>';}
+    if(ROOM.env==='transit'){
+      html+='<div class="chip" data-a="trim"><div class="ce">'+swatch(TRIMS[C.trim%TRIMS.length])+'</div><div class="cn">SEAT TRIM<br>'+(TRIMS[C.trim%TRIMS.length]<0?'FOLLOWS SONG':'CUSTOM')+'</div></div>';
+      html+='<div class="chip" data-a="charm"><div class="ce">'+['⭐','🌙','⚡','💀'][C.charm%4]+'</div><div class="cn">'+CHARMS[C.charm%4]+'</div></div>';
+      html+='<div class="chip txt"><div class="ce"><input id="cfgdest" maxlength="12" placeholder="DESTINATION" value="'+e2(C.dest||'')+'"></div><div class="cn">ON THE LED SIGN</div></div>';
+    }
+    if(ROOM.env==='terrarium'){
+      html+='<div class="chip" data-a="glaze"><div class="ce">'+swatch(GLAZES[C.glaze%GLAZES.length])+'</div><div class="cn">POT GLAZE</div></div>';
+      html+='<div class="chip" data-a="lights"><div class="ce">'+(C.lights?'✨':'⬛')+'</div><div class="cn">STRING LIGHTS<br>'+(C.lights?'ON':'OFF')+'</div></div>';
+    }
+    if(ROOM.env==='aqua'){
+      html+='<div class="chip" data-a="gravel"><div class="ce">'+swatch(GRAVELS[C.gravel%GRAVELS.length])+'</div><div class="cn">GRAVEL</div></div>';
+      html+='<div class="chip" data-a="shells"><div class="ce">'+(C.shells?'🐚':'⬛')+'</div><div class="cn">GLOW SHELLS<br>'+(C.shells?'ON':'OFF')+'</div></div>';
+      html+='<div class="chip txt"><div class="ce"><input id="cfgpet" maxlength="12" placeholder="PET NAME" value="'+e2(C.petname||'')+'"></div><div class="cn">NAME YOUR PET</div></div>';
+    }
     $("chips").innerHTML=html;
-    Array.prototype.forEach.call($("chips").querySelectorAll(".chip"),function(c){
+    Array.prototype.forEach.call($("chips").querySelectorAll('.chip[data-a]'),function(c){
       c.onclick=function(){
-        var id=c.getAttribute("data-id");
-        if(selChip===id){selChip=null;c.classList.remove("sel");return;}
-        selChip=id;
-        Array.prototype.forEach.call($("chips").querySelectorAll(".chip"),function(x){x.classList.remove("sel");});
-        c.classList.add("sel");
+        var a=c.getAttribute('data-a'); ROOM.cfg=cfg();
+        if(a==='trim')ROOM.cfg.trim=(ROOM.cfg.trim+1)%TRIMS.length;
+        if(a==='charm')ROOM.cfg.charm=(ROOM.cfg.charm+1)%4;
+        if(a==='glaze')ROOM.cfg.glaze=(ROOM.cfg.glaze+1)%GLAZES.length;
+        if(a==='lights')ROOM.cfg.lights=ROOM.cfg.lights?0:1;
+        if(a==='gravel')ROOM.cfg.gravel=(ROOM.cfg.gravel+1)%GRAVELS.length;
+        if(a==='shells')ROOM.cfg.shells=ROOM.cfg.shells?0:1;
+        markDirty(); renderChips();
       };
     });
-    $("drawer").classList.add("open");
-  }
-  /* collection ids the member owns (env/games from Supabase + the engine flag) */
-  function collectionIds(){
-    var ids=OWNED.filter(function(id){return INVMETA[id];});
-    try{ if(localStorage.getItem('ibee_engine10')==='1'&&ids.indexOf('universe-engine')<0) ids.push('universe-engine'); }catch(e){}
-    return ids;
-  }
-  (function(){  /* drawer tab switch */
-    ['tabFurn','tabColl'].forEach(function(id){ var el=$(id); if(!el)return;
-      el.onclick=function(){ drawerTab=el.getAttribute('data-tab'); selChip=null;
-        $("tabFurn").classList.toggle('on',drawerTab==='furn');
-        $("tabColl").classList.toggle('on',drawerTab==='coll');
-        renderDrawer(); };
-    });
-  })();
-
-  async function saveRoom(){
-    var b=$("savebtn"); b.disabled=true; b.textContent="SAVING…";
-    var r=await rpc('save_room',{r:ROOM});
-    if(r&&r.status==='ok'){ DIRTY=false; b.textContent="✓ SAVED"; toast("ROOM SAVED_"); }
-    else { b.disabled=false; b.textContent="▣ SAVE ROOM"; toast("✕ COULD NOT SAVE"); }
+    var di=$("cfgdest"); if(di)di.oninput=function(){ ROOM.cfg=cfg(); ROOM.cfg.dest=di.value.slice(0,12); markDirty(); };
+    var pi=$("cfgpet"); if(pi)pi.oninput=function(){ ROOM.cfg=cfg(); ROOM.cfg.petname=pi.value.slice(0,12); markDirty(); };
+    $("custom").classList.add("open");
   }
 
-  /* ================= the mimi avatar (device-local, shared key ibee_avatar) ================= */
+  /* ================= stat tiles: the whole room, summarized ================= */
+  function renderStats(){
+    var S=statsFor(ROOM.env),html='';
+    function tile(v,l){return '<div class="stat"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>';}
+    if(ROOM.env==='transit'){
+      html=tile((S.miles||0).toLocaleString()+' MI','RIDDEN ON THE LINE')
+          +tile((S.plays||0).toLocaleString(),'RECORDS FELT')
+          +tile(CHARMS[cfg().charm%4],'YOUR CHARM');
+    }else if(ROOM.env==='terrarium'){
+      html=tile(S.plants||0,'SPECIMENS GROWING')
+          +tile((S.sunmin||0)+' MIN','SUNLIGHT GIVEN')
+          +tile((S.radiant||0)+' ★','RADIANT (MAXED)');
+    }else{
+      var idx=S.phase!=null?S.phase:petPhase(S.xp||0);
+      var nxt=PET_PHASES[idx+1];
+      html=tile(PET_PHASES[idx][0],'YOUR PET')
+          +tile((S.xp||0).toLocaleString()+' XP','PET EXPERIENCE')
+          +tile(nxt?(nxt[1]-(S.xp||0))+' XP':'MAXED ✦','TO NEXT EVOLUTION');
+    }
+    $("statrow").innerHTML=html; $("statrow").style.display='';
+  }
+
+  /* stash a stats snapshot in the saved room so VISITORS see real numbers too */
+  async function snapshotStats(){
+    if(!ISMINE)return;
+    var s=liveStats(ROOM.env);
+    if(JSON.stringify(s)!==JSON.stringify(ROOM.stats||{})){
+      ROOM.stats=s;
+      if(ME)saveRoom(true);                    // quiet background save (demo mode has no session)
+    }
+  }
+
+  /* ================= the mimi avatar (device-local) ================= */
   var AV_N=12;
   function avSrc(i){ return "../assets/img/avatars/mimi-"+(i<10?"0":"")+i+".png"; }
   function avGet(){ var n=parseInt(localStorage.getItem("ibee_avatar"),10); return (n>=0&&n<AV_N)?n:0; }
@@ -607,7 +844,12 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("av").onclick=function(){ $("avpick").classList.toggle("open"); };
   })();
 
-  /* ================= identity (own profile) ================= */
+  /* ================= identity ================= */
+  async function loadCollection(){
+    OWNED=[];
+    if(!sb||!ISMINE)return;
+    try{ var r=await sb.rpc('my_inventory'); (r.data||[]).forEach(function(it){ OWNED.push(it.id); }); }catch(e){}
+  }
   function renderIdentity(prof){
     var uid=(ME&&ME.user&&ME.user.id)||OWNERNAME;
     var codename=NAMES[hash(uid+"n")%NAMES.length]+" #"+(1000+(hash(uid+"x")%9000));
@@ -619,55 +861,53 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("idband").style.display=""; avPaint();
     $("logout").onclick=function(ev){ ev.preventDefault(); if(sb)sb.auth.signOut().then(function(){location.reload();}); };
   }
+
   /* ================= views ================= */
+  var ANNEXMETA={
+    transit:{t:"PRIVATE CAR",sub:"your own car on the midnight line — it logs your miles and rides your records",enter:"▶ BOARD THE LINE"},
+    terrarium:{t:"THE CONSERVATORY",sub:"your private glass alcove — your most-grown records live on this shelf",enter:"▶ ENTER THE GREENHOUSE"},
+    aqua:{t:"THE COVE",sub:"your own water — your pet lives here, fed by everything you listen to",enter:"▶ DIVE INTO THE TANK"}
+  };
   function showRoom(prof,mine){
-    OWNERNAME=prof.username; ROOM=prof.room||{}; ISMINE=mine;
-    if(!ROOM.k)ROOM={v:1,k:"attic",tiles:[],shelf:[]};
-    /* stash the picked env so the room-gate (aqua/terrarium/transit) & arcade know it fast */
+    OWNERNAME=prof.username; ISMINE=mine;
+    ROOM=migrate(prof.room);
+    if(mine&&prof.room&&prof.room.v!==2){ markDirty(); }        // v1 → v2: save once re-styled
     if(mine){ try{ if(ROOM.env)localStorage.setItem("ibee_room",ROOM.env); }catch(e){} }
-    var K=KINDS[ROOM.k]||KINDS.attic;
-    document.title=(mine?"MY PROFILE":OWNERNAME.toUpperCase()+"'S ROOM")+" — ONLY IBEE";
+    var K=KINDS[ROOM.k], AXM=ANNEXMETA[ROOM.env];
+    document.documentElement.style.setProperty("--hue",K.hue);
+    document.title=(mine?"MY PROFILE":OWNERNAME.toUpperCase()+"'S ANNEX")+" — ONLY IBEE";
     $("titlebar").style.display="";
-    $("roomname").textContent=(mine?"MY ROOM · ":"")+OWNERNAME.toUpperCase()+" — "+K.n;
+    $("roomname").textContent=(mine?"MY ANNEX · ":"")+OWNERNAME.toUpperCase()+" — "+AXM.t;
     var since=prof.since?new Date(prof.since).toLocaleDateString(undefined,{year:'numeric',month:'short'}):"";
-    $("roomsub").textContent=(mine?"your profile — arrange it, show your collection, share it":"you are visiting — look, don't touch")+(since?" · est. "+since:"");
+    $("roomsub").textContent=(mine?AXM.sub:"you are visiting "+OWNERNAME+"'s annex — look, play, don't re-style")+(since?" · est. "+since:"");
     var tb=$("tbtns"); tb.innerHTML="";
     if(mine){
       tb.innerHTML='<button class="tb solid" id="savebtn" disabled>✓ SAVED</button>'
         +'<a class="tb" href="?u='+encodeURIComponent(OWNERNAME)+'">👁 VIEW AS VISITOR</a>'
         +'<a class="tb" href="../member/inventory/">♟ COLLECTION</a>';
-      $("savebtn").onclick=saveRoom;
+      $("savebtn").onclick=function(){saveRoom(false);};
       var link=location.origin+"/room/?u="+encodeURIComponent(OWNERNAME);
       $("sharebox").style.display=""; $("sharelink").value=link;
       $("sharecopy").onclick=function(){
-        if(navigator.share){navigator.share({title:"my room on ONLY IBEE",url:link}).catch(function(){});}
+        if(navigator.share){navigator.share({title:"my annex on ONLY IBEE",url:link}).catch(function(){});}
         try{navigator.clipboard.writeText(link);toast("LINK COPIED_");}catch(e){}
       };
-      renderIdentity(prof);
+      loadCollection().then(function(){ renderIdentity(prof); });
+      renderChips();
+      snapshotStats();
     } else {
-      tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY PROFILE":"✦ GET YOUR OWN ROOM")+'</a>';
+      tb.innerHTML='<a class="tb" href="./">'+(ME?"▶ MY PROFILE":"✦ GET YOUR OWN ANNEX")+'</a>';
     }
     $("stagewrap").style.display="";
-    geom=drawRoom(ROOM.k);
-    fitStage();
-    renderItems();
-    if(mine){ document.body.classList.add("edit"); renderDrawer(); loadCollection(); }
-    $("stage").onclick=stageClick;
+    $("enterbtn").textContent=AXM.enter;
+    $("enterbtn").href='../arcade/'+ROOM.env+'/';
+    axFit(); renderStats();
+    $("stage").onclick=stageTap;
+    setInterval(renderStats,4000);              // stats stay live while you listen
+    if(!running){ running=true; lastT=performance.now(); requestAnimationFrame(axLoop); }
   }
 
-  /* ---------- onboarding: nickname + pick 1 of 3 randomized starter rooms ---------- */
-  function miniRoomSVG(K){
-    var s='<svg viewBox="0 0 120 84" xmlns="http://www.w3.org/2000/svg">';
-    s+='<polygon points="60,6 12,30 12,54 60,30" fill="'+K.wall+'"/>';
-    s+='<polygon points="60,6 108,30 108,54 60,30" fill="'+K.wall2+'"/>';
-    for(var y=0;y<3;y++)for(var x=0;x<3;x++){
-      var cx=60+(x-y)*16, cy=30+(x+y)*8;
-      s+='<polygon points="'+cx+','+cy+' '+(cx+16)+','+(cy+8)+' '+cx+','+(cy+16)+' '+(cx-16)+','+(cy+8)+'" fill="'+(((x+y)%2===0)?K.fA:K.fB)+'" stroke="hsl('+K.hue+',80%,50%)" stroke-width=".6" stroke-opacity=".5"/>';
-    }
-    s+='<polygon points="30,18 44,25 44,34 30,27" fill="hsl('+K.hue+',70%,25%)" stroke="hsl('+K.hue+',95%,60%)" stroke-width="1"/>';
-    return s+'</svg>';
-  }
-  /* the pick thumbnails — a real scene of each room so you can SEE what you're choosing */
+  /* ---------- onboarding: nickname + pick 1 of 3 starter rooms ---------- */
   var PICKART={
     aqua:'<svg viewBox="0 0 120 84" xmlns="http://www.w3.org/2000/svg">'
       +'<defs><linearGradient id="aqg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a2a3e"/><stop offset="1" stop-color="#04121e"/></linearGradient></defs>'
@@ -701,12 +941,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       +'<g fill="#d8d0ff"><circle cx="43" cy="56" r="1.6"/><circle cx="65" cy="56" r="1.6"/><circle cx="76" cy="56" r="1.6"/></g>'
       +'<circle cx="46" cy="70" r="2.5" fill="#0a0c1e" stroke="#8a7cff" stroke-width="1"/><circle cx="74" cy="70" r="2.5" fill="#0a0c1e" stroke="#8a7cff" stroke-width="1"/></svg>'
   };
-  function pickArt(env){ return PICKART[env] || miniRoomSVG(KINDS[env]||KINDS.attic); }
   function onboard(step,keep){
     var ob=$("ob"); ob.style.display="";
     if(step==='nick'){
       ob.innerHTML='<div class="bigh">CLAIM YOUR NAME_</div>'
-        +'<div class="cnote">your unique id on the frequency — it names your room:<br>onlyibee.com/room/<b style="color:var(--acid)">yourname</b> · 3–16 chars · a-z 0-9 _ · permanent</div>'
+        +'<div class="cnote">your unique id on the frequency — it names your annex:<br>onlyibee.com/room/<b style="color:var(--acid)">yourname</b> · 3–16 chars · a-z 0-9 _ · permanent</div>'
         +'<div class="nick"><input id="nick" maxlength="16" placeholder="pick_your_name" autocapitalize="off" autocomplete="off" spellcheck="false">'
         +'<button class="cbtn" id="nickgo">▶ CHECK &amp; CONTINUE</button></div><div class="msg" id="nmsg"></div>';
       var inp=$("nick"); if(keep)inp.value=keep;
@@ -724,12 +963,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }
     if(step==='pick'){
       var nm=keep;
-      /* the three rooms — AQUA BASS · TERRARIUM · MIDNIGHT TRANSIT (fixed choice, 2026-07-13) */
       var offer=PICKS.slice();
       ob.innerHTML='<div class="bigh">PICK YOUR ROOM_</div>'
         +'<div class="cnote">hey <b style="color:var(--acid)">'+e2(nm)+'</b> — pick your room wisely. '
-        +'it will grow with you and the art. it lives on your profile — you\'ll come back to check on it_</div>'
-        +'<div class="picks">'+offer.map(function(k,ki){var K=KINDS[k],art=pickArt(k);
+        +'your profile becomes a personal slice of it — your annex — and it grows with you_</div>'
+        +'<div class="picks">'+offer.map(function(k,ki){var K=KINDS[k],art=PICKART[k];
           return '<button class="pick" data-k="'+k+'" style="border-color:hsla('+K.hue+',60%,45%,.6);'
             +'--pglow:hsla('+K.hue+',90%,55%,.45);--pdur:'+(6.2+ki*0.9)+'s">'
             +'<div class="proom"><div class="part3"><div class="f">'+art+'</div><div class="b">'+art+'</div></div></div>'
@@ -756,12 +994,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }
   }
 
-  /* logged-out: a real login / 2-second join box (the profile IS the room, so this is
-     the profile's login too). On success → boot() re-runs into onboarding or the room. */
+  /* logged-out: login / 2-second join */
   function showJoin(){
     if(!sb){ $("loginbox").innerHTML='<div class="login"><div class="msg">✕ backend offline — refresh in a moment_</div></div>'; return; }
-    $("loginbox").innerHTML='<div class="login crtin"><div class="h">// YOUR PROFILE + YOUR ROOM_</div>'
-      +'<p><b style="color:var(--ink)">Every member gets a room.</b> Pick a name, choose your door, place your collection, share it at onlyibee.com/room/<b style="color:var(--acid)">you</b>. Joining takes 2 seconds — just an email and a password.</p>'
+    $("loginbox").innerHTML='<div class="login crtin"><div class="h">// YOUR PROFILE + YOUR ANNEX_</div>'
+      +'<p><b style="color:var(--ink)">Every member gets an annex</b> — a personal slice of the room they pick, alive on their profile. Joining takes 2 seconds — just an email and a password.</p>'
       +'<input id="lem" type="email" placeholder="your email" inputmode="email" autocomplete="email">'
       +'<input id="lpw" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password">'
       +'<button id="lreg">＋ CREATE MY ACCOUNT — FREE, 2 SEC</button>'
@@ -793,79 +1030,23 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       $("llog").disabled=false;$("lreg").disabled=false; };
   }
 
-  /* ================= music: the room is a living display of the radio =================
-     One 100ms loop reads the bridge (beat, level, song, slug) + the pressed groove
-     (window.IBEE_BEAT — bpm) + the universe save (plays) and paints: CSS vars --mb/--mh
-     (items bob, tiles glow, baseboards breathe), the wall EQ bars, the stat screen,
-     the now-playing plaque, and floating hue glyphs over the floor. */
-  function playsTotal(){ try{ var p=(JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}).plays||{},t=0;
-    Object.keys(p).forEach(function(k){t+=(+p[k]||0);}); return t; }catch(e){ return 0; } }
-  var GLYPHS=["♪","♫","✦","✧","◆"], glyN=0, tick0=Date.now();
-  setInterval(function(){
-    var b=0,lvl=0,h=null,r=window.IBEERADIO,nm="",slug="",on=false;
-    try{ if(r&&r.playing()){ on=true; b=r.beat()||0; lvl=(r.level&&r.level())||0; h=75;
-      slug=(r.slug&&r.slug())||""; var s=r.song&&r.song(); if(s){ if(s.hue!=null)h=s.hue; nm=s.n||""; } } }catch(e){}
-    var st=$("stage"), root=document.documentElement;
-    st.style.setProperty("--mb",b.toFixed(3));
-    /* also drive the whole profile (idband, stat screens, badges) — the page follows the groove */
-    root.style.setProperty("--mb",b.toFixed(3));
-    /* radio silent → leave --mh unset so the walls fall back to the room kind's hue */
-    if(h!=null){ st.style.setProperty("--mh",h); root.style.setProperty("--mh",h); }
-    else { st.style.removeProperty("--mh"); root.style.removeProperty("--mh"); }
-    $("npline").textContent=nm?("♪ "+nm):"";
-    /* the wall EQ: 9 bars, per-bar phase over the beat so they dance, not jump in unison */
-    var t=(Date.now()-tick0)/1000;
-    Array.prototype.forEach.call(document.querySelectorAll("#roomsvg rect.eqb"),function(el,i){
-      var base=+el.getAttribute("data-base");
-      var v=on ? (0.18+0.82*Math.abs(Math.sin(t*2.3+i*1.65)))*(0.25+b*0.55+lvl*0.45) : 0.1;
-      var hh=Math.max(3,Math.round(4+24*Math.min(1,v)));
-      el.setAttribute("height",hh); el.setAttribute("y",base-hh);
-    });
-    /* the stat screen: who lives here + what's on air + the groove's numbers */
-    var so=$("scrOwner"),ss=$("scrSong"),sm=$("scrMeta"),sl=$("scrLed");
-    if(so){
-      so.textContent=((OWNERNAME||"ROOM").toUpperCase()+".SYS_").slice(0,20);
-      ss.textContent=on?("▶ "+(nm.length>18?nm.slice(0,17)+"…":nm).toUpperCase()):"RADIO OFF_";
-      var bpm=null; try{ var bd=window.IBEE_BEAT&&window.IBEE_BEAT[slug]; if(bd&&bd.bpm)bpm=Math.round(bd.bpm); }catch(e){}
-      sm.textContent=on ? ((bpm?("BPM "+bpm+" · "):"")+playsTotal().toLocaleString()+" plays_")
-                        : "tap ► on the radio_";
-      if(sl){ sl.setAttribute("fill",on?"hsl(var(--mh,75),95%,60%)":"#3a3a3a");
-        sl.setAttribute("opacity",on?(0.35+b*0.65).toFixed(2):"1"); }
-    }
-    /* floating glyphs drift up from the floor while the record spins */
-    if(on&&glyN<7&&Math.random()<0.13){
-      var gx=Math.random()*GX, gy=Math.random()*GY;
-      var d=document.createElement("div"); d.className="gly";
-      d.textContent=GLYPHS[(Math.random()*GLYPHS.length)|0];
-      d.style.left=px(gx,gy)+"px"; d.style.top=(py(gx,gy)+TH/2)+"px";
-      $("itemlayer").appendChild(d); glyN++;
-      setTimeout(function(){ d.remove(); glyN--; },3500);
-    }
-  },100);
-
   /* ================= boot ================= */
   async function boot(){
-    /* ?demo=<kind>[&edit=1] — preview any starter room with no account (also the dev harness) */
+    /* ?demo=<env>[&edit=1] — preview any annex with no account (dev harness) */
     var demo=param("demo");
     if(demo==="pick"){ onboard('pick','demo'); return; }
-    if(demo){ var dk=KINDS[demo]?demo:"vhs";
+    if(demo){ var dk=KINDS[demo]?demo:"transit";
       showRoom({username:"demo",room:starterRoom(dk),since:new Date().toISOString()},!!param("edit"));
       return; }
     if(!sb){ showJoin(); return; }
     ME=(await sb.auth.getSession()).data.session;
     if(visiting){
       var prof=await rpc('get_room',{name:visiting});
-      if(prof&&prof.username){
-        /* visiting your own link → still read-only, with a MY ROOM button */
-        var mineToo=false;
-        if(ME){ MYPROF=await rpc('my_profile'); mineToo=!!(MYPROF&&MYPROF.username===prof.username); }
-        showRoom(prof,false);
-        return;
-      }
+      if(prof&&prof.username){ showRoom(prof,false); return; }
       $("titlebar").style.display="";
-      $("roomname").textContent="ROOM NOT FOUND_";
+      $("roomname").textContent="ANNEX NOT FOUND_";
       $("roomsub").textContent='nobody lives at "'+visiting+'" — the hallway is empty.';
-      $("tbtns").innerHTML='<a class="tb" href="./">✦ GET YOUR OWN ROOM</a>';
+      $("tbtns").innerHTML='<a class="tb" href="./">✦ GET YOUR OWN ANNEX</a>';
       return;
     }
     if(!ME){ showJoin(); return; }
@@ -876,7 +1057,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   boot();
   if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') location.reload(); });
 
-  /* warn before leaving with unsaved furniture */
   window.addEventListener("beforeunload",function(e){ if(DIRTY){e.preventDefault();e.returnValue="";} });
 })();
 </script>
