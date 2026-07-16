@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <!-- ===== favicon (bishop 1) ===== -->
-<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
 <link rel="shortcut icon" type="image/png" href="/assets/chess/bishop1.png">
 <link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
 <meta name="theme-color" content="#070707">
@@ -57,9 +57,23 @@ header .t{color:var(--dim);font-size:8px}
   width:min(88vw,520px);height:min(88vw,520px);
   border:3px solid var(--acid);box-shadow:0 0 24px rgba(182,255,0,.25);
 }
+/* ---- music reactivity: the board breathes with the site radio. --mb (beat 0..1)
+   and --mh (song hue) are set by a tiny loop at the bottom; when the radio is
+   silent they read 0/75 and everything below collapses to the original look.
+   Visual only — pointer-events:none, never touches the game. ---- */
+#board{border-color:hsl(var(--mh,75),95%,60%);
+  box-shadow:0 0 calc(24px + var(--mb,0)*40px) hsla(var(--mh,75),95%,55%,calc(.25 + var(--mb,0)*.45))}
+#board::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:6;
+  mix-blend-mode:screen;opacity:calc(var(--mb,0)*.45);
+  background:radial-gradient(circle at 50% 45%,hsla(var(--mh,75),90%,55%,.30),transparent 72%)}
 .sq{overflow:hidden;min-width:0;min-height:0}
 .sq{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .sq.l{background:var(--light)} .sq.d{background:var(--dark)}
+/* the dark tiles catch a faint hue-tinted shimmer on the beat (browsers without
+   color-mix simply keep the plain tiles above) */
+@supports (background:color-mix(in srgb,red,blue 10%)){
+  .sq.d{background:color-mix(in srgb,var(--dark),hsl(var(--mh,75),85%,50%) calc(var(--mb,0)*16%))}
+}
 .sq .base{position:absolute;width:72%;height:26%;bottom:5%;left:14%;border-radius:50%;filter:blur(1px);opacity:.85}
 .base.w{background:radial-gradient(circle at 50% 40%,#eaffb0,#b6ff00 60%,#5c8000)}
 .base.b{background:radial-gradient(circle at 50% 40%,#ff9d9d,#ff2b2b 60%,#6e0000)}
@@ -452,6 +466,8 @@ function commit(from,mv,promoT){
     gameOver=true;
     if(chk){
       status.textContent='CHECKMATE!';
+      /* badge event: the human (green) checkmated the CPU */
+      if(mode==='ai'&&mover==='w'){try{localStorage.setItem("ibee_badge_evt",JSON.stringify({k:"chess",t:Date.now()}));}catch(e){}}
       FX.mate();
       setTimeout(function(){
         showBanner('<img src="'+ART[mover].K+'" alt="">K.O.!!!<br><span style="font-size:12px;letter-spacing:2px">'+(mover==='w'?'GREEN':'RED')+' WINS THE SET</span>',true);
@@ -722,7 +738,21 @@ var FX=(function(){
     winSound:S.win
   };
 })();
+
+/* ---------- music: the board breathes with the site radio (visual only).
+   Reads window.IBEERADIO (bridged to the shell when framed, own instance when
+   standalone) and feeds the CSS vars --mb/--mh on #board. 80ms interval — light,
+   and it never touches game state. ---------- */
+(function(){
+  var bd=document.getElementById('board'); if(!bd) return;
+  setInterval(function(){
+    var b=0,h=75,r=window.IBEERADIO;
+    try{ if(r&&r.playing()){ b=r.beat()||0; var s=r.song&&r.song(); if(s&&s.hue!=null) h=s.hue; } }catch(e){}
+    bd.style.setProperty('--mb',b.toFixed(3));
+    bd.style.setProperty('--mh',h);
+  },80);
+})();
 </script>
-<script src="../assets/player.js?v=8"></script>
+<script src="../assets/player.js?v=20"></script>
 </body>
 </html>
