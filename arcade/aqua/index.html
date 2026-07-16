@@ -37,6 +37,10 @@
     color:var(--ink);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:8px 10px;
     display:flex;gap:8px;align-items:center;max-width:52vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
   #np .dot{width:7px;height:7px;flex:none;background:var(--acid)}
+  #fstog{position:fixed;top:calc(50px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+    z-index:801;font-size:14px;line-height:1;
+    color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:6px 8px;cursor:pointer}
+  #fstog:hover,#fstog.on{color:var(--acid);border-color:var(--acid)}
   #hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);z-index:800;
     color:var(--dim);font-size:17px;text-align:center;background:rgba(0,0,0,.55);
     padding:2px 12px;border:1px solid #161616;pointer-events:none;transition:opacity .8s;white-space:nowrap}
@@ -56,6 +60,7 @@
 <canvas id="over"></canvas>
 <a class="back" href="../">◀ ROOMS</a>
 <div id="viewtog">🌊 THE SURFACE</div>
+<div id="fstog" title="fullscreen">⛶</div>
 <div id="np"><span class="dot" id="npdot"></span><span id="npname">RADIO OFF — TAP THE TANK</span></div>
 <div id="hint">your egg hatches as the music plays_ — feed it, pet it, explore the tank: it evolves 5 times</div>
 
@@ -960,6 +965,22 @@ function loop(nowMs){
   drawFx(T,hue,playing);
 }
 requestAnimationFrame(loop);
+</script>
+<script>
+/* fullscreen chip — hides itself where the API is missing (iPhone Safari) */
+(function(){
+  var b=document.getElementById('fstog'),d=document.documentElement;
+  var req=d.requestFullscreen||d.webkitRequestFullscreen;
+  if(!b)return; if(!req){b.style.display='none';return}
+  function on(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
+  function upd(){b.classList.toggle('on',on());b.title=on()?'exit fullscreen':'fullscreen'}
+  b.addEventListener('click',function(){
+    if(on()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+    else{try{req.call(d)}catch(e){}}
+  });
+  document.addEventListener('fullscreenchange',upd);
+  document.addEventListener('webkitfullscreenchange',upd);
+})();
 </script>
 </body>
 </html>

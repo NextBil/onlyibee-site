@@ -58,6 +58,28 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
 .item.r-leg{border-color:#4d6600}.item.r-leg .rtag{color:var(--acid)}.item.r-leg:hover{border-color:var(--acid)}
 .item.soldout{opacity:.4;filter:grayscale(1)}.item.soldout .pr{color:var(--red)}
 .notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0;text-align:center}
+/* ---- THE PROCESS (ICS folders): sketches + making-of + nfc demo ---- */
+.proc{margin-top:34px;border-top:2px solid var(--border);padding-top:26px}
+.proc h2{font-family:var(--px);font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:6px}
+.proc .sub2{color:var(--dim);line-height:1.4;margin-bottom:18px;max-width:640px}
+.proc h3{font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:1px;margin:22px 0 10px}
+.vidrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.vcard{border:2px solid var(--border);background:var(--panel)}
+.vcard video{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}
+.vcard.wide video{aspect-ratio:5/4}
+.vcard .cap{padding:10px;border-top:2px solid var(--border)}
+.vcard .cap b{font-family:var(--px);font-size:8px;color:var(--ink);display:block;line-height:1.7}
+.vcard .cap span{color:var(--dim);font-size:17px;line-height:1.3;display:block;margin-top:4px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sgrid a{border:2px solid var(--border);background:var(--panel);display:block;position:relative;transition:border-color .2s,transform .15s}
+.sgrid a:hover{border-color:var(--gold);transform:translateY(-3px)}
+.sgrid img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;filter:saturate(1.02)}
+.sgrid .snm{font-family:var(--px);font-size:6px;color:var(--dim);padding:7px 8px;line-height:1.6}
+/* lightbox */
+#lbx{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9500;display:none;align-items:center;justify-content:center;cursor:zoom-out}
+#lbx.on{display:flex}
+#lbx img{max-width:94vw;max-height:90vh;border:2px solid var(--border)}
+#lbx .x{position:absolute;top:14px;right:16px;font-family:var(--px);font-size:12px;color:var(--red);background:none;border:0;cursor:pointer}
 footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
 </style>
 </head>
@@ -71,6 +93,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <div id="wrap"></div>
 </main>
 <footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
+<div id="lbx"><button class="x" aria-label="close">✕</button><img id="lbxim" alt=""></div>
 
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
@@ -105,7 +128,42 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         +'<span class="pr">'+(out?"CLAIMED":e2((p.cur||"€")+p.price))+'</span></div></a>';
     }).join('')+'</div>';
   }
-  document.getElementById("wrap").innerHTML=head+grid;
+  /* ---- THE PROCESS: only on ICS drop folders ---- */
+  var proc="";
+  if(/^ics/.test(fd.id)){
+    var P="../assets/img/ics-process/";
+    var sketches=[
+      ["process-sketches-spread.jpg","FIRST PEN SKETCHES"],
+      ["process-sketch-kings-mask.jpg","KING NANNAN + THE MASK"],
+      ["process-sketch-eiffel-knight.jpg","EIFFEL TOWER KNIGHT"],
+      ["process-sketch-hippo-knight.jpg","HIPPO KNIGHT — BAOULE MYTH"],
+      ["process-sketch-beebee.jpg","BEEBEE — MIMI'S BROTHER"],
+      ["process-photoshop-mask.jpg","INKING IN PHOTOSHOP"],
+      ["process-photoshop-swordy.jpg","SWORDY + SWORDA IN COLOR"],
+      ["process-beebee-final.jpg","BEEBEE — FINAL CARD"]
+    ];
+    proc='<section class="proc"><h2>THE PROCESS_</h2>'
+      +'<div class="sub2">every ICS character starts as a pen sketch, gets inked + colored in photoshop, '
+      +'then pressed onto the fabric by hand. one by one. that’s why each piece is made only once_</div>'
+      +'<h3>▸ MAKING OF</h3><div class="vidrow">'
+      +'<div class="vcard"><video controls playsinline preload="none" poster="'+P+'process-makingoff-poster.jpg" src="'+P+'process-makingoff.mp4"></video>'
+      +'<div class="cap"><b>MAKING OF — THE PRESS</b><span>how the clothes get made, from print to heat press_</span></div></div>'
+      +'<div class="vcard wide"><video controls playsinline preload="none" poster="'+P+'process-nfc-demo-poster.jpg" src="'+P+'process-nfc-demo.mp4"></video>'
+      +'<div class="cap"><b>SCAN THE SHIRT</b><span>every piece has a chip inside — tap your phone on it and it unlocks the universe_</span></div></div>'
+      +'</div>'
+      +'<h3>▸ THE SKETCHES</h3><div class="sgrid">'
+      +sketches.map(function(s){
+        return '<a href="'+P+s[0]+'" data-lbx><img loading="lazy" src="'+P+s[0]+'" alt="'+e2(s[1])+'"><div class="snm">'+e2(s[1])+'</div></a>';
+      }).join('')+'</div></section>';
+  }
+  document.getElementById("wrap").innerHTML=head+grid+proc;
+  /* lightbox for the sketches */
+  var lbx=document.getElementById("lbx"),lim=document.getElementById("lbxim");
+  document.querySelectorAll("[data-lbx]").forEach(function(a){
+    a.addEventListener("click",function(ev){ev.preventDefault();lim.src=a.getAttribute("href");lbx.classList.add("on");});
+  });
+  lbx.addEventListener("click",function(){lbx.classList.remove("on");lim.src="";});
+  document.addEventListener("keydown",function(ev){if(ev.key==="Escape"){lbx.classList.remove("on");lim.src="";}});
 })();
 </script>
 <script src="../assets/player.js?v=20"></script>

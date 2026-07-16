@@ -37,6 +37,10 @@
     font-family:var(--px);font-size:8px;color:var(--dim);background:rgba(0,0,0,.7);
     border:1px solid var(--border);padding:8px 12px;white-space:nowrap}
   #title b{color:var(--acid);font-weight:normal}
+  #fstog{position:fixed;top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+    z-index:801;font-size:14px;line-height:1;
+    color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:6px 8px;cursor:pointer}
+  #fstog:hover,#fstog.on{color:var(--acid);border-color:var(--acid)}
   #hint{position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:800;
     color:var(--dim);font-size:17px;text-align:center;background:rgba(0,0,0,.55);
     padding:2px 12px;border:1px solid #161616;pointer-events:none;transition:opacity .8s;white-space:nowrap}
@@ -95,6 +99,7 @@
 <a class="back" href="../">◀ ROOMS</a>
 <div id="title">SYNTH-BOTANICAL TERRARIUM · <b id="tcount">--</b> SPECIMENS</div>
 <div id="viewtog">✿ THE GARDEN</div>
+<div id="fstog" title="fullscreen">⛶</div>
 <div id="hint">every record grows here_ — tap a plant for its story · tap its POT to water it · ✿ opens the garden</div>
 <div id="plaque">
   <div class="head"><span class="no" id="pqNo">SPECIMEN No. 00</span><span class="x" id="pqX">✕</span></div>
@@ -915,6 +920,22 @@ function drawPreview(){
   }
 }
 requestAnimationFrame(loop);
+</script>
+<script>
+/* fullscreen chip — hides itself where the API is missing (iPhone Safari) */
+(function(){
+  var b=document.getElementById('fstog'),d=document.documentElement;
+  var req=d.requestFullscreen||d.webkitRequestFullscreen;
+  if(!b)return; if(!req){b.style.display='none';return}
+  function on(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
+  function upd(){b.classList.toggle('on',on());b.title=on()?'exit fullscreen':'fullscreen'}
+  b.addEventListener('click',function(){
+    if(on()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+    else{try{req.call(d)}catch(e){}}
+  });
+  document.addEventListener('fullscreenchange',upd);
+  document.addEventListener('webkitfullscreenchange',upd);
+})();
 </script>
 </body>
 </html>

@@ -68,6 +68,11 @@
   #zenchip:hover{color:var(--acid);border-color:var(--acid)}
   body.zen #zenchip{opacity:.25}
   body.zen #zenchip:hover{opacity:1}
+  #fstog{position:fixed;top:calc(50px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+    z-index:801;font-size:14px;line-height:1;
+    color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);padding:6px 8px;cursor:pointer}
+  #fstog:hover,#fstog.on{color:var(--acid);border-color:var(--acid)}
+  body.zen #fstog{opacity:.25}body.zen #fstog:hover{opacity:1}
   /* VIEW toggle: close-up interior ⇄ whole-train overview — parked at the BOTTOM */
   #viewtog{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:801;font-family:var(--px);font-size:8px;
     color:#000;background:var(--acid);border:1px solid var(--acid);padding:10px 14px;cursor:pointer}
@@ -106,6 +111,7 @@
 <div id="line" class="ui"><span class="lbl">MIDNIGHT LINE</span></div>
 <div id="viewtog">▦ WHOLE TRAIN</div>
 <div id="zenchip">✧ ZEN</div>
+<div id="fstog" title="fullscreen">⛶</div>
 <div id="milechip" class="ui" title="tap to name your car">YOUR LINE · 0 mi</div>
 <div id="hint" class="ui">ride the midnight line_ — tap a window to zone out · tap the seats to re-trim · tap the charm for a little magic · name your car below-left</div>
 
@@ -1158,6 +1164,22 @@ function loop(nowMs){
   drawFx(T,hue);
 }
 requestAnimationFrame(loop);
+</script>
+<script>
+/* fullscreen chip — hides itself where the API is missing (iPhone Safari) */
+(function(){
+  var b=document.getElementById('fstog'),d=document.documentElement;
+  var req=d.requestFullscreen||d.webkitRequestFullscreen;
+  if(!b)return; if(!req){b.style.display='none';return}
+  function on(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
+  function upd(){b.classList.toggle('on',on());b.title=on()?'exit fullscreen':'fullscreen'}
+  b.addEventListener('click',function(){
+    if(on()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+    else{try{req.call(d)}catch(e){}}
+  });
+  document.addEventListener('fullscreenchange',upd);
+  document.addEventListener('webkitfullscreenchange',upd);
+})();
 </script>
 </body>
 </html>
