@@ -339,6 +339,18 @@
   .crew a .cn{font-family:var(--px);font-size:8px;color:var(--ink);padding:8px 6px;border-top:2px solid var(--border);
     display:flex;justify-content:space-between;align-items:center;gap:6px}
   .crew a .cn .rr{font-size:7px;color:var(--dim)}
+  /* ICS — THE PROCESS: making-of videos + sketch cards (cards reuse .crew) */
+  .procvids{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;max-width:760px;margin-bottom:16px}
+  .procvids .vc{border:2px solid var(--border);background:#0e0e0e}
+  .procvids video{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}
+  .procvids .vc.wide video{aspect-ratio:5/4}
+  .procvids .vcap{padding:9px 10px;border-top:2px solid var(--border)}
+  .procvids .vcap b{font-family:var(--px);font-size:8px;color:var(--ink);display:block;line-height:1.7;font-weight:normal}
+  .procvids .vcap span{color:var(--dim);font-size:16px;line-height:1.3;display:block;margin-top:3px}
+  #icslbx{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9500;display:none;
+    align-items:center;justify-content:center;cursor:zoom-out}
+  #icslbx.on{display:flex}
+  #icslbx img{max-width:94vw;max-height:90vh;border:2px solid var(--border)}
 
   /* ---------- Shop: game inventory ---------- */
   .rarity-legend{display:flex;flex-wrap:wrap;gap:10px;margin:-10px 0 20px}
@@ -589,7 +601,26 @@
           style="width:100%;max-width:660px;display:block;border:2px solid var(--border);box-shadow:0 0 24px rgba(182,255,0,.15)"></p>
         <p style="color:var(--dim);font-size:17px;margin-top:-8px">ICS — THE FULL SET ♟ every character, one board_</p>
         <p><a href="chess/" style="font-family:var(--px);font-size:10px;color:#000;background:var(--acid);padding:12px 16px;text-decoration:none;display:inline-block">♟ PLAY ICS CHESS</a></p>
-        <p class="red">// PARIS FALL 2025</p>
+
+        <div class="crewhead" style="color:var(--gold,#ffd60a)">// THE PROCESS_</div>
+        <div class="crewsub">every character starts as a pen sketch, gets inked + colored in photoshop, then pressed onto the fabric by hand. one by one — that's why each piece is made only once_</div>
+        <div class="procvids">
+          <div class="vc"><video controls playsinline preload="none" poster="assets/img/ics-process/process-makingoff-poster.jpg" src="assets/img/ics-process/process-makingoff.mp4"></video>
+            <div class="vcap"><b>MAKING OF — THE PRESS</b><span>how the clothes get made, from print to heat press_</span></div></div>
+          <div class="vc wide"><video controls playsinline preload="none" poster="assets/img/ics-process/process-nfc-demo-poster.jpg" src="assets/img/ics-process/process-nfc-demo.mp4"></video>
+            <div class="vcap"><b>SCAN THE SHIRT</b><span>every piece has a chip inside — tap your phone on it and it unlocks the universe_</span></div></div>
+        </div>
+        <div class="crew" id="icsproc">
+          <a href="assets/img/ics-process/process-sketches-spread.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketches-spread.jpg" alt="first pen sketches" loading="lazy"></span><span class="cn">SKETCHES<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-kings-mask.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-kings-mask.jpg" alt="King NanNan and the mask" loading="lazy"></span><span class="cn">NANNAN<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-eiffel-knight.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-eiffel-knight.jpg" alt="Eiffel tower knight sketch" loading="lazy"></span><span class="cn">KNIGHT<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-hippo-knight.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-hippo-knight.jpg" alt="hippo knight sketch — Baoulé mythology" loading="lazy"></span><span class="cn">HIPPO<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-beebee.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-beebee.jpg" alt="Beebee sketch — Mimi's brother" loading="lazy"></span><span class="cn">BEEBEE<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-photoshop-mask.jpg"><span class="ph"><img src="assets/img/ics-process/process-photoshop-mask.jpg" alt="inking the mask in photoshop" loading="lazy"></span><span class="cn">INKING<span class="rr">PSD</span></span></a>
+          <a href="assets/img/ics-process/process-photoshop-swordy.jpg"><span class="ph"><img src="assets/img/ics-process/process-photoshop-swordy.jpg" alt="Swordy and Sworda in color" loading="lazy"></span><span class="cn">SWORDY+A<span class="rr">PSD</span></span></a>
+          <a href="assets/img/ics-process/process-beebee-final.jpg"><span class="ph"><img src="assets/img/ics-process/process-beebee-final.jpg" alt="Beebee final card" loading="lazy"></span><span class="cn">BEEBEE<span class="rr">FINAL</span></span></a>
+        </div>
+        <p class="red" style="margin-top:16px">// PARIS FALL 2025</p>
       </div>
     </section>
 
@@ -1847,5 +1878,17 @@
 })();
 </script>
 <script src="assets/player.js?v=20"></script>
+<div id="icslbx"><img alt=""></div>
+<script>
+/* ICS process sketches — click a card to open it big, click/Esc closes */
+(function(){
+  var lbx=document.getElementById('icslbx'),im=lbx.querySelector('img');
+  document.querySelectorAll('#icsproc a').forEach(function(a){
+    a.addEventListener('click',function(ev){ev.preventDefault();im.src=a.getAttribute('href');lbx.classList.add('on');});
+  });
+  lbx.addEventListener('click',function(){lbx.classList.remove('on');im.src='';});
+  document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){lbx.classList.remove('on');im.src='';}});
+})();
+</script>
 </body>
 </html>
