@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/png" href="/assets/chess/bishop1.png">
+<link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
 <link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
 <meta name="theme-color" content="#070707">
 <meta charset="UTF-8">
@@ -51,6 +51,15 @@ main{flex:1;width:100%;max-width:680px;padding:22px 16px 60px;display:flex;flex-
   border:2px solid var(--border);background:#0a0a0c;opacity:.65}
 .thumbs img.on{border-color:var(--acid);opacity:1}
 .thumbs img:hover{opacity:1}
+/* 3D viewer */
+.model3d{width:100%;border:2px solid var(--border);background:#0a0a0c;margin-top:10px;position:relative;aspect-ratio:1/1;overflow:hidden}
+.model3d canvas{display:block;width:100%!important;height:100%!important;cursor:grab}
+.model3d canvas:active{cursor:grabbing}
+.model3d .vlab{position:absolute;left:10px;top:10px;z-index:3;font-family:var(--px);font-size:8px;color:var(--acid);background:rgba(0,0,0,.6);padding:6px 8px}
+.model3d .vhint{position:absolute;left:10px;bottom:10px;z-index:3;font-size:15px;color:var(--dim);background:rgba(0,0,0,.55);padding:4px 8px}
+.model3d .vload{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-family:var(--px);font-size:9px;color:var(--acid);text-align:center;padding:16px;line-height:1.9}
+.model3d .vspin{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--acid);border-radius:50%;animation:spin3d 1s linear infinite}
+@keyframes spin3d{to{transform:rotate(360deg)}}
 
 h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-height:1.8;color:var(--ink)}
 .price{font-family:var(--px);font-size:clamp(18px,5.5vw,26px);color:var(--acid);
@@ -98,6 +107,11 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="gal">
       <div class="big"><img id="bigimg" src="" alt=""><span class="rtag" id="rtag"></span><span class="claimtag" id="claimtag" style="display:none">CLAIMED</span></div>
       <div class="thumbs" id="thumbs"></div>
+    </div>
+    <div class="model3d" id="model3d" style="display:none">
+      <div class="vlab">◉ 3D — DRAG TO SPIN</div>
+      <div class="vhint">drag to rotate · scroll to zoom</div>
+      <div class="vload"><div class="vspin"></div>LOADING 3D_</div>
     </div>
     <h1 id="pname">—</h1>
     <div class="price" id="pprice">—</div>
@@ -165,8 +179,59 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("paynote").style.display="none";
   }
   $("paybtns").innerHTML=btns;
+
+  /* ---- optional 3D model (product.model = path/URL to .fbx/.obj/.glb).
+     three.js + the right loader are pulled from the CDN only when a piece
+     actually has a model, so plain products stay light. ---- */
+  if(p.model){
+    var box=$("model3d"); box.style.display="";
+    var ext=(p.model.split("?")[0].split(".").pop()||"").toLowerCase();
+    var need=["https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js",
+      "https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/controls/OrbitControls.js"];
+    if(ext==="fbx") need=need.concat([
+      "https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/libs/fflate.min.js",
+      "https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/curves/NURBSCurve.js",
+      "https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/curves/NURBSUtils.js",
+      "https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/loaders/FBXLoader.js"]);
+    else if(ext==="obj") need.push("https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/loaders/OBJLoader.js");
+    else need.push("https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/loaders/GLTFLoader.js");
+    function chain(list,done){ (function next(i){ if(i>=list.length){done();return;}
+      var s=document.createElement("script"); s.src=list[i];
+      s.onload=function(){ next(i+1); }; s.onerror=function(){ next(i+1); };
+      document.head.appendChild(s); })(0); }
+    function fail(m){ var v=box.querySelector(".vload"); if(v) v.innerHTML=m||"3D OFFLINE_"; }
+    chain(need, function(){
+      if(!window.THREE || !THREE.OrbitControls){ fail("3D VIEWER OFFLINE_"); return; }
+      var Loader = ext==="fbx"?THREE.FBXLoader : ext==="obj"?THREE.OBJLoader : THREE.GLTFLoader;
+      if(!Loader){ fail("CAN'T READ ."+ext.toUpperCase()+"_"); return; }
+      var w=box.clientWidth||400,h=box.clientHeight||400;
+      var scene=new THREE.Scene();
+      var cam=new THREE.PerspectiveCamera(45,w/h,0.1,5000);
+      var rnd=new THREE.WebGLRenderer({antialias:true,alpha:true});
+      rnd.setPixelRatio(Math.min(2,window.devicePixelRatio||1)); rnd.setSize(w,h); box.appendChild(rnd.domElement);
+      scene.add(new THREE.HemisphereLight(0xffffff,0x223,1.15));
+      var key=new THREE.DirectionalLight(0xffffff,1.1); key.position.set(3,6,4); scene.add(key);
+      var ctr=new THREE.OrbitControls(cam,rnd.domElement);
+      ctr.enableDamping=true; ctr.autoRotate=true; ctr.autoRotateSpeed=1.1;
+      ctr.addEventListener("start",function(){ ctr.autoRotate=false; });
+      function frame(obj){
+        var b=new THREE.Box3().setFromObject(obj),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
+        var s=2.2/(Math.max(sz.x,sz.y,sz.z)||1); obj.scale.setScalar(s);
+        obj.position.sub(c.multiplyScalar(s)); scene.add(obj);
+        cam.position.set(0,.4,4); ctr.target.set(0,0,0); ctr.update();
+        var vl=box.querySelector(".vload"); if(vl) vl.remove();
+      }
+      var ld=new Loader();
+      ld.load(p.model, function(res){ frame(res.scene?res.scene:res); },
+        function(x){ var vl=box.querySelector(".vload small"); if(vl&&x.total) vl.textContent=Math.round(x.loaded/x.total*100)+"%"; },
+        function(){ fail("COULDN'T LOAD THE 3D FILE_"); });
+      var vis=true;
+      try{ new IntersectionObserver(function(e){ vis=e[0].isIntersecting; }).observe(box); }catch(e){}
+      (function loop(){ requestAnimationFrame(loop); if(!vis) return; ctr.update(); rnd.render(scene,cam); })();
+    });
+  }
 })();
 </script>
-<script src="../assets/player.js?v=13"></script>
+<script src="../assets/player.js?v=20"></script>
 </body>
 </html>
