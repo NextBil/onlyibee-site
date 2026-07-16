@@ -438,6 +438,13 @@
     color:var(--acid);text-decoration:none;font-size:22px;border-bottom:1px dashed var(--acid);
   }
   .clinks a:hover{color:var(--red);border-color:var(--red)}
+  /* about: streaming-platform + social icon tiles */
+  .plats{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+  .plats a{width:54px;height:54px;border:2px solid var(--border);background:#0e0e0e;color:var(--dim);
+    display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s,transform .15s}
+  .plats a:hover{color:var(--acid);border-color:var(--acid);transform:translateY(-3px);
+    box-shadow:0 0 14px rgba(182,255,0,.3)}
+  .plats svg{width:28px;height:28px;fill:currentColor;display:block}
 
   /* ---------- Footer HUD ---------- */
   footer{
@@ -653,12 +660,31 @@
       <ul class="clinks">
         <li><a href="https://www.youtube.com/watch?v=7F42hEzB44M" target="_blank" rel="noopener">TOUJOURS / JE NE REGRETTE RIEN →</a></li>
         <li><a href="https://www.youtube.com/watch?v=hMkh-wA1kvo" target="_blank" rel="noopener">FUYEZ! (COURT MÉTRAGE) →</a></li>
-        <li><a href="https://www.youtube.com/watch?v=uliwCPrMX38" target="_blank" rel="noopener">JUICY BOYZ (W/ LUKAZAM) →</a></li>
         <li><a href="https://www.youtube.com/watch?v=T1e6cesSEpg" target="_blank" rel="noopener">DANS LA STREET →</a></li>
       </ul>
+      <div class="scrtitle" style="margin-top:34px;font-size:13px">LISTEN<span class="acid">.FM</span></div>
+      <div class="scrsub">only ibee on every platform_</div>
+      <div class="plats">
+        <a href="https://open.spotify.com/artist/6VBneQK3OAOExbH18Wfu1F" target="_blank" rel="noopener" title="Spotify" aria-label="Spotify">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.67 11.55a.5.5 0 0 1-.69.16c-1.88-1.15-4.25-1.41-7.04-.77a.5.5 0 1 1-.22-.97c3.05-.7 5.67-.4 7.78.88.24.14.31.46.17.7zm.98-2.18a.62.62 0 0 1-.86.2C9.64 8.25 6.36 7.87 3.82 8.64a.62.62 0 1 1-.36-1.19c2.9-.88 6.52-.45 8.99 1.07.29.18.38.57.2.85zm.08-2.27C10.19 5.58 5.94 5.44 3.48 6.19a.75.75 0 1 1-.44-1.43c2.82-.86 7.52-.69 10.4 1.02a.75.75 0 0 1-.71 1.32z"/></svg>
+        </a>
+        <a href="https://music.apple.com/fr/artist/only-ibee/1772808731" target="_blank" rel="noopener" title="Apple Music" aria-label="Apple Music">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M11.18 8.51c-.02-1.62 1.32-2.4 1.38-2.44-.75-1.1-1.92-1.25-2.34-1.27-1-.1-1.94.59-2.45.59-.5 0-1.28-.58-2.11-.56-1.09.02-2.09.63-2.65 1.6-1.13 1.96-.29 4.86.81 6.45.54.78 1.18 1.65 2.02 1.62.81-.03 1.12-.52 2.1-.52.98 0 1.26.52 2.12.5.87-.01 1.42-.79 1.95-1.57.61-.9.86-1.77.88-1.82-.02-.01-1.69-.65-1.71-2.58zM9.6 3.74c.44-.54.74-1.28.66-2.03-.64.03-1.41.42-1.87.96-.41.48-.77 1.24-.68 1.97.71.06 1.44-.36 1.89-.9z"/></svg>
+        </a>
+        <a href="https://www.deezer.com/en/artist/212664517" target="_blank" rel="noopener" title="Deezer" aria-label="Deezer">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M12.6 3.2h3v1.7h-3zM12.6 5.7h3v1.7h-3zM12.6 8.2h3v1.7h-3zM12.6 10.7h3v1.7h-3zM8.4 5.7h3v1.7h-3zM8.4 8.2h3v1.7h-3zM8.4 10.7h3v1.7h-3zM4.2 8.2h3v1.7h-3zM4.2 10.7h3v1.7h-3zM0 10.7h3v1.7H0z"/></svg>
+        </a>
+        <a href="https://music.amazon.co.uk/artists/B0C4FY48GJ/only-ibee" target="_blank" rel="noopener" title="Amazon Music" aria-label="Amazon Music">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M12.4 1.2 6.6 2.5v7.02a2.6 2.6 0 0 0-1.35-.37C3.9 9.15 2.8 10.1 2.8 11.27s1.1 2.13 2.45 2.13 2.45-.95 2.45-2.13V5.4l3.6-.8v3.87a2.6 2.6 0 0 0-1.3-.34c-1.36 0-2.45.95-2.45 2.12 0 1.18 1.1 2.13 2.45 2.13 1.35 0 2.4-.95 2.4-2.13V1.2z" transform="translate(1.2 -0.4) scale(0.92)"/><path d="M1.2 13.3c3.9 2.3 9.7 2.3 13.6 0l-.6 1.2c-3.6 2.1-8.8 2.1-12.4 0z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/onlyibee/" target="_blank" rel="noopener" title="Instagram" aria-label="Instagram">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M4.7 1h6.6A3.7 3.7 0 0 1 15 4.7v6.6a3.7 3.7 0 0 1-3.7 3.7H4.7A3.7 3.7 0 0 1 1 11.3V4.7A3.7 3.7 0 0 1 4.7 1zm0 1.5A2.2 2.2 0 0 0 2.5 4.7v6.6a2.2 2.2 0 0 0 2.2 2.2h6.6a2.2 2.2 0 0 0 2.2-2.2V4.7a2.2 2.2 0 0 0-2.2-2.2H4.7zM8 4.6A3.4 3.4 0 1 1 8 11.4 3.4 3.4 0 0 1 8 4.6zm0 1.5a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8zm3.65-2.5a.85.85 0 1 1 0 1.7.85.85 0 0 1 0-1.7z"/></svg>
+        </a>
+      </div>
       <div class="scrtitle" style="margin-top:34px;font-size:13px">CONTACT<span class="acid">.SYS</span></div>
       <ul class="clinks">
-        <li><a href="mailto:nebula.direction@gmail.com">EMAIL →</a></li>
+        <li><a href="mailto:contact@onlyibee.com">EMAIL → CONTACT@ONLYIBEE.COM</a></li>
+        <li><a href="https://www.instagram.com/onlyibee/" target="_blank" rel="noopener">INSTAGRAM → @ONLYIBEE</a></li>
       </ul>
     </section>
   </main>
