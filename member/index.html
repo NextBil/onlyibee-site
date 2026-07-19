@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
-<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <meta name="theme-color" content="#070707">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
@@ -348,6 +348,13 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     grant.innerHTML=LOCK+" "+e2(msg);
     $("mcard").style.display="none"; $("recruit").style.display="none"; $("actions").style.display="none";
   }
+  /* open door: no pass is not a rejection — joining is free */
+  function showOpen(msg){
+    setHue(88);
+    grant.className="banner granted crtin";
+    grant.innerHTML=UNLOCK+" "+e2(msg);
+    $("mcard").style.display="none"; $("recruit").style.display="none"; $("actions").style.display="none";
+  }
   function updSess(sess){
     var el=$("sessline");
     if(sess&&sess.user){ el.innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout" style="color:var(--acid)">log out</a>';
@@ -382,7 +389,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   /* ---- LOCKED: no valid pass → enter a code, or log in to see your collection ---- */
   function lockedGate(sess, invalid){
-    showLocked(invalid ? "PASS NOT RECOGNIZED" : "ACCESS RESTRICTED — MEMBERS ONLY");
+    /* red only for a bad code — a visitor with no pass gets an open door, not a wall */
+    if(invalid) showLocked("PASS NOT RECOGNIZED — CHECK THE CODE");
+    else if(sess) showOpen("CONNECTED — WELCOME BACK");
+    else showOpen("THE FREQUENCY IS OPEN — JOIN FREE");
     boxh.textContent="// ENTER THE FREQUENCY_";
     if(sess){
       host.innerHTML='<div class="cnote" style="margin-bottom:10px">you\'re signed in.</div>'
@@ -523,8 +533,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   /* re-route only when the session is dropped (sign-in transitions are driven explicitly) */
   if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') route(); });
 
-  /* ---- boot sequence → reveal → route ---- */
-  var msgs=["READING PASS…","VERIFYING SIGNATURE…","MATCHING FREQUENCY…","STAND BY…"];
+  /* ---- boot sequence → reveal → route (pass-talk only when there IS a pass) ---- */
+  var msgs=pass?["READING PASS…","VERIFYING SIGNATURE…","MATCHING FREQUENCY…","STAND BY…"]
+               :["CONNECTING…","TUNING THE FREQUENCY…","STAND BY…"];
   var i=0,bar=$("bootbar"),bl=$("bootl");
   (function step(){
     bl.textContent=msgs[Math.min(i,msgs.length-1)];
