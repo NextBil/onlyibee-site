@@ -65,7 +65,7 @@
   #plaque .no{font-family:var(--px);font-size:7px;color:var(--dim)}
   #plaque .x{cursor:pointer;color:var(--dim);font-size:15px;padding:0 4px}
   #plaque .x:hover{color:var(--red)}
-  #pqCanvas{display:block;width:120px;height:120px;margin:10px auto 2px;image-rendering:pixelated;
+  #pqCanvas{position:static;inset:auto;display:block;width:120px;height:120px;margin:10px auto 2px;image-rendering:pixelated;
     background:radial-gradient(ellipse at 50% 40%,rgba(182,255,0,.06),#06070a 70%);border:1px solid var(--border)}
   #plaque h3{font-family:var(--px);font-size:10px;color:#fff;padding:10px 12px 2px;text-align:center}
   /* on phones the plaque becomes a bottom sheet (60vh max) and the garden auto-scrolls
@@ -935,6 +935,20 @@ requestAnimationFrame(loop);
   });
   document.addEventListener('fullscreenchange',upd);
   document.addEventListener('webkitfullscreenchange',upd);
+  /* leaving the room while fullscreen would keep the shell's iframe fullscreen,
+     hiding the nav + player — exit fullscreen first, then follow the link */
+  document.addEventListener('click',function(ev){
+    var a=ev.target&&ev.target.closest&&ev.target.closest('a[href]');
+    if(!a||!on())return;
+    ev.preventDefault();
+    var href=a.href, done=false;
+    function go(){ if(!done){done=true;location.href=href;} }
+    try{
+      var p=(document.exitFullscreen||document.webkitExitFullscreen).call(document);
+      if(p&&p.then){ p.then(go,go); }
+    }catch(e){}
+    setTimeout(go,250);
+  },true);
 })();
 </script>
 </body>
