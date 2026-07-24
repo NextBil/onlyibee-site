@@ -4,16 +4,15 @@
    to assets/products-data.js. Loaded clock-stamped (?cb=) by console.html
    (shop grid) and product-page/index.html (product pages) - replacing the
    file goes live in ~1 min, no version bumps.
+   folders:[{id,name,sub,tint,hype}] group products into drops (shop/?f=id).
    Each product: {id, n:name, price, cur, r:rarity(c/sr/sdr/leg), out:0/1,
-   desc, imgs:[urls], pay:{wix, stripe, paypal}} - empty pay links hide
-   their button on the product page. pay_config.paypalClientId (a PayPal
-   Business "Client ID") turns on real on-page PayPal checkout for everything. Seeded 2026-07-12 from the old Wix
-   store (JSON-LD scrape: names, prices, descriptions, galleries, stock).
+   folder:id, model:'.fbx/.obj path', desc, imgs:[urls], pay:{wix,stripe,paypal}}
+   - empty pay links hide their button on the product page.
    ===================================================================== */
 window.IBEE_PRODUCTS={
  "v": 1,
  "pay_config": {
-  "paypalClientId": "",
+  "paypalClientId": "AUHwgMw7LAn2_JBhmCyCEbpZbprIPq_kzQR1_CaflHDlBNzTdjCXvoAK8PYMFAo95-KYpRKtWSoU8Ih7",
   "currency": "EUR"
  },
  "folders": [
