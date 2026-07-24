@@ -200,7 +200,7 @@
   css.textContent=
     "#bgtoasts{position:fixed;top:50px;right:10px;z-index:8600;display:flex;flex-direction:column;"
     +"gap:8px;align-items:flex-end;pointer-events:none;font-family:'Press Start 2P',monospace}"
-    +".bgt{display:flex;align-items:center;gap:10px;max-width:min(320px,86vw);pointer-events:auto;"
+    +".bgt{display:flex;align-items:center;gap:10px;max-width:min(320px,86vw);pointer-events:auto;touch-action:pan-y;"
     +"background:rgba(8,8,10,.94);border:1px solid #2a2a2a;border-left:3px solid #b6ff00;"
     +"padding:9px 12px 9px 10px;box-shadow:0 4px 18px rgba(0,0,0,.6),0 0 12px rgba(182,255,0,.12);"
     +"transform:translateX(115%);opacity:0;transition:transform .38s cubic-bezier(.2,.9,.25,1.2),opacity .3s}"
@@ -220,6 +220,7 @@
     +".bgt.link{cursor:pointer;border-left-color:#26e0ff;box-shadow:0 4px 18px rgba(0,0,0,.6),0 0 16px rgba(38,224,255,.2)}"
     +".bgt.link .bn{color:#26e0ff}.bgt.link:hover{background:rgba(10,16,18,.96)}"
     +".bgt .bxx{flex:none;color:#555;font-size:9px;padding:2px 0 2px 6px;cursor:pointer}.bgt .bxx:hover{color:#fff}"
+    +"@media(max-width:560px){#bgtoasts{top:42px;right:7px;gap:6px}.bgt{max-width:78vw;gap:7px;padding:7px 9px 7px 8px}.bgt .bi{font-size:18px}.bgt .bi .bimg{width:21px;height:21px}.bgt .bx{gap:3px}.bgt .bh{font-size:6px}.bgt .bn{font-size:7px}.bgt .bd2{font-size:12px}.bgt .bxx{font-size:8px}}"
     /* iMessage-style unread COUNT badge on whichever button the unread belongs to:
        profile pill, SHOP, TV, galaxy. Bigger + shows the number (9+ past 9). */
     +"#acct button,#nav button,#buni{position:relative;overflow:visible}"
@@ -284,6 +285,11 @@
       el.classList.add("bye");
       setTimeout(function(){ el.remove(); showing=false; setTimeout(pump,350); },480);
     }
+    var sx=0,dragging=false;
+    el.addEventListener("pointerdown",function(ev){sx=ev.clientX;dragging=true;try{el.setPointerCapture(ev.pointerId);}catch(e){}});
+    el.addEventListener("pointermove",function(ev){if(!dragging)return;var dx=ev.clientX-sx;if(Math.abs(dx)>4){el.style.transition="none";el.style.transform="translateX("+dx+"px)";el.style.opacity=String(Math.max(.25,1-Math.abs(dx)/220));}});
+    el.addEventListener("pointerup",function(ev){if(!dragging)return;dragging=false;var dx=ev.clientX-sx;el.style.transition="";el.style.transform="";el.style.opacity="";if(Math.abs(dx)>58)bye();});
+    el.addEventListener("pointercancel",function(){dragging=false;el.style.transition="";el.style.transform="";el.style.opacity="";});
     if(t.link){
       el.querySelector(".bxx").addEventListener("click",function(ev){ev.stopPropagation();bye();});
       el.addEventListener("click",function(){
