@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>ONLY IBEE — NETWORK DATA</title>
-<meta name="description" content="Live statistics from the ONLY IBEE universe. Population, signals, citizens, entrances and the current online count.">
+<meta name="description" content="Community statistics from the ONLY IBEE universe: visitors, listeners, citizens and plays.">
 <meta name="theme-color" content="#070707">
 <link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -131,15 +131,6 @@
     box-shadow:0 0 18px rgba(182,255,0,.18);
     transform:translateY(-2px);
   }
-  .statcard.live{
-    border-color:#4d6600;
-    animation:livepulse 2.2s ease-in-out infinite;
-  }
-  .statcard.live:hover{border-color:var(--acid)}
-  @keyframes livepulse{
-    0%,100%{box-shadow:0 0 6px rgba(182,255,0,.12)}
-    50%{box-shadow:0 0 20px rgba(182,255,0,.35)}
-  }
   /* corner accent */
   .statcard::before{
     content:"";position:absolute;top:0;left:0;width:18px;height:18px;
@@ -153,16 +144,22 @@
     opacity:.35;transition:opacity .2s;
   }
   .statcard:hover::after{opacity:.9}
-  /* live dot */
-  .statcard .pulsedot{
-    position:absolute;top:12px;right:12px;
-    width:8px;height:8px;border-radius:50%;background:var(--red);
-    box-shadow:0 0 8px var(--red);
-    animation:dotpulse 1.4s ease-in-out infinite;
-    display:none;
-  }
-  .statcard.live .pulsedot{display:block}
-  @keyframes dotpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  .statbody{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .statobject{width:56px;height:56px;position:relative;flex:none;perspective:180px;opacity:.85}
+  .statobject::before,.statobject::after,.statobject i{content:"";position:absolute;display:block;box-sizing:border-box}
+  .statobject.orbit::before{inset:10px;border:2px solid var(--acid);border-radius:50%;box-shadow:0 0 10px rgba(182,255,0,.28);animation:objspin 6s linear infinite}
+  .statobject.orbit::after{width:9px;height:9px;top:2px;left:23px;background:var(--red);box-shadow:0 0 8px var(--red);border-radius:50%;animation:objspin 3.6s linear infinite reverse;transform-origin:5px 26px}
+  .statobject.signal::before{inset:5px;border:2px solid var(--red);border-radius:50%;animation:objpulse 2.4s ease-out infinite}
+  .statobject.signal::after{inset:15px;border:2px solid var(--acid);border-radius:50%;animation:objpulse 2.4s .5s ease-out infinite}
+  .statobject.signal i{width:7px;height:7px;left:25px;top:25px;background:var(--acid);box-shadow:0 0 10px var(--acid);border-radius:50%}
+  .statobject.cube{transform-style:preserve-3d;animation:objspin 7s linear infinite}
+  .statobject.cube::before{width:30px;height:30px;left:12px;top:12px;border:2px solid var(--acid);transform:rotate(30deg) skew(-8deg);box-shadow:0 0 12px rgba(182,255,0,.25)}
+  .statobject.cube::after{width:30px;height:30px;left:18px;top:6px;border:2px solid var(--red);transform:rotate(30deg) skew(-8deg);opacity:.65}
+  .statobject.gate::before{left:12px;top:8px;width:32px;height:40px;border:2px solid var(--acid);border-bottom:0;transform:perspective(100px) rotateY(28deg);animation:objgate 3.5s ease-in-out infinite}
+  .statobject.gate::after{left:23px;top:18px;width:2px;height:25px;background:var(--red);box-shadow:0 0 9px var(--red)}
+  @keyframes objspin{to{transform:rotateY(360deg) rotateZ(360deg)}}
+  @keyframes objpulse{0%,100%{transform:scale(.55);opacity:.15}55%{transform:scale(1);opacity:.9}}
+  @keyframes objgate{0%,100%{transform:perspective(100px) rotateY(18deg)}50%{transform:perspective(100px) rotateY(-26deg)}}
 
   .statlabel{
     font-family:var(--px);font-size:8px;color:var(--dim);
@@ -175,7 +172,6 @@
     text-shadow:0 0 14px rgba(232,232,232,.08);
     line-height:1.2;
   }
-  .statcard.live .statnum{color:var(--acid);text-shadow:0 0 16px rgba(182,255,0,.35)}
   .statdesc{
     font-family:var(--vt);font-size:17px;color:#555;
     margin-top:8px;letter-spacing:.5px;
@@ -281,7 +277,6 @@
     <h2 id="infotitle">WHY THESE NUMBERS ARE REAL_</h2>
     <p><strong>NOT HAND-TYPED.</strong> Every number on this screen is read from the ONLY IBEE database when the page refreshes. The screen does not generate random numbers or add pretend activity.</p>
     <p><strong>VISITS.</strong> When someone enters the site, their browser gets an anonymous visitor token. It has no name or email. The same browser is counted once for monthly population, rather than once per page refresh.</p>
-    <p><strong>ONLINE NOW.</strong> A visitor is shown as online only while their browser has checked in during the last two minutes. Leave the site and that signal naturally disappears.</p>
     <p><strong>SONG PLAYS.</strong> A play is saved only when the radio actually starts a song. Repeated taps or replays of the same song from the same browser within 30 minutes do not add extra plays. Each song's count in the radio list comes from those saved plays.</p>
     <p><strong>MEMBERS.</strong> CITIZENS is the real number of registered ONLY IBEE accounts. The public page can see only the final total — never account details.</p>
     <p><strong>COUNTRIES.</strong> For the country ranking, the site asks a location service only for a two-letter country code. No IP address is saved in the ONLY IBEE database.</p>
@@ -365,23 +360,21 @@
     var extras=document.getElementById("extras");
     var lastup=document.getElementById("lastup");
 
-    /* build the 5 metric cards once */
+    /* build the four dependable, long-lived metrics */
     var METRICS=[
-      {key:"population", label:"POPULATION",       desc:"monthly visitors"},
-      {key:"signals",    label:"SIGNALS",          desc:"total listeners"},
-      {key:"citizens",   label:"CITIZENS",         desc:"registered members"},
-      {key:"entrances",  label:"ENTRANCES",        desc:"total plays"},
-      {key:"online",     label:"CURRENTLY ONLINE", desc:"people here now", live:true}
+      {key:"population", label:"POPULATION", desc:"monthly visitors", object:"orbit"},
+      {key:"signals",    label:"SIGNALS",    desc:"total listeners", object:"signal"},
+      {key:"citizens",   label:"CITIZENS",   desc:"registered members", object:"cube"},
+      {key:"entrances",  label:"ENTRANCES",  desc:"total plays", object:"gate"}
     ];
 
     METRICS.forEach(function(m,i){
       var card=document.createElement("div");
-      card.className="statcard"+(m.live?" live":"");
+      card.className="statcard";
       card.innerHTML=
-        '<div class="pulsedot"></div>'+
         '<div class="statlabel">'+m.label+'</div>'+
-        '<div class="statnum scramble" id="sn_'+m.key+'">—</div>'+
-        '<div class="statdesc">'+m.desc+'</div>';
+        '<div class="statbody"><div><div class="statnum scramble" id="sn_'+m.key+'">—</div>'+
+        '<div class="statdesc">'+m.desc+'</div></div><div class="statobject '+m.object+'"><i></i></div></div>';
       grid.appendChild(card);
     });
 
@@ -433,7 +426,7 @@
         var D=window.IBEE_STATS||{};
         if(D.metrics){
           D.metrics.forEach(function(m,i){
-            var key=["population","signals","citizens","entrances","online"][i];
+            var key=["population","signals","citizens","entrances"][i];
             var el=document.getElementById("sn_"+key);
             if(el&&m.value!=null){ el.dataset.val=m.value; el.textContent=fmt(m.value); }
           });

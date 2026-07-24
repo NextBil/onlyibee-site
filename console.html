@@ -95,6 +95,13 @@
   }
   header .brand .red{color:var(--red)}
   header .sys{color:var(--dim);font-size:9px;text-align:right;line-height:1.6}
+  #networkbar{display:flex;align-items:center;gap:13px;padding:8px 18px;border-bottom:1px solid var(--border);background:#090909;font-family:var(--px);font-size:8px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;max-height:42px;transition:max-height .45s ease,opacity .35s,padding .45s ease}
+  #networkbar .netlabel{color:var(--acid);text-decoration:none}.netmetric{color:var(--dim)}.netmetric b{color:var(--ink);font-weight:normal}.netgo{margin-left:auto;color:var(--red);text-decoration:none}
+  #networktab{position:fixed;z-index:70;right:14px;top:66px;opacity:0;pointer-events:none;transform:translateY(-8px);transition:.3s;padding:7px 9px;border:1px solid var(--border);background:#090909;color:var(--acid);font-family:var(--px);font-size:8px;text-decoration:none}
+  body.network-quiet #networkbar{max-height:0;padding-top:0;padding-bottom:0;opacity:0;border-bottom-color:transparent}
+  body.network-quiet #networktab{opacity:1;pointer-events:auto;transform:none}
+  body.musicfit #networkbar,body.musicfit #networktab{display:none}
+  @media(max-width:560px){#networkbar{gap:8px;font-size:7px}#networkbar .netmetric:nth-of-type(3),#networkbar .netmetric:nth-of-type(4){display:none}}
   main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:26px 18px 90px}
 
   /* ---------- Screens ---------- */
@@ -445,6 +452,9 @@
   .plats a:hover{color:var(--acid);border-color:var(--acid);transform:translateY(-3px);
     box-shadow:0 0 14px rgba(182,255,0,.3)}
   .plats svg{width:28px;height:28px;fill:currentColor;display:block}
+  .aboutnet{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:34px;padding:13px 14px;border:1px solid var(--border);background:#0a0a0a;color:var(--acid);text-decoration:none;font-family:var(--px);font-size:9px;line-height:1.7;transition:border-color .2s,background .2s}
+  .aboutnet span{color:var(--dim);font-family:var(--vt);font-size:17px}.aboutnet b{color:var(--ink);font-weight:normal}.aboutnet:hover{border-color:var(--acid);background:#0d1400}
+  @media(max-width:560px){.aboutnet{display:block}.aboutnet span{display:block;margin-top:5px;font-size:15px}}
 
   /* ---------- Footer HUD ---------- */
   footer{
@@ -478,6 +488,8 @@
     <div class="brand" id="brand" data-go="menu">ONLY<span class="red">IBEE</span>&nbsp;OS</div>
     <div class="sys">v1.1 // engine for art &amp; discovery<br><span id="clock"></span></div>
   </header>
+  <div id="networkbar" aria-label="Community data"><a class="netlabel" href="stats/">NETWORK</a><span class="netmetric"><b data-net="population">—</b> VISITORS</span><span class="netmetric"><b data-net="signals">—</b> LISTENERS</span><span class="netmetric"><b data-net="citizens">—</b> CITIZENS</span><span class="netmetric"><b data-net="entrances">—</b> PLAYS</span><a class="netgo" href="stats/">OPEN ↗</a></div>
+  <a id="networktab" href="stats/">NETWORK ↗</a>
 
   <main>
     <!-- MENU -->
@@ -686,6 +698,7 @@
         <li><a href="mailto:contact@onlyibee.com">EMAIL → CONTACT@ONLYIBEE.COM</a></li>
         <li><a href="https://www.instagram.com/onlyibee/" target="_blank" rel="noopener">INSTAGRAM → @ONLYIBEE</a></li>
       </ul>
+      <a class="aboutnet" href="stats/">NETWORK DATA ↗ <span><b data-net="population">—</b> VISITORS · <b data-net="signals">—</b> LISTENERS · <b data-net="citizens">—</b> CITIZENS · <b data-net="entrances">—</b> PLAYS</span></a>
     </section>
   </main>
 
@@ -1917,5 +1930,15 @@
 })();
 </script>
 <script src="/assets/stats-client.js?v=6"></script>
+<script>
+(function(){
+  var bar=document.getElementById("networkbar"), quietTimer;
+  function show(){document.body.classList.remove("network-quiet");clearTimeout(quietTimer);quietTimer=setTimeout(function(){document.body.classList.add("network-quiet");},9000);}
+  function setValues(d){document.querySelectorAll("[data-net]").forEach(function(el){var v=d[el.getAttribute("data-net")];if(v!=null)el.textContent=Number(v).toLocaleString();});}
+  function refresh(tries){var S=window.IBEE_STATS_CLIENT;if(!S||!S.fetch){if((tries||0)<20)setTimeout(function(){refresh((tries||0)+1);},350);return;}S.fetch().then(setValues).catch(function(){});}
+  refresh();setInterval(refresh,60000);show();
+  bar.addEventListener("mouseenter",show);bar.addEventListener("focusin",show);document.addEventListener("mousemove",function(e){if(e.clientY<115)show();});document.addEventListener("touchstart",function(e){if(e.touches[0]&&e.touches[0].clientY<115)show();},{passive:true});
+})();
+</script>
 </body>
 </html>
