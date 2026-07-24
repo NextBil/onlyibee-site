@@ -56,8 +56,8 @@
   #acct{flex:none;border-left:1px solid var(--border)}
   #acct button{font-family:var(--px);font-size:9px;padding:13px 12px;cursor:pointer;white-space:nowrap;
     display:flex;align-items:center;gap:6px;height:100%}
-  #acct button.login{background:var(--acid);color:#000;border:0}
-  #acct button.login:hover{background:#c9ff33}
+  #bar #acct button.login{background:#ffd60a!important;color:#000!important;border:0}
+  #bar #acct button.login:hover{background:#ffe166!important}
   #acct button.me{background:transparent;color:var(--acid);border:0}
   #acct button.me:hover{color:#fff}
   #acct .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 6px var(--acid);flex:none}
@@ -399,7 +399,7 @@
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
 <script src="assets/player.js?v=23"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
-<script src="assets/stats-client.js?v=6"></script>
+<script src="assets/stats-client.js?v=7"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
