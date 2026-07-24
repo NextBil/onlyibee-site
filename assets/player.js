@@ -65,7 +65,7 @@
      pages defer to the shell above, so a visit is never counted twice. */
   try{
     var tsc = document.createElement("script");
-    tsc.src = BASE + "stats-client.js?v=4";
+    tsc.src = BASE + "stats-client.js?v=5";
     document.head.appendChild(tsc);
   }catch(e){}
 
