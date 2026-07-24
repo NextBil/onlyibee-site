@@ -86,7 +86,7 @@
   header{
     display:flex;align-items:center;justify-content:space-between;
     padding:16px 18px;border-bottom:2px solid var(--border);
-    font-family:var(--px);font-size:11px;position:relative;z-index:50;
+    font-family:var(--px);font-size:11px;position:sticky;top:0;z-index:61;
   }
   header .brand{
     color:var(--acid);cursor:pointer;user-select:none;
@@ -95,7 +95,7 @@
   }
   header .brand .red{color:var(--red)}
   header .sys{color:var(--dim);font-size:9px;text-align:right;line-height:1.6}
-  #networkbar{display:flex;align-items:center;gap:13px;padding:8px 18px;border-bottom:1px solid var(--border);background:#090909;font-family:var(--px);font-size:8px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;max-height:42px;transition:max-height .45s ease,opacity .35s,padding .45s ease}
+  #networkbar{display:flex;align-items:center;gap:13px;padding:8px 18px;border-bottom:1px solid var(--border);background:#090909;font-family:var(--px);font-size:8px;letter-spacing:.4px;white-space:nowrap;overflow:hidden;max-height:42px;transition:max-height .45s ease,opacity .35s,padding .45s ease;position:sticky;top:55px;z-index:60}
   #networkbar .netlabel{color:var(--acid);text-decoration:none}.netmetric{color:var(--dim)}.netmetric b{color:var(--ink);font-weight:normal}.netgo{margin-left:auto;color:var(--red);text-decoration:none}
   #networktab{position:fixed;z-index:70;right:14px;top:66px;opacity:0;pointer-events:none;transform:translateY(-8px);transition:.3s;padding:7px 9px;border:1px solid var(--border);background:#090909;color:var(--acid);font-family:var(--px);font-size:8px;text-decoration:none}
   body.network-quiet #networkbar{max-height:0;padding-top:0;padding-bottom:0;opacity:0;border-bottom-color:transparent}

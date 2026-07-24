@@ -813,7 +813,8 @@
   var pcover=document.getElementById('pcover'),pcoverimg=document.getElementById('pcoverimg'),lastCoverI=-2;
   var songinfo=document.getElementById('songinfo');
   function openSongInfo(){
-    var r=R(),i=r&&r.current?r.current():-1,s=r&&r.song?r.song():null;if(!s||i<0)return;
+    var r=R(),i=r&&r.current?r.current():-1,s=r&&r.song?r.song():null;
+    if(!s||i<0){document.getElementById('songinfoname').textContent='NO SONG SELECTED';document.getElementById('songinfoalbum').textContent='START A TRACK TO READ ITS INFO';document.getElementById('songinfocopy').innerHTML='<p>THE RECORD’S STORY AND PLAY COUNT APPEAR HERE.</p>';document.getElementById('songinfoplays').textContent='PLAYS // —';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');return;}
     var alb=r.album?r.album(i):{},m=META[s.f]||{},art=document.getElementById('songinfoart');
     document.getElementById('songinfoname').textContent=s.n||'—';document.getElementById('songinfoalbum').textContent=alb.name||'';
     art.onerror=function(){art.onerror=null;art.style.display='none';};art.style.display='block';art.src=(s.cover||alb.cover||'');
@@ -823,7 +824,8 @@
     var S=window.IBEE_STATS_CLIENT;if(S&&S.songCounts)S.songCounts().then(function(rows){var row=(rows||[]).filter(function(x){return x.song_slug===s.f;})[0];plays.textContent='PLAYS // '+(row?Number(row.plays).toLocaleString():'0');}).catch(function(){plays.textContent='PLAYS // UNAVAILABLE';});else plays.textContent='PLAYS // UNAVAILABLE';
   }
   function closeSongInfo(){songinfo.classList.remove('on');songinfo.setAttribute('aria-hidden','true');}
-  pcover.onclick=openSongInfo;pcover.setAttribute('role','button');pcover.setAttribute('tabindex','0');pcover.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openSongInfo();}};
+  function coverTap(e){if(e){e.preventDefault();e.stopPropagation();}openSongInfo();}
+  pcover.onclick=coverTap;pcover.addEventListener('pointerup',coverTap,true);pcover.setAttribute('role','button');pcover.setAttribute('tabindex','0');pcover.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openSongInfo();}};
   document.getElementById('songinfoclose').onclick=closeSongInfo;songinfo.onclick=function(e){if(e.target===songinfo)closeSongInfo();};
   function setPcover(r,i,s){
     var hue=(s&&s.hue!=null)?s.hue:75;
