@@ -196,6 +196,11 @@
     letter-spacing:1px;
   }
   .extraline .x b{color:var(--acid);font-weight:normal}
+  .rankings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+  .rankcard{border:1px solid var(--border);background:#0a0a0a;padding:15px 16px}
+  .ranktitle{font-family:var(--px);font-size:9px;color:var(--cyan);margin-bottom:13px;letter-spacing:1px}
+  .rankrow{display:flex;align-items:center;gap:9px;border-top:1px solid #1b1b1b;padding:9px 0;font-size:19px;color:#cfcfcf}
+  .rankrow:first-of-type{border-top:0;padding-top:0}.rankno{font-family:var(--px);font-size:8px;color:#555;width:17px}.rankname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.rankvalue{font-family:var(--px);font-size:8px;color:var(--acid);white-space:nowrap}.rankempty{color:#555;font-size:18px}
 
   /* Terminal log lines */
   .termlog{
@@ -223,6 +228,7 @@
   @media(max-width:560px){
     header .sys{display:none}
     #statgrid{grid-template-columns:1fr}
+    .rankings{grid-template-columns:1fr}
   }
 </style>
 </head>
@@ -252,6 +258,10 @@
     <div id="statgrid"></div>
 
     <div class="extraline" id="extras"></div>
+    <div class="rankings">
+      <section class="rankcard"><div class="ranktitle">TOP SONGS // MOST STREAMED</div><div id="topsongs" class="rankempty">reading signals_</div></section>
+      <section class="rankcard"><div class="ranktitle">TOP COUNTRIES // THIS MONTH</div><div id="topcountries" class="rankempty">reading locations_</div></section>
+    </div>
 
     <div class="termlog" id="termlog">
       <div><span class="tl-time">[00:00:00]</span><span class="tl-ok">✓</span> stats module loaded</div>
@@ -270,15 +280,16 @@
     <button class="infoclose" id="infoclose" aria-label="Close">✕</button>
     <h2 id="infotitle">WHY THESE NUMBERS ARE REAL_</h2>
     <p><strong>NOT HAND-TYPED.</strong> Every number on this screen is read from the ONLY IBEE database when the page refreshes. The screen does not generate random numbers or add pretend activity.</p>
-    <p><strong>VISITS.</strong> When someone enters the site, their browser gets an anonymous visitor token. It has no name, email or IP address. The same browser is counted once for monthly population, rather than once per page refresh.</p>
+    <p><strong>VISITS.</strong> When someone enters the site, their browser gets an anonymous visitor token. It has no name or email. The same browser is counted once for monthly population, rather than once per page refresh.</p>
     <p><strong>ONLINE NOW.</strong> A visitor is shown as online only while their browser has checked in during the last two minutes. Leave the site and that signal naturally disappears.</p>
     <p><strong>SONG PLAYS.</strong> A play is saved only when the radio actually starts a song. Repeated taps or replays of the same song from the same browser within 30 minutes do not add extra plays. Each song's count in the radio list comes from those saved plays.</p>
     <p><strong>MEMBERS.</strong> CITIZENS is the real number of registered ONLY IBEE accounts. The public page can see only the final total — never account details.</p>
+    <p><strong>COUNTRIES.</strong> For the country ranking, the site asks a location service only for a two-letter country code. No IP address is saved in the ONLY IBEE database.</p>
     <p class="dim">The database is the source of truth. If it cannot be reached, this screen does not invent a replacement number.</p>
   </section>
 </div>
 
-<script src="../assets/stats-client.js?v=4"></script>
+<script src="../assets/stats-client.js?v=5"></script>
 <script src="../assets/stats-data.js?cb=1"></script>
 <script>
 (function(){
@@ -381,6 +392,12 @@
       }).join('');
     }
     renderExtras(window.IBEE_STATS&&window.IBEE_STATS.extra);
+    function songName(slug){return String(slug||"").replace(/\.[a-z0-9]+$/i,"").replace(/[-_]+/g," ").toUpperCase();}
+    function rankRows(rows,nameKey,valueKey,suffix,empty){return rows&&rows.length?rows.slice(0,5).map(function(row,i){return '<div class="rankrow"><span class="rankno">0'+(i+1)+'</span><span class="rankname">'+songName(row[nameKey])+'</span><span class="rankvalue">'+fmt(row[valueKey])+suffix+'</span></div>';}).join(''):'<div class="rankempty">'+empty+'</div>';}
+    function refreshRankings(){var S=window.IBEE_STATS_CLIENT;if(!S)return;
+      if(S.songCounts)S.songCounts().then(function(rows){document.getElementById("topsongs").innerHTML=rankRows(rows,"song_slug","plays"," PLAYS","no plays yet_");}).catch(function(){});
+      if(S.countries)S.countries().then(function(rows){document.getElementById("topcountries").innerHTML=rankRows(rows,"country_code","visitors"," VISITORS","locations appear as visitors arrive_");}).catch(function(){});
+    }
 
     /* terminal chatter */
     setTimeout(function(){logLine("connected to ONLY IBEE node","tl-ok");},400);
@@ -407,6 +424,7 @@
           {value:d.signals||0,label:"LISTENERS REACHED"},
           {value:d.entrances||0,label:"SIGNALS PLAYED"}
         ]);
+        refreshRankings();
         logLine("signal refreshed — live","tl-ok");
       }).catch(function(e){
         logLine("network unreachable — showing cached","tl-warn");
