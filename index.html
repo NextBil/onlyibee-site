@@ -384,7 +384,7 @@
     </div>
   </div>
 
-  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocities"><div class="citytitle">TOP CITIES // LISTENER LOCATIONS</div><div class="cityempty">READING LOCATIONS_</div></div><div id="songinfocopy"></div><div id="songinfomorelabel">MORE SIGNALS_</div><div id="songinfomore"></div></section></div>
+  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div><div id="songinfocopy"></div><div id="songinfomorelabel">MORE SIGNALS_</div><div id="songinfomore"></div></section></div>
 </div>
 
 <!-- PRESS START intro overlay -->
@@ -399,7 +399,7 @@
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
 <script src="assets/player.js?v=23"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
-<script src="assets/stats-client.js?v=7"></script>
+<script src="assets/stats-client.js?v=8"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -815,7 +815,7 @@
   var songinfo=document.getElementById('songinfo'),songInfoRequest=0;
   function openSongInfo(){
     var r=R(),i=r&&r.current?r.current():-1,s=r&&r.song?r.song():null;
-    if(!s||i<0){document.getElementById('songinfoname').textContent='NO SONG SELECTED';document.getElementById('songinfoalbum').textContent='START A TRACK TO READ ITS INFO';document.getElementById('songinfocopy').innerHTML='<p>THE RECORD’S STORY, PLAY COUNT AND LISTENER LOCATIONS APPEAR HERE.</p>';document.getElementById('songinfoplays').textContent='PLAYS // —';document.getElementById('songinfocities').innerHTML='<div class="citytitle">TOP CITIES // LISTENER LOCATIONS</div><div class="cityempty">START A TRACK TO READ LOCATIONS_</div>';document.getElementById('songinfomore').innerHTML='';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');return;}
+    if(!s||i<0){document.getElementById('songinfoname').textContent='NO SONG SELECTED';document.getElementById('songinfoalbum').textContent='START A TRACK TO READ ITS INFO';document.getElementById('songinfocopy').innerHTML='<p>THE RECORD’S STORY, PLAY COUNT AND LISTENER LOCATIONS APPEAR HERE.</p>';document.getElementById('songinfoplays').textContent='PLAYS // —';document.getElementById('songinfocities').innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">START A TRACK TO READ LOCATIONS_</div>';document.getElementById('songinfomore').innerHTML='';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');return;}
     var alb=r.album?r.album(i):{},m=META[s.f]||{},art=document.getElementById('songinfoart');
     document.getElementById('songinfoname').textContent=s.n||'—';document.getElementById('songinfoalbum').textContent=alb.name||'';
     art.onerror=function(){art.onerror=null;art.style.display='none';};art.style.display='block';art.src=(s.cover||alb.cover||'');
@@ -824,9 +824,9 @@
     var more=[],total=r.count||0;for(var step=1;step<=total&&more.length<6;step++){var n=(i+step)%total,other=r.song(n);if(other&&n!==i)more.push({i:n,s:other,a:r.album?r.album(n):{}});}
     document.getElementById('songinfomore').innerHTML=more.map(function(x){var src=x.s.cover||x.a.cover||'';return '<button class="songmore" data-song="'+x.i+'"><img alt="" src="'+e3(src)+'"><span>'+e3(x.s.n)+'</span></button>';}).join('');
     document.getElementById('songinfomore').onclick=function(e){var b=e.target.closest('.songmore');if(!b)return;var n=Number(b.dataset.song);if(r.control&&r.control.play){r.control.play(n);openSongInfo();}};
-    var plays=document.getElementById('songinfoplays'),cities=document.getElementById('songinfocities'),request=++songInfoRequest;plays.textContent='PLAYS // READING_';cities.innerHTML='<div class="citytitle">TOP CITIES // LISTENER LOCATIONS</div><div class="cityempty">READING LOCATIONS_</div>';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');
+    var plays=document.getElementById('songinfoplays'),cities=document.getElementById('songinfocities'),request=++songInfoRequest;plays.textContent='PLAYS // READING_';cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div>';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');
     var S=window.IBEE_STATS_CLIENT;if(S&&S.songCounts)S.songCounts().then(function(rows){var row=(rows||[]).filter(function(x){return x.song_slug===s.f;})[0];plays.textContent='PLAYS // '+(row?Number(row.plays).toLocaleString():'0');}).catch(function(){plays.textContent='PLAYS // UNAVAILABLE';});else plays.textContent='PLAYS // UNAVAILABLE';
-    if(S&&S.cities)S.cities().then(function(rows){if(request!==songInfoRequest)return;rows=(rows||[]).slice(0,5);cities.innerHTML='<div class="citytitle">TOP CITIES // LISTENER LOCATIONS</div>'+(rows.length?rows.map(function(row,n){return '<div class="cityrow"><span>0'+(n+1)+' · '+e3(row.city_name||'UNKNOWN')+'</span><span class="citycount">'+Number(row.visitors||0).toLocaleString()+' VISITORS</span></div>';}).join(''):'<div class="cityempty">LOCATIONS APPEAR AS LISTENERS ARRIVE_</div>');}).catch(function(){if(request===songInfoRequest)cities.innerHTML='<div class="citytitle">TOP CITIES // LISTENER LOCATIONS</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';});else cities.innerHTML='<div class="citytitle">TOP CITIES // LISTENER LOCATIONS</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';
+    if(S&&S.songCities)S.songCities(s.f).then(function(rows){if(request!==songInfoRequest)return;rows=(rows||[]).slice(0,5);cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div>'+(rows.length?rows.map(function(row,n){return '<div class="cityrow"><span>0'+(n+1)+' · '+e3(row.city_name||'UNKNOWN')+'</span><span class="citycount">'+Number(row.listeners||0).toLocaleString()+' LISTENERS</span></div>';}).join(''):'<div class="cityempty">CITIES APPEAR AS THIS SONG IS PLAYED_</div>');}).catch(function(){if(request===songInfoRequest)cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';});else cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';
   }
   function closeSongInfo(){songinfo.classList.remove('on');songinfo.setAttribute('aria-hidden','true');}
   document.getElementById('songinfoalbum').onclick=function(){
