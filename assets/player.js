@@ -60,6 +60,14 @@
     csc.src = BASE + "cloudsync.js?cb=" + Date.now();
     document.head.appendChild(csc);
   }catch(e){}
+  /* Public community telemetry: the client keeps an anonymous presence heartbeat
+     on every standalone page and listens for actual radio play events. Framed
+     pages defer to the shell above, so a visit is never counted twice. */
+  try{
+    var tsc = document.createElement("script");
+    tsc.src = BASE + "stats-client.js?v=3";
+    document.head.appendChild(tsc);
+  }catch(e){}
 
   /* ---------- albums: the cover + name every song wears, and (for specials)
      the ROOM it belongs to + the galaxy it maps to in the music universe.
