@@ -7,19 +7,22 @@
 <meta name="description" content="Only Ibee — a genre-blending artist and a playable music console. Alternative RnB, soul and hip hop across a reactive universe, arcade games, karaoke lyrics, ICS characters and UTOPIE clothing.">
 <link rel="canonical" href="https://onlyibee.com/">
 <link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
-<link rel="apple-touch-icon" href="/assets/chess/bishop1.png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <meta name="theme-color" content="#070707">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ONLY IBEE">
 <meta property="og:title" content="ONLY IBEE — music, played as a world">
 <meta property="og:description" content="A playable music console: every page reacts to the song. Music, games, lyrics, ICS characters, UTOPIE clothing.">
 <meta property="og:url" content="https://onlyibee.com/">
-<meta property="og:image" content="https://onlyibee.com/assets/chess/bishop1.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://onlyibee.com/assets/img/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <!-- structured data: tells Google this is the artist Only Ibee. Add your real social URLs to sameAs for stronger branded search. -->
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"MusicGroup","name":"Only Ibee","alternateName":"ONLYIBEE",
-"url":"https://onlyibee.com/","image":"https://onlyibee.com/assets/chess/bishop1.png",
+"url":"https://onlyibee.com/","image":"https://onlyibee.com/assets/img/og-default.png",
+"logo":"https://onlyibee.com/assets/img/brand/utopie-umbrella-pixel-acid.png",
 "genre":["Alternative RnB","Soul","Hip Hop"],
 "description":"Only Ibee — genre-blending artist and creative world: music, UTOPIE clothing, ICS characters, presented as a playable music console where every page reacts to the song.",
 "sameAs":[]}
@@ -85,6 +88,7 @@
   #tracklist .tr .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #tracklist .tr .al{font-family:var(--px);font-size:7px;letter-spacing:1px;color:#565656;
     margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #tracklist .tr .pc{font-family:var(--px);font-size:7px;letter-spacing:.6px;color:#5d5d5d;margin-top:5px}
   #tracklist .tr.now .al{color:#6b8f00}
   #tracklist .tr:hover{background:#0d0d0d;color:var(--ink)}
   #tracklist .tr.now{color:var(--acid);background:#0d1400}
@@ -142,7 +146,9 @@
     background:var(--rt,var(--red));padding:4px 5px;letter-spacing:.5px}
   .tl-tile .nm{font-family:var(--px);font-size:8px;color:#cfcfcf;margin-top:7px;line-height:1.5;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tl-tile .pc{display:block;font-family:var(--px);font-size:7px;color:#5d5d5d;margin-top:5px;letter-spacing:.4px}
   .tl-tile.now .nm{color:var(--acid)}
+  .tl-tile.now .pc{color:#6b8f00}
   .tl-tile.locked{cursor:not-allowed}
   .tl-tile.locked .art img{filter:brightness(.32) grayscale(.75)}
   .tl-tile.locked .art::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.35)}
@@ -382,7 +388,9 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=20"></script>
+<script src="assets/player.js?v=21"></script>
+<!-- privacy-preserving community heartbeat + global song-play counter -->
+<script src="assets/stats-client.js?v=3"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -408,7 +416,8 @@
     {n:'ROOMS',   u:'arcade/'},
     {n:'SHOP',    u:'console.html#shop'},
     {n:'TV',      u:'tv/'},
-    {n:'ICS',     u:'console.html#ics'}
+    {n:'ICS',     u:'console.html#ics'},
+    {n:'NETWORK', u:'stats/'}
   ];
   /* (lyrics left the nav — the spinning book in the player opens the overlay) */
   var navEl=document.getElementById('nav');
@@ -420,6 +429,18 @@
       if(tg&&window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget(tg);
       navigate(it.u); };
     navEl.appendChild(b);});
+  /* A quiet proof of life on the permanent bar. The full community readout lives
+     in NETWORK so the console screen stays uncluttered. */
+  (function(){
+    var netBtn=navEl.querySelector('[data-nav="NETWORK"]'), S=window.IBEE_STATS_CLIENT;
+    if(!netBtn||!S||!S.fetch)return;
+    function networkPulse(){ S.fetch().then(function(d){
+      if(!d||d.online==null)return;
+      netBtn.textContent='NETWORK · '+d.online;
+      netBtn.title=d.online+' PEOPLE CURRENTLY ONLINE — OPEN NETWORK DATA';
+    }).catch(function(){}); }
+    networkPulse(); setInterval(networkPulse,60000);
+  })();
 
   /* ---- account pill: LOG IN / PROFILE, reachable from every page (persistent shell) ----
      No supabase-js load here — just reads the same localStorage key pattern Supabase writes
@@ -626,6 +647,15 @@
     return c;
   }
   function imgTag(cands){ return cands.length?'<img alt="" loading="lazy" src="'+cands[0]+'" data-alt="'+cands.slice(1).join('|')+'">':''; }
+  var playCounts={},playStatsReady=false;
+  function playsLabel(slug){ return playStatsReady?'<span class="pc">'+((playCounts[slug]||0).toLocaleString())+' PLAYS</span>':''; }
+  function refreshSongCounts(){
+    var S=window.IBEE_STATS_CLIENT;if(!S||!S.songCounts)return;
+    S.songCounts().then(function(rows){
+      playCounts={};(rows||[]).forEach(function(row){playCounts[row.song_slug]=+row.plays||0;});
+      playStatsReady=true;if(builtCount>=0)renderTracks();
+    }).catch(function(){});
+  }
   function renderTracks(){
     var r=R();if(!r)return;
     tlbody.className = viewMode==='grid'?'grid':'';
@@ -645,12 +675,12 @@
           +(room?'<span class="roomb">ROOM</span>':'')
           +fv
           +'<span class="gtag">'+e3(aln)+'</span></div>'
-          +'<div class="nm">'+e3(s.n||'—')+'</div></div>';
+          +'<div class="nm">'+e3(s.n||'—')+playsLabel(s.f)+'</div></div>';
       } else {
         html+='<div class="tr'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
           +'<span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
           +'<span class="cv" style="background:'+vinyl(s.hue)+'">'+img0+'</span>'
-          +'<span class="ti"><span class="tn">'+e3(s.n||'—')+'</span><span class="al">'+e3(aln)+'</span></span>'
+          +'<span class="ti"><span class="tn">'+e3(s.n||'—')+'</span><span class="al">'+e3(aln)+'</span>'+playsLabel(s.f)+'</span>'
           +fv
           +(s.locked?LKSVG:(room?'<span class="rmroom">ROOM</span>':''))
           +'</div>';
@@ -702,6 +732,9 @@
       };
     });
   }
+  refreshSongCounts();
+  setInterval(refreshSongCounts,30000);
+  window.addEventListener('ibee:play-counted',refreshSongCounts);
   function markNow(){
     var r=R();if(!r)return; var cur=r.current();
     Array.prototype.forEach.call(tlbody.children,function(el){

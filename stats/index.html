@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ONLY IBEE — NETWORK DATA</title>
+<meta name="description" content="Live statistics from the ONLY IBEE universe. Population, signals, citizens, entrances and the current online count.">
+<meta name="theme-color" content="#070707">
+<link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070707;
+    --panel:#0e0e0e;
+    --ink:#e8e8e8;
+    --dim:#7a7a7a;
+    --acid:#b6ff00;
+    --red:#ff2b2b;
+    --cyan:#26e0ff;
+    --pink:#ff2bd6;
+    --border:#2a2a2a;
+    --px:'Press Start 2P',monospace;
+    --vt:'VT323',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:var(--vt);font-size:20px;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--acid);color:#000}
+
+  /* CRT overlay */
+  .crt::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);
+  }
+  .crt::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+    background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);
+  }
+  .flicker{animation:flick 6s infinite}
+  @keyframes flick{
+    0%,100%{opacity:1}92%{opacity:1}93%{opacity:.82}94%{opacity:1}97%{opacity:.9}98%{opacity:1}
+  }
+
+  /* Boot */
+  #boot{
+    position:fixed;inset:0;background:#000;z-index:8000;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+    cursor:pointer;
+  }
+  #boot .glyph{
+    font-family:var(--px);font-size:clamp(20px,5vw,44px);color:var(--acid);
+    text-shadow:0 0 18px rgba(182,255,0,.55);
+    letter-spacing:2px;
+  }
+  #boot .glyph .red{color:var(--red);text-shadow:0 0 18px rgba(255,43,43,.55)}
+  #bootbar{width:min(420px,70vw);height:16px;border:2px solid var(--acid);padding:2px}
+  #bootfill{height:100%;width:0%;background:var(--acid)}
+  #bootlog{font-family:var(--vt);color:var(--dim);font-size:18px;height:24px;text-align:center}
+  #pressstart{
+    display:none;font-family:var(--px);font-size:14px;color:var(--ink);
+    animation:blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
+
+  /* OS */
+  #os{display:none;min-height:100dvh;flex-direction:column}
+  #os.on{display:flex}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px;border-bottom:2px solid var(--border);
+    font-family:var(--px);font-size:11px;position:relative;z-index:50;
+  }
+  header .brand{
+    color:var(--acid);cursor:pointer;user-select:none;
+    font-size:clamp(15px,4.2vw,20px);letter-spacing:1px;
+    text-shadow:0 0 12px rgba(182,255,0,.35);
+  }
+  header .brand .red{color:var(--red)}
+  header .sys{color:var(--dim);font-size:9px;text-align:right;line-height:1.6}
+  main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:26px 18px 90px}
+
+  /* Title */
+  .scrtitle{
+    font-family:var(--px);font-size:clamp(14px,3vw,22px);margin-bottom:6px;color:var(--ink);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .scrsub{color:var(--dim);margin-bottom:26px;font-size:20px}
+  .acid{color:var(--acid)} .red{color:var(--red)} .dim{color:var(--dim)}
+
+  /* Back */
+  .back{
+    font-family:var(--px);font-size:10px;color:var(--dim);cursor:pointer;
+    display:inline-block;margin-bottom:22px;border:1px solid var(--border);padding:8px 12px;
+    background:var(--bg);user-select:none;text-decoration:none;
+  }
+  .back:hover{color:var(--acid);border-color:var(--acid)}
+  .infobtn{font-family:var(--px);font-size:8px;color:var(--cyan);background:#071114;border:1px solid #17424b;padding:10px 12px;cursor:pointer;margin:-8px 0 24px}
+  .infobtn:hover{color:#000;background:var(--cyan);border-color:var(--cyan)}
+  #datainfo{display:none;position:fixed;inset:0;z-index:7000;background:rgba(0,0,0,.78);padding:18px;align-items:center;justify-content:center}
+  #datainfo.on{display:flex}
+  .infobox{width:min(620px,100%);max-height:85dvh;overflow:auto;background:#090909;border:2px solid var(--acid);box-shadow:0 0 32px rgba(182,255,0,.2);padding:22px 20px;position:relative}
+  .infobox h2{font-family:var(--px);font-size:14px;color:var(--acid);line-height:1.55;margin:0 34px 14px 0}
+  .infobox p{font-size:20px;line-height:1.36;color:#d0d0d0;margin:0 0 14px}
+  .infobox strong{font-family:var(--px);font-size:9px;color:var(--cyan)}
+  .infoclose{position:absolute;top:12px;right:12px;font-family:var(--px);font-size:11px;background:#151515;color:#ddd;border:1px solid var(--border);padding:8px;cursor:pointer}
+  .infoclose:hover{border-color:var(--acid);color:var(--acid)}
+
+  /* ================= STATS GRID ================= */
+  #statgrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+    margin-bottom:34px;
+  }
+  .statcard{
+    position:relative;
+    border:2px solid var(--border);
+    background:var(--panel);
+    padding:18px 16px 16px;
+    transition:border-color .2s,box-shadow .2s,transform .2s;
+    overflow:hidden;
+  }
+  .statcard:hover{
+    border-color:var(--acid);
+    box-shadow:0 0 18px rgba(182,255,0,.18);
+    transform:translateY(-2px);
+  }
+  .statcard.live{
+    border-color:#4d6600;
+    animation:livepulse 2.2s ease-in-out infinite;
+  }
+  .statcard.live:hover{border-color:var(--acid)}
+  @keyframes livepulse{
+    0%,100%{box-shadow:0 0 6px rgba(182,255,0,.12)}
+    50%{box-shadow:0 0 20px rgba(182,255,0,.35)}
+  }
+  /* corner accent */
+  .statcard::before{
+    content:"";position:absolute;top:0;left:0;width:18px;height:18px;
+    border-top:2px solid var(--acid);border-left:2px solid var(--acid);
+    opacity:.35;transition:opacity .2s;
+  }
+  .statcard:hover::before{opacity:.9}
+  .statcard::after{
+    content:"";position:absolute;bottom:0;right:0;width:18px;height:18px;
+    border-bottom:2px solid var(--acid);border-right:2px solid var(--acid);
+    opacity:.35;transition:opacity .2s;
+  }
+  .statcard:hover::after{opacity:.9}
+  /* live dot */
+  .statcard .pulsedot{
+    position:absolute;top:12px;right:12px;
+    width:8px;height:8px;border-radius:50%;background:var(--red);
+    box-shadow:0 0 8px var(--red);
+    animation:dotpulse 1.4s ease-in-out infinite;
+    display:none;
+  }
+  .statcard.live .pulsedot{display:block}
+  @keyframes dotpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+  .statlabel{
+    font-family:var(--px);font-size:8px;color:var(--dim);
+    letter-spacing:1.5px;margin-bottom:10px;
+  }
+  .statcard:hover .statlabel{color:var(--acid)}
+  .statnum{
+    font-family:var(--px);font-size:clamp(22px,5vw,34px);
+    color:var(--ink);letter-spacing:1px;
+    text-shadow:0 0 14px rgba(232,232,232,.08);
+    line-height:1.2;
+  }
+  .statcard.live .statnum{color:var(--acid);text-shadow:0 0 16px rgba(182,255,0,.35)}
+  .statdesc{
+    font-family:var(--vt);font-size:17px;color:#555;
+    margin-top:8px;letter-spacing:.5px;
+  }
+  .statcard:hover .statdesc{color:var(--dim)}
+
+  /* scramble effect chars */
+  .scramble{display:inline-block;min-width:1ch}
+
+  /* Extra stats row */
+  .extraline{
+    display:flex;flex-wrap:wrap;gap:10px 28px;
+    margin-top:10px;padding-top:18px;
+    border-top:1px solid var(--border);
+  }
+  .extraline .x{
+    font-family:var(--px);font-size:8px;color:var(--dim);
+    letter-spacing:1px;
+  }
+  .extraline .x b{color:var(--acid);font-weight:normal}
+
+  /* Terminal log lines */
+  .termlog{
+    margin-top:34px;
+    border:1px solid var(--border);
+    background:#050505;
+    padding:14px 16px;
+    font-family:var(--vt);font-size:16px;
+    color:var(--dim);line-height:1.7;
+    max-height:180px;overflow-y:auto;
+  }
+  .termlog .tl-time{color:#444;margin-right:8px}
+  .termlog .tl-ok{color:var(--acid)}
+  .termlog .tl-warn{color:var(--red)}
+  .termlog .tl-info{color:var(--cyan)}
+
+  /* Footer */
+  footer{
+    position:fixed;bottom:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 18px;background:#000;border-top:2px solid var(--border);
+    font-family:var(--px);font-size:9px;color:var(--dim);
+  }
+
+  @media(max-width:560px){
+    header .sys{display:none}
+    #statgrid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body class="crt flicker">
+
+<!-- ============ BOOT ============ -->
+<div id="boot">
+  <div class="glyph">ONLY<span class="red">IBEE</span></div>
+  <div id="bootbar"><div id="bootfill"></div></div>
+  <div id="bootlog">initializing…</div>
+  <div id="pressstart">▶ PRESS START</div>
+</div>
+
+<!-- ============ OS ============ -->
+<div id="os">
+  <header>
+    <div class="brand" onclick="location.href='../console.html'">ONLY<span class="red">IBEE</span>&nbsp;OS</div>
+    <div class="sys">NETWORK DATA // live stats_<br><span id="clock"></span></div>
+  </header>
+
+  <main>
+    <a class="back" href="../console.html#menu">◀ BACK</a>
+    <div class="scrtitle">NETWORK<span class="red">.DATA</span></div>
+    <div class="scrsub">live metrics from the universe_</div>
+    <button class="infobtn" id="infobtn">? HOW THIS DATA WORKS</button>
+
+    <div id="statgrid"></div>
+
+    <div class="extraline" id="extras"></div>
+
+    <div class="termlog" id="termlog">
+      <div><span class="tl-time">[00:00:00]</span><span class="tl-ok">✓</span> stats module loaded</div>
+      <div><span class="tl-time">[00:00:00]</span><span class="tl-info">~</span> waiting for signal…</div>
+    </div>
+  </main>
+
+  <footer>
+    <span class="dim">DATA LAST UPDATE: <span id="lastup">—</span></span>
+    <span>© ONLYIBEE <span id="yr"></span></span>
+  </footer>
+</div>
+
+<div id="datainfo" aria-hidden="true">
+  <section class="infobox" role="dialog" aria-modal="true" aria-labelledby="infotitle">
+    <button class="infoclose" id="infoclose" aria-label="Close">✕</button>
+    <h2 id="infotitle">WHY THESE NUMBERS ARE REAL_</h2>
+    <p><strong>NOT HAND-TYPED.</strong> Every number on this screen is read from the ONLY IBEE database when the page refreshes. The screen does not generate random numbers or add pretend activity.</p>
+    <p><strong>VISITS.</strong> When someone enters the site, their browser gets an anonymous visitor token. It has no name, email or IP address. The same browser is counted once for monthly population, rather than once per page refresh.</p>
+    <p><strong>ONLINE NOW.</strong> A visitor is shown as online only while their browser has checked in during the last two minutes. Leave the site and that signal naturally disappears.</p>
+    <p><strong>SONG PLAYS.</strong> A play is saved only when the radio actually starts a song. Repeated taps or replays of the same song from the same browser within 30 minutes do not add extra plays. Each song's count in the radio list comes from those saved plays.</p>
+    <p><strong>MEMBERS.</strong> CITIZENS is the real number of registered ONLY IBEE accounts. The public page can see only the final total — never account details.</p>
+    <p class="dim">The database is the source of truth. If it cannot be reached, this screen does not invent a replacement number.</p>
+  </section>
+</div>
+
+<script src="../assets/stats-client.js?v=3"></script>
+<script src="../assets/stats-data.js?cb=1"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ---- Boot sequence ---- */
+  var bootLines=["initializing…","loading STATS.SYS","connecting to network","calibrating sensors","ready."];
+  var fill=document.getElementById("bootfill"),log=document.getElementById("bootlog"),ps=document.getElementById("pressstart");
+  var booted=false,p=0,li=0;
+  var bootTimer=setInterval(function(){
+    p+=Math.random()*14+6;
+    if(p>=100){p=100;clearInterval(bootTimer);log.textContent="ready.";ps.style.display="block";}
+    else if(li<bootLines.length-1 && p>(li+1)*(100/bootLines.length)){li++;log.textContent=bootLines[li];}
+    fill.style.width=p+"%";
+  },120);
+  function start(){
+    if(booted||p<100)return;booted=true;
+    document.getElementById("boot").style.display="none";
+    document.getElementById("os").classList.add("on");
+    initStats();
+  }
+  document.getElementById("boot").addEventListener("click",start);
+  var info=document.getElementById("datainfo");
+  document.getElementById("infobtn").onclick=function(){info.classList.add("on");info.setAttribute("aria-hidden","false");};
+  document.getElementById("infoclose").onclick=function(){info.classList.remove("on");info.setAttribute("aria-hidden","true");};
+  info.onclick=function(e){if(e.target===info)document.getElementById("infoclose").click();};
+
+  /* ---- Clock ---- */
+  function tick(){
+    var el=document.getElementById("clock");
+    if(el)el.textContent=new Date().toTimeString().slice(0,8);
+  }
+  tick();setInterval(tick,1000);
+  document.getElementById("yr").textContent=new Date().getFullYear();
+
+  /* ---- Number scramble effect ---- */
+  var GLY="0123456789ABCDEF#@$%&*";
+  function scramble(el,target,duration){
+    var start=performance.now();
+    var len=String(target).length;
+    function step(now){
+      var t=Math.min(1,(now-start)/duration);
+      var s="";
+      for(var i=0;i<len;i++){
+        if(t>=(i+1)/len) s+=String(target)[i];
+        else s+=GLY[Math.floor(Math.random()*GLY.length)];
+      }
+      el.textContent=s;
+      if(t<1) requestAnimationFrame(step);
+      else el.textContent=target;
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---- Format large numbers with commas ---- */
+  function fmt(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");}
+
+  /* ---- Terminal logger ---- */
+  var tlog=document.getElementById("termlog");
+  function logLine(txt,cls){
+    var d=new Date();
+    var ts=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)+":"+("0"+d.getSeconds()).slice(-2);
+    var div=document.createElement("div");
+    div.innerHTML='<span class="tl-time">['+ts+']</span><span class="'+cls+'">'+(cls==="tl-ok"?"✓":cls==="tl-warn"?"!":"~")+'</span> '+txt;
+    tlog.appendChild(div);
+    tlog.scrollTop=tlog.scrollHeight;
+  }
+
+  /* ---- Build stats ---- */
+  /* ---- Build stats ---- */
+  function initStats(){
+    var grid=document.getElementById("statgrid");
+    var extras=document.getElementById("extras");
+    var lastup=document.getElementById("lastup");
+
+    /* build the 5 metric cards once */
+    var METRICS=[
+      {key:"population", label:"POPULATION",       desc:"monthly visitors"},
+      {key:"signals",    label:"SIGNALS",          desc:"total listeners"},
+      {key:"citizens",   label:"CITIZENS",         desc:"registered members"},
+      {key:"entrances",  label:"ENTRANCES",        desc:"total plays"},
+      {key:"online",     label:"CURRENTLY ONLINE", desc:"people here now", live:true}
+    ];
+
+    METRICS.forEach(function(m,i){
+      var card=document.createElement("div");
+      card.className="statcard"+(m.live?" live":"");
+      card.innerHTML=
+        '<div class="pulsedot"></div>'+
+        '<div class="statlabel">'+m.label+'</div>'+
+        '<div class="statnum scramble" id="sn_'+m.key+'">—</div>'+
+        '<div class="statdesc">'+m.desc+'</div>';
+      grid.appendChild(card);
+    });
+
+    function renderExtras(extraData){
+      if(!extraData||!extraData.length){ extras.innerHTML=""; return; }
+      extras.innerHTML=extraData.map(function(x){
+        return '<span class="x"><b>'+fmt(x.value)+'</b> '+x.label+'</span>';
+      }).join('');
+    }
+    renderExtras(window.IBEE_STATS&&window.IBEE_STATS.extra);
+
+    /* terminal chatter */
+    setTimeout(function(){logLine("connected to ONLY IBEE node","tl-ok");},400);
+
+    /* ---- LIVE FETCH ---- */
+    function updateLive(){
+      var S=window.IBEE_STATS_CLIENT;
+      if(!S||!S.fetch){ logLine("stats client offline","tl-warn"); return; }
+      S.fetch().then(function(d){
+        if(!d||typeof d!=="object"){ logLine("bad signal from network","tl-warn"); return; }
+        METRICS.forEach(function(m){
+          var el=document.getElementById("sn_"+m.key);
+          if(!el) return;
+          var v=d[m.key]; if(v==null) return;
+          var old=el.dataset.val;
+          var s=fmt(v);
+          if(old!==String(v)){
+            el.dataset.val=v;
+            scramble(el,s,700);
+          }
+        });
+        if(d.updated) lastup.textContent=new Date(d.updated).toLocaleString();
+        renderExtras([
+          {value:d.signals||0,label:"LISTENERS REACHED"},
+          {value:d.entrances||0,label:"SIGNALS PLAYED"}
+        ]);
+        logLine("signal refreshed — live","tl-ok");
+      }).catch(function(e){
+        logLine("network unreachable — showing cached","tl-warn");
+        /* fallback to static stats-data.js */
+        var D=window.IBEE_STATS||{};
+        if(D.metrics){
+          D.metrics.forEach(function(m,i){
+            var key=["population","signals","citizens","entrances","online"][i];
+            var el=document.getElementById("sn_"+key);
+            if(el&&m.value!=null){ el.dataset.val=m.value; el.textContent=fmt(m.value); }
+          });
+        }
+      });
+    }
+
+    updateLive();
+    setInterval(updateLive, 10000);   // refresh every 10s
+
+  }
+})();
+</script>
+</body>
+</html>
