@@ -289,7 +289,7 @@
   </section>
 </div>
 
-<script src="../assets/stats-client.js?v=5"></script>
+<script src="../assets/stats-client.js?v=6"></script>
 <script src="../assets/stats-data.js?cb=1"></script>
 <script>
 (function(){
@@ -406,7 +406,8 @@
     function updateLive(){
       var S=window.IBEE_STATS_CLIENT;
       if(!S||!S.fetch){ logLine("stats client offline","tl-warn"); return; }
-      S.fetch().then(function(d){
+      /* Check this page in first, so the first screen refresh includes this visitor. */
+      (S.heartbeat ? S.heartbeat().catch(function(){}) : Promise.resolve()).then(function(){ return S.fetch(); }).then(function(d){
         if(!d||typeof d!=="object"){ logLine("bad signal from network","tl-warn"); return; }
         METRICS.forEach(function(m){
           var el=document.getElementById("sn_"+m.key);
