@@ -42,57 +42,25 @@
     buttons.forEach(function(b){b.onclick=function(){input.value=b.dataset.amount;buttons.forEach(function(x){x.classList.toggle('on',x===b);});};});
     input.oninput=function(){buttons.forEach(function(b){b.classList.toggle('on',Number(b.dataset.amount)===value());});};
     var cfg=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.pay_config)||{},client=cfg.paypalClientId||'';
-    var diag=document.getElementById('offline');
-    function warn(m){diag.style.display='block';diag.innerHTML='<b>SUPPORT DIAG_</b><br>'+String(m);}
-    /* Catch the SDK's internal script errors — they otherwise vanish silently
-       and leave window.paypal as an empty {} with no .Buttons. */
-    window.addEventListener('error',function(e){
-      if(e&&/paypal|sdk\/js/.test(e.filename||e.message||'')){warn('SDK runtime error: '+(e.message||'(unknown)'));}
-    },true);
-    if(!client){warn('no paypalClientId in products-data.js — got: '+JSON.stringify(cfg));return;}
+    var offline=document.getElementById('offline');
+    if(!client)return;
     function supporterCode(orderId){var key='ibee_thank_card_'+orderId,code='';try{code=localStorage.getItem(key)||'';}catch(e){}if(code)return code;var salt='';try{var a=new Uint32Array(2);crypto.getRandomValues(a);salt=(a[0].toString(36)+a[1].toString(36)).slice(-8).toUpperCase();}catch(e){salt=Math.random().toString(36).slice(2,10).toUpperCase();}code='IBEE-'+String(orderId||Date.now()).replace(/[^A-Z0-9]/gi,'').slice(-6).toUpperCase()+'-'+salt;try{localStorage.setItem(key,code);}catch(e){}return code;}
     function downloadCard(){var code=document.getElementById('cardcode').textContent,cv=document.createElement('canvas'),x=cv.getContext('2d');cv.width=1200;cv.height=630;x.fillStyle='#070707';x.fillRect(0,0,cv.width,cv.height);x.strokeStyle='#ffd60a';x.lineWidth=8;x.strokeRect(28,28,1144,574);x.strokeStyle='#b6ff00';x.lineWidth=2;x.strokeRect(48,48,1104,534);x.fillStyle='#b6ff00';x.font='42px monospace';x.fillText('ONLYIBEE // SUPPORTER CARD',88,130);x.fillStyle='#ffffff';x.font='bold 76px monospace';x.fillText('THANK YOU.',88,250);x.fillStyle='#c8e7a6';x.font='34px monospace';x.fillText('KEEP THIS CARD — YOU MIGHT NEED IT LATER.',88,320);x.fillStyle='#ffd60a';x.font='bold 38px monospace';x.fillText(code,88,452);x.fillStyle='#7a7a7a';x.font='26px monospace';x.fillText('INDEPENDENT ART. REAL SUPPORT.  © ONLYIBEE',88,530);var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='onlyibee-thank-you-card-'+code+'.png';a.click();}
     document.getElementById('downloadcard').onclick=downloadCard;
     function showThank(orderId){document.getElementById('cardcode').textContent=supporterCode(orderId);document.getElementById('paypal').style.display='none';document.getElementById('thank').classList.add('on');}
-    function renderButtons(){
-      try{
-        window.paypal.Buttons({
-          style:{color:'gold',shape:'rect',label:'pay',height:45},
-          createOrder:function(data,actions){var n=value();if(!n){input.focus();return Promise.reject(new Error('Choose an amount'));}return actions.order.create({purchase_units:[{description:'Support the art — ONLY IBEE',amount:{currency_code:cfg.currency||'EUR',value:n.toFixed(2)}}]});},
-          onApprove:function(data,actions){return actions.order.capture().then(function(){showThank(data.orderID);});},
-          onError:function(err){document.getElementById('offline').style.display='block';document.getElementById('offline').innerHTML='<b>PAYMENT HICCUP_</b><br>Try again in a moment.';}
-        }).render('#paypal').then(function(){document.getElementById('offline').style.display='none';},function(err){warn('render() rejected: '+(err&&err.message?err.message:String(err)));});
-      }catch(err){warn('exception while building buttons: '+(err&&err.message?err.message:String(err)));}
-    }
-    /* Load the PayPal SDK ONCE. The SDK will not re-initialize if loaded twice —
-       the second load finds window.paypal already (half-)defined and bails, which
-       is exactly the empty {} with no .Buttons we've been seeing. */
-    var started=false;
-    function loadSDK(){
-      if(started)return;started=true;
-      try{delete window.paypal;}catch(e){window.paypal=undefined;}
-      var s=document.createElement('script');
-      s.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(client)+'&currency='+encodeURIComponent(cfg.currency||'EUR')+'&intent=capture';
-      s.onerror=function(){warn('PayPal SDK script FAILED to load — blocked by network or an ad/tracker blocker.');};
-      s.onload=function(){};
-      document.head.appendChild(s);
-    }
-    var tries=0;
-    function waitForButtons(){
-      if(window.paypal&&window.paypal.Buttons&&typeof window.paypal.Buttons==='function'){renderButtons();return;}
-      tries++;
-      if(tries>=40){
-        var pp=typeof window.paypal,keys=[];
-        try{keys=Object.keys(window.paypal||{});}catch(e){}
-        var ready=!!(window.paypal&&window.paypal.Buttons);
-        warn('TIMEOUT. typeof window.paypal='+pp+' keys=['+keys.join(',')+'] Buttons='+ready+
-             ' — open the browser console (Cmd+Opt+J) for the red error line, then send it.');
-        return;
-      }
-      setTimeout(waitForButtons,150);
-    }
-    loadSDK();
-    waitForButtons();
+    var s=document.createElement('script');
+    s.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(client)+'&currency='+encodeURIComponent(cfg.currency||'EUR')+'&intent=capture';
+    s.onerror=function(){offline.innerHTML='<b>PAYMENT HICCUP_</b><br>Try again in a moment.';};
+    s.onload=function(){
+      if(!window.paypal||!window.paypal.Buttons)return;
+      window.paypal.Buttons({
+        style:{color:'gold',shape:'rect',label:'pay',height:45},
+        createOrder:function(data,actions){var n=value();if(!n){input.focus();return Promise.reject(new Error('Choose an amount'));}return actions.order.create({purchase_units:[{description:'Support the art — ONLY IBEE',amount:{currency_code:cfg.currency||'EUR',value:n.toFixed(2)}}]});},
+        onApprove:function(data,actions){return actions.order.capture().then(function(){showThank(data.orderID);});},
+        onError:function(){offline.style.display='block';offline.innerHTML='<b>PAYMENT HICCUP_</b><br>Try again in a moment.';}
+      }).render('#paypal').then(function(){offline.style.display='none';});
+    };
+    document.head.appendChild(s);
   })();
   </script>
 </body>
