@@ -294,7 +294,9 @@
       el.querySelector(".bxx").addEventListener("click",function(ev){ev.stopPropagation();bye();});
       el.addEventListener("click",function(){
         bye();
-        var href=t.href; if(!href) return;            /* no destination → tap just dismisses */
+        /* A notification is the doorway to the member space: signed-in listeners
+           see their profile; guests land directly on its login screen. */
+        var href=loggedIn()?"/member/":"/member/?login=1";
         var f=document.getElementById("frame");
         if(f) f.src=href; else location.href=href;
       });
