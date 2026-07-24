@@ -192,7 +192,7 @@
     letter-spacing:1px;
   }
   .extraline .x b{color:var(--acid);font-weight:normal}
-  .rankings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+  .rankings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
   .rankcard{border:1px solid var(--border);background:#0a0a0a;padding:15px 16px}
   .ranktitle{font-family:var(--px);font-size:9px;color:var(--cyan);margin-bottom:13px;letter-spacing:1px}
   .rankrow{display:flex;align-items:center;gap:9px;border-top:1px solid #1b1b1b;padding:9px 0;font-size:19px;color:#cfcfcf}
@@ -257,6 +257,7 @@
     <div class="rankings">
       <section class="rankcard"><div class="ranktitle">TOP SONGS // MOST STREAMED</div><div id="topsongs" class="rankempty">reading signals_</div></section>
       <section class="rankcard"><div class="ranktitle">TOP COUNTRIES // THIS MONTH</div><div id="topcountries" class="rankempty">reading locations_</div></section>
+      <section class="rankcard"><div class="ranktitle">TOP CITIES // THIS MONTH</div><div id="topcities" class="rankempty">reading locations_</div></section>
     </div>
 
     <div class="termlog" id="termlog">
@@ -284,7 +285,7 @@
   </section>
 </div>
 
-<script src="../assets/stats-client.js?v=6"></script>
+<script src="../assets/stats-client.js?v=7"></script>
 <script src="../assets/stats-data.js?cb=1"></script>
 <script>
 (function(){
@@ -391,6 +392,7 @@
     function refreshRankings(){var S=window.IBEE_STATS_CLIENT;if(!S)return;
       if(S.songCounts)S.songCounts().then(function(rows){document.getElementById("topsongs").innerHTML=rankRows(rows,"song_slug","plays"," PLAYS","no plays yet_");}).catch(function(){});
       if(S.countries)S.countries().then(function(rows){document.getElementById("topcountries").innerHTML=rankRows(rows,"country_code","visitors"," VISITORS","locations appear as visitors arrive_");}).catch(function(){});
+      if(S.cities)S.cities().then(function(rows){document.getElementById("topcities").innerHTML=rankRows(rows,"city_name","visitors"," VISITORS","cities appear as visitors arrive_");}).catch(function(){});
     }
 
     /* terminal chatter */
