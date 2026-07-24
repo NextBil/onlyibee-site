@@ -115,7 +115,7 @@
 <div id="milechip" class="ui" title="tap to name your car">YOUR LINE · 0 mi</div>
 <div id="hint" class="ui">ride the midnight line_ — tap a window to zone out · tap the seats to re-trim · tap the charm for a little magic · name your car below-left</div>
 
-<script src="../../assets/player.js?v=20"></script>
+<script src="../../assets/player.js?v=22"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
 <script src="../../assets/roomgate.js?v=2"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -1179,6 +1179,20 @@ requestAnimationFrame(loop);
   });
   document.addEventListener('fullscreenchange',upd);
   document.addEventListener('webkitfullscreenchange',upd);
+  /* leaving the room while fullscreen would keep the shell's iframe fullscreen,
+     hiding the nav + player — exit fullscreen first, then follow the link */
+  document.addEventListener('click',function(ev){
+    var a=ev.target&&ev.target.closest&&ev.target.closest('a[href]');
+    if(!a||!on())return;
+    ev.preventDefault();
+    var href=a.href, done=false;
+    function go(){ if(!done){done=true;location.href=href;} }
+    try{
+      var p=(document.exitFullscreen||document.webkitExitFullscreen).call(document);
+      if(p&&p.then){ p.then(go,go); }
+    }catch(e){}
+    setTimeout(go,250);
+  },true);
 })();
 </script>
 </body>
