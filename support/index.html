@@ -50,7 +50,8 @@
     document.getElementById('downloadcard').onclick=downloadCard;
     function showThank(orderId){document.getElementById('cardcode').textContent=supporterCode(orderId);document.getElementById('paypal').style.display='none';document.getElementById('thank').classList.add('on');}
     s.onload=function(){if(!window.paypal||!window.paypal.Buttons)return;window.paypal.Buttons({
-      createOrder:function(data,actions){var n=value();if(!n){input.focus();return Promise.reject(new Error('Choose an amount'));}return actions.order.create({purchase_units:[{description:'Support the art — ONLY IBEE',amount:{currency_code:'EUR',value:n.toFixed(2)}}]});},
+      style:{color:'gold',shape:'rect',label:'pay',height:45},
+      createOrder:function(data,actions){var n=value();if(!n){input.focus();return Promise.reject(new Error('Choose an amount'));}return actions.order.create({purchase_units:[{description:'Support the art — ONLY IBEE',amount:{currency_code:cfg.currency||'EUR',value:n.toFixed(2)}}]});},
       onApprove:function(data,actions){return actions.order.capture().then(function(){showThank(data.orderID);});},
       onError:function(){document.getElementById('offline').style.display='block';document.getElementById('offline').innerHTML='<b>PAYMENT HICCUP_</b><br>Try again in a moment.';}
     }).render('#paypal');};document.head.appendChild(s);
