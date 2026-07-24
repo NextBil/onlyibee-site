@@ -164,6 +164,12 @@
   #pcover{width:38px;height:38px;flex:none;border-radius:5px;overflow:hidden;border:1px solid var(--border);
     position:relative;background:radial-gradient(circle,#333 0 20%,#070707 22% 28%,#141414 30% 100%);cursor:pointer}
   #pcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+  #pcover:hover{border-color:var(--acid);box-shadow:0 0 12px rgba(182,255,0,.35)}
+  #songinfo{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72)}
+  #songinfo.on{display:flex}#songinfocard{position:relative;width:min(390px,94vw);max-height:86dvh;overflow:auto;background:#0a0a0a;border:2px solid var(--border);padding:18px;box-shadow:0 18px 55px rgba(0,0,0,.78)}
+  #songinfoclose{position:absolute;right:9px;top:9px;background:#111;border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:9px;padding:6px 8px;cursor:pointer}#songinfoclose:hover{color:var(--red);border-color:var(--red)}
+  #songinfotop{display:flex;gap:14px;align-items:center;padding-right:30px}#songinfoart{width:92px;height:92px;object-fit:cover;background:#111;border:1px solid var(--acid)}#songinfoname{font-family:var(--px);font-size:13px;line-height:1.5;color:#fff}#songinfoalbum{margin-top:5px;color:var(--dim);font-size:17px}
+  #songinfoplays{margin:17px 0 13px;padding:10px;border-left:2px solid var(--acid);background:#101408;color:var(--acid);font-family:var(--px);font-size:9px}#songinfocopy{font-size:18px;line-height:1.38;color:#c5c5c5}#songinfocopy p{margin:10px 0}#songinfocopy b{font-family:var(--px);font-size:8px;color:var(--dim)}
   #nowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;
     color:var(--acid);font-family:var(--px);font-size:9px;cursor:pointer;text-align:left;padding:0}
   #nowbtn #rt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -376,6 +382,8 @@
       </div>
     </div>
   </div>
+
+  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><div id="songinfoalbum">—</div></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocopy"></div></section></div>
 </div>
 
 <!-- PRESS START intro overlay -->
@@ -803,7 +811,20 @@
       fill=document.getElementById('fill'),timeEl=document.getElementById('time'),bd=document.querySelector('#nowbtn .bd');
   /* the now-playing album cover in the bar: song's own art → album cover → hue vinyl */
   var pcover=document.getElementById('pcover'),pcoverimg=document.getElementById('pcoverimg'),lastCoverI=-2;
-  pcover.onclick=toggleTL;
+  var songinfo=document.getElementById('songinfo');
+  function openSongInfo(){
+    var r=R(),i=r&&r.current?r.current():-1,s=r&&r.song?r.song():null;if(!s||i<0)return;
+    var alb=r.album?r.album(i):{},m=META[s.f]||{},art=document.getElementById('songinfoart');
+    document.getElementById('songinfoname').textContent=s.n||'—';document.getElementById('songinfoalbum').textContent=alb.name||'';
+    art.onerror=function(){art.onerror=null;art.style.display='none';};art.style.display='block';art.src=(s.cover||alb.cover||'');
+    var copy='';if(m.vibe)copy+='<p><b>VIBE //</b> '+e3(m.vibe)+'</p>';if(m.meaning)copy+='<p>'+e3(m.meaning)+'</p>';if(m.context)copy+='<p><b>MADE //</b> '+e3(m.context)+'</p>';if(m.took)copy+='<p><b>TIME //</b> '+e3(m.took)+'</p>';
+    document.getElementById('songinfocopy').innerHTML=copy||'<p>INFO TRANSMISSION INCOMING_</p>';
+    var plays=document.getElementById('songinfoplays');plays.textContent='PLAYS // READING_';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');
+    var S=window.IBEE_STATS_CLIENT;if(S&&S.songCounts)S.songCounts().then(function(rows){var row=(rows||[]).filter(function(x){return x.song_slug===s.f;})[0];plays.textContent='PLAYS // '+(row?Number(row.plays).toLocaleString():'0');}).catch(function(){plays.textContent='PLAYS // UNAVAILABLE';});else plays.textContent='PLAYS // UNAVAILABLE';
+  }
+  function closeSongInfo(){songinfo.classList.remove('on');songinfo.setAttribute('aria-hidden','true');}
+  pcover.onclick=openSongInfo;pcover.setAttribute('role','button');pcover.setAttribute('tabindex','0');pcover.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openSongInfo();}};
+  document.getElementById('songinfoclose').onclick=closeSongInfo;songinfo.onclick=function(e){if(e.target===songinfo)closeSongInfo();};
   function setPcover(r,i,s){
     var hue=(s&&s.hue!=null)?s.hue:75;
     pcover.style.background='radial-gradient(circle,hsl('+hue+',85%,55%) 0 20%,#070707 22% 28%,#141414 30% 100%)';
