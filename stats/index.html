@@ -50,7 +50,7 @@
   /* Boot */
   #boot{
     position:fixed;inset:0;background:#000;z-index:8000;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+    display:none;flex-direction:column;align-items:center;justify-content:center;gap:34px;
     cursor:pointer;
   }
   #boot .glyph{
@@ -300,13 +300,14 @@
     else if(li<bootLines.length-1 && p>(li+1)*(100/bootLines.length)){li++;log.textContent=bootLines[li];}
     fill.style.width=p+"%";
   },120);
-  function start(){
-    if(booted||p<100)return;booted=true;
+  function start(force){
+    if(booted||(!force&&p<100))return;booted=true;
     document.getElementById("boot").style.display="none";
     document.getElementById("os").classList.add("on");
     initStats();
   }
   document.getElementById("boot").addEventListener("click",start);
+  start(true); // Network data opens immediately; no boot curtain.
   var info=document.getElementById("datainfo");
   document.getElementById("infobtn").onclick=function(){info.classList.add("on");info.setAttribute("aria-hidden","false");};
   document.getElementById("infoclose").onclick=function(){info.classList.remove("on");info.setAttribute("aria-hidden","true");};
