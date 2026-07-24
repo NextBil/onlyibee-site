@@ -2,8 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://onlyibee.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://onlyibee.com/console.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://onlyibee.com/stats/</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
   <url><loc>https://onlyibee.com/arcade/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://onlyibee.com/tv/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://onlyibee.com/brand/</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://onlyibee.com/utopie/</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://onlyibee.com/nouveauxpunk/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://onlyibee.com/chess/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -16,4 +18,37 @@
   <url><loc>https://onlyibee.com/sworda/</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://onlyibee.com/nannan/</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://onlyibee.com/ablah/</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://onlyibee.com/shop/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://onlyibee.com/20minzasession/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://onlyibee.com/shop/?f=ics-v1-autumn-2024</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://onlyibee.com/shop/?f=ics-v3</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=all-ics-pink</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=all-ics-black</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=queen-shirt</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=small-king</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=kiss-crop-top</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=vdf-sweater</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=orange-jacket</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=vdf-blue-hoodie</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=weed-jean</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=drinking-skull-jean</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=goli-hoodie</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=mimi-long-sleeves</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=vdf-long-sleeve-blue</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=continents-long-sleeves</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=pink-jean</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=denim-skirt-2</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=les-bleus-sont-vert-grey-tshirt</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=les-bleus-sont-vert-1</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=rib-jean</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=denim-skirt-1</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=rib-crop-top</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=mimi-crop-top</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=jardin-crop-top</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=denim-skirt-3</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=les-bleus-sont-vert-2</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=stoner-content</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=utopie-hoodie</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=nouveaux-punk-crop-top</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://onlyibee.com/product-page/?id=20minzasession</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 </urlset>
