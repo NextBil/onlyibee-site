@@ -3,7 +3,7 @@
   "use strict";
   if(window.IBEE_STATS_CLIENT) return;
   var URL="https://hloxwicoeahczifshyoe.supabase.co";
-  var KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var KEY="sb_publishable_1GXmfEAlQlq8aeF8hgE-sQ_mKprQbQY";
   var VISITOR_KEY="ibee_network_visitor",lastPlay="";
   function visitor(){try{var id=localStorage.getItem(VISITOR_KEY);if(id)return id;id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():"v_"+Date.now()+"_"+Math.random().toString(36).slice(2);localStorage.setItem(VISITOR_KEY,id);return id;}catch(e){return "v_"+Math.random().toString(36).slice(2);}}
   function call(name,body){return fetch(URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(function(r){if(!r.ok)throw new Error("stats endpoint unavailable");return r.json();});}
