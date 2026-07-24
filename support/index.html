@@ -53,8 +53,7 @@
     function downloadCard(){var code=document.getElementById('cardcode').textContent,cv=document.createElement('canvas'),x=cv.getContext('2d');cv.width=1200;cv.height=630;x.fillStyle='#070707';x.fillRect(0,0,cv.width,cv.height);x.strokeStyle='#ffd60a';x.lineWidth=8;x.strokeRect(28,28,1144,574);x.strokeStyle='#b6ff00';x.lineWidth=2;x.strokeRect(48,48,1104,534);x.fillStyle='#b6ff00';x.font='42px monospace';x.fillText('ONLYIBEE // SUPPORTER CARD',88,130);x.fillStyle='#ffffff';x.font='bold 76px monospace';x.fillText('THANK YOU.',88,250);x.fillStyle='#c8e7a6';x.font='34px monospace';x.fillText('KEEP THIS CARD — YOU MIGHT NEED IT LATER.',88,320);x.fillStyle='#ffd60a';x.font='bold 38px monospace';x.fillText(code,88,452);x.fillStyle='#7a7a7a';x.font='26px monospace';x.fillText('INDEPENDENT ART. REAL SUPPORT.  © ONLYIBEE',88,530);var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='onlyibee-thank-you-card-'+code+'.png';a.click();}
     document.getElementById('downloadcard').onclick=downloadCard;
     function showThank(orderId){document.getElementById('cardcode').textContent=supporterCode(orderId);document.getElementById('paypal').style.display='none';document.getElementById('thank').classList.add('on');}
-    s.onload=function(){
-      if(!window.paypal||!window.paypal.Buttons){warn('SDK loaded but window.paypal.Buttons is missing.');return;}
+    function renderButtons(){
       try{
         window.paypal.Buttons({
           style:{color:'gold',shape:'rect',label:'pay',height:45},
@@ -63,7 +62,23 @@
           onError:function(err){warn('PayPal render/flow error: '+(err&&err.message?err.message:String(err)));document.getElementById('offline').style.display='block';document.getElementById('offline').innerHTML='<b>PAYMENT HICCUP_</b><br>Try again in a moment.';}
         }).render('#paypal').then(function(){document.getElementById('offline').style.display='none';},function(err){warn('render() rejected: '+(err&&err.message?err.message:String(err)));});
       }catch(err){warn('exception while building buttons: '+(err&&err.message?err.message:String(err)));}
-    };document.head.appendChild(s);
+    }
+    var tries=0;
+    function waitForButtons(){
+      if(window.paypal&&window.paypal.Buttons){renderButtons();return;}
+      tries++;
+      if(tries>=30){
+        var pp=typeof window.paypal;
+        warn('window.paypal.Buttons never appeared. typeof window.paypal = '+pp+
+             (pp==='undefined'?' — SDK did not initialize (blocked by an extension/network, or served empty).'
+             :' — paypal global exists but .Buttons missing (script loaded twice?).'));
+        return;
+      }
+      setTimeout(waitForButtons,200);
+    }
+    s.onload=waitForButtons;
+    s.onerror=function(){warn('PayPal SDK script FAILED to load (network/ad-blocker?).');};
+    document.head.appendChild(s);
   })();
   </script>
 </body>
