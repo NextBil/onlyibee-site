@@ -168,8 +168,9 @@
   #songinfo{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72)}
   #songinfo.on{display:flex}#songinfocard{position:relative;width:min(390px,94vw);max-height:86dvh;overflow:auto;background:#0a0a0a;border:2px solid var(--border);padding:18px;box-shadow:0 18px 55px rgba(0,0,0,.78)}
   #songinfoclose{position:absolute;right:9px;top:9px;background:#111;border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:9px;padding:6px 8px;cursor:pointer}#songinfoclose:hover{color:var(--red);border-color:var(--red)}
-  #songinfotop{display:flex;gap:14px;align-items:center;padding-right:30px}#songinfoart{width:92px;height:92px;object-fit:cover;background:#111;border:1px solid var(--acid)}#songinfoname{font-family:var(--px);font-size:13px;line-height:1.5;color:#fff}#songinfoalbum{margin-top:5px;color:var(--dim);font-size:17px}
+  #songinfotop{display:flex;gap:14px;align-items:center;padding-right:30px}#songinfoart{width:92px;height:92px;object-fit:cover;background:#111;border:1px solid var(--acid)}#songinfoname{font-family:var(--px);font-size:13px;line-height:1.5;color:#fff}#songinfoalbum{margin-top:5px;color:var(--acid);font-family:var(--vt);font-size:17px;background:transparent;border:0;border-bottom:1px dashed var(--acid);padding:0;cursor:pointer;text-align:left}#songinfoalbum:hover{color:var(--red);border-color:var(--red)}
   #songinfoplays{margin:17px 0 13px;padding:10px;border-left:2px solid var(--acid);background:#101408;color:var(--acid);font-family:var(--px);font-size:9px}#songinfocopy{font-size:18px;line-height:1.38;color:#c5c5c5}#songinfocopy p{margin:10px 0}#songinfocopy b{font-family:var(--px);font-size:8px;color:var(--dim)}
+  #songinfomorelabel{margin:20px 0 9px;font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px}#songinfomore{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.songmore{min-width:0;padding:0;background:#111;border:1px solid var(--border);color:var(--ink);cursor:pointer;text-align:left}.songmore:hover{border-color:var(--acid);transform:translateY(-2px)}.songmore img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#171717}.songmore span{display:block;padding:6px;font-family:var(--px);font-size:7px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #nowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;
     color:var(--acid);font-family:var(--px);font-size:9px;cursor:pointer;text-align:left;padding:0}
   #nowbtn #rt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -383,7 +384,7 @@
     </div>
   </div>
 
-  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><div id="songinfoalbum">—</div></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocopy"></div></section></div>
+  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocopy"></div><div id="songinfomorelabel">MORE SIGNALS_</div><div id="songinfomore"></div></section></div>
 </div>
 
 <!-- PRESS START intro overlay -->
@@ -407,7 +408,7 @@
 <!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
 <script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
-<script src="assets/badges.js?v=9"></script>
+<script src="assets/badges.js?v=10"></script>
 <!-- the unlock ladder: earn the rhythm games by playing (grants via grant_game, see member/unlocks.sql) -->
 <script src="assets/unlocks.js?v=1"></script>
 <script>
@@ -814,16 +815,25 @@
   var songinfo=document.getElementById('songinfo');
   function openSongInfo(){
     var r=R(),i=r&&r.current?r.current():-1,s=r&&r.song?r.song():null;
-    if(!s||i<0){document.getElementById('songinfoname').textContent='NO SONG SELECTED';document.getElementById('songinfoalbum').textContent='START A TRACK TO READ ITS INFO';document.getElementById('songinfocopy').innerHTML='<p>THE RECORD’S STORY AND PLAY COUNT APPEAR HERE.</p>';document.getElementById('songinfoplays').textContent='PLAYS // —';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');return;}
+    if(!s||i<0){document.getElementById('songinfoname').textContent='NO SONG SELECTED';document.getElementById('songinfoalbum').textContent='START A TRACK TO READ ITS INFO';document.getElementById('songinfocopy').innerHTML='<p>THE RECORD’S STORY AND PLAY COUNT APPEAR HERE.</p>';document.getElementById('songinfoplays').textContent='PLAYS // —';document.getElementById('songinfomore').innerHTML='';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');return;}
     var alb=r.album?r.album(i):{},m=META[s.f]||{},art=document.getElementById('songinfoart');
     document.getElementById('songinfoname').textContent=s.n||'—';document.getElementById('songinfoalbum').textContent=alb.name||'';
     art.onerror=function(){art.onerror=null;art.style.display='none';};art.style.display='block';art.src=(s.cover||alb.cover||'');
     var copy='';if(m.vibe)copy+='<p><b>VIBE //</b> '+e3(m.vibe)+'</p>';if(m.meaning)copy+='<p>'+e3(m.meaning)+'</p>';if(m.context)copy+='<p><b>MADE //</b> '+e3(m.context)+'</p>';if(m.took)copy+='<p><b>TIME //</b> '+e3(m.took)+'</p>';
     document.getElementById('songinfocopy').innerHTML=copy||'<p>INFO TRANSMISSION INCOMING_</p>';
+    var more=[],total=r.count||0;for(var step=1;step<=total&&more.length<6;step++){var n=(i+step)%total,other=r.song(n);if(other&&n!==i)more.push({i:n,s:other,a:r.album?r.album(n):{}});}
+    document.getElementById('songinfomore').innerHTML=more.map(function(x){var src=x.s.cover||x.a.cover||'';return '<button class="songmore" data-song="'+x.i+'"><img alt="" src="'+e3(src)+'"><span>'+e3(x.s.n)+'</span></button>';}).join('');
+    document.getElementById('songinfomore').onclick=function(e){var b=e.target.closest('.songmore');if(!b)return;var n=Number(b.dataset.song);if(r.control&&r.control.play){r.control.play(n);openSongInfo();}};
     var plays=document.getElementById('songinfoplays');plays.textContent='PLAYS // READING_';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');
     var S=window.IBEE_STATS_CLIENT;if(S&&S.songCounts)S.songCounts().then(function(rows){var row=(rows||[]).filter(function(x){return x.song_slug===s.f;})[0];plays.textContent='PLAYS // '+(row?Number(row.plays).toLocaleString():'0');}).catch(function(){plays.textContent='PLAYS // UNAVAILABLE';});else plays.textContent='PLAYS // UNAVAILABLE';
   }
   function closeSongInfo(){songinfo.classList.remove('on');songinfo.setAttribute('aria-hidden','true');}
+  document.getElementById('songinfoalbum').onclick=function(){
+    var r=R(),i=r&&r.current?r.current():-1,alb=r&&r.album?r.album(i):null;if(!alb)return;
+    closeSongInfo();
+    if(alb.room){navigate(alb.room);return;}
+    query=alb.name||'';tlsearch.value=query;openTL();renderTracks();markNow();
+  };
   function coverTap(e){if(e){e.preventDefault();e.stopPropagation();}openSongInfo();}
   pcover.onclick=coverTap;pcover.addEventListener('pointerup',coverTap,true);pcover.setAttribute('role','button');pcover.setAttribute('tabindex','0');pcover.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openSongInfo();}};
   document.getElementById('songinfoclose').onclick=closeSongInfo;songinfo.onclick=function(e){if(e.target===songinfo)closeSongInfo();};
