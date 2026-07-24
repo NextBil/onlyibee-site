@@ -464,6 +464,8 @@
     font-family:var(--px);font-size:9px;color:var(--dim);
   }
   footer .np{color:var(--acid);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:60vw}
+  footer .support{color:#ffd60a;text-decoration:none;white-space:nowrap;padding:4px 7px;border:1px solid rgba(255,214,10,.45);transition:background .2s,border-color .2s}
+  footer .support:hover{background:#ffd60a;color:#000;border-color:#ffd60a}
 
   @media(max-width:560px){
     header .sys{display:none}
@@ -704,6 +706,7 @@
 
   <footer>
     <span class="np" id="nowplaying">IDLE — NO SIGNAL</span>
+    <a class="support" href="support/" title="Support the art">SUPPORT THE ART</a>
     <span>© ONLYIBEE <span id="yr"></span></span>
   </footer>
 </div>

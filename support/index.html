@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
+  <meta name="robots" content="noindex">
+  <title>SUPPORT THE ART — ONLY IBEE</title>
+  <link rel="icon" type="image/png" href="../assets/img/favicon-utopie.png">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--gold:#ffd60a;--red:#ff2b2b;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{min-height:100dvh;background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;display:flex;flex-direction:column}body:after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.2) 0 1px,transparent 1px 3px)}
+    header,footer{position:relative;z-index:1;padding:14px 18px;background:#000;font-family:var(--px);font-size:9px;border-bottom:2px solid var(--border)}header{display:flex;justify-content:space-between;gap:12px}header a{color:var(--acid);text-decoration:none}header .r{color:var(--red)}header .back{color:var(--dim)}header .back:hover{color:var(--acid)}
+    main{position:relative;z-index:1;flex:1;width:min(560px,100%);margin:auto;padding:44px 18px 54px;text-align:center}.eyebrow{font-family:var(--px);font-size:8px;color:var(--gold);letter-spacing:1px;margin-bottom:14px}.title{font-family:var(--px);font-size:clamp(22px,7vw,38px);line-height:1.25;color:#fff}.title b{color:var(--gold);font-weight:normal}.copy{max-width:470px;margin:21px auto 28px;color:#bdbdbd;line-height:1.45;font-size:22px}.copy b{color:var(--ink);font-weight:normal}
+    .panel{background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--gold);padding:20px;text-align:left;box-shadow:0 14px 34px rgba(0,0,0,.4)}.label{font-family:var(--px);font-size:8px;color:var(--dim);display:block;margin-bottom:10px}.amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.amt{font-family:var(--px);font-size:10px;padding:13px 5px;border:1px solid var(--border);background:#080808;color:var(--ink);cursor:pointer}.amt:hover,.amt.on{background:#211d09;border-color:var(--gold);color:var(--gold)}.custom{display:flex;align-items:center;border:1px solid var(--border);background:#080808;padding-left:12px;color:var(--gold);font-family:var(--px);font-size:14px}.custom input{min-width:0;width:100%;padding:13px 12px;background:transparent;border:0;outline:0;color:#fff;font:24px var(--vt)}.note{font-size:17px;line-height:1.35;color:var(--dim);margin:12px 0 16px}.note b{color:var(--gold);font-weight:normal}#paypal{min-height:42px}.offline{border:1px dashed var(--border);padding:13px;color:var(--dim);font-size:18px;line-height:1.35}.offline b{color:var(--gold);font-family:var(--px);font-size:8px}.thank{display:none;border:1px solid var(--acid);background:#0c1406;color:var(--acid);font-family:var(--px);font-size:9px;line-height:1.8;padding:14px;text-align:center}.thank.on{display:block}footer{border-top:2px solid var(--border);border-bottom:0;color:var(--dim);text-align:center}footer a{color:var(--gold);text-decoration:none}
+    @media(max-width:430px){main{padding-top:32px}.copy{font-size:20px}.panel{padding:16px}.amt{font-size:8px}}
+  </style>
+</head>
+<body>
+  <header><a href="../console.html">ONLY<span class="r">IBEE</span></a><a class="back" href="../console.html">◀ BACK TO THE WORLD</a></header>
+  <main>
+    <div class="eyebrow">// KEEP THE FREQUENCY ALIVE_</div>
+    <h1 class="title">SUPPORT <b>THE ART</b></h1>
+    <p class="copy">The music, worlds and pieces are made independently. If it means something to you, you can put energy back into what comes next.</p>
+    <section class="panel" aria-label="Choose a support amount">
+      <label class="label">CHOOSE AN AMOUNT — EUR</label>
+      <div class="amounts"><button class="amt" data-amount="3">€3</button><button class="amt on" data-amount="8">€8</button><button class="amt" data-amount="20">€20</button></div>
+      <label class="custom">€<input id="amount" type="number" min="1" step="0.01" inputmode="decimal" value="8" aria-label="Custom support amount"></label>
+      <p class="note">No product. No subscription. <b>Just support.</b></p>
+      <div id="paypal"></div>
+      <div id="offline" class="offline"><b>SUPPORT CHANNEL OFFLINE_</b><br>Payment setup is being connected. Please come back soon.</div>
+      <div id="thank" class="thank">THANK YOU FOR BACKING INDEPENDENT ART_</div>
+    </section>
+  </main>
+  <footer>© ONLYIBEE · <a href="../shop/">SHOP THE PIECES</a></footer>
+  <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+  <script>
+  (function(){
+    var input=document.getElementById('amount'),buttons=[].slice.call(document.querySelectorAll('.amt'));
+    function value(){var n=Number(input.value);return isFinite(n)&&n>=1?Math.round(n*100)/100:0;}
+    buttons.forEach(function(b){b.onclick=function(){input.value=b.dataset.amount;buttons.forEach(function(x){x.classList.toggle('on',x===b);});};});
+    input.oninput=function(){buttons.forEach(function(b){b.classList.toggle('on',Number(b.dataset.amount)===value());});};
+    var cfg=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.pay_config)||{},client=cfg.paypalClientId||'';
+    if(!client)return;
+    document.getElementById('offline').style.display='none';
+    var s=document.createElement('script');s.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(client)+'&currency=EUR&intent=capture';
+    s.onload=function(){if(!window.paypal||!window.paypal.Buttons)return;window.paypal.Buttons({
+      createOrder:function(data,actions){var n=value();if(!n){input.focus();return Promise.reject(new Error('Choose an amount'));}return actions.order.create({purchase_units:[{description:'Support the art — ONLY IBEE',amount:{currency_code:'EUR',value:n.toFixed(2)}}]});},
+      onApprove:function(data,actions){return actions.order.capture().then(function(){document.getElementById('paypal').style.display='none';document.getElementById('thank').classList.add('on');});},
+      onError:function(){document.getElementById('offline').style.display='block';document.getElementById('offline').innerHTML='<b>PAYMENT HICCUP_</b><br>Try again in a moment.';}
+    }).render('#paypal');};document.head.appendChild(s);
+  })();
+  </script>
+</body>
+</html>
