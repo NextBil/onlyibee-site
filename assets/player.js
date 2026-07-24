@@ -141,6 +141,7 @@
   /* now-playing: album cover next to the title, album name small under it */
   +"#rp-nowtop{display:flex;gap:11px;align-items:center;cursor:pointer;margin-bottom:11px}"
   +"#rp-cover{width:52px;height:52px;flex:none;object-fit:cover;background:#111;border:1px solid #2a2a2a;image-rendering:auto}"
+  +"#rp-cover{cursor:zoom-in}#rp-cover:hover{border-color:#b6ff00;box-shadow:0 0 12px rgba(182,255,0,.35)}"
   +"#rp-nowtext{min-width:0;flex:1}"
   +"#rp-title{font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;margin-bottom:5px;line-height:1.4;"
   +"white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
@@ -230,6 +231,11 @@
   +"background:#0e0e0e;color:#7a7a7a;border:1px solid #2a2a2a;cursor:pointer}"
   +"#rp-favtgl:hover,#rp-favtgl.on{border-color:#ff2b6b;color:#ff2b6b}"
   +"#rp-favb.on{color:#ff2b6b;border-color:#ff2b6b}"
+  +"#rp-info{position:fixed;inset:0;z-index:9002;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72);font-family:'VT323',monospace}"
+  +"#rp-info.on{display:flex}#rp-info-card{position:relative;width:min(390px,94vw);max-height:min(580px,86vh);overflow:auto;border:2px solid #2a2a2a;background:#0a0a0a;padding:18px;box-shadow:0 18px 55px rgba(0,0,0,.75)}"
+  +"#rp-info-close{position:absolute;top:9px;right:9px;border:1px solid #2a2a2a;background:#111;color:#aaa;padding:5px 8px;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:9px}#rp-info-close:hover{border-color:#ff2b2b;color:#ff2b2b}"
+  +"#rp-info-top{display:flex;gap:14px;padding-right:32px;align-items:center}#rp-info-art{width:92px;height:92px;object-fit:cover;border:1px solid #b6ff00;background:#111}#rp-info-title{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5;color:#fff}#rp-info-album{font-size:16px;color:#999;margin-top:5px}"
+  +"#rp-info-plays{margin:17px 0 13px;padding:9px 10px;border-left:2px solid #b6ff00;background:#101408;font-family:'Press Start 2P',monospace;font-size:9px;color:#b6ff00}#rp-info-copy{font-size:18px;line-height:1.38;color:#c5c5c5}#rp-info-copy p{margin:10px 0}#rp-info-copy b{font-family:'Press Start 2P',monospace;font-size:8px;color:#777}"
   ;
   var st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
@@ -274,6 +280,9 @@
     +'<div id="rp-list"></div>'
     +'<div id="rp-empty">NO SIGNALS_<br>TRY ANOTHER WORD</div>';
   document.body.appendChild(panel);
+  var infoPanel=document.createElement("div"); infoPanel.id="rp-info";
+  infoPanel.innerHTML='<section id="rp-info-card" role="dialog" aria-modal="true" aria-label="Song information"><button id="rp-info-close" aria-label="Close song information">✕</button><div id="rp-info-top"><img id="rp-info-art" alt=""><div><div id="rp-info-title">—</div><div id="rp-info-album">—</div></div></div><div id="rp-info-plays">PLAYS // READING_</div><div id="rp-info-copy"></div></section>';
+  document.body.appendChild(infoPanel);
 
   var audio = document.createElement("audio");
   audio.id = "radioaudio"; audio.preload = "none";
@@ -661,7 +670,28 @@
   function togglePanel(){ panel.classList.toggle("open"); }
   chip.onclick = togglePanel;
   $("rp-close").onclick = function(){ panel.classList.remove("open"); };
-  /* tap the cover / title → open the browser (grid) + focus search */
+  function openSongInfo(){
+    if(cur<0)return;
+    var s=SONGS[cur], al=album(s.al), meta=(window.IBEE_META&&window.IBEE_META[s.f])||{};
+    $("rp-info-title").textContent=s.n;$("rp-info-album").textContent=al.name;
+    var art=$("rp-info-art");art.onerror=function(){art.onerror=null;art.src=fallbackCover(s.hue);};art.src=songCover(s);
+    var copy="";
+    if(meta.vibe)copy+='<p><b>VIBE //</b> '+esc(meta.vibe)+'</p>';
+    if(meta.meaning)copy+='<p>'+esc(meta.meaning)+'</p>';
+    if(meta.context)copy+='<p><b>MADE //</b> '+esc(meta.context)+'</p>';
+    if(meta.took)copy+='<p><b>TIME //</b> '+esc(meta.took)+'</p>';
+    $("rp-info-copy").innerHTML=copy||'<p>INFO TRANSMISSION INCOMING_</p>';
+    $("rp-info-plays").textContent="PLAYS // READING_";infoPanel.classList.add("on");
+    var S=window.IBEE_STATS_CLIENT;
+    if(S&&S.songCounts)S.songCounts().then(function(rows){var hit=(rows||[]).filter(function(row){return row.song_slug===s.f;})[0];$("rp-info-plays").textContent="PLAYS // "+(hit?Number(hit.plays).toLocaleString():"0");}).catch(function(){$("rp-info-plays").textContent="PLAYS // UNAVAILABLE";});
+    else $("rp-info-plays").textContent="PLAYS // UNAVAILABLE";
+  }
+  $("rp-info-close").onclick=function(){infoPanel.classList.remove("on");};
+  infoPanel.onclick=function(e){if(e.target===infoPanel)infoPanel.classList.remove("on");};
+  /* Only the cover opens song information; the rest of this row still browses songs. */
+  $("rp-cover").onclick=function(e){e.stopPropagation();openSongInfo();};
+  $("rp-cover").setAttribute("role","button");$("rp-cover").setAttribute("tabindex","0");$("rp-cover").onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openSongInfo();}};
+  /* tap the title/album area → open the browser (grid) + focus search */
   $("rp-nowtop").onclick = function(){
     viewMode = "grid";
     $("rp-view").textContent = "≡ LIST"; $("rp-view").classList.add("on");
@@ -687,7 +717,7 @@
   /* click anywhere outside the box closes it — music keeps playing */
   document.addEventListener("pointerdown", function(e){
     if(!panel.classList.contains("open")) return;
-    if(panel.contains(e.target) || chip.contains(e.target)) return;
+    if(panel.contains(e.target) || chip.contains(e.target) || infoPanel.contains(e.target)) return;
     panel.classList.remove("open");
   });
 
