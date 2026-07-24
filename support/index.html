@@ -46,6 +46,16 @@
     function warn(m){diag.style.display='block';diag.innerHTML='<b>SUPPORT DIAG_</b><br>'+m;}
     if(!client){warn('no paypalClientId in products-data.js — got: '+JSON.stringify(cfg));return;}
     document.getElementById('offline').style.display='none';
+    /* A bogus window.paypal may already exist (injected by a shopping/coupon
+       browser extension such as Honey). The real PayPal SDK will NOT overwrite
+       an existing window.paypal, so .Buttons never gets attached. Wipe it first. */
+    try{
+      if(window.paypal&&!window.paypal.Buttons){
+        var bad=Object.keys(window.paypal||{});
+        console.warn('[support] removing stale window.paypal injected before SDK. keys:',bad);
+        delete window.paypal;
+      }
+    }catch(e){}
     var s=document.createElement('script');
     s.onerror=function(){warn('PayPal SDK script FAILED to load (network/ad-blocker?).');};
     s.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(client)+'&currency=EUR&intent=capture';
@@ -68,10 +78,12 @@
       if(window.paypal&&window.paypal.Buttons){renderButtons();return;}
       tries++;
       if(tries>=30){
-        var pp=typeof window.paypal;
+        var pp=typeof window.paypal,keys=[];
+        try{keys=Object.keys(window.paypal||{});}catch(e){}
         warn('window.paypal.Buttons never appeared. typeof window.paypal = '+pp+
-             (pp==='undefined'?' — SDK did not initialize (blocked by an extension/network, or served empty).'
-             :' — paypal global exists but .Buttons missing (script loaded twice?).'));
+             (pp==='undefined'?' — SDK did not initialize (blocked by an extension/network).'
+             :' — a non-PayPal window.paypal is present. keys = ['+keys.join(', ')+
+             ']. Likely a shopping/coupon browser extension (e.g. Honey). Try a private window with extensions off, or disable the extension on this site.'));
         return;
       }
       setTimeout(waitForButtons,200);
