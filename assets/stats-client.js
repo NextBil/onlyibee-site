@@ -6,7 +6,7 @@
   var KEY="sb_publishable_1GXmfEAlQlq8aeF8hgE-sQ_mKprQbQY";
   var VISITOR_KEY="ibee_network_visitor",COUNTRY_KEY="ibee_network_country",lastPlay="";
   function visitor(){try{var id=localStorage.getItem(VISITOR_KEY);if(id)return id;id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():"v_"+Date.now()+"_"+Math.random().toString(36).slice(2);localStorage.setItem(VISITOR_KEY,id);return id;}catch(e){return "v_"+Math.random().toString(36).slice(2);}}
-  function call(name,body){return fetch(URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(function(r){if(!r.ok)throw new Error("stats endpoint unavailable");return r.json();});}
+  function call(name,body){return fetch(URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(function(r){if(!r.ok)throw new Error("stats endpoint unavailable");return r.status===204?null:r.text().then(function(text){return text?JSON.parse(text):null;});});}
   function fetchStats(){return call("get_public_stats",{}).then(function(data){return Array.isArray(data)?data[0]:data;});}
   function songCounts(){return call("get_song_play_stats",{}).then(function(data){return Array.isArray(data)?data:[];});}
   function countries(){return call("get_top_countries",{}).then(function(data){return Array.isArray(data)?data:[];});}
