@@ -540,6 +540,18 @@
     audio.play().then(function(){
       $("rp-play").textContent = "❚❚";
       chip.classList.remove("idle");
+      /* Telemetry belongs here, after the browser confirms that audio really
+         started. This catches every radio play even if the visitor stayed on
+         the page longer than the stats client's initial setup window. */
+      (function reportRealPlay(){
+        var S=window.IBEE_STATS_CLIENT;
+        if(S){
+          try{ if(S.heartbeat) S.heartbeat().catch(function(){}); }catch(e){}
+          try{ if(S.trackPlay) S.trackPlay(SONGS[cur].f).catch(function(){}); }catch(e){}
+        } else {
+          setTimeout(reportRealPlay,700);
+        }
+      })();
       var np = document.getElementById("nowplaying");
       if(np) np.textContent = "RADIO ▶ " + SONGS[cur].n + " — ONLY IBEE";
       setSession();
