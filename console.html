@@ -466,6 +466,8 @@
   footer .np{color:var(--acid);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:60vw}
   footer .support{color:#ffd60a;text-decoration:none;white-space:nowrap;padding:4px 7px;border:1px solid rgba(255,214,10,.45);transition:background .2s,border-color .2s}
   footer .support:hover{background:#ffd60a;color:#000;border-color:#ffd60a}
+  footer .legal{color:var(--dim);text-decoration:none;white-space:nowrap}
+  footer .legal:hover{color:var(--ink)}
 
   @media(max-width:560px){
     header .sys{display:none}
@@ -474,6 +476,7 @@
     footer{padding:8px 7px;gap:5px;font-size:7px}
     footer .np{max-width:31vw}
     footer .support{font-size:7px;padding:4px 5px}
+    footer .legal{font-size:7px}
   }
 </style>
 </head>
@@ -710,6 +713,7 @@
   <footer>
     <span class="np" id="nowplaying">IDLE — NO SIGNAL</span>
     <a class="support" href="support/" title="Support the art">SUPPORT THE ART</a>
+    <a class="legal" href="legal/" title="Copyright and use">RIGHTS &amp; USE</a>
     <span>© ONLYIBEE <span id="yr"></span></span>
   </footer>
 </div>
@@ -1284,26 +1288,47 @@
     function gridSlot(i,n,bounds){
       var narrow=bounds.w<560;                 // phones
       var mx=narrow?12:46, mtop=narrow?70:88, mbot=narrow?26:34;
+      // round the stage size so subpixel breathing (scrollbars, the now-playing bar
+      // appearing/disappearing) can't make the layout teeter frame to frame. Reserve
+      // the bottom strip the now-playing bar sits on so a track starting/stopping
+      // can't shift the grid (another jitter source, worst on the bottom rows).
+      var W=Math.round(bounds.w),H=Math.round(bounds.h)-pbarReserve();
       var cols;
       if(narrow){                              // phones: always a 4-wide grid (or fewer if <4 records)
         cols=Math.min(4,n);
       } else {                                 // desktop: fit to width as before
         var minCell=120;
-        cols=Math.max(1,Math.round(Math.sqrt(n*bounds.w/Math.max(1,bounds.h))));
-        cols=Math.min(cols,Math.max(1,Math.floor((bounds.w-mx*2)/minCell)),n);
+        cols=Math.max(1,Math.round(Math.sqrt(n*W/Math.max(1,H))));
+        cols=Math.min(cols,Math.max(1,Math.floor((W-mx*2)/minCell)),n);
       }
       var rows=Math.ceil(n/cols);
-      var cw=(bounds.w-mx*2)/cols;
+      var cw=(W-mx*2)/cols;
       /* fixed, generous vertical pitch — the grid scrolls when it's taller than the
          stage, so rows always get real breathing room (and it scales as songs grow) */
       var pitchY=narrow?92:104;
       var contentH=mtop+rows*pitchY+mbot;
-      gridMaxScroll=Math.max(0,contentH-bounds.h);
+      // Hysteresis: only treat the grid as scrollable once it overflows by more than
+      // a few px. Without this, when content ≈ stage height the fit/overflow branch
+      // flips every frame and the whole grid (worst at the bottom rows) jitters.
+      gridMaxScroll=contentH-H>4?contentH-H:0;
       // when everything fits, centre the block vertically; otherwise pin to the top + scroll
-      var top=gridMaxScroll>0?mtop:Math.max(mtop,(bounds.h-rows*pitchY)/2);
+      var top=gridMaxScroll>0?mtop:Math.max(mtop,(H-rows*pitchY)/2);
       if(gridScrollY>gridMaxScroll)gridScrollY=gridMaxScroll;   // keep clamped as layout changes
       var c=i%cols,r=Math.floor(i/cols);
-      return {x:mx+cw*(c+0.5),y:top+pitchY*(r+0.5)-gridScrollY};
+      // round the final slot so the easing target is byte-stable between frames
+      return {x:Math.round(mx+cw*(c+0.5)),y:Math.round(top+pitchY*(r+0.5)-gridScrollY)};
+    }
+    /* how much of the bottom of the canvas the now-playing bar (#pbar) covers, so the
+       grid can keep a stable layout whether or not a track is playing (avoids a jump
+       when the bar appears/disappears). Cached + rounded so it never twitches. */
+    var _pbarH=-1,_pbarVis=null;
+    function pbarReserve(){
+      if(!pbar)return 0;
+      var vis=pbar.classList.contains("show");
+      if(vis===_pbarVis&&_pbarH>=0)return _pbarH;   // unchanged → reuse cached value
+      _pbarVis=vis;
+      _pbarH=vis?Math.round(pbar.offsetHeight+20):0;  // +20 for its bottom gap
+      return _pbarH;
     }
     /* pan the grid; carries the planets with it so it feels 1:1 (not rubber-banded) */
     function panGrid(dScroll){
