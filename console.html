@@ -1018,9 +1018,13 @@
 
     /* ---------- canvas ---------- */
     function resize(){
-      var w=root.clientWidth,h=root.clientHeight;
-      canvas.width=w*devicePixelRatio;canvas.height=h*devicePixelRatio;
-      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      var w=root.clientWidth,h=root.clientHeight,dpr=window.devicePixelRatio||1;
+      /* iOS can change the usable viewport height without changing its width
+         (address bar / fixed player settling). Reset both backing-store axes so
+         pixels from the previous, taller frame cannot bleed in at the bottom. */
+      canvas.width=Math.max(1,Math.round(w*dpr));
+      canvas.height=Math.max(1,Math.round(h*dpr));
+      ctx.setTransform(dpr,0,0,dpr,0,0);
       stars=null;galaxyGeo=null;
     }
     window.addEventListener("resize",resize);
@@ -1288,47 +1292,26 @@
     function gridSlot(i,n,bounds){
       var narrow=bounds.w<560;                 // phones
       var mx=narrow?12:46, mtop=narrow?70:88, mbot=narrow?26:34;
-      // round the stage size so subpixel breathing (scrollbars, the now-playing bar
-      // appearing/disappearing) can't make the layout teeter frame to frame. Reserve
-      // the bottom strip the now-playing bar sits on so a track starting/stopping
-      // can't shift the grid (another jitter source, worst on the bottom rows).
-      var W=Math.round(bounds.w),H=Math.round(bounds.h)-pbarReserve();
       var cols;
       if(narrow){                              // phones: always a 4-wide grid (or fewer if <4 records)
         cols=Math.min(4,n);
       } else {                                 // desktop: fit to width as before
         var minCell=120;
-        cols=Math.max(1,Math.round(Math.sqrt(n*W/Math.max(1,H))));
-        cols=Math.min(cols,Math.max(1,Math.floor((W-mx*2)/minCell)),n);
+        cols=Math.max(1,Math.round(Math.sqrt(n*bounds.w/Math.max(1,bounds.h))));
+        cols=Math.min(cols,Math.max(1,Math.floor((bounds.w-mx*2)/minCell)),n);
       }
       var rows=Math.ceil(n/cols);
-      var cw=(W-mx*2)/cols;
+      var cw=(bounds.w-mx*2)/cols;
       /* fixed, generous vertical pitch — the grid scrolls when it's taller than the
          stage, so rows always get real breathing room (and it scales as songs grow) */
       var pitchY=narrow?92:104;
       var contentH=mtop+rows*pitchY+mbot;
-      // Hysteresis: only treat the grid as scrollable once it overflows by more than
-      // a few px. Without this, when content ≈ stage height the fit/overflow branch
-      // flips every frame and the whole grid (worst at the bottom rows) jitters.
-      gridMaxScroll=contentH-H>4?contentH-H:0;
+      gridMaxScroll=Math.max(0,contentH-bounds.h);
       // when everything fits, centre the block vertically; otherwise pin to the top + scroll
-      var top=gridMaxScroll>0?mtop:Math.max(mtop,(H-rows*pitchY)/2);
+      var top=gridMaxScroll>0?mtop:Math.max(mtop,(bounds.h-rows*pitchY)/2);
       if(gridScrollY>gridMaxScroll)gridScrollY=gridMaxScroll;   // keep clamped as layout changes
       var c=i%cols,r=Math.floor(i/cols);
-      // round the final slot so the easing target is byte-stable between frames
-      return {x:Math.round(mx+cw*(c+0.5)),y:Math.round(top+pitchY*(r+0.5)-gridScrollY)};
-    }
-    /* how much of the bottom of the canvas the now-playing bar (#pbar) covers, so the
-       grid can keep a stable layout whether or not a track is playing (avoids a jump
-       when the bar appears/disappears). Cached + rounded so it never twitches. */
-    var _pbarH=-1,_pbarVis=null;
-    function pbarReserve(){
-      if(!pbar)return 0;
-      var vis=pbar.classList.contains("show");
-      if(vis===_pbarVis&&_pbarH>=0)return _pbarH;   // unchanged → reuse cached value
-      _pbarVis=vis;
-      _pbarH=vis?Math.round(pbar.offsetHeight+20):0;  // +20 for its bottom gap
-      return _pbarH;
+      return {x:mx+cw*(c+0.5),y:top+pitchY*(r+0.5)-gridScrollY};
     }
     /* pan the grid; carries the planets with it so it feels 1:1 (not rubber-banded) */
     function panGrid(dScroll){
@@ -1841,7 +1824,8 @@
       updateAudio();
       if(!document.getElementById("music").classList.contains("on"))return;
       var w=root.clientWidth,h=root.clientHeight;
-      if(canvas.width!==Math.floor(w*devicePixelRatio))resize();
+      var dpr=window.devicePixelRatio||1;
+      if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr))resize();
       ctx.clearRect(0,0,w,h);
       drawSpace(w,h);
       // radio → universe: the radio's current song performs at center.
