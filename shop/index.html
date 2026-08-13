@@ -56,7 +56,10 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
 .item.r-sr{border-color:#5c3350}.item.r-sr .rtag{color:#e879c9}.item.r-sr:hover{border-color:#e879c9;box-shadow:0 0 16px rgba(232,121,201,.35)}
 .item.r-sdr{border-color:#5c4b2c}.item.r-sdr .rtag{color:#d9b36c}.item.r-sdr:hover{border-color:#d9b36c;box-shadow:0 0 16px rgba(217,179,108,.4)}
 .item.r-leg{border-color:#4d6600}.item.r-leg .rtag{color:var(--acid)}.item.r-leg:hover{border-color:var(--acid)}
-.item.soldout{opacity:.4;filter:grayscale(1)}.item.soldout .pr{color:var(--red)}
+.item.soldout{opacity:.72}.item.soldout .sq img{filter:grayscale(1) brightness(.62)}.item.soldout .pr{color:var(--red)}
+.sotag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);
+  font-family:var(--px);font-size:9px;letter-spacing:1px;color:#fff;background:var(--red);
+  border:2px solid #ff7b7b;padding:8px 11px;box-shadow:0 0 18px rgba(255,43,43,.55);white-space:nowrap}
 .notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0;text-align:center}
 /* ---- THE PROCESS (ICS folders): sketches + making-of + nfc demo ---- */
 .proc{margin-top:34px;border-top:2px solid var(--border);padding-top:26px}
@@ -123,9 +126,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       var sq=(p.imgs&&p.imgs[0])?'<img loading="lazy" src="'+e2(p.imgs[0])+'" alt="'+e2(p.n)+'">'
         :'<div class="noimg">NO VISUAL<br>TAP TO VIEW</div>';
       return '<a class="'+cls+'" href="../product-page/?id='+encodeURIComponent(p.id)+'">'
-        +'<div class="sq">'+sq+'<span class="rtag">'+(RNAME[p.r]||"COMMON")+'</span></div>'
+        +'<div class="sq">'+sq+'<span class="rtag">'+(RNAME[p.r]||"COMMON")+'</span>'
+        +(out?'<span class="sotag">SOLD OUT</span>':'')+'</div>'
         +'<div class="meta"><span class="nm">'+e2(p.n)+'</span>'
-        +'<span class="pr">'+(out?"CLAIMED":e2((p.cur||"€")+p.price))+'</span></div></a>';
+        +'<span class="pr">'+(out?"SOLD OUT":e2((p.cur||"€")+p.price))+'</span></div></a>';
     }).join('')+'</div>';
   }
   /* ---- THE PROCESS: only on ICS drop folders ---- */
@@ -166,7 +170,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   document.addEventListener("keydown",function(ev){if(ev.key==="Escape"){lbx.classList.remove("on");lim.src="";}});
 })();
 </script>
-<script src="../assets/player.js?v=23"></script>
-<script src="/assets/stats-client.js?v=6"></script>
+<script src="../assets/player.js?v=24"></script>
+<script src="/assets/stats-client.js?v=7"></script>
 </body>
 </html>

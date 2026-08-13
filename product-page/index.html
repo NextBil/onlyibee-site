@@ -89,6 +89,9 @@ h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-
 .paynote{color:var(--dim);font-size:16px;margin-top:10px;text-align:center}
 .claimbox{border:1px solid var(--red);color:var(--red);font-family:var(--px);font-size:9px;
   padding:14px;text-align:center;line-height:1.8;background:#140505}
+/* sold-out pieces get a real red button in the buy slot, not just grey text */
+.paybtn.sold{background:var(--red);color:#fff;border:2px solid #ff7b7b;cursor:not-allowed;
+  box-shadow:0 0 18px rgba(255,43,43,.4)}
 
 .notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0}
 .back{font-family:var(--px);font-size:9px;color:var(--acid);text-decoration:none;border:1px solid var(--acid);padding:12px 16px}
@@ -162,9 +165,9 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var rz=$("rtag"); rz.textContent=RNAME[p.r]||"COMMON"; rz.className="rtag rz-"+(p.r||"c");
   $("pname").textContent=p.n;
   var out=!!p.out;
-  $("pprice").textContent=out?"CLAIMED":((p.cur||"€")+p.price);
+  $("pprice").textContent=out?"SOLD OUT":((p.cur||"€")+p.price);
   $("pprice").className="price"+(out?" claimed":"");
-  if(out) $("claimtag").style.display="";
+  if(out){ $("claimtag").style.display=""; $("claimtag").textContent="SOLD OUT"; }
   $("pchips").innerHTML='<span class="chip a">✓ HUMAN-MADE</span><span class="chip a">1 OF 1</span>'
     +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">IN STOCK</span>');
   $("pdesc").textContent=p.desc||"made once, by hand, then never again_";
@@ -175,7 +178,8 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   if(!out){
     btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
   } else {
-    btns='<div class="claimbox">CLAIMED — THIS PIECE LIVES WITH SOMEONE NOW_<br>EACH ONE IS MADE ONLY ONCE</div>';
+    btns='<span class="paybtn sold" aria-disabled="true">✕ SOLD OUT</span>'
+      +'<div class="claimbox">CLAIMED — THIS PIECE LIVES WITH SOMEONE NOW_<br>EACH ONE IS MADE ONLY ONCE</div>';
     $("paynote").style.display="none";
   }
   $("paybtns").innerHTML=btns;
@@ -232,7 +236,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   }
 })();
 </script>
-<script src="../assets/player.js?v=23"></script>
-<script src="/assets/stats-client.js?v=6"></script>
+<script src="../assets/player.js?v=24"></script>
+<script src="/assets/stats-client.js?v=7"></script>
 </body>
 </html>

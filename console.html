@@ -101,7 +101,7 @@
   body.network-quiet #networkbar{max-height:42px;padding:8px 18px;opacity:1;border-bottom-color:var(--border)}
   body.network-quiet #networktab{display:none}
   body.musicfit #networkbar,body.musicfit #networktab{display:none}
-  @media(max-width:560px){#networkbar{gap:8px;font-size:7px}#networkbar .netmetric:nth-of-type(3),#networkbar .netmetric:nth-of-type(4){display:none}}
+  @media(max-width:560px){#networkbar{gap:8px;font-size:7px}#networkbar .netmetric:nth-of-type(1),#networkbar .netmetric:nth-of-type(4){display:none}}
   main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:26px 18px 90px}
 
   /* ---------- Screens ---------- */
@@ -402,8 +402,12 @@
     0%,100%{box-shadow:0 0 6px rgba(182,255,0,.15)}
     50%{box-shadow:0 0 22px rgba(182,255,0,.5)}
   }
-  .item.soldout{opacity:.4;filter:grayscale(1)}
+  .item.soldout{opacity:.72}
+  .item.soldout .sq img{filter:grayscale(1) brightness(.62)}
   .item.soldout .pr{color:var(--red)}
+  .sotag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);
+    font-family:var(--px);font-size:9px;letter-spacing:1px;color:#fff;background:var(--red);
+    border:2px solid #ff7b7b;padding:8px 11px;box-shadow:0 0 18px rgba(255,43,43,.55);white-space:nowrap}
 
   /* ---------- Shop folders (drops) ---------- */
   .folderblock{margin-bottom:34px}
@@ -466,17 +470,14 @@
   footer .np{color:var(--acid);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:60vw}
   footer .support{color:#ffd60a;text-decoration:none;white-space:nowrap;padding:4px 7px;border:1px solid rgba(255,214,10,.45);transition:background .2s,border-color .2s}
   footer .support:hover{background:#ffd60a;color:#000;border-color:#ffd60a}
-  footer .legal{color:var(--dim);text-decoration:none;white-space:nowrap}
-  footer .legal:hover{color:var(--ink)}
 
   @media(max-width:560px){
     header .sys{display:none}
     #engroot{height:calc(100dvh - 215px)}
     .eng-hud .r{display:none}
-    footer{padding:8px 7px;gap:5px;font-size:7px}
-    footer .np{max-width:31vw}
-    footer .support{font-size:7px;padding:4px 5px}
-    footer .legal{font-size:7px}
+    footer{padding:8px 10px;gap:6px;font-size:7px;flex-wrap:wrap;row-gap:6px}
+    footer .np{max-width:100%;flex:1 1 100%;text-align:center;order:-1;text-overflow:ellipsis}
+    footer .support{font-size:7px;padding:5px 8px}
   }
 </style>
 </head>
@@ -713,7 +714,6 @@
   <footer>
     <span class="np" id="nowplaying">IDLE — NO SIGNAL</span>
     <a class="support" href="support/" title="Support the art">SUPPORT THE ART</a>
-    <a class="legal" href="legal/" title="Copyright and use">RIGHTS &amp; USE</a>
     <span>© ONLYIBEE <span id="yr"></span></span>
   </footer>
 </div>
@@ -866,7 +866,7 @@
     var LIVE=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.products)||null;
     var FOLDERS=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.folders)||null;
     if(LIVE&&LIVE.length) SHOP=LIVE.map(function(pr){
-      return {n:pr.n,p:pr.out?"CLAIMED":((pr.cur||"€")+pr.price),r:pr.r||"c",
+      return {n:pr.n,p:pr.out?"SOLD OUT":((pr.cur||"€")+pr.price),r:pr.r||"c",
         u:pr.id,i:(pr.imgs&&pr.imgs[0])||null,out:pr.out?1:0,self:1,folder:pr.folder||null};
     });
     var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};
@@ -878,7 +878,8 @@
       var sq=it.i?'<img loading="lazy" src="'+it.i+'" alt="'+it.n+'">'
         :'<div class="noimg">NO VISUAL<br>TAP TO VIEW</div>';
       return '<a class="'+cls+'" href="product-page/?id='+encodeURIComponent(it.u)+'">'
-        +'<div class="sq">'+sq+'<span class="rtag">'+RNAME[it.r]+'</span></div>'
+        +'<div class="sq">'+sq+'<span class="rtag">'+RNAME[it.r]+'</span>'
+        +(it.out?'<span class="sotag">SOLD OUT</span>':'')+'</div>'
         +'<div class="meta"><span class="nm">'+it.n+'</span><span class="pr">'+it.p+'</span></div></a>';
     }
     /* ---- folders (drops): each is a labelled folder with a snippet of pieces;
@@ -1936,7 +1937,7 @@
   });
 })();
 </script>
-<script src="assets/player.js?v=23"></script>
+<script src="assets/player.js?v=24"></script>
 <div id="icslbx"><img alt=""></div>
 <script>
 /* ICS process sketches — click a card to open it big, click/Esc closes */

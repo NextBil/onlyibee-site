@@ -51,39 +51,53 @@ h1{font-family:var(--px);font-size:clamp(15px,4.4vw,26px);letter-spacing:1px;col
 .sub{font-family:var(--px);font-size:clamp(8px,2.2vw,11px);color:var(--za);letter-spacing:2px;margin-top:8px}
 .meta{color:var(--dim);margin-top:8px;font-size:19px;letter-spacing:1px}
 
-/* ---------- the burning spliff (the play/seek bar) ---------- */
-.spliff{display:flex;align-items:center;margin-top:18px;height:30px;cursor:pointer;touch-action:none}
-.spliff .roach{width:30px;height:17px;flex:none;border-radius:7px 3px 3px 7px;margin-right:-5px;z-index:2;
+/* ---------- the burning spliff (the play/seek bar) ----------
+   Shaped like a hand-rolled cone: pinched at the roach, flaring out
+   toward the lit tip. The taper lives on .cone (clip-path), which also
+   clips the ash so the burnt part keeps the cone silhouette. The ember,
+   smoke and falling ash sit OUTSIDE that clip so they can spill past it. */
+.spliff{display:flex;align-items:center;margin-top:18px;height:48px;cursor:pointer;touch-action:none;
+  padding-bottom:10px}
+.spliff .roach{width:30px;height:9px;flex:none;border-radius:5px 2px 2px 5px;margin-right:-4px;z-index:2;
   background:linear-gradient(180deg,#c79a5e,#7a5330);box-shadow:inset 0 -2px 3px rgba(0,0,0,.4)}
-.spliff .stick{position:relative;flex:1;height:17px;border-radius:9px;
-  background:linear-gradient(180deg,#f6efdc,#d9cdb0);box-shadow:inset 0 -3px 4px rgba(0,0,0,.22),inset 0 2px 3px rgba(255,255,255,.55)}
-.spliff .ash{position:absolute;left:0;top:0;height:100%;width:0;border-radius:9px 2px 2px 9px;
-  background:repeating-linear-gradient(90deg,#8f8f8f 0 3px,#6a6a6a 3px 6px),linear-gradient(180deg,#9a9a9a,#404040);
-  box-shadow:inset 0 0 6px rgba(0,0,0,.5)}
-/* the lit cherry — bigger, hotter, flickers with the beat */
-.spliff .ember{position:absolute;left:0;top:50%;transform:translate(-50%,-50%);width:19px;height:24px;border-radius:50%;z-index:3;
+.spliff .stick{position:relative;flex:1;height:34px;overflow:visible}
+/* the rolled paper cone — pinched at the roach, flaring out to the cherry */
+.spliff .cone{position:absolute;inset:0;z-index:1;
+  clip-path:polygon(0 41%,100% 0,100% 100%,0 59%);
+  background:linear-gradient(180deg,#f6efdc,#e4dac2 55%,#cfc3a4);
+  box-shadow:inset 0 -3px 5px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.5)}
+/* burnt-down section — grows left→right, clipped to the cone by its parent */
+.spliff .ash{position:absolute;left:0;top:0;height:100%;width:0;
+  background:repeating-linear-gradient(96deg,#8f8f8f 0 3px,#6a6a6a 3px 6px),linear-gradient(180deg,#9a9a9a,#3a3a3a);
+  box-shadow:inset 0 0 7px rgba(0,0,0,.55)}
+/* the lit cherry — grows as the cone widens, flickers with the beat */
+.spliff .ember{position:absolute;left:0;top:50%;z-index:3;
+  transform:translate(-50%,-50%);border-radius:50%;
+  width:calc(9px + var(--burn,0)*13px);height:calc(10px + var(--burn,0)*24px);
   background:radial-gradient(circle at 50% 38%,#fff7d2,#ff9d2b 42%,#ff3b1a 80%);
-  box-shadow:0 0 calc(12px + var(--emb,0)*34px) rgba(255,110,30,.98),0 0 8px #ffcf5c,0 0 3px #fff}
+  box-shadow:0 0 calc(10px + var(--emb,0)*28px) rgba(255,110,30,.95),0 0 7px #ffcf5c,0 0 3px #fff}
 body.playing .spliff .ember{animation:emberflick .18s steps(2) infinite}
 @keyframes emberflick{0%{filter:brightness(1)}100%{filter:brightness(1.22)}}
-/* base smoke stream — bigger + more visible than before */
-.spliff .stick{overflow:visible}
-.spliff .smoke{position:absolute;left:0;bottom:14px;width:16px;height:16px;margin-left:-8px;border-radius:50%;
+/* base smoke stream */
+.spliff .smoke{position:absolute;left:0;bottom:22px;width:16px;height:16px;margin-left:-8px;border-radius:50%;
   background:radial-gradient(circle,rgba(235,228,246,.6),rgba(205,196,220,.25) 60%,transparent 74%);
   filter:blur(3px);opacity:0;z-index:2}
 body.playing .spliff .smoke{animation:spliffsmoke 2.4s ease-out infinite}
 @keyframes spliffsmoke{0%{opacity:.7;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(22px,-64px) scale(2.8)}}
-/* extra rising smoke puffs (spawned in JS while playing) — makes the smoke read clearly */
-.puff{position:absolute;bottom:14px;width:14px;height:14px;margin-left:-7px;border-radius:50%;z-index:2;pointer-events:none;
+/* extra rising smoke puffs (spawned in JS while playing) */
+.puff{position:absolute;bottom:22px;width:14px;height:14px;margin-left:-7px;border-radius:50%;z-index:2;pointer-events:none;
   background:radial-gradient(circle,rgba(238,231,248,.55),rgba(205,196,220,.2) 60%,transparent 74%);
   filter:blur(2px);animation:puffrise 2.8s ease-out forwards}
 @keyframes puffrise{0%{opacity:.72;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(30px,-74px) scale(2.7)}}
-/* falling ash flakes — drop off the burning cherry */
-.ashbit{position:absolute;top:50%;width:4px;height:4px;margin-left:-2px;border-radius:1px;z-index:3;pointer-events:none;
-  background:linear-gradient(180deg,#cdcdcd,#565656);box-shadow:0 0 3px rgba(255,120,40,.55);
-  animation:ashfall linear forwards}
+/* falling ash flakes — crumble off the cherry and drop away below the cone.
+   ease-in on the fall so the flakes accelerate like real ash. */
+.ashbit{position:absolute;top:50%;z-index:3;pointer-events:none;border-radius:1px;
+  width:var(--sz,4px);height:var(--sz,4px);margin-left:calc(var(--sz,4px)/-2);
+  background:linear-gradient(180deg,#d6d6d6,#4a4a4a);box-shadow:0 0 3px rgba(255,120,40,.5);
+  animation:ashfall cubic-bezier(.4,0,.85,.5) forwards}
 @keyframes ashfall{0%{opacity:1;transform:translate(0,0) rotate(0)}
-  100%{opacity:0;transform:translate(var(--dx,0px),48px) rotate(220deg)}}
+  75%{opacity:.85}
+  100%{opacity:0;transform:translate(var(--dx,0px),var(--dy,86px)) rotate(var(--rot,300deg))}}
 
 .sec{margin-top:46px}
 .sh{font-family:var(--px);font-size:clamp(11px,3vw,16px);margin-bottom:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -230,7 +244,7 @@ body.playing #roomtag{opacity:.92}
       <div class="spliff" id="spliff" title="drag the ember to seek">
         <span class="roach"></span>
         <span class="stick" id="stick">
-          <span class="ash" id="ash"></span>
+          <span class="cone"><span class="ash" id="ash"></span></span>
           <span class="smoke" id="smk"></span>
           <span class="ember" id="ember"></span>
         </span>
@@ -396,9 +410,13 @@ body.playing #roomtag{opacity:.92}
 
   /* the spliff burns down as the session rolls: ash grows, ember + smoke ride the burn line */
   var ash=$("ash"),ember=$("ember"),smk=$("smk");
+  var burn=0;
   function setProgress(fr){
     fr=Math.max(0,Math.min(1,fr)); var pct=(fr*100)+"%";
+    burn=fr;
     ash.style.width=pct; ember.style.left=pct; smk.style.left=pct;
+    /* the cone widens toward the tip, so the cherry grows as it burns down */
+    ember.style.setProperty("--burn",fr.toFixed(3));
   }
   /* ---- badge: ride the WHOLE 20-minute mix → CERTIFIED STONER. Flagged in its
      own localStorage key ("ibee_mzs_full") once you're past 92% (or it ends). ---- */
@@ -443,13 +461,24 @@ body.playing #roomtag{opacity:.92}
     var p=document.createElement("span"); p.className="puff"; p.style.left=emberLeft();
     p.style.animationDuration=(2.3+Math.random()*0.9)+"s"; stick.appendChild(p);
     setTimeout(function(){ if(p.parentNode)p.remove(); },3400); }
+  /* ash crumbles off the cherry and drops away. Flakes get bigger and fall in
+     bigger clumps the further down the cone burns, since there's more paper
+     and packed material burning at the wide end. */
   function spawnAsh(){ if(!body.classList.contains("playing"))return;
-    var a=document.createElement("span"); a.className="ashbit"; a.style.left=emberLeft();
-    a.style.setProperty("--dx",(Math.random()*18-9).toFixed(0)+"px");
-    a.style.animationDuration=(1.1+Math.random()*0.9)+"s"; stick.appendChild(a);
-    setTimeout(function(){ if(a.parentNode)a.remove(); },2200); }
+    var n=1+Math.round(Math.random()*(1+burn*2));
+    for(var i=0;i<n;i++){
+      var a=document.createElement("span"); a.className="ashbit"; a.style.left=emberLeft();
+      a.style.setProperty("--sz",(2.5+Math.random()*(2.5+burn*3.5)).toFixed(1)+"px");
+      a.style.setProperty("--dx",(Math.random()*26-13).toFixed(0)+"px");
+      a.style.setProperty("--dy",(60+Math.random()*55).toFixed(0)+"px");
+      a.style.setProperty("--rot",(180+Math.random()*320).toFixed(0)+"deg");
+      a.style.animationDelay=(Math.random()*0.22).toFixed(2)+"s";
+      a.style.animationDuration=(1.0+Math.random()*1.0)+"s"; stick.appendChild(a);
+      (function(el){ setTimeout(function(){ if(el.parentNode)el.remove(); },2600); })(a);
+    }
+  }
   setInterval(spawnPuff,380);
-  setInterval(spawnAsh,820);
+  setInterval(spawnAsh,420);
 
   /* =====================================================================
      THE ROOM — a road unspooling into the dark, streetlights sliding by,
@@ -688,8 +717,8 @@ body.playing #roomtag{opacity:.92}
   document.querySelectorAll(".viewer").forEach(function(v){ io.observe(v); });
 })();
 </script>
-<script src="../assets/player.js?v=23"></script>
-<script src="../assets/badges.js?v=9"></script>
-<script src="/assets/stats-client.js?v=6"></script>
+<script src="../assets/player.js?v=24"></script>
+<script src="../assets/badges.js?v=11"></script>
+<script src="/assets/stats-client.js?v=7"></script>
 </body>
 </html>
