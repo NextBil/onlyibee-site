@@ -770,13 +770,13 @@
       beat *= 0.9; level *= 0.92;
     }
     var hue = cur >= 0 ? SONGS[cur].hue : 75;
-    var a = Math.min(1, 0.08 + beat*0.85 + level*0.25);
+    var a = Math.min(1, 0.05 + beat*0.5 + level*0.15);
     var root = document.documentElement.style;
     if(playing || beat > 0.02){
-      nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.9).toFixed(3)+")";
+      nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.65).toFixed(3)+")";
       nf.style.boxShadow =
-        "inset 0 0 "+(16+beat*70)+"px hsla("+hue+",95%,55%,"+(a*0.7).toFixed(3)+"),"
-        +"inset 0 0 5px hsla("+hue+",95%,70%,"+(a*0.9).toFixed(3)+")";
+        "inset 0 0 "+(9+beat*38)+"px hsla("+hue+",95%,55%,"+(a*0.45).toFixed(3)+"),"
+        +"inset 0 0 3px hsla("+hue+",95%,70%,"+(a*0.6).toFixed(3)+")";
       root.setProperty("--beat", beat.toFixed(3));
       root.setProperty("--songhue", hue);
       root.setProperty("--ga", Math.min(1, 0.12 + beat*1.1).toFixed(3));
