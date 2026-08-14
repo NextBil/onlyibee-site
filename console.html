@@ -502,23 +502,31 @@
   .aboutnet span{color:var(--dim);font-family:var(--vt);font-size:17px}.aboutnet b{color:var(--ink);font-weight:normal}.aboutnet:hover{border-color:var(--acid);background:#0d1400}
   @media(max-width:560px){.aboutnet{display:block}.aboutnet span{display:block;margin-top:5px;font-size:15px}}
 
-  /* ---------- Footer HUD ---------- */
+  /* ---------- Footer HUD ----------
+     A 3-column grid, NOT space-between: space-between only distributes leftover
+     space, so SUPPORT would sit wherever the copyright left it rather than in the
+     middle. 1fr / auto / 1fr puts column 2 at the true centre. Column 1 is left
+     deliberately EMPTY (the now-playing readout used to live there) and both
+     remaining items are pinned by column — without that, auto-placement would
+     slide SUPPORT into column 1 and it would no longer be centred. */
   footer{
     position:fixed;bottom:0;left:0;right:0;z-index:100;
-    display:flex;justify-content:space-between;align-items:center;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
     padding:10px 18px;background:#000;border-top:2px solid var(--border);
     font-family:var(--px);font-size:9px;color:var(--dim);
   }
-  footer .np{color:var(--acid);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:60vw}
-  footer .support{color:#ffd60a;text-decoration:none;white-space:nowrap;padding:4px 7px;border:1px solid rgba(255,214,10,.45);transition:background .2s,border-color .2s}
+  footer .support{grid-column:2;justify-self:center;color:#ffd60a;text-decoration:none;
+    white-space:nowrap;padding:4px 7px;border:1px solid rgba(255,214,10,.45);
+    transition:background .2s,border-color .2s}
   footer .support:hover{background:#ffd60a;color:#000;border-color:#ffd60a}
+  footer .cr{grid-column:3;justify-self:end;white-space:nowrap}
 
   @media(max-width:560px){
     header .sys{display:none}
     #engroot{height:calc(100dvh - 215px)}
     .eng-hud .r{display:none}
-    footer{padding:8px 10px;gap:6px;font-size:7px;flex-wrap:wrap;row-gap:6px}
-    footer .np{max-width:100%;flex:1 1 100%;text-align:center;order:-1;text-overflow:ellipsis}
+    /* two items fit one line on a phone now, so the same centred grid holds */
+    footer{padding:8px 10px;gap:8px;font-size:7px}
     footer .support{font-size:7px;padding:5px 8px}
   }
 </style>
@@ -777,9 +785,8 @@
   </main>
 
   <footer>
-    <span class="np" id="nowplaying">IDLE — NO SIGNAL</span>
     <a class="support" href="support/" title="Support the art">SUPPORT THE ART</a>
-    <span>© ONLYIBEE <span id="yr"></span></span>
+    <span class="cr">© ONLYIBEE <span id="yr"></span></span>
   </footer>
 </div>
 
@@ -1740,7 +1747,9 @@
       var gg=galaxyOf(pl.t.g);
       pbsub.textContent="ONLY IBEE · "+(gg?gg.name:"");
       if(pl.t.cover)pbcover.src=pl.t.cover;
-      $("#nowplaying").textContent="▶ "+pl.t.name+" — ONLY IBEE";
+      /* the footer now-playing readout was removed — keep these writes optional so
+         the track still drives the mini player, media session and orbits. */
+      if($("#nowplaying"))$("#nowplaying").textContent="▶ "+pl.t.name+" — ONLY IBEE";
       try{if("mediaSession" in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:pl.t.name,artist:"ONLY IBEE",album:galaxyOf(pl.t.g)?galaxyOf(pl.t.g).name:"THE UNIVERSE",artwork:[{src:"assets/img/follow-me.jpg",sizes:"512x512",type:"image/jpeg"}]});navigator.mediaSession.setActionHandler("play",function(){audio.play();pbplay.textContent="❚❚";});navigator.mediaSession.setActionHandler("pause",function(){audio.pause();pbplay.textContent="►";});}}catch(e){}
       assignOrbits();
       var n=playsOf(pl.t);
@@ -1762,7 +1771,7 @@
       pblist.classList.remove("open");
       $("#pbmini").classList.remove("show");
       updEngback();
-      $("#nowplaying").textContent="IDLE — NO SIGNAL";
+      if($("#nowplaying"))$("#nowplaying").textContent="IDLE — NO SIGNAL";
     }
     pbplay.addEventListener("click",function(){
       if(!playing)return;
