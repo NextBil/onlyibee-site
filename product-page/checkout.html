@@ -141,6 +141,22 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var p=null; all.forEach(function(x){ if(x.id===id) p=x; });
   $("backlink").href="./?id="+encodeURIComponent(id);
 
+  /* ---- COLLECTION CLOSED. The buy buttons are gone from the product pages, but this
+     page is still reachable by an old link / browser history — and it can take real
+     money through PayPal. So it has to refuse too, or someone pays for a piece that
+     is no longer for sale. Keep this in sync with CLOSED in product-page/index.html. ---- */
+  var CLOSED=true;
+  if(CLOSED){
+    $("notfound").innerHTML='◼ COLLECTION CLOSED_<br><br>'
+      +'<span style="font-family:var(--vt);font-size:20px;color:var(--dim);line-height:1.4">'
+      +'ICS CLOTHING V1 is finished — nothing is for sale right now.<br>'
+      +'The archive stays up, ICS V2 is loading_</span><br><br>'
+      +'<a href="../shop/?f=ics-v1-autumn-2024" style="font-family:var(--px);font-size:9px;color:var(--acid);text-decoration:none;border:1px solid var(--acid);padding:12px 16px;display:inline-block">◀ BACK TO THE ARCHIVE</a>';
+    $("notfound").style.color="var(--gold)";
+    $("notfound").style.display="";
+    return;
+  }
+
   if(!p||p.out){ $("notfound").style.display=""; return; }
   document.title="CHECKOUT — "+p.n+" | ONLY IBEE";
   $("flow").style.display="";

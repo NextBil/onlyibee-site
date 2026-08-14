@@ -92,6 +92,13 @@ h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-
 /* sold-out pieces get a real red button in the buy slot, not just grey text */
 .paybtn.sold{background:var(--red);color:#fff;border:2px solid #ff7b7b;cursor:not-allowed;
   box-shadow:0 0 18px rgba(255,43,43,.4)}
+/* still-available pieces, but the drop is closed — gold, not red: nothing is wrong,
+   the collection just isn't selling anymore */
+.paybtn.closed{background:transparent;color:var(--gold);border:2px solid var(--gold);cursor:not-allowed}
+.closedbox{border:1px solid #4a3a12;color:var(--gold);font-family:var(--px);font-size:9px;
+  padding:14px;text-align:center;line-height:1.8;background:#151104}
+/* the price of a sold piece is a record, not an offer */
+.price.claimed{text-decoration:line-through;text-decoration-color:rgba(255,43,43,.75)}
 
 .notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0}
 .back{font-family:var(--px);font-size:9px;color:var(--acid);text-decoration:none;border:1px solid var(--acid);padding:12px 16px}
@@ -165,22 +172,30 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var rz=$("rtag"); rz.textContent=RNAME[p.r]||"COMMON"; rz.className="rtag rz-"+(p.r||"c");
   $("pname").textContent=p.n;
   var out=!!p.out;
-  $("pprice").textContent=out?"SOLD OUT":((p.cur||"€")+p.price);
+  /* the price always shows — even on sold pieces. It's part of the record of what
+     the piece was; the SOLD OUT stamp + strike-through carry the status instead. */
+  $("pprice").textContent=(p.cur||"€")+p.price;
   $("pprice").className="price"+(out?" claimed":"");
   if(out){ $("claimtag").style.display=""; $("claimtag").textContent="SOLD OUT"; }
   $("pchips").innerHTML='<span class="chip a">✓ HUMAN-MADE</span><span class="chip a">1 OF 1</span>'
-    +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">IN STOCK</span>');
+    +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">LAST ONE</span>');
   $("pdesc").textContent=p.desc||"made once, by hand, then never again_";
 
-  /* payment: everything happens ON THIS SITE — one button into the checkout page
-     (checkout.html collects the buyer's info + pays via PayPal / card / invoice) */
+  /* ---- COLLECTION CLOSED: ICS CLOTHING V1 is no longer for sale. The whole
+     catalogue stays browsable, but nothing checks out — so the buy button is
+     replaced everywhere. Flip CLOSED to false to re-open checkout as it was. ---- */
+  var CLOSED=true;
   var btns="";
-  if(!out){
-    btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
-  } else {
+  if(out){
     btns='<span class="paybtn sold" aria-disabled="true">✕ SOLD OUT</span>'
       +'<div class="claimbox">CLAIMED — THIS PIECE LIVES WITH SOMEONE NOW_<br>EACH ONE IS MADE ONLY ONCE</div>';
     $("paynote").style.display="none";
+  } else if(CLOSED){
+    btns='<span class="paybtn closed" aria-disabled="true">◼ COLLECTION CLOSED</span>'
+      +'<div class="closedbox">ICS CLOTHING V1 IS CLOSED_<br>THE ARCHIVE STAYS UP — ICS V2 IS LOADING</div>';
+    $("paynote").style.display="none";
+  } else {
+    btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
   }
   $("paybtns").innerHTML=btns;
 

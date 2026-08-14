@@ -397,7 +397,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=23"></script>
+<script src="assets/player.js?v=24"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
@@ -408,7 +408,7 @@
 <!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
 <script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
-<script src="assets/badges.js?v=11"></script>
+<script src="assets/badges.js?v=12"></script>
 <!-- the unlock ladder: earn the rhythm games by playing (grants via grant_game, see member/unlocks.sql) -->
 <script src="assets/unlocks.js?v=1"></script>
 <script>

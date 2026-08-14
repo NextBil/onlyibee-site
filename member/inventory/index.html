@@ -177,10 +177,10 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   async function boot(){
     var sess=(await sb.auth.getSession()).data.session;
     var cat=(await sb.from('items').select('*').eq('active',true).order('value')).data||[];
-    /* the UNIVERSE MUSIC ENGINE is part of the collection too — not a DB item:
+    /* the GALAXYS ENGINE is part of the collection too — not a DB item:
        it unlocks by signing in + feeling a track for 10s (player.js's ibee_engine10 flag) */
     var eng10=false; try{ eng10=localStorage.getItem("ibee_engine10")==="1"; }catch(e){}
-    cat.unshift({id:"universe-engine",name:"UNIVERSE MUSIC ENGINE",rarity:"legendary",value:"∞",
+    cat.unshift({id:"universe-engine",name:"GALAXYS ENGINE",rarity:"legendary",value:"∞",
       type:"engine",payload:"#playing",showname:true,lockhint:"10s OF MUSIC + SIGN IN"});
     /* ICS CHESS is in EVERY collection — always free, now music-reactive */
     cat.splice(1,0,{id:"ics-chess",name:"ICS CHESS",rarity:"rare",value:"FREE",
@@ -230,7 +230,7 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   });
 })();
 </script>
-<script src="../../assets/player.js?v=22"></script>
-<script src="/assets/stats-client.js?v=6"></script>
+<script src="../../assets/player.js?v=24"></script>
+<script src="/assets/stats-client.js?v=7"></script>
 </body>
 </html>

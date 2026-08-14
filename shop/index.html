@@ -39,6 +39,15 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
   background:var(--gold);padding:7px 10px;letter-spacing:1px}
 .fhead.r-leg .proto{background:var(--acid)}
 .fhead .cnt{color:var(--dim);font-size:19px;margin-top:12px}
+/* COLLECTION CLOSED notice — gold, not red: the drop is over, nothing is broken.
+   Everything below stays browsable; only checkout is gone. */
+.closednote{display:flex;align-items:flex-start;gap:12px;margin:0 0 22px;padding:14px 16px;
+  border:1px solid #4a3a12;background:linear-gradient(180deg,#151104,#0d0a02)}
+.closednote b{font-family:var(--px);font-size:9px;color:var(--gold);letter-spacing:1px;
+  white-space:nowrap;line-height:1.7}
+.closednote span{color:var(--dim);font-size:18px;line-height:1.35}
+.closednote span i{color:var(--ink);font-style:normal}
+@media(max-width:560px){.closednote{flex-direction:column;gap:7px}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .item{border:2px solid var(--border);background:var(--panel);text-decoration:none;color:var(--ink);
   display:block;transition:transform .15s,border-color .2s,box-shadow .2s}
@@ -56,7 +65,7 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
 .item.r-sr{border-color:#5c3350}.item.r-sr .rtag{color:#e879c9}.item.r-sr:hover{border-color:#e879c9;box-shadow:0 0 16px rgba(232,121,201,.35)}
 .item.r-sdr{border-color:#5c4b2c}.item.r-sdr .rtag{color:#d9b36c}.item.r-sdr:hover{border-color:#d9b36c;box-shadow:0 0 16px rgba(217,179,108,.4)}
 .item.r-leg{border-color:#4d6600}.item.r-leg .rtag{color:var(--acid)}.item.r-leg:hover{border-color:var(--acid)}
-.item.soldout{opacity:.72}.item.soldout .sq img{filter:grayscale(1) brightness(.62)}.item.soldout .pr{color:var(--red)}
+.item.soldout{opacity:.72}.item.soldout .sq img{filter:grayscale(1) brightness(.62)}.item.soldout .pr{color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(255,43,43,.75)}
 .sotag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);
   font-family:var(--px);font-size:9px;letter-spacing:1px;color:#fff;background:var(--red);
   border:2px solid #ff7b7b;padding:8px 11px;box-shadow:0 0 18px rgba(255,43,43,.55);white-space:nowrap}
@@ -117,6 +126,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var head='<div class="fhead r-'+(fd.tint||'leg')+'"><h1>'+e2(fd.name)+'</h1>'
     +(fd.sub?'<div class="proto">'+e2(fd.sub)+'</div>':'')
     +'<div class="cnt">'+items.length+' piece'+(items.length===1?'':'s')+' · each made once, then never again_</div></div>';
+  /* ---- drops that are over: browsable, not buyable. Add a folder id here when its
+     drop closes; the product pages carry their own CLOSED flag. ---- */
+  var CLOSED_FOLDERS={"ics-v1-autumn-2024":1};
+  var note=CLOSED_FOLDERS[fd.id]
+    ? '<div class="closednote"><b>◼ COLLECTION CLOSED</b>'
+      +'<span><i>This drop is finished — nothing is for sale right now.</i> The archive stays up: '
+      +'every piece, every price, every story. Look around_ <i>ICS V2 is loading.</i></span></div>'
+    : '';
   var grid;
   if(!items.length){
     grid='<div class="notfound">✕ NOTHING IN THIS FOLDER YET_<br><br>stay tuned — the drop is loading_</div>';
@@ -129,7 +146,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         +'<div class="sq">'+sq+'<span class="rtag">'+(RNAME[p.r]||"COMMON")+'</span>'
         +(out?'<span class="sotag">SOLD OUT</span>':'')+'</div>'
         +'<div class="meta"><span class="nm">'+e2(p.n)+'</span>'
-        +'<span class="pr">'+(out?"SOLD OUT":e2((p.cur||"€")+p.price))+'</span></div></a>';
+        +'<span class="pr">'+e2((p.cur||"€")+p.price)+'</span></div></a>';
     }).join('')+'</div>';
   }
   /* ---- THE PROCESS: only on ICS drop folders ---- */
@@ -160,7 +177,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         return '<a href="'+P+s[0]+'" data-lbx><img loading="lazy" src="'+P+s[0]+'" alt="'+e2(s[1])+'"><div class="snm">'+e2(s[1])+'</div></a>';
       }).join('')+'</div></section>';
   }
-  document.getElementById("wrap").innerHTML=head+grid+proc;
+  document.getElementById("wrap").innerHTML=head+note+grid+proc;
   /* lightbox for the sketches */
   var lbx=document.getElementById("lbx"),lim=document.getElementById("lbxim");
   document.querySelectorAll("[data-lbx]").forEach(function(a){
