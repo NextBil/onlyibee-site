@@ -20,7 +20,7 @@ create policy "items readable" on public.items for select using (true);
 
 -- ============ INVENTORY: what each account owns ============
 create table if not exists public.inventory (
-  user_id     uuid not null references auth.users(id),
+  user_id     uuid not null references auth.users(id) on delete cascade,
   item_id     text not null references public.items(id),
   source_code text,
   obtained_at timestamptz not null default now(),
@@ -35,7 +35,7 @@ create table if not exists public.cards (
   code       text primary key,
   drop_code  text not null,
   serial     int,
-  claimed_by uuid references auth.users(id),
+  claimed_by uuid references auth.users(id) on delete set null,
   claimed_at timestamptz,
   item_id    text references public.items(id),
   created_at timestamptz not null default now()

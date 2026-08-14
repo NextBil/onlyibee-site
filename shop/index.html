@@ -39,15 +39,14 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
   background:var(--gold);padding:7px 10px;letter-spacing:1px}
 .fhead.r-leg .proto{background:var(--acid)}
 .fhead .cnt{color:var(--dim);font-size:19px;margin-top:12px}
-/* COLLECTION CLOSED notice — gold, not red: the drop is over, nothing is broken.
-   Everything below stays browsable; only checkout is gone. */
-.closednote{display:flex;align-items:flex-start;gap:12px;margin:0 0 22px;padding:14px 16px;
-  border:1px solid #4a3a12;background:linear-gradient(180deg,#151104,#0d0a02)}
-.closednote b{font-family:var(--px);font-size:9px;color:var(--gold);letter-spacing:1px;
-  white-space:nowrap;line-height:1.7}
-.closednote span{color:var(--dim);font-size:18px;line-height:1.35}
-.closednote span i{color:var(--ink);font-style:normal}
-@media(max-width:560px){.closednote{flex-direction:column;gap:7px}}
+/* COLLECTION CLOSED — a compact gold stamp, not a wide banner. It sits tight under
+   this drop's header so it reads as "THIS drop is closed", never as a whole-store
+   notice. Gold, not red: the drop is over, nothing is broken. */
+.closednote{display:inline-flex;align-items:center;gap:9px;margin:-14px 0 22px;padding:9px 12px;
+  border:1px solid var(--gold);background:#1a1204}
+.closednote b{font-family:var(--px);font-size:9px;color:var(--gold);letter-spacing:1px;white-space:nowrap}
+.closednote span{color:var(--dim);font-size:17px;line-height:1.3}
+@media(max-width:560px){.closednote{display:flex;align-items:flex-start;flex-direction:column;gap:6px}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .item{border:2px solid var(--border);background:var(--panel);text-decoration:none;color:var(--ink);
   display:block;transition:transform .15s,border-color .2s,box-shadow .2s}
@@ -116,10 +115,26 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var D=window.IBEE_PRODUCTS||{};
   var folders=D.folders||[], products=D.products||[];
   var fid=decodeURIComponent((new RegExp("[?&]f=([^&]+)").exec(location.search)||[])[1]||"");
-  if(!fid && folders.length) fid=folders[0].id;
+  /* folder ids that were renamed — old links (shared, bookmarked, in someone's
+     history) must keep landing on the right drop instead of an empty folder. */
+  var ALIAS={"ics-v1-autumn-2024":"ics-v1-autumn-2025","ics-v3":"ics-v2"};
+  if(ALIAS[fid]) fid=ALIAS[fid];
+  /* No ?f= → land on the first folder that actually HAS pieces, not whichever
+     folder happens to sit first. The teaser drop leads the shop for hype, and a
+     bare /shop/ link must still open a real drop rather than a sealed empty one. */
+  if(!fid && folders.length){
+    var firstReal=null;
+    folders.forEach(function(f){
+      if(firstReal) return;
+      if(!f.hype && products.some(function(p){ return p.folder===f.id; })) firstReal=f.id;
+    });
+    fid=firstReal||folders[0].id;
+  }
   var fd=null; folders.forEach(function(f){ if(f.id===fid) fd=f; });
   if(!fd) fd={id:fid||"all",name:"THE SHOP",sub:"",tint:"leg"};
-  var defId=folders.length?folders[0].id:fd.id;
+  /* every product now carries an explicit folder; this fallback only catches a
+     legacy record that predates that, and points it at the first real drop. */
+  var defId=fid;
   var items=products.filter(function(p){ return (p.folder||defId)===fd.id; });
 
   document.title=fd.name+" — ONLY IBEE";
@@ -128,11 +143,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +'<div class="cnt">'+items.length+' piece'+(items.length===1?'':'s')+' · each made once, then never again_</div></div>';
   /* ---- drops that are over: browsable, not buyable. Add a folder id here when its
      drop closes; the product pages carry their own CLOSED flag. ---- */
-  var CLOSED_FOLDERS={"ics-v1-autumn-2024":1};
+  var CLOSED_FOLDERS={"ics-v1-autumn-2025":1};
   var note=CLOSED_FOLDERS[fd.id]
     ? '<div class="closednote"><b>◼ COLLECTION CLOSED</b>'
-      +'<span><i>This drop is finished — nothing is for sale right now.</i> The archive stays up: '
-      +'every piece, every price, every story. Look around_ <i>ICS V2 is loading.</i></span></div>'
+      +'<span>this drop is finished — nothing is for sale_</span></div>'
     : '';
   var grid;
   if(!items.length){

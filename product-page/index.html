@@ -192,7 +192,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("paynote").style.display="none";
   } else if(CLOSED){
     btns='<span class="paybtn closed" aria-disabled="true">◼ COLLECTION CLOSED</span>'
-      +'<div class="closedbox">ICS CLOTHING V1 IS CLOSED_<br>THE ARCHIVE STAYS UP — ICS V2 IS LOADING</div>';
+      +'<div class="closedbox">ICS CLOTHING V1 IS CLOSED_<br>ICS V2 IS LOADING</div>';
     $("paynote").style.display="none";
   } else {
     btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
