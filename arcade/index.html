@@ -100,6 +100,33 @@
   .case.locked .lockbadge svg{width:22px;height:22px;color:var(--red);
     filter:drop-shadow(0 0 6px rgba(255,43,43,.7))}
 
+  /* ---------- the GATE BOX ----------
+     A locked card used to be a link to member/, which threw the visitor off the
+     shelf onto a sign-in page with no way back. This is a box instead: it says
+     why the room is locked, offers the way in, and CLOSES back to exactly where
+     the visitor was — closing never navigates anywhere. */
+  #gate{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;
+    padding:20px;background:rgba(0,0,0,.82);backdrop-filter:blur(2px)}
+  #gate.on{display:flex}
+  #gatebox{position:relative;width:min(430px,100%);border:2px solid var(--red);background:linear-gradient(180deg,#140707,#0a0a0a);
+    padding:26px 22px 22px;box-shadow:0 0 40px rgba(255,43,43,.28);text-align:center}
+  #gatebox.soft{border-color:var(--acid);box-shadow:0 0 40px rgba(182,255,0,.22);background:linear-gradient(180deg,#0d1405,#0a0a0a)}
+  #gatebox .gx{position:absolute;top:8px;right:9px;font-family:var(--px);font-size:11px;color:var(--dim);
+    background:none;border:0;cursor:pointer;padding:6px 8px;line-height:1}
+  #gatebox .gx:hover{color:var(--ink)}
+  #gatebox .gi{width:44px;height:44px;margin:0 auto 14px;color:var(--red)}
+  #gatebox.soft .gi{color:var(--acid)}
+  #gatebox .gi svg{width:100%;height:100%}
+  #gatebox h3{font-family:var(--px);font-size:11px;color:var(--ink);letter-spacing:1px;line-height:1.8;margin-bottom:10px}
+  #gatebox p{color:var(--dim);font-size:19px;line-height:1.4;margin-bottom:18px}
+  #gatebox .ga{display:flex;flex-direction:column;gap:9px}
+  #gatebox .go{font-family:var(--px);font-size:10px;padding:14px;text-decoration:none;
+    background:var(--acid);color:#000;letter-spacing:1px}
+  #gatebox .go:hover{background:#c9ff33}
+  #gatebox .gc{font-family:var(--px);font-size:9px;padding:12px;background:transparent;color:var(--dim);
+    border:1px solid var(--border);cursor:pointer;letter-spacing:1px}
+  #gatebox .gc:hover{color:var(--ink);border-color:#3a3a3a}
+
   footer{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
     padding:10px 18px;background:#000;border-top:2px solid var(--border);font-family:var(--px);font-size:9px;color:var(--dim)}
   footer .a{color:var(--acid)}
@@ -127,19 +154,32 @@
 </head>
 <body>
   <header>
-    <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
+    <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
     <div class="sys">ROOMS.EXE<br>insert a cartridge_</div>
   </header>
 
   <main>
-    <a class="back" href="../#menu">◀ CONSOLE</a>
+    <a class="back" href="#" data-back>◀ CONSOLE</a>
     <div class="scrtitle">ONLYIBEE <span class="n">ROOMS</span></div>
     <div class="scrsub">creative, artistic ways to listen — pick a room · free play_</div>
     <div class="storebar"><div class="run"><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span></div></div>
     <div id="store"></div>
   </main>
 
-  <footer>
+  <div id="gate" aria-hidden="true">
+  <div id="gatebox" role="dialog" aria-modal="true" aria-labelledby="gatettl">
+    <button class="gx" id="gateclose" aria-label="Close">✕</button>
+    <div class="gi" id="gateico"></div>
+    <h3 id="gatettl">LOCKED_</h3>
+    <p id="gatetxt">—</p>
+    <div class="ga">
+      <a class="go" id="gatego" href="../member/?login=1">▶ JOIN</a>
+      <button class="gc" id="gatestay">✕ KEEP LOOKING AROUND</button>
+    </div>
+  </div>
+</div>
+
+<footer>
     <span class="a">♪ ONLYIBEE OS</span>
     <span id="foot">ROOMS // select_</span>
   </footer>
@@ -156,7 +196,7 @@
     {name:"ICS CHESS",       by:"Play the crew as chess pieces",         cover:"covers/ics-chess.png",  url:"../chess/", status:"live", item:null},
     /* THE GALAXYS ENGINE — the universe itself. Lives on the console screen (#music);
        it gates itself behind "signed in + felt a track 10s", so no item: here. */
-    {name:"GALAXYS ENGINE",  by:"The universe — galaxies of releases, planets you can play", cover:"covers/galaxys-engine.svg", url:"../console.html#music", status:"live", item:null},
+    {name:"GALAXYS ENGINE",  by:"The universe — galaxies of releases, planets you can play", cover:"covers/galaxys-engine.svg", url:"../console.html#music", status:"live", item:null, gate:"engine"},
     /* THE GAMES — earned by playing (see the unlock ladder in badges.js / member). */
     {name:"RUN BEEBEE!",     by:"A lyrics engine you jump through — words rain from the sky, city runs by on the beat", cover:"covers/neon-run.png",   url:"runner/",   status:"live", item:"game-runner", earn:"EARN — feel 10 records, or beat ICS chess"},
     {name:"MIMI GUITAR RUSH",by:"Mimi dashes the guitar-neck highway to the beat", cover:"covers/mimi-rush.png", url:"rush/",   status:"live", item:"game-rush", earn:"EARN — come back on 3 different days"},
@@ -185,6 +225,65 @@
     return "--wsec:"+(4.5+(h%3))+"s;--wdel:-"+((h>>>3)%4)+"s";
   }
   var pickedRoom=null, signedIn=false, ownerAcct=false;   // the member's chosen env — only that one is theirs
+
+  /* the engine's own unlock condition, read the same way console.html reads it */
+  function engineFelt(){ try{ return localStorage.getItem("ibee_engine10")==="1"; }catch(e){ return false; } }
+
+  /* ---------- the gate box ---------- */
+  var GATE={
+    "engine-join":{ soft:true,
+      t:"THE GALAXYS ENGINE IS SEALED_",
+      p:"The universe opens once you're a member and you've felt a track. Join, press play for ten seconds, and every galaxy is yours.",
+      a:"▶ JOIN — IT'S FREE", href:"../member/?login=1" },
+    "engine-listen":{ soft:true,
+      t:"ALMOST IN_",
+      p:"You're signed in. Press play on the radio and let a track run for ten seconds — the engine opens itself.",
+      a:"▶ GO LISTEN", href:"../console.html#menu" },
+    "room-join":{ soft:false,
+      t:"THIS ROOM IS MEMBERS ONLY_",
+      p:"Rooms belong to members — you pick one when you join, and it grows with you. Free, takes a minute.",
+      a:"▶ JOIN — PICK YOUR ROOM", href:"../member/?login=1" },
+    "room-pick":{ soft:false,
+      t:"NOT YOUR ROOM_",
+      p:"You already have a room of your own — one per member. Open your profile to see it, or grab an ARCADE PASS to open every room.",
+      a:"▶ MY ROOM", href:"../room/" },
+    "earn":{ soft:false,
+      t:"THIS ONE IS EARNED_",
+      p:"You unlock this by playing — see the ladder on your profile. Nothing to buy.",
+      a:"▶ SEE THE LADDER", href:"../member/" }
+  };
+  var LOCKICO="<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
+    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
+  var gateEl=document.getElementById("gate"), gateBox=document.getElementById("gatebox"),
+      lastFocus=null;
+  function closeGate(){
+    gateEl.classList.remove("on"); gateEl.setAttribute("aria-hidden","true");
+    /* closing returns you to exactly what you were doing — it never navigates */
+    if(lastFocus&&lastFocus.focus){ try{lastFocus.focus();}catch(e){} }
+  }
+  function openGate(kind,name,href){
+    var g=GATE[kind]||GATE["room-join"];
+    gateBox.classList.toggle("soft",!!g.soft);
+    document.getElementById("gateico").innerHTML=LOCKICO;
+    document.getElementById("gatettl").textContent=g.t;
+    document.getElementById("gatetxt").textContent=(name?name+" — ":"")+g.p;
+    var go=document.getElementById("gatego");
+    go.textContent=g.a; go.href=g.href||href||"../member/?login=1";
+    gateEl.classList.add("on"); gateEl.setAttribute("aria-hidden","false");
+    setTimeout(function(){ try{document.getElementById("gatestay").focus();}catch(e){} },30);
+  }
+  document.getElementById("gateclose").onclick=closeGate;
+  document.getElementById("gatestay").onclick=closeGate;
+  gateEl.addEventListener("click",function(e){ if(e.target===gateEl) closeGate(); });
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&gateEl.classList.contains("on")) closeGate(); });
+  /* one delegated handler: any locked card opens the box instead of leaving */
+  document.addEventListener("click",function(e){
+    var a=e.target.closest?e.target.closest("a.case.locked[data-gate]"):null;
+    if(!a) return;
+    e.preventDefault(); lastFocus=a;
+    openGate(a.getAttribute("data-gate"), a.getAttribute("data-nm"), a.getAttribute("href"));
+  });
   function card(g){
     var soon=g.status==="soon";
     /* env rooms are MEMBERS-ONLY: open if it's the member's own pick, the owner, OR an
@@ -192,9 +291,16 @@
     var isMyRoom   = !!(g.env && (ownerAcct || (signedIn && pickedRoom===g.env)));
     var passRoom   = !!(g.env && g.item && owned[g.item]);
     var roomLocked = !!(g.env && !isMyRoom && !passRoom);
-    var isLocked = !soon && (g.env ? roomLocked : (g.item && !owned[g.item]));
+    /* the GALAXYS ENGINE gates itself on the console screen ("signed in + felt a
+       track 10s", §3 engineUnlocked). Mirror that here so the shelf tells the
+       same story the engine will — a card that looks open and then refuses is worse
+       than a card that says why up front. */
+    var engineLocked = g.gate==="engine" && !ownerAcct && !(signedIn && engineFelt());
+    var isLocked = !soon && (engineLocked || (g.env ? roomLocked : (g.item && !owned[g.item])));
     var tagKey = soon?"soon":(isLocked?"locked":"live");
-    var byText = roomLocked ? (!signedIn ? "members only — join to pick a room_"
+    var byText = engineLocked ? (!signedIn ? "members only — join, then feel a track_"
+                                : "almost — press play and feel a track for 10s_")
+               : roomLocked ? (!signedIn ? "members only — join to pick a room_"
                               : (pickedRoom ? "you chose "+pickedRoom.toUpperCase()+" — one room only_"
                                             : "pick your room on your profile_"))
                : (isLocked&&g.earn ? g.earn : g.by);
@@ -210,8 +316,19 @@
         +'<div class="brow"><span class="barcode"></span><span class="pr">'+prText+'</span></div></div>';
     var style=' style="'+wobbleVars(g.name)+'"';
     if(soon) return '<div class="case soon"'+style+'>'+inner+'</div>';
-    /* locked env room → join (guest) or your profile (signed in); earned games → member */
-    if(isLocked) return '<a class="case live locked" href="'+(roomLocked?(signedIn?'../room/':'../member/?login=1'):'../member/')+'"'+style+'>'+inner+'</a>';
+    /* A locked card used to be a LINK to member/ — which threw the visitor out of
+       the shelf onto a sign-in page with no way back. It now opens a closable box
+       right here (see openGate); the destination is carried as data so the box can
+       offer it as a choice rather than forcing it. */
+    if(isLocked){
+      var dest = engineLocked ? '../member/?login=1'
+               : roomLocked   ? (signedIn?'../room/':'../member/?login=1')
+               : '../member/';
+      var why  = engineLocked ? (signedIn?'engine-listen':'engine-join')
+               : roomLocked   ? (signedIn?'room-pick':'room-join')
+               : 'earn';
+      return '<a class="case live locked" href="'+dest+'" data-gate="'+why+'" data-nm="'+g.name+'"'+style+'>'+inner+'</a>';
+    }
     return '<a class="case live" href="'+g.url+'"'+style+'>'+inner+'</a>';
   }
   function render(){
@@ -268,5 +385,6 @@
 </script>
 <script src="../assets/player.js?v=24"></script>
 <script src="/assets/stats-client.js?v=7"></script>
+<script src="../assets/nav.js?v=1"></script>
 </body>
 </html>

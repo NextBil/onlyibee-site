@@ -29,7 +29,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
   background:radial-gradient(ellipse at 50% 22%,hsla(var(--hue),90%,45%,.16),transparent 60%)}
 header{width:100%;display:flex;justify-content:space-between;align-items:center;
   padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
-header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+header a{color:var(--acid);text-decoration:none}
+.mback{display:inline-block;font-family:var(--px);font-size:9px;color:var(--dim);text-decoration:none;
+  border:1px solid var(--border);padding:8px 12px;margin-bottom:16px}
+.mback:hover{color:var(--acid);border-color:var(--acid)}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
 main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-direction:column;
   align-items:center;gap:14px;text-align:center;position:relative;z-index:2}
 
@@ -156,7 +159,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <body>
 <div class="bgglow"></div>
 <header>
-  <a href="../#menu">ONLY<span class="r">IBEE</span> OS</a>
+  <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
   <span>MEMBER.SYS</span>
 </header>
 
@@ -168,6 +171,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 </div>
 
 <main id="stage" style="visibility:hidden">
+  <!-- Reaching this page used to be a one-way trip: no back control, and the
+       first thing offered was "enter a pass code". Both are fixed — the trail
+       comes from the shell (assets/nav.js) and hides this when it is the first
+       page, and the gate below leads with joining, not with a code. -->
+  <a class="mback" href="#" data-back>◀ BACK</a>
   <div class="banner locked crtin" id="grant"><svg class="gi" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="#050505"/></svg> CHECKING ACCESS…</div>
 
   <div class="stage"><div class="o3" id="medal"></div></div>
@@ -399,8 +407,13 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         +'<a class="cbtn" href="inventory/">♟ VIEW MY COLLECTION</a>';
       return;
     }
-    /* came from the shell's LOG IN button (?login=1) → lead with the login form; otherwise lead with the code */
-    var loginFirst = !!param("login");
+    /* LOGIN LEADS. Landing on "enter a pass code" is confusing for the many more
+       visitors who have no garment and no code — it reads as a wall. Joining is
+       free and takes seconds, so that's the first thing offered; the code stays
+       right below it for the people who actually have one.
+       The one exception: someone who just typed a WRONG code gets the code field
+       back on top so they can correct it without hunting for it. */
+    var loginFirst = !invalid;
     var codeBlock='<div class="sub">Got a pass code from your garment? Enter it:</div>'
       +'<input id="gcode" placeholder="IBEE-XXXX-0000-XXXX" autocapitalize="characters" autocomplete="off">'
       +'<button class="cbtn" id="gcodego">▶ UNLOCK WITH CODE</button>';
@@ -411,8 +424,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       +'<button class="cbtn" id="glogin" style="background:transparent;border:1px solid var(--acid);color:var(--acid);margin-top:8px">▶ LOG IN (already joined)</button>';
     host.innerHTML='<div class="gate">'
       +(loginFirst
-        ? loginBlock+'<div class="or">OR UNLOCK WITH A CODE</div>'+codeBlock
-        : codeBlock+'<div class="or">OR LOG IN</div>'+loginBlock)
+        ? loginBlock+'<div class="or">OR — GOT A PASS CODE?</div>'+codeBlock
+        : codeBlock+'<div class="or">OR JOIN / LOG IN</div>'+loginBlock)
       +'<div class="cnote" id="gmsg"></div></div>';
     $("gcodego").onclick=function(){ var c=($("gcode").value||'').toUpperCase().trim();
       if(!c){$("gmsg").textContent='enter your code_';return;} location.search='?pass='+encodeURIComponent(c); };
@@ -553,5 +566,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 </script>
 <script src="../assets/player.js?v=24"></script>
 <script src="/assets/stats-client.js?v=7"></script>
+<script src="../assets/nav.js?v=1"></script>
 </body>
 </html>

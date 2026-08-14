@@ -1,6 +1,10 @@
 -- ONLYIBEE — LIVE COMMUNITY TELEMETRY. Run once in Supabase → SQL Editor.
 -- pgcrypto gives us digest() for one-way IP hashing (the raw IP is NEVER stored).
-create extension if not exists pgcrypto;
+-- On Supabase extensions live in the "extensions" schema, so install it there and
+-- call it as extensions.digest(). If it is already installed elsewhere this is a
+-- no-op and the hash simply degrades to NULL (see the exception block below).
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
 create table if not exists public.site_visits (visitor_id text primary key, first_seen timestamptz not null default now(), last_seen timestamptz not null default now(), last_path text not null default '/', country_code text);
 alter table public.site_visits add column if not exists country_code text;
 alter table public.site_visits add column if not exists city_name text;
@@ -15,7 +19,11 @@ alter table public.song_plays enable row level security;
 
 -- Replace the older three-argument visit function with the city-aware version.
 drop function if exists public.record_site_visit(text,text,text);
-create or replace function public.record_site_visit(visitor_id text, page_path text default '/', country_code text default null, city_name text default null) returns void language plpgsql security definer set search_path=public as $$
+-- search_path MUST include "extensions": Supabase installs pgcrypto there, not in
+-- public. With search_path=public alone, digest() below is unresolvable and the
+-- whole function throws ("function digest(text, unknown) does not exist") on EVERY
+-- call — which is exactly why site_visits stayed empty while song_plays filled up.
+create or replace function public.record_site_visit(visitor_id text, page_path text default '/', country_code text default null, city_name text default null) returns void language plpgsql security definer set search_path=public, extensions as $$
 declare
   cc text := upper(left(nullif($3,''),2));
   cy text := left(nullif(trim($4),''),80);
@@ -39,11 +47,18 @@ begin
 
   -- One-way SHA-256 hash of the caller IP. The RAW IP is never stored, so the site's
   -- privacy claim ("No IP address is saved in the ONLY IBEE database") stays true.
-  caller_ip := current_setting('request.headers', true)::json->>'x-forwarded-for';
-  caller_ip := split_part(coalesce(caller_ip,''), ',', 1);
-  if caller_ip <> '' then
-    v_ip_hash := encode(digest(caller_ip, 'sha256'), 'hex');
-  end if;
+  -- The hash feeds ONLY the optional bot-swarm filter below. It must never be able
+  -- to cost us a real visit, so any failure here (pgcrypto missing, header absent,
+  -- schema moved) leaves v_ip_hash NULL and recording carries on regardless.
+  begin
+    caller_ip := current_setting('request.headers', true)::json->>'x-forwarded-for';
+    caller_ip := split_part(coalesce(caller_ip,''), ',', 1);
+    if caller_ip <> '' then
+      v_ip_hash := encode(extensions.digest(caller_ip, 'sha256'), 'hex');
+    end if;
+  exception when others then
+    v_ip_hash := null;
+  end;
 
   -- Swarm filter ONLY: this catches a single source IP cycling hundreds of fresh
   -- visitor IDs in minutes — the classic bot-farm signature. Set high enough that
@@ -93,17 +108,21 @@ begin
   if cy ~* 'singapore' then return; end if;
   if not exists (select 1 from song_plays sp where sp.visitor_id=$1 and sp.song_slug=$2 and sp.played_at > now()-interval '30 minutes') then insert into song_plays(visitor_id,song_slug,city_name) values($1,left($2,180),cy); end if;
 end; $$;
+-- POPULATION is a ROLLING 30-DAY window, not "since the 1st of the month".
+-- date_trunc('month',now()) sent the number to 0 at every midnight on the 1st and
+-- made it climb back from nothing — the counter looked broken once a month. A
+-- rolling window always covers 30 real days, so it never resets to zero.
 create or replace function public.get_public_stats() returns table(population bigint, signals bigint, citizens bigint, entrances bigint, online bigint, updated timestamptz) language sql stable security definer set search_path=public as $$
-  select (select count(*) from site_visits where last_seen >= date_trunc('month',now()))::bigint, (select count(distinct visitor_id) from song_plays)::bigint, (select count(*) from auth.users)::bigint, (select count(*) from song_plays)::bigint, (select count(*) from site_visits where last_seen >= now()-interval '2 minutes')::bigint, now();
+  select (select count(*) from site_visits where last_seen >= now()-interval '30 days')::bigint, (select count(distinct visitor_id) from song_plays)::bigint, (select count(*) from auth.users)::bigint, (select count(*) from song_plays)::bigint, (select count(*) from site_visits where last_seen >= now()-interval '2 minutes')::bigint, now();
 $$;
 create or replace function public.get_song_play_stats() returns table(song_slug text, plays bigint) language sql stable security definer set search_path=public as $$
   select song_slug, count(*)::bigint from song_plays group by song_slug order by count(*) desc;
 $$;
 create or replace function public.get_top_countries() returns table(country_code text, visitors bigint) language sql stable security definer set search_path=public as $$
-  select country_code, count(*)::bigint from site_visits where country_code is not null and last_seen >= date_trunc('month',now()) group by country_code order by count(*) desc, country_code asc limit 5;
+  select country_code, count(*)::bigint from site_visits where country_code is not null and last_seen >= now()-interval '30 days' group by country_code order by count(*) desc, country_code asc limit 5;
 $$;
 create or replace function public.get_top_cities() returns table(city_name text, visitors bigint) language sql stable security definer set search_path=public as $$
-  select city_name, count(*)::bigint from site_visits where city_name is not null and last_seen >= date_trunc('month',now()) group by city_name order by count(*) desc, city_name asc limit 5;
+  select city_name, count(*)::bigint from site_visits where city_name is not null and last_seen >= now()-interval '30 days' group by city_name order by count(*) desc, city_name asc limit 5;
 $$;
 create or replace function public.get_song_top_cities(p_song_slug text) returns table(city_name text, listeners bigint) language sql stable security definer set search_path=public as $$
   select sp.city_name, count(distinct sp.visitor_id)::bigint from song_plays sp where sp.song_slug=left(coalesce(p_song_slug,''),180) and sp.city_name is not null group by sp.city_name order by count(distinct sp.visitor_id) desc, sp.city_name asc limit 5;
