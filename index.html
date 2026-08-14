@@ -473,15 +473,50 @@
   window.addEventListener('storage',renderAcct);
   setInterval(renderAcct,3000);
 
-  function navigate(url){
+  /* ---- navigation + a real "back" ------------------------------------------
+     Frame navigations DO add browser history entries, but every page used to
+     carry a hardcoded back link ("../console.html#shop"), so back always went to
+     one fixed place instead of where the visitor actually came from. The shell
+     now owns it: pages call IBEE_SHELL.back(), and ask canBack() so they can
+     hide the button when there is nowhere to go back to.
+     We keep an explicit TRAIL of pages rather than a counter: a counter drifted
+     out of sync because hash changes inside console.html create history entries
+     of their own, so popstate fired more often than pages actually changed. */
+  var trail=[], goingBack=false;
+
+  function navigate(url,opts){
+    opts=opts||{};
     try{lyrClose();}catch(e){}   /* moving to a section closes the lyrics room */
     try{
       var cur=frame.contentWindow.location, tgt=new URL(url, location.href);
       if(cur.pathname===tgt.pathname && tgt.hash){ frame.contentWindow.location.hash=tgt.hash; sync(); return; }
     }catch(e){}
+    if(opts.noanim) markNoAnim();
     frame.classList.remove('on');
-    setTimeout(function(){ frame.src=url; }, 120);
+    setTimeout(function(){ frame.src=url; }, opts.noanim?0:120);
   }
+
+  /* Returning somewhere should not replay that page's CRT boot-in — that reads as
+     "a new page opened", which is exactly what a back button must not feel like.
+     The flag is read (and cleared) by the destination page on load. */
+  function markNoAnim(){ try{ sessionStorage.setItem('ibee_noanim','1'); }catch(e){} }
+
+  function canBack(){ return trail.length>1; }
+  function back(){
+    if(!canBack()){ navigate('console.html#menu',{noanim:true}); return; }
+    goingBack=true; markNoAnim(); history.back();
+  }
+  /* NOTE: the parent's popstate does NOT fire when history.back() moves an
+     IFRAME entry — which is every navigation here. So the trail is popped in
+     sync() (where we can see the frame actually landed) rather than on popstate. */
+
+  /* the API pages talk to (same-origin, so a plain property is enough) */
+  window.IBEE_SHELL={
+    navigate:function(u){ navigate(u); },
+    home:function(){ navigate('console.html#menu',{noanim:true}); },
+    back:back,
+    canBack:canBack
+  };
 
   /* first page: ?p= (deep-link/NFC) or the console */
   var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
@@ -491,10 +526,22 @@
   frame.src=p;
   frame.addEventListener('load',function(){ frame.classList.add('on'); sync(); });
 
+  var lastRel=null;
   function sync(){
     try{
       var l=frame.contentWindow.location, rel=(l.pathname+l.search+l.hash).replace(/^\//,'');
+      /* A hash tweak on the same page is not a step — going "back" from
+         console#ics should leave the console, not walk its screens one hash at
+         a time. Only a different PAGE extends the trail. */
+      var page=rel.split('#')[0];
+      var lastPage=trail.length?trail[trail.length-1].split('#')[0]:null;
+      if(goingBack){ goingBack=false; if(trail.length>1) trail.pop(); }
+      else if(lastPage===null || page!==lastPage) trail.push(rel);
+      else trail[trail.length-1]=rel;      /* same page, newer hash */
+      lastRel=rel;
       history.replaceState(null,'','?p='+encodeURIComponent(rel));
+      /* the trail is now accurate — let the page re-decide its back button */
+      try{ if(frame.contentWindow.IBEE_NAV) frame.contentWindow.IBEE_NAV.refresh(); }catch(e){}
       if(frame.contentDocument&&frame.contentDocument.title) document.title=frame.contentDocument.title;
       var path=l.pathname.replace(/^\//,''), hash=l.hash;
       document.querySelectorAll('#nav button').forEach(function(b,i){
