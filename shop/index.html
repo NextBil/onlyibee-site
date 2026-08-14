@@ -131,6 +131,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     fid=firstReal||folders[0].id;
   }
   var fd=null; folders.forEach(function(f){ if(f.id===fid) fd=f; });
+  /* a drop with its own page owns the whole presentation — send the generic list
+     there so one drop never has two different-looking front doors */
+  if(fd&&fd.page){ location.replace("../"+fd.page); return; }
   if(!fd) fd={id:fid||"all",name:"THE SHOP",sub:"",tint:"leg"};
   /* every product now carries an explicit folder; this fallback only catches a
      legacy record that predates that, and points it at the first real drop. */
@@ -143,10 +146,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +'<div class="cnt">'+items.length+' piece'+(items.length===1?'':'s')+' · each made once, then never again_</div></div>';
   /* ---- drops that are over: browsable, not buyable. Add a folder id here when its
      drop closes; the product pages carry their own CLOSED flag. ---- */
-  var CLOSED_FOLDERS={"ics-v1-autumn-2025":1};
-  var note=CLOSED_FOLDERS[fd.id]
-    ? '<div class="closednote"><b>◼ COLLECTION CLOSED</b>'
-      +'<span>this drop is finished — nothing is for sale_</span></div>'
+  /* drop state lives in the data (folder.state) so the shop, the product pages
+     and the vault can never disagree about whether something is selling */
+  var note = fd.state==="closed"
+    ? '<div class="closednote"><b>◼ CLOSED FOR NOW</b>'
+      +'<span>the shop is taking a break — reopens soon_</span></div>'
+    : fd.state==="soon"
+    ? '<div class="closednote"><b>◆ OPENS SOON</b>'
+      +'<span>this drop hasn\'t opened yet — nothing claimed_</span></div>'
     : '';
   var grid;
   if(!items.length){

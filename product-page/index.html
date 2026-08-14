@@ -100,6 +100,34 @@ h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-
 /* the price of a sold piece is a record, not an offer */
 .price.claimed{text-decoration:line-through;text-decoration-color:rgba(255,43,43,.75)}
 
+/* drawn artwork for made-to-order pieces (no photo exists) */
+.teestage{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+  perspective:900px;padding:16px;background:radial-gradient(ellipse at 50% 18%,#161616,#070707)}
+.teestage .tw{width:82%;transform-style:preserve-3d;animation:psway 7s ease-in-out infinite}
+.teestage .teeart{width:100%;height:auto;filter:drop-shadow(0 16px 20px rgba(0,0,0,.8))}
+@keyframes psway{0%,100%{transform:rotateY(-17deg) rotateX(2deg)}50%{transform:rotateY(17deg) rotateX(-2deg)}}
+
+/* ---- owner plate: an empty slot is the pitch, so it renders either way ---- */
+.ownerplate{width:100%;border:1px solid var(--gold);background:linear-gradient(180deg,#15110a,#0a0a0a);
+  padding:14px 16px;text-align:left}
+.ownerplate.owned{border-color:var(--acid);background:linear-gradient(180deg,#0d1405,#0a0a0a)}
+.ownerplate .oph{font-family:var(--px);font-size:8px;letter-spacing:2px;color:var(--gold);
+  margin-bottom:12px}
+.ownerplate.owned .oph{color:var(--acid)}
+.ownerplate .oprow{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  font-family:var(--px);font-size:8px;letter-spacing:1px;line-height:1.8;
+  padding:7px 0;border-top:1px solid #1c1c1c}
+.ownerplate .oprow .k{color:#555}
+.ownerplate .oprow .v{color:var(--dim)}
+.ownerplate .oprow .v.open{color:var(--gold)}
+.ownerplate .oprow .v.taken{color:var(--acid)}
+.ownerplate .odot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);
+  margin-right:7px;box-shadow:0 0 8px var(--gold);animation:obeat 1.5s ease-in-out infinite}
+@keyframes obeat{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.ownerplate .opfoot{margin-top:11px;padding-top:10px;border-top:1px solid #1c1c1c;
+  font-size:17px;color:var(--dim);line-height:1.35}
+@media(prefers-reduced-motion:reduce){.teestage .tw,.ownerplate .odot{animation:none}}
+
 .notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0}
 .back{font-family:var(--px);font-size:9px;color:var(--acid);text-decoration:none;border:1px solid var(--acid);padding:12px 16px}
 footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
@@ -139,6 +167,8 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
 
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<!-- draws made-to-order pieces that have no photo; must precede the renderer -->
+<script src="../assets/tee-art.js?v=1"></script>
 <script>
 (function(){
   "use strict";
@@ -148,7 +178,8 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   var id=(new RegExp("[?&]id=([^&]+)").exec(location.search)||[])[1]||"";
   id=decodeURIComponent(id);
-  var all=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.products)||[];
+  var D=window.IBEE_PRODUCTS||{};
+  var all=D.products||[];
   var p=null; all.forEach(function(x){ if(x.id===id) p=x; });
 
   if(!p){ $("notfound").style.display=""; return; }
@@ -181,18 +212,55 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">LAST ONE</span>');
   $("pdesc").textContent=p.desc||"made once, by hand, then never again_";
 
-  /* ---- COLLECTION CLOSED: ICS CLOTHING V1 is no longer for sale. The whole
-     catalogue stays browsable, but nothing checks out — so the buy button is
-     replaced everywhere. Flip CLOSED to false to re-open checkout as it was. ---- */
-  var CLOSED=true;
+  /* ---- pieces with no photograph draw themselves. The 1-of-1 tees are made to
+     order, so there is no product shot to take — assets/tee-art.js renders the
+     artwork from the piece's own colours, and it sways like it does in the vault. */
+  if(!imgs.length && p.motif && window.IBEE_TEE){
+    $("bigimg").style.display="none";
+    var stage=document.createElement("div");
+    stage.className="teestage";
+    stage.innerHTML='<div class="tw">'+window.IBEE_TEE.svg(p)+'</div>';
+    $("bigimg").parentNode.insertBefore(stage,$("bigimg"));
+  }
+
+  /* ---- OWNER PLATE — only for 1-of-1 pieces. Deliberately rendered even when
+     nobody owns it yet: an empty slot that says UNCLAIMED is the whole pitch of
+     the drop, so people can see their own name could go there. ---- */
+  if(p.one){
+    var owned=!!p.owner;
+    var plate=document.createElement("div");
+    plate.className="ownerplate"+(owned?" owned":"");
+    plate.innerHTML=
+      '<div class="oph">'+(owned?'◆ IN A COLLECTION':'◆ UNCLAIMED')+'</div>'
+      +'<div class="oprow"><span class="k">OWNER</span>'
+        +(owned?'<span class="v taken">@'+e2(p.owner)+'</span>'
+               :'<span class="v open"><span class="odot"></span>NOBODY YET</span>')+'</div>'
+      +'<div class="oprow"><span class="k">ACQUIRED</span>'
+        +(owned&&p.acquired?'<span class="v taken">'+e2(p.acquired)+'</span>'
+                           :'<span class="v">——</span>')+'</div>'
+      +'<div class="opfoot">'+(owned
+          ? 'this piece is spoken for. the design is retired_'
+          : 'claim it and your name sits here, on this page, permanently_')+'</div>';
+    $("pdesc").parentNode.insertBefore(plate,$("pdesc").nextSibling);
+  }
+
+  /* ---- BUY STATE comes from the piece's own drop, not one global switch: each
+     folder in products-data.js carries state "live" | "soon" | "closed", so the
+     closed ICS archive and a drop that hasn't opened yet can coexist. ---- */
+  var FOLD=(D.folders||[]).filter(function(f){return f.id===p.folder;})[0]||{};
+  var state=FOLD.state||"live";
   var btns="";
   if(out){
     btns='<span class="paybtn sold" aria-disabled="true">✕ SOLD OUT</span>'
       +'<div class="claimbox">CLAIMED — THIS PIECE LIVES WITH SOMEONE NOW_<br>EACH ONE IS MADE ONLY ONCE</div>';
     $("paynote").style.display="none";
-  } else if(CLOSED){
-    btns='<span class="paybtn closed" aria-disabled="true">◼ COLLECTION CLOSED</span>'
-      +'<div class="closedbox">ICS CLOTHING V1 IS CLOSED_<br>ICS V2 IS LOADING</div>';
+  } else if(state==="closed"){
+    btns='<span class="paybtn closed" aria-disabled="true">◼ REOPENS SOON</span>'
+      +'<div class="closedbox">'+e2(FOLD.name||"THIS DROP")+' — CLOSED FOR NOW_<br>THIS PIECE COMES BACK WHEN THE SHOP REOPENS</div>';
+    $("paynote").style.display="none";
+  } else if(state==="soon"){
+    btns='<span class="paybtn closed" aria-disabled="true">◆ CLAIM — OPENS SOON</span>'
+      +'<div class="closedbox">'+e2(FOLD.name||"THIS DROP")+' HASN\'T OPENED YET_<br>NOBODY OWNS THIS ONE — IT COULD BE YOU</div>';
     $("paynote").style.display="none";
   } else {
     btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
