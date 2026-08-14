@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#070707">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>15 T-SHIRTS — ONLY IBEE</title>
-<meta name="description" content="15 t-shirts. Each one a single design, printed once and retired forever. Claim one and your name stays on its page.">
-<meta property="og:title" content="15 T-SHIRTS — ONE OF ONE">
+<title>THE VAULT — ONLY IBEE</title>
+<meta name="description" content="One-of-one t-shirts. Each design is printed a single time and then retired forever. Claim one and your name stays on its page.">
+<meta property="og:title" content="THE VAULT — ONE OF ONE">
 <meta property="og:description" content="Each design printed once, then never again. Claim one and your name goes on the wall.">
 <meta property="og:image" content="https://onlyibee.com/assets/img/og-default.png">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -97,6 +97,22 @@ main{max-width:1180px;margin:0 auto;padding:22px 16px 90px;position:relative;z-i
 }
 .case:hover .tw{animation-duration:calc(var(--sway,7s) / 1.9)}
 .teeart{display:block;width:100%;height:auto;filter:drop-shadow(0 12px 16px rgba(0,0,0,.75))}
+/* product photographs, backdrop keyed out (branding/cutout.py) so the garment
+   floats on the dark page. The glow behind it comes from the rarity colour, so
+   each piece is lit by its own tier instead of sitting on a white tile. */
+.teeshot{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:contain;
+  filter:drop-shadow(0 10px 18px rgba(0,0,0,.85))
+         drop-shadow(0 0 26px var(--glow,rgba(182,255,0,.30)));
+  transition:filter .25s}
+.case:hover .teeshot{filter:drop-shadow(0 14px 22px rgba(0,0,0,.9))
+                            drop-shadow(0 0 40px var(--glow,rgba(182,255,0,.5)))}
+/* the pool of light the shirt hangs in */
+.stage::before{content:"";position:absolute;left:50%;top:46%;width:82%;height:74%;
+  transform:translate(-50%,-50%);border-radius:50%;z-index:0;
+  background:radial-gradient(ellipse,var(--glow,rgba(182,255,0,.3)),transparent 68%);
+  filter:blur(26px);opacity:.55;transition:opacity .25s}
+.case:hover .stage::before{opacity:1}
+.stage>.tw{position:relative;z-index:1}
 /* foil sweep across the shirt */
 .teefoil{animation:foil 4.6s ease-in-out infinite;animation-delay:var(--swayd,0s)}
 @keyframes foil{0%,62%{transform:translateX(0)}100%{transform:translateX(460px)}}
@@ -162,7 +178,7 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   <section class="marquee">
     <div class="bulbs" id="bulbs" aria-hidden="true"></div>
-    <h1 id="dropname">15 T-SHIRTS</h1>
+    <h1 id="dropname">THE VAULT</h1>
     <div class="sub"><span>ONE OF ONE ·</span> <span>PRINTED ONCE ·</span> <span>NEVER AGAIN</span></div>
     <div class="tag">every shirt here is a <b>single design</b>. it gets printed one time,<br>
       then retired forever. buy one and <b>your name stays on its page</b>.</div>
@@ -190,7 +206,7 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </section>
 </main>
 
-<footer>© ONLYIBEE — 15 T-SHIRTS · ONE OF ONE, MADE ONCE</footer>
+<footer id="foot">© ONLYIBEE — ONE OF ONE, MADE ONCE</footer>
 
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script src="../assets/tee-art.js?v=1"></script>
@@ -206,10 +222,13 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   var D=window.IBEE_PRODUCTS||{};
   var FOLDER="15-tshirts";
-  var fd=(D.folders||[]).filter(function(f){return f.id===FOLDER;})[0]||{name:"15 T-SHIRTS"};
+  var fd=(D.folders||[]).filter(function(f){return f.id===FOLDER;})[0]||{name:"THE VAULT"};
   var items=(D.products||[]).filter(function(p){return p.folder===FOLDER;});
 
-  document.getElementById("dropname").textContent=fd.name||"15 T-SHIRTS";
+  /* the title comes from the data so the count can never contradict the grid —
+     the page said "15" while 14 pieces were on the shelf before this. */
+  document.getElementById("dropname").textContent=fd.name||"THE VAULT";
+  try{document.title=(fd.name||"THE VAULT")+" — ONLY IBEE";}catch(e){}
 
   /* ---- marquee bulbs: evenly spaced around the frame, chasing in sequence ---- */
   (function(){
@@ -252,7 +271,12 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var style='--rar:'+RCOL[rar]+';--glow:'+RGLOW[rar]
             +';--sway:'+(6.4+(h%5)*0.7).toFixed(1)+'s'
             +';--swayd:-'+((h>>>3)%6)+'s';
-    var art=window.IBEE_TEE?window.IBEE_TEE.svg(p):'';
+    /* real mockups win over the drawn placeholder — a piece only falls back to
+       tee-art.js if it has no photograph yet */
+    var shot=(p.imgs&&p.imgs[0])||null;
+    var art=shot
+      ? '<img class="teeshot" src="'+e2(shot)+'" alt="'+e2(p.n)+'" loading="lazy">'
+      : (window.IBEE_TEE?window.IBEE_TEE.svg(p):'');
     var ownerV=taken
       ? '<span class="v taken">@'+e2(p.owner||"CLAIMED")+'</span>'
       : '<span class="v open"><span class="dot"></span>UNCLAIMED</span>';

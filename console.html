@@ -421,7 +421,12 @@
   .teebox .teeart{width:100%;height:auto;animation:tsway 7s ease-in-out infinite;
     filter:drop-shadow(0 8px 10px rgba(0,0,0,.7))}
   @keyframes tsway{0%,100%{transform:rotateY(-15deg)}50%{transform:rotateY(15deg)}}
-  @media(prefers-reduced-motion:reduce){.teebox .teeart{animation:none}}
+  /* keyed-out product cutouts swing like they do in the vault */
+  .teebox .teeswing{width:100%;height:auto;object-fit:contain;
+    animation:tsway var(--sw,7s) ease-in-out infinite;animation-delay:var(--swd,0s);
+    filter:drop-shadow(0 8px 12px rgba(0,0,0,.7));will-change:transform}
+  .item:hover .teebox .teeswing{animation-duration:calc(var(--sw,7s) / 1.9)}
+  @media(prefers-reduced-motion:reduce){.teebox .teeart,.teebox .teeswing{animation:none}}
 .sotag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);
     font-family:var(--px);font-size:9px;letter-spacing:1px;color:#fff;background:var(--red);
     border:2px solid #ff7b7b;padding:8px 11px;box-shadow:0 0 18px rgba(255,43,43,.55);white-space:nowrap}
@@ -956,10 +961,21 @@
     var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};
     var grid=document.getElementById("shopgrid");
     if(!grid)return;
+    /* stable per-tile sway timing from the id, so the shelf never moves in
+       lockstep and the rhythm is identical on every reload */
+    function swingVars(k){
+      var h=0,ss=String(k||"x");
+      for(var i=0;i<ss.length;i++) h=(h*31+ss.charCodeAt(i))>>>0;
+      return "--sw:"+(6.4+(h%5)*0.7).toFixed(1)+"s;--swd:-"+((h>>>3)%6)+"s";
+    }
     /* one tile → OUR self-hosted product page (never the old Wix store) */
     function tile(it){
       var cls="item r-"+it.r+(it.out?" soldout":"");
-      var sq=it.i?'<img loading="lazy" src="'+it.i+'" alt="'+it.n+'">'
+      /* a local /assets/tees/ image is a keyed-out cutout — give it the same
+         side-to-side swing it has in the vault instead of sitting there flat */
+      var cut=it.i&&/^\/assets\/tees\//.test(it.i);
+      var sq=cut?'<div class="teebox"><img class="teeswing" loading="lazy" src="'+it.i+'" alt="'+it.n+'" style="'+swingVars(it.u||it.n)+'"></div>'
+        :it.i?'<img loading="lazy" src="'+it.i+'" alt="'+it.n+'">'
         :(it.motif&&window.IBEE_TEE)?'<div class="teebox">'+window.IBEE_TEE.svg(it)+'</div>'
         :'<div class="noimg">NO VISUAL<br>TAP TO VIEW</div>';
       return '<a class="'+cls+'" href="product-page/?id='+encodeURIComponent(it.u)+'">'

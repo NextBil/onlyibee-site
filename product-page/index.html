@@ -40,6 +40,16 @@ main{flex:1;width:100%;max-width:680px;padding:22px 16px 60px;display:flex;flex-
 /* ---- gallery ---- */
 .gal{width:100%;border:2px solid var(--border);background:var(--panel);padding:10px}
 .gal .big{position:relative;width:100%;aspect-ratio:1/1;background:#0a0a0c;overflow:hidden}
+/* Pieces shot on a keyed-out backdrop get a WHITE stage here. The vault card
+   shows the die-cut "sticker" against the dark shelf; opening the piece should
+   read like a proper product shot instead, and on white the cut border simply
+   disappears into the page. */
+.gal.oncanvas{background:#f4f4f4;border-color:#d4d4d4}
+.gal.oncanvas .big{background:#fff}
+.gal.oncanvas .thumbs img{background:#fff;border-color:#d8d8d8;opacity:.8}
+.gal.oncanvas .thumbs img.on{border-color:#111;opacity:1}
+.gal.oncanvas .rtag{background:rgba(255,255,255,.9)}
+.gal.oncanvas .claimtag{background:rgba(255,235,235,.95)}
 .gal .big img{width:100%;height:100%;object-fit:contain;display:block}
 .gal .rtag{position:absolute;top:10px;left:10px;font-family:var(--px);font-size:8px;letter-spacing:1px;
   padding:6px 8px;border:1px solid;background:rgba(0,0,0,.75)}
@@ -194,6 +204,10 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     big.src=imgs[i]; big.alt=p.n;
     Array.prototype.forEach.call($("thumbs").children,function(t,k){ t.classList.toggle("on",k===i); });
   }
+  /* derived from the data, not hardcoded: a local /assets/tees/ file is one of
+     the keyed-out cutouts, so it wants the white stage. Remote Wix photos still
+     carry their own white backdrop and stay on the dark panel. */
+  if(imgs.length && /^\/assets\/tees\//.test(imgs[0])) document.querySelector(".gal").classList.add("oncanvas");
   $("thumbs").innerHTML=imgs.map(function(u,i){ return '<img src="'+e2(u)+'" alt="" data-i="'+i+'" loading="lazy">'; }).join('');
   Array.prototype.forEach.call($("thumbs").children,function(t){ t.onclick=function(){ show(+t.getAttribute("data-i")); }; });
   show(0);
@@ -208,7 +222,14 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   $("pprice").textContent=(p.cur||"€")+p.price;
   $("pprice").className="price"+(out?" claimed":"");
   if(out){ $("claimtag").style.display=""; $("claimtag").textContent="SOLD OUT"; }
-  $("pchips").innerHTML='<span class="chip a">✓ HUMAN-MADE</span><span class="chip a">1 OF 1</span>'
+  /* how the piece was made is a property of its DROP, not of the site: the ICS
+     archive is hand-made one by one, the vault is printed to order. Saying
+     "human-made" for both told the buyer nothing. */
+  var FOLD0=(D.folders||[]).filter(function(f){return f.id===p.folder;})[0]||{};
+  var madeChip = FOLD0.made==="hand"  ? '<span class="chip a">✋ HAND-MADE</span>'
+               : FOLD0.made==="print" ? '<span class="chip a">✓ PRINTED TO ORDER</span>'
+               : '<span class="chip a">✓ HUMAN-MADE</span>';
+  $("pchips").innerHTML=madeChip+'<span class="chip a">1 OF 1</span>'
     +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">LAST ONE</span>');
   $("pdesc").textContent=p.desc||"made once, by hand, then never again_";
 
@@ -247,7 +268,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   /* ---- BUY STATE comes from the piece's own drop, not one global switch: each
      folder in products-data.js carries state "live" | "soon" | "closed", so the
      closed ICS archive and a drop that hasn't opened yet can coexist. ---- */
-  var FOLD=(D.folders||[]).filter(function(f){return f.id===p.folder;})[0]||{};
+  var FOLD=FOLD0;
   var state=FOLD.state||"live";
   var btns="";
   if(out){
