@@ -539,7 +539,7 @@
     if(load._arm) load._arm();
     initGraph();
     if(actx && actx.state === "suspended") actx.resume();
-    // pause any other audio on the page (music engine etc.)
+    // pause any other audio on the page (galaxys engine etc.)
     document.querySelectorAll("audio,video").forEach(function(a){
       if(a !== audio && !a.paused){ try{ a.pause(); }catch(e){} }
     });
@@ -627,7 +627,7 @@
     $("rp-cur").textContent = fmt(audio.currentTime);
     if(audio.duration) $("rp-fill").style.width = (audio.currentTime/audio.duration*100)+"%";
   });
-  /* unlock the Music Engine after ~10s of real listening (member flow). Sets a
+  /* unlock the Galaxys Engine after ~10s of real listening (member flow). Sets a
      localStorage flag the console checks; guards seeks/track-changes with dt<1. */
   var _lt=0,_listened=0;
   audio.addEventListener("timeupdate", function(){
@@ -638,7 +638,7 @@
     }catch(e){}
   });
 
-  /* if some other player starts (music engine planets), pause the radio */
+  /* if some other player starts (galaxys engine planets), pause the radio */
   document.addEventListener("play", function(e){
     if(e.target !== audio && !audio.paused) pause();
   }, true);

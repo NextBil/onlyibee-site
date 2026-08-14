@@ -60,7 +60,7 @@
     {id:"first-signal",ico:"📡",n:"FIRST SIGNAL",d:"felt a track for 10 seconds",
       chk:function(P){return P.listen>=10||P.eng10;},
       pr:function(P){return Math.min(10,Math.floor(P.listen))+"/10s";}},
-    {id:"engine",ico:"🌌",n:"UNIVERSE ENGINE",n2:"UNIVERSE MUSIC ENGINE",gold:true,
+    {id:"engine",ico:"🌌",n:"GALAXYS ENGINE",n2:"THE GALAXYS ENGINE",gold:true,
       d:"signed in + felt the music — the engine is yours",
       chk:function(P){return (P.listen>=10||P.eng10)&&P.loggedIn;},
       pr:function(P){return ((P.listen>=10||P.eng10)?"✓ listened":"○ listen 10s")+" · "+(P.loggedIn?"✓ signed in":"○ sign in");}},
@@ -355,7 +355,7 @@
     /* the hook: signal felt but no account yet → one small nudge per visit */
     if(!promptShown && S.earned["first-signal"] && !S.earned["engine"] && !P.loggedIn && P.listen>=10){
       promptShown=true;
-      toast({ico:"🌌",h:"ONE LAST THING",n:"UNLOCK THE UNIVERSE MUSIC ENGINE",
+      toast({ico:"🌌",h:"ONE LAST THING",n:"UNLOCK THE GALAXYS ENGINE",
         d:"a few seconds — sign in & it's yours. tap here_",link:true,href:"member/?login=1"});
     }
     save();

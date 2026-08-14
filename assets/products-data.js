@@ -18,23 +18,24 @@ window.IBEE_PRODUCTS={
  },
  "folders": [
   {
-   "id": "ics-v1-autumn-2024",
-   "name": "ICS V1 — AUTUMN 2024",
-   "sub": "FIRST DROP PROTOTYPE",
-   "tint": "leg",
-   "hype": 0
-  },
-  {
-   "id": "ics-v3",
-   "name": "ICS V3",
+   "id": "ics-v2",
+   "name": "ICS V2",
    "sub": "NEXT DROP — LOADING…",
    "tint": "sdr",
    "hype": 1
+  },
+  {
+   "id": "ics-v1-autumn-2025",
+   "name": "ICS CLOTHING V1 — AUTUMN 2025",
+   "sub": "FIRST DROP PROTOTYPE",
+   "tint": "leg",
+   "hype": 0
   }
  ],
  "products": [
   {
    "id": "all-ics-pink",
+   "folder": "ics-v1-autumn-2025",
    "n": "VIP ALL ICS CHARACTERS — PINK",
    "price": 270,
    "cur": "€",
@@ -57,6 +58,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "all-ics-black",
+   "folder": "ics-v1-autumn-2025",
    "n": "VIP ALL ICS CHARACTERS — BLACK",
    "price": 250,
    "cur": "€",
@@ -77,6 +79,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "orange-jacket",
+   "folder": "ics-v1-autumn-2025",
    "n": "PAINTED ORANGE DENIM JACKET — MIMI",
    "price": 150,
    "cur": "€",
@@ -95,6 +98,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "queen-shirt",
+   "folder": "ics-v1-autumn-2025",
    "n": "ABLA LONG SLEEVE — QUEEN",
    "price": 140,
    "cur": "€",
@@ -119,6 +123,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "vdf-sweater",
+   "folder": "ics-v1-autumn-2025",
    "n": "VDF GREY PINK HOODIE — BEEBEE",
    "price": 120,
    "cur": "€",
@@ -142,6 +147,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "small-king",
+   "folder": "ics-v1-autumn-2025",
    "n": "NANNAN OVERSIZED BLACK TEE — KING",
    "price": 110,
    "cur": "€",
@@ -165,6 +171,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "vdf-blue-hoodie",
+   "folder": "ics-v1-autumn-2025",
    "n": "VDF RED HOODIE — SWORDY",
    "price": 95,
    "cur": "€",
@@ -189,6 +196,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "weed-jean",
+   "folder": "ics-v1-autumn-2025",
    "n": "FLOWER NEON PAINTED BLACK JEAN",
    "price": 90,
    "cur": "€",
@@ -207,6 +215,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "drinking-skull-jean",
+   "folder": "ics-v1-autumn-2025",
    "n": "SIPPIN SKELETON JEAN XL",
    "price": 90,
    "cur": "€",
@@ -228,6 +237,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "goli-hoodie",
+   "folder": "ics-v1-autumn-2025",
    "n": "STONER GREY PINK HOODIE — GOLI",
    "price": 85,
    "cur": "€",
@@ -250,6 +260,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "continents-long-sleeves",
+   "folder": "ics-v1-autumn-2025",
    "n": "CONTINENTS LONG SLEEVE — MIMI",
    "price": 75,
    "cur": "€",
@@ -267,6 +278,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "mimi-long-sleeves",
+   "folder": "ics-v1-autumn-2025",
    "n": "MIMI BLUE LONG SLEEVE",
    "price": 75,
    "cur": "€",
@@ -292,6 +304,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "vdf-long-sleeve-blue",
+   "folder": "ics-v1-autumn-2025",
    "n": "VDF BLACK LONG SLEEVE — UTOPIE",
    "price": 75,
    "cur": "€",
@@ -314,6 +327,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "pink-jean",
+   "folder": "ics-v1-autumn-2025",
    "n": "PINK DIPPED JEAN + CHAIN — MIMI",
    "price": 70,
    "cur": "€",
@@ -335,6 +349,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "denim-skirt-2",
+   "folder": "ics-v1-autumn-2025",
    "n": "PUNK GENERAL DENIM SKIRT",
    "price": 70,
    "cur": "€",
@@ -353,6 +368,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "les-bleus-sont-vert-1",
+   "folder": "ics-v1-autumn-2025",
    "n": "LBSV LONG SLEEVE — ARMY GREEN",
    "price": 60,
    "cur": "€",
@@ -374,6 +390,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "les-bleus-sont-vert-grey-tshirt",
+   "folder": "ics-v1-autumn-2025",
    "n": "LES BLEUS SONT VERTS GREY TSHIRT",
    "price": 60,
    "cur": "€",
@@ -395,6 +412,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "denim-skirt-1",
+   "folder": "ics-v1-autumn-2025",
    "n": "MIMI BLACK DENIM SKIRT — SKELETON",
    "price": 60,
    "cur": "€",
@@ -413,6 +431,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "rib-jean",
+   "folder": "ics-v1-autumn-2025",
    "n": "RIB JEAN",
    "price": 60,
    "cur": "€",
@@ -430,6 +449,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "kiss-crop-top",
+   "folder": "ics-v1-autumn-2025",
    "n": "BISOUS CROP TOP — ABLA",
    "price": 50,
    "cur": "€",
@@ -451,6 +471,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "denim-skirt-3",
+   "folder": "ics-v1-autumn-2025",
    "n": "BISOUS DENIM SKIRT",
    "price": 50,
    "cur": "€",
@@ -473,6 +494,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "jardin-crop-top",
+   "folder": "ics-v1-autumn-2025",
    "n": "BROWN CROP TOP JARDIN — MIMI",
    "price": 50,
    "cur": "€",
@@ -494,6 +516,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "les-bleus-sont-vert-2",
+   "folder": "ics-v1-autumn-2025",
    "n": "LBSV LONG SLEEVE — LIGHT",
    "price": 50,
    "cur": "€",
@@ -514,6 +537,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "mimi-crop-top",
+   "folder": "ics-v1-autumn-2025",
    "n": "MIMI WHITE CROP TOP",
    "price": 50,
    "cur": "€",
@@ -535,6 +559,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "rib-crop-top",
+   "folder": "ics-v1-autumn-2025",
    "n": "RIB GREY CROP TOP — MIMI",
    "price": 50,
    "cur": "€",
@@ -556,6 +581,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "stoner-content",
+   "folder": "ics-v1-autumn-2025",
    "n": "STONER CONTENT LONG SLEEVE",
    "price": 35,
    "cur": "€",
@@ -573,6 +599,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "vdf-long-sleeve-red",
+   "folder": "ics-v1-autumn-2025",
    "n": "VDF GREY LONG SLEEVE — KING",
    "price": 180,
    "cur": "€",
@@ -604,6 +631,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "king-shirt",
+   "folder": "ics-v1-autumn-2025",
    "n": "BLUE LONG SLEEVE — KING NANNAN",
    "price": 160,
    "cur": "€",
@@ -625,6 +653,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "ics-print-jacket",
+   "folder": "ics-v1-autumn-2025",
    "n": "HAND BRUSH PAINTED ICS COW PRINT GREEN JACKET",
    "price": 130,
    "cur": "€",
@@ -646,6 +675,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "sworda-jacket",
+   "folder": "ics-v1-autumn-2025",
    "n": "SWORDA & SWORDY RED RETRO JACKET — LIMITED",
    "price": 130,
    "cur": "€",
@@ -672,6 +702,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "liberty-jean",
+   "folder": "ics-v1-autumn-2025",
    "n": "LIBERTY NEON BLACK JEAN",
    "price": 110,
    "cur": "€",
@@ -696,6 +727,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "airbrush-painted-ics-print-green-jacket",
+   "folder": "ics-v1-autumn-2025",
    "n": "AIRBRUSH PAINTED GREEN JACKET",
    "price": 100,
    "cur": "€",
@@ -713,6 +745,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "nannan-red-zebra-tshirt",
+   "folder": "ics-v1-autumn-2025",
    "n": "BRUSH PAINTED RED TSHIRT — NANNAN",
    "price": 95,
    "cur": "€",
@@ -732,6 +765,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "les-bleus-sont-vert",
+   "folder": "ics-v1-autumn-2025",
    "n": "LES BLEUS SONT VERTS JERSEY",
    "price": 95,
    "cur": "€",
@@ -754,6 +788,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "leather-denim",
+   "folder": "ics-v1-autumn-2025",
    "n": "NEON COATED BLACK JEAN — MIMI",
    "price": 95,
    "cur": "€",
@@ -774,6 +809,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "red-ics-jacket",
+   "folder": "ics-v1-autumn-2025",
    "n": "RED RETRO JACKET",
    "price": 90,
    "cur": "€",
@@ -791,6 +827,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "utopie-hoodie",
+   "folder": "ics-v1-autumn-2025",
    "n": "UTOPIE GREY PINK HOODIE",
    "price": 75,
    "cur": "€",
@@ -814,6 +851,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "mimi-hoodie",
+   "folder": "ics-v1-autumn-2025",
    "n": "MIMI RED HOODIE",
    "price": 70,
    "cur": "€",
@@ -832,6 +870,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "mimi-white-tshirt",
+   "folder": "ics-v1-autumn-2025",
    "n": "MIMI WHITE TSHIRT",
    "price": 70,
    "cur": "€",
@@ -857,6 +896,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "biker-jacket-denim",
+   "folder": "ics-v1-autumn-2025",
    "n": "SPRAY-PAINTED DENIM VEST",
    "price": 65,
    "cur": "€",
@@ -879,6 +919,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "nanap-croptop",
+   "folder": "ics-v1-autumn-2025",
    "n": "NANAP EIFFEL TOWER CROPTOP — MIMI",
    "price": 60,
    "cur": "€",
@@ -897,6 +938,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "nouveaux-punk-black",
+   "folder": "ics-v1-autumn-2025",
    "n": "NOUVEAUX PUNK BLACK LONG SLEEVES",
    "price": 55,
    "cur": "€",
@@ -922,6 +964,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "nouveaux-punk-crop-top",
+   "folder": "ics-v1-autumn-2025",
    "n": "NOUVEAUX PUNK CROP TOP",
    "price": 55,
    "cur": "€",
@@ -948,6 +991,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "nouveaux-punk-red",
+   "folder": "ics-v1-autumn-2025",
    "n": "NOUVEAUX PUNK RED LONG SLEEVE",
    "price": 55,
    "cur": "€",
@@ -969,6 +1013,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "20minzasession",
+   "folder": "ics-v1-autumn-2025",
    "n": "20 MIN ZA SESSION ONE SLEEVE TEE",
    "price": 50,
    "cur": "€",
@@ -989,6 +1034,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "coochie-eater-long-sleeve",
+   "folder": "ics-v1-autumn-2025",
    "n": "COOCHIE EATER LONG SLEEVE",
    "price": 50,
    "cur": "€",
@@ -1009,6 +1055,7 @@ window.IBEE_PRODUCTS={
   },
   {
    "id": "racing-tshirt-only-ibee",
+   "folder": "ics-v1-autumn-2025",
    "n": "RACING GREEN LONG SLEEVES ONLY IBEE",
    "price": 50,
    "cur": "€",
