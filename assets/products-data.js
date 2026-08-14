@@ -60,7 +60,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "Mimi, straight to the chest. The tower of the set, drawn by hand before anything else existed. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/01-mimi.png"
+    "/assets/tees/mockups/01-mimi.jpg"
    ],
    "pay": {
     "wix": "",
@@ -82,7 +82,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The King. A king with trust issues — he been thru a lot and would rather not speak about it. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/02-nannan.png"
+    "/assets/tees/mockups/02-nannan.jpg"
    ],
    "pay": {
     "wix": "",
@@ -104,7 +104,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "A cracked heart held together with a dollar bill. Small chest print, loud idea. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/03-coeur-dollar.png"
+    "/assets/tees/mockups/03-coeur-dollar.jpg"
    ],
    "pay": {
     "wix": "",
@@ -126,7 +126,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The Queen. She represents moms and fertility — wise, very caring, with a big attitude. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/04-abla.png"
+    "/assets/tees/mockups/04-abla.jpg"
    ],
    "pay": {
     "wix": "",
@@ -148,7 +148,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The bats and the manifesto, yellow on red. Punk ça veut dire voyou en anglais. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/05-nouveaux-punk-rouge.png"
+    "/assets/tees/mockups/05-nouveaux-punk-rouge.jpg"
    ],
    "pay": {
     "wix": "",
@@ -170,7 +170,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The wordmark off the site itself: ONLY in acid, IBEE in red. Engine for art and discovery. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/06-onlyibee-engine.png"
+    "/assets/tees/mockups/06-onlyibee-engine.jpg"
    ],
    "pay": {
     "wix": "",
@@ -192,7 +192,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The pixel umbrella with the rain coming down through it. One red drop in the whole storm. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/07-utopie-pluie.png"
+    "/assets/tees/mockups/07-utopie-pluie.jpg"
    ],
    "pay": {
     "wix": "",
@@ -214,7 +214,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The lockup. Umbrella, wordmark, two cities, and the promise underneath: each piece made once. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/08-utopie-paris-toronto.png"
+    "/assets/tees/mockups/08-utopie-paris-toronto.jpg"
    ],
    "pay": {
     "wix": "",
@@ -236,7 +236,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "Goli in full. This guy does bare stuff that we can't understand — just don't wake him up at night. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/09-goli.png"
+    "/assets/tees/mockups/09-goli.jpg"
    ],
    "pay": {
     "wix": "",
@@ -258,7 +258,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "Just the mask, blown up big. The Baoulé face that started the whole crew. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/10-goli-masque.png"
+    "/assets/tees/mockups/10-goli-masque.jpg"
    ],
    "pay": {
     "wix": "",
@@ -280,7 +280,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The clean umbrella mark and one line: somewhere in Dreamland… One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/11-utopie-dreamland.png"
+    "/assets/tees/mockups/11-utopie-dreamland.jpg"
    ],
    "pay": {
     "wix": "",
@@ -302,7 +302,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The knight on his hippo. The King granted these guys total freedom — they'll woop you on sight. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/12-swordy.png"
+    "/assets/tees/mockups/12-swordy.jpg"
    ],
    "pay": {
     "wix": "",
@@ -324,7 +324,7 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The same manifesto, pink bats on deep green, glowing. The loudest piece in the drop. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/13-nouveaux-punk-neon.png"
+    "/assets/tees/mockups/13-nouveaux-punk-neon.jpg"
    ],
    "pay": {
     "wix": "",
@@ -346,8 +346,8 @@ window.IBEE_PRODUCTS={
    "acquired": null,
    "desc": "The session, worn. One take, twenty minutes, no skips — the tape that never got a second run. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
    "imgs": [
-    "/assets/tees/mockups/14-20mzs.png",
-    "/assets/tees/mockups/14-20mzs-worn.png"
+    "/assets/tees/mockups/14-20mzs.jpg",
+    "/assets/tees/mockups/14-20mzs-worn.jpg"
    ],
    "pay": {
     "wix": "",
