@@ -138,6 +138,29 @@ h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-
   font-size:17px;color:var(--dim);line-height:1.35}
 @media(prefers-reduced-motion:reduce){.teestage .tw,.ownerplate .odot{animation:none}}
 
+/* ---- related pieces from the same drop ---- */
+.related{width:100%;margin-top:20px;border-top:2px solid var(--border);padding-top:22px;text-align:left}
+.relhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.relhead #relttl{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px}
+.relall{font-family:var(--px);font-size:8px;color:var(--dim);text-decoration:none;white-space:nowrap}
+.relall:hover{color:var(--acid)}
+.relgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:560px){.relgrid{grid-template-columns:repeat(2,1fr)}}
+.relcard{border:1px solid var(--border);background:var(--panel);text-decoration:none;color:var(--ink);
+  display:block;transition:border-color .2s,transform .15s}
+.relcard:hover{border-color:var(--acid);transform:translateY(-3px)}
+.relcard .rsq{position:relative;aspect-ratio:1/1;background:#0a0a0c;overflow:hidden}
+.relcard .rsq img{width:100%;height:100%;object-fit:cover;display:block}
+.relcard .rno{position:absolute;top:5px;left:5px;font-family:var(--px);font-size:6px;
+  letter-spacing:1px;padding:3px 4px;background:rgba(0,0,0,.72);color:var(--dim)}
+.relcard .rmeta{padding:8px;border-top:1px solid var(--border)}
+.relcard .rnm{font-family:var(--px);font-size:6.5px;line-height:1.7;
+  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.relcard .rpr{font-family:var(--px);font-size:7px;color:var(--acid);margin-top:5px;display:block}
+.relcard.gone{opacity:.55}
+.relcard.gone .rsq img{filter:grayscale(1) brightness(.6)}
+.relcard.gone .rpr{color:var(--red);text-decoration:line-through}
+
 .notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0}
 .back{font-family:var(--px);font-size:9px;color:var(--acid);text-decoration:none;border:1px solid var(--acid);padding:12px 16px}
 footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
@@ -169,6 +192,12 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       <div class="paybtns" id="paybtns"></div>
       <div class="paynote" id="paynote">from paris to wherever you are — shipping's on us_</div>
     </div>
+    <!-- other pieces from the same drop; hidden until the script finds some -->
+    <section class="related" id="related" style="display:none">
+      <div class="relhead"><span id="relttl">MORE FROM THIS DROP_</span>
+        <a class="relall" id="relall" href="../console.html#shop">SEE ALL →</a></div>
+      <div class="relgrid" id="relgrid"></div>
+    </section>
   </div>
   <div class="notfound" id="notfound" style="display:none">✕ PIECE NOT FOUND_<br><br>
     <a class="back" href="../console.html#shop">◀ BACK TO THE SHOP</a></div>
@@ -287,6 +316,34 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
   }
   $("paybtns").innerHTML=btns;
+
+  /* ---- RELATED: other pieces from the same drop. Every piece here is one of
+     one, so once someone is looking at a sold or closed item the only useful
+     next step is a sibling — this is the way back into the collection. ---- */
+  (function(){
+    var grid=$("relgrid"), box=$("related");
+    if(!grid||!box) return;
+    var sibs=all.filter(function(x){ return x.folder===p.folder && x.id!==p.id; });
+    if(!sibs.length) return;
+    /* prefer pieces still available, keep the drop's own running order */
+    sibs.sort(function(a,b){ return (a.out?1:0)-(b.out?1:0); });
+    sibs=sibs.slice(0,4);
+    $("relttl").textContent="MORE FROM "+((FOLD0.name||"THIS DROP").toUpperCase())+"_";
+    var seeAll=FOLD0.page ? "../"+FOLD0.page
+             : FOLD0.id  ? "../shop/?f="+encodeURIComponent(FOLD0.id)
+             : "../console.html#shop";
+    $("relall").href=seeAll;
+    grid.innerHTML=sibs.map(function(x){
+      var im=(x.imgs&&x.imgs[0])||"";
+      var gone=!!x.out;
+      return '<a class="relcard'+(gone?' gone':'')+'" href="./?id='+encodeURIComponent(x.id)+'">'
+        +'<div class="rsq">'+(im?'<img loading="lazy" src="'+e2(im)+'" alt="'+e2(x.n)+'">':'')
+        +(x.no?'<span class="rno">'+e2(x.no)+'</span>':'')+'</div>'
+        +'<div class="rmeta"><span class="rnm">'+e2(x.n)+'</span>'
+        +'<span class="rpr">'+e2((x.cur||"€")+x.price)+'</span></div></a>';
+    }).join('');
+    box.style.display="";
+  })();
 
   /* ---- optional 3D model (product.model = path/URL to .fbx/.obj/.glb).
      three.js + the right loader are pulled from the CDN only when a piece
