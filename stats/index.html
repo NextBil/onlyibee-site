@@ -256,8 +256,8 @@
     <div class="extraline" id="extras"></div>
     <div class="rankings">
       <section class="rankcard"><div class="ranktitle">TOP SONGS // MOST STREAMED</div><div id="topsongs" class="rankempty">reading signals_</div></section>
-      <section class="rankcard"><div class="ranktitle">TOP COUNTRIES // THIS MONTH</div><div id="topcountries" class="rankempty">reading locations_</div></section>
-      <section class="rankcard"><div class="ranktitle">TOP CITIES // THIS MONTH</div><div id="topcities" class="rankempty">reading locations_</div></section>
+      <section class="rankcard"><div class="ranktitle">TOP COUNTRIES // LAST 30 DAYS</div><div id="topcountries" class="rankempty">reading locations_</div></section>
+      <section class="rankcard"><div class="ranktitle">TOP CITIES // LAST 30 DAYS</div><div id="topcities" class="rankempty">reading locations_</div></section>
     </div>
 
     <div class="termlog" id="termlog">
@@ -277,7 +277,7 @@
     <button class="infoclose" id="infoclose" aria-label="Close">✕</button>
     <h2 id="infotitle">WHY THESE NUMBERS ARE REAL_</h2>
     <p><strong>NOT HAND-TYPED.</strong> Every number on this screen is read from the ONLY IBEE database when the page refreshes. The screen does not generate random numbers or add pretend activity.</p>
-    <p><strong>VISITS.</strong> When someone enters the site, their browser gets an anonymous visitor token. It has no name or email. The same browser is counted once for monthly population, rather than once per page refresh.</p>
+    <p><strong>VISITS.</strong> When someone enters the site, their browser gets an anonymous visitor token. It has no name or email. The same browser is counted once in POPULATION, rather than once per page refresh. POPULATION is a rolling 30-day window, so it never resets to zero on the 1st of a month.</p>
     <p><strong>SONG PLAYS.</strong> A play is saved only when the radio actually starts a song. Repeated taps or replays of the same song from the same browser within 30 minutes do not add extra plays. Each song's count in the radio list comes from those saved plays.</p>
     <p><strong>MEMBERS.</strong> CITIZENS is the real number of registered ONLY IBEE accounts. The public page can see only the final total — never account details.</p>
     <p><strong>LOCATIONS.</strong> For country and city rankings, the site asks a location service for a country code and city name. No IP address is saved in the ONLY IBEE database.</p>
@@ -364,7 +364,7 @@
 
     /* build the four dependable, long-lived metrics */
     var METRICS=[
-      {key:"population", label:"POPULATION", desc:"monthly visitors", object:"orbit"},
+      {key:"population", label:"POPULATION", desc:"visitors · last 30 days", object:"orbit"},
       {key:"signals",    label:"SIGNALS",    desc:"total listeners", object:"signal"},
       {key:"citizens",   label:"CITIZENS",   desc:"registered members", object:"cube"},
       {key:"entrances",  label:"ENTRANCES",  desc:"total plays", object:"gate"}

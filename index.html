@@ -446,7 +446,7 @@
     function networkPulse(){ S.fetch().then(function(d){
       if(!d||d.population==null)return;
       netBtn.textContent='NETWORK · '+d.population;
-      netBtn.title=d.population+' VISITORS THIS MONTH — OPEN NETWORK DATA';
+      netBtn.title=d.population+' VISITORS IN THE LAST 30 DAYS — OPEN NETWORK DATA';
     }).catch(function(){}); }
     networkPulse(); setInterval(networkPulse,60000);
   })();
