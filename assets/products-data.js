@@ -19,12 +19,13 @@ window.IBEE_PRODUCTS={
  "folders": [
   {
    "id": "15-tshirts",
-   "name": "15 T-SHIRTS",
+   "name": "14 T-SHIRTS",
    "sub": "ONE OF ONE · PRINTED ONCE",
    "tint": "sdr",
    "hype": 0,
    "state": "soon",
-   "page": "drop/"
+   "page": "drop/",
+   "made": "print"
   },
   {
    "id": "ics-v2",
@@ -37,30 +38,52 @@ window.IBEE_PRODUCTS={
   {
    "id": "ics-v1-autumn-2025",
    "name": "ICS CLOTHING V1 — AUTUMN 2025",
-   "sub": "FIRST DROP PROTOTYPE",
+   "sub": "FIRST DROP · HAND-MADE",
    "tint": "leg",
    "hype": 0,
-   "state": "closed"
+   "state": "closed",
+   "made": "hand"
   }
  ],
  "products": [
   {
-   "id": "tee-golden-pawn",
+   "id": "tee-mimi",
    "folder": "15-tshirts",
-   "n": "GOLDEN PAWN",
+   "n": "MIMI",
    "no": "01",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sdr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "Mimi, straight to the chest. The tower of the set, drawn by hand before anything else existed. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/01-mimi.png"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-nannan",
+   "folder": "15-tshirts",
+   "n": "NAN-NAN — CHEF EN BAOULE",
+   "no": "02",
    "one": 1,
    "price": 75,
    "cur": "€",
    "r": "leg",
    "out": 0,
-   "motif": "pawn",
-   "body": "#0d0d0d",
-   "ink": "#ffd60a",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The King. A king with trust issues — he been thru a lot and would rather not speak about it. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/02-nannan.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -68,45 +91,65 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-third-eye",
+   "id": "tee-coeur-dollar",
    "folder": "15-tshirts",
-   "n": "THIRD EYE",
-   "no": "02",
-   "one": 1,
-   "price": 65,
-   "cur": "€",
-   "r": "sdr",
-   "out": 0,
-   "motif": "eye",
-   "body": "#101820",
-   "ink": "#26e0ff",
-   "owner": null,
-   "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-static-skull",
-   "folder": "15-tshirts",
-   "n": "STATIC SKULL",
+   "n": "CŒUR / DOLLAR",
    "no": "03",
    "one": 1,
+   "price": 55,
+   "cur": "€",
+   "r": "sr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "A cracked heart held together with a dollar bill. Small chest print, loud idea. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/03-coeur-dollar.png"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-abla",
+   "folder": "15-tshirts",
+   "n": "ABLA — REINE EN BAOULE",
+   "no": "04",
+   "one": 1,
+   "price": 75,
+   "cur": "€",
+   "r": "leg",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The Queen. She represents moms and fertility — wise, very caring, with a big attitude. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/04-abla.png"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np-rouge",
+   "folder": "15-tshirts",
+   "n": "NOUVEAUX PUNK — ROUGE",
+   "no": "05",
+   "one": 1,
    "price": 65,
    "cur": "€",
    "r": "sdr",
    "out": 0,
-   "motif": "skull",
-   "body": "#0d0d0d",
-   "ink": "#ff2b2b",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The bats and the manifesto, yellow on red. Punk ça veut dire voyou en anglais. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/05-nouveaux-punk-rouge.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -114,68 +157,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-leaf-001",
+   "id": "tee-onlyibee-engine",
    "folder": "15-tshirts",
-   "n": "LEAF 001",
-   "no": "04",
-   "one": 1,
-   "price": 60,
-   "cur": "€",
-   "r": "sr",
-   "out": 0,
-   "motif": "leaf",
-   "body": "#12160a",
-   "ink": "#b6ff00",
-   "owner": null,
-   "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-thunder",
-   "folder": "15-tshirts",
-   "n": "THUNDER",
-   "no": "05",
-   "one": 1,
-   "price": 60,
-   "cur": "€",
-   "r": "sr",
-   "out": 0,
-   "motif": "bolt",
-   "body": "#0d0d0d",
-   "ink": "#ffd60a",
-   "owner": null,
-   "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-le-masque",
-   "folder": "15-tshirts",
-   "n": "LE MASQUE",
+   "n": "ONLYIBEE — ENGINE",
    "no": "06",
    "one": 1,
    "price": 60,
    "cur": "€",
    "r": "sr",
    "out": 0,
-   "motif": "mask",
-   "body": "#160d08",
-   "ink": "#ff9d2b",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The wordmark off the site itself: ONLY in acid, IBEE in red. Engine for art and discovery. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/06-onlyibee-engine.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -183,22 +179,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-crown",
+   "id": "tee-utopie-pluie",
    "folder": "15-tshirts",
-   "n": "CROWN",
+   "n": "UTOPIE — LA PLUIE",
    "no": "07",
    "one": 1,
    "price": 60,
    "cur": "€",
    "r": "sr",
    "out": 0,
-   "motif": "crown",
-   "body": "#140a12",
-   "ink": "#ff2bd6",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The pixel umbrella with the rain coming down through it. One red drop in the whole storm. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/07-utopie-pluie.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -206,22 +201,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-spiral",
+   "id": "tee-utopie-pt",
    "folder": "15-tshirts",
-   "n": "SPIRAL",
+   "n": "UTOPIE — PARIS/TORONTO",
    "no": "08",
    "one": 1,
-   "price": 55,
+   "price": 60,
    "cur": "€",
-   "r": "c",
+   "r": "sr",
    "out": 0,
-   "motif": "spiral",
-   "body": "#0a1014",
-   "ink": "#26e0ff",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The lockup. Umbrella, wordmark, two cities, and the promise underneath: each piece made once. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/08-utopie-paris-toronto.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -229,22 +223,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-flame",
+   "id": "tee-goli",
    "folder": "15-tshirts",
-   "n": "FLAME",
+   "n": "GOLI",
    "no": "09",
    "one": 1,
-   "price": 55,
+   "price": 65,
    "cur": "€",
-   "r": "c",
+   "r": "sdr",
    "out": 0,
-   "motif": "flame",
-   "body": "#140808",
-   "ink": "#ff5a1a",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "Goli in full. This guy does bare stuff that we can't understand — just don't wake him up at night. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/09-goli.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -252,22 +245,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-lune",
+   "id": "tee-goli-masque",
    "folder": "15-tshirts",
-   "n": "LUNE",
+   "n": "GOLI — LE MASQUE",
    "no": "10",
    "one": 1,
-   "price": 55,
+   "price": 65,
    "cur": "€",
-   "r": "c",
+   "r": "sdr",
    "out": 0,
-   "motif": "moon",
-   "body": "#0b0b14",
-   "ink": "#f4ecd8",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "Just the mask, blown up big. The Baoulé face that started the whole crew. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/10-goli-masque.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -275,22 +267,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-la-tour",
+   "id": "tee-utopie-dreamland",
    "folder": "15-tshirts",
-   "n": "LA TOUR",
+   "n": "UTOPIE — DREAMLAND",
    "no": "11",
    "one": 1,
    "price": 55,
    "cur": "€",
    "r": "c",
    "out": 0,
-   "motif": "tower",
-   "body": "#100a16",
-   "ink": "#7b4bff",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The clean umbrella mark and one line: somewhere in Dreamland… One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/11-utopie-dreamland.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -298,22 +289,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-coeur",
+   "id": "tee-swordy",
    "folder": "15-tshirts",
-   "n": "COEUR",
+   "n": "SWORDY",
    "no": "12",
    "one": 1,
-   "price": 55,
+   "price": 65,
    "cur": "€",
-   "r": "c",
+   "r": "sdr",
    "out": 0,
-   "motif": "heart",
-   "body": "#140a10",
-   "ink": "#ff2bd6",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The knight on his hippo. The King granted these guys total freedom — they'll woop you on sight. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/12-swordy.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -321,22 +311,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-vague",
+   "id": "tee-np-neon",
    "folder": "15-tshirts",
-   "n": "VAGUE",
+   "n": "NOUVEAUX PUNK — NEON",
    "no": "13",
    "one": 1,
-   "price": 55,
+   "price": 75,
    "cur": "€",
-   "r": "c",
+   "r": "leg",
    "out": 0,
-   "motif": "wave",
-   "body": "#08121a",
-   "ink": "#26e0ff",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The same manifesto, pink bats on deep green, glowing. The loudest piece in the drop. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/13-nouveaux-punk-neon.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -344,45 +333,22 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-etoile",
+   "id": "tee-20mzs",
    "folder": "15-tshirts",
-   "n": "ETOILE",
+   "n": "20 MIN ZA SESSION",
    "no": "14",
    "one": 1,
-   "price": 55,
+   "price": 75,
    "cur": "€",
-   "r": "c",
+   "r": "leg",
    "out": 0,
-   "motif": "star",
-   "body": "#0d0d0d",
-   "ink": "#ffd60a",
    "owner": null,
    "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-la-grille",
-   "folder": "15-tshirts",
-   "n": "LA GRILLE",
-   "no": "15",
-   "one": 1,
-   "price": 55,
-   "cur": "€",
-   "r": "c",
-   "out": 0,
-   "motif": "grid",
-   "body": "#0c1208",
-   "ink": "#b6ff00",
-   "owner": null,
-   "acquired": null,
-   "desc": "One of one. This design is printed a single time and then retired — nobody else will ever wear it. Claim it and your name goes on this page, permanently, with the date you took it.",
-   "imgs": [],
+   "desc": "The session, worn. One take, twenty minutes, no skips — the tape that never got a second run. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "imgs": [
+    "/assets/tees/mockups/14-20mzs.png",
+    "/assets/tees/mockups/14-20mzs-worn.png"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
