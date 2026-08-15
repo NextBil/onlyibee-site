@@ -83,6 +83,14 @@
   /* ---------- Console frame ---------- */
   #os{display:none;min-height:100dvh;flex-direction:column}
   #os.on{display:flex}
+  /* Arriving with a screen hash means the boot sequence is skipped — but that
+     decision used to be made at the BOTTOM of the script, so the phone painted
+     the full-screen #boot overlay (logo + animating progress bar) for as long as
+     ~150KB took to parse. That flash was the "loading animation" on every return
+     from TV, ROOMS or a character page. The class is set in the first inline
+     script instead, before #boot is even parsed. */
+  html.skipboot #boot{display:none!important}
+  html.skipboot #os{display:flex!important}
   header{
     display:flex;align-items:center;justify-content:space-between;
     padding:16px 18px;border-bottom:2px solid var(--border);
@@ -552,6 +560,13 @@ try{if(sessionStorage.getItem('ibee_noanim')==='1'){sessionStorage.removeItem('i
 document.documentElement.classList.add('noanim');var _n=document.createElement('style');
 _n.textContent='.noanim main,.noanim .screen,.noanim #os{animation:none!important}';
 document.head.appendChild(_n);}}catch(e){}</script>
+<script>/* …and must not flash the boot overlay either: decide NOW, not at the end
+   of the script, or the loading bar is on screen for the whole parse. Kept as a
+   literal id list because the sections are not parsed yet at this point. */
+try{var _h=location.hash.slice(1);
+if(_h==='playing'||_h==='nowplaying')_h='music';
+if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
+  document.documentElement.classList.add('skipboot');}catch(e){}</script>
 
 <!-- ============ BOOT ============ -->
 <div id="boot">
@@ -619,7 +634,7 @@ document.head.appendChild(_n);}}catch(e){}</script>
         <div id="pbar">
           <div class="pb-row">
             <div id="pbi" title="open track list">
-              <img id="pbcover" src="assets/img/follow-me.jpg" alt="">
+              <img id="pbcover" data-src="assets/img/follow-me.jpg" alt="">
               <div class="pb-info">
                 <div id="pbtitle">—</div>
                 <div id="pbsub">—</div>
@@ -642,9 +657,9 @@ document.head.appendChild(_n);}}catch(e){}</script>
     <!-- UTOPIE -->
     <section class="screen" id="utopie">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle"><span class="mico"><span class="sp"><img class="inv" src="assets/img/utopie-logo.png" alt=""></span></span>UTOPIE<span class="red">™</span></div>
+      <div class="scrtitle"><span class="mico"><span class="sp"><img class="inv" data-src="assets/img/utopie-logo.png" alt=""></span></span>UTOPIE<span class="red">™</span></div>
       <div class="scrsub">project 01 // clothing</div>
-      <img class="projlogo" src="assets/img/utopie-logo.png" alt="UTOPIE logo">
+      <img class="projlogo" data-src="assets/img/utopie-logo.png" alt="UTOPIE logo">
       <div class="prose">
         <p>Dreams and ideas that go beyond money — pure passion, proving that art is real.</p>
         <p><a href="utopie/" style="font-family:var(--px);font-size:10px;color:#000;background:var(--acid);padding:12px 16px;text-decoration:none;display:inline-block">▶ ENTER UTOPIE</a></p>
@@ -655,9 +670,9 @@ document.head.appendChild(_n);}}catch(e){}</script>
     <!-- LA ZONE -->
     <section class="screen" id="lazone">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle"><span class="mico"><span class="sp"><img class="inv" src="assets/img/lazone-logo.png" alt=""></span></span>LA ZONE</div>
+      <div class="scrtitle"><span class="mico"><span class="sp"><img class="inv" data-src="assets/img/lazone-logo.png" alt=""></span></span>LA ZONE</div>
       <div class="scrsub">project 02</div>
-      <img class="projlogo" src="assets/img/lazone-logo.png" alt="LA ZONE logo">
+      <img class="projlogo" data-src="assets/img/lazone-logo.png" alt="LA ZONE logo">
       <div class="prose">
         <p>LA ZONE is an artistic hub where creative minds come together to showcase their philosophy and work. Imagined in Paris, now taking place in Toronto.</p>
         <p>But it is more than just a physical place. It is a mental space where artists can find inspiration and create fascinating art pieces.</p>
@@ -672,7 +687,7 @@ document.head.appendChild(_n);}}catch(e){}</script>
       <div class="scrtitle"><span class="mico" style="width:74px;height:74px"><span class="sp"><img src="assets/chess/bishop2.png" alt=""></span></span>ICS<span class="red"> = IBEE'S CHESS SET</span></div>
       <div class="scrsub">project 03 // characters</div>
       <div class="icsbanner">
-        <video src="assets/ics-banner.mp4" poster="assets/ics-banner-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+        <video data-src="assets/ics-banner.mp4" poster="assets/ics-banner-poster.jpg" muted loop playsinline preload="none"></video>
         <span class="lbl">▶ ICS — THE FULL CREW_</span>
       </div>
       <div class="prose">
@@ -700,9 +715,9 @@ document.head.appendChild(_n);}}catch(e){}</script>
         <div class="crewhead" style="color:var(--gold,#ffd60a)">// THE PROCESS_</div>
         <div class="crewsub">every character starts as a pen sketch, gets inked + colored in photoshop, then pressed onto the fabric by hand. one by one — that's why each piece is made only once_</div>
         <div class="procvids">
-          <div class="vc"><video controls playsinline preload="none" poster="assets/img/ics-process/process-recap-poster.jpg" src="assets/img/ics-process/process-recap.mp4"></video>
+          <div class="vc"><video controls playsinline preload="none" data-poster="assets/img/ics-process/process-recap-poster.jpg" src="assets/img/ics-process/process-recap.mp4"></video>
             <div class="vcap"><b>PROCESS RECAP</b><span>from first sketch to finished shirt — how the clothes get made_</span></div></div>
-          <div class="vc wide"><video controls playsinline preload="none" poster="assets/img/ics-process/process-nfc-demo-poster.jpg" src="assets/img/ics-process/process-nfc-demo.mp4"></video>
+          <div class="vc wide"><video controls playsinline preload="none" data-poster="assets/img/ics-process/process-nfc-demo-poster.jpg" src="assets/img/ics-process/process-nfc-demo.mp4"></video>
             <div class="vcap"><b>SCAN THE SHIRT</b><span>every piece has a chip inside — tap your phone on it and it unlocks the universe_</span></div></div>
         </div>
         <div class="crew" id="icsproc">
@@ -756,12 +771,12 @@ document.head.appendChild(_n);}}catch(e){}</script>
       <div class="scrsub">the three worlds_</div>
       <div class="projgrid">
         <a class="projcard" data-go="utopie" href="#utopie">
-          <span class="pj"><img class="inv" src="assets/img/utopie-logo.png" alt="" loading="lazy"></span>
+          <span class="pj"><img class="inv" data-src="assets/img/utopie-logo.png" alt=""></span>
           <span class="pt">UTOPIE<span class="red">™</span></span>
           <span class="pn">PROJECT 01 · CLOTHING</span>
         </a>
         <a class="projcard" data-go="lazone" href="#lazone">
-          <span class="pj"><img class="inv" src="assets/img/lazone-logo.png" alt="" loading="lazy"></span>
+          <span class="pj"><img class="inv" data-src="assets/img/lazone-logo.png" alt=""></span>
           <span class="pt">LA ZONE</span>
           <span class="pn">PROJECT 02 · THE MUSEUM</span>
         </a>
@@ -816,9 +831,11 @@ document.head.appendChild(_n);}}catch(e){}</script>
 <script>document.write('<script src="assets/songs-extra.js?cb='+Date.now()+'"><\/script>')</script>
 <!-- the records' souls (vibes) — feeds the universe search; missing file = search still works on names -->
 <script>document.write('<script src="assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
-<!-- the store catalog (tools/shop-manager.html → assets/products-data.js). Clock-stamped,
-     synchronous; missing file = the shop falls back to its built-in list + old-store links. -->
-<script>document.write('<script src="assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<!-- the store catalog (tools/shop-manager.html → assets/products-data.js) is NOT loaded here.
+     It is 63KB and clock-stamped, so `?cb=` makes it permanently uncacheable — pulling it on every
+     console load meant re-downloading it on every return from TV, ROOMS or a character page, over
+     mobile data, to render a MENU. loadShop() below fetches it the first time the SHOP screen is
+     opened. Missing file = the shop falls back to its built-in list + old-store links. -->
 <!-- draws the 1-of-1 tee mockups; must load BEFORE the shop renderer below -->
 <script src="assets/tee-art.js?v=1"></script>
 <script>
@@ -911,6 +928,9 @@ document.head.appendChild(_n);}}catch(e){}</script>
         requestAnimationFrame(topReset); setTimeout(topReset,300);
       }
     }
+    hydrateScreen(id);
+    if(id==="ics") hydrateICS();
+    if(id==="shop") loadShop();
     document.body.classList.toggle("musicfit", id==="music");  // music screen fills the viewport (no page scroll)
     if(id==="music"){ ENG.wake(); updateEngLock(); }
   }
@@ -932,9 +952,24 @@ document.head.appendChild(_n);}}catch(e){}</script>
     lk.classList.add("on");
   }
   setInterval(function(){ if(current==="music" && document.getElementById("englock") && document.getElementById("englock").classList.contains("on")) updateEngLock(); },1500);
+  /* Opening a screen must leave a HISTORY ENTRY, or there is nothing to come
+     back to. go() only swaps which section is visible; the URL hash is the part
+     the browser can step back through. Clicking the ICS cartridge used to call
+     go("ics") directly, leaving the URL on #menu — so opening a character card
+     and pressing BACK returned to the MAIN MENU instead of the ICS screen.
+     Route user activations through navTo(): set the hash, let hashchange do the
+     work. ROOMS and TV are their own documents, not hashes, so they still go
+     straight through (go() handles the hand-off and the from-menu flag). */
+  var userStep=false;
+  function navTo(id){
+    if(id==="arcade"||id==="tv"){ go(id); return; }        /* own pages */
+    if(location.hash.slice(1)===id){ go(id); return; }      /* already there */
+    userStep=true;                                          /* → go(id,false): keep the in-console BACK */
+    location.hash=id;
+  }
   document.addEventListener("click",function(e){
     var el=e.target.closest("[data-go]");
-    if(el){go(el.getAttribute("data-go"));}
+    if(el){navTo(el.getAttribute("data-go"));}
   });
 
   var items=$$("#menulist li"),sel=0;
@@ -967,7 +1002,7 @@ document.head.appendChild(_n);}}catch(e){}</script>
      SHOP — inventory renderer
      rarity: c=common, sr=super rare, sdr=super duper rare, leg=legendary
   ======================================================= */
-  (function(){
+  function renderShop(){
     var W="https://static.wixstatic.com/media/";
     var P="https://nebuladirection.wixsite.com/mysite/product-page/";
     function img(id,ext){return W+id+"~mv2."+ext+"/v1/fit/w_600,h_600,q_85/file."+ext;}
@@ -1097,7 +1132,54 @@ document.head.appendChild(_n);}}catch(e){}</script>
       grid.classList.add("grid");
       grid.innerHTML=SHOP.map(tile).join('');
     }
-  })();
+  }
+
+  /* The ICS screen's media is held back until the screen is opened: the banner
+     video alone is 350KB and was being downloaded on every console load — every
+     return from TV, ROOMS or a character page — just to show the MAIN MENU.
+     The poster still paints instantly, so the banner never looks empty. */
+  /* Screens are display:none until opened, and Chrome downloads loading="lazy"
+     images inside display:none anyway — so heavy art is held as data-src and
+     swapped in when its screen is actually shown. Add data-src (not src) to any
+     new heavy image on a non-default screen and this picks it up for free. */
+  function hydrateScreen(id){
+    var t=document.getElementById(id); if(!t) return;
+    Array.prototype.forEach.call(t.querySelectorAll("img[data-src]"),function(el){
+      /* #pbcover is written by the radio on every track change — if it already
+         carries a src, the placeholder must not stomp the current cover */
+      if(!el.getAttribute("src")) el.src=el.dataset.src;
+      el.removeAttribute("data-src");
+    });
+    Array.prototype.forEach.call(t.querySelectorAll("video[data-poster]"),function(el){
+      el.poster=el.dataset.poster; el.removeAttribute("data-poster");
+    });
+  }
+
+  function hydrateICS(){
+    var v=document.querySelector(".icsbanner video");
+    if(v&&!v.getAttribute("src")&&v.dataset.src){
+      v.src=v.dataset.src;
+      var go=function(){ var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){}); };
+      go(); v.addEventListener("canplay",go,{once:true});   /* src set != ready to play */
+    }
+    Array.prototype.forEach.call(document.querySelectorAll("#ics video[data-poster]"),function(el){
+      el.poster=el.dataset.poster; el.removeAttribute("data-poster");
+    });
+  }
+
+  /* Pull the catalog on first SHOP open, then render. Fires once; every later
+     visit is already in memory. If the file fails, renderShop() still runs and
+     falls back to its built-in list, so the screen is never blank. */
+  var shopState=0;                                   /* 0 idle · 1 loading · 2 done */
+  function loadShop(){
+    if(shopState===2){ renderShop(); return; }
+    if(shopState===1) return;
+    shopState=1;
+    var sc=document.createElement("script");
+    sc.src="assets/products-data.js?cb="+Date.now();
+    sc.onload=sc.onerror=function(){ shopState=2; renderShop(); };
+    document.head.appendChild(sc);
+  }
 
   /* =======================================================
      ENGINE — the music universe
@@ -2087,8 +2169,8 @@ document.head.appendChild(_n);}}catch(e){}</script>
     if(current==="menu"){
       if(e.key==="ArrowDown"){sel=(sel+1)%items.length;paint();blip(440,.03);e.preventDefault();}
       if(e.key==="ArrowUp"){sel=(sel-1+items.length)%items.length;paint();blip(330,.03);e.preventDefault();}
-      if(e.key==="Enter"){go(items[sel].getAttribute("data-go"));}
-    }else if(e.key==="Escape"){go("menu");}
+      if(e.key==="Enter"){navTo(items[sel].getAttribute("data-go"));}
+    }else if(e.key==="Escape"){navTo("menu");}
   });
 
   /* arriving with a screen hash (#menu, #music, #shop…) skips the boot sequence
@@ -2117,7 +2199,9 @@ document.head.appendChild(_n);}}catch(e){}</script>
     var h=location.hash.slice(1);
     if(h==="playing"||h==="nowplaying"){ go("music",true); requestAnimationFrame(function(){try{ENG.enterPlaying();}catch(e){}}); return; }
     var el=h&&document.getElementById(h);
-    if(el&&el.classList.contains("screen")) go(h,true);
+    /* a step the visitor took inside the console keeps its BACK; a hash arriving
+       from outside (shell nav header, deep link) is a top-level landing */
+    if(el&&el.classList.contains("screen")){ go(h,!userStep); userStep=false; }
   });
 })();
 </script>
