@@ -1144,6 +1144,10 @@
      Moving the node (rather than duplicating the markup) means openSongInfo()
      and every field it fills keep working with no second code path. */
   var songinfoCard=document.getElementById('songinfocard');
+  /* The panel keeps whatever scroll offset it had, so re-filling it with a new
+     record left you looking at the middle of the card instead of the cover.
+     Anything that repopulates the panel must send it back to the top. */
+  function sideTop(){ var e=document.getElementById('tlside'); if(e) e.scrollTop=0; }
   var wideMQ=window.matchMedia('(min-width:900px)');
   function placeSongInfo(){
     var side=document.getElementById('tlside');
@@ -1152,6 +1156,7 @@
       if(songinfoCard.parentNode!==side){ side.appendChild(songinfoCard); }
       songinfo.classList.remove('on'); songinfo.setAttribute('aria-hidden','true');
       try{ openSongInfo(true); }catch(e){}      /* fill it without popping the overlay */
+      sideTop();
     }else if(songinfoCard.parentNode!==songinfo){
       songinfo.appendChild(songinfoCard);
     }
@@ -1198,7 +1203,7 @@
     if(builtCount!==r.count)renderTracks(); /* extra records arrived — rebuild the browser */
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
     var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s);
-      if(wideMQ.matches&&tl.classList.contains('open')) try{ openSongInfo(true); }catch(e){} }
+      if(wideMQ.matches&&tl.classList.contains('open')){ try{ openSongInfo(true); }catch(e){} sideTop(); } }
     var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
     /* --- the radio's two states ---
        `radioon` swings --rs from desaturated steel to full neon; --rh follows the
