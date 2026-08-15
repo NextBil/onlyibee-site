@@ -142,7 +142,10 @@
   #tlbody{max-height:52vh;overflow-y:auto}
   /* minmax(0,1fr) + min-width:0: a long nowrap song name must never widen its column —
      every cover stays the exact same square (the old 1fr let columns grow with the text) */
-  #tlbody.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:12px}
+  /* auto-fill, not a fixed 3: on a laptop the list is far wider than three
+     covers and the rest of the bar sat empty. 104px keeps 3 across on a phone
+     and simply adds columns as the window grows. */
+  #tlbody.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;padding:12px}
   .tl-tile{cursor:pointer;perspective:640px;min-width:0}
   .tl-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;
     transform:rotateY(-18deg);transform-origin:center;transition:transform .35s cubic-bezier(.2,.7,.2,1);overflow:hidden}
@@ -238,7 +241,7 @@
   #songinfoclose{position:absolute;right:9px;top:9px;background:#111;border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:9px;padding:6px 8px;cursor:pointer}#songinfoclose:hover{color:var(--red);border-color:var(--red)}
   #songinfotop{display:flex;gap:14px;align-items:center;padding-right:30px}#songinfoart{width:92px;height:92px;object-fit:cover;background:#111;border:1px solid var(--acid)}#songinfoname{font-family:var(--px);font-size:13px;line-height:1.5;color:#fff}#songinfoalbum{margin-top:5px;color:var(--acid);font-family:var(--vt);font-size:17px;background:transparent;border:0;border-bottom:1px dashed var(--acid);padding:0;cursor:pointer;text-align:left}#songinfoalbum:hover{color:var(--red);border-color:var(--red)}
   #songinfoplays{margin:17px 0 13px;padding:10px;border-left:2px solid var(--acid);background:#101408;color:var(--acid);font-family:var(--px);font-size:9px}#songinfocities{margin:0 0 13px;padding:10px;border-left:2px solid var(--cyan);background:#081216;color:#cceff7;font-size:17px;line-height:1.35}#songinfocities .citytitle{font-family:var(--px);font-size:7px;color:var(--cyan);margin-bottom:7px;letter-spacing:.5px}#songinfocities .cityrow{display:flex;justify-content:space-between;gap:10px;border-top:1px solid rgba(38,224,255,.14);padding:4px 0}#songinfocities .cityrow:first-of-type{border-top:0;padding-top:0}#songinfocities .citycount{font-family:var(--px);font-size:7px;color:var(--dim);white-space:nowrap}#songinfocities .cityempty{color:var(--dim);font-size:16px}#songinfocopy{font-size:18px;line-height:1.38;color:#c5c5c5}#songinfocopy p{margin:10px 0}#songinfocopy b{font-family:var(--px);font-size:8px;color:var(--dim)}
-  #songinfomorelabel{margin:16px 0 7px;font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px}#songinfomore{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.songmore{min-width:0;padding:0;background:#111;border:1px solid var(--border);color:var(--ink);cursor:pointer;text-align:left}.songmore:hover{border-color:var(--acid);transform:translateY(-2px)}.songmore img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#171717}.songmore span{display:block;padding:3px 2px;font-family:var(--px);font-size:5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  
   #nowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;
     color:hsla(var(--rh),calc(var(--rs) + 8%),86%,1);font-family:var(--px);font-size:9px;
     cursor:pointer;text-align:left;padding:0;text-shadow:0 0 10px hsla(var(--rh),var(--rs),60%,.35)}
@@ -372,6 +375,30 @@
     width:20px;height:20px;margin-left:6px;border-radius:50%;flex:none;
     border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:8px;cursor:pointer}
   #tlbody .nfo:hover{color:var(--acid);border-color:var(--acid)}
+
+  /* ---- WIDE SCREENS: the radio becomes two columns ----
+     A laptop has room to show the record's story beside the list, so the info
+     card stops being a modal and simply lives in the right-hand column. The ⓘ
+     on each row disappears with it — there is nothing left to open, because the
+     panel is already on screen and follows whatever is playing. Below 900px it
+     all reverts: one column, ⓘ per row, card as an overlay. */
+  #tlside{display:none}
+  @media(min-width:900px){
+    /* the taller list is a LAPTOP affordance only — phones keep the 52vh they
+       always had, which is tuned to leave the page visible behind the radio */
+    #tracklist{max-height:min(62vh,560px)}
+    #tracklist.open{display:grid;grid-template-columns:1fr 320px;align-content:start}
+    /* the header rows span both columns; #tlbody and #tlside then auto-place
+       side by side on the row beneath them */
+    #tracklist .th,#tltools,#tlalbums,#roomband,#tlempty{grid-column:1 / -1}
+    #tlbody{grid-column:1;max-height:min(52vh,470px)}
+    #tlside{display:block;grid-column:2;max-height:min(52vh,470px);overflow-y:auto;
+      border-left:1px solid hsla(var(--rh),var(--rs),55%,.28);padding:12px}
+    #tlbody .nfo{display:none}          /* the panel replaces it */
+    /* the card is no longer a dialog here — it is just the panel's content */
+    #tlside #songinfocard{width:auto;max-height:none;border:0;padding:0;box-shadow:none;background:transparent}
+    #tlside #songinfoclose{display:none}
+  }
 </style>
 <script src="/assets/cart.js?v=3"></script>
 </head>
@@ -447,6 +474,7 @@
       <div id="tlalbums"></div>
       <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
       <div id="tlbody"></div>
+      <aside id="tlside" aria-label="Now playing details"></aside>
       <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
     </div>
     <div id="player">
@@ -490,7 +518,7 @@
     </div>
   </div>
 
-  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div><div id="songinfocopy"></div><div id="songinfomore"></div></section></div>
+  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div><div id="songinfocopy"></div></section></div>
 </div>
 
 <!-- PRESS START intro overlay -->
@@ -1004,7 +1032,7 @@
     tl.classList.toggle('open',on);
     document.getElementById('bottom').classList.toggle('listopen',on);
   }
-  function openTL(){ var r=R(); if(r&&builtCount!==r.count)renderTracks(); renderAlbums(); setTL(true); updateRoomband(); markNow(); }
+  function openTL(){ var r=R(); if(r&&builtCount!==r.count)renderTracks(); renderAlbums(); setTL(true); updateRoomband(); markNow(); placeSongInfo(); }
   function toggleTL(){ if(tl.classList.contains('open'))setTL(false); else openTL(); }
   /* ONE handler for the whole strip. Previously the title had its own click and
      the cover had click AND a capturing pointerup — so a single tap on the cover
@@ -1035,24 +1063,40 @@
   /* the now-playing album cover in the bar: song's own art → album cover → hue vinyl */
   var pcover=document.getElementById('pcover'),pcoverimg=document.getElementById('pcoverimg'),lastCoverI=-2;
   var songinfo=document.getElementById('songinfo'),songInfoRequest=0;
-  function openSongInfo(){
+  function openSongInfo(inline){
     var r=R(),i=r&&r.current?r.current():-1,s=r&&r.song?r.song():null;
-    if(!s||i<0){document.getElementById('songinfoname').textContent='NO SONG SELECTED';document.getElementById('songinfoalbum').textContent='START A TRACK TO READ ITS INFO';document.getElementById('songinfocopy').innerHTML='<p>THE RECORD’S STORY, PLAY COUNT AND LISTENER LOCATIONS APPEAR HERE.</p>';document.getElementById('songinfoplays').textContent='PLAYS // —';document.getElementById('songinfocities').innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">START A TRACK TO READ LOCATIONS_</div>';document.getElementById('songinfomore').innerHTML='';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');return;}
+    if(!s||i<0){document.getElementById('songinfoname').textContent='NO SONG SELECTED';document.getElementById('songinfoalbum').textContent='START A TRACK TO READ ITS INFO';document.getElementById('songinfocopy').innerHTML='<p>THE RECORD’S STORY, PLAY COUNT AND LISTENER LOCATIONS APPEAR HERE.</p>';document.getElementById('songinfoplays').textContent='PLAYS // —';document.getElementById('songinfocities').innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">START A TRACK TO READ LOCATIONS_</div>';if(!inline){if(!inline){songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');}}return;}
     var alb=r.album?r.album(i):{},m=META[s.f]||{},art=document.getElementById('songinfoart');
     document.getElementById('songinfoname').textContent=s.n||'—';document.getElementById('songinfoalbum').textContent=alb.name||'';
     art.onerror=function(){art.onerror=null;art.style.display='none';};art.style.display='block';art.src=(s.cover||alb.cover||'');
     var copy='';if(m.vibe)copy+='<p><b>VIBE //</b> '+e3(m.vibe)+'</p>';if(m.meaning)copy+='<p>'+e3(m.meaning)+'</p>';if(m.context)copy+='<p><b>MADE //</b> '+e3(m.context)+'</p>';if(m.took)copy+='<p><b>TIME //</b> '+e3(m.took)+'</p>';
     document.getElementById('songinfocopy').innerHTML=copy||'<p>INFO TRANSMISSION INCOMING_</p>';
-    var more=[],total=r.count||0;for(var step=1;step<=total&&more.length<6;step++){var n=(i+step)%total,other=r.song(n);if(other&&n!==i)more.push({i:n,s:other,a:r.album?r.album(n):{}});}
-    document.getElementById('songinfomore').innerHTML=more.map(function(x){var src=x.s.cover||x.a.cover||'';return '<button class="songmore" data-song="'+x.i+'"><img alt="" src="'+e3(src)+'"><span>'+e3(x.s.n)+'</span></button>';}).join('');
-    document.getElementById('songinfomore').onclick=function(e){var b=e.target.closest('.songmore');if(!b)return;var n=Number(b.dataset.song);if(r.control&&r.control.play){r.control.play(n);openSongInfo();}};
-    var plays=document.getElementById('songinfoplays'),cities=document.getElementById('songinfocities'),request=++songInfoRequest;plays.textContent='PLAYS // READING_';cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div>';songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');
+    var plays=document.getElementById('songinfoplays'),cities=document.getElementById('songinfocities'),request=++songInfoRequest;plays.textContent='PLAYS // READING_';cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div>';if(!inline){songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');}
     var S=window.IBEE_STATS_CLIENT;if(S&&S.songCounts)S.songCounts().then(function(rows){var row=(rows||[]).filter(function(x){return x.song_slug===s.f;})[0];plays.textContent='PLAYS // '+(row?Number(row.plays).toLocaleString():'0');}).catch(function(){plays.textContent='PLAYS // UNAVAILABLE';});else plays.textContent='PLAYS // UNAVAILABLE';
     if(S&&S.songCities)S.songCities(s.f).then(function(rows){if(request!==songInfoRequest)return;rows=(rows||[]).slice(0,5);cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div>'+(rows.length?rows.map(function(row,n){return '<div class="cityrow"><span>0'+(n+1)+' · '+e3(row.city_name||'UNKNOWN')+'</span><span class="citycount">'+Number(row.listeners||0).toLocaleString()+' LISTENERS</span></div>';}).join(''):'<div class="cityempty">CITIES APPEAR AS THIS SONG IS PLAYED_</div>');}).catch(function(){if(request===songInfoRequest)cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';});else cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';
   }
   /* Closing lands you back on the RADIO. The card is opened from a row in the
      list, so dismissing it should return you to that list — leaving the player
      collapsed would drop you somewhere you never chose to go. */
+  /* The info card is a single element that lives in one of two places: the
+     centre overlay on a phone, or the list's right-hand column on a laptop.
+     Moving the node (rather than duplicating the markup) means openSongInfo()
+     and every field it fills keep working with no second code path. */
+  var songinfoCard=document.getElementById('songinfocard');
+  var wideMQ=window.matchMedia('(min-width:900px)');
+  function placeSongInfo(){
+    var side=document.getElementById('tlside');
+    if(!side||!songinfoCard) return;
+    if(wideMQ.matches){
+      if(songinfoCard.parentNode!==side){ side.appendChild(songinfoCard); }
+      songinfo.classList.remove('on'); songinfo.setAttribute('aria-hidden','true');
+      try{ openSongInfo(true); }catch(e){}      /* fill it without popping the overlay */
+    }else if(songinfoCard.parentNode!==songinfo){
+      songinfo.appendChild(songinfoCard);
+    }
+  }
+  try{ wideMQ.addEventListener('change',placeSongInfo); }catch(e){ wideMQ.addListener(placeSongInfo); }
+
   function closeSongInfo(){
     songinfo.classList.remove('on');songinfo.setAttribute('aria-hidden','true');
     if(typeof openTL==='function' && !tl.classList.contains('open')) openTL();
@@ -1092,7 +1136,8 @@
     var r=R();if(!r)return;
     if(builtCount!==r.count)renderTracks(); /* extra records arrived — rebuild the browser */
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
-    var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s); }
+    var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s);
+      if(wideMQ.matches&&tl.classList.contains('open')) try{ openSongInfo(true); }catch(e){} }
     var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
     /* --- the radio's two states ---
        `radioon` swings --rs from desaturated steel to full neon; --rh follows the
