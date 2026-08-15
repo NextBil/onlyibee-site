@@ -155,7 +155,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   border-top:1px solid var(--border);padding-top:9px;width:100%}
 .pick:hover .pt,.pick:focus-visible .pt{color:hsl(var(--hue),95%,68%)}
 </style>
-<script src="/assets/cart.js?v=2"></script>
+<script src="/assets/cart.js?v=3"></script>
 <script src="/assets/saved.js?v=2" defer></script>
 </head>
 <body>
@@ -418,10 +418,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var codeBlock='<div class="sub">Got a pass code from your garment? Enter it:</div>'
       +'<input id="gcode" placeholder="IBEE-XXXX-0000-XXXX" autocapitalize="characters" autocomplete="off">'
       +'<button class="cbtn" id="gcodego">▶ UNLOCK WITH CODE</button>';
-    var loginBlock='<div class="sub"><b style="color:var(--ink)">New here? Joining takes 2 seconds</b> — just an email and a password. No pass, no invite, free.</div>'
+    var loginBlock='<div class="sub"><b style="color:var(--ink)">New here?</b> Just an email and a password.</div>'
       +'<input id="gemail" type="email" placeholder="your email" autocomplete="email" inputmode="email">'
       +'<input id="gpass" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password">'
-      +'<button class="cbtn" id="gsignup">＋ CREATE ACCOUNT — FREE, 2 SEC</button>'
+      +'<button class="cbtn" id="gsignup">＋ CREATE ACCOUNT</button>'
       +'<button class="cbtn" id="glogin" style="background:transparent;border:1px solid var(--acid);color:var(--acid);margin-top:8px">▶ LOG IN (already joined)</button>';
     host.innerHTML='<div class="gate">'
       +(loginFirst

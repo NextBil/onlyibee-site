@@ -233,12 +233,6 @@
     position:relative;background:radial-gradient(circle,#333 0 20%,#070707 22% 28%,#141414 30% 100%);cursor:pointer}
   #pcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
   #pcover:hover{border-color:hsla(var(--rh),var(--rs),60%,.9);box-shadow:0 0 12px hsla(var(--rh),var(--rs),55%,.4)}
-  /* song-info moved onto its own badge: the cover itself now opens the radio
-     with the rest of the strip, but the card it used to open is still one tap away */
-  #pinfo{position:absolute;right:-4px;bottom:-4px;width:16px;height:16px;border-radius:50%;
-    background:#0b0d10;border:1px solid hsla(var(--rh),var(--rs),60%,.9);color:hsla(var(--rh),var(--rs),70%,1);
-    font-family:var(--px);font-size:7px;line-height:14px;text-align:center;cursor:pointer;z-index:3}
-  #pinfo:hover{background:hsla(var(--rh),var(--rs),60%,1);color:#08090b}
   #songinfo{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72)}
   #songinfo.on{display:flex}#songinfocard{position:relative;width:min(390px,94vw);max-height:86dvh;overflow:auto;background:#0a0a0a;border:2px solid var(--border);padding:18px;box-shadow:0 18px 55px rgba(0,0,0,.78)}
   #songinfoclose{position:absolute;right:9px;top:9px;background:#111;border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:9px;padding:6px 8px;cursor:pointer}#songinfoclose:hover{color:var(--red);border-color:var(--red)}
@@ -372,8 +366,14 @@
     color:hsla(var(--rh),var(--rs),74%,.95);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .alb .aq{display:block;font-family:var(--px);font-size:5.5px;color:var(--dim);margin-top:2px}
+
+  /* the row's ⓘ — same weight as the ♥ beside it */
+  #tlbody .nfo{display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;margin-left:6px;border-radius:50%;flex:none;
+    border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:8px;cursor:pointer}
+  #tlbody .nfo:hover{color:var(--acid);border-color:var(--acid)}
 </style>
-<script src="/assets/cart.js?v=2"></script>
+<script src="/assets/cart.js?v=3"></script>
 </head>
 <body>
 <!-- crawlable content for search engines (the app is JS/canvas Google can't read).
@@ -451,7 +451,7 @@
     </div>
     <div id="player">
       <div class="pl-top">
-        <span id="pcover"><img alt="" id="pcoverimg"><span id="pinfo" title="about this record">i</span></span>
+        <span id="pcover"><img alt="" id="pcoverimg"></span>
         <button id="nowbtn" title="open the radio"><span class="bd"></span><span id="rt">RADIO</span></button>
         <span id="time">0:00 / --:--</span>
         <span class="hint">ALL SONGS</span><span class="chev">▲</span>
@@ -581,7 +581,9 @@
       /* opening the profile is what "seeing" the saved pieces means — clear the
          dot here, not on save, or it would never show in the first place */
       if(window.IBEE_CART) window.IBEE_CART.markSeen();
-      navigate(on?'room/':'member/?login=1');
+      /* no CRT boot-in on the way to the profile/join — a step sideways, not a
+         new place opening */
+      navigate(on?'room/':'member/?login=1',{noanim:true});
     };
     if(window.IBEE_CART) window.IBEE_CART.refresh();   /* renderAcct rebuilt the button */
   }
@@ -878,7 +880,11 @@
       if(favOnly&&!isFav(s.f))continue;
       shown++;
       var img0=imgTag(coverCands(s,alb)), room=alb&&alb.room, tint=(alb&&alb.tint)||'#ff2b2b';
-      var fv='<span class="fv'+(isFav(s.f)?' on':'')+'" data-fv="'+i+'" title="favourite">♥</span>';
+      /* ♥ and ⓘ sit together on the row: one saves the record, the other tells
+         you about it. The ⓘ used to be a badge on the player's cover, which put
+         it nowhere near the record it described. */
+      var fv='<span class="fv'+(isFav(s.f)?' on':'')+'" data-fv="'+i+'" title="favourite">♥</span>'
+        +'<span class="nfo" data-nfo="'+i+'" title="about this record">i</span>';
       if(viewMode==='grid'){
         html+='<div class="tl-tile'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
           +'<div class="art" style="background:'+vinyl(s.hue)+'">'+img0
@@ -1005,7 +1011,6 @@
      ran its handler twice, and it opened a different thing (the song-info card)
      than the title did. That is what made this bar feel broken. */
   document.querySelector('.pl-top').addEventListener('click',function(e){
-    if(e.target.closest('#pinfo')) return;      /* the badge has its own job */
     toggleTL();
   });
   /* click anywhere outside the track list closes it (music keeps playing) */
@@ -1054,9 +1059,17 @@
   };
   /* One binding, one fire. The old pair (onclick + capturing pointerup) ran
      twice for every single tap. */
-  document.getElementById('pinfo').addEventListener('click',function(e){
-    e.preventDefault(); e.stopPropagation(); openSongInfo();
-  });
+  /* ⓘ on a row: adopt that record, then open its card.
+     CAPTURE phase — the row carries its own click handler that plays the track
+     and closes the list, and on the bubble phase that runs first, so stopping
+     propagation there is already too late. */
+  document.addEventListener('click',function(e){
+    var n=e.target.closest&&e.target.closest('[data-nfo]'); if(!n) return;
+    e.preventDefault(); e.stopPropagation();
+    var r=R(), i=+n.getAttribute('data-nfo');
+    if(r&&r.adopt) { try{ r.adopt(i); }catch(err){} }
+    openSongInfo();
+  },true);
   document.getElementById('songinfoclose').onclick=closeSongInfo;songinfo.onclick=function(e){if(e.target===songinfo)closeSongInfo();};
   function setPcover(r,i,s){
     var hue=(s&&s.hue!=null)?s.hue:75;

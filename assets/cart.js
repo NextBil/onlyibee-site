@@ -57,12 +57,27 @@
   /* called when the profile is opened — clears the dot, keeps the list */
   function markSeen(){ try{ localStorage.setItem(SEEN, String(count())); }catch(e){} refreshEverywhere(); }
 
-  /* ---- the red dot on the header's PROFILE button ---- */
+  /* ---- the red dot on the header's PROFILE button ----
+     ⚠ It must NOT be a `.ibdot`. badges.js runs placeDots() on a 1s timer and
+     calls dotOn(#acctbtn, <its own news count>), which removes any `:scope >
+     .ibdot` it did not put there. Sharing the class meant the cart's dot was
+     deleted every second and re-added on the next refresh — it visibly blinked.
+     Own class, own corner (left, so both can show at once without stacking). */
+  function css(){
+    if(document.getElementById('ibcartdot-css')) return;
+    var st=document.createElement('style'); st.id='ibcartdot-css';
+    st.textContent='#acct button{position:relative;overflow:visible}'
+      +'.ibcartdot{position:absolute;top:3px;left:2px;min-width:18px;height:18px;border-radius:9px;'
+      +'background:#ff2b2b;color:#fff;font-family:inherit;font-size:9px;line-height:18px;text-align:center;'
+      +'padding:0 4px;box-shadow:0 0 8px rgba(255,43,43,.8);pointer-events:none;z-index:5}';
+    document.head.appendChild(st);
+  }
   function paintDot(){
     var btn=document.getElementById('acctbtn'); if(!btn) return;
-    var n=unseen(), d=btn.querySelector(':scope > .ibdot');
+    css();
+    var n=unseen(), d=btn.querySelector(':scope > .ibcartdot');
     if(n>0){
-      if(!d){ d=document.createElement('span'); d.className='ibdot'; btn.appendChild(d); }
+      if(!d){ d=document.createElement('span'); d.className='ibcartdot'; btn.appendChild(d); }
       var t=n>9?'9+':String(n); if(d.textContent!==t) d.textContent=t;
     }else if(d){ d.remove(); }
   }
@@ -84,4 +99,7 @@
   };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paintDot);
   else paintDot();
+  /* the header button is rebuilt by renderAcct on sign-in/out; re-assert cheaply.
+     paintDot is a no-op when the dot already matches, so this costs nothing. */
+  setInterval(paintDot, 1200);
 })();

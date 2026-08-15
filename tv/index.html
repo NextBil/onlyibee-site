@@ -275,7 +275,10 @@ function tune(i){
 yt.addEventListener("load",function(){
   if(cur<0)return;
   var kick=function(){try{yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*");}catch(e){}};
-  setTimeout(kick,350); setTimeout(kick,1200);
+  /* One or two nudges is not enough: the player has to finish booting before it
+     accepts commands, and how long that takes varies with the connection. Keep
+     asking across the first few seconds — each call is a no-op once it plays. */
+  [250,700,1400,2400,3600].forEach(function(ms){ setTimeout(kick,ms); });
 });
 /* fullscreen toggle — container only, so the embed keeps playing throughout */
 (function(){
