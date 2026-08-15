@@ -52,28 +52,32 @@ h1{font-family:var(--px);font-size:clamp(15px,4.4vw,26px);letter-spacing:1px;col
 .meta{color:var(--dim);margin-top:8px;font-size:19px;letter-spacing:1px}
 
 /* ---------- the burning spliff (the play/seek bar) ----------
-   Shaped like a hand-rolled cone: pinched at the roach, flaring out
-   toward the lit tip. The taper lives on .cone (clip-path), which also
-   clips the ash so the burnt part keeps the cone silhouette. The ember,
-   smoke and falling ash sit OUTSIDE that clip so they can spill past it. */
+   A hand-rolled cone burns the way you smoke it: you spark the FAT end and it
+   burns down to the roach. So the wide lit end is at the START of the bar
+   (0:00) and the pinched filter tip is at the END (20:00) — playback runs
+   left→right, wide→narrow, exactly like the thing burning down in your hand.
+   The taper lives on .cone (clip-path), which also clips the ash so the burnt
+   part keeps the cone silhouette. Ember, smoke and falling ash sit OUTSIDE
+   that clip so they can spill past it. */
 .spliff{display:flex;align-items:center;margin-top:18px;height:48px;cursor:pointer;touch-action:none;
   padding-bottom:10px}
-.spliff .roach{width:30px;height:9px;flex:none;border-radius:5px 2px 2px 5px;margin-right:-4px;z-index:2;
+.spliff .roach{width:30px;height:9px;flex:none;border-radius:2px 5px 5px 2px;margin-left:-4px;z-index:2;
   background:linear-gradient(180deg,#c79a5e,#7a5330);box-shadow:inset 0 -2px 3px rgba(0,0,0,.4)}
 .spliff .stick{position:relative;flex:1;height:34px;overflow:visible}
-/* the rolled paper cone — pinched at the roach, flaring out to the cherry */
+/* the rolled paper cone — fat at the lit end (left), pinched into the roach (right) */
 .spliff .cone{position:absolute;inset:0;z-index:1;
-  clip-path:polygon(0 41%,100% 0,100% 100%,0 59%);
+  clip-path:polygon(0 0,100% 41%,100% 59%,0 100%);
   background:linear-gradient(180deg,#f6efdc,#e4dac2 55%,#cfc3a4);
   box-shadow:inset 0 -3px 5px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.5)}
 /* burnt-down section — grows left→right, clipped to the cone by its parent */
 .spliff .ash{position:absolute;left:0;top:0;height:100%;width:0;
   background:repeating-linear-gradient(96deg,#8f8f8f 0 3px,#6a6a6a 3px 6px),linear-gradient(180deg,#9a9a9a,#3a3a3a);
   box-shadow:inset 0 0 7px rgba(0,0,0,.55)}
-/* the lit cherry — grows as the cone widens, flickers with the beat */
+/* the lit cherry — widest when freshly sparked, shrinking as the cone tapers
+   down toward the roach. Flickers with the beat. */
 .spliff .ember{position:absolute;left:0;top:50%;z-index:3;
   transform:translate(-50%,-50%);border-radius:50%;
-  width:calc(9px + var(--burn,0)*13px);height:calc(10px + var(--burn,0)*24px);
+  width:calc(22px - var(--burn,0)*13px);height:calc(34px - var(--burn,0)*24px);
   background:radial-gradient(circle at 50% 38%,#fff7d2,#ff9d2b 42%,#ff3b1a 80%);
   box-shadow:0 0 calc(10px + var(--emb,0)*28px) rgba(255,110,30,.95),0 0 7px #ffcf5c,0 0 3px #fff}
 body.playing .spliff .ember{animation:emberflick .18s steps(2) infinite}
@@ -214,7 +218,7 @@ body.playing #roomtag{opacity:.92}
   <div class="smoke s1"></div><div class="smoke s2"></div><div class="smoke s3"></div>
 </div>
 <header>
-  <a href="../">ONLY<span class="r">IBEE</span> OS</a>
+  <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
   <span>ZA.SYS</span>
 </header>
 <div class="mq"><div>
@@ -242,12 +246,12 @@ body.playing #roomtag{opacity:.92}
         <div class="reel"><div class="spokes" id="sp2"></div><div class="hub"></div></div>
       </div>
       <div class="spliff" id="spliff" title="drag the ember to seek">
-        <span class="roach"></span>
         <span class="stick" id="stick">
           <span class="cone"><span class="ash" id="ash"></span></span>
           <span class="smoke" id="smk"></span>
           <span class="ember" id="ember"></span>
         </span>
+        <span class="roach"></span>
       </div>
       <div id="dtimes"><span id="dcur">0:00</span><span id="dtot">20:00</span></div>
       <div class="deckctrl">
@@ -415,7 +419,7 @@ body.playing #roomtag{opacity:.92}
     fr=Math.max(0,Math.min(1,fr)); var pct=(fr*100)+"%";
     burn=fr;
     ash.style.width=pct; ember.style.left=pct; smk.style.left=pct;
-    /* the cone widens toward the tip, so the cherry grows as it burns down */
+    /* the cone NARROWS as it burns toward the roach, so the cherry shrinks */
     ember.style.setProperty("--burn",fr.toFixed(3));
   }
   /* ---- badge: ride the WHOLE 20-minute mix → CERTIFIED STONER. Flagged in its
@@ -461,14 +465,15 @@ body.playing #roomtag{opacity:.92}
     var p=document.createElement("span"); p.className="puff"; p.style.left=emberLeft();
     p.style.animationDuration=(2.3+Math.random()*0.9)+"s"; stick.appendChild(p);
     setTimeout(function(){ if(p.parentNode)p.remove(); },3400); }
-  /* ash crumbles off the cherry and drops away. Flakes get bigger and fall in
-     bigger clumps the further down the cone burns, since there's more paper
-     and packed material burning at the wide end. */
+  /* ash crumbles off the cherry and drops away. The fat end has the most paper
+     and packed material burning, so flakes are biggest and fall in the biggest
+     clumps early on, thinning out as the cone tapers toward the roach. */
   function spawnAsh(){ if(!body.classList.contains("playing"))return;
-    var n=1+Math.round(Math.random()*(1+burn*2));
+    var fat=1-burn;                                  /* 1 at the lit fat end → 0 at the roach */
+    var n=1+Math.round(Math.random()*(1+fat*2));
     for(var i=0;i<n;i++){
       var a=document.createElement("span"); a.className="ashbit"; a.style.left=emberLeft();
-      a.style.setProperty("--sz",(2.5+Math.random()*(2.5+burn*3.5)).toFixed(1)+"px");
+      a.style.setProperty("--sz",(2.5+Math.random()*(2.5+fat*3.5)).toFixed(1)+"px");
       a.style.setProperty("--dx",(Math.random()*26-13).toFixed(0)+"px");
       a.style.setProperty("--dy",(60+Math.random()*55).toFixed(0)+"px");
       a.style.setProperty("--rot",(180+Math.random()*320).toFixed(0)+"deg");

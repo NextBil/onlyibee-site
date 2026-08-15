@@ -961,10 +961,16 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
      work. ROOMS and TV are their own documents, not hashes, so they still go
      straight through (go() handles the hand-off and the from-menu flag). */
   var userStep=false;
+  /* Screens the shell's nav header can reach are TOP-LEVEL destinations. Opening
+     SHOP or ICS from its cartridge must feel identical to pressing SHOP or ICS in
+     the header — same screen, no extra in-console BACK making it look like a
+     sub-page you opened inside something else. Screens the header cannot reach
+     (ABOUT, UTOPIE, LA ZONE, MUSIC) are steps in, and keep their BACK. */
+  var TOPLEVEL={menu:1,shop:1,ics:1};
   function navTo(id){
     if(id==="arcade"||id==="tv"){ go(id); return; }        /* own pages */
-    if(location.hash.slice(1)===id){ go(id); return; }      /* already there */
-    userStep=true;                                          /* → go(id,false): keep the in-console BACK */
+    if(location.hash.slice(1)===id){ go(id,!!TOPLEVEL[id]); return; }
+    userStep=!TOPLEVEL[id];                                 /* → go(id,top) via hashchange */
     location.hash=id;
   }
   document.addEventListener("click",function(e){
@@ -2229,5 +2235,6 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
   bar.addEventListener("mouseenter",show);bar.addEventListener("focusin",show);document.addEventListener("mousemove",function(e){if(e.clientY<115)show();});document.addEventListener("touchstart",function(e){if(e.touches[0]&&e.touches[0].clientY<115)show();},{passive:true});
 })();
 </script>
+<script src="/assets/pulse.js?v=1"></script>
 </body>
 </html>

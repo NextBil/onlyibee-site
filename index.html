@@ -533,7 +533,14 @@
   /* profile === room (one page): old member/profile links land straight on room/ */
   p=p.replace(/^\/?member\/profile\/?(index\.html)?/i,'room/');
   frame.src=p;
-  frame.addEventListener('load',function(){ frame.classList.add('on'); sync(); });
+  frame.addEventListener('load',function(){
+    frame.classList.add('on'); sync();
+    /* The console switches screens by changing its own hash, which is NOT a frame
+       load — so without this the nav header stayed unlit and ?p= stale, and
+       opening SHOP from its cartridge looked like a different place than pressing
+       SHOP in the header. Re-sync on the frame's own hash changes. */
+    try{ frame.contentWindow.addEventListener('hashchange',sync); }catch(e){}
+  });
 
   var lastRel=null;
   function sync(){
