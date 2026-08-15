@@ -96,15 +96,18 @@ box-shadow:0 0 22px color-mix(in srgb,var(--rc) 35%,transparent)}
 
 footer{padding:22px 14px 40px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
 .blip{position:fixed;opacity:0}
+.icsback{display:inline-block;font-family:'Press Start 2P',monospace;font-size:9px;color:#7a7a7a;text-decoration:none;border:1px solid #2a2a2a;padding:8px 12px;margin:0 0 16px 18px;position:relative;z-index:60}
+.icsback:hover{color:#b6ff00;border-color:#b6ff00}
 </style>
 </head>
 <body>
 <header>
-  <a href="../">ONLY<span class="red">IBEE</span> OS</a>
+  <a href="../console.html#menu" data-home>ONLY<span class="red">IBEE</span> OS</a>
   <span>CHARACTER FILE<br>ICS · BEEBEE</span>
 </header>
 
 <main>
+  <a class="icsback" href="../console.html#ics" data-back>◀ BACK</a>
   <div class="sys">// LOADING CHARACTER_</div>
 
   <div class="box">
@@ -207,7 +210,8 @@ footer{padding:22px 14px 40px;font-family:var(--px);font-size:8px;color:var(--di
   paint();
 })();
 </script>
-<script src="../assets/player.js?v=23"></script>
-<script src="/assets/stats-client.js?v=6"></script>
+<script src="../assets/player.js?v=24"></script>
+<script src="/assets/stats-client.js?v=7"></script>
+<script src="../assets/nav.js?v=1"></script>
 </body>
 </html>

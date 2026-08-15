@@ -436,7 +436,11 @@
     b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
     b.onclick=function(){ var tg=NAV_TGT[it.n];
       if(tg&&window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget(tg);
-      navigate(it.u); };
+      /* The CRT boot-in is for ARRIVING at the site, not for moving around it.
+         Now that pages have no back buttons, this bar is the only way between
+         sections — replaying the turn-on animation on every hop reads as
+         "another page opened" and is what made NETWORK → CONSOLE feel wrong. */
+      navigate(it.u,{noanim:true}); };
     navEl.appendChild(b);});
   /* A quiet proof of life on the permanent bar. The full community readout lives
      in NETWORK so the console screen stays uncluttered. */

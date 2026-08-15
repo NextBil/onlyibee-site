@@ -170,7 +170,6 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 </header>
 
 <main>
-  <div class="crumbs"><a href="#" data-back>◀ BACK TO THE SHOP_</a></div>
 
   <section class="marquee">
     <div class="bulbs" id="bulbs" aria-hidden="true"></div>
@@ -209,6 +208,17 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <script>
 (function(){
   "use strict";
+
+  /* Land at the TOP. Browsers restore the previous scroll offset on a
+     same-path navigation — and every product link is the same path with a
+     different ?id=, so arriving from the related strip at the bottom of one
+     piece could drop you halfway down the next one. Opting out of scroll
+     restoration and forcing 0 makes the landing position deterministic no
+     matter how the page was reached (in the shell frame or standalone).
+     The second call catches a late restore after images settle. */
+  try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
+  window.scrollTo(0,0);
+  window.addEventListener('load',function(){ window.scrollTo(0,0); });
   function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};

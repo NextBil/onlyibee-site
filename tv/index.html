@@ -56,7 +56,10 @@
   #hint .blink{animation:bk 1.1s steps(1) infinite}
   /* the set used to read "NO SIGNAL", which made people think it was broken.
      It's an invitation now: one button that drops you on a random transmission. */
-  #pressbtn{font-family:var(--px);font-size:clamp(13px,3.4vw,20px);letter-spacing:3px;
+  /* #hint is pointer-events:none (it was decorative "NO SIGNAL" text over the
+     tube). A button inside it inherits that and can never be clicked — re-enable
+     pointer events on the button itself, and only on the button. */
+  #pressbtn{pointer-events:auto;font-family:var(--px);font-size:clamp(13px,3.4vw,20px);letter-spacing:3px;
     color:#0a0a0a;background:var(--acid);border:0;padding:16px 30px;cursor:pointer;
     box-shadow:0 0 0 3px rgba(182,255,0,.25),0 0 26px rgba(182,255,0,.55);
     animation:presspulse 1.9s ease-in-out infinite}
@@ -100,7 +103,6 @@
 <body>
 <header>
   <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span>&nbsp;TV</a>
-  <a class="back" href="#" data-back>◀ CONSOLE</a>
 </header>
 <main>
   <div id="set">

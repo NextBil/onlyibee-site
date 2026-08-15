@@ -173,7 +173,6 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 </header>
 
 <main id="main">
-  <div class="crumbs"><a href="#" data-back>◀ BACK TO THE SHOP_</a></div>
   <div id="pwrap" style="width:100%;display:none;flex-direction:column;gap:14px;align-items:center">
     <div class="gal">
       <div class="big"><img id="bigimg" src="" alt=""><span class="rtag" id="rtag"></span><span class="claimtag" id="claimtag" style="display:none">CLAIMED</span></div>
@@ -200,7 +199,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     </section>
   </div>
   <div class="notfound" id="notfound" style="display:none">✕ PIECE NOT FOUND_<br><br>
-    <a class="back" href="#" data-back>◀ BACK TO THE SHOP</a></div>
+    <a class="back" href="../console.html#shop">◀ BACK TO THE SHOP</a></div>
 </main>
 
 <footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
@@ -211,6 +210,17 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <script>
 (function(){
   "use strict";
+
+  /* Land at the TOP. Browsers restore the previous scroll offset on a
+     same-path navigation — and every product link is the same path with a
+     different ?id=, so arriving from the related strip at the bottom of one
+     piece could drop you halfway down the next one. Opting out of scroll
+     restoration and forcing 0 makes the landing position deterministic no
+     matter how the page was reached (in the shell frame or standalone).
+     The second call catches a late restore after images settle. */
+  try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
+  window.scrollTo(0,0);
+  window.addEventListener('load',function(){ window.scrollTo(0,0); });
   var $=function(id){return document.getElementById(id);};
   function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};

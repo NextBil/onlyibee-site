@@ -181,13 +181,16 @@ footer{margin-top:20px;color:var(--dim);font-size:16px;text-align:center;padding
 @keyframes winflash{50%{color:var(--acid);text-shadow:0 0 24px rgba(182,255,0,.7),3px 3px 0 #000}}
 .banner img{height:120px;display:block;margin:0 auto 10px;
   filter:drop-shadow(0 0 18px rgba(182,255,0,.5))}
+.icsback{display:inline-block;font-family:'Press Start 2P',monospace;font-size:9px;color:#7a7a7a;text-decoration:none;border:1px solid #2a2a2a;padding:8px 12px;margin:0 0 16px 18px;position:relative;z-index:60}
+.icsback:hover{color:#b6ff00;border-color:#b6ff00}
 </style>
 </head>
 <body>
 <header>
-  <a href="../">ONLY<span class="r">IBEE</span> OS</a>
+  <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
   <span class="t">CHESS.EXE</span>
 </header>
+<a class="icsback" href="../console.html#ics" data-back>◀ BACK</a>
 
 <div class="title">ICS <span class="acid">♟</span> IBEE'S CHESS SET</div>
 <div class="sub">every piece is a character. tap one, then tap a glowing square_</div>
@@ -755,5 +758,6 @@ var FX=(function(){
 </script>
 <script src="../assets/player.js?v=24"></script>
 <script src="/assets/stats-client.js?v=7"></script>
+<script src="../assets/nav.js?v=1"></script>
 </body>
 </html>

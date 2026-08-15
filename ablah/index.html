@@ -59,11 +59,14 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim)}
 .card{width:min(360px,88vw);border:3px solid var(--rc);background:#fff;margin-top:6px;box-shadow:0 0 22px color-mix(in srgb,var(--rc) 35%,transparent)}
 .card img{width:100%;display:block}
 .cardcap{font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;letter-spacing:1px}
+.icsback{display:inline-block;font-family:'Press Start 2P',monospace;font-size:9px;color:#7a7a7a;text-decoration:none;border:1px solid #2a2a2a;padding:8px 12px;margin:0 0 16px 18px;position:relative;z-index:60}
+.icsback:hover{color:#b6ff00;border-color:#b6ff00}
 </style>
 </head>
 <body>
-<header><a href="../">ONLY<span class="red">IBEE</span> OS</a><span>CERTIFICATION.SYS</span></header>
+<header><a href="../console.html#menu" data-home>ONLY<span class="red">IBEE</span> OS</a><span>CERTIFICATION.SYS</span></header>
 <main>
+  <a class="icsback" href="../console.html#ics" data-back>◀ BACK</a>
   <div class="sys">// AUTHENTICITY CHECK_</div>
   <div class="box">
     <video id="v" autoplay muted loop playsinline></video>
@@ -93,7 +96,8 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim)}
   },2200);
 })();
 </script>
-<script src="../assets/player.js?v=23"></script>
-<script src="/assets/stats-client.js?v=6"></script>
+<script src="../assets/player.js?v=24"></script>
+<script src="/assets/stats-client.js?v=7"></script>
+<script src="../assets/nav.js?v=1"></script>
 </body>
 </html>
