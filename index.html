@@ -515,18 +515,11 @@
      sync() (where we can see the frame actually landed) rather than on popstate. */
 
   /* the API pages talk to (same-origin, so a plain property is enough) */
-  /* Where back would actually LAND. Some pages want a back button only for one
-     particular origin — TV and ROOMS show one when they were opened from the
-     console and stay clean when reached any other way — and "did I come from
-     the console" is not answerable from canBack() alone. */
-  function prev(){ return trail.length>1 ? trail[trail.length-2] : null; }
-
   window.IBEE_SHELL={
     navigate:function(u){ navigate(u); },
     home:function(){ navigate('console.html#menu',{noanim:true}); },
     back:back,
-    canBack:canBack,
-    prev:prev
+    canBack:canBack
   };
 
   /* Same reason as console.html: on a phone, reopening the site restores the

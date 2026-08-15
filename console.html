@@ -860,8 +860,13 @@ document.head.appendChild(_n);}}catch(e){}</script>
     b.style.display = cameFromScreen ? "" : "none";
   }
   function go(id,top){
-    if(id==="arcade"){blip(520,.05);location.href="arcade/";return;} // ROOMS is its own page (folder stays arcade/)
-    if(id==="tv"){blip(520,.05);location.href="tv/";return;}          // TV is its own page too
+    /* ROOMS and TV are their own pages. Leave a one-shot flag so they know a
+       MENU CARD opened them and can show a BACK button — arriving via the shell's
+       nav header must not, even from this very screen, because the header is
+       already the way out. nav.js consumes the flag on arrival. */
+    function fromMenu(){ try{ sessionStorage.setItem("ibee_frommenu","1"); }catch(e){} }
+    if(id==="arcade"){blip(520,.05);fromMenu();location.href="arcade/";return;} // ROOMS is its own page (folder stays arcade/)
+    if(id==="tv"){blip(520,.05);fromMenu();location.href="tv/";return;}          // TV is its own page too
     /* leaving the universe: clear the stale #playing hash, or the next hash event
        bounces the user straight back into the planets (the "menu loop") */
     if(id!=="music"&&/^#(playing|nowplaying)$/.test(location.hash)){
