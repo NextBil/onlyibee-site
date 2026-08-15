@@ -529,6 +529,11 @@
     prev:prev
   };
 
+  /* Same reason as console.html: on a phone, reopening the site restores the
+     scroll offset from last time and the main menu comes up half-way down.
+     Every page here decides its own landing position. */
+  try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
+
   /* first page: ?p= (deep-link/NFC) or the console */
   var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
   if(/^(https?:)?\/\//i.test(p)) p='console.html#menu';

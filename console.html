@@ -332,7 +332,10 @@
   /* ICS banner video + crew cards */
   .icsbanner{position:relative;width:100%;max-width:760px;border:2px solid var(--border);
     background:#000;overflow:hidden;margin:4px 0 22px;box-shadow:0 0 24px rgba(182,255,0,.12)}
-  .icsbanner video{width:100%;display:block}
+  /* 1280x428. Reserving the box matters: without it the video is 0-high until
+     metadata arrives, then pops and shifts the crew grid ~750px down the page —
+     which broke returning to a card position and read as lag. */
+  .icsbanner video{width:100%;display:block;aspect-ratio:1280/428;background:#000}
   .icsbanner .lbl{position:absolute;left:0;bottom:0;font-family:var(--px);font-size:8px;color:var(--acid);
     background:rgba(0,0,0,.7);padding:6px 9px;letter-spacing:1px}
   .crewhead{font-family:var(--px);font-size:12px;color:var(--acid);margin:26px 0 4px}
@@ -873,27 +876,35 @@ document.head.appendChild(_n);}}catch(e){}</script>
     if(t){
       t.classList.add("on");current=id;window.scrollTo(0,0);blip(220,.04);
       paintBack(id);
-      /* A #ics hash can restore an old scroll position after this function runs.
-         Reset once more after the screen animation so ICS always opens at its title
-         — UNLESS we are coming back off a character card, in which case land on
-         the row of cards the visitor tapped rather than scrolling them to a top
-         they already read past. nav.js leaves the flag; we consume it once. */
-      if(id==="ics")setTimeout(function(){
+
+      /* EVERY screen id doubles as a URL fragment (#menu, #shop, #ics…), so the
+         browser ALSO treats it as an anchor and scrolls the section into view on
+         its own — after this function has already reset to 0. That is why the
+         main menu opened ~45px down on phones. One scrollTo(0,0) cannot win the
+         race; reset again next frame and once past the screen animation. */
+      function topReset(){
+        window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;
+      }
+
+      /* …unless we are coming back off a character card, in which case land on
+         the row of cards the visitor tapped rather than the top they already
+         read past. nav.js leaves the flag; we consume it once. */
+      if(id==="ics"){
         var to=null; try{ to=sessionStorage.getItem('ibee_returnto'); sessionStorage.removeItem('ibee_returnto'); }catch(e){}
         var crew=to==="crew"&&document.querySelector("#ics .crew");
-        if(!crew){ window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0; return; }
-        /* Aim, then KEEP aiming. The ICS banner video and the card thumbnails
-           decode after this runs and move the grid by several hundred pixels —
-           a single scrollIntoView lands where the cards used to be. Re-align on
-           a short timer and stop as soon as the target holds still. */
-        var last=null, tries=0;
-        (function settle(){
-          var y=Math.round(crew.getBoundingClientRect().top+window.scrollY);
-          crew.scrollIntoView({block:"center"});
-          if(y===last || ++tries>8) return;      /* stable, or give up */
-          last=y; setTimeout(settle,150);
-        })();
-      },300);
+        if(crew){
+          /* Jump straight to the grid, NOW. The banner and the cards reserve
+             their boxes in CSS, so nothing moves after load — no timer to
+             outlast and no re-aiming. Both were tried; both just made the page
+             visibly crawl on the way back. */
+          crew.scrollIntoView({block:"start"});
+          window.scrollBy(0,-90);                /* leave the CREW heading in shot */
+        }else{
+          requestAnimationFrame(topReset); setTimeout(topReset,300);
+        }
+      }else{
+        requestAnimationFrame(topReset); setTimeout(topReset,300);
+      }
     }
     document.body.classList.toggle("musicfit", id==="music");  // music screen fills the viewport (no page scroll)
     if(id==="music"){ ENG.wake(); updateEngLock(); }
@@ -2077,6 +2088,11 @@ document.head.appendChild(_n);}}catch(e){}</script>
 
   /* arriving with a screen hash (#menu, #music, #shop…) skips the boot sequence
      (home buttons + the lyrics PLANETS button on sub-pages rely on this) */
+  /* Phones restore the previous scroll offset when the shell reloads, dropping
+     visitors into the middle of the main menu on arrival. The console decides
+     its own scroll position in go(); opt out of the browser's guess entirely. */
+  try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
+
   var _hash=location.hash.slice(1);
   var _live=(_hash==="playing"||_hash==="nowplaying"); // PLANETS button → drop into the live room
   if(_live)_hash="music";
