@@ -46,6 +46,19 @@
     }
   }catch(e){}
 
+  /* Did a console MENU CARD open this page? Read once per page load, because
+     wire() runs again on every refresh() and the flag is one-shot.
+     This is deliberately not "is the console behind me": arriving via the nav
+     header while standing on the menu also has the console behind it, and that
+     must NOT get a back button — the header is already the way out. Only the
+     menu card sets the flag (console.html's go(), the arcade/tv branches). */
+  var fromMenu=false;
+  try{
+    if(sessionStorage.getItem('ibee_frommenu')==='1'){
+      sessionStorage.removeItem('ibee_frommenu'); fromMenu=true;
+    }
+  }catch(e){}
+
   function wire(){
     var sh=shell();
 
@@ -53,13 +66,12 @@
     var backs=document.querySelectorAll('[data-back]');
     var can = sh ? !!sh.canBack() : (history.length>1);
     Array.prototype.forEach.call(backs,function(el){
-      /* `data-back-only="console.html"` — show ONLY when that is where back
-         would land. TV and ROOMS are reachable both from the console menu and
-         from the always-on nav header; they get a back button in the first case
-         (you stepped in from a menu, you expect a way out) and none in the
-         second (the header is already the way out). */
-      var only=el.getAttribute('data-back-only'), show=can;
-      if(show && only && sh) show = (sh.prev()||'').indexOf(only)===0;
+      /* `data-back-only="menu"` — show ONLY when a console menu card opened
+         this page. TV and ROOMS are reachable both ways; they get a back button
+         when you stepped in from the menu, and none when you jumped there from
+         the nav header (which is itself the way out). */
+      var show = can;
+      if(show && el.getAttribute('data-back-only')==='menu') show = fromMenu;
 
       /* visibility is re-evaluated on every refresh… */
       el.style.display = show ? '' : 'none';
