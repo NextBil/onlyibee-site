@@ -20,7 +20,7 @@ window.IBEE_PRODUCTS={
   {
    "id": "15-tshirts",
    "name": "14 T-SHIRTS",
-   "sub": "ONE OF ONE · PRINTED ONCE",
+   "sub": "PARIS 2026 · ONE OF ONE · PRINTED ONCE",
    "tint": "sdr",
    "hype": 0,
    "state": "soon",
