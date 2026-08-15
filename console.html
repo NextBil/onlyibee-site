@@ -874,8 +874,26 @@ document.head.appendChild(_n);}}catch(e){}</script>
       t.classList.add("on");current=id;window.scrollTo(0,0);blip(220,.04);
       paintBack(id);
       /* A #ics hash can restore an old scroll position after this function runs.
-         Reset once more after the screen animation so ICS always opens at its title. */
-      if(id==="ics")setTimeout(function(){window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;},300);
+         Reset once more after the screen animation so ICS always opens at its title
+         — UNLESS we are coming back off a character card, in which case land on
+         the row of cards the visitor tapped rather than scrolling them to a top
+         they already read past. nav.js leaves the flag; we consume it once. */
+      if(id==="ics")setTimeout(function(){
+        var to=null; try{ to=sessionStorage.getItem('ibee_returnto'); sessionStorage.removeItem('ibee_returnto'); }catch(e){}
+        var crew=to==="crew"&&document.querySelector("#ics .crew");
+        if(!crew){ window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0; return; }
+        /* Aim, then KEEP aiming. The ICS banner video and the card thumbnails
+           decode after this runs and move the grid by several hundred pixels —
+           a single scrollIntoView lands where the cards used to be. Re-align on
+           a short timer and stop as soon as the target holds still. */
+        var last=null, tries=0;
+        (function settle(){
+          var y=Math.round(crew.getBoundingClientRect().top+window.scrollY);
+          crew.scrollIntoView({block:"center"});
+          if(y===last || ++tries>8) return;      /* stable, or give up */
+          last=y; setTimeout(settle,150);
+        })();
+      },300);
     }
     document.body.classList.toggle("musicfit", id==="music");  // music screen fills the viewport (no page scroll)
     if(id==="music"){ ENG.wake(); updateEngLock(); }
