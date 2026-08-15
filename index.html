@@ -386,7 +386,16 @@
   @media(min-width:900px){
     /* the taller list is a LAPTOP affordance only — phones keep the 52vh they
        always had, which is tuned to leave the page visible behind the radio */
-    #tracklist{max-height:min(72vh,640px)}
+    /* 72vh swallowed the whole laptop screen. Half the viewport still gives room
+       to browse while leaving the page you were on visible behind it. */
+    #tracklist{max-height:min(50vh,430px);overflow:hidden}
+    /* `auto auto 1fr` + overflow:hidden is what makes each pane scroll ITSELF.
+       Without a sized row the panes grow to fit their content and the OUTER box
+       scrolls instead — the info panel measured 4085px tall and dragged the
+       whole radio with it. min-height:0 is required too: a grid/flex child
+       refuses to shrink below its content without it. */
+    #tracklist.open{grid-template-rows:auto auto 1fr}
+    #tlleft,#tlside{min-height:0;overflow-y:auto}
     /* HALF AND HALF, like a desktop music app: the tracks own the left, the
        record owns the right. The panel spans every row (1/-1) so it runs the
        full height of the open radio instead of starting below the search and
@@ -397,16 +406,21 @@
        on the row underneath, so their top edges line up. Spanning the panel from
        row 1 instead made it start level with the title while the tracks started
        below the shelf, which is why the two halves looked off. */
-    #tracklist .th,#tltools,#tlalbums,#roomband,#tlempty{grid-column:1 / -1}
-    #tlbody{grid-column:1;max-height:min(52vh,470px)}
+    /* Only the title bar and the search span the top — they act on the whole
+       radio. The album shelf belongs to the LEFT pane, so the info panel starts
+       LEVEL WITH THE SHELF instead of below it. #tlleft groups shelf + tracks
+       into one column, which puts the two panes on a single grid row without any
+       brittle row arithmetic. */
+    #tracklist .th,#tltools{grid-column:1 / -1}
+    #tlleft{grid-column:1;display:flex;flex-direction:column;min-height:0}
+    #tlbody{max-height:none;flex:1 1 auto;min-height:0}
     /* Bound it like the track column. Without a max-height the panel grew to fit
        its content and dragged the whole radio taller than its own limit, so the
        OUTER box scrolled instead of the panel. Each half now scrolls on its own,
        which is what makes the two sides feel like two panes rather than one long
        page. */
-    /* same row as the tracks, same height — two panes side by side */
-    #tlside{display:block;grid-column:2;align-self:stretch;
-      max-height:min(52vh,470px);overflow-y:auto;
+    /* same row as the shelf + tracks, same height — two panes side by side */
+    #tlside{display:block;grid-column:2;align-self:stretch;overflow-y:auto;
       border-left:1px solid hsla(var(--rh),var(--rs),55%,.28);padding:18px}
     /* it has room now, so the card can breathe at this size */
     #tlside #songinfoart{width:100%;height:auto;aspect-ratio:1;max-width:none}
@@ -490,11 +504,13 @@
       <!-- the shelf: albums as covers, straight under the search. Bigger art than
            the rows below because a cover is how people recognise a record. Tapping
            one filters the list to that album — it is a shortcut, not a new screen. -->
-      <div id="tlalbums"></div>
-      <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
-      <div id="tlbody"></div>
+      <div id="tlleft">
+        <div id="tlalbums"></div>
+        <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
+        <div id="tlbody"></div>
+        <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
+      </div>
       <aside id="tlside" aria-label="Now playing details"></aside>
-      <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
     </div>
     <div id="player">
       <div class="pl-top">
