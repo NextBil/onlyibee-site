@@ -128,9 +128,16 @@
     st.textContent =
       '#ibee-pulse{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0;'
         + 'transition:opacity .5s ease;'
-        + 'box-shadow:inset 0 0 calc(60px + var(--pulse,0)*90px) '
-        + 'hsla(var(--phue,75),95%,55%,calc(0.05 + var(--pulse,0)*0.16)),'
-        + 'inset 0 0 2px hsla(var(--phue,75),95%,65%,calc(var(--pulse,0)*0.18))}'
+        + 'box-shadow:inset 0 0 calc(38px + var(--pulse,0)*52px) '
+        + 'hsla(var(--phue,75),95%,55%,calc(0.030 + var(--pulse,0)*0.095)),'
+        + 'inset 0 0 2px hsla(var(--phue,75),95%,65%,calc(var(--pulse,0)*0.12))}'
+      /* On a phone the blur radius is a big fraction of the screen WIDTH, so an
+         edge glow sized for a laptop bleeds all the way into the middle and the
+         whole display looks lit. Same effect, tighter to the edges. */
+      + '@media(max-width:600px){#ibee-pulse{'
+        + 'box-shadow:inset 0 0 calc(20px + var(--pulse,0)*26px) '
+        + 'hsla(var(--phue,75),95%,55%,calc(0.022 + var(--pulse,0)*0.065)),'
+        + 'inset 0 0 2px hsla(var(--phue,75),95%,65%,calc(var(--pulse,0)*0.09))}}'
       + 'html.playing #ibee-pulse{opacity:1}'
       /* The brand mark is the one element on every page in the same place, so
          it carries the beat where you can actually see it — the edge wash alone
@@ -141,7 +148,7 @@
          on the older ones. */
       + 'header [data-home],header .brand,header>a:first-child{transition:text-shadow .12s linear}'
       + 'html.playing header [data-home],html.playing header .brand,html.playing header>a:first-child{'
-        + 'text-shadow:0 0 calc(4px + var(--pulse,0)*14px) hsla(var(--phue,75),95%,62%,calc(0.18 + var(--pulse,0)*0.45))}'
+        + 'text-shadow:0 0 calc(3px + var(--pulse,0)*10px) hsla(var(--phue,75),95%,62%,calc(0.13 + var(--pulse,0)*0.30))}'
       /* opt-in, for anything that wants to move with the record */
       + '[data-pulse]{transition:text-shadow .12s linear}'
       + 'html.playing [data-pulse]{'
