@@ -395,12 +395,16 @@
        whole radio with it. min-height:0 is required too: a grid/flex child
        refuses to shrink below its content without it. */
     #tracklist.open{grid-template-rows:auto auto 1fr}
-    #tlleft,#tlside{min-height:0;overflow-y:auto}
+    #tlleft,#tlside,#tlalbums{min-height:0;overflow-y:auto}
     /* HALF AND HALF, like a desktop music app: the tracks own the left, the
        record owns the right. The panel spans every row (1/-1) so it runs the
        full height of the open radio instead of starting below the search and
        shelf — which is what made it read as small and pushed down. */
-    #tracklist.open{display:grid;grid-template-columns:1fr 1fr;align-content:start}
+    /* albums · tracks · record. The info is a fixed side column, not a half:
+       the track list is what the radio is FOR, so it takes the growth. */
+    /* Symmetric side columns — equal weight left and right, which also centres
+       the track list between them without any centring rule of its own. */
+    #tracklist.open{display:grid;grid-template-columns:348px 1fr 348px;align-content:start}
     /* The title bar, search and album shelf run the FULL width across the top —
        they belong to the whole radio, not to the tracks. Both panes then begin
        on the row underneath, so their top edges line up. Spanning the panel from
@@ -412,21 +416,43 @@
        into one column, which puts the two panes on a single grid row without any
        brittle row arithmetic. */
     #tracklist .th,#tltools{grid-column:1 / -1}
-    #tlleft{grid-column:1;display:flex;flex-direction:column;min-height:0}
+    /* THREE panes: albums · tracks · the record. All three begin on the same row
+       under the search, and each scrolls on its own. */
+    /* two covers per row: at 300px a single column would blow each cover up to
+       full width, which is bigger than the artwork deserves next to the list */
+    #tlalbums{grid-column:1;display:grid;grid-template-columns:repeat(2,1fr);
+      align-content:start;overflow-x:hidden;overflow-y:auto;
+      min-height:0;border-right:1px solid hsla(var(--rh),var(--rs),55%,.28);border-bottom:0;
+      /* breathing room on the outer edge — the covers sat flush against the
+         screen edge, which reads as clipped rather than as a column */
+      padding:14px 14px 14px 44px;gap:12px}
+    #tlalbums .alb{width:100%}
+    #tlalbums .alb .ac{width:100%;height:auto;aspect-ratio:1}
+    #tlalbums .alb .an{white-space:normal;font-size:6.5px;line-height:1.45}
+    #tlleft{grid-column:2;display:flex;flex-direction:column;min-height:0}
+    #tlside{grid-column:3}
     #tlbody{max-height:none;flex:1 1 auto;min-height:0}
+    /* Centre the songs inside their column. In GRID view the tiles get a fixed
+       width and the block is centred, so a part-full last row sits under the
+       middle of the others instead of hugging the left edge. In LIST view the
+       rows are capped and auto-margined — full-width rows across 760px left the
+       text stranded far from the covers. */
+    #tlbody.grid{grid-template-columns:repeat(auto-fill,124px);justify-content:center}
+    #tlbody:not(.grid){max-width:600px;margin-left:auto;margin-right:auto;width:100%}
     /* Bound it like the track column. Without a max-height the panel grew to fit
        its content and dragged the whole radio taller than its own limit, so the
        OUTER box scrolled instead of the panel. Each half now scrolls on its own,
        which is what makes the two sides feel like two panes rather than one long
        page. */
     /* same row as the shelf + tracks, same height — two panes side by side */
-    #tlside{display:block;grid-column:2;align-self:stretch;overflow-y:auto;
+    #tlside{display:block;align-self:stretch;overflow-y:auto;
       border-left:1px solid hsla(var(--rh),var(--rs),55%,.28);padding:18px}
     /* it has room now, so the card can breathe at this size */
+    #tlside{padding:16px 24px 16px 16px}
     #tlside #songinfoart{width:100%;height:auto;aspect-ratio:1;max-width:none}
     #tlside #songinfotop{display:block}
-    #tlside #songinfoname{font-size:20px;margin-top:12px}
-    #tlside #songinfocopy{font-size:17px}
+    #tlside #songinfoname{font-size:16px;margin-top:10px}
+    #tlside #songinfocopy{font-size:16px}
     #tlbody .nfo{display:none}          /* the panel replaces it */
     /* the card is no longer a dialog here — it is just the panel's content */
     #tlside #songinfocard{width:auto;max-height:none;border:0;padding:0;box-shadow:none;background:transparent}
@@ -504,8 +530,8 @@
       <!-- the shelf: albums as covers, straight under the search. Bigger art than
            the rows below because a cover is how people recognise a record. Tapping
            one filters the list to that album — it is a shortcut, not a new screen. -->
+      <div id="tlalbums"></div>
       <div id="tlleft">
-        <div id="tlalbums"></div>
         <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
         <div id="tlbody"></div>
         <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
@@ -553,7 +579,7 @@
     </div>
   </div>
 
-  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div><div id="songinfocopy"></div></section></div>
+  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocopy"></div><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div></section></div>
 </div>
 
 <!-- PRESS START intro overlay -->
