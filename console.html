@@ -6,8 +6,8 @@
 <title>ONLY IBEE — a creative dude</title>
 <meta name="description" content="Only Ibee is a creative dude born in Ivory Coast and raised in Paris. Music, art, and unexpected creations — human-made work filled with intention and philosophy, connecting Paris, Toronto, and beyond. An engine for art and discovery.">
 <!-- ===== favicon (bishop 1) ===== -->
-<link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
-<link rel="shortcut icon" type="image/png" href="/assets/img/favicon-utopie.png">
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <meta name="theme-color" content="#070707">
 <!-- ===== social / metadata ===== -->
@@ -110,7 +110,7 @@
   body.network-quiet #networktab{display:none}
   body.musicfit #networkbar,body.musicfit #networktab{display:none}
   @media(max-width:560px){#networkbar{gap:8px;font-size:7px}#networkbar .netmetric:nth-of-type(1),#networkbar .netmetric:nth-of-type(4){display:none}}
-  main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:26px 18px 90px}
+  main{flex:1;width:100%;max-width:980px;margin:0 auto;padding:26px 18px 34px}
 
   /* ---------- Screens ---------- */
   .screen{display:none;animation:crtin .25s ease-out}
@@ -199,13 +199,21 @@
     background:transparent;color:var(--dim);border:1px solid var(--border)}
   #englock .egclose:hover{color:var(--red);border-color:#3a1414}
   .engnav{display:flex;align-items:center;flex-wrap:wrap;gap:8px;position:relative;z-index:40}
+  /* the way back out of a galaxy — neon so it is findable over the starfield */
+  .engnav .back{border-color:var(--acid);color:var(--acid);
+    box-shadow:0 0 10px rgba(182,255,0,.20),inset 0 0 8px rgba(182,255,0,.06)}
+  .engnav .back:hover{box-shadow:0 0 20px rgba(182,255,0,.42),inset 0 0 10px rgba(182,255,0,.10)}
   /* ===== universe search — records / albums / vibes, arcade style ===== */
   #uniseek{position:relative;flex:1;min-width:180px;margin-bottom:22px}
   body.musicfit #uniseek{margin-bottom:0}
   /* 16px minimum or iOS zooms the whole page when the input is focused */
-  #uniseek input{width:100%;background:#0a0a0a;border:1px solid var(--border);color:var(--acid);
-    font-family:var(--vt);font-size:18px;padding:8px 12px;letter-spacing:1px;outline:none}
-  #uniseek input:focus{border-color:var(--acid);box-shadow:0 0 14px rgba(182,255,0,.25)}
+  /* Neon border at rest, not only on focus — against the black starfield a
+     grey 1px box disappears and people never find the search at all. */
+  #uniseek input{width:100%;background:#0a0a0a;border:1px solid var(--acid);color:var(--acid);
+    font-family:var(--vt);font-size:18px;padding:8px 12px;letter-spacing:1px;outline:none;
+    box-shadow:0 0 10px rgba(182,255,0,.20),inset 0 0 8px rgba(182,255,0,.06)}
+  #uniseek input:focus{border-color:var(--acid);
+    box-shadow:0 0 20px rgba(182,255,0,.42),inset 0 0 10px rgba(182,255,0,.10)}
   #uniseek input::placeholder{color:#4a4a4a}
   #usr{position:absolute;left:0;right:0;top:100%;background:rgba(0,0,0,.96);border:1px solid var(--acid);
     border-top:0;display:none;max-height:46vh;overflow-y:auto;z-index:41}
@@ -533,7 +541,10 @@
      remaining items are pinned by column — without that, auto-placement would
      slide SUPPORT into column 1 and it would no longer be centred. */
   footer{
-    position:fixed;bottom:0;left:0;right:0;z-index:100;
+    /* Sits at the END of the document, not pinned over it. #os is a flex column
+       with min-height:100dvh, so on a short screen it still lands at the bottom
+       of the viewport; on a long one you scroll to it, which is the point. */
+    position:relative;z-index:100;
     display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
     padding:10px 18px;background:#000;border-top:2px solid var(--border);
     font-family:var(--px);font-size:9px;color:var(--dim);
@@ -552,6 +563,47 @@
     footer{padding:8px 10px;gap:8px;font-size:7px}
     footer .support{font-size:7px;padding:5px 8px}
   }
+
+  /* the ICS teaser strip above the inventory — a banner, deliberately not a hero */
+  .shopreel{max-width:760px;margin:2px 0 20px;border:2px solid var(--border);overflow:hidden;
+    background:#000;box-shadow:0 0 22px rgba(182,255,0,.10)}
+  .shopreel video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+  @media(max-width:600px){ .shopreel{margin-bottom:14px} }
+
+  /* ABOUT opens on the loop with the statement laid over it. The gradient is what
+     keeps the text readable — the footage underneath is bright and moves. */
+  .conreel{position:relative;max-width:760px;margin:2px 0 22px;border:2px solid var(--border);
+    overflow:hidden;background:#000;box-shadow:0 0 22px rgba(182,255,0,.10)}
+  .conreel video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+  .conreel .reeltxt{position:absolute;left:0;right:0;bottom:0;margin:0;padding:26px 20px 16px;
+    font-family:var(--vt);font-size:19px;line-height:1.45;color:#f0f0f0;
+    text-shadow:0 2px 10px rgba(0,0,0,.95);
+    background:linear-gradient(180deg,transparent,rgba(0,0,0,.55) 42%,rgba(0,0,0,.88))}
+  @media(max-width:600px){
+    .conreel video{aspect-ratio:4/3}
+    .conreel .reeltxt{font-size:16px;padding:20px 14px 12px}
+  }
+
+  /* fullscreen chip for the engine — only exists while the MUSIC screen is up */
+  #fstog{position:fixed;top:calc(50px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+    z-index:801;font-size:14px;line-height:1;display:none;
+    color:var(--dim);border:1px solid var(--border);background:rgba(0,0,0,.7);
+    padding:6px 8px;cursor:pointer;user-select:none}
+  body.musicfit #fstog{display:block}
+  #fstog:hover,#fstog.on{color:var(--acid);border-color:var(--acid)}
+
+  /* ---- ABOUT videos ----
+     controls + preload="none": these are things you choose to watch, not loops,
+     so they cost nothing until pressed. hydrateScreen gives them their src when
+     ABOUT opens, and the autoplay it does elsewhere is harmless on a paused
+     video with controls — the browser refuses to start an unmuted one anyway. */
+  .vquote,.vfilm{max-width:640px;margin:16px 0 18px;border:2px solid var(--border);
+    background:#000;overflow:hidden;position:relative}
+  .vquote video,.vfilm video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+  .vquote figcaption{padding:14px 16px;font-family:var(--vt);font-size:20px;line-height:1.4;
+    color:var(--ink);border-top:2px solid var(--border);
+    background:linear-gradient(180deg,rgba(182,255,0,.05),transparent)}
+  @media(max-width:600px){ .vquote figcaption{font-size:17px;padding:12px} }
 </style>
 </head>
 <body class="crt flicker">
@@ -578,11 +630,12 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
 
 <!-- ============ OS ============ -->
 <div id="os">
+<div id="fstog" title="fullscreen">⛶</div>
   <header>
     <div class="brand" id="brand" data-go="menu">ONLY<span class="red">IBEE</span>&nbsp;OS</div>
     <div class="sys">v1.1 // engine for art &amp; discovery<br><span id="clock"></span></div>
   </header>
-  <div id="networkbar" aria-label="Community data"><a class="netlabel" href="stats/">NETWORK</a><span class="netmetric"><b data-net="population">—</b> VISITORS</span><span class="netmetric"><b data-net="signals">—</b> LISTENERS</span><span class="netmetric"><b data-net="citizens">—</b> CITIZENS</span><span class="netmetric"><b data-net="entrances">—</b> PLAYS</span><a class="netgo" href="stats/">OPEN ↗</a></div>
+  <div id="networkbar" aria-label="Community data"><a class="netlabel" href="stats/">NETWORK</a><span class="netmetric"><b data-net="population">—</b> VISITORS</span><span class="netmetric"><b data-net="signals">—</b> LISTENERS</span><span class="netmetric"><b data-net="citizens">—</b> MEMBERS</span><span class="netmetric"><b data-net="entrances">—</b> PLAYS</span><a class="netgo" href="stats/">OPEN ↗</a></div>
   <a id="networktab" href="stats/">NETWORK ↗</a>
 
   <main>
@@ -684,7 +737,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     <!-- ICS -->
     <section class="screen" id="ics">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle"><span class="mico" style="width:74px;height:74px"><span class="sp"><img src="assets/chess/bishop2.png" alt=""></span></span>ICS<span class="red"> = IBEE'S CHESS SET</span></div>
+      <div class="scrtitle"><span class="mico" style="width:74px;height:74px"><span class="sp"><img data-src="assets/chess/bishop2.png" alt=""></span></span>ICS<span class="red"> = IBEE'S CHESS SET</span></div>
       <div class="scrsub">project 03 // characters</div>
       <div class="icsbanner">
         <video data-src="assets/ics-banner.mp4" poster="assets/ics-banner-poster.jpg" muted loop playsinline preload="none"></video>
@@ -698,15 +751,15 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         <div class="crewhead">// MEET THE CREW_</div>
         <div class="crewsub">tap a card to open their file &amp; games_</div>
         <div class="crew">
-          <a href="nannan/"><span class="ph"><img src="assets/cards/nannan.png" alt="NanNan" loading="lazy"></span><span class="cn">NANNAN<span class="rr">KING</span></span></a>
-          <a href="ablah/"><span class="ph"><img src="assets/cards/abla.png" alt="Abla" loading="lazy"></span><span class="cn">ABLA<span class="rr">QUEEN</span></span></a>
-          <a href="beebee/"><span class="ph"><img src="assets/cards/beebee.png" alt="Beebee" loading="lazy"></span><span class="cn">BEEBEE<span class="rr">BISHOP</span></span></a>
-          <a href="swordy/"><span class="ph"><img src="assets/cards/swordy.png" alt="Swordy" loading="lazy"></span><span class="cn">SWORDY<span class="rr">KNIGHT</span></span></a>
-          <a href="sworda/"><span class="ph"><img src="assets/cards/sworda.png" alt="Sworda" loading="lazy"></span><span class="cn">SWORDA<span class="rr">KNIGHT</span></span></a>
-          <a href="mimi/"><span class="ph"><img src="assets/cards/mimi.png" alt="Mimi" loading="lazy"></span><span class="cn">MIMI<span class="rr">TOWER</span></span></a>
-          <a href="goli/"><span class="ph"><img src="assets/cards/goli.png" alt="Goli" loading="lazy"></span><span class="cn">GOLI<span class="rr">PON</span></span></a>
+          <a href="nannan/"><span class="ph"><img data-src="assets/cards/nannan.png" alt="NanNan"></span><span class="cn">NANNAN<span class="rr">KING</span></span></a>
+          <a href="ablah/"><span class="ph"><img data-src="assets/cards/abla.png" alt="Abla"></span><span class="cn">ABLA<span class="rr">QUEEN</span></span></a>
+          <a href="beebee/"><span class="ph"><img data-src="assets/cards/beebee.png" alt="Beebee"></span><span class="cn">BEEBEE<span class="rr">BISHOP</span></span></a>
+          <a href="swordy/"><span class="ph"><img data-src="assets/cards/swordy.png" alt="Swordy"></span><span class="cn">SWORDY<span class="rr">KNIGHT</span></span></a>
+          <a href="sworda/"><span class="ph"><img data-src="assets/cards/sworda.png" alt="Sworda"></span><span class="cn">SWORDA<span class="rr">KNIGHT</span></span></a>
+          <a href="mimi/"><span class="ph"><img data-src="assets/cards/mimi.png" alt="Mimi"></span><span class="cn">MIMI<span class="rr">TOWER</span></span></a>
+          <a href="goli/"><span class="ph"><img data-src="assets/cards/goli.png" alt="Goli"></span><span class="cn">GOLI<span class="rr">PON</span></span></a>
         </div>
-        <p><img src="assets/img/ics-all-set.jpg" alt="ICS — the full 3D chess set" loading="lazy"
+        <p><img data-src="assets/img/ics-all-set.jpg" alt="ICS — the full 3D chess set"
           onerror="this.onerror=null;this.src='ics 3d all set_.png';"
           style="width:100%;max-width:660px;display:block;border:2px solid var(--border);box-shadow:0 0 24px rgba(182,255,0,.15)"></p>
         <p style="color:var(--dim);font-size:17px;margin-top:-8px">ICS — THE FULL SET ♟ every character, one board_</p>
@@ -721,14 +774,21 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
             <div class="vcap"><b>SCAN THE SHIRT</b><span>every piece has a chip inside — tap your phone on it and it unlocks the universe_</span></div></div>
         </div>
         <div class="crew" id="icsproc">
-          <a href="assets/img/ics-process/process-sketches-spread.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketches-spread.jpg" alt="first pen sketches" loading="lazy"></span><span class="cn">SKETCHES<span class="rr">PEN</span></span></a>
-          <a href="assets/img/ics-process/process-sketch-kings-mask.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-kings-mask.jpg" alt="King NanNan and the mask" loading="lazy"></span><span class="cn">NANNAN<span class="rr">PEN</span></span></a>
-          <a href="assets/img/ics-process/process-sketch-eiffel-knight.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-eiffel-knight.jpg" alt="Eiffel tower knight sketch" loading="lazy"></span><span class="cn">KNIGHT<span class="rr">PEN</span></span></a>
-          <a href="assets/img/ics-process/process-sketch-hippo-knight.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-hippo-knight.jpg" alt="hippo knight sketch — Baoulé mythology" loading="lazy"></span><span class="cn">HIPPO<span class="rr">PEN</span></span></a>
-          <a href="assets/img/ics-process/process-sketch-beebee.jpg"><span class="ph"><img src="assets/img/ics-process/process-sketch-beebee.jpg" alt="Beebee sketch — Mimi's brother" loading="lazy"></span><span class="cn">BEEBEE<span class="rr">PEN</span></span></a>
-          <a href="assets/img/ics-process/process-photoshop-mask.jpg"><span class="ph"><img src="assets/img/ics-process/process-photoshop-mask.jpg" alt="inking the mask in photoshop" loading="lazy"></span><span class="cn">INKING<span class="rr">PSD</span></span></a>
-          <a href="assets/img/ics-process/process-photoshop-swordy.jpg"><span class="ph"><img src="assets/img/ics-process/process-photoshop-swordy.jpg" alt="Swordy and Sworda in color" loading="lazy"></span><span class="cn">SWORDY+A<span class="rr">PSD</span></span></a>
-          <a href="assets/img/ics-process/process-beebee-final.jpg"><span class="ph"><img src="assets/img/ics-process/process-beebee-final.jpg" alt="Beebee final card" loading="lazy"></span><span class="cn">BEEBEE<span class="rr">FINAL</span></span></a>
+          <a href="assets/img/ics-process/process-sketches-spread.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-sketches-spread.jpg" alt="first pen sketches"></span><span class="cn">SKETCHES<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-kings-mask.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-sketch-kings-mask.jpg" alt="King NanNan and the mask"></span><span class="cn">NANNAN<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-eiffel-knight.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-sketch-eiffel-knight.jpg" alt="Eiffel tower knight sketch"></span><span class="cn">KNIGHT<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-hippo-knight.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-sketch-hippo-knight.jpg" alt="hippo knight sketch — Baoulé mythology"></span><span class="cn">HIPPO<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-sketch-beebee.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-sketch-beebee.jpg" alt="Beebee sketch — Mimi's brother"></span><span class="cn">BEEBEE<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/process-photoshop-mask.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-photoshop-mask.jpg" alt="inking the mask in photoshop"></span><span class="cn">INKING<span class="rr">PSD</span></span></a>
+          <a href="assets/img/ics-process/process-photoshop-swordy.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-photoshop-swordy.jpg" alt="Swordy and Sworda in color"></span><span class="cn">SWORDY+A<span class="rr">PSD</span></span></a>
+          <a href="assets/img/ics-process/process-beebee-final.jpg"><span class="ph"><img data-src="assets/img/ics-process/process-beebee-final.jpg" alt="Beebee final card"></span><span class="cn">BEEBEE<span class="rr">FINAL</span></span></a>
+          <a href="assets/img/ics-process/sketch-01.jpg"><span class="ph"><img data-src="assets/img/ics-process/sketch-01.jpg" alt="ICS process sketch 1"></span><span class="cn">STUDY<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/sketch-02.jpg"><span class="ph"><img data-src="assets/img/ics-process/sketch-02.jpg" alt="ICS process sketch 2"></span><span class="cn">LAYOUT<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/sketch-03.jpg"><span class="ph"><img data-src="assets/img/ics-process/sketch-03.jpg" alt="ICS process sketch 3"></span><span class="cn">BOARD<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/sketch-04.jpg"><span class="ph"><img data-src="assets/img/ics-process/sketch-04.jpg" alt="ICS process sketch 4"></span><span class="cn">PIECES<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/sketch-05.jpg"><span class="ph"><img data-src="assets/img/ics-process/sketch-05.jpg" alt="ICS process sketch 5"></span><span class="cn">CREW<span class="rr">PEN</span></span></a>
+          <a href="assets/img/ics-process/sketch-06.jpg"><span class="ph"><img data-src="assets/img/ics-process/sketch-06.jpg" alt="ICS process sketch 6"></span><span class="cn">COLOUR<span class="rr">PSD</span></span></a>
+          <a href="assets/img/ics-process/sketch-07.jpg"><span class="ph"><img data-src="assets/img/ics-process/sketch-07.jpg" alt="ICS process sketch 7"></span><span class="cn">SET<span class="rr">FINAL</span></span></a>
         </div>
         <p class="red" style="margin-top:16px">// PARIS FALL 2025</p>
       </div>
@@ -739,6 +799,9 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       <span class="back" data-go="menu">◀ BACK</span>
       <div class="scrtitle"><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='%23b6ff00' stroke='%23223300' stroke-width='.5'/%3E%3Crect x='6.6' y='7' width='2.8' height='2.8' fill='%23ff2b2b'/%3E%3Cpath d='M6.4 2.2 A1.8 1.8 0 0 0 9.6 2.2' fill='%23070707'/%3E%3C/svg%3E" alt="tee" style="transform:translateZ(3.2px)"></span></span>INVENTORY<span class="acid">.EXE</span></div>
       <div class="scrsub">each item is unique, made only once_</div>
+      <!-- teaser loop. data-src + hydrateScreen: 3MB must not ride on every
+           console load, only on the visit that actually opens the shop. -->
+      <div class="shopreel"><video data-src="assets/video/ics-teaser.mp4" muted loop playsinline preload="none" aria-label="Ibee wearing ICS"></video></div>
       <div class="rarity-legend">
         <span class="rl r-c">■ COMMON</span><span class="rl r-sr">■ SUPER RARE</span><span class="rl r-sdr">■ SUPER DUPER RARE</span><span class="rl r-leg">■ LEGENDARY</span>
       </div>
@@ -749,7 +812,13 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     <!-- ABOUT -->
     <section class="screen" id="about">
       <span class="back" data-go="menu">◀ BACK</span>
-      <div class="scrtitle"><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="cartridge" style="transform:translateZ(3.2px)"></span></span>ABOUT<span class="acid">.TXT</span></div>
+      
+      <div class="conreel">
+        <video data-src="assets/video/radio-loop.mp4" muted loop playsinline preload="none" aria-label="ONLY IBEE"></video>
+        <p class="reeltxt">Explore the intersection of art and philosophy. As an artist, I am committed to
+          preserving the meaning and value of my work, ensuring that each piece is a timeless masterpiece.</p>
+      </div>
+<div class="scrtitle"><span class="mico"><span class="o3"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-3.2px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(-0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(0.6px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="" style="transform:translateZ(1.9px);filter:brightness(.45)"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 1.5 H13.5 V14.5 H4.5 L2.5 12.5 Z' fill='%23ff2b2b' stroke='%23400000' stroke-width='.6'/%3E%3Crect x='4.4' y='3.2' width='7.2' height='4.6' fill='%23b6ff00'/%3E%3Crect x='5.2' y='4.1' width='5.6' height='1' fill='%23070707'/%3E%3Crect x='5.2' y='5.8' width='3.4' height='1' fill='%23070707'/%3E%3Crect x='5' y='9.4' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='10.8' width='6' height='.8' fill='%23991111'/%3E%3Crect x='5' y='12.2' width='6' height='.8' fill='%23991111'/%3E%3C/svg%3E" alt="cartridge" style="transform:translateZ(3.2px)"></span></span>ABOUT<span class="acid">.TXT</span></div>
       <div class="scrsub">readme_</div>
       <div class="prose">
         <!-- the face behind it — self-hosted copy of the YouTube channel avatar
@@ -760,7 +829,12 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         </figure>
         <p>ONLY IBEE — a creative dude. Born in Ivory Coast, grew up in Paris. Still mind-blown by just being alive and conscious — seriously, whaaat?</p>
         <p>A versatile and curious artist who finds joy in both creation and exploration. With a passion for philosophy, I enjoy diving into deep thoughts and concepts — exploring the intersection of art and philosophy, committed to preserving the meaning and value of every piece.</p>
-        <p>When I'm feeling down, recording music turns me into the happiest person alive.</p>
+        <!-- the line now lives ON the footage rather than beside it -->
+        <figure class="vquote">
+          <video data-src="assets/video/alive.mp4" muted loop playsinline preload="none"
+                 aria-label="recording music"></video>
+          <figcaption>When I'm feeling down, recording music turns me into the happiest person alive.</figcaption>
+        </figure>
         <p>Human-made work filled with intention, connecting Paris, Toronto, and beyond — for those who seek something real and meaningful. This site is an engine for art and discovery. Scan a tag, enter the zone. Not everything is where you can see it.</p>
         <div style="clear:both"></div>
       </div>
@@ -787,6 +861,10 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         </a>
       </div>
       <div class="scrtitle" style="margin-top:34px;font-size:13px">VIDEOS<span class="red">.DIR</span></div>
+      <figure class="vfilm">
+        <video data-src="assets/video/shortfilm.mp4" muted loop playsinline preload="none"
+               aria-label="short film"></video>
+      </figure>
       <ul class="clinks">
         <li><a href="https://www.youtube.com/watch?v=7F42hEzB44M" target="_blank" rel="noopener">TOUJOURS / JE NE REGRETTE RIEN →</a></li>
         <li><a href="https://www.youtube.com/watch?v=hMkh-wA1kvo" target="_blank" rel="noopener">FUYEZ! (COURT MÉTRAGE) →</a></li>
@@ -816,7 +894,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         <li><a href="mailto:contact@onlyibee.com">EMAIL → CONTACT@ONLYIBEE.COM</a></li>
         <li><a href="https://www.instagram.com/onlyibee/" target="_blank" rel="noopener">INSTAGRAM → @ONLYIBEE</a></li>
       </ul>
-      <a class="aboutnet" href="stats/">NETWORK DATA ↗ <span><b data-net="population">—</b> VISITORS · <b data-net="signals">—</b> LISTENERS · <b data-net="citizens">—</b> CITIZENS · <b data-net="entrances">—</b> PLAYS</span></a>
+      <a class="aboutnet" href="stats/">NETWORK DATA ↗ <span><b data-net="population">—</b> VISITORS · <b data-net="signals">—</b> LISTENERS · <b data-net="citizens">—</b> MEMBERS · <b data-net="entrances">—</b> PLAYS</span></a>
     </section>
   </main>
 
@@ -961,16 +1039,14 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
      work. ROOMS and TV are their own documents, not hashes, so they still go
      straight through (go() handles the hand-off and the from-menu flag). */
   var userStep=false;
-  /* Screens the shell's nav header can reach are TOP-LEVEL destinations. Opening
-     SHOP or ICS from its cartridge must feel identical to pressing SHOP or ICS in
-     the header — same screen, no extra in-console BACK making it look like a
-     sub-page you opened inside something else. Screens the header cannot reach
-     (ABOUT, UTOPIE, LA ZONE, MUSIC) are steps in, and keep their BACK. */
-  var TOPLEVEL={menu:1,shop:1,ics:1};
+  /* A cartridge is a step IN — it gets a BACK to the menu, exactly like ROOMS
+     and TV do. Arriving via the shell's nav header is a top-level landing and
+     gets none (the header is already the way out). Same rule, both routes:
+     what decides is how you came, not which screen it is. */
   function navTo(id){
     if(id==="arcade"||id==="tv"){ go(id); return; }        /* own pages */
-    if(location.hash.slice(1)===id){ go(id,!!TOPLEVEL[id]); return; }
-    userStep=!TOPLEVEL[id];                                 /* → go(id,top) via hashchange */
+    if(location.hash.slice(1)===id){ go(id); return; }      /* already there */
+    userStep=true;                                          /* → go(id,false) via hashchange */
     location.hash=id;
   }
   document.addEventListener("click",function(e){
@@ -1158,6 +1234,14 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     });
     Array.prototype.forEach.call(t.querySelectorAll("video[data-poster]"),function(el){
       el.poster=el.dataset.poster; el.removeAttribute("data-poster");
+    });
+    /* deferred autoplay loops (the shop teaser): fetch and start on first open */
+    Array.prototype.forEach.call(t.querySelectorAll("video[data-src]"),function(el){
+      el.src=el.dataset.src; el.removeAttribute("data-src");
+      /* start anything muted — that is exactly what browsers permit unattended.
+         The controls stay so the visitor can unmute; a short film with sound
+         cannot legally autostart, so it begins muted and looping instead. */
+      if(el.muted){ var pr=el.play(); if(pr&&pr.catch) pr.catch(function(){}); }
     });
   }
 
@@ -2236,5 +2320,23 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
 })();
 </script>
 <script src="/assets/pulse.js?v=1"></script>
+
+<script>
+/* fullscreen chip — identical to the one in the transit/terrarium/aqua rooms.
+   Hides itself where the API is missing (iPhone Safari refuses it on non-video). */
+(function(){
+  var b=document.getElementById('fstog'),d=document.documentElement;
+  var req=d.requestFullscreen||d.webkitRequestFullscreen;
+  if(!b)return; if(!req){b.style.display='none';return}
+  function on(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
+  function upd(){b.classList.toggle('on',on());b.textContent=on()?'✕':'⛶';b.title=on()?'exit fullscreen':'fullscreen'}
+  b.addEventListener('click',function(){
+    if(on()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+    else{try{req.call(d)}catch(e){}}
+  });
+  document.addEventListener('fullscreenchange',upd);
+  document.addEventListener('webkitfullscreenchange',upd);
+})();
+</script>
 </body>
 </html>

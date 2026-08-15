@@ -64,9 +64,17 @@
   #dlg .body{font-size:21px;line-height:1.25;color:#d9ffd0;min-height:44px;white-space:pre-wrap}
   #dlg .foot{margin-top:8px;font-family:var(--px);font-size:7px;color:var(--dim);text-align:right;animation:blink 1.1s steps(2) infinite}
   @keyframes blink{50%{opacity:.15}}
+
+  /* fullscreen chip — laptop mainly; matches the other rooms */
+  #fstog{position:fixed;top:calc(50px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+    z-index:801;font-size:14px;line-height:1;
+    color:var(--dim,#7a7a7a);border:1px solid var(--border,#2a2a2a);background:rgba(0,0,0,.7);
+    padding:6px 8px;cursor:pointer;user-select:none}
+  #fstog:hover,#fstog.on{color:var(--acid,#b6ff00);border-color:var(--acid,#b6ff00)}
 </style>
 </head>
 <body>
+<div id="fstog" title="fullscreen">⛶</div>
 <div id="wrap"><div id="stage"><canvas id="bg"></canvas><canvas id="fx"></canvas></div></div>
 <a class="back" href="../">◀ ROOMS</a>
 <div id="np"><span class="dot" id="npdot"></span><span id="npname">RADIO OFF — TAP THE VINYL DECK</span></div>
@@ -1182,5 +1190,23 @@ window.loop=function(){frame(performance.now())};
 window.BEDROOM={click:doClick,go:goScene,cam:camT,focus:focusOn,unfocus:unfocus};
 </script>
 <script src="/assets/stats-client.js?v=7"></script>
+
+<script>
+/* fullscreen chip — identical to the one in the transit/terrarium/aqua rooms.
+   Hides itself where the API is missing (iPhone Safari refuses it on non-video). */
+(function(){
+  var b=document.getElementById('fstog'),d=document.documentElement;
+  var req=d.requestFullscreen||d.webkitRequestFullscreen;
+  if(!b)return; if(!req){b.style.display='none';return}
+  function on(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
+  function upd(){b.classList.toggle('on',on());b.textContent=on()?'✕':'⛶';b.title=on()?'exit fullscreen':'fullscreen'}
+  b.addEventListener('click',function(){
+    if(on()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+    else{try{req.call(d)}catch(e){}}
+  });
+  document.addEventListener('fullscreenchange',upd);
+  document.addEventListener('webkitfullscreenchange',upd);
+})();
+</script>
 </body>
 </html>

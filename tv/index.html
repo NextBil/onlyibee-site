@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>IBEE TV — ONLYIBEE</title>
-<link rel="icon" type="image/png" href="/assets/img/favicon-utopie.png">
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <meta name="theme-color" content="#070707">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -101,6 +101,17 @@
 
 .mback{display:inline-block;font-family:'Press Start 2P',monospace;font-size:9px;color:#7a7a7a;text-decoration:none;border:1px solid #2a2a2a;padding:8px 12px;margin:0 0 14px 18px;position:relative;z-index:60;cursor:pointer}
 .mback:hover{color:#b6ff00;border-color:#b6ff00}
+
+  /* Fullscreen applies to #screenwrap, so the <iframe> is never re-created and
+     playback survives entering AND leaving. Reassigning yt.src here would reload
+     the embed and stop the video, which is exactly the bug this avoids. */
+  #tvfs{position:absolute;right:10px;top:10px;z-index:30;width:34px;height:34px;
+    font-size:15px;line-height:1;cursor:pointer;color:var(--acid,#b6ff00);
+    background:rgba(0,0,0,.62);border:1px solid rgba(182,255,0,.5);border-radius:6px}
+  #tvfs:hover{background:rgba(182,255,0,.16);border-color:#b6ff00}
+  #screenwrap:fullscreen{background:#000;display:flex;align-items:center;justify-content:center}
+  #screenwrap:fullscreen #screen{width:100%;height:100%;max-width:none;border:0}
+  #screenwrap:fullscreen #tvfs{right:16px;top:16px}
 </style>
 </head>
 <body>
@@ -112,6 +123,7 @@
 
   <div id="set">
     <div id="screenwrap">
+      <button id="tvfs" title="fullscreen">⛶</button>
       <div id="screen">
         <iframe id="yt" title="IBEE TV" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
         <canvas id="static"></canvas>
@@ -265,6 +277,19 @@ yt.addEventListener("load",function(){
   var kick=function(){try{yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*");}catch(e){}};
   setTimeout(kick,350); setTimeout(kick,1200);
 });
+/* fullscreen toggle — container only, so the embed keeps playing throughout */
+(function(){
+  var wrap=document.getElementById("screenwrap"), btn=document.getElementById("tvfs");
+  btn.onclick=function(){
+    if(document.fullscreenElement) (document.exitFullscreen||function(){}).call(document);
+    else (wrap.requestFullscreen||wrap.webkitRequestFullscreen||function(){}).call(wrap);
+  };
+  document.addEventListener("fullscreenchange",function(){
+    btn.textContent = document.fullscreenElement ? "✕" : "⛶";
+    /* nudge playback in case the transition paused it — never reload the src */
+    try{ yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*"); }catch(e){}
+  });
+})();
 document.getElementById("chup").onclick=function(){tune(cur+1);};
 document.getElementById("chdn").onclick=function(){tune(cur<0?CHANNELS.length-1:cur-1);};
 addEventListener("keydown",function(e){
