@@ -1182,7 +1182,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var main=document.querySelector('main')||document.body;
   var st=document.createElement('style');
   st.textContent=
-     '#collsec{max-width:820px;margin:18px auto 10px;padding:0 16px}'
+     /* #main is a FLEX container, so these sections were flex items squeezed to
+        their content width — that is why the tile grid collapsed to two columns
+        and read as a vertical list. Make them full-width rows. */
+     '#collsec,#savedwrap{width:100%;max-width:none;flex:0 0 auto;align-self:stretch}'
+    +'#collsec{margin:18px 0 10px;padding:0 16px}'
     +'#collsec h3{font-family:"Press Start 2P",monospace;font-size:11px;color:#b6ff00;margin:0 0 4px}'
     +'#collsec .sub{color:#7a7a7a;font-size:16px;margin-bottom:12px}'
     +'#collsec .openrow{margin-top:14px}'
@@ -1191,7 +1195,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +'.pk{border:2px solid #2a2a2a;background:#0d0d10;overflow:hidden;padding:0;cursor:pointer;'
       +'display:block;width:100%;text-align:left;font:inherit;color:inherit}'
     +'.pk:hover{border-color:#b6ff00}'
-    +'.pkg{font-family:"Press Start 2P",monospace;font-size:20px;color:#b6ff00;opacity:.9}'
+    +'.pkart img{width:78%;height:78%;object-fit:contain;display:block}'
+    +'.pkdot{width:34%;aspect-ratio:1;border-radius:50%;background:currentColor;opacity:.5}'
+    +'.pk.r-common .pkdot{color:#b6ff00}.pk.r-rare .pkdot{color:#26e0ff}'
+    +'.pk.r-epic .pkdot{color:#ff2bd6}.pk.r-legendary .pkdot{color:#ffd60a}'
     +'.pkart{display:flex;align-items:center;justify-content:center;aspect-ratio:1;'
       +'background:radial-gradient(circle at 50% 45%,#1b1b22,#0a0a0d 70%)}'
     +'.pk.r-common .pkart{box-shadow:inset 0 0 22px rgba(182,255,0,.18)}'
@@ -1264,10 +1271,22 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     /* Collection items have NO photo — the box draws generated art from shapes.
        So the tile has to carry the name legibly and be tappable; a dark square
        with 6px text under it reads as an empty broken thumbnail. */
+    /* Real artwork, not a letter. The collection's SHAPES map in member/inventory
+       already points the owned pieces at actual image files — mirror those here.
+       Anything without a picture gets a rarity-coloured plate, never a character:
+       a letter on a dark square reads as a broken thumbnail. */
+    /* `src` is resolved and cached by the collection box (member/inventory), so
+       EVERY owned piece has artwork here — the three with real image files and
+       the eight drawn as inline SVG. The small map is only a fallback for a
+       cache written before this existed. */
+    var ART={'ics-chess':'/assets/chess/knight1.png',
+             'np-album':'/assets/img/np-cover.jpg',
+             'mzs-album':'/assets/img/20mzs-album.png'};
     host.innerHTML=items.slice(0,6).map(function(x){
-      var r=String(x.r||'common').replace(/[^a-z]/g,'');
+      var r=String(x.r||'common').replace(/[^a-z]/g,''), src=x.src||ART[x.id];
+      var art=src?'<img src="'+src+'" alt="" loading="lazy">':'<i class="pkdot"></i>';
       return '<button type="button" class="pk r-'+r+'" data-open>'
-        +'<span class="pkart"><span class="pkg">'+String(x.n||'?').trim().charAt(0)+'</span></span>'
+        +'<span class="pkart">'+art+'</span>'
         +'<span class="pkn">'+String(x.n||'PIECE').replace(/[&<>]/g,'')+'</span></button>';
     }).join('')+(items.length>6?'<button type="button" class="pk more">+'+(items.length-6)+'</button>':'');
     Array.prototype.forEach.call(host.querySelectorAll('.pk'),function(b){ b.onclick=open; });
