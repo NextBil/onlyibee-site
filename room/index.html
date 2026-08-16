@@ -324,7 +324,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var RANKS=[{n:"INITIATE"},{n:"OPERATIVE"},{n:"ELITE"},{n:"LEGEND"}];
   var OWNER_EMAIL="droguepuissance4@gmail.com";
 
-  function markDirty(){ DIRTY=true; var b=$("savebtn"); if(b){b.disabled=false;b.textContent="▣ SAVE ANNEX";} }
+  /* With the SAVE button gone, edits have to persist themselves. Debounced so a
+     drag does not fire a write per pixel; quiet so it never toasts at you. */
+  var _saveT=null;
+  function saveSoon(){ clearTimeout(_saveT); _saveT=setTimeout(function(){ try{ saveRoom(true); }catch(e){} },900); }
+  function markDirty(){ DIRTY=true; var b=$("savebtn"); if(b){b.disabled=false;b.textContent="▣ SAVE ANNEX";} saveSoon(); }
   async function saveRoom(quiet){
     var b=$("savebtn");
     if(!quiet&&b){ b.disabled=true; b.textContent="SAVING…"; }
@@ -979,12 +983,13 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("roomsub").textContent=(mine?AXM.sub:"you are visiting "+OWNERNAME+"'s annex — look, play, don't re-style")+(since?" · est. "+since:"");
     var tb=$("tbtns"); tb.innerHTML="";
     if(mine){
-      tb.innerHTML='<button class="tb solid" id="savebtn" disabled>✓ SAVED</button>'
-        +'<a class="tb" href="?u='+encodeURIComponent(OWNERNAME)+'">👁 VIEW AS VISITOR</a>'
-        +'<a class="tb" href="../member/inventory/">♟ COLLECTION</a>';
-      $("savebtn").onclick=function(){saveRoom(false);};
-      var link=location.origin+"/room/?u="+encodeURIComponent(OWNERNAME);
-      $("sharebox").style.display=""; $("sharelink").value=link;
+      /* The annex is PRIVATE now: no visitor preview, no shareable link, and no
+         manual save — changes persist on their own (markDirty → saveRoom), so a
+         SAVE button was only ever a thing to forget to press. */
+      tb.innerHTML='<button class="tb solid" id="collbtn">♟ OPEN COLLECTION</button>';
+      $("collbtn").onclick=openColl;
+      $("sharebox").style.display="none";
+      var link="";
       $("sharecopy").onclick=function(){
         if(navigator.share){navigator.share({title:"my annex on ONLY IBEE",url:link}).catch(function(){});}
         try{navigator.clipboard.writeText(link);toast("LINK COPIED_");}catch(e){}
@@ -1163,5 +1168,65 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <script src="../assets/player.js?v=24"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
+
+<script>
+/* ---- COLLECTION, at the top of the profile ----
+   A preview strip of what you own, with SAVED PIECES sitting above it: pieces
+   you are eyeing, framed as things that could join the collection. Opening the
+   full collection is a BOX over the profile, not a trip to another page — the
+   annex stays behind it. The box reuses member/inventory/ in a frame rather
+   than reimplementing the grid twice. */
+(function(){
+  var main=document.querySelector('main')||document.body;
+  var st=document.createElement('style');
+  st.textContent=
+     '#collsec{max-width:820px;margin:18px auto 10px;padding:0 16px}'
+    +'#collsec h3{font-family:"Press Start 2P",monospace;font-size:11px;color:#b6ff00;margin:0 0 4px}'
+    +'#collsec .sub{color:#7a7a7a;font-size:16px;margin-bottom:12px}'
+    +'#collsec .openrow{margin-top:14px}'
+    +'#collopen{font-family:"Press Start 2P",monospace;font-size:9px;padding:12px 16px;cursor:pointer;'
+      +'background:transparent;color:#b6ff00;border:1px solid #b6ff00}'
+    +'#collopen:hover{background:#b6ff00;color:#000}'
+    +'#collbox{position:fixed;inset:0;z-index:9700;display:none;align-items:center;justify-content:center;'
+      +'padding:16px;background:rgba(0,0,0,.84)}'
+    +'#collbox.on{display:flex}'
+    +'#collcard{position:relative;width:min(900px,96vw);height:min(78dvh,720px);background:#0a0a0a;'
+      +'border:2px solid #b6ff00;box-shadow:0 20px 60px rgba(0,0,0,.8);display:flex;flex-direction:column}'
+    +'#collhead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;'
+      +'border-bottom:2px solid #2a2a2a;font-family:"Press Start 2P",monospace;font-size:9px;color:#b6ff00}'
+    +'#collx{cursor:pointer;color:#7a7a7a;font-size:12px;padding:2px 8px}#collx:hover{color:#ff2b2b}'
+    +'#collframe{flex:1;border:0;width:100%;background:#070707}';
+  document.head.appendChild(st);
+
+  var sec=document.createElement('div'); sec.id='collsec';
+  sec.innerHTML='<h3>// YOUR COLLECTION_</h3>'
+    +'<div class="sub">what you own, and what you are eyeing_</div>'
+    +'<div class="openrow"><button id="collopen">♟ OPEN COLLECTION</button></div>';
+  main.insertBefore(sec, main.firstChild);
+
+  var box=document.createElement('div'); box.id='collbox'; box.setAttribute('aria-hidden','true');
+  box.innerHTML='<div id="collcard"><div id="collhead"><span>MY COLLECTION_</span><span id="collx">✕</span></div>'
+    +'<iframe id="collframe" title="My collection"></iframe></div>';
+  document.body.appendChild(box);
+
+  function open(){ var f=document.getElementById('collframe');
+    if(!f.getAttribute('src')) f.src='../member/inventory/';
+    box.classList.add('on'); box.setAttribute('aria-hidden','false'); }
+  function close(){ box.classList.remove('on'); box.setAttribute('aria-hidden','true'); }
+  window.openColl=open;
+  document.getElementById('collopen').onclick=open;
+  document.getElementById('collx').onclick=close;
+  box.addEventListener('click',function(e){ if(e.target===box) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+
+  /* SAVED PIECES belongs INSIDE this section, above the collection button —
+     saved.js drops it at the top of <main>, so adopt it once it exists. */
+  (function adopt(n){
+    var w=document.getElementById('savedwrap');
+    if(w){ w.style.margin='0'; w.style.padding='0'; sec.insertBefore(w, sec.querySelector('.openrow')); return; }
+    if(n<40) setTimeout(function(){ adopt(n+1); },100);
+  })(0);
+})();
+</script>
 </body>
 </html>

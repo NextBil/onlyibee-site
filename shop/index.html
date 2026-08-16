@@ -64,7 +64,10 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
 .item.r-sr{border-color:#5c3350}.item.r-sr .rtag{color:#e879c9}.item.r-sr:hover{border-color:#e879c9;box-shadow:0 0 16px rgba(232,121,201,.35)}
 .item.r-sdr{border-color:#5c4b2c}.item.r-sdr .rtag{color:#d9b36c}.item.r-sdr:hover{border-color:#d9b36c;box-shadow:0 0 16px rgba(217,179,108,.4)}
 .item.r-leg{border-color:#4d6600}.item.r-leg .rtag{color:var(--acid)}.item.r-leg:hover{border-color:var(--acid)}
-.item.soldout{opacity:.72}.item.soldout .sq img{filter:grayscale(1) brightness(.62)}.item.soldout .pr{color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(255,43,43,.75)}
+/* Sold out still deserves to be SEEN — these are one-of-ones and the archive
+   is half the reason to visit. Enough desaturation to read as gone, not so
+   much that the piece disappears. */
+.item.soldout{opacity:.92}.item.soldout .sq img{filter:grayscale(.45) brightness(.92)}.item.soldout .pr{color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(255,43,43,.75)}
 .sotag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);
   font-family:var(--px);font-size:9px;letter-spacing:1px;color:#fff;background:var(--red);
   border:2px solid #ff7b7b;padding:8px 11px;box-shadow:0 0 18px rgba(255,43,43,.55);white-space:nowrap}

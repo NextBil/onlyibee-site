@@ -607,6 +607,14 @@
 </style>
 </head>
 <body class="crt flicker">
+<script>/* The console is a SCREEN of the shell, never a page on its own. Opened
+   top-level — a bookmark, a shared link, the 404 button, the redirect after
+   signing up — it renders with no bottom radio bar, and player.js falls back to
+   its own little floating chip (that stray radio button). Send it into the shell
+   at the same screen instead. No loop risk: inside the frame top!==self. */
+try{ if(window.top===window.self){
+  location.replace('/?p='+encodeURIComponent('console.html'+(location.hash||'#menu')));
+} }catch(e){}</script>
 <script>/* returning here must not replay the CRT boot-in (see assets/nav.js) */
 try{if(sessionStorage.getItem('ibee_noanim')==='1'){sessionStorage.removeItem('ibee_noanim');
 document.documentElement.classList.add('noanim');var _n=document.createElement('style');

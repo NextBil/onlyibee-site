@@ -404,7 +404,7 @@
        the track list is what the radio is FOR, so it takes the growth. */
     /* Symmetric side columns — equal weight left and right, which also centres
        the track list between them without any centring rule of its own. */
-    #tracklist.open{display:grid;grid-template-columns:348px 1fr 348px;align-content:start}
+    #tracklist.open{display:grid;grid-template-columns:392px 1fr 348px;align-content:start}
     /* The title bar, search and album shelf run the FULL width across the top —
        they belong to the whole radio, not to the tracks. Both panes then begin
        on the row underneath, so their top edges line up. Spanning the panel from
@@ -426,8 +426,13 @@
       /* breathing room on the outer edge — the covers sat flush against the
          screen edge, which reads as clipped rather than as a column */
       padding:14px 14px 14px 44px;gap:12px}
+    /* align-items:start — grid items stretch to the row height by default, which
+       dragged each cover into a tall rectangle (161x246) no matter what the
+       aspect-ratio said. */
+    #tlalbums{align-items:start}
     #tlalbums .alb{width:100%}
-    #tlalbums .alb .ac{width:100%;height:auto;aspect-ratio:1}
+    #tlalbums .alb .ac{width:100%;height:auto;aspect-ratio:1/1;overflow:hidden;display:block}
+    #tlalbums .alb .ac img{width:100%;height:100%;object-fit:cover;display:block}
     #tlalbums .alb .an{white-space:normal;font-size:6.5px;line-height:1.45}
     #tlleft{grid-column:2;display:flex;flex-direction:column;min-height:0}
     #tlside{grid-column:3}
@@ -458,6 +463,17 @@
     #tlside #songinfocard{width:auto;max-height:none;border:0;padding:0;box-shadow:none;background:transparent}
     #tlside #songinfoclose{display:none}
   }
+
+  /* the hearts card in the shelf */
+  /* the heart must sit dead centre of the square and read at cover size — the
+     glyph's own line-box was offsetting it and 26px was lost on a 161px tile */
+  .alb.liked .ac{display:flex!important;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#2a0a1a,#160610);line-height:0}
+  .alb.liked .lkh{display:block;font-size:54%;line-height:1;color:#ff2b6b;
+    text-shadow:0 0 18px rgba(255,43,107,.85)}
+  #tlalbums .alb.liked .lkh{font-size:74px}
+  .alb.liked.on .ac{border-color:#ff2b6b;box-shadow:0 0 18px rgba(255,43,107,.5)}
+  .alb.liked .an{color:#ff8fb4}
 </style>
 <script src="/assets/cart.js?v=3"></script>
 </head>
@@ -942,7 +958,16 @@
       var key=alb.name||'?'; if(seen[key]) { seen[key].n++; continue; }
       seen[key]={n:1}; out.push({name:key,cover:alb.cover,ref:seen[key]});
     }
-    host.innerHTML=out.map(function(a){
+    /* LIKED SONGS sits at the head of the shelf, like a playlist above the
+       albums: hearts cut across records, so it is the one collection that is not
+       an album but belongs in the same list. */
+    var favN=0; try{ var F=favs(); for(var k in F){ if(F[k]) favN++; } }catch(e){}
+    var favOn = favOnly;
+    var favCard='<button class="alb liked'+(favOn?' on':'')+'" data-liked="1" title="Liked songs">'
+      +'<span class="ac"><span class="lkh">&#9829;</span></span>'
+      +'<span class="an">LIKED SONGS</span>'
+      +'<span class="aq">'+favN+(favN===1?' SONG':' SONGS')+'</span></button>';
+    host.innerHTML=favCard+out.map(function(a){
       var on = query && a.name.toLowerCase()===query.toLowerCase();
       return '<button class="alb'+(on?' on':'')+'" data-alb="'+esc(a.name)+'" title="'+esc(a.name)+'">'
         +'<span class="ac">'+(a.cover?'<img src="'+esc(a.cover)+'" alt="" loading="lazy">':'')+'</span>'
@@ -952,6 +977,10 @@
   }
   document.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('.alb'); if(!b) return;
+    if(b.hasAttribute('data-liked')){          /* the hearts filter, not an album */
+      favOnly=!favOnly; tlfav.classList.toggle('on',favOnly);
+      query=''; tlsearch.value=''; renderTracks(); markNow(); renderAlbums(); return;
+    }
     var name=b.getAttribute('data-alb');
     /* tapping the album that is already filtering clears it — a toggle, so the
        shelf can never trap you in one record with no way back to everything */
@@ -1036,6 +1065,7 @@
         var on=!isFav(s.f); setFav(s.f,on);
         el.classList.toggle('on',on);
         if(favOnly&&!on)renderTracks();   // un-hearted inside the ♥ filter → it leaves the list
+        renderAlbums();                   // the LIKED SONGS count lives on the shelf
       };
     });
   }
