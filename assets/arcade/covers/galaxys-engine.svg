@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 480" width="360" height="480" role="img" aria-label="Galaxys Engine">
+  <defs>
+    <radialGradient id="space" cx="50%" cy="42%" r="78%">
+      <stop offset="0%"   stop-color="#241238"/>
+      <stop offset="55%"  stop-color="#0d0718"/>
+      <stop offset="100%" stop-color="#050308"/>
+    </radialGradient>
+    <radialGradient id="core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="28%"  stop-color="#e6ff9a"/>
+      <stop offset="60%"  stop-color="#b6ff00"/>
+      <stop offset="100%" stop-color="#b6ff00" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="haze" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#7b4bff" stop-opacity=".55"/>
+      <stop offset="70%"  stop-color="#7b4bff" stop-opacity=".10"/>
+      <stop offset="100%" stop-color="#7b4bff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="grid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#b6ff00" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#b6ff00" stop-opacity=".5"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="360" height="480" fill="url(#space)"/>
+  <ellipse cx="180" cy="200" rx="168" ry="150" fill="url(#haze)"/>
+
+  <!-- starfield -->
+  <g fill="#fff7ea">
+    <circle cx="28"  cy="42"  r="1.6" opacity=".9"/><circle cx="322" cy="60"  r="1.3" opacity=".75"/>
+    <circle cx="76"  cy="96"  r="1"   opacity=".6"/> <circle cx="286" cy="128" r="1.7" opacity=".85"/>
+    <circle cx="46"  cy="182" r="1.2" opacity=".7"/> <circle cx="338" cy="214" r="1"   opacity=".55"/>
+    <circle cx="18"  cy="288" r="1.5" opacity=".8"/> <circle cx="306" cy="300" r="1.2" opacity=".65"/>
+    <circle cx="92"  cy="356" r="1"   opacity=".5"/> <circle cx="268" cy="382" r="1.4" opacity=".7"/>
+    <circle cx="140" cy="52"  r="1"   opacity=".5"/> <circle cx="222" cy="34"  r="1.2" opacity=".65"/>
+    <circle cx="58"  cy="418" r="1.2" opacity=".6"/> <circle cx="330" cy="440" r="1"   opacity=".5"/>
+    <circle cx="196" cy="452" r="1.3" opacity=".6"/>
+  </g>
+
+  <!-- orbits + planets, tilted like the engine's galaxy view -->
+  <g transform="translate(180 200) rotate(-18)">
+    <ellipse rx="146" ry="52" fill="none" stroke="#2a2140" stroke-width="2"/>
+    <ellipse rx="146" ry="52" fill="none" stroke="#26e0ff" stroke-width="1.2" opacity=".45"/>
+    <ellipse rx="104" ry="36" fill="none" stroke="#2a2140" stroke-width="2"/>
+    <ellipse rx="104" ry="36" fill="none" stroke="#ff2bd6" stroke-width="1.2" opacity=".42"/>
+    <ellipse rx="62"  ry="22" fill="none" stroke="#2a2140" stroke-width="2"/>
+    <ellipse rx="62"  ry="22" fill="none" stroke="#ff9d2b" stroke-width="1.2" opacity=".45"/>
+
+    <!-- planets sitting on the rings -->
+    <circle cx="-146" cy="0"   r="7"   fill="#26e0ff"/>
+    <circle cx="-146" cy="0"   r="12"  fill="#26e0ff" opacity=".22"/>
+    <circle cx="88"   cy="24"  r="8.5" fill="#ff2bd6"/>
+    <circle cx="88"   cy="24"  r="14"  fill="#ff2bd6" opacity=".2"/>
+    <circle cx="-44"  cy="-17" r="5.5" fill="#ff9d2b"/>
+    <circle cx="132"  cy="-22" r="4.5" fill="#b6ff00" opacity=".85"/>
+
+    <!-- the core -->
+    <circle r="54" fill="url(#core)"/>
+    <circle r="13" fill="#f7ffe2"/>
+  </g>
+
+  <!-- horizon grid: the "engine" floor -->
+  <g opacity=".55">
+    <path d="M0 382 H360 M0 404 H360 M0 430 H360 M0 462 H360" stroke="url(#grid)" stroke-width="1.4" fill="none"/>
+    <g stroke="url(#grid)" stroke-width="1.2" fill="none">
+      <path d="M180 366 L60 480"/><path d="M180 366 L300 480"/>
+      <path d="M180 366 L-40 480"/><path d="M180 366 L400 480"/>
+      <path d="M180 366 L150 480"/><path d="M180 366 L210 480"/>
+    </g>
+  </g>
+
+  <rect x="0" y="0" width="360" height="480" fill="none" stroke="#b6ff00" stroke-opacity=".22" stroke-width="2"/>
+</svg>

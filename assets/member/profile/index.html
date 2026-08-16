@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>MY PROFILE — ONLY IBEE</title>
+<!-- 2026-07-13: the profile and the room were merged into ONE concept — the room
+     page IS the profile now (identity, collection, badges, groove). This URL is kept
+     as a contract (the shell pill, NFC, old links point here) and redirects to /room/. -->
+<link rel="canonical" href="https://onlyibee.com/room/">
+<script>location.replace("../../room/"+location.search+location.hash);</script>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--acid:#b6ff00;--red:#ff2b2b;--px:'Press Start 2P',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#070707;color:#e8e8e8;font-family:var(--px);min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+p{font-size:11px;color:var(--acid);letter-spacing:2px;line-height:1.8}
+a{font-size:9px;color:var(--acid);border:1px solid var(--acid);padding:14px 18px;text-decoration:none}
+</style>
+</head>
+<body>
+<p>OPENING YOUR PROFILE…</p>
+<a href="../../room/">▶ MY PROFILE + ROOM</a>
+<script src="/assets/stats-client.js?v=7"></script>
+<script src="/assets/pulse.js?v=2"></script>
+</body>
+</html>

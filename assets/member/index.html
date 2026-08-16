@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>MEMBER ACCESS — THE FREQUENCY | ONLY IBEE</title>
+<meta name="description" content="ONLY IBEE member access. Scan your garment's monster head to enter the frequency.">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --hue:88;                                  /* recolored per member rank */
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+/* animated starfield tint by rank */
+.bgglow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 22%,hsla(var(--hue),90%,45%,.16),transparent 60%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}
+.mback{display:inline-block;font-family:var(--px);font-size:9px;color:var(--dim);text-decoration:none;
+  border:1px solid var(--border);padding:8px 12px;margin-bottom:16px}
+.mback:hover{color:var(--acid);border-color:var(--acid)}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:600px;padding:24px 18px 60px;display:flex;flex-direction:column;
+  align-items:center;gap:14px;text-align:center;position:relative;z-index:2}
+
+/* ---------- boot / authenticating ---------- */
+#boot{position:fixed;inset:0;z-index:200;background:#000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;font-family:var(--px);padding:24px;text-align:center}
+#boot.gone{opacity:0;pointer-events:none;transition:opacity .5s}
+#boot .lock{width:44px;height:44px;color:var(--red);filter:drop-shadow(0 0 12px rgba(255,43,43,.5))}
+.banner .gi{width:.9em;height:.9em;vertical-align:-0.12em}
+#boot .l{font-size:10px;color:var(--acid);letter-spacing:2px;min-height:16px}
+#boot .bar{width:min(260px,70vw);height:10px;border:1px solid var(--border);padding:1px}
+#boot .bar i{display:block;height:100%;width:0;background:var(--acid);box-shadow:0 0 10px var(--acid)}
+
+.crtin{animation:crtin .35s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.03)}100%{transform:scaleY(1)}}
+.granted{font-family:var(--px);font-size:clamp(11px,3.2vw,14px);letter-spacing:2px;color:hsl(var(--hue),95%,68%);
+  text-shadow:0 0 16px hsla(var(--hue),95%,55%,.6)}
+
+/* ---------- spinning 3D member medallion ---------- */
+.stage{perspective:640px;width:min(230px,60vw);height:min(230px,60vw);margin-top:4px}
+.o3{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:spin 6s linear infinite}
+@keyframes spin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
+.o3 img{position:absolute;inset:0;width:100%;height:100%}
+.ped{width:150px;height:26px;border-radius:50%;margin:-6px auto 6px;
+  background:radial-gradient(ellipse,hsla(var(--hue),95%,55%,.5),transparent 70%);animation:pulse 3.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scaleX(1);opacity:.85}50%{transform:scaleX(.7);opacity:.4}}
+
+/* ---------- member card ---------- */
+.mcard{width:100%;border:2px solid hsla(var(--hue),60%,45%,.6);background:rgba(10,10,12,.92);
+  padding:18px;margin-top:6px;box-shadow:0 0 26px hsla(var(--hue),90%,45%,.18),inset 0 0 40px rgba(0,0,0,.6);position:relative}
+.mcard .tag{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px}
+.mcard .rank{font-family:var(--px);font-size:clamp(16px,5.4vw,26px);color:hsl(var(--hue),95%,70%);
+  text-shadow:0 0 18px hsla(var(--hue),95%,55%,.55);margin:8px 0 2px;letter-spacing:2px}
+.mcard .code{font-family:var(--px);font-size:12px;color:var(--ink);letter-spacing:2px;cursor:pointer;margin-top:8px}
+.mcard .code:hover{color:var(--acid)}
+.stats{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.stat{flex:1;min-width:120px;border:1px solid var(--border);padding:9px}
+.stat .k{font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px}
+.stat .v{font-family:var(--px);font-size:14px;color:hsl(var(--hue),95%,70%);margin-top:6px}
+.powerwrap{height:8px;border:1px solid var(--border);margin-top:8px;padding:1px}
+.powerwrap i{display:block;height:100%;width:0;background:hsl(var(--hue),95%,55%);box-shadow:0 0 8px hsla(var(--hue),95%,55%,.7);transition:width 1.4s ease}
+
+/* ---------- referral / recruit ---------- */
+.box{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);padding:16px 18px;text-align:left;margin-top:14px}
+.box .h{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;margin-bottom:10px}
+.box p{color:#bdbdbd;font-size:19px;line-height:1.5;margin-bottom:10px}
+.reflink{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.reflink input{flex:1;min-width:160px;background:#050505;border:1px solid var(--border);color:var(--acid);
+  font-family:var(--vt);font-size:17px;padding:10px}
+.reflink button,.share{font-family:var(--px);font-size:9px;padding:0 14px;background:var(--acid);color:#000;border:1px solid var(--acid);cursor:pointer}
+.share{padding:12px 14px;margin-top:8px;display:inline-block;text-decoration:none;background:transparent;color:var(--cyan);border-color:#123a44}
+.refby{font-family:var(--px);font-size:8px;color:var(--gold);margin-top:10px}
+
+/* ---------- register (Tally) ---------- */
+#regbox{width:100%;margin-top:10px;min-height:60px}
+.cnote{color:var(--dim);font-size:17px;line-height:1.4}
+.claim{display:flex;flex-direction:column;gap:9px}
+.claim input{background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px}
+.claim input:focus{outline:none;border-color:var(--acid)}
+.cbtn{font-family:var(--px);font-size:11px;padding:14px;background:var(--acid);color:#000;border:1px solid var(--acid);cursor:pointer;text-align:center;text-decoration:none;display:block}
+.cbtn:disabled{opacity:.5;cursor:default}
+.taken{border:1px solid var(--red);color:var(--red);font-family:var(--px);font-size:11px;padding:16px;text-align:center;letter-spacing:1px;line-height:1.6}
+.taken .gi{width:1em;height:1em;vertical-align:-0.12em}
+.item{border:2px solid var(--border);padding:18px;text-align:center;position:relative;overflow:hidden;background:#0a0a0c;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.item .rz{font-family:var(--px);font-size:8px;letter-spacing:2px;padding:5px 8px;display:inline-block;border:1px solid}
+.item .ilabel{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px;margin-top:14px}
+.item .iname{font-family:var(--px);font-size:16px;color:hsl(var(--hue),95%,72%);margin:8px 0 6px;text-shadow:0 0 14px hsla(var(--hue),95%,55%,.5)}
+.item .ity{color:var(--dim);font-size:16px;margin-bottom:12px}
+.r-common{color:#9a9a9a;border-color:#444}.r-rare{color:var(--cyan);border-color:#123a44}
+.r-epic{color:var(--pink);border-color:#4a1240}.r-legendary{color:var(--gold);border-color:#4a3a12}
+.item.g-rare{box-shadow:0 0 26px rgba(38,224,255,.22)}.item.g-epic{box-shadow:0 0 30px rgba(255,43,214,.26)}
+.item.g-legendary{box-shadow:0 0 36px rgba(255,214,10,.3)}
+.regph{border:1px dashed var(--border);padding:16px;color:var(--dim);font-family:var(--px);font-size:8px;line-height:1.8;text-align:center}
+
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.btn{font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;background:transparent;color:var(--acid);border:1px solid var(--acid)}
+.btn.solid{background:var(--acid);color:#000}
+.btn:active{transform:translateY(2px)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--acid);
+  color:var(--acid);font-family:var(--px);font-size:9px;padding:10px 16px;z-index:9500;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+
+/* ---------- access banner: green (granted) vs red (locked) ---------- */
+.banner{font-family:var(--px);font-size:clamp(11px,3.2vw,14px);letter-spacing:2px;line-height:1.5}
+.banner.granted{color:hsl(var(--hue),95%,68%);text-shadow:0 0 16px hsla(var(--hue),95%,55%,.6)}
+.banner.locked{color:var(--red);text-shadow:0 0 16px rgba(255,43,43,.55)}
+/* ---------- locked gate: enter a code / log in ---------- */
+.gate{display:flex;flex-direction:column;gap:9px}
+.gate input{background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px}
+.gate input:focus{outline:none;border-color:var(--acid)}
+.gate .sub{color:var(--dim);font-size:16px;line-height:1.4}
+.gate .or{color:var(--dim);font-family:var(--px);font-size:8px;text-align:center;letter-spacing:2px;margin:8px 0;
+  border-top:1px solid var(--border);padding-top:12px}
+/* ---------- starter pick: choose 1 of 3 rooms (rotating 3D room cards) ---------- */
+.picks{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:560px){.picks{grid-template-columns:repeat(3,1fr)}}
+.pick{border:2px solid var(--border);background:radial-gradient(ellipse at 50% -10%,hsla(var(--hue),80%,40%,.14),#0a0a0c 65%);
+  padding:16px 12px 14px;text-align:center;cursor:pointer;font-family:var(--vt);color:var(--ink);
+  transition:.18s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+.pick:hover,.pick:focus-visible{border-color:hsl(var(--hue),95%,55%);transform:translateY(-3px);
+  box-shadow:0 0 26px hsla(var(--hue),90%,45%,.3);outline:none}
+.pick:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+/* the room itself: perspective box the artifact spins inside, walls implied by gradient + floor */
+.proom{perspective:520px;width:84px;height:84px;margin:2px auto 4px;position:relative}
+.proom::after{content:"";position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);width:60px;height:11px;
+  border-radius:50%;background:radial-gradient(ellipse,hsla(var(--hue),90%,55%,.35),transparent 70%);
+  animation:pulse 3.2s ease-in-out infinite}
+.part3{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spin3d 6s linear infinite}
+.part3 .f,.part3 .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.part3 .f img,.part3 .b img{width:100%;height:100%}
+.part3 .b{transform:rotateY(180deg);filter:brightness(.55)}
+.pick .pn{font-family:var(--px);font-size:10px;color:hsl(var(--hue),95%,72%);margin:8px 0 8px;line-height:1.5}
+.vibes{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:8px}
+.vibes span{font-family:var(--px);font-size:6px;letter-spacing:1px;color:hsl(var(--hue),80%,68%);
+  border:1px solid hsla(var(--hue),60%,45%,.5);padding:4px 6px;white-space:nowrap}
+.pick .pdesc{color:#b8b8b8;font-size:15px;line-height:1.4;margin-bottom:10px;flex:1}
+.pick .pt{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:2px;
+  border-top:1px solid var(--border);padding-top:9px;width:100%}
+.pick:hover .pt,.pick:focus-visible .pt{color:hsl(var(--hue),95%,68%)}
+</style>
+<script src="/assets/cart.js?v=3"></script>
+<script src="/assets/saved.js?v=2" defer></script>
+</head>
+<body>
+<div class="bgglow"></div>
+<header>
+  <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
+  <span>MEMBER.SYS</span>
+</header>
+
+<!-- boot: authenticating the pass -->
+<div id="boot">
+  <svg class="lock" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="#050505"/></svg>
+  <div class="l" id="bootl">READING PASS…</div>
+  <div class="bar"><i id="bootbar"></i></div>
+</div>
+
+<main id="stage" style="visibility:hidden">
+  <!-- Reaching this page used to be a one-way trip: no back control, and the
+       first thing offered was "enter a pass code". Both are fixed — the trail
+       comes from the shell (assets/nav.js) and hides this when it is the first
+       page, and the gate below leads with joining, not with a code. -->
+  <div class="banner locked crtin" id="grant"><svg class="gi" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="12" cy="15" r="1.5" fill="#050505"/></svg> CHECKING ACCESS…</div>
+
+  <div class="stage"><div class="o3" id="medal"></div></div>
+  <div class="ped"></div>
+
+  <div class="mcard crtin" id="mcard" style="display:none">
+    <div class="rank" id="rank">—</div>
+    <div id="codename" style="font-family:var(--px);font-size:11px;color:hsl(var(--hue),95%,72%);letter-spacing:1px;margin-top:6px">—</div>
+    <div class="code" id="code" title="tap to copy">————</div>
+    <div class="stats">
+      <div class="stat"><div class="k">RARITY</div><div class="v" id="rarity">—</div></div>
+      <div class="stat"><div class="k">POWER</div><div class="v" id="power">—</div>
+        <div class="powerwrap"><i id="powerbar"></i></div></div>
+    </div>
+  </div>
+
+  <div class="box crtin">
+    <div class="h" id="boxh">// ACCESS_</div>
+    <div id="regbox"><div class="cnote">connecting…</div></div>
+    <div class="cnote" id="sessline" style="margin-top:10px;font-size:15px"></div>
+  </div>
+
+  <div class="box crtin" id="recruit" style="display:none">
+    <div class="h">// RECRUIT_</div>
+    <div class="reflink">
+      <input id="ref" readonly value="">
+      <button id="copyref">COPY</button>
+    </div>
+    <a class="share" id="shareref" href="#">▶ SHARE — every friend who joins levels you up</a>
+    <div class="refby" id="refby" style="display:none"></div>
+  </div>
+
+  <div class="actions" id="actions" style="display:none">
+    <a class="btn solid" href="../room/">⌂ MY PROFILE + ROOM</a>
+    <a class="btn" href="../console.html#music">▶ THE UNIVERSE</a>
+    <a class="btn" href="inventory/">♟ MY COLLECTION</a>
+  </div>
+</main>
+
+<footer>© ONLYIBEE — THE FREQUENCY</footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+
+  /* ---- Supabase: accounts + single-use claim + inventory (anon key is public by design) ---- */
+  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+  var sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
+
+  /* ---- read the card + referral from the URL (NO fabricated guest pass — locked by default) ---- */
+  function param(n){var m=new RegExp("[?&]"+n+"=([^&]+)").exec(location.search);return m?decodeURIComponent(m[1]):"";}
+  var LS="ibee_member";
+  var saved={}; try{saved=JSON.parse(localStorage.getItem(LS)||"{}")||{};}catch(e){}
+
+  var pass=(param("pass")||param("tag")||"").toUpperCase().trim();   // empty = no card = stays LOCKED
+  var ref=(param("ref")||saved.ref||"").toUpperCase().trim();
+  if(ref===pass) ref="";                          // can't refer yourself
+  if(pass){                                        // persist first-touch referrer only for a real pass
+    var rec={pass:pass, ref:ref||saved.ref||"", ts:saved.ts||Date.now()};
+    try{localStorage.setItem(LS,JSON.stringify(rec));}catch(e){}
+    ref=rec.ref;
+  }
+
+  /* flat neon lock/unlock icons — no emoji; currentColor picks up the banner's red/green */
+  var LOCK="<svg class='gi' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
+    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
+  var UNLOCK="<svg class='gi' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
+    +"<path d='M8 11V7.5a4 4 0 0 1 7.3-3.9' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
+    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  function toast(m){var t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on");},1900);}
+  function copy(txt){try{navigator.clipboard.writeText(txt);toast("COPIED_");}catch(e){var i=$("ref");i.select();document.execCommand&&document.execCommand("copy");toast("COPIED_");}}
+  function setHue(h){document.documentElement.style.setProperty("--hue",h);}
+  async function rpc(fn,args){ if(!sb)return{status:'error',error:'offline'}; var r=await sb.rpc(fn,args); return r.error?{status:'error',error:r.error.message}:r.data; }
+
+  /* ---- deterministic member stats from the pass code (only shown once granted) ---- */
+  function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0);}
+  var TIERS=[
+    {n:"ROOKIE", hue:88 },{n:"OPERATIVE",hue:190},{n:"ELITE",hue:40},{n:"LEGEND",hue:300}
+  ];
+  var NAMES=["RED NOMAD","NEON STRAY","VOID RUNNER","STATIC GHOST","ACID SAINT","MIDNIGHT FOX",
+    "CHROME WOLF","PIXEL SHAMAN","ROGUE SIGNAL","VELVET RIOT","GLASS TIGER","ECHO BANDIT",
+    "SOLAR STRAY","NIGHT MARROW","CRIMSON DRIFT","LUCID FIEND","OFFGRID KING","FERAL BLOOM",
+    "COBALT MONK","DUSK PROWLER","NOVA THIEF","SILK STATIC","GRIM NEON","ZERO HOUR",
+    "MAD ORACLE","WIRED SAINT","GHOST FREQ","LO-FI BEAST","IRON MAGPIE","PLASMA STRAY"];
+
+  /* ---- 3D ROTATING MONSTER HEAD — drop your transparent PNG at assets/img/monster.png.
+     The code tries a couple of common names, then falls back to a drawn head so the page
+     is never broken. Exact path it loads first: onlyibee.com/assets/img/monster.png ---- */
+  var MON_CANDS=["../assets/img/monster.png","../assets/img/monster-head.png","../assets/img/monster.PNG"];
+  var FB="data:image/svg+xml,"+encodeURIComponent(
+    "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'>"
+    +"<g stroke='#111' stroke-width='4' stroke-linejoin='round' fill='#ff3b30'>"
+    +"<path d='M32 52 Q10 40 20 14 Q31 24 35 44 Z'/><path d='M68 52 Q90 40 80 14 Q69 24 65 44 Z'/>"
+    +"<path d='M50 40 Q86 44 84 78 Q84 108 50 111 Q16 108 16 78 Q14 44 50 40 Z'/></g>"
+    +"<g stroke='#ffd60a' stroke-width='7' stroke-linecap='round'><path d='M20 72 L11 76 M18 86 L9 92 M24 98 L18 107 M50 109 L50 118 M80 72 L89 76 M82 86 L91 92 M76 98 L82 107'/></g>"
+    +"<circle cx='40' cy='78' r='7.5' fill='#fff' stroke='#111' stroke-width='4'/><circle cx='64' cy='78' r='7.5' fill='#fff' stroke='#111' stroke-width='4'/>"
+    +"<circle cx='52' cy='97' r='2.6' fill='#111'/>"
+    +"<g stroke='#fff' stroke-width='3' stroke-linecap='round'><path d='M39 60 h6 M56 60 h6 M28 90 l6 -3 M72 90 l-6 -3'/></g></svg>");
+  function buildMedal(){
+    var zs=[-4,-2.4,-0.8,0.8,2.4,4],html="";
+    zs.forEach(function(z,i){var front=(i===zs.length-1);
+      html+="<img src='"+MON_CANDS[0]+"' data-ci='0' alt='"+(front?'ONLY IBEE monster head':'')+"' style='transform:translateZ("+z+"px)"+(front?'':";filter:brightness(.4)")+"'>";});
+    $("medal").innerHTML=html;
+    Array.prototype.forEach.call($("medal").querySelectorAll("img"),function(im){
+      im.onerror=function(){ var ci=(+this.getAttribute('data-ci'))+1;
+        if(ci<MON_CANDS.length){ this.setAttribute('data-ci',ci); this.src=MON_CANDS[ci]; }
+        else { this.onerror=null; this.src=FB; } };
+    });
+  }
+
+  /* ---- the 3 starter rooms (Pokémon pick — choose one, find the others later) ----
+     Vibe tags + a feel-not-spoilers description per room; art reuses the collection's
+     rotating-artifact system (see member/inventory/index.html FORMS) so a room feels
+     like the same object whether it's on the pick screen or in your shelf later. ---- */
+  var V="viewBox='0 0 100 100'", NS="xmlns='http://www.w3.org/2000/svg'";
+  var PFORMS={
+    bee:"<svg "+NS+" "+V+"><ellipse cx='34' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='66' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='50' cy='58' rx='20' ry='24' fill='#ffd60a' stroke='#0a0a0a' stroke-width='3'/><rect x='31' y='48' width='38' height='7' fill='#0a0a0a'/><rect x='31' y='62' width='38' height='7' fill='#0a0a0a'/><circle cx='50' cy='30' r='11' fill='#0a0a0a'/><circle cx='46' cy='29' r='2.5' fill='#fff'/><circle cx='54' cy='29' r='2.5' fill='#fff'/><line x1='44' y1='21' x2='41' y2='13' stroke='#0a0a0a' stroke-width='2'/><line x1='56' y1='21' x2='59' y2='13' stroke='#0a0a0a' stroke-width='2'/></svg>",
+    cassette:"<svg "+NS+" "+V+"><rect x='8' y='28' width='84' height='44' rx='5' fill='#15151d' stroke='#b6ff00' stroke-width='3'/><rect x='16' y='35' width='68' height='19' rx='2' fill='#050505' stroke='#333' stroke-width='1.5'/><circle cx='36' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='64' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='36' cy='45' r='2.5' fill='#b6ff00'/><circle cx='64' cy='45' r='2.5' fill='#b6ff00'/><rect x='28' y='60' width='44' height='7' fill='#ff2bd6'/><rect x='40' y='68' width='6' height='4' fill='#555'/><rect x='54' y='68' width='6' height='4' fill='#555'/></svg>",
+    floppy:"<svg "+NS+" "+V+"><path d='M22 16 h48 l12 12 v56 h-60 z' fill='#3b46a8' stroke='#0a0d2a' stroke-width='3'/><rect x='32' y='16' width='34' height='24' fill='#c9ccdd' stroke='#0a0d2a' stroke-width='2'/><rect x='48' y='18' width='11' height='20' fill='#7c81a6'/><rect x='28' y='50' width='46' height='30' fill='#e8e4cf' stroke='#0a0d2a' stroke-width='2'/><rect x='32' y='55' width='38' height='5' fill='#ff2b2b'/><line x1='32' y1='66' x2='70' y2='66' stroke='#0a0d2a' stroke-width='2'/><line x1='32' y1='72' x2='60' y2='72' stroke='#0a0d2a' stroke-width='2'/></svg>"
+  };
+  var STARTERS=[
+    {id:'game-runner',name:'RUN BEEBEE',form:'bee',
+     vibes:['⚡ FAST','🎤 LYRICS SKY','🏙 CITY RUN'],
+     desc:'A jumping game built out of the words themselves — the city scrolls, the lyrics rain down overhead, and you time your jumps to the beat.'},
+    {id:'game-rush',  name:'MIMI GUITAR RUSH',form:'cassette',
+     vibes:['🎸 NEON HIGHWAY','⚡ FAST','🔥 INTENSE'],
+     desc:'A dash down a glowing guitar-neck highway. Lanes, obstacles, and a tempo that only gets hungrier the deeper you go.'},
+    {id:'game-tiles', name:'MIMI MUSIC TILES', form:'floppy',
+     vibes:['🎹 RHYTHM TAPS','🎯 PRECISION','📖 LYRICS'],
+     desc:'A calmer, precision rhythm room — lyric tiles fall in time with the song and you tap them right as they land.'}
+  ];
+  var RCLASS={common:'r-common',rare:'r-rare',epic:'r-epic',legendary:'r-legendary'};
+  var host=$("regbox"), grant=$("grant"), boxh=$("boxh");
+
+  /* ---- fill the green member card from the pass (only when access is granted) ---- */
+  function fillCard(){
+    var h=hash(pass), roll=h%100, tier=roll<60?0:roll<88?1:roll<97?2:3, T=TIERS[tier];
+    var power=500+(h%9500);
+    setHue(T.hue);
+    $("rank").textContent=T.n;
+    $("codename").textContent="CODENAME · "+NAMES[hash(pass+"n")%NAMES.length]+" #"+(1000+(hash(pass+"x")%9000));
+    $("code").textContent=pass;
+    $("rarity").textContent=T.n;
+    $("power").textContent=power.toLocaleString();
+    $("powerbar").style.width=Math.min(100,power/9999*100)+"%";
+    $("code").onclick=function(){copy(pass);};
+    /* referral */
+    var myLink=location.origin+location.pathname+"?ref="+encodeURIComponent(pass);
+    $("ref").value=myLink;
+    /* badge event: sharing/copying your pass = RECRUITER (the shell's badges.js picks it up) */
+    function sharedEvt(){try{localStorage.setItem("ibee_badge_evt",JSON.stringify({k:"share",t:Date.now()}));}catch(e){}}
+    $("copyref").onclick=function(){copy(myLink);sharedEvt();};
+    var shareText="I'm on the ONLY IBEE frequency 👾 tap in with my pass:";
+    $("shareref").onclick=function(ev){
+      sharedEvt();
+      if(navigator.share){ev.preventDefault();navigator.share({title:"ONLY IBEE — THE FREQUENCY",text:shareText,url:myLink}).catch(function(){});}
+      else{ev.preventDefault();copy(myLink);}
+    };
+    if(ref){ var rb=$("refby"); rb.style.display="block"; rb.textContent="↳ RECRUITED BY "+ref; }
+  }
+
+  /* ---- visual states ---- */
+  function showGranted(){
+    grant.className="banner granted crtin";
+    grant.innerHTML=UNLOCK+" ACCESS GRANTED — WELCOME TO THE FREQUENCY";
+    $("mcard").style.display=""; $("recruit").style.display=""; $("actions").style.display="";
+    fillCard();
+  }
+  function showLocked(msg){
+    setHue(0);                                    // red glow when locked
+    grant.className="banner locked crtin";
+    grant.innerHTML=LOCK+" "+e2(msg);
+    $("mcard").style.display="none"; $("recruit").style.display="none"; $("actions").style.display="none";
+  }
+  /* open door: no pass is not a rejection — joining is free */
+  function showOpen(msg){
+    setHue(88);
+    grant.className="banner granted crtin";
+    grant.innerHTML=UNLOCK+" "+e2(msg);
+    $("mcard").style.display="none"; $("recruit").style.display="none"; $("actions").style.display="none";
+  }
+  function updSess(sess){
+    var el=$("sessline");
+    if(sess&&sess.user){ el.innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="logout" style="color:var(--acid)">log out</a>';
+      $("logout").onclick=function(ev){ev.preventDefault();sb.auth.signOut();}; }
+    else el.textContent='';
+  }
+
+  /* ---- item card (owned room) ---- */
+  function itemCard(item,label){
+    var rar=(item&&item.rarity)||'common', route=(item&&item.payload)||'', name=(item&&item.name)||'YOUR ROOM';
+    var cta = route ? '<a class="cbtn" href="../'+e2(route)+'">▶ ENTER '+e2(name)+'</a>'
+                    : '<div class="cnote">it\'s in your collection now_</div>';
+    return '<div class="item g-'+rar+'"><span class="rz '+(RCLASS[rar]||'r-common')+'">'+rar.toUpperCase()+'</span>'
+      +'<div class="ilabel">'+e2(label)+'</div><div class="iname">'+e2(name)+'</div>'+cta+'</div>'
+      +'<a class="cbtn" style="margin-top:10px;background:transparent;border:1px solid var(--acid);color:var(--acid)" href="../room/">⌂ FOUND YOUR OWN ROOM — pick your name_</a>'
+      +'<div class="cnote" style="margin-top:10px">The other two starter rooms are still out there — keep exploring to find them.</div>';
+  }
+
+  /* ================= routing ================= */
+  async function route(){
+    if(!sb){ showLocked("✕ BACKEND OFFLINE"); host.innerHTML='<div class="cnote">refresh in a moment_</div>'; return; }
+    var sess=(await sb.auth.getSession()).data.session;
+    updSess(sess);
+    var st = pass ? await rpc('card_status',{card_code:pass}) : {status:'none'};
+    var s = st&&st.status;
+    if(s==='available'){ showGranted(); redeemFlow(sess); }
+    else if(s==='owned'){ showGranted(); boxh.textContent="// YOUR ROOM_"; host.innerHTML=itemCard(st.item,'✓ YOURS'); }
+    else if(s==='taken'){ showLocked("SEAT TAKEN — THIS PASS IS CLAIMED");
+      boxh.textContent="// PASS STATUS_"; host.innerHTML='<div class="taken">'+LOCK+' This pass was already redeemed by another account.</div>'; }
+    else { lockedGate(sess, s==='invalid'); }        // 'invalid' or 'none'
+  }
+
+  /* ---- LOCKED: no valid pass → enter a code, or log in to see your collection ---- */
+  function lockedGate(sess, invalid){
+    /* red only for a bad code — a visitor with no pass gets an open door, not a wall */
+    if(invalid) showLocked("PASS NOT RECOGNIZED — CHECK THE CODE");
+    else if(sess) showOpen("CONNECTED — WELCOME BACK");
+    else showOpen("THE FREQUENCY IS OPEN — JOIN FREE");
+    boxh.textContent="// ENTER THE FREQUENCY_";
+    if(sess){
+      host.innerHTML='<div class="cnote" style="margin-bottom:10px">you\'re signed in.</div>'
+        +'<a class="cbtn" href="inventory/">♟ VIEW MY COLLECTION</a>';
+      return;
+    }
+    /* LOGIN LEADS. Landing on "enter a pass code" is confusing for the many more
+       visitors who have no garment and no code — it reads as a wall. Joining is
+       free and takes seconds, so that's the first thing offered; the code stays
+       right below it for the people who actually have one.
+       The one exception: someone who just typed a WRONG code gets the code field
+       back on top so they can correct it without hunting for it. */
+    var loginFirst = !invalid;
+    var codeBlock='<div class="sub">Got a pass code from your garment? Enter it:</div>'
+      +'<input id="gcode" placeholder="IBEE-XXXX-0000-XXXX" autocapitalize="characters" autocomplete="off">'
+      +'<button class="cbtn" id="gcodego">▶ UNLOCK WITH CODE</button>';
+    var loginBlock='<div class="sub"><b style="color:var(--ink)">New here?</b> Just an email and a password.</div>'
+      +'<input id="gemail" type="email" placeholder="your email" autocomplete="email" inputmode="email">'
+      +'<input id="gpass" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password">'
+      +'<button class="cbtn" id="gsignup">＋ CREATE ACCOUNT</button>'
+      +'<button class="cbtn" id="glogin" style="background:transparent;border:1px solid var(--acid);color:var(--acid);margin-top:8px">▶ LOG IN (already joined)</button>';
+    host.innerHTML='<div class="gate">'
+      +(loginFirst
+        ? loginBlock+'<div class="or">OR — GOT A PASS CODE?</div>'+codeBlock
+        : codeBlock+'<div class="or">OR JOIN / LOG IN</div>'+loginBlock)
+      +'<div class="cnote" id="gmsg"></div></div>';
+    $("gcodego").onclick=function(){ var c=($("gcode").value||'').toUpperCase().trim();
+      if(!c){$("gmsg").textContent='enter your code_';return;} location.search='?pass='+encodeURIComponent(c); };
+    $("gcode").addEventListener("keydown",function(e){ if(e.key==="Enter") $("gcodego").click(); });
+    $("gpass").addEventListener("keydown",function(e){ if(e.key==="Enter") $("glogin").click(); });
+    function gvalid(){
+      var em=($("gemail").value||'').trim(), pw=$("gpass").value||'';
+      if(!/.+@.+\..+/.test(em)){$("gmsg").textContent='enter your email_';return null;}
+      if(pw.length<6){$("gmsg").textContent='password needs 6+ characters_';return null;}
+      return {em:em,pw:pw};
+    }
+    $("glogin").onclick=async function(){
+      var v=gvalid(); if(!v)return;
+      $("glogin").disabled=true;$("gsignup").disabled=true;$("gmsg").textContent='…';
+      var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+      if(si.error){ $("gmsg").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ wrong email or password — new? tap CREATE ACCOUNT_'; $("glogin").disabled=false;$("gsignup").disabled=false; return; }
+      location.href='inventory/';
+    };
+    /* the 2-second join: email + password, no pass. Needs Supabase Auth "Confirm
+       email" OFF for an instant session (README §14); else prompts to confirm. */
+    $("gsignup").onclick=async function(){
+      var v=gvalid(); if(!v)return;
+      $("glogin").disabled=true;$("gsignup").disabled=true;$("gmsg").textContent='creating your account…';
+      var su=await sb.auth.signUp({email:v.em,password:v.pw});
+      if(su.error){
+        var m=String(su.error.message||'').toLowerCase();
+        if(m.indexOf('already')>=0||m.indexOf('registered')>=0){
+          var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
+          if(!si.error){ location.href='inventory/'; return; }
+          $("gmsg").textContent='✕ that email already has an account — check your password_';
+        } else { $("gmsg").textContent='✕ '+(su.error.message||'could not create account')+'_'; }
+        $("glogin").disabled=false;$("gsignup").disabled=false; return;
+      }
+      /* fresh account → straight to founding their room (nickname + starter pick) */
+      if(su.data&&su.data.session){ location.href='../room/'; return; }
+      $("gmsg").textContent='✓ account made — check your email to confirm, then log in_';
+      $("glogin").disabled=false;$("gsignup").disabled=false;
+    };
+  }
+
+  /* ---- GRANTED + unclaimed: redeem first, then account ---- */
+  function redeemFlow(sess){
+    boxh.textContent="// REDEEM YOUR PASS_";
+    if(sess){ starterPick(); return; }            // already signed in → pick right away
+    host.innerHTML='<div class="cnote" style="margin-bottom:10px">This pass is unclaimed. Redeem it to join the frequency and choose your first room.</div>'
+      +'<button class="cbtn" id="redeembtn">✦ REDEEM THIS PASS</button>';
+    $("redeembtn").onclick=authForm;
+  }
+
+  function authForm(){
+    boxh.textContent="// CREATE YOUR ACCESS_";
+    host.innerHTML='<div class="claim">'
+      +'<div class="cnote" style="text-align:left">One last step — your email + a password. That\'s your account.</div>'
+      +'<input id="cemail" type="email" placeholder="email" autocomplete="email" inputmode="email">'
+      +'<input id="cpass" type="password" placeholder="password (make one, 6+ chars)" autocomplete="new-password">'
+      +'<button class="cbtn" id="loginbtn">✦ JOIN THE FREQUENCY</button><div class="cnote" id="cmsg"></div></div>';
+    $("cpass").addEventListener("keydown",function(e){ if(e.key==="Enter") doAuth(); });
+    $("loginbtn").onclick=doAuth;
+  }
+
+  /* instant account: sign up (or log in if the email already exists), then pick a room */
+  async function doAuth(){
+    var email=($("cemail").value||'').trim(), pw=($("cpass").value||'');
+    if(!/.+@.+\..+/.test(email)){ $("cmsg").textContent='enter your email_'; return; }
+    if(pw.length<6){ $("cmsg").textContent='password: 6+ characters_'; return; }
+    $("loginbtn").disabled=true; $("cmsg").textContent='…';
+    await sb.auth.signUp({email:email,password:pw});
+    var sess=(await sb.auth.getSession()).data.session;
+    if(!sess){                                    // already registered, or email-confirm is still ON
+      var si=await sb.auth.signInWithPassword({email:email,password:pw});
+      if(si.error){
+        $("cmsg").textContent=/confirm/i.test(si.error.message)
+          ? '✉ confirm your email, then reopen this link_'
+          : '✕ that email already exists with a different password_';
+        $("loginbtn").disabled=false; return;
+      }
+      sess=(await sb.auth.getSession()).data.session;
+    }
+    if(sess){ starterPick(); }
+    else { $("cmsg").textContent='✉ check your email to confirm, then reopen this link_'; $("loginbtn").disabled=false; }
+  }
+
+  /* ---- CHOOSE YOUR STARTER ROOM (1 of 3) ---- */
+  function roomArt(formKey){
+    var svg=PFORMS[formKey]||PFORMS.floppy, src="data:image/svg+xml,"+encodeURIComponent(svg);
+    return '<div class="proom"><div class="part3">'
+      +'<div class="f"><img alt="" src="'+src+'"></div><div class="b"><img alt="" src="'+src+'"></div>'
+      +'</div></div>';
+  }
+  function starterPick(){
+    boxh.textContent="// CHOOSE YOUR STARTER ROOM_";
+    var cards=STARTERS.map(function(g){
+      var vibes=g.vibes.map(function(v){return '<span>'+e2(v)+'</span>';}).join('');
+      return '<button class="pick" data-id="'+g.id+'">'+roomArt(g.form)
+        +'<div class="pn">'+e2(g.name)+'</div>'
+        +'<div class="vibes">'+vibes+'</div>'
+        +'<div class="pdesc">'+e2(g.desc)+'</div>'
+        +'<div class="pt">▶ CHOOSE THIS ROOM</div></button>';
+    }).join('');
+    host.innerHTML='<div class="cnote" style="margin-bottom:12px">Welcome in. Step into your first room — the other two are still out there to discover.</div>'
+      +'<div class="picks">'+cards+'</div><div class="cnote" id="cmsg" style="margin-top:10px"></div>';
+    Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){
+      b.onclick=function(){ pickGame(b.getAttribute('data-id')); };
+    });
+  }
+  async function pickGame(id){
+    Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){b.disabled=true;});
+    var msg=$("cmsg"); if(msg)msg.textContent='opening your room…';
+    var r=await rpc('claim_card_pick',{card_code:pass, want:id});
+    if(r.status==='claimed'||r.status==='owned'){
+      boxh.textContent="// YOUR ROOM_"; host.innerHTML=itemCard(r.item, r.status==='owned'?'✓ YOURS':'✦ ROOM UNLOCKED');
+      toast(r.status==='owned'?'ALREADY YOURS_':'ROOM UNLOCKED_');
+    } else if(r.status==='taken'){ showLocked("SEAT TAKEN"); host.innerHTML='<div class="taken">'+LOCK+' This pass was just claimed by another account.</div>'; }
+    else if(r.status==='need_login'){ authForm(); }
+    else { if(msg)msg.textContent='✕ could not unlock ('+(r.error||r.status)+')'; Array.prototype.forEach.call(host.querySelectorAll('.pick'),function(b){b.disabled=false;}); }
+  }
+
+  /* re-route only when the session is dropped (sign-in transitions are driven explicitly) */
+  if(sb) sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') route(); });
+
+  /* ---- boot sequence → reveal → route (pass-talk only when there IS a pass) ---- */
+  var msgs=pass?["READING PASS…","VERIFYING SIGNATURE…","MATCHING FREQUENCY…","STAND BY…"]
+               :["CONNECTING…","TUNING THE FREQUENCY…","STAND BY…"];
+  var i=0,bar=$("bootbar"),bl=$("bootl");
+  (function step(){
+    bl.textContent=msgs[Math.min(i,msgs.length-1)];
+    bar.style.width=Math.min(100,(i+1)/msgs.length*100)+"%";
+    i++;
+    if(i<=msgs.length){ setTimeout(step, i===msgs.length?520:430); }
+    else{
+      $("boot").classList.add("gone");
+      $("stage").style.visibility="visible";
+      buildMedal();
+      route();
+    }
+  })();
+})();
+</script>
+<script src="../assets/player.js?v=25"></script>
+<script src="/assets/stats-client.js?v=7"></script>
+<script src="../assets/nav.js?v=1"></script>
+<script src="/assets/pulse.js?v=2"></script>
+</body>
+</html>

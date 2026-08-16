@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#0b0713">
+<meta property="og:image" content="https://onlyibee.com/assets/img/20mzs-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://onlyibee.com/assets/img/20mzs-cover.png">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20 MIN ZA SESSION — THE ROOM | ONLY IBEE</title>
+<meta name="description" content="20 MIN ZA SESSION by Only Ibee — a 20-minute one-take session for stunners. Roll up, hop in the whip, pull down the blinds. A radio for the late-night drive.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0713;--panel:#140d1f;--ink:#f4ecd8;--dim:#9a8fae;
+  --amber:#ff9d2b;--amber2:#ffcf5c;--za:#b6ff00;--pink:#ff5db2;--purple:#7b4bff;
+  --border:#2a2140;--px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:radial-gradient(circle at 50% -10%,#241238,var(--bg) 62%);
+  color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;overflow-x:hidden;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.6) 100%)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
+  border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--amber);text-decoration:none}header a .r{color:var(--pink)}
+header span{color:var(--dim);font-size:8px}
+.mq{overflow:hidden;border-bottom:2px solid var(--border);background:rgba(255,157,43,.08);
+  font-family:var(--px);font-size:9px;color:var(--amber);padding:8px 0;white-space:nowrap}
+.mq div{display:inline-block;animation:mq 20s linear infinite}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+main{max-width:1000px;margin:0 auto;padding:32px 18px 90px;position:relative;z-index:2;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+
+/* hero */
+.hero{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.logo{width:min(560px,90vw);filter:drop-shadow(0 8px 30px rgba(255,120,20,.35))}
+.albumcover{width:min(440px,86vw);aspect-ratio:1;object-fit:cover;display:block;border:3px solid var(--amber);
+  box-shadow:0 0 40px rgba(255,157,43,.35),0 20px 50px rgba(0,0,0,.6);
+  transform:scale(calc(1 + var(--zbeat,0)*.035));will-change:transform}
+h1{font-family:var(--px);font-size:clamp(15px,4.4vw,26px);letter-spacing:1px;color:var(--amber);
+  text-shadow:0 0 22px rgba(255,157,43,.5),3px 3px 0 #1a0e05;margin-top:16px}
+.sub{font-family:var(--px);font-size:clamp(8px,2.2vw,11px);color:var(--za);letter-spacing:2px;margin-top:8px}
+.meta{color:var(--dim);margin-top:8px;font-size:19px;letter-spacing:1px}
+
+/* ---------- the burning spliff (the play/seek bar) ----------
+   A hand-rolled cone burns the way you smoke it: you spark the FAT end and it
+   burns down to the roach. So the wide lit end is at the START of the bar
+   (0:00) and the pinched filter tip is at the END (20:00) — playback runs
+   left→right, wide→narrow, exactly like the thing burning down in your hand.
+   The taper lives on .cone (clip-path), which also clips the ash so the burnt
+   part keeps the cone silhouette. Ember, smoke and falling ash sit OUTSIDE
+   that clip so they can spill past it. */
+.spliff{display:flex;align-items:center;margin-top:18px;height:48px;cursor:pointer;touch-action:none;
+  padding-bottom:10px}
+.spliff .roach{width:30px;height:9px;flex:none;border-radius:2px 5px 5px 2px;margin-left:-4px;z-index:2;
+  background:linear-gradient(180deg,#c79a5e,#7a5330);box-shadow:inset 0 -2px 3px rgba(0,0,0,.4)}
+.spliff .stick{position:relative;flex:1;height:34px;overflow:visible}
+/* the rolled paper cone — fat at the lit end (left), pinched into the roach (right) */
+.spliff .cone{position:absolute;inset:0;z-index:1;
+  clip-path:polygon(0 0,100% 41%,100% 59%,0 100%);
+  background:linear-gradient(180deg,#f6efdc,#e4dac2 55%,#cfc3a4);
+  box-shadow:inset 0 -3px 5px rgba(0,0,0,.2),inset 0 2px 3px rgba(255,255,255,.5)}
+/* burnt-down section — grows left→right, clipped to the cone by its parent */
+.spliff .ash{position:absolute;left:0;top:0;height:100%;width:0;
+  background:repeating-linear-gradient(96deg,#8f8f8f 0 3px,#6a6a6a 3px 6px),linear-gradient(180deg,#9a9a9a,#3a3a3a);
+  box-shadow:inset 0 0 7px rgba(0,0,0,.55)}
+/* the lit cherry — widest when freshly sparked, shrinking as the cone tapers
+   down toward the roach. Flickers with the beat. */
+.spliff .ember{position:absolute;left:0;top:50%;z-index:3;
+  transform:translate(-50%,-50%);border-radius:50%;
+  width:calc(22px - var(--burn,0)*13px);height:calc(34px - var(--burn,0)*24px);
+  background:radial-gradient(circle at 50% 38%,#fff7d2,#ff9d2b 42%,#ff3b1a 80%);
+  box-shadow:0 0 calc(10px + var(--emb,0)*28px) rgba(255,110,30,.95),0 0 7px #ffcf5c,0 0 3px #fff}
+body.playing .spliff .ember{animation:emberflick .18s steps(2) infinite}
+@keyframes emberflick{0%{filter:brightness(1)}100%{filter:brightness(1.22)}}
+/* base smoke stream */
+.spliff .smoke{position:absolute;left:0;bottom:22px;width:16px;height:16px;margin-left:-8px;border-radius:50%;
+  background:radial-gradient(circle,rgba(235,228,246,.6),rgba(205,196,220,.25) 60%,transparent 74%);
+  filter:blur(3px);opacity:0;z-index:2}
+body.playing .spliff .smoke{animation:spliffsmoke 2.4s ease-out infinite}
+@keyframes spliffsmoke{0%{opacity:.7;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(22px,-64px) scale(2.8)}}
+/* extra rising smoke puffs (spawned in JS while playing) */
+.puff{position:absolute;bottom:22px;width:14px;height:14px;margin-left:-7px;border-radius:50%;z-index:2;pointer-events:none;
+  background:radial-gradient(circle,rgba(238,231,248,.55),rgba(205,196,220,.2) 60%,transparent 74%);
+  filter:blur(2px);animation:puffrise 2.8s ease-out forwards}
+@keyframes puffrise{0%{opacity:.72;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(30px,-74px) scale(2.7)}}
+/* falling ash flakes — crumble off the cherry and drop away below the cone.
+   ease-in on the fall so the flakes accelerate like real ash. */
+.ashbit{position:absolute;top:50%;z-index:3;pointer-events:none;border-radius:1px;
+  width:var(--sz,4px);height:var(--sz,4px);margin-left:calc(var(--sz,4px)/-2);
+  background:linear-gradient(180deg,#d6d6d6,#4a4a4a);box-shadow:0 0 3px rgba(255,120,40,.5);
+  animation:ashfall cubic-bezier(.4,0,.85,.5) forwards}
+@keyframes ashfall{0%{opacity:1;transform:translate(0,0) rotate(0)}
+  75%{opacity:.85}
+  100%{opacity:0;transform:translate(var(--dx,0px),var(--dy,86px)) rotate(var(--rot,300deg))}}
+
+.sec{margin-top:46px}
+.sh{font-family:var(--px);font-size:clamp(11px,3vw,16px);margin-bottom:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sh .a{color:var(--za)} .sh .m{color:var(--amber)} .sh .p{color:var(--pink)}
+.ssub{color:var(--dim);margin-bottom:20px;font-size:18px}
+.card{border:2px solid var(--border);background:rgba(20,13,31,.9);padding:18px 20px}
+.prose{font-size:22px;line-height:1.55;color:#d8cfe4}.prose p{margin-bottom:14px}
+.prose .a{color:var(--za)}.prose .m{color:var(--amber)}
+
+/* ---------- THE CASSETTE DECK ---------- */
+.deck{border:2px solid var(--amber);background:linear-gradient(180deg,#1c1330,#120b1e);
+  box-shadow:0 0 30px rgba(255,157,43,.2);padding:20px;position:relative;overflow:hidden}
+.tape{display:flex;align-items:center;gap:26px;justify-content:center;flex-wrap:wrap}
+.reel{width:120px;height:120px;border-radius:50%;border:6px solid #2a2140;background:
+  radial-gradient(circle,#0a0710 30%,#1a1230 31% 62%,#0a0710 63%);position:relative;flex:none}
+.reel::before{content:"";position:absolute;inset:38px;border-radius:50%;border:3px dashed var(--amber);opacity:.8}
+.reel .hub{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);
+  border-radius:50%;background:var(--amber);box-shadow:0 0 12px rgba(255,157,43,.6)}
+body.playing .reel .hub{box-shadow:0 0 calc(8px + var(--zbeat,0)*22px) rgba(255,157,43,.85)}
+body.playing .deck{box-shadow:0 0 calc(20px + var(--zbeat,0)*30px) rgba(255,157,43,.28)}
+.reel .spokes{position:absolute;inset:0;animation:spin 2.4s linear infinite;animation-play-state:paused}
+.reel .spokes i{position:absolute;top:50%;left:50%;width:46px;height:3px;background:#4a3a6a;transform-origin:0 50%}
+body.playing .reel .spokes{animation-play-state:running}
+@keyframes spin{to{transform:rotate(360deg)}}
+.win{flex:1;min-width:180px;text-align:center;color:var(--dim);font-size:18px}
+.win .lab{font-family:var(--px);font-size:9px;color:var(--amber2);letter-spacing:1px;margin-bottom:8px}
+.deckctrl{display:flex;gap:10px;margin-top:20px;justify-content:center;flex-wrap:wrap}
+.deckctrl button{font-family:var(--px);font-size:11px;padding:13px 18px;background:#0e0a18;color:var(--ink);
+  border:1px solid var(--border);cursor:pointer}
+.deckctrl button:hover{border-color:var(--amber);color:var(--amber)}
+.deckctrl button.main{background:var(--amber);color:#1a0e05;border-color:var(--amber)}
+#dseek{margin-top:16px;height:14px;border:1px solid var(--border);padding:2px;cursor:pointer;position:relative;touch-action:none}
+#dfill{height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--pink))}
+#dtimes{display:flex;justify-content:space-between;color:var(--dim);font-size:15px;margin-top:4px}
+
+/* ---------- USER MANUAL (converted from the old notice) ---------- */
+.manual{background:var(--amber);border:3px solid var(--amber);padding:6px}
+.manual .mh{text-align:center;color:#1a0e05;padding:16px 10px 6px}
+.manual .mh b{font-family:var(--px);font-size:clamp(13px,4vw,22px);display:block;letter-spacing:1px}
+.manual .mh span{font-size:19px;display:block;margin-top:8px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mcard{background:#0e0a18;padding:20px 14px 16px;text-align:center;cursor:default;position:relative}
+.mcard .ic{font-size:38px;line-height:1;filter:drop-shadow(0 0 14px rgba(255,157,43,.7));margin-bottom:12px}
+.mcard .t{font-family:var(--px);font-size:10px;color:var(--amber2);line-height:1.6;margin-bottom:10px}
+.mcard .d{color:var(--dim);font-size:17px;line-height:1.4}
+@media(max-width:640px){.mgrid{grid-template-columns:repeat(2,1fr)}.logo{width:96vw}}
+
+/* ---------- 9 SONGS ---------- */
+.tracks{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.trk{border:1px solid var(--border);background:var(--panel);padding:14px 12px;text-align:center;color:var(--dim)}
+.trk .n{font-family:var(--px);font-size:8px;color:var(--amber2);margin-bottom:8px}
+.trk .s{font-size:16px}
+.trk .lk{display:inline-block;margin-top:8px;font-family:var(--px);font-size:7px;color:var(--pink);
+  border:1px solid var(--pink);padding:4px 6px}
+
+/* ---------- 3D viewers ---------- */
+.viewers{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.viewers{grid-template-columns:1fr}}
+.viewer{border:2px solid var(--border);background:#0a0710;position:relative;aspect-ratio:1/1;overflow:hidden}
+.viewer canvas{display:block;width:100%!important;height:100%!important;cursor:grab}
+.viewer canvas:active{cursor:grabbing}
+.viewer .vlab{position:absolute;left:10px;top:10px;z-index:3;font-family:var(--px);font-size:8px;
+  color:var(--amber2);background:rgba(0,0,0,.6);padding:6px 8px;letter-spacing:1px}
+.viewer .vhint{position:absolute;left:10px;bottom:10px;z-index:3;font-size:15px;color:var(--dim);
+  background:rgba(0,0,0,.55);padding:4px 8px}
+.viewer .vload{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:12px;font-family:var(--px);font-size:9px;color:var(--amber);text-align:center;padding:16px;line-height:1.9}
+.viewer .vspin{width:26px;height:26px;border:3px solid #2a2140;border-top-color:var(--amber);border-radius:50%;animation:spin 1s linear infinite}
+
+/* ---------- videos ---------- */
+.vids{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.vids{grid-template-columns:1fr}}
+.vid{border:2px solid var(--border);background:#000;aspect-ratio:16/9;position:relative}
+.vid iframe{width:100%;height:100%;border:0;display:block}
+
+/* ---------- actions ---------- */
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:46px}
+.btn{font-family:var(--px);font-size:10px;padding:14px 18px;text-decoration:none;background:var(--amber);color:#1a0e05}
+.btn.alt{background:transparent;color:var(--za);border:1px solid var(--za)}
+.btn.claim{background:var(--za);color:#0a1400}
+.btn:active{transform:translateY(2px)}
+#toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9500;
+  font-family:var(--px);font-size:9px;color:var(--ink);background:rgba(0,0,0,.92);border:1px solid var(--amber);
+  padding:10px 16px;opacity:0;transition:all .3s ease;pointer-events:none;max-width:92vw;text-align:center;line-height:1.8}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+
+/* ============================================================
+   THE ROOM — night-drive haze. It looks like a normal page,
+   then the tape rolls and the room lights up: a road unspooling
+   into the dark, warm streetlights sliding by, smoke drifting.
+   Only visible while the cassette plays (body.playing).
+   ============================================================ */
+#room{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.6s ease}
+body.playing #room{opacity:1}
+#drive{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block}
+.smoke{position:fixed;bottom:-10%;width:420px;height:420px;border-radius:50%;filter:blur(48px);opacity:0;
+  background:radial-gradient(circle,rgba(255,157,43,.16),transparent 62%);animation:smoke linear infinite}
+body.playing .smoke{opacity:1}
+.smoke.s2{background:radial-gradient(circle,rgba(123,75,255,.18),transparent 62%);animation-duration:26s;animation-delay:-8s;left:60%}
+.smoke.s1{left:8%;animation-duration:34s}
+.smoke.s3{background:radial-gradient(circle,rgba(255,93,178,.14),transparent 62%);left:34%;animation-duration:30s;animation-delay:-16s}
+@keyframes smoke{from{transform:translateY(30vh) scale(.7)}to{transform:translateY(-120vh) scale(1.5)}}
+#roomtag{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:9;opacity:0;
+  font-family:var(--px);font-size:9px;color:var(--amber);letter-spacing:2px;text-align:center;
+  text-shadow:0 0 14px rgba(255,157,43,.7);transition:opacity 1s ease;pointer-events:none;line-height:1.9}
+body.playing #roomtag{opacity:.92}
+
+/* who actually made the mix — sits with the player, not buried in the credits */
+.mixcred{margin-top:14px;display:flex;flex-direction:column;gap:5px;
+  font-family:'Press Start 2P',monospace;font-size:7px;line-height:1.7;color:#7a7a7a;
+  border-left:2px solid var(--amber,#ff9d2b);padding-left:10px}
+.mixcred b{color:var(--amber,#ff9d2b);font-weight:normal}
+
+/* ---------- THE FEATURES — collaborator faces, tap through to instagram ---------- */
+.feats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;max-width:820px;margin-top:6px}
+.fcard{position:relative;display:block;text-decoration:none;border:2px solid #2a2a2a;background:#0d0d10;
+  overflow:hidden;transition:transform .14s,border-color .14s,box-shadow .14s}
+a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
+  box-shadow:0 0 18px rgba(255,157,43,.35)}
+.fcard .ph{display:block;aspect-ratio:287/323;overflow:hidden;background:#000}
+.fcard .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.fcard .cn{display:block;font-family:'Press Start 2P',monospace;font-size:8px;color:#e8e8e8;
+  padding:9px 8px;border-top:2px solid #2a2a2a;line-height:1.6}
+.fcard .ig{display:block;margin-top:5px;font-size:7px;color:var(--amber,#ff9d2b)}
+.fcard .ig.none{color:#4a4a4a}
+.fcard.noig{cursor:default;opacity:.92}
+.mixcred.big{margin-top:22px;font-size:8px}
+
+/* ---------- the instagram box ---------- */
+#igbox{position:fixed;inset:0;z-index:9600;display:none;align-items:center;justify-content:center;
+  padding:16px;background:rgba(0,0,0,.82)}
+#igbox.on{display:flex}
+#igcard{position:relative;width:min(430px,96vw);background:#0a0a0a;border:2px solid var(--amber,#ff9d2b);
+  box-shadow:0 20px 60px rgba(0,0,0,.8);display:flex;flex-direction:column;max-height:92dvh}
+#ighead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;
+  border-bottom:2px solid #2a2a2a;font-family:'Press Start 2P',monospace;font-size:9px;
+  color:var(--amber,#ff9d2b)}
+#igx{cursor:pointer;color:#7a7a7a;font-size:11px;padding:2px 6px}
+#igx:hover{color:#ff2b2b}
+#igframe{width:100%;height:min(560px,66dvh);border:0;background:#fff;display:block}
+#igopen{display:block;text-align:center;padding:12px;font-family:'Press Start 2P',monospace;font-size:8px;
+  color:#000;background:var(--amber,#ff9d2b);text-decoration:none}
+#igopen:hover{filter:brightness(1.12)}
+</style>
+</head>
+<body>
+<!-- THE ROOM — dormant night-drive layer, wakes when the tape rolls -->
+<div id="room" aria-hidden="true">
+  <canvas id="drive"></canvas>
+  <div class="smoke s1"></div><div class="smoke s2"></div><div class="smoke s3"></div>
+</div>
+<header>
+  <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
+  <span>ZA.SYS</span>
+</header>
+<div class="mq"><div>
+  +++ 20 MIN ZA SESSION +++ ONE TAKE · 20 MINUTES · NO SKIPS +++ ROLL UP · HOP IN THE WHIP · PULL DOWN THE BLINDS +++ A RADIO FOR STUNNERS +++&nbsp;
+  +++ 20 MIN ZA SESSION +++ ONE TAKE · 20 MINUTES · NO SKIPS +++ ROLL UP · HOP IN THE WHIP · PULL DOWN THE BLINDS +++ A RADIO FOR STUNNERS +++&nbsp;
+</div></div>
+
+<main>
+  <!-- hero — the album cover, up top -->
+  <div class="hero">
+    <img class="albumcover" id="acover" src="../assets/img/20mzs-album.png" alt="20 Min Za Session — album cover">
+    <h1>20 MIN ZA SESSION</h1>
+    <div class="sub">— A RADIO FOR STUNNERS —</div>
+    <div class="meta">2024 · TORONTO · ONE TAKE · 20 MINUTES · BY ONLY IBEE</div>
+  </div>
+
+  <!-- THE CASSETTE DECK — the spliff burns as it plays (player first, then the 9 songs) -->
+  <div class="sec">
+    <div class="sh">THE <span class="m">TAPE DECK</span>_</div>
+    <div class="ssub">spark it up — the spliff burns down as the session rolls_</div>
+    <div class="deck">
+      <div class="tape">
+        <div class="reel"><div class="spokes" id="sp1"></div><div class="hub"></div></div>
+        <div class="win"><div class="lab">NOW ROLLING</div><div id="dtitle">20 MIN ZA SESSION — ONE TAKE</div></div>
+        <div class="reel"><div class="spokes" id="sp2"></div><div class="hub"></div></div>
+      </div>
+      <div class="spliff" id="spliff" title="drag the ember to seek">
+        <span class="stick" id="stick">
+          <span class="cone"><span class="ash" id="ash"></span></span>
+          <span class="smoke" id="smk"></span>
+          <span class="ember" id="ember"></span>
+        </span>
+        <span class="roach"></span>
+      </div>
+      <div id="dtimes"><span id="dcur">0:00</span><span id="dtot">20:00</span></div>
+      <div class="mixcred">
+        <span>ORIGINAL MIX WITH VOICE OVERS <b>BY JOHN SCHOFIELD</b></span>
+        <span>RECORDING AND MIXING <b>BY IBEE</b></span>
+      </div>
+      <div class="deckctrl">
+        <button id="dback" title="rewind 15s">◀◀ 15</button>
+        <button id="dplay" class="main">► SPARK THE SESSION</button>
+        <button id="dfwd" title="forward 15s">15 ▶▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 SONGS — right under the player -->
+  <div class="sec">
+    <div class="sh">THE <span class="p">9 SONGS</span>_</div>
+    <div class="ssub" id="tracksub">the session splits into 9 — dropping later with lyrics + stories. sealed for now_</div>
+    <div class="tracks" id="tracks"></div>
+  </div>
+
+  <!-- videos -->
+  <!-- the instagram box: their profile, without leaving the site.
+       instagram.com/<handle>/embed renders avatar + followers + a live post grid
+       inside a frame (checked — profile embeds are allowed, unlike post embeds
+       which need a real shortcode). The ↗ link is still there for the full thing. -->
+  <div id="igbox" aria-hidden="true">
+    <div id="igcard">
+      <div id="ighead"><span id=" igname"></span><span id="igname"></span>
+        <span id="igx" title="close">✕</span></div>
+      <iframe id="igframe" title="Instagram profile" loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <a id="igopen" target="_blank" rel="noopener noreferrer">OPEN ON INSTAGRAM ↗</a>
+    </div>
+  </div>
+
+  <!-- ===== CREDITS — the people on the session ===== -->
+  <div class="sec" id="credits">
+    <div class="stitle">THE <span class="am">FEATURES</span> _</div>
+    <div class="ssub">the voices on the session — tap a face to find them on instagram_</div>
+    <div class="feats">
+        <a class="fcard" data-ig href="https://www.instagram.com/sutrashawty/" target="_blank" rel="noopener noreferrer" title="@sutrashawty on Instagram"><span class="ph"><img src="https://static.wixstatic.com/media/0fcae7_3ffbd61197e342319dee9cb2788b5907~mv2.jpg/v1/fill/w_400,h_450,al_c,q_85,enc_auto/x.jpg" alt="KARMA SUTRA" loading="lazy"></span><span class="cn">KARMA SUTRA<span class="ig">@sutrashawty</span></span></a>
+        <a class="fcard" data-ig href="https://www.instagram.com/g_saltee/" target="_blank" rel="noopener noreferrer" title="@g_saltee on Instagram"><span class="ph"><img src="https://static.wixstatic.com/media/0fcae7_e80df78cf2b64add8829f0e3d44a350e~mv2.jpg/v1/fill/w_400,h_450,al_c,q_85,enc_auto/x.jpg" alt="G SALTE" loading="lazy"></span><span class="cn">G SALTE<span class="ig">@g_saltee</span></span></a>
+        <a class="fcard" data-ig href="https://www.instagram.com/gotcho_the_wrong/" target="_blank" rel="noopener noreferrer" title="@gotcho_the_wrong on Instagram"><span class="ph"><img src="https://static.wixstatic.com/media/0fcae7_b4c266183f874a81b3ce41eca869b58f~mv2.jpg/v1/fill/w_400,h_450,al_c,q_85,enc_auto/x.jpg" alt="GOTCHO" loading="lazy"></span><span class="cn">GOTCHO<span class="ig">@gotcho_the_wrong</span></span></a>
+        <a class="fcard" data-ig href="https://www.instagram.com/lukazam/" target="_blank" rel="noopener noreferrer" title="@lukazam on Instagram"><span class="ph"><img src="https://static.wixstatic.com/media/0fcae7_741def71ac294f95b18e3e03e716a586~mv2.jpg/v1/fill/w_400,h_450,al_c,q_85,enc_auto/x.jpg" alt="LUKAZAM" loading="lazy"></span><span class="cn">LUKAZAM<span class="ig">@lukazam</span></span></a>
+        <a class="fcard" data-ig href="https://www.instagram.com/inxsgb/" target="_blank" rel="noopener noreferrer" title="@inxsgb on Instagram"><span class="ph"><img src="https://static.wixstatic.com/media/0fcae7_8cba33a49e174b74ab5b6749aaa9a08d~mv2.jpg/v1/fill/w_400,h_450,al_c,q_85,enc_auto/x.jpg" alt="INES" loading="lazy"></span><span class="cn">INES<span class="ig">@inxsgb</span></span></a>
+        <a class="fcard" data-ig href="https://www.instagram.com/harwariss/" target="_blank" rel="noopener noreferrer" title="@harwariss on Instagram"><span class="ph"><img src="https://static.wixstatic.com/media/0fcae7_342d59f8a9ff4ffdb96cab63b8236fd5~mv2.png/v1/fill/w_400,h_450,al_c,q_85,enc_auto/x.png" alt="WARIS" loading="lazy"></span><span class="cn">WARIS<span class="ig">@harwariss</span></span></a>
+        <span class="fcard noig"><span class="ph"><img src="https://static.wixstatic.com/media/0fcae7_eddafaa9ee1e40dc87e65b36f15586d2~mv2.jpg/v1/fill/w_400,h_450,al_c,q_85,enc_auto/x.jpg" alt="MR TED" loading="lazy"></span><span class="cn">MR TED<span class="ig none">—</span></span></span>
+    </div>
+    <div class="mixcred big">
+      <span>ORIGINAL MIX WITH VOICE OVERS <b>BY JOHN SCHOFIELD</b></span>
+      <span>RECORDING AND MIXING <b>BY IBEE</b></span>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sh">THE <span class="m">VISUALS</span>_</div>
+    <div class="ssub">two moving pieces from the session_</div>
+    <div class="vids">
+      <div class="vid"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/MaCk7vngdrA" title="20MZS video 1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="vid"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/f8bar-0NK10" title="20MZS video 2" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+    </div>
+  </div>
+
+  <!-- USER MANUAL (old notice, reborn) — data-driven (see MAN[] in the script / studio) -->
+  <div class="sec">
+    <div class="sh">20 MIN ZA SESSION <span class="m">USER MANUAL</span>_</div>
+    <div class="ssub">roll up your spliffs, hop in the whip, pull down the blinds… here's what u can do during your 20 min session_</div>
+    <div class="manual">
+      <div class="mh"><b>USER MANUAL</b><span>six ways to spend your twenty minutes_</span></div>
+      <div class="mgrid" id="mgrid"></div>
+    </div>
+  </div>
+
+  <!-- 3D relics -->
+  <div class="sec">
+    <div class="sh">3D <span class="a">RELICS</span>_</div>
+    <div class="ssub">scanned from the session — drag to spin them, scroll to zoom_</div>
+    <div class="viewers">
+      <div class="viewer" data-src="models/ibee-scan.fbx" data-scale="cover">
+        <div class="vlab">IBEE // 3D SCAN</div>
+        <div class="vhint">drag to rotate · scroll to zoom</div>
+        <div class="vload"><div class="vspin"></div>LOADING THE SCAN_<br><small style="font-size:14px;color:var(--dim)">~14MB · give it a sec</small></div>
+      </div>
+      <div class="viewer" data-src="models/ted-living-room.fbx" data-scale="cover">
+        <div class="vlab">TED'S LIVING ROOM</div>
+        <div class="vhint">drag to rotate · scroll to zoom</div>
+        <div class="vload"><div class="vspin"></div>LOADING THE ROOM_<br><small style="font-size:14px;color:var(--dim)">~28MB · give it a sec</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- about — short, at the bottom -->
+  <div class="sec">
+    <div class="sh"><span class="m">//</span> WHAT IS <span class="a">THE SESSION</span>_</div>
+    <div class="card prose">
+      <p>project made in <span class="a">Toronto</span>, baked af, met some cool humans_ 🍃</p>
+      <p><span class="m">20 minutes, one take, no skips.</span> free for members.</p>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a class="btn claim" id="claimbtn" href="../member/inventory/">＋ ADD TO MY COLLECTION — FREE</a>
+    <a class="btn" href="../?tag=20MZS">▶ ENTER THE GALAXY</a>
+  </div>
+</main>
+
+<div id="toast"></div>
+<footer>© ONLYIBEE — 20 MIN ZA SESSION · ONE TAKE, ONE NIGHT</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(id){return document.getElementById(id);};
+  var body=document.body;
+
+  /* ---------- toast ---------- */
+  var toastEl=$("toast"),tt=null;
+  function toast(m,d){toastEl.innerHTML=m;toastEl.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove("show");},d||3000);}
+
+  /* ---------- USER MANUAL cards (from the old notice) ---------- */
+  var MAN=[
+    {ic:"🌆",t:"Late-Night GTA Cruise",d:"I choose each beat while cruising in GTA V. Might make sense if it sounds so blessed while you're playin' it!"},
+    {ic:"🚿",t:"Shower Serenade Session",d:"How long is a shower? 🤔 Long enough for one full session."},
+    {ic:"🧹",t:"Cleaning Groove Guide",d:"Doing the dishes with a crazy playlist is actually a vibe fr."},
+    {ic:"🍃",t:"Smoke & Chill",d:"duuuh !"},
+    {ic:"🌃",t:"Late-Night Walk Mix",d:"While I'm creating the project, I like to go for walks at 3 AM."},
+    {ic:"👕",t:"Outfit Check Playlist",d:"Have u ever tried to put some nasty drip on, while bumping this? Try it."}
+  ];
+  $("mgrid").innerHTML=MAN.map(function(m){
+    return '<div class="mcard"><div class="ic">'+m.ic+'</div><div class="t">'+m.t+'</div><div class="d">'+m.d+'</div></div>';
+  }).join('');
+
+  /* ---------- the 9 songs — DATA-DRIVEN (fed by IBEE STUDIO later) ----------
+     The session splits into 9. Those songs arrive from the song data: add them in
+     IBEE STUDIO as records with galaxy g:"mzs" (assets/songs-extra.js) and they
+     render here on their own — tapping one plays it on the radio, in sync. Until
+     the data is supplied, the slots stay sealed. No code edit needed to fill them. */
+  function mzsSongs(){
+    var out=[]; try{
+      var ex=window.IBEE_SONGS_EXTRA||(window.top&&window.top.IBEE_SONGS_EXTRA);
+      ((ex&&ex.songs)||[]).forEach(function(s){ if(s&&s.g==="mzs"&&s.f!=="20mzs.mp3") out.push(s); });
+    }catch(e){}
+    return out;
+  }
+  function playSong(f,tries){ tries=tries||0; var r=RADIO();
+    if(!r){ if(tries<40) setTimeout(function(){ playSong(f,tries+1); },200); return; }
+    var ri=r.indexBySlug?r.indexBySlug(f):-1;
+    if(ri<0){ if(tries<40) setTimeout(function(){ playSong(f,tries+1); },250); return; }
+    if(r.current()===ri && r.playing()) r.control.pause(); else r.control.play(ri);
+  }
+  function renderTracks9(){
+    var tk=$("tracks"), songs=mzsSongs(), th="";
+    for(var i=0;i<9;i++){ var s=songs[i], n2=(i+1<10?"0":"")+(i+1);
+      if(s){ th+='<div class="trk live" data-f="'+(s.f||'')+'" style="cursor:pointer"><div class="n">SONG '+n2+'</div>'
+        +'<div class="s">'+(s.n||'—')+'</div><div class="lk" style="color:var(--za);border-color:var(--za)">▶ PLAY</div></div>'; }
+      else { th+='<div class="trk"><div class="n">SONG '+n2+'</div><div class="s">??????</div><div class="lk">SEALED</div></div>'; }
+    }
+    tk.innerHTML=th;
+    if(songs.length){ var sub=$("tracksub"); if(sub) sub.textContent="the session splits into 9 — tap one to play_"; }
+    Array.prototype.forEach.call(tk.querySelectorAll(".trk.live"),function(el){
+      el.onclick=function(){ playSong(el.getAttribute("data-f")); };
+    });
+  }
+  renderTracks9();
+  /* the studio records load async (songs-extra.js) — pick them up when they arrive */
+  setTimeout(renderTracks9,1500); setTimeout(renderTracks9,3500);
+
+  /* =====================================================================
+     THE TAPE DECK — the one 20-minute take. Playing it opens THE ROOM.
+     Uses the site radio bridge so the radio steps aside (and vice-versa).
+     ===================================================================== */
+  /* ---- ONE RADIO, IN SYNC ----------------------------------------------------
+     The session lives on the site radio as the "20MZS" track (assets/audio/20mzs.mp3,
+     al:"mzs"). The deck no longer owns an <audio> element — SPARK THE SESSION DRIVES
+     the radio, so it plays here AND on the radio bar (the same stream) and keeps
+     rolling when you leave the room. A sync loop mirrors the radio back: arrive while
+     the session is already on air and the deck lights up + the night-drive opens by
+     itself. The spliff/road read the radio's audio at the playhead (background-safe). */
+  function RADIO(){ try{ return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null; }catch(e){ return null; } }
+  function fmt(s){ if(!isFinite(s))return "--:--"; var m=Math.floor(s/60),ss=Math.floor(s%60); return m+":"+(ss<10?"0":"")+ss; }
+  function mzsIdx(){ var r=RADIO(); return (r&&r.indexBySlug)?r.indexBySlug("20mzs.mp3"):-1; }
+  function isMzsOn(){ var r=RADIO(); try{ return !!(r&&r.slug&&r.slug()==="20mzs.mp3"); }catch(e){ return false; } }
+
+  function playPauseDeck(tries){
+    tries=tries||0; var r=RADIO();
+    if(!r){ if(tries<40) setTimeout(function(){ playPauseDeck(tries+1); },200); else toast("tap again to roll the tape_"); return; }
+    if(isMzsOn() && r.playing()){ r.control.pause(); return; }
+    if(isMzsOn()){ r.control.play(); return; }
+    var ri=mzsIdx();
+    if(ri<0){ if(tries<40) setTimeout(function(){ playPauseDeck(tries+1); },250); return; }
+    r.control.play(ri);
+  }
+  $("dplay").onclick=function(){ playPauseDeck(); };
+  $("dback").onclick=function(){ if(!isMzsOn())return; var r=RADIO(); try{ r.audio.currentTime=Math.max(0,(r.audio.currentTime||0)-15); }catch(e){} };
+  $("dfwd").onclick=function(){ if(!isMzsOn())return; var r=RADIO(); try{ if(r.audio.duration) r.audio.currentTime=Math.min(r.audio.duration,(r.audio.currentTime||0)+15); }catch(e){} };
+
+  /* the spliff burns down as the session rolls: ash grows, ember + smoke ride the burn line */
+  var ash=$("ash"),ember=$("ember"),smk=$("smk");
+  var burn=0;
+  function setProgress(fr){
+    fr=Math.max(0,Math.min(1,fr)); var pct=(fr*100)+"%";
+    burn=fr;
+    ash.style.width=pct; ember.style.left=pct; smk.style.left=pct;
+    /* the cone NARROWS as it burns toward the roach, so the cherry shrinks */
+    ember.style.setProperty("--burn",fr.toFixed(3));
+  }
+  /* ---- badge: ride the WHOLE 20-minute mix → CERTIFIED STONER. Flagged in its
+     own localStorage key ("ibee_mzs_full") once you're past 92% (or it ends). ---- */
+  function mzsCertify(){ try{ localStorage.setItem("ibee_mzs_full","1"); }catch(e){} }
+
+  /* draggable seek along the spliff → seek the radio (only while the session is on air) */
+  var stick=$("stick"),scr=false;
+  function seekTo(e){ if(!isMzsOn())return; var r=RADIO(),rc=stick.getBoundingClientRect(),x=(e.touches?e.touches[0].clientX:e.clientX)-rc.left;
+    var fr=Math.max(0,Math.min(1,x/rc.width)); try{ if(r.audio.duration) r.audio.currentTime=fr*r.audio.duration; }catch(e2){} setProgress(fr); }
+  var spl=$("spliff");
+  spl.addEventListener("pointerdown",function(e){ scr=true; try{spl.setPointerCapture(e.pointerId);}catch(x){} seekTo(e); });
+  spl.addEventListener("pointermove",function(e){ if(scr) seekTo(e); });
+  spl.addEventListener("pointerup",function(e){ scr=false; try{spl.releasePointerCapture(e.pointerId);}catch(x){} });
+
+  /* the sync loop: the radio is the single source of truth (4×/sec) */
+  function syncDeck(){
+    var r=RADIO(); if(!r)return;
+    var on=isMzsOn(), playing=false; try{ playing=!!r.playing(); }catch(e){}
+    var c=0,d=0; try{ c=r.audio.currentTime||0; d=r.audio.duration||0; }catch(e){}
+    if(on){
+      $("dtot").textContent=fmt(d||1200);
+      $("dcur").textContent=fmt(c);
+      if(d){ setProgress(c/d); if(d>60 && c>=d*0.92) mzsCertify(); }
+      $("dplay").textContent=playing?"❚❚ PAUSE":"► SPARK THE SESSION";
+      if(playing) startRoom(); else stopRoom();
+    } else {
+      $("dplay").textContent="► SPARK THE SESSION"; stopRoom();
+    }
+  }
+  setInterval(syncDeck,250); syncDeck();
+
+  /* spokes for the reels */
+  function spokes(el){ var h=""; for(var a=0;a<6;a++){ h+='<i style="transform:translate(-50%,-50%) rotate('+(a*60)+'deg)"></i>'; } el.innerHTML=h; }
+  spokes($("sp1")); spokes($("sp2"));
+
+  /* ---- rising smoke puffs + falling ash flakes off the burning cherry ----
+     Only while the session rolls (body.playing). Both emit from the ember's
+     current burn position (ember.style.left), so they track the spliff as it
+     burns down. Elements self-remove when their animation ends. */
+  function emberLeft(){ return ember.style.left || "0%"; }
+  function spawnPuff(){ if(!body.classList.contains("playing"))return;
+    var p=document.createElement("span"); p.className="puff"; p.style.left=emberLeft();
+    p.style.animationDuration=(2.3+Math.random()*0.9)+"s"; stick.appendChild(p);
+    setTimeout(function(){ if(p.parentNode)p.remove(); },3400); }
+  /* ash crumbles off the cherry and drops away. The fat end has the most paper
+     and packed material burning, so flakes are biggest and fall in the biggest
+     clumps early on, thinning out as the cone tapers toward the roach. */
+  function spawnAsh(){ if(!body.classList.contains("playing"))return;
+    var fat=1-burn;                                  /* 1 at the lit fat end → 0 at the roach */
+    var n=1+Math.round(Math.random()*(1+fat*2));
+    for(var i=0;i<n;i++){
+      var a=document.createElement("span"); a.className="ashbit"; a.style.left=emberLeft();
+      a.style.setProperty("--sz",(2.5+Math.random()*(2.5+fat*3.5)).toFixed(1)+"px");
+      a.style.setProperty("--dx",(Math.random()*26-13).toFixed(0)+"px");
+      a.style.setProperty("--dy",(60+Math.random()*55).toFixed(0)+"px");
+      a.style.setProperty("--rot",(180+Math.random()*320).toFixed(0)+"deg");
+      a.style.animationDelay=(Math.random()*0.22).toFixed(2)+"s";
+      a.style.animationDuration=(1.0+Math.random()*1.0)+"s"; stick.appendChild(a);
+      (function(el){ setTimeout(function(){ if(el.parentNode)el.remove(); },2600); })(a);
+    }
+  }
+  setInterval(spawnPuff,380);
+  setInterval(spawnAsh,420);
+
+  /* =====================================================================
+     THE ROOM — a road unspooling into the dark, streetlights sliding by,
+     smoke drifting. Canvas driven while the tape rolls.
+     ===================================================================== */
+  var driving=false, cv=$("drive"), cx=cv.getContext("2d");
+  var W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1), lights=[], stars=[], t0=0;
+  function sizeDrive(){
+    W=window.innerWidth||document.documentElement.clientWidth||screen.width||1280;
+    H=window.innerHeight||document.documentElement.clientHeight||screen.height||720;
+    cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
+    buildStars();
+  }
+  window.addEventListener("resize",function(){ if(driving) sizeDrive(); });
+  function spawnLight(){ lights.push({z:1, side:Math.random()<.5?-1:1, hue:Math.random()<.5?"#ff9d2b":"#7b4bff", life:0}); }
+  /* a fixed field of stars scattered across the night sky (above the horizon) */
+  function buildStars(){ stars=[]; var horizon=H*0.40, n=Math.round(W/16);
+    for(var i=0;i<n;i++) stars.push({x:Math.random()*W,y:Math.random()*horizon,r:Math.random()*1.3+0.3,ph:Math.random()*6.28,tw:0.6+Math.random()*1.6}); }
+  /* NIGHT — dark sky above the road, a glowing moon, a scatter of twinkling stars.
+     Drawn first each frame so the road + lights sit on top of the night. This is
+     what makes "outside the road" read as a dark night while the tape plays. */
+  function drawNight(horizon){
+    var sky=cx.createLinearGradient(0,0,0,horizon);
+    sky.addColorStop(0,"rgba(3,2,9,0.94)"); sky.addColorStop(1,"rgba(15,9,28,0.88)");
+    cx.fillStyle=sky; cx.fillRect(0,0,W,horizon);
+    cx.fillStyle="rgba(6,4,15,0.82)"; cx.fillRect(0,horizon,W,H-horizon);   // dark ground wash
+    /* stars */
+    var now=performance.now()/1000;
+    for(var i=0;i<stars.length;i++){ var s=stars[i], a=0.35+0.5*Math.abs(Math.sin(now*s.tw+s.ph));
+      cx.globalAlpha=a; cx.fillStyle="#fff7ea"; cx.beginPath(); cx.arc(s.x,s.y,s.r,0,7); cx.fill(); }
+    cx.globalAlpha=1;
+    /* the moon, up in the corner, with a soft halo */
+    var mx=W*0.80, my=horizon*0.42, mr=Math.max(24,Math.min(50,W*0.055));
+    var halo=cx.createRadialGradient(mx,my,0,mx,my,mr*2.6);
+    halo.addColorStop(0,"rgba(255,250,235,0.85)"); halo.addColorStop(0.42,"rgba(255,240,205,0.4)"); halo.addColorStop(1,"transparent");
+    cx.fillStyle=halo; cx.beginPath(); cx.arc(mx,my,mr*2.6,0,7); cx.fill();
+    cx.fillStyle="rgba(255,250,240,0.98)"; cx.beginPath(); cx.arc(mx,my,mr,0,7); cx.fill();
+    cx.fillStyle="rgba(206,201,186,0.5)";
+    cx.beginPath(); cx.arc(mx-mr*0.32,my-mr*0.22,mr*0.22,0,7); cx.fill();
+    cx.beginPath(); cx.arc(mx+mr*0.26,my+mr*0.30,mr*0.15,0,7); cx.fill();
+    cx.beginPath(); cx.arc(mx+mr*0.05,my-mr*0.4,mr*0.1,0,7); cx.fill();
+  }
+
+  /* ---- beat from the song's own data: read the pressed groove for 20mzs.mp3
+     (window.IBEE_BEAT, self-loaded by player.js) at the playhead — same
+     architecture the radio + universe use. No Web Audio → background-safe. ---- */
+  var beat=0, level=0, emaLow=0, scrollPos=0, lastT=0;
+  function groove(){
+    var r=RADIO(),B=window.IBEE_BEAT; if(!B) return null;
+    var g=B["20mzs.mp3"]||B["20mzs-raw.mp3"]; if(!g) return null;
+    var t=0; try{ t=(r&&r.audio.currentTime)||0; }catch(e){}
+    var idx=Math.max(0,Math.min(g.low.length-1,Math.floor(t*g.r)));
+    return { low:parseInt(g.low.charAt(idx),36)/35, lv:parseInt(g.lvl.charAt(idx),36)/35 };
+  }
+  function stepBeat(){
+    var gv=groove();
+    if(gv){
+      emaLow+=(gv.low-emaLow)*0.1;
+      var on=Math.max(0,gv.low-emaLow*1.15);
+      beat=Math.max(beat*0.86,Math.min(1,gv.low*0.5+on*3.2));
+      level+=(gv.lv-level)*0.2;
+    } else {                                   // no data → gentle synthetic pulse
+      beat=Math.max(beat*0.86,Math.pow(Math.abs(Math.sin(performance.now()/430)),8));
+      level+=(0.32-level)*0.05;
+    }
+    /* push it to the DOM: album cover breathes, spliff ember flares */
+    var root=document.documentElement.style;
+    root.setProperty("--zbeat",beat.toFixed(3));
+    if(ember) ember.style.setProperty("--emb",beat.toFixed(3));
+  }
+
+  function drawDrive(){
+    if(!driving) return;
+    requestAnimationFrame(drawDrive);
+    stepBeat();
+    cx.clearRect(0,0,W,H);
+    var horizon=H*0.40, cxp=W/2;
+    drawNight(horizon);
+    /* road — WIDER: near-full width at the bottom, a broad apex at the horizon */
+    var apex=26+beat*10, base=W*0.50;         // half-width of the road at the bottom
+    var g=cx.createLinearGradient(0,horizon,0,H);
+    g.addColorStop(0,"rgba(34,20,56,0)"); g.addColorStop(1,"rgba(18,9,32,.9)");
+    cx.fillStyle=g; cx.beginPath();
+    cx.moveTo(cxp-apex,horizon); cx.lineTo(cxp+apex,horizon);
+    cx.lineTo(cxp+base,H); cx.lineTo(cxp-base,H); cx.closePath(); cx.fill();
+    /* edge glow lines of the road, brighter on the beat */
+    cx.strokeStyle="hsla(28,100%,60%,"+(0.25+beat*0.5).toFixed(2)+")"; cx.lineWidth=2+beat*3;
+    cx.beginPath(); cx.moveTo(cxp-apex,horizon); cx.lineTo(cxp-base,H);
+    cx.moveTo(cxp+apex,horizon); cx.lineTo(cxp+base,H); cx.stroke();
+    /* center dashes rushing toward us — speed rides the track's level */
+    var now=performance.now(), dt=Math.min(50,now-(lastT||now)); lastT=now;
+    scrollPos=(scrollPos+dt*(0.10+level*0.22))%60;
+    cx.strokeStyle="rgba(255,207,92,"+(0.55+beat*0.4).toFixed(2)+")";
+    for(var d=0; d<26; d++){
+      var p=(d*60 - scrollPos)/1560; if(p<0||p>1) continue;
+      var y=horizon+(H-horizon)*p*p, w=2+p*14, len=8+p*54;
+      cx.lineWidth=w; cx.beginPath(); cx.moveTo(cxp,y); cx.lineTo(cxp,y+len); cx.stroke();
+    }
+    /* streetlights sliding past — they arrive faster when the beat's up */
+    if(Math.random()<0.05+level*0.09) spawnLight();
+    for(var i=lights.length-1;i>=0;i--){
+      var L=lights[i]; L.z+=0.012+level*0.006;
+      var p2=L.z; if(p2>1.25){ lights.splice(i,1); continue; }
+      var y2=horizon+(H-horizon)*Math.min(1,p2)*Math.min(1,p2);
+      var spread=(y2-horizon)/(H-horizon);
+      var x2=cxp + L.side*(30 + spread*W*0.62);
+      var r=(2+spread*18)*(1+beat*0.5);
+      var grd=cx.createRadialGradient(x2,y2,0,x2,y2,r*3);
+      grd.addColorStop(0,L.hue); grd.addColorStop(.4,L.hue+"aa"); grd.addColorStop(1,"transparent");
+      cx.globalAlpha=Math.min(1,spread*1.4); cx.fillStyle=grd;
+      cx.beginPath(); cx.arc(x2,y2,r*3,0,7); cx.fill();
+      cx.globalAlpha=1;
+    }
+    /* soft haze, pulsing warm on the beat */
+    cx.fillStyle="rgba(255,157,43,"+(0.015+beat*0.03).toFixed(3)+")"; cx.fillRect(0,0,W,H);
+  }
+  function startRoom(){
+    if(driving) return; driving=true;
+    body.classList.add("playing"); sizeDrive(); lights=[]; drawDrive();
+  }
+  function stopRoom(){
+    if(!driving) return; driving=false;
+    body.classList.remove("playing");
+    setTimeout(function(){ if(!driving) cx.clearRect(0,0,cv.width,cv.height); },200);
+  }
+
+  /* ---------- claim to collection ---------- */
+  $("claimbtn").addEventListener("click",function(){
+    try{ localStorage.setItem("ibee_mzs_claim","1"); }catch(e){}
+    toast("★ 20 MIN ZA SESSION added_<br>sign in to see it in your collection_",3600);
+    /* let it flash the toast, then head to the inventory */
+    setTimeout(function(){},0);
+  });
+})();
+</script>
+
+<!-- ============================================================
+     3D FBX viewers (three.js, non-module examples build). Loaded
+     lazily; each .viewer gets an OrbitControls scene the user can
+     drag/zoom. Heavy files — a spinner shows until they're ready.
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.136.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/libs/fflate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/curves/NURBSCurve.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/curves/NURBSUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/loaders/FBXLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  "use strict";
+  if(!window.THREE || !THREE.FBXLoader){
+    document.querySelectorAll(".vload").forEach(function(v){ v.innerHTML="3D VIEWER OFFLINE_<br><small style='font-size:14px'>check your connection</small>"; });
+    return;
+  }
+  function makeViewer(el){
+    var src=el.getAttribute("data-src"), loadEl=el.querySelector(".vload");
+    /* one loader PER viewer, with its resource path set to the model's own folder,
+       so any external texture reference resolves next to the .fbx (the scans also
+       embed their JPEG texture, which the loader unpacks — this is the fallback). */
+    var loader=new THREE.FBXLoader();
+    try{ loader.setResourcePath(src.replace(/[^\/]+$/,"")); }catch(e){}
+    var w=el.clientWidth||400, h=el.clientHeight||400;
+    var scene=new THREE.Scene(); scene.background=null;
+    var camera=new THREE.PerspectiveCamera(45, w/h, 0.1, 5000);
+    var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    renderer.setSize(w,h); el.appendChild(renderer.domElement);
+    /* sRGB output so the scan's baked photo texture reads at its true colour
+       (default linear output makes photogrammetry textures look washed/dark) */
+    try{ if(THREE.sRGBEncoding) renderer.outputEncoding=THREE.sRGBEncoding; }catch(e){}
+    /* NEUTRAL light only. The orange key + purple rim that used to be here were
+       repainting the scan: a photogrammetry model already has its real lighting
+       baked into the photo texture, so any coloured lamp tints the whole thing
+       and the colours come out wrong. These are white and only matter for the
+       fallback case where a mesh has no texture at all. */
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    var key=new THREE.DirectionalLight(0xffffff, 0.35); key.position.set(3,6,4); scene.add(key);
+    var rim=new THREE.DirectionalLight(0xffffff, 0.25); rim.position.set(-4,2,-3); scene.add(rim);
+    var controls=new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping=true; controls.dampingFactor=.08; controls.autoRotate=true; controls.autoRotateSpeed=1.1;
+    controls.addEventListener("start",function(){ controls.autoRotate=false; });
+    var pivot=new THREE.Group(); scene.add(pivot);
+    function resize(){
+      var W=el.clientWidth||w, Hh=el.clientHeight||h;
+      camera.aspect=W/Hh; camera.updateProjectionMatrix(); renderer.setSize(W,Hh);
+    }
+    window.addEventListener("resize",resize);
+    loader.load(src, function(obj){
+      /* fix up the scan's materials so the TEXTURE actually shows:
+         · sRGB colour space on the baked photo map (else it renders washed/dark)
+         · DoubleSide — photogrammetry meshes are thin/one-sided, so backface
+           culling was hiding faces and leaving only a bare shape
+         · vertex colours enabled when the scan baked colour into the geometry
+           (some scans carry no texture map at all, only vertex colours) */
+      obj.traverse(function(ch){
+        if(!ch.isMesh) return;
+        ch.frustumCulled=false;
+        var mats=Array.isArray(ch.material)?ch.material:[ch.material];
+        var hasVC = !!(ch.geometry&&ch.geometry.attributes&&ch.geometry.attributes.color);
+        ch.material = mats.map(function(m){
+          if(!m) return m;
+          if(m.map){ try{ if(THREE.sRGBEncoding) m.map.encoding=THREE.sRGBEncoding; m.map.needsUpdate=true; }catch(e){} }
+          /* Show the bake UNLIT — this is what a scan viewer does. A lit material
+             multiplies the baked photo by whatever the scene lamps are doing, so
+             the model never matches the capture. MeshBasicMaterial displays the
+             texture exactly as photographed, which is the whole point of a scan. */
+          if(m.map || hasVC){
+            var b=new THREE.MeshBasicMaterial({
+              map:m.map||null, vertexColors:hasVC, side:THREE.DoubleSide,
+              transparent:!!m.transparent, opacity:m.opacity==null?1:m.opacity
+            });
+            if(!m.map) b.color.setRGB(1,1,1);
+            return b;
+          }
+          m.side=THREE.DoubleSide;
+          if(m.emissive&&m.emissive.setRGB) m.emissive.setRGB(0,0,0);
+          m.needsUpdate=true; return m;
+        });
+        if(ch.material.length===1) ch.material=ch.material[0];
+      });
+      /* center + frame the model so it fills the view */
+      var box=new THREE.Box3().setFromObject(obj);
+      var size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+      var maxd=Math.max(size.x,size.y,size.z)||1;
+      var s=2.2/maxd; obj.scale.setScalar(s);
+      obj.position.sub(center.multiplyScalar(s));
+      pivot.add(obj);
+      camera.position.set(0,0.4,4);
+      controls.target.set(0,0,0); controls.update();
+      if(loadEl) loadEl.remove();
+    }, function(xhr){
+      if(loadEl && xhr.total){ var pct=Math.round(xhr.loaded/xhr.total*100);
+        var s=loadEl.querySelector("small"); if(s) s.textContent=pct+"% loaded"; }
+    }, function(err){
+      if(loadEl) loadEl.innerHTML="COULDN'T LOAD THIS RELIC_<br><small style='font-size:14px'>try a reload</small>";
+    });
+    /* only spin/render while the viewer is actually on screen — two WebGL
+       scenes running at once (esp. with big FBX) is needless load otherwise */
+    var onScreen=true;
+    try{
+      new IntersectionObserver(function(es){ onScreen=es[0].isIntersecting; })
+        .observe(el);
+    }catch(e){}
+    (function anim(){ requestAnimationFrame(anim);
+      if(!onScreen) return;
+      controls.update(); renderer.render(scene,camera);
+    })();
+  }
+  /* only build a viewer once it scrolls near view (saves the big downloads) */
+  var io=new IntersectionObserver(function(ents){
+    ents.forEach(function(e){ if(e.isIntersecting){ makeViewer(e.target); io.unobserve(e.target); } });
+  },{rootMargin:"300px"});
+  document.querySelectorAll(".viewer").forEach(function(v){ io.observe(v); });
+})();
+</script>
+<script src="../assets/player.js?v=25"></script>
+<script src="../assets/badges.js?v=12"></script>
+<script src="/assets/stats-client.js?v=7"></script>
+
+<script>
+/* Collaborator cards open their profile INSIDE the site. The frame is only given
+   a src when the box opens, and it is cleared on close so the embed stops
+   loading in the background. */
+(function(){
+  var box=document.getElementById('igbox'), fr=document.getElementById('igframe'),
+      nm=document.getElementById('igname'), go=document.getElementById('igopen'),
+      x=document.getElementById('igx');
+  function open(handle,label){
+    nm.textContent='@'+handle;
+    go.href='https://www.instagram.com/'+handle+'/';
+    fr.src='https://www.instagram.com/'+handle+'/embed';
+    box.classList.add('on'); box.setAttribute('aria-hidden','false');
+  }
+  function close(){ box.classList.remove('on'); box.setAttribute('aria-hidden','true'); fr.removeAttribute('src'); }
+  document.addEventListener('click',function(e){
+    var a=e.target.closest('a[data-ig]');
+    if(a){ e.preventDefault();
+      var h=(a.getAttribute('href')||'').replace(/\/+$/,'').split('/').pop();
+      if(h) open(h); return; }
+    if(e.target===box||e.target===x) close();
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+</script>
+</body>
+</html>
