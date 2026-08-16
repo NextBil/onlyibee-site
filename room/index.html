@@ -1189,8 +1189,11 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +'#collpeek{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-bottom:4px}'
     +'#collpeek:empty{display:none}'
     +'.pk{border:2px solid #2a2a2a;background:#0d0d10;overflow:hidden}'
-    +'.pk img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#000}'
-    +'.pkq{display:flex;align-items:center;justify-content:center;aspect-ratio:1;color:#3a3a3a;font-size:26px}'
+    +'.pkart{display:block;aspect-ratio:1;background:radial-gradient(circle at 50% 45%,#1b1b22,#0a0a0d 70%)}'
+    +'.pk.r-common .pkart{box-shadow:inset 0 0 22px rgba(182,255,0,.18)}'
+    +'.pk.r-rare .pkart{box-shadow:inset 0 0 22px rgba(38,224,255,.22)}'
+    +'.pk.r-epic .pkart{box-shadow:inset 0 0 22px rgba(255,43,214,.24)}'
+    +'.pk.r-legendary .pkart{box-shadow:inset 0 0 24px rgba(255,214,10,.3)}'
     +'.pkn{display:block;padding:6px 5px;font-family:"Press Start 2P",monospace;font-size:6px;'
       +'line-height:1.5;color:#e8e8e8;border-top:2px solid #2a2a2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
     +'.pk.more{display:flex;align-items:center;justify-content:center;color:#b6ff00;'
@@ -1244,9 +1247,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     if(!items.length){ host.innerHTML=''; host.style.display='none'; return; }
     host.style.display='';
     host.innerHTML=items.slice(0,6).map(function(x){
-      var img=x.img||x.cover||'';
-      return '<div class="pk">'+(img?'<img src="'+String(img).replace(/"/g,'&quot;')+'" alt="">':'<span class="pkq">?</span>')
-        +'<span class="pkn">'+String(x.n||x.name||x.id||'PIECE').replace(/[&<>]/g,'')+'</span></div>';
+      return '<div class="pk r-'+String(x.r||'common').replace(/[^a-z]/g,'')+'">'
+        +'<span class="pkart"></span>'
+        +'<span class="pkn">'+String(x.n||'PIECE').replace(/[&<>]/g,'')+'</span></div>';
     }).join('')+(items.length>6?'<div class="pk more">+'+(items.length-6)+'</div>':'');
   }
   /* ---- members only ----
@@ -1280,11 +1283,24 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     if(peeked || !sb) return;
     try{
       var sess=(await sb.auth.getSession()).data.session; if(!sess) return;
+      /* Mirror the collection box: `my_inventory` returns which ids you own, but
+         the NAMES and rarities live in the `items` catalogue — the box joins the
+         two, so the snippet must as well. Reading only my_inventory (what I did
+         first) gives rows with no name, which is why nothing appeared. */
+      var cat=(await sb.from('items').select('*').eq('active',true)).data||[];
+      var byId={}; cat.forEach(function(it){ byId[it.id]=it; });
       var inv=await sb.rpc('my_inventory');
-      peeked=true;
-      paintPeek((inv.data||[]).map(function(it){
-        return {n:it.name||it.id, img:it.img||it.image||''};
-      }));
+      var own={}; (inv.data||[]).forEach(function(it){ own[it.id]=true; });
+      /* the freebies every member has, exactly as the box grants them */
+      own['ics-chess']=true; own['np-album']=true; own['mzs-album']=true;
+      try{ if(localStorage.getItem('ibee_engine10')==='1') own['universe-engine']=true; }catch(e){}
+      var EXTRA={'ics-chess':'ICS CHESS','np-album':'NOUVEAUX PUNK','mzs-album':'20 MIN ZA SESSION',
+                 'universe-engine':'GALAXYS ENGINE'};
+      var rows=Object.keys(own).map(function(id){
+        var it=byId[id]||{};
+        return {n:it.name||EXTRA[id]||id, r:it.rarity||'common'};
+      });
+      peeked=true; paintPeek(rows);
     }catch(e){}
   }
   gate();

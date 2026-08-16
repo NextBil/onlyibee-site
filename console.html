@@ -188,6 +188,11 @@
   #englock{position:absolute;inset:0;z-index:30;background:rgba(5,5,8,.95);display:none;
     flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:26px}
   #englock.on{display:flex}
+  /* While the engine is locked its CONTROLS should be gone too, not just dimmed
+     behind the overlay: ◀ GALAXIES and the search sit in .engnav, ABOVE the
+     lock (z-index 40 vs 30), so they stayed tappable and a visitor could drive
+     a universe they had not unlocked. */
+  body.englocked .engnav{display:none}
   #englock .lk{width:44px;height:44px;color:var(--acid);filter:drop-shadow(0 0 14px rgba(182,255,0,.4))}
   #englock .et{font-family:var(--px);font-size:14px;color:var(--acid);letter-spacing:2px;text-shadow:0 0 16px rgba(182,255,0,.5)}
   #englock .ed{color:var(--dim);font-size:19px;max-width:360px;line-height:1.4}
@@ -1017,6 +1022,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     hydrateScreen(id);
     if(id==="ics") hydrateICS();
     if(id==="shop") loadShop();
+    if(id!=="music") document.body.classList.remove("englocked");
     document.body.classList.toggle("musicfit", id==="music");  // music screen fills the viewport (no page scroll)
     if(id==="music"){ ENG.wake(); updateEngLock(); }
   }
@@ -1028,7 +1034,8 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
   function engineUnlocked(){ try{ return loggedIn() && localStorage.getItem("ibee_engine10")==="1"; }catch(e){ return true; } }
   function updateEngLock(){
     var lk=document.getElementById("englock"); if(!lk) return;
-    if(engineUnlocked()){ lk.classList.remove("on"); return; }
+    if(engineUnlocked()){ lk.classList.remove("on"); document.body.classList.remove("englocked"); return; }
+    document.body.classList.add("englocked");
     var acct=loggedIn(), lis=localStorage.getItem("ibee_engine10")==="1", st=document.getElementById("esteps");
     if(st) st.innerHTML='<b class="'+(acct?'on':'')+'">'+(acct?'✓':'○')+' ACCOUNT MADE</b><br><b class="'+(lis?'on':'')+'">'+(lis?'✓':'○')+' FELT A TRACK 10s</b>';
     /* already connected → no reason to ask them to make an account again, just point at listening */

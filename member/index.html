@@ -422,8 +422,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var loginBlock='<div class="sub"><b style="color:var(--ink)">New here?</b> Just an email and a password.</div>'
       +'<input id="gemail" type="email" placeholder="your email" autocomplete="email" inputmode="email">'
       +'<input id="gpass" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password">'
-      +'<button class="cbtn" id="gsignup">＋ CREATE ACCOUNT</button>'
-      +'<button class="cbtn" id="glogin" style="background:transparent;border:1px solid var(--acid);color:var(--acid);margin-top:8px">▶ LOG IN (already joined)</button>';
+      /* LOG IN first: most people arriving already have an account */
+      +'<button class="cbtn" id="glogin">▶ LOG IN</button>'
+      +'<button class="cbtn" id="gsignup" style="background:transparent;border:1px solid var(--acid);color:var(--acid);margin-top:8px">＋ CREATE ACCOUNT</button>';
     host.innerHTML='<div class="gate">'
       +(loginFirst
         ? loginBlock+'<div class="or">OR — GOT A PASS CODE?</div>'+codeBlock
