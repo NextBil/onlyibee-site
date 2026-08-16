@@ -423,7 +423,31 @@
     })); }catch(e){}
   }
   /* aleatory mode: next song is a surprise (never the same one twice); skip locked */
+  /* ---------- THE QUEUE ----------
+     The shell hands us the list the visitor is actually looking at (an album,
+     the hearts, a search) via setQueue. Playback then walks THAT, in that order,
+     so LIKED SONGS behaves like a playlist and an album plays album-order.
+     Empty or unset → the whole catalogue, exactly as before. Shuffle still
+     shuffles, but inside the queue rather than across everything. */
+  var QUEUE = null;
+  function queueList(){
+    if(!QUEUE || !QUEUE.length) return null;
+    var q = QUEUE.filter(function(i){ return i>=0 && i<SONGS.length && !SONGS[i].locked; });
+    return q.length ? q : null;
+  }
+  function stepQueue(dir){
+    var q = queueList(); if(!q) return -1;
+    var at = q.indexOf(cur);
+    if(at < 0) return q[0];                       /* playing something outside it → start at its head */
+    if(shuffle && q.length > 1){
+      var j, guard=0; do{ j = q[Math.floor(Math.random()*q.length)]; }while(j===cur && ++guard<40);
+      return j;
+    }
+    return q[(at + dir + q.length) % q.length];
+  }
+
   function nextIndex(){
+    var qi = stepQueue(1); if(qi >= 0) return qi;
     if(shuffle && SONGS.length > 1){
       var j, guard=0; do{ j = Math.floor(Math.random()*SONGS.length); }while((j === cur || SONGS[j].locked) && ++guard<40);
       return j;
@@ -433,6 +457,7 @@
     return k;
   }
   function prevIndex(){
+    var qi = stepQueue(-1); if(qi >= 0) return qi;
     var k = cur < 0 ? 0 : cur, guard=0;
     do{ k = (k - 1 + SONGS.length) % SONGS.length; }while(SONGS[k].locked && ++guard < SONGS.length);
     return k;
@@ -825,6 +850,9 @@
       });
     },
     shuffled: function(){ return shuffle; },
+    /* the shell calls this on every re-render of the track list */
+    setQueue: function(arr){ QUEUE = (arr && arr.length) ? arr.slice() : null; },
+    queue: function(){ return QUEUE ? QUEUE.slice() : null; },
     toggleShuffle: function(){ setShuffle(!shuffle); return shuffle; },
     control: {
       play: function(i){ play(i == null ? (cur < 0 ? 0 : cur) : i); },

@@ -119,9 +119,6 @@
     color:var(--dim);border:1px solid var(--border);cursor:pointer}
   #tlview:hover,#tlview.on{border-color:var(--acid);color:var(--acid)}
   /* ♥ favourites filter + the hearts on every song */
-  #tlfav{font-family:var(--px);font-size:10px;padding:0 9px;height:31px;flex:none;background:#0e0e0e;
-    color:var(--dim);border:1px solid var(--border);cursor:pointer}
-  #tlfav:hover,#tlfav.on{border-color:#ff2b6b;color:#ff2b6b}
   #tracklist .tr .fv{flex:none;font-size:17px;line-height:1;color:#3a3a3a;cursor:pointer;padding:3px 5px}
   #tracklist .tr .fv:hover{color:#ff2b6b}
   #tracklist .tr .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.6)}
@@ -474,6 +471,10 @@
   #tlalbums .alb.liked .lkh{font-size:74px}
   .alb.liked.on .ac{border-color:#ff2b6b;box-shadow:0 0 18px rgba(255,43,107,.5)}
   .alb.liked .an{color:#ff8fb4}
+
+  /* icon-only account pill: no label to centre around */
+  #acct .login{display:flex;align-items:center;justify-content:center;padding:0 12px;min-width:46px}
+  #acct .login svg{margin:0}
 </style>
 <script src="/assets/cart.js?v=3"></script>
 </head>
@@ -540,7 +541,6 @@
 
       <div id="tltools">
         <input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false">
-        <button id="tlfav" title="my favourites only">♥</button>
         <button id="tlview" title="grid / list view">▦ GRID</button>
       </div>
       <!-- the shelf: albums as covers, straight under the search. Bigger art than
@@ -608,7 +608,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=24"></script>
+<script src="assets/player.js?v=25"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
@@ -680,7 +680,7 @@
     var on=memberSession(); if(on===acctOn) return; acctOn=on;
     acctEl.innerHTML = on
       ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
-      : '<button class="login" id="acctbtn">'+ICO_USER+'JOIN</button>';
+      : '<button class="login" id="acctbtn" title="Join / log in" aria-label="Join">'+ICO_USER+'</button>';
     /* profile === room now (one concept, 2026-07-13): the pill opens the member's room/profile */
     document.getElementById('acctbtn').onclick=function(){
       /* opening the profile is what "seeing" the saved pieces means — clear the
@@ -978,9 +978,12 @@
   document.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('.alb'); if(!b) return;
     if(b.hasAttribute('data-liked')){          /* the hearts filter, not an album */
-      favOnly=!favOnly; tlfav.classList.toggle('on',favOnly);
+      favOnly=!favOnly;
       query=''; tlsearch.value=''; renderTracks(); markNow(); renderAlbums(); return;
     }
+    /* leaving LIKED SONGS: without this the hearts filter stayed on and the
+       album's tracks were filtered away to nothing — the list looked stuck. */
+    favOnly=false;
     var name=b.getAttribute('data-alb');
     /* tapping the album that is already filtering clears it — a toggle, so the
        shelf can never trap you in one record with no way back to everything */
@@ -1042,6 +1045,17 @@
       }
     });
     tlbody.innerHTML=html;
+    /* Hand the radio the queue it should walk: whatever is on screen, in the
+       order it is on screen. That is what makes LIKED SONGS play like a playlist
+       and an album play in album order — ▶▶ and end-of-track follow this list
+       instead of the whole catalogue. Aleatory still shuffles, but within it. */
+    try{ var q=[],r3=R();
+      if(r3&&r3.setQueue){
+        Array.prototype.forEach.call(tlbody.children,function(el){
+          var v=el.getAttribute('data-i'); if(v!=null) q.push(+v); });
+        r3.setQueue(q);
+      }
+    }catch(e){}
     tlempty.innerHTML=(favOnly&&!query)?'NO FAVOURITES YET_<br>TAP ♥ ON A SONG':'NO SIGNALS_<br>TRY ANOTHER WORD';
     tlempty.style.display=shown?'none':'block';
     builtCount=r.count;
@@ -1100,8 +1114,6 @@
   }
   roombtn.onclick=function(){ var u=roomband.dataset.room; if(u){ navigate(u); setTL(false); } };
   tlsearch.addEventListener('input',function(){ query=this.value.trim(); renderTracks(); markNow(); });
-  document.getElementById('tlfav').onclick=function(){
-    favOnly=!favOnly; this.classList.toggle('on',favOnly); renderTracks(); markNow(); };
   /* SHARE: a link to the current record — <site>/?s=<slug>; opening it plays the song.
      Copies to the clipboard and offers the native share sheet where there is one. */
   document.getElementById('bshare').onclick=function(){
@@ -1136,8 +1148,10 @@
   document.addEventListener('pointerdown',function(e){
     if(!tl.classList.contains('open'))return;
     var nb=document.getElementById('nowbtn'),pc=document.getElementById('pcover');
-    var strip=document.querySelector('.pl-top');
-    if(tl.contains(e.target)||(strip&&strip.contains(e.target)))return;
+    /* The whole PLAYER is part of the radio — ▶▶, ◀◀, shuffle and the seek bar
+       all used to count as "outside" and slammed the list shut mid-browse. */
+    var pl=document.getElementById('player');
+    if(tl.contains(e.target)||(pl&&pl.contains(e.target)))return;
     setTL(false);
   });
   /* clicks INSIDE the frame never bubble up to the shell — catch them via the

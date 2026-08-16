@@ -50,7 +50,13 @@
     var g=document.getElementById('savedgrid'), e=document.getElementById('savedempty');
     if(!g) return;
     var l=C.list();
-    e.style.display=l.length?'none':'block';
+    /* Nothing saved → show NOTHING. An empty section with a heading, a subtitle
+       and an explainer is three lines of noise, and it is worst on the sign-in
+       screen where someone is trying to do one thing. It appears the moment
+       there is something to show. */
+    var wrap=document.getElementById('savedwrap');
+    if(wrap) wrap.style.display = l.length ? '' : 'none';
+    e.style.display='none';
     g.innerHTML=l.map(function(x){
       return '<div class="scard"><span class="srm" data-rm="'+esc(x.id)+'" title="remove">✕</span>'
         +'<a href="/product-page/?id='+encodeURIComponent(x.id)+'">'
