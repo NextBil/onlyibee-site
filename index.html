@@ -136,7 +136,13 @@
   @keyframes roompulse{0%,100%{box-shadow:0 0 6px rgba(255,80,40,.35)}50%{box-shadow:0 0 18px rgba(255,80,40,.75)}}
 
   /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
-  #tlbody{max-height:52vh;overflow-y:auto}
+  /* ONE scroll on phones. #tracklist already scrolls; giving the song list its
+     own max-height + overflow made a second scroll area nested inside the first,
+     so a thumb-drag either moved the wrong one or trapped at a boundary. The
+     list now grows to its content and the whole radio scrolls as one surface.
+     The laptop layout re-introduces per-pane scrolling on purpose (§21.3) —
+     there the panes sit side by side and each one needs its own. */
+  #tlbody{max-height:none;overflow:visible}
   /* minmax(0,1fr) + min-width:0: a long nowrap song name must never widen its column —
      every cover stays the exact same square (the old 1fr let columns grow with the text) */
   /* auto-fill, not a fixed 3: on a laptop the list is far wider than three
