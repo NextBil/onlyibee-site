@@ -796,6 +796,10 @@
   /* spinning shortcuts */
   document.getElementById('buni').onclick=function(){
     if(window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget('music'); /* clear the new-music dot */
+    /* Both of these open something FULL SIZE over the page, so the track list has
+       to get out of the way — left open it sat behind them, and closing the
+       overlay revealed a radio the visitor never chose to leave open. */
+    setTL(false);
     navigate('console.html#playing');
   };
 
@@ -820,7 +824,10 @@
     lyrCentered=lyrActive;
   }
   function esc(s){return s.replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
-  function lyrToggle(){ lyrOpen=!lyrOpen; lyr.classList.toggle('open',lyrOpen); if(lyrOpen)lyrRefresh(); }
+  function lyrToggle(){
+    lyrOpen=!lyrOpen; lyr.classList.toggle('open',lyrOpen);
+    if(lyrOpen){ setTL(false); lyrRefresh(); }   /* close the radio on the way IN only */
+  }
   function lyrClose(){ lyrOpen=false; lyr.classList.remove('open'); }
   document.getElementById('blyr').onclick=lyrToggle;               // the book icon toggles it
   document.getElementById('lclose').onclick=lyrClose;

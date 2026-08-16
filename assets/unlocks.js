@@ -103,4 +103,19 @@
   setTimeout(tick, 3000);
   /* re-check right after a sign-in (badges.js flips loggedIn; grant then) */
   window.addEventListener("storage",function(e){ if(e&&/supabase|sb-/.test(e.key||"")) setTimeout(tick,800); });
+  /* ---- read-only view of the ladder, for anything that wants to SHOW it ----
+     The arcade's gate box displays these rules. Exposing them here means the box
+     reads the real conditions instead of restating them in its own words, so the
+     two can never disagree about how a game is earned. */
+  window.IBEE_UNLOCKS = {
+    ladder: function(){
+      var g=granted(), P=null;
+      try{ var B=window.IBEE_BADGES; P=(B&&B.snapshot)?B.snapshot():null; }catch(e){}
+      return Object.keys(GAMES).map(function(id){
+        var it=GAMES[id], got=!!g[id];
+        if(!got && P){ try{ got=!!it.test(P); }catch(e){} }
+        return { id:id, name:it.name, slug:it.slug, why:it.why, got:got };
+      });
+    }
+  };
 })();

@@ -153,6 +153,15 @@
 
 .mback{display:inline-block;font-family:'Press Start 2P',monospace;font-size:9px;color:#7a7a7a;text-decoration:none;border:1px solid #2a2a2a;padding:8px 12px;margin:0 0 14px 18px;position:relative;z-index:60;cursor:pointer}
 .mback:hover{color:#b6ff00;border-color:#b6ff00}
+
+  /* the unlock ladder, shown inside the gate box */
+  #gateladder{margin:14px 0 2px;text-align:left}
+  #gateladder .lrow{display:flex;flex-direction:column;gap:3px;padding:9px 11px;margin-bottom:7px;
+    border:1px solid var(--border,#2a2a2a);background:rgba(255,255,255,.02)}
+  #gateladder .lrow.got{border-color:var(--acid,#b6ff00);background:rgba(182,255,0,.06)}
+  #gateladder .ln{font-family:var(--px);font-size:8px;color:var(--ink,#e8e8e8)}
+  #gateladder .lrow.got .ln{color:var(--acid,#b6ff00)}
+  #gateladder .lw{font-family:var(--vt);font-size:15px;color:var(--dim,#7a7a7a);line-height:1.4}
 </style>
 </head>
 <body>
@@ -177,6 +186,7 @@
     <h3 id="gatettl">LOCKED_</h3>
     <p id="gatetxt">—</p>
     <div class="ga">
+      <div id="gateladder" style="display:none"></div>
       <a class="go" id="gatego" href="../member/?login=1">▶ JOIN</a>
       <button class="gc" id="gatestay">✕ KEEP LOOKING AROUND</button>
     </div>
@@ -256,6 +266,22 @@
       p:"You unlock this by playing — see the ladder on your profile. Nothing to buy.",
       a:"▶ SEE THE LADDER", href:"../member/" }
   };
+  /* The rules, and where you stand against them. Mirrors assets/unlocks.js —
+     which is the thing that actually grants these — rather than restating them,
+     so the box cannot drift from the real conditions. */
+  function ladderHTML(){
+    var L=(window.IBEE_UNLOCKS&&window.IBEE_UNLOCKS.ladder&&window.IBEE_UNLOCKS.ladder())||null;
+    if(!L||!L.length){
+      return '<div class="lrow"><span class="ln">RUN BEEBEE!</span><span class="lw">feel 10 records, or beat ICS chess</span></div>'
+        +'<div class="lrow"><span class="ln">MIMI GUITAR RUSH</span><span class="lw">come back 3 different days</span></div>'
+        +'<div class="lrow"><span class="ln">MIMI MUSIC TILES</span><span class="lw">clear a full RUSH song without dying</span></div>';
+    }
+    return L.map(function(x){
+      return '<div class="lrow'+(x.got?' got':'')+'"><span class="ln">'+x.name+'</span>'
+        +'<span class="lw">'+(x.got?'UNLOCKED':x.why)+'</span></div>';
+    }).join('');
+  }
+
   var LOCKICO="<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
     +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
     +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
@@ -274,6 +300,19 @@
     document.getElementById("gatetxt").textContent=(name?name+" — ":"")+g.p;
     var go=document.getElementById("gatego");
     go.textContent=g.a; go.href=g.href||href||"../member/?login=1";
+
+    /* THE LADDER IS NOT A LOGIN. "▶ SEE THE LADDER" used to point at ../member/,
+       which throws a signed-in visitor at a sign-in screen for information that
+       needs no account at all — the unlock rules are the same for everybody.
+       Show them right here in the box instead. */
+    var lad=document.getElementById("gateladder");
+    if(kind==="earn"){
+      go.style.display="none";
+      lad.innerHTML=ladderHTML();
+      lad.style.display="block";
+    }else{
+      go.style.display=""; lad.style.display="none"; lad.innerHTML="";
+    }
     gateEl.classList.add("on"); gateEl.setAttribute("aria-hidden","false");
     setTimeout(function(){ try{document.getElementById("gatestay").focus();}catch(e){} },30);
   }
@@ -391,5 +430,7 @@
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
 <script src="/assets/pulse.js?v=3"></script>
+<!-- the unlock ladder data, shown in the gate box (assets/unlocks.js owns the rules) -->
+<script src="/assets/unlocks.js?v=2"></script>
 </body>
 </html>
