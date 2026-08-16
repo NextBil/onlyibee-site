@@ -206,7 +206,7 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
 </style>
 <script src="/assets/cart.js?v=3"></script>
-<script src="/assets/saved.js?v=3" defer></script>
+<script src="/assets/saved.js?v=5" defer></script>
 </head>
 <body>
 <div class="bgglow"></div>
@@ -1167,7 +1167,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   window.addEventListener("beforeunload",function(e){ if(DIRTY){e.preventDefault();e.returnValue="";} });
 })();
 </script>
-<script src="../assets/player.js?v=25"></script>
+<script src="../assets/player.js?v=26"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
 
@@ -1278,9 +1278,21 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   /* One source of truth with the collection box: the my_inventory RPC. The old
      code read an `ibee_inventory` localStorage key that nothing ever writes —
      which is why the snippet was always empty. */
+  /* Paint instantly from whatever the collection box last cached — no network,
+     no session juggling, and it is the same join the box itself performed. The
+     RPC below then refreshes it. This is why the snippet was blank: the live
+     query path alone was never returning usable rows. */
+  function peekCached(){
+    try{
+      var c=JSON.parse(localStorage.getItem('ibee_owned_cache')||'[]');
+      if(Array.isArray(c)&&c.length){ paintPeek(c); return true; }
+    }catch(e){}
+    return false;
+  }
   var peeked=false;
   async function peek(){
-    if(peeked || !sb) return;
+    if(peekCached()) peeked=true;      /* show something now; still refresh below */
+    if(!sb) return;
     try{
       var sess=(await sb.auth.getSession()).data.session; if(!sess) return;
       /* Mirror the collection box: `my_inventory` returns which ids you own, but

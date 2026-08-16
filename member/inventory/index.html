@@ -210,6 +210,18 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
       $("sess").textContent='';
       renderLogin(true);
     }
+    /* Cache what we own for the profile's snippet. The profile was querying
+       Supabase itself and getting nothing usable; this page has already done the
+       join (catalogue × my_inventory × the freebies), so it is the honest source.
+       Written every time the collection is opened, read instantly by the profile. */
+    try{
+      localStorage.setItem('ibee_owned_cache', JSON.stringify(
+        Object.keys(owned).map(function(id){
+          var it=(cat.filter(function(c){return c.id===id;})[0])||{};
+          return {id:id, n:it.name||id, r:it.rarity||'common'};
+        })
+      ));
+    }catch(e){}
     var nOwned=Object.keys(owned).length, total=cat.length, val=0;
     cat.forEach(function(it){ if(owned[it.id]&&typeof it.value==='number') val+=it.value; });
     $("prog").textContent="COLLECTED "+nOwned+" / "+total+"  ·  TOTAL VALUE "+val;
@@ -231,10 +243,10 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   });
 })();
 </script>
-<script src="../../assets/player.js?v=25"></script>
+<script src="../../assets/player.js?v=26"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../../assets/nav.js?v=1"></script>
-<script src="/assets/pulse.js?v=2"></script>
+<script src="/assets/pulse.js?v=3"></script>
 <script>/* mark ourselves when we are the profile's collection box, not a page */
 try{ if(window.parent!==window && /\/room\//.test(window.parent.location.pathname)) document.documentElement.classList.add('inbox'); }catch(e){}
 </script>

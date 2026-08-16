@@ -46,7 +46,10 @@
   function RAD(){ try{ return window.IBEERADIO || (window.top && window.top.IBEERADIO) || null; }catch(e){ return null; } }
   function DB(n){ try{ return window[n] || (window.top && window.top[n]) || null; }catch(e){ return null; } }
 
-  var GENTLE = 0.55;            /* how much of the raw beat reaches --pulse */
+  /* How much of the raw beat reaches --pulse. This stacks with player.js's own
+     neon frame, so what looks fine in isolation is doubled on screen — 0.55 was
+     too much once both were lit. */
+  var GENTLE = 0.30;
   var calm = false;
   try{ calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
 
@@ -128,16 +131,20 @@
     st.textContent =
       '#ibee-pulse{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0;'
         + 'transition:opacity .5s ease;'
-        + 'box-shadow:inset 0 0 calc(38px + var(--pulse,0)*52px) '
-        + 'hsla(var(--phue,75),95%,55%,calc(0.030 + var(--pulse,0)*0.095)),'
-        + 'inset 0 0 2px hsla(var(--phue,75),95%,65%,calc(var(--pulse,0)*0.12))}'
+        + 'box-shadow:inset 0 0 calc(26px + var(--pulse,0)*34px) '
+        + 'hsla(var(--phue,75),95%,55%,calc(0.020 + var(--pulse,0)*0.060)),'
+        + 'inset 0 0 2px hsla(var(--phue,75),95%,65%,calc(var(--pulse,0)*0.08))}'
       /* On a phone the blur radius is a big fraction of the screen WIDTH, so an
          edge glow sized for a laptop bleeds all the way into the middle and the
          whole display looks lit. Same effect, tighter to the edges. */
+      /* PHONE: a blur radius is a big slice of a narrow screen, so light meant for
+         the edges lands in the middle and sits on top of what you are reading.
+         Keep it tight and faint — it should be felt at the rim, never noticed
+         over content. */
       + '@media(max-width:600px){#ibee-pulse{'
-        + 'box-shadow:inset 0 0 calc(20px + var(--pulse,0)*26px) '
-        + 'hsla(var(--phue,75),95%,55%,calc(0.022 + var(--pulse,0)*0.065)),'
-        + 'inset 0 0 2px hsla(var(--phue,75),95%,65%,calc(var(--pulse,0)*0.09))}}'
+        + 'box-shadow:inset 0 0 calc(12px + var(--pulse,0)*14px) '
+        + 'hsla(var(--phue,75),95%,55%,calc(0.014 + var(--pulse,0)*0.032)),'
+        + 'inset 0 0 2px hsla(var(--phue,75),95%,65%,calc(var(--pulse,0)*0.05))}}'
       + 'html.playing #ibee-pulse{opacity:1}'
       /* The brand mark is the one element on every page in the same place, so
          it carries the beat where you can actually see it — the edge wash alone
@@ -148,7 +155,7 @@
          on the older ones. */
       + 'header [data-home],header .brand,header>a:first-child{transition:text-shadow .12s linear}'
       + 'html.playing header [data-home],html.playing header .brand,html.playing header>a:first-child{'
-        + 'text-shadow:0 0 calc(3px + var(--pulse,0)*10px) hsla(var(--phue,75),95%,62%,calc(0.13 + var(--pulse,0)*0.30))}'
+        + 'text-shadow:0 0 calc(2px + var(--pulse,0)*7px) hsla(var(--phue,75),95%,62%,calc(0.10 + var(--pulse,0)*0.20))}'
       /* opt-in, for anything that wants to move with the record */
       + '[data-pulse]{transition:text-shadow .12s linear}'
       + 'html.playing [data-pulse]{'
