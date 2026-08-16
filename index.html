@@ -111,8 +111,17 @@
 
   /* ---- search + grid/list toggle (GRID is the default view) ---- */
   #tltools{display:flex;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border)}
-  #tlsearch{flex:1;background:#0a0a0a;border:1px solid var(--border);color:var(--ink);font-family:var(--vt);
-    font-size:16px;padding:7px 9px;outline:none}
+  /* the field and its ✕ travel together; the wrapper is what the button sits in */
+  #tlsearchwrap{position:relative;flex:1;display:flex}
+  #tlsearch{flex:1;width:100%;background:#0a0a0a;border:1px solid var(--border);color:var(--ink);
+    font-family:var(--vt);font-size:16px;padding:7px 30px 7px 9px;outline:none}
+  /* only there when there is something to clear — an always-on ✕ next to an
+     empty field reads as a control that does nothing */
+  #tlclear{position:absolute;right:1px;top:1px;bottom:1px;width:28px;display:none;
+    align-items:center;justify-content:center;cursor:pointer;
+    background:transparent;border:0;color:var(--dim);font-size:13px;line-height:1;padding:0}
+  #tlclear:hover{color:var(--red)}
+  #tlsearchwrap.has #tlclear{display:flex}
   #tlsearch:focus{border-color:var(--acid)}
   #tlsearch::placeholder{color:#555}
   #tlview{font-family:var(--px);font-size:8px;padding:0 9px;height:31px;flex:none;background:#0e0e0e;
@@ -546,7 +555,7 @@
       <div class="th"><span>IBEE RADIO_</span><span class="x" id="tlx">✕ close</span></div>
 
       <div id="tltools">
-        <input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false">
+        <span id="tlsearchwrap"><input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false"><button id="tlclear" type="button" title="clear search" aria-label="Clear search">✕</button></span>
         <button id="tlview" title="grid / list view">▦ GRID</button>
       </div>
       <!-- the shelf: albums as covers, straight under the search. Bigger art than
@@ -992,7 +1001,7 @@
     var b=e.target.closest&&e.target.closest('.alb'); if(!b) return;
     if(b.hasAttribute('data-liked')){          /* the hearts filter, not an album */
       favOnly=!favOnly;
-      query=''; tlsearch.value=''; renderTracks(); markNow(); renderAlbums(); return;
+      query=''; _setQ(''); renderTracks(); markNow(); renderAlbums(); return;
     }
     /* leaving LIKED SONGS: without this the hearts filter stayed on and the
        album's tracks were filtered away to nothing — the list looked stuck. */
@@ -1001,7 +1010,7 @@
     /* tapping the album that is already filtering clears it — a toggle, so the
        shelf can never trap you in one record with no way back to everything */
     query = (query&&query.toLowerCase()===name.toLowerCase()) ? '' : name;
-    tlsearch.value=query; renderTracks(); markNow(); renderAlbums();
+    _setQ(query); renderTracks(); markNow(); renderAlbums();
   });
 
   function renderTracks(){
@@ -1126,7 +1135,19 @@
     else roomband.classList.remove('show');
   }
   roombtn.onclick=function(){ var u=roomband.dataset.room; if(u){ navigate(u); setTL(false); } };
-  tlsearch.addEventListener('input',function(){ query=this.value.trim(); renderTracks(); markNow(); });
+  var tlclear=document.getElementById('tlclear'), tlwrap=document.getElementById('tlsearchwrap');
+  function searchChanged(){
+    query=tlsearch.value.trim();
+    tlwrap.classList.toggle('has', tlsearch.value.length>0);
+    renderTracks(); markNow(); renderAlbums();
+  }
+  tlsearch.addEventListener('input',searchChanged);
+  tlclear.addEventListener('click',function(){
+    tlsearch.value=''; searchChanged(); tlsearch.focus();
+  });
+  /* tapping an album fills this field, so the ✕ has to appear for that too */
+  var _setQ=function(v){ tlsearch.value=v; tlwrap.classList.toggle('has', !!v); };
+  window.__tlSetSearch=_setQ;
   /* SHARE: a link to the current record — <site>/?s=<slug>; opening it plays the song.
      Copies to the clipboard and offers the native share sheet where there is one. */
   document.getElementById('bshare').onclick=function(){
