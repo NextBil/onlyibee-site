@@ -445,7 +445,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       $("glogin").disabled=true;$("gsignup").disabled=true;$("gmsg").textContent='…';
       var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
       if(si.error){ $("gmsg").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ wrong email or password — new? tap CREATE ACCOUNT_'; $("glogin").disabled=false;$("gsignup").disabled=false; return; }
-      location.href='inventory/';
+      location.href='../room/';
     };
     /* the 2-second join: email + password, no pass. Needs Supabase Auth "Confirm
        email" OFF for an instant session (README §14); else prompts to confirm. */
@@ -457,7 +457,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         var m=String(su.error.message||'').toLowerCase();
         if(m.indexOf('already')>=0||m.indexOf('registered')>=0){
           var si=await sb.auth.signInWithPassword({email:v.em,password:v.pw});
-          if(!si.error){ location.href='inventory/'; return; }
+          if(!si.error){ location.href='../room/'; return; }
           $("gmsg").textContent='✕ that email already has an account — check your password_';
         } else { $("gmsg").textContent='✕ '+(su.error.message||'could not create account')+'_'; }
         $("glogin").disabled=false;$("gsignup").disabled=false; return;

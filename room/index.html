@@ -1188,13 +1188,17 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +'#collsec .openrow{margin-top:14px}'
     +'#collpeek{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-bottom:4px}'
     +'#collpeek:empty{display:none}'
-    +'.pk{border:2px solid #2a2a2a;background:#0d0d10;overflow:hidden}'
-    +'.pkart{display:block;aspect-ratio:1;background:radial-gradient(circle at 50% 45%,#1b1b22,#0a0a0d 70%)}'
+    +'.pk{border:2px solid #2a2a2a;background:#0d0d10;overflow:hidden;padding:0;cursor:pointer;'
+      +'display:block;width:100%;text-align:left;font:inherit;color:inherit}'
+    +'.pk:hover{border-color:#b6ff00}'
+    +'.pkg{font-family:"Press Start 2P",monospace;font-size:20px;color:#b6ff00;opacity:.9}'
+    +'.pkart{display:flex;align-items:center;justify-content:center;aspect-ratio:1;'
+      +'background:radial-gradient(circle at 50% 45%,#1b1b22,#0a0a0d 70%)}'
     +'.pk.r-common .pkart{box-shadow:inset 0 0 22px rgba(182,255,0,.18)}'
     +'.pk.r-rare .pkart{box-shadow:inset 0 0 22px rgba(38,224,255,.22)}'
     +'.pk.r-epic .pkart{box-shadow:inset 0 0 22px rgba(255,43,214,.24)}'
     +'.pk.r-legendary .pkart{box-shadow:inset 0 0 24px rgba(255,214,10,.3)}'
-    +'.pkn{display:block;padding:6px 5px;font-family:"Press Start 2P",monospace;font-size:6px;'
+    +'.pkn{display:block;padding:7px 6px;font-family:"Press Start 2P",monospace;font-size:7px;'
       +'line-height:1.5;color:#e8e8e8;border-top:2px solid #2a2a2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
     +'.pk.more{display:flex;align-items:center;justify-content:center;color:#b6ff00;'
       +'font-family:"Press Start 2P",monospace;font-size:11px;aspect-ratio:1}'
@@ -1215,9 +1219,20 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var sec=document.createElement('div'); sec.id='collsec';
   /* No heading, no blurb: a strip of what you actually own, and a button for
      the rest. The label was explaining a thing the pieces show by themselves. */
-  sec.innerHTML='<div id="collpeek"></div>'
+  sec.innerHTML='<h3>// MY COLLECTION_</h3>'
+    +'<div id="collpeek"></div>'
     +'<div class="openrow"><button id="collopen">♟ OPEN COLLECTION</button></div>';
-  main.insertBefore(sec, main.firstChild);
+  /* The cart (#savedwrap, from saved.js) owns the top of the page — it is the
+     one thing a visitor can act on. The collection goes UNDER it as its own
+     section, with its own button. They were nested before, which put OPEN
+     COLLECTION beneath the cart and made the two read as one confused block. */
+  function placeSection(){
+    var saved=document.getElementById('savedwrap');
+    if(saved && saved.parentNode===main){ main.insertBefore(sec, saved.nextSibling); }
+    else { main.insertBefore(sec, main.firstChild); }
+  }
+  placeSection();
+  setTimeout(placeSection,600);          /* saved.js may mount after us */
 
   var box=document.createElement('div'); box.id='collbox'; box.setAttribute('aria-hidden','true');
   box.innerHTML='<div id="collcard"><div id="collhead"><span>MY COLLECTION_</span><span id="collx">✕</span></div>'
@@ -1246,11 +1261,16 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var host=document.getElementById('collpeek'); if(!host) return;
     if(!items.length){ host.innerHTML=''; host.style.display='none'; return; }
     host.style.display='';
+    /* Collection items have NO photo — the box draws generated art from shapes.
+       So the tile has to carry the name legibly and be tappable; a dark square
+       with 6px text under it reads as an empty broken thumbnail. */
     host.innerHTML=items.slice(0,6).map(function(x){
-      return '<div class="pk r-'+String(x.r||'common').replace(/[^a-z]/g,'')+'">'
-        +'<span class="pkart"></span>'
-        +'<span class="pkn">'+String(x.n||'PIECE').replace(/[&<>]/g,'')+'</span></div>';
-    }).join('')+(items.length>6?'<div class="pk more">+'+(items.length-6)+'</div>':'');
+      var r=String(x.r||'common').replace(/[^a-z]/g,'');
+      return '<button type="button" class="pk r-'+r+'" data-open>'
+        +'<span class="pkart"><span class="pkg">'+String(x.n||'?').trim().charAt(0)+'</span></span>'
+        +'<span class="pkn">'+String(x.n||'PIECE').replace(/[&<>]/g,'')+'</span></button>';
+    }).join('')+(items.length>6?'<button type="button" class="pk more">+'+(items.length-6)+'</button>':'');
+    Array.prototype.forEach.call(host.querySelectorAll('.pk'),function(b){ b.onclick=open; });
   }
   /* ---- members only ----
      A collection is something you OWN, so it means nothing to a visitor with no
@@ -1322,13 +1342,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   box.addEventListener('click',function(e){ if(e.target===box) close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
 
-  /* SAVED PIECES belongs INSIDE this section, above the collection button —
-     saved.js drops it at the top of <main>, so adopt it once it exists. */
-  (function adopt(n){
-    var w=document.getElementById('savedwrap');
-    if(w){ w.style.margin='0'; w.style.padding='0'; sec.insertBefore(w, sec.querySelector('.openrow')); return; }
-    if(n<40) setTimeout(function(){ adopt(n+1); },100);
-  })(0);
 })();
 </script>
 </body>
