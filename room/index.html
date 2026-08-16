@@ -1264,8 +1264,16 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
      a glimpse, the button is for the rest. Nothing owned yet → the strip stays
      out of the way rather than printing an empty state. */
   /* pure renderer — the RPC above decides WHAT, this decides how it looks */
+  var lastPeek='';
   function paintPeek(items){
     var host=document.getElementById('collpeek'); if(!host) return;
+    /* ⚠ gate() runs on a 1.5s interval and calls through to here. Rewriting
+       innerHTML each time destroyed every tile and re-fetched every cover —
+       which is exactly what "the covers are glitching" looked like. Repaint
+       ONLY when the data actually changed. */
+    var sig=JSON.stringify(items);
+    if(sig===lastPeek) return;
+    lastPeek=sig;
     if(!items.length){ host.innerHTML=''; host.style.display='none'; return; }
     host.style.display='';
     /* Collection items have NO photo — the box draws generated art from shapes.
@@ -1328,10 +1336,12 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     }catch(e){}
     return false;
   }
-  var peeked=false;
+  var peeked=false, peekTried=false;
   async function peek(){
-    if(peekCached()) peeked=true;      /* show something now; still refresh below */
-    if(!sb) return;
+    if(peeked) return;                 /* painted already — nothing to redo */
+    if(peekCached()) peeked=true;      /* instant, from what the box cached */
+    if(peekTried || !sb) return;       /* only ever hit the network once */
+    peekTried=true;
     try{
       var sess=(await sb.auth.getSession()).data.session; if(!sess) return;
       /* Mirror the collection box: `my_inventory` returns which ids you own, but
