@@ -79,8 +79,12 @@ h1{font-family:var(--px);font-size:clamp(15px,5vw,24px);color:var(--acid);letter
 .backbtn:active{transform:translateY(2px)}
 footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:var(--dim)}
 </style>
-<style>/* framed inside the profile's collection box → no way-out link needed */
-  .inbox #backprof{display:none!important}</style>
+<style>/* Framed inside the profile's collection BOX it is a panel, not a page:
+   hide the site chrome. The ONLYIBEE OS link and BACK TO MY PROFILE both loaded
+   whole pages INSIDE the modal — the console inside the collection inside the
+   profile — which is a loop with no way out. The box's own ✕ is the exit. */
+  .inbox header,.inbox #backprof{display:none!important}
+  .inbox main{padding-top:14px}</style>
 </head>
 <body>
 <header>
@@ -168,9 +172,8 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
        the honest reason to make an account. Only when this page is opened on its
        own: inside the profile's box the button is already members-only. */
     if(window.parent===window){ location.replace('../../room/'); return; }
-    $("loginbox").innerHTML=''; return;
-    /* eslint-disable no-unreachable */
-
+    $("loginbox").innerHTML='';
+  }
 
   async function boot(){
     var sess=(await sb.auth.getSession()).data.session;

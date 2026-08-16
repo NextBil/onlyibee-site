@@ -986,8 +986,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       /* The annex is PRIVATE now: no visitor preview, no shareable link, and no
          manual save — changes persist on their own (markDirty → saveRoom), so a
          SAVE button was only ever a thing to forget to press. */
-      tb.innerHTML='<button class="tb solid" id="collbtn">♟ OPEN COLLECTION</button>';
-      $("collbtn").onclick=openColl;
+      /* the collection already has its own button in the section above */
+      tb.innerHTML='';
       $("sharebox").style.display="none";
       var link="";
       $("sharecopy").onclick=function(){
@@ -1238,13 +1238,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
      inventory the box does, borrows the cover art, and caps at 6 — the point is
      a glimpse, the button is for the rest. Nothing owned yet → the strip stays
      out of the way rather than printing an empty state. */
-  function peek(){
+  /* pure renderer — the RPC above decides WHAT, this decides how it looks */
+  function paintPeek(items){
     var host=document.getElementById('collpeek'); if(!host) return;
-    var items=[];
-    try{
-      var inv=JSON.parse(localStorage.getItem('ibee_inventory')||'[]');
-      if(Array.isArray(inv)) items=inv;
-    }catch(e){}
     if(!items.length){ host.innerHTML=''; host.style.display='none'; return; }
     host.style.display='';
     host.innerHTML=items.slice(0,6).map(function(x){
@@ -1276,9 +1272,23 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var savedVisible = saved && saved.style.display!=='none';
     sec.style.display = (on || savedVisible) ? '' : 'none';
   }
+  /* One source of truth with the collection box: the my_inventory RPC. The old
+     code read an `ibee_inventory` localStorage key that nothing ever writes —
+     which is why the snippet was always empty. */
+  var peeked=false;
+  async function peek(){
+    if(peeked || !sb) return;
+    try{
+      var sess=(await sb.auth.getSession()).data.session; if(!sess) return;
+      var inv=await sb.rpc('my_inventory');
+      peeked=true;
+      paintPeek((inv.data||[]).map(function(it){
+        return {n:it.name||it.id, img:it.img||it.image||''};
+      }));
+    }catch(e){}
+  }
   gate();
   setInterval(gate,1500);                       /* signing in elsewhere reflects here */
-  window.addEventListener('storage',function(e){ if(e&&e.key==='ibee_inventory') peek(); });
   document.getElementById('collopen').onclick=open;
   document.getElementById('collx').onclick=close;
   box.addEventListener('click',function(e){ if(e.target===box) close(); });
