@@ -253,7 +253,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <div id="custom" class="crtin">
     <div class="h">// MAKE IT YOURS_</div>
     <div class="chips" id="chips"></div>
-    <div class="drawhint" id="drawhint">tap a chip to re-style your annex — then SAVE. it follows you (and your visitors see it).</div>
+    <div class="drawhint" id="drawhint">tap a chip to re-style your annex_</div>
   </div>
 
   <!-- badges: the trophy shelf (rendered from assets/badges.js, owner only) -->
@@ -900,7 +900,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     if(!B||!box||!ISMINE){ if(box)box.style.display="none"; return; }
     var items=B.inbox().slice(0,8);
     if(!items.length){ box.style.display="none"; return; }
-    var h='<div class="nh"><span>// SIGNALS_ ('+items.length+')</span><span class="clr" id="nclear">CLEAR ALL ✕</span></div>';
+    var h='<div class="nh"><span>NOTIFICATIONS ('+items.length+')</span><span class="clr" id="nclear">CLEAR ALL ✕</span></div>';
     items.forEach(function(it,ix){
       var when=it.ts?new Date(it.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'}):"";
       h+='<div class="nrow'+(it.link?' lnk':'')+'" data-nix="'+ix+'">'
@@ -1103,12 +1103,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   function showJoin(){
     if(!sb){ $("loginbox").innerHTML='<div class="login"><div class="msg">✕ backend offline — refresh in a moment_</div></div>'; return; }
     $("loginbox").innerHTML='<div class="login crtin"><div class="h">// YOUR PROFILE + YOUR ANNEX_</div>'
-      +'<p><b style="color:var(--ink)">Every member gets an annex</b> — a personal slice of the room they pick, alive on their profile. Joining takes 2 seconds — just an email and a password.</p>'
+      /* LOG IN leads: most people arriving here already have an account, and the
+         blurb that used to sit on top was selling a feature to someone who just
+         wants to get in. */
       +'<input id="lem" type="email" placeholder="your email" inputmode="email" autocomplete="email">'
-      +'<input id="lpw" type="password" placeholder="pick a password (6+ characters)" autocomplete="current-password">'
-      +'<button id="lreg">＋ CREATE MY ACCOUNT</button>'
-      +'<div class="or">— ALREADY JOINED? —</div>'
-      +'<button id="llog" class="ghost">▶ LOG IN</button>'
+      +'<input id="lpw" type="password" placeholder="your password" autocomplete="current-password">'
+      +'<button id="llog">▶ LOG IN</button>'
+      +'<div class="or">— NEW HERE? —</div>'
+      +'<button id="lreg" class="ghost">＋ CREATE MY ACCOUNT</button>'
       +'<div class="msg" id="lmsg"></div>'
       +'<div class="msg" style="margin-top:8px">Got a garment pass? <a href="../member/" style="color:var(--acid)">redeem it here</a>_</div></div>';
     $("lpw").addEventListener("keydown",function(e){ if(e.key==="Enter")$("llog").click(); });
@@ -1184,6 +1186,15 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     +'#collsec h3{font-family:"Press Start 2P",monospace;font-size:11px;color:#b6ff00;margin:0 0 4px}'
     +'#collsec .sub{color:#7a7a7a;font-size:16px;margin-bottom:12px}'
     +'#collsec .openrow{margin-top:14px}'
+    +'#collpeek{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-bottom:4px}'
+    +'#collpeek:empty{display:none}'
+    +'.pk{border:2px solid #2a2a2a;background:#0d0d10;overflow:hidden}'
+    +'.pk img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#000}'
+    +'.pkq{display:flex;align-items:center;justify-content:center;aspect-ratio:1;color:#3a3a3a;font-size:26px}'
+    +'.pkn{display:block;padding:6px 5px;font-family:"Press Start 2P",monospace;font-size:6px;'
+      +'line-height:1.5;color:#e8e8e8;border-top:2px solid #2a2a2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+    +'.pk.more{display:flex;align-items:center;justify-content:center;color:#b6ff00;'
+      +'font-family:"Press Start 2P",monospace;font-size:11px;aspect-ratio:1}'
     +'#collopen{font-family:"Press Start 2P",monospace;font-size:9px;padding:12px 16px;cursor:pointer;'
       +'background:transparent;color:#b6ff00;border:1px solid #b6ff00}'
     +'#collopen:hover{background:#b6ff00;color:#000}'
@@ -1199,8 +1210,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   document.head.appendChild(st);
 
   var sec=document.createElement('div'); sec.id='collsec';
-  sec.innerHTML='<h3>// YOUR COLLECTION_</h3>'
-    +'<div class="sub">what you own, and what you are eyeing_</div>'
+  /* No heading, no blurb: a strip of what you actually own, and a button for
+     the rest. The label was explaining a thing the pieces show by themselves. */
+  sec.innerHTML='<div id="collpeek"></div>'
     +'<div class="openrow"><button id="collopen">♟ OPEN COLLECTION</button></div>';
   main.insertBefore(sec, main.firstChild);
 
@@ -1210,10 +1222,63 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   document.body.appendChild(box);
 
   function open(){ var f=document.getElementById('collframe');
-    if(!f.getAttribute('src')) f.src='../member/inventory/';
+    if(!f.getAttribute('src')){
+      /* Tag the framed page from HERE rather than letting it detect its own
+         parent: the box owns the frame, so it is the thing that knows this is a
+         modal and not a page. Runs on load and again now, in case it is cached. */
+      f.addEventListener('load',function(){ try{ f.contentDocument.documentElement.classList.add('inbox'); }catch(e){} });
+      f.src='../member/inventory/';
+    }else{ try{ f.contentDocument.documentElement.classList.add('inbox'); }catch(e){} }
     box.classList.add('on'); box.setAttribute('aria-hidden','false'); }
   function close(){ box.classList.remove('on'); box.setAttribute('aria-hidden','true'); }
   window.openColl=open;
+
+  /* ---- the snippet ----
+     A few pieces you actually own, shown right on the profile. Reads the same
+     inventory the box does, borrows the cover art, and caps at 6 — the point is
+     a glimpse, the button is for the rest. Nothing owned yet → the strip stays
+     out of the way rather than printing an empty state. */
+  function peek(){
+    var host=document.getElementById('collpeek'); if(!host) return;
+    var items=[];
+    try{
+      var inv=JSON.parse(localStorage.getItem('ibee_inventory')||'[]');
+      if(Array.isArray(inv)) items=inv;
+    }catch(e){}
+    if(!items.length){ host.innerHTML=''; host.style.display='none'; return; }
+    host.style.display='';
+    host.innerHTML=items.slice(0,6).map(function(x){
+      var img=x.img||x.cover||'';
+      return '<div class="pk">'+(img?'<img src="'+String(img).replace(/"/g,'&quot;')+'" alt="">':'<span class="pkq">?</span>')
+        +'<span class="pkn">'+String(x.n||x.name||x.id||'PIECE').replace(/[&<>]/g,'')+'</span></div>';
+    }).join('')+(items.length>6?'<div class="pk more">+'+(items.length-6)+'</div>':'');
+  }
+  /* ---- members only ----
+     A collection is something you OWN, so it means nothing to a visitor with no
+     account: no snippet, no OPEN COLLECTION. SAVED PIECES stays, because saving
+     needs no account and it is the one thing a visitor has here — and it is the
+     reason to make an account. Same session check the rest of the site uses. */
+  function signedIn(){
+    try{ for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(/^sb-.*-auth-token$/.test(k)){ var v=localStorage.getItem(k); if(v&&v!=='null') return true; }
+    } }catch(e){}
+    return false;
+  }
+  function gate(){
+    var on=signedIn();
+    var pk=document.getElementById('collpeek'), row=sec.querySelector('.openrow');
+    if(pk)  pk.style.display  = on ? '' : 'none';
+    if(row) row.style.display = on ? '' : 'none';
+    if(on) peek();
+    /* the whole section disappears if there is nothing left in it to show */
+    var saved=document.getElementById('savedwrap');
+    var savedVisible = saved && saved.style.display!=='none';
+    sec.style.display = (on || savedVisible) ? '' : 'none';
+  }
+  gate();
+  setInterval(gate,1500);                       /* signing in elsewhere reflects here */
+  window.addEventListener('storage',function(e){ if(e&&e.key==='ibee_inventory') peek(); });
   document.getElementById('collopen').onclick=open;
   document.getElementById('collx').onclick=close;
   box.addEventListener('click',function(e){ if(e.target===box) close(); });

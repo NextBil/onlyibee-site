@@ -79,6 +79,8 @@ h1{font-family:var(--px);font-size:clamp(15px,5vw,24px);color:var(--acid);letter
 .backbtn:active{transform:translateY(2px)}
 footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:var(--dim)}
 </style>
+<style>/* framed inside the profile's collection box → no way-out link needed */
+  .inbox #backprof{display:none!important}</style>
 </head>
 <body>
 <header>
@@ -86,6 +88,10 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
   <span><a href="../../room/" style="color:var(--acid);text-decoration:none">☺ PROFILE</a> · COLLECTION.SYS</span>
 </header>
 <main>
+  <!-- Shown only when this page is opened on its own. Inside the profile's
+       collection BOX it is hidden: the box has its own ✕, and this link used to
+       navigate the frame to the standalone collection page — a dead end inside
+       a modal. -->
   <a class="backbtn" id="backprof" href="../../room/">◀ BACK TO MY PROFILE</a>
   <h1>MY COLLECTION</h1>
   <div class="progress" id="prog">SYNCING THE VAULT…</div>
@@ -156,23 +162,15 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
 
   function renderLogin(show){
     if(!show){ $("loginbox").innerHTML=''; return; }
-    $("loginbox").innerHTML='<div class="login"><div class="h">// LOG IN TO REVEAL YOUR COLLECTION_</div>'
-      +'<input id="em" type="email" placeholder="email" inputmode="email" autocomplete="email">'
-      +'<input id="pw" type="password" placeholder="password" autocomplete="current-password" style="margin-bottom:8px">'
-      +'<button id="go">▶ ENTER</button><div class="msg" id="m"></div></div>';
-    $("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") $("go").click(); });
-    $("go").onclick=async function(){
-      var em=($("em").value||'').trim(), pw=($("pw").value||'');
-      if(!/.+@.+\..+/.test(em)){$("m").textContent='enter your email_';return;}
-      if(pw.length<6){$("m").textContent='password: 6+ characters_';return;}
-      $("go").disabled=true;$("m").textContent='…';
-      await sb.auth.signUp({email:em,password:pw});
-      var sess=(await sb.auth.getSession()).data.session;
-      if(!sess){ var si=await sb.auth.signInWithPassword({email:em,password:pw});
-        if(si.error){$("m").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ '+si.error.message;$("go").disabled=false;return;} }
-      /* onAuthStateChange re-runs boot() and reveals the collection */
-    };
-  }
+    /* A collection is something you OWN, so it does not exist for a visitor —
+       no sign-in wall standing in front of an empty room. The profile is where
+       a visitor belongs; saved pieces are waiting for them there, and that is
+       the honest reason to make an account. Only when this page is opened on its
+       own: inside the profile's box the button is already members-only. */
+    if(window.parent===window){ location.replace('../../room/'); return; }
+    $("loginbox").innerHTML=''; return;
+    /* eslint-disable no-unreachable */
+
 
   async function boot(){
     var sess=(await sb.auth.getSession()).data.session;
@@ -234,5 +232,8 @@ footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../../assets/nav.js?v=1"></script>
 <script src="/assets/pulse.js?v=2"></script>
+<script>/* mark ourselves when we are the profile's collection box, not a page */
+try{ if(window.parent!==window && /\/room\//.test(window.parent.location.pathname)) document.documentElement.classList.add('inbox'); }catch(e){}
+</script>
 </body>
 </html>

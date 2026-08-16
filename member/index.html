@@ -212,7 +212,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <div class="actions" id="actions" style="display:none">
     <a class="btn solid" href="../room/">⌂ MY PROFILE + ROOM</a>
     <a class="btn" href="../console.html#music">▶ THE UNIVERSE</a>
-    <a class="btn" href="inventory/">♟ MY COLLECTION</a>
+    <a class="btn" href="../room/">▣ MY PROFILE</a>
   </div>
 </main>
 
@@ -404,8 +404,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     else showOpen("THE FREQUENCY IS OPEN — JOIN FREE");
     boxh.textContent="// ENTER THE FREQUENCY_";
     if(sess){
+      /* the profile is home — the collection lives inside it as a box now */
       host.innerHTML='<div class="cnote" style="margin-bottom:10px">you\'re signed in.</div>'
-        +'<a class="cbtn" href="inventory/">♟ VIEW MY COLLECTION</a>';
+        +'<a class="cbtn" href="../room/">▣ GO TO MY PROFILE</a>';
       return;
     }
     /* LOGIN LEADS. Landing on "enter a pass code" is confusing for the many more
