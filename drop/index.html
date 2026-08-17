@@ -145,9 +145,31 @@ main{max-width:1180px;margin:0 auto;padding:22px 16px 90px;position:relative;z-i
 .case.taken .stage{filter:saturate(.55)}
 .case.taken .tw{animation-play-state:paused}
 
-/* ================= how it works ================= */
-.how{margin-top:40px;border-top:2px solid var(--border);padding-top:28px}
-.how h2{font-family:var(--px);font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:8px}
+/* ================= how it works — a box you open =================
+   The shelf is the point of this page; the explainer is for the people who
+   want it. As a closed <details> it costs one line instead of a screenful,
+   and it needs no javascript to open. */
+.how{margin-top:34px;border:2px solid var(--border);background:#0a0a0a}
+.how>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;
+  padding:16px 18px;font-family:var(--px);font-size:11px;color:var(--gold);letter-spacing:1px;
+  line-height:1.6;-webkit-tap-highlight-color:transparent}
+.how>summary::-webkit-details-marker{display:none}
+.how>summary .hint{margin-left:auto;font-size:8px;color:var(--dim);letter-spacing:1px;
+  white-space:nowrap;display:flex;align-items:center;gap:8px}
+.how>summary .pm{display:inline-block;width:20px;height:20px;line-height:18px;text-align:center;
+  border:1px solid var(--border);color:var(--acid);font-size:10px;flex:none;font-style:normal}
+/* the label and the sign are written by CSS so the one control says the right
+   thing in both states without a line of script */
+.how>summary .lbl{font-style:normal}
+.how>summary .lbl::after{content:"READ IT"}
+.how[open]>summary .lbl::after{content:"CLOSE"}
+.how>summary .pm::after{content:"+"}
+.how[open]>summary .pm::after{content:"–"}
+.how:hover>summary{color:#fff}
+.how:hover>summary .pm{border-color:var(--acid)}
+.how[open]>summary{border-bottom:2px solid var(--border)}
+.how[open]>summary .pm{color:var(--red);border-color:#3a1a1a}
+.howbody{padding:20px 18px 22px}
 .how .s{color:var(--dim);margin-bottom:20px;max-width:660px;line-height:1.4}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .step{border:1px solid var(--border);background:#0a0a0a;padding:16px 13px}
@@ -181,8 +203,8 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="bulbs" id="bulbs" aria-hidden="true"></div>
     <h1 id="dropname">THE VAULT</h1>
     <div class="sub"><span>ONE OF ONE ·</span> <span>MADE TO ORDER ·</span> <span>NEVER AGAIN</span></div>
-    <div class="tag">nothing here is in stock. you claim a <b>single design</b>, then it gets<br>
-      pressed, painted and stitched <b>by hand</b> — 7–14 days — and retired forever.</div>
+    <div class="tag">you claim a <b>single design</b>, then it gets pressed, painted<br>
+      and stitched <b>by hand</b> — 7–14 days — and retired forever.</div>
     <div class="odo" id="odo" aria-label="pieces remaining"></div>
   </section>
 
@@ -195,8 +217,9 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   <div class="vault" id="vault"></div>
 
-  <section class="how">
-    <h2>HOW IT WORKS_</h2>
+  <details class="how">
+    <summary>HOW IT WORKS_<span class="hint"><i class="lbl"></i><i class="pm"></i></span></summary>
+    <div class="howbody">
     <div class="s">no warehouse, no leftover boxes of unsold shirts. every piece is drawn in pen,
       inked in photoshop, then pressed, painted and stitched by hand after someone claims it —
       which is exactly why there's only ever one.</div>
@@ -206,10 +229,12 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       <div class="step"><div class="n">03</div><b>TAP THE PATCH</b><span>the nfc chip lives in the monster patch. tap your phone on it — it verifies the piece and drops it into your collection. the code works by hand too.</span></div>
       <div class="step"><div class="n">04</div><b>YOUR NAME STAYS</b><span>this page shows who owns it and when they got it. permanently.</span></div>
     </div>
-  </section>
+    </div>
+  </details>
 
-  <!-- the shared process block (assets/process.js) — same section the shop and
-       the console show, so "made to order" means the same thing everywhere -->
+  <!-- the shared blocks (assets/process.js) — the same two sections the shop
+       and the console show, so the process reads the same everywhere -->
+  <div id="howscan"></div>
   <div id="howmade"></div>
 </main>
 
@@ -324,7 +349,7 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       +'font-size:11px;color:var(--red);line-height:2">✕ THE VAULT IS EMPTY_<br><br>check back soon_</div>';
 })();
 </script>
-<script src="/assets/process.js?v=1"></script>
+<script src="/assets/process.js?v=2"></script>
 <script src="../assets/player.js?v=27"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>

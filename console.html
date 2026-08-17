@@ -832,12 +832,15 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         <span class="rl r-c">■ COMMON</span><span class="rl r-sr">■ SUPER RARE</span><span class="rl r-sdr">■ SUPER DUPER RARE</span><span class="rl r-leg">■ LEGENDARY</span>
       </div>
       <div class="grid" id="shopgrid"></div>
+      <!-- the scan demo sits directly above the sentence that explains it -->
+      <div id="howscan"></div>
       <div class="prose" style="margin-top:26px"><p>Every garment carries an NFC tag behind the monster head logo — scan it to verify it's real, see your number from the limited drop, and check your character's rarity and power level ♟️</p></div>
 
       <!-- the shared process block (assets/process.js), same one the vault and the
-           folder pages carry. Its stills are loading="lazy" and its videos
-           preload="none", so sitting inside this hidden screen costs nothing
-           until the shop is actually opened. -->
+           folder pages carry. Its stills are loading="lazy", its long film is
+           preload="none" and its loops get a src only once they are on screen,
+           so sitting inside this hidden screen costs nothing until the shop is
+           actually opened. -->
       <div id="howmade"></div>
     </section>
 
@@ -2333,7 +2336,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
 })();
 </script>
 <script src="assets/player.js?v=27"></script>
-<script src="/assets/process.js?v=1"></script>
+<script src="/assets/process.js?v=2"></script>
 <div id="icslbx"><img alt=""></div>
 <script>
 /* ICS process sketches — click a card to open it big, click/Esc closes.

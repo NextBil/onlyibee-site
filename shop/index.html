@@ -72,23 +72,8 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
   font-family:var(--px);font-size:9px;letter-spacing:1px;color:#fff;background:var(--red);
   border:2px solid #ff7b7b;padding:8px 11px;box-shadow:0 0 18px rgba(255,43,43,.55);white-space:nowrap}
 .notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0;text-align:center}
-/* ---- THE PROCESS (ICS folders): sketches + making-of + nfc demo ---- */
-.proc{margin-top:34px;border-top:2px solid var(--border);padding-top:26px}
-.proc h2{font-family:var(--px);font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:6px}
-.proc .sub2{color:var(--dim);line-height:1.4;margin-bottom:18px;max-width:640px}
-.proc h3{font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:1px;margin:22px 0 10px}
-.vidrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.vcard{border:2px solid var(--border);background:var(--panel)}
-.vcard video{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}
-.vcard.wide video{aspect-ratio:5/4}
-.vcard .cap{padding:10px;border-top:2px solid var(--border)}
-.vcard .cap b{font-family:var(--px);font-size:8px;color:var(--ink);display:block;line-height:1.7}
-.vcard .cap span{color:var(--dim);font-size:17px;line-height:1.3;display:block;margin-top:4px}
-.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.sgrid a{border:2px solid var(--border);background:var(--panel);display:block;position:relative;transition:border-color .2s,transform .15s}
-.sgrid a:hover{border-color:var(--gold);transform:translateY(-3px)}
-.sgrid img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;filter:saturate(1.02)}
-.sgrid .snm{font-family:var(--px);font-size:6px;color:var(--dim);padding:7px 8px;line-height:1.6}
+/* THE PROCESS moved to assets/process.js (shared with the vault + console), so
+   its styles live there too. Only the lightbox stays — the shared gallery uses it. */
 /* lightbox */
 #lbx{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9500;display:none;align-items:center;justify-content:center;cursor:zoom-out}
 #lbx.on{display:flex}
@@ -110,8 +95,9 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   <div id="wrap"></div>
 
-  <!-- the shared process block (assets/process.js) — same section the vault and
-       the console show, so "made to order" means the same thing everywhere -->
+  <!-- the shared blocks (assets/process.js) — the same two sections the vault
+       and the console show, so the process reads the same everywhere -->
+  <div id="howscan"></div>
   <div id="howmade"></div>
 </main>
 <footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
@@ -181,45 +167,26 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         +'<span class="pr">'+e2((p.cur||"€")+p.price)+'</span></div></a>';
     }).join('')+'</div>';
   }
-  /* ---- THE PROCESS: only on ICS drop folders ---- */
-  var proc="";
-  if(/^ics/.test(fd.id)){
-    var P="../assets/img/ics-process/";
-    var sketches=[
-      ["process-sketches-spread.jpg","FIRST PEN SKETCHES"],
-      ["process-sketch-kings-mask.jpg","KING NANNAN + THE MASK"],
-      ["process-sketch-eiffel-knight.jpg","EIFFEL TOWER KNIGHT"],
-      ["process-sketch-hippo-knight.jpg","HIPPO KNIGHT — BAOULE MYTH"],
-      ["process-sketch-beebee.jpg","BEEBEE — MIMI'S BROTHER"],
-      ["process-photoshop-mask.jpg","INKING IN PHOTOSHOP"],
-      ["process-photoshop-swordy.jpg","SWORDY + SWORDA IN COLOR"],
-      ["process-beebee-final.jpg","BEEBEE — FINAL CARD"]
-    ];
-    proc='<section class="proc"><h2>THE PROCESS_</h2>'
-      +'<div class="sub2">every ICS character starts as a pen sketch, gets inked + colored in photoshop, '
-      +'then pressed onto the fabric by hand. one by one. that’s why each piece is made only once_</div>'
-      +'<h3>▸ MAKING OF</h3><div class="vidrow">'
-      +'<div class="vcard"><video controls playsinline preload="none" poster="'+P+'process-recap-poster.jpg" src="'+P+'process-recap.mp4"></video>'
-      +'<div class="cap"><b>PROCESS RECAP</b><span>from first sketch to finished shirt — how the clothes get made_</span></div></div>'
-      +'<div class="vcard wide"><video controls playsinline preload="none" poster="'+P+'process-nfc-demo-poster.jpg" src="'+P+'process-nfc-demo.mp4"></video>'
-      +'<div class="cap"><b>SCAN THE SHIRT</b><span>every piece has a chip inside — tap your phone on it and it unlocks the universe_</span></div></div>'
-      +'</div>'
-      +'<h3>▸ THE SKETCHES</h3><div class="sgrid">'
-      +sketches.map(function(s){
-        return '<a href="'+P+s[0]+'" data-lbx><img loading="lazy" src="'+P+s[0]+'" alt="'+e2(s[1])+'"><div class="snm">'+e2(s[1])+'</div></a>';
-      }).join('')+'</div></section>';
-  }
-  document.getElementById("wrap").innerHTML=head+note+grid+proc;
-  /* lightbox for the sketches */
+  /* THE PROCESS used to be built here, ICS folders only, with its own copy of
+     the videos and sketches. It now comes from assets/process.js (#howmade /
+     #howscan below the grid) so there is one version of it across the vault,
+     these folder pages and the console — and so every drop gets it, not only
+     the ICS ones. */
+  document.getElementById("wrap").innerHTML=head+note+grid;
+  /* lightbox for the sketches. Delegated: the shared block is injected after
+     this runs, so binding per link would miss it and the stills would navigate
+     away from the page instead of opening. */
   var lbx=document.getElementById("lbx"),lim=document.getElementById("lbxim");
-  document.querySelectorAll("[data-lbx]").forEach(function(a){
-    a.addEventListener("click",function(ev){ev.preventDefault();lim.src=a.getAttribute("href");lbx.classList.add("on");});
+  document.addEventListener("click",function(ev){
+    var a=ev.target.closest&&ev.target.closest("[data-lbx], .hmshots a");
+    if(!a) return;
+    ev.preventDefault();lim.src=a.getAttribute("href");lbx.classList.add("on");
   });
   lbx.addEventListener("click",function(){lbx.classList.remove("on");lim.src="";});
   document.addEventListener("keydown",function(ev){if(ev.key==="Escape"){lbx.classList.remove("on");lim.src="";}});
 })();
 </script>
-<script src="/assets/process.js?v=1"></script>
+<script src="/assets/process.js?v=2"></script>
 <script src="../assets/player.js?v=27"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
