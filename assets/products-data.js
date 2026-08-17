@@ -20,7 +20,7 @@ window.IBEE_PRODUCTS={
   {
    "id": "15-tshirts",
    "name": "14 T-SHIRTS",
-   "sub": "PARIS 2026 · ONE OF ONE · PRINTED ONCE",
+   "sub": "PARIS 2026 · ONE OF ONE · MADE TO ORDER",
    "tint": "sdr",
    "hype": 0,
    "state": "soon",
@@ -58,7 +58,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "Mimi, straight to the chest. The tower of the set, drawn by hand before anything else existed. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "Mimi. The tower of the set — she was on paper before anything else in ICS existed.\n\nMADE BY HAND_ pen sketch, inked in Photoshop, printed to DTF film and pressed onto the blank by hand. One shirt, one pass, no ganging it up with anything else. The ONLYIBEE mark is embroidered, not printed. The ICS monster patch goes on last, stitched by hand.\n\nPRINTED ONCE_ VAULT 01/14 — PARIS 2026. This design gets printed a single time and then retired. No second run. No restock. Not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nAUTHENTICATION_ the NFC chip lives inside the monster patch. Tap your phone on it: it verifies the piece is real, shows 01/14 and its rarity, and opens its page on onlyibee.com with your name on it.",
    "imgs": ["/assets/tees/mockups/mimi.jpg"],
    "pay": {
     "wix": "",
@@ -78,7 +78,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The King. A king with trust issues — he been thru a lot and would rather not speak about it. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "NAN-NAN, the King. A king with trust issues — he been thru a lot and would rather not speak on it.\n\nMADE BY HAND_ drawn in pen, inked and coloured in Photoshop, pressed onto the blank by hand from DTF film. The crown highlights are painted on after the press, so the gold sits on top of the print instead of inside it. Embroidered ONLYIBEE mark. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 02/14 — PARIS 2026. Legendary tier. One print, then the file is retired. No second run, no restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. The King doesn't exist as a shirt until someone claims him. 7–14 days from claim to the post office.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: real or not real, 02/14, rarity and power level, and a link straight to this page on onlyibee.com carrying your name.",
    "imgs": ["/assets/tees/mockups/nannan.jpg"],
    "pay": {
     "wix": "",
@@ -98,7 +98,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "A cracked heart held together with a dollar bill. Small chest print, loud idea. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "A cracked heart held together with a dollar bill. Small chest print, loud idea.\n\nMADE BY HAND_ inked in Photoshop, printed to DTF and hand-pressed small and high on the chest — the placement is set by eye, not by a jig. The crack is painted in by hand after the press, so no two strokes of it exist anywhere else. Monster patch stitched on.\n\nPRINTED ONCE_ VAULT 03/14 — PARIS 2026. Printed a single time, then retired. There is no restock and there will not be one.\n\nMADE TO ORDER_ commissioned, not shipped from stock. It gets made after you claim it: 7–14 days on the table, then it ships from Paris.\n\nAUTHENTICATION_ NFC chip in the patch. Tap your phone on it to verify the piece, pull up 03/14 and its rarity, and land on its page on onlyibee.com.",
    "imgs": ["/assets/tees/mockups/coeur-dollar.jpg"],
    "pay": {
     "wix": "",
@@ -118,7 +118,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The Queen. She represents moms and fertility — wise, very caring, with a big attitude. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "ABLA, the Queen. She represents the mothers and fertility — wise, very caring, big attitude.\n\nMADE BY HAND_ pen sketch, inked in Photoshop, hand-pressed from DTF film onto one blank. Her jewellery is picked out in paint by hand after the press. The ONLYIBEE mark is embroidered. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 04/14 — PARIS 2026. Legendary tier. One print of this design, ever, then it's retired out of the vault. No restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. She's made for the person who claims her — 7–14 days, then out of Paris.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, shows 04/14, rarity and power level, opens this page on onlyibee.com with your name on it.",
    "imgs": ["/assets/tees/mockups/abla.jpg"],
    "pay": {
     "wix": "",
@@ -138,7 +138,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The bats and the manifesto, yellow on red. Punk ça veut dire voyou en anglais. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "NOUVEAUX PUNK — the bats and the manifesto, yellow on red. Punk ça veut dire voyou en anglais.\n\nMADE BY HAND_ inked in Photoshop, printed to DTF and pressed by hand across the full front. The bats get hand-painted edges after the press so they bleed off the print the way they do on the cover. Embroidered ONLYIBEE mark, monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 05/14 — PARIS 2026. Printed once, retired once claimed. No second run, no restock, no reprint in another colourway.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Press, paint, needle — all of it happens after the claim. 7–14 days.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone: it verifies the piece, shows 05/14 and its rarity, and opens the NOUVEAUX PUNK page on onlyibee.com.",
    "imgs": ["/assets/tees/mockups/nouveaux-punk-rouge.jpg"],
    "pay": {
     "wix": "",
@@ -158,7 +158,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The wordmark off the site itself: ONLY in acid, IBEE in red. Engine for art and discovery. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "The wordmark taken straight off the site — ONLY in acid, IBEE in red. Engine for art and discovery.\n\nMADE BY HAND_ the mark is embroidered directly onto the chest, thread over fabric, not pressed. The engine block underneath it is DTF, applied by hand in a second pass and lined up against the stitching by eye. Monster patch sewn on last.\n\nPRINTED ONCE_ VAULT 06/14 — PARIS 2026. One make of this design, then it's out of the vault for good. No restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Embroidery gets set up per shirt — 7–14 days from claim to shipment.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: proof the piece is real, 06/14, rarity, and a direct line back to onlyibee.com.",
    "imgs": ["/assets/tees/mockups/onlyibee-engine.jpg"],
    "pay": {
     "wix": "",
@@ -178,7 +178,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The pixel umbrella with the rain coming down through it. One red drop in the whole storm. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "UTOPIE — the pixel umbrella with the rain coming down through it. One red drop in the whole storm.\n\nMADE BY HAND_ inked in Photoshop, printed to DTF and hand-pressed. The single red drop is painted on by hand after the press — one drop, one shirt, done with a brush. Embroidered ONLYIBEE mark. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 07/14 — PARIS 2026. Printed a single time and retired. No restock, ever.\n\nMADE TO ORDER_ commissioned, not shipped from stock. The storm doesn't exist on fabric until you claim it. 7–14 days, then it ships from Paris.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone on it to verify the piece, see 07/14 and its rarity, and open its page on onlyibee.com under your name.",
    "imgs": ["/assets/tees/mockups/utopie-pluie.jpg"],
    "pay": {
     "wix": "",
@@ -198,7 +198,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The lockup. Umbrella, wordmark, two cities, and the promise underneath: each piece made once. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "UTOPIE — the lockup. Umbrella, wordmark, two cities, and the promise underneath: each piece made once.\n\nMADE BY HAND_ hand-pressed DTF across the chest, then PARIS and TORONTO embroidered underneath it in thread so the two cities sit raised off the print. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 08/14 — PARIS 2026. Printed one time, then retired. No second run and no restock — the shirt says it, so it has to be true.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Press first, embroidery after, both after you claim it. 7–14 days.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece is real, shows 08/14 and its rarity, and opens this page on onlyibee.com with your name on it.",
    "imgs": ["/assets/tees/mockups/utopie-paris-toronto.jpg"],
    "pay": {
     "wix": "",
@@ -218,7 +218,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "Goli in full. This guy does bare stuff that we can't understand — just don't wake him up at night. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "GOLI in full. This guy does bare stuff we can't understand — just don't wake him up at night.\n\nMADE BY HAND_ pen sketch, inked in Photoshop, hand-pressed from DTF onto one blank. The mask is gone over with paint after the press so the face carries texture the file doesn't have. Embroidered ONLYIBEE mark, monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 09/14 — PARIS 2026. One print, then retired. No restock, no reissue.\n\nMADE TO ORDER_ commissioned, not shipped from stock. He gets made after the claim — 7–14 days on the table, then out of Paris.\n\nAUTHENTICATION_ NFC chip in the patch. Tap your phone: real-or-fake, 09/14, rarity and power level, straight through to onlyibee.com.",
    "imgs": ["/assets/tees/mockups/goli.jpg"],
    "pay": {
     "wix": "",
@@ -238,7 +238,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "Just the mask, blown up big. The Baoulé face that started the whole crew. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "GOLI — the mask alone, blown up big. The Baoulé face that started the whole crew.\n\nMADE BY HAND_ hand-pressed DTF, oversized on the front, aligned by eye — at this size there's no hiding a crooked pass. The mask lines are picked out in paint afterwards by hand. Embroidered ONLYIBEE mark. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 10/14 — PARIS 2026. Printed once, retired once claimed. No second run.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is pre-made. 7–14 days from your claim to the shipment.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, shows 10/14 and its rarity, opens the mask's page on onlyibee.com with your name on it.",
    "imgs": ["/assets/tees/mockups/goli-masque.jpg"],
    "pay": {
     "wix": "",
@@ -258,7 +258,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The clean umbrella mark and one line: somewhere in Dreamland… One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "UTOPIE — the clean umbrella mark and one line: somewhere in Dreamland…\n\nMADE BY HAND_ the quietest one in the vault. Small hand-pressed DTF umbrella, the line set underneath it, nothing else on the shirt. The mark is embroidered. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 11/14 — PARIS 2026. One print of this design and then it's retired. No restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. It gets made after you claim it — 7–14 days, then it ships from Paris.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone on it: verifies the piece, shows 11/14 and its rarity, and opens its page on onlyibee.com under your name.",
    "imgs": ["/assets/tees/mockups/utopie-dreamland.jpg"],
    "pay": {
     "wix": "",
@@ -278,7 +278,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The knight on his hippo. The King granted these guys total freedom — they'll woop you on sight. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "SWORDY — the knight on his hippo. The King granted these guys total freedom; they'll woop you on sight.\n\nMADE BY HAND_ drawn in pen, inked in Photoshop, hand-pressed from DTF. The blade is painted in after the press so it catches light off the fabric. Embroidered ONLYIBEE mark, monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 12/14 — PARIS 2026. Printed a single time, then retired out of the vault. No second run, no restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. He rides out after someone claims him — 7–14 days.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, pulls 12/14, rarity and power level, and links back to onlyibee.com.",
    "imgs": ["/assets/tees/mockups/swordy.jpg"],
    "pay": {
     "wix": "",
@@ -298,7 +298,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The same manifesto, pink bats on deep green, glowing. The loudest piece in the drop. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "NOUVEAUX PUNK — the same manifesto, pink bats on deep green, glowing. The loudest thing in the vault.\n\nMADE BY HAND_ inked in Photoshop, hand-pressed from DTF, then the neon is pushed further with paint on top of the print — that glow is pigment, not a filter. The mark is embroidered. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 13/14 — PARIS 2026. Legendary tier. Printed once, then retired. No restock, no colourway two.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Press, paint, dry, stitch — 7–14 days after the claim, then it leaves Paris.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone: verifies the piece, shows 13/14 and its rarity, and opens the NOUVEAUX PUNK page on onlyibee.com with your name on it.",
    "imgs": ["/assets/tees/mockups/nouveaux-punk-neon.jpg"],
    "pay": {
     "wix": "",
@@ -318,7 +318,7 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The session, worn. One take, twenty minutes, no skips — the tape that never got a second run. One of one: this design is printed a single time and then retired. Claim it and your name goes on this page, permanently, with the date.",
+   "desc": "20 MIN ZA SESSION, worn. One take, twenty minutes, no skips — the tape that never got a second run.\n\nMADE BY HAND_ hand-pressed DTF on the front, the session title embroidered in thread, and the tape marks painted in by hand after the press. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 14/14 — PARIS 2026. Legendary tier, last number in the drop. One print, then retired. The session didn't get a second run and neither does the shirt.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Made after the claim: 7–14 days on the table, then out of Paris.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, shows 14/14 and its rarity, and opens the session's page on onlyibee.com with your name on it.",
    "imgs": ["/assets/tees/mockups/20mzs-worn.jpg"],
    "pay": {
     "wix": "",

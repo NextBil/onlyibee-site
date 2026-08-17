@@ -7,9 +7,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>THE VAULT — ONLY IBEE</title>
-<meta name="description" content="One-of-one t-shirts. Each design is printed a single time and then retired forever. Claim one and your name stays on its page.">
-<meta property="og:title" content="THE VAULT — ONE OF ONE">
-<meta property="og:description" content="Each design printed once, then never again. Claim one and your name goes on the wall.">
+<meta name="description" content="One-of-one t-shirts, made to order. Pressed, embroidered and stitched by hand after you claim it — 7–14 days. Each design is printed a single time and then retired forever.">
+<meta property="og:title" content="THE VAULT — ONE OF ONE, MADE TO ORDER">
+<meta property="og:description" content="Nothing sits in stock. Your piece gets made after you claim it, printed once, then never again.">
 <meta property="og:image" content="https://onlyibee.com/assets/img/og-default.png">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <!--
@@ -66,11 +66,12 @@ main{max-width:1180px;margin:0 auto;padding:22px 16px 90px;position:relative;z-i
 .odo .lbl{font-family:var(--px);font-size:9px;color:var(--gold);letter-spacing:2px;margin-left:9px}
 
 /* the rules strip */
-.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 30px}
+.rules{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 30px}
 .rule{border:1px solid var(--border);background:#0a0a0a;padding:13px 12px;text-align:center}
 .rule b{display:block;font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:1px;margin-bottom:7px}
 .rule span{color:var(--dim);font-size:17px;line-height:1.3}
-@media(max-width:640px){.rules{grid-template-columns:1fr}}
+@media(max-width:900px){.rules{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.rules{grid-template-columns:1fr}}
 
 /* ================= THE VITRINE GRID ================= */
 .vault{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:16px}
@@ -179,14 +180,15 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <section class="marquee">
     <div class="bulbs" id="bulbs" aria-hidden="true"></div>
     <h1 id="dropname">THE VAULT</h1>
-    <div class="sub"><span>ONE OF ONE ·</span> <span>PRINTED ONCE ·</span> <span>NEVER AGAIN</span></div>
-    <div class="tag">every shirt here is a <b>single design</b>. it gets printed one time,<br>
-      then retired forever. buy one and <b>your name stays on its page</b>.</div>
+    <div class="sub"><span>ONE OF ONE ·</span> <span>MADE TO ORDER ·</span> <span>NEVER AGAIN</span></div>
+    <div class="tag">nothing here is in stock. you claim a <b>single design</b>, then it gets<br>
+      pressed, painted and stitched <b>by hand</b> — 7–14 days — and retired forever.</div>
     <div class="odo" id="odo" aria-label="pieces remaining"></div>
   </section>
 
   <div class="rules">
     <div class="rule"><b>◆ 1 OF 1</b><span>one print per design. when it's claimed, the design is retired.</span></div>
+    <div class="rule"><b>◆ MADE TO ORDER</b><span>commissioned, not shipped from stock. 7–14 days on the table, then it leaves paris.</span></div>
     <div class="rule"><b>◆ YOUR NAME</b><span>the owner is printed on this site, publicly, with the date.</span></div>
     <div class="rule"><b>◆ NO RESTOCK</b><span>no second run, no "back in stock". ever.</span></div>
   </div>
@@ -195,12 +197,13 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
   <section class="how">
     <h2>HOW IT WORKS_</h2>
-    <div class="s">no warehouse, no leftover boxes of unsold shirts. each piece is made the moment
-      someone claims it — which is exactly why there's only ever one.</div>
+    <div class="s">no warehouse, no leftover boxes of unsold shirts. every piece is drawn in pen,
+      inked in photoshop, then pressed, painted and stitched by hand after someone claims it —
+      which is exactly why there's only ever one.</div>
     <div class="steps">
       <div class="step"><div class="n">01</div><b>PICK YOUR ONE</b><span>every design here is unclaimed until it isn't. first one there takes it.</span></div>
-      <div class="step"><div class="n">02</div><b>IT GETS MADE</b><span>printed for you, once. then that design never gets printed again.</span></div>
-      <div class="step"><div class="n">03</div><b>REDEEM THE CODE</b><span>a code ships in the package. enter it and the piece lands in your collection.</span></div>
+      <div class="step"><div class="n">02</div><b>IT GETS MADE</b><span>pressed from dtf film by hand, painted where the design calls for it, the mark embroidered, the ics monster patch stitched on last. 7–14 days, then it leaves paris.</span></div>
+      <div class="step"><div class="n">03</div><b>TAP THE PATCH</b><span>the nfc chip lives in the monster patch. tap your phone on it — it verifies the piece and drops it into your collection. the code works by hand too.</span></div>
       <div class="step"><div class="n">04</div><b>YOUR NAME STAYS</b><span>this page shows who owns it and when they got it. permanently.</span></div>
     </div>
   </section>

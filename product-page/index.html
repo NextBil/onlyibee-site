@@ -87,6 +87,10 @@ h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-
 .card{width:100%;border:2px solid var(--border);background:rgba(14,14,14,.9);
   padding:16px 18px;text-align:left;font-size:21px;line-height:1.55;color:#c9c9c9}
 .card .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px;letter-spacing:1px}
+/* the descriptions are written as blocks (hook / made by hand / printed once /
+   made to order / authentication) separated by blank lines, and they arrive as
+   plain text through .textContent — pre-line is what keeps those breaks. */
+#pdesc{white-space:pre-line}
 
 /* ---- payment ---- */
 .paybtns{display:flex;flex-direction:column;gap:10px}
@@ -291,7 +295,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
      "human-made" for both told the buyer nothing. */
   var FOLD0=(D.folders||[]).filter(function(f){return f.id===p.folder;})[0]||{};
   var madeChip = FOLD0.made==="hand"  ? '<span class="chip a">✋ HAND-MADE</span>'
-               : FOLD0.made==="print" ? '<span class="chip a">✓ PRINTED TO ORDER</span>'
+               : FOLD0.made==="print" ? '<span class="chip a">✋ MADE TO ORDER · 7–14 DAYS</span>'
                : '<span class="chip a">✓ HUMAN-MADE</span>';
   $("pchips").innerHTML=madeChip+'<span class="chip a">1 OF 1</span>'
     +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">LAST ONE</span>');
