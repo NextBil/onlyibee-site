@@ -308,23 +308,13 @@
   /* =====================  TRACKING (top window only)  ===================== */
   var curSlug=null,lastT=0,playSec=0,fullDone=false,daySec=0,promptShown=false,minAcc=0;
 
-  /* ---- the owner's account: full access, everywhere. Reads the Supabase token
-     straight from localStorage (no library) and flips the site's unlock flags. ---- */
-  var OWNER="droguepuissance4@gmail.com", ownerDone=false;
-  function ownerIn(){
-    try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i);
-      if(/^sb-.*-auth-token$/.test(k)){
-        var v=JSON.parse(localStorage.getItem(k)||"null");
-        var em=(v&&((v.user&&v.user.email)||(v.currentSession&&v.currentSession.user&&v.currentSession.user.email)))||"";
-        if(String(em).toLowerCase()===OWNER) return true;
-      } } }catch(e){}
-    return false;
-  }
-  function ownerGrant(){
-    if(ownerDone||!ownerIn()) return; ownerDone=true;
-    try{ localStorage.setItem("ibee_engine10","1"); }catch(e){}
-    try{ var sv=sav(); if(!sv.vault){ sv.vault=true; localStorage.setItem("ibee_sav",JSON.stringify(sv)); } }catch(e){}
-  }
+  /* REMOVED 2026-08-17 (security audit): an ownerGrant() used to match a hardcoded
+     owner email out of the Supabase token and flip ibee_engine10 + the vault flag.
+     Both are device-local convenience flags — nothing was being protected — but the
+     check published the site's all-access address in a file every visitor loads, so
+     it went the same way as the ones in gate.js / roomgate.js / arcade / inventory.
+     The owner earns these the normal way (10s of listening, one sign-in), and the
+     real all-access grant lives server-side in the VIP list (member/vip.sql). */
 
   function consumeEvent(){
     try{
@@ -472,6 +462,5 @@
     detectDrops();
     announceNews();
     placeDots();
-    ownerGrant();
   },1000);
 })();

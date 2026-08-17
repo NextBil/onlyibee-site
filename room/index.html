@@ -203,7 +203,32 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000;border:1px solid var(--acid);
   color:var(--acid);font-family:var(--px);font-size:9px;padding:10px 16px;z-index:9500;opacity:0;transition:.2s;pointer-events:none}
 .toast.on{opacity:1}
-footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2}
+footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center;position:relative;z-index:2;line-height:2.1}
+footer a{color:var(--dim);text-decoration:none}
+footer a:hover{color:var(--acid)}
+
+/* ---- danger zone: delete my profile (GDPR Art. 17) ----
+   Red-edged and last on the page so it never reads as an ordinary control. The
+   confirm step asks the member to TYPE their own nickname: a second button is
+   one mis-tap away from erasing an account, a typed word is not. */
+.box.danger{border-color:#3a1414;margin-top:26px}
+.box.danger .h{color:var(--red)}
+.dnote{font-size:16px;color:var(--dim);line-height:1.45;margin-bottom:9px}
+.dnote strong{color:var(--ink);font-weight:normal}
+.dnote.dim{font-size:15px;color:#5e5e5e}
+.dnote a{color:var(--dim)}
+.dbtn{font-family:var(--px);font-size:8px;letter-spacing:1px;padding:11px 13px;cursor:pointer;
+  background:transparent;color:#8a5252;border:1px solid #3a1414}
+.dbtn:hover{color:var(--red);border-color:var(--red)}
+.dbtn.go{background:var(--red);color:#000;border-color:var(--red)}
+.dbtn.go:disabled{background:transparent;color:#4a3030;border-color:#2a1414;cursor:not-allowed}
+.dbtn.cancel{color:var(--dim);border-color:var(--border)}
+.dbtn.cancel:hover{color:var(--acid);border-color:var(--acid)}
+.dconfirm{margin-top:12px;padding-top:12px;border-top:1px solid #2a1414}
+.dconfirm #dinput{width:100%;max-width:280px;background:#050505;border:1px solid #3a1414;color:var(--red);
+  font-family:var(--vt);font-size:19px;padding:9px 10px;margin-bottom:10px}
+.drow{display:flex;flex-wrap:wrap;gap:8px}
+.dmsg{font-size:16px;color:var(--red);margin-top:9px;min-height:20px}
 </style>
 <script src="/assets/cart.js?v=3"></script>
 <script src="/assets/saved.js?v=5" defer></script>
@@ -269,9 +294,28 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   </div>
 
   <div class="ob crtin" id="ob" style="display:none"></div>
+
+  <!-- DANGER ZONE: erasure (GDPR Art. 17). Deliberately the last thing on the page
+       and deliberately NOT next to LOG OUT in the identity band — the two get
+       confused, and only one of them is reversible. Own profile only. -->
+  <div class="box crtin danger" id="dangerbox" style="display:none">
+    <div class="h">// LEAVE_</div>
+    <p class="dnote">Deleting your profile removes your account, your codename, your annex, your saved pieces, your badges and your listening history. Your nickname goes back in the pool. <strong>This cannot be undone.</strong></p>
+    <p class="dnote dim">Orders you've placed are kept — French law requires sales records to be held for 10 years. Everything else goes immediately. See the <a href="/legal/privacy/">privacy notice</a>.</p>
+    <button class="dbtn" id="delbtn">DELETE MY PROFILE</button>
+    <div class="dconfirm" id="dconfirm" style="display:none">
+      <p class="dnote">Type <strong id="dword">—</strong> to confirm.</p>
+      <input id="dinput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type it here">
+      <div class="drow">
+        <button class="dbtn go" id="delgo" disabled>ERASE EVERYTHING</button>
+        <button class="dbtn cancel" id="delno">KEEP MY PROFILE</button>
+      </div>
+      <div class="dmsg" id="dmsg"></div>
+    </div>
+  </div>
 </main>
 
-<footer>© ONLYIBEE — THE FREQUENCY</footer>
+<footer>© ONLYIBEE — THE FREQUENCY · <a href="/legal/privacy/">PRIVACY</a> · <a href="/legal/">RIGHTS</a> · <a href="/legal/mentions/">LEGAL</a></footer>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -322,7 +366,6 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     "COBALT MONK","DUSK PROWLER","NOVA THIEF","SILK STATIC","GRIM NEON","ZERO HOUR",
     "MAD ORACLE","WIRED SAINT","GHOST FREQ","LO-FI BEAST","IRON MAGPIE","PLASMA STRAY"];
   var RANKS=[{n:"INITIATE"},{n:"OPERATIVE"},{n:"ELITE"},{n:"LEGEND"}];
-  var OWNER_EMAIL="droguepuissance4@gmail.com";
 
   /* With the SAVE button gone, edits have to persist themselves. Debounced so a
      drag does not fire a write per pixel; quiet so it never toasts at you. */
@@ -961,6 +1004,47 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("idsince").textContent="codename "+codename+(since?" · since "+since:"");
     $("idband").style.display=""; avPaint();
     $("logout").onclick=function(ev){ ev.preventDefault(); if(sb)sb.auth.signOut().then(function(){location.reload();}); };
+    wireDelete(prof);
+  }
+
+  /* ---- DELETE MY PROFILE (server side: member/delete-account.sql) ----
+     The whole erasure is one RPC — delete_my_account() drops the auth.users row
+     and every foreign key cascades from there (fix-user-delete.sql). Nothing to
+     clean up field by field, which is exactly why it can't half-fail.
+     Local storage is wiped too: the account is gone from the server, so leaving
+     ibee_badges / ibee_favs / ibee_sav on the device would resurrect a ghost of
+     the profile on the next visit and cloudsync would happily push it back up. */
+  function wireDelete(prof){
+    var box=$("dangerbox"); if(!box) return;
+    var word=(prof&&prof.username)||""; if(!word) return;   // no nickname yet → nothing claimed to erase
+    $("dword").textContent=word;
+    box.style.display="";
+    $("delbtn").onclick=function(){ $("delbtn").style.display="none"; $("dconfirm").style.display=""; $("dinput").focus(); };
+    $("delno").onclick=function(){ $("dconfirm").style.display="none"; $("delbtn").style.display=""; $("dinput").value=""; $("delgo").disabled=true; $("dmsg").textContent=""; };
+    $("dinput").oninput=function(){ $("delgo").disabled = $("dinput").value.trim().toLowerCase()!==word.toLowerCase(); };
+    $("delgo").onclick=async function(){
+      if($("delgo").disabled) return;
+      $("delgo").disabled=true; $("delgo").textContent="ERASING…"; $("dmsg").textContent="";
+      try{
+        var r=await sb.rpc("delete_my_account");
+        var st=(r&&r.data&&r.data.status)||(r&&r.error?"error":"");
+        if(st!=="deleted") throw new Error(st||"failed");
+        /* wipe the device copy before signing out, or cloudsync re-uploads it */
+        try{ ["ibee_badges","ibee_favs","ibee_sav","ibee_aquapet","ibee_garden","ibee_transit",
+              "ibee_cart","ibee_avatar","ibee_room","ibee_engine10"].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
+        try{ await sb.auth.signOut(); }catch(e){}
+        document.body.innerHTML='<div style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;'
+          +'justify-content:center;gap:18px;text-align:center;padding:28px;font-family:'
+          +"'Press Start 2P',monospace;color:#e8e8e8;background:#070707\">"
+          +'<div style="font-size:13px;color:#b6ff00;line-height:2">YOUR PROFILE IS GONE_</div>'
+          +'<div style="font-family:VT323,monospace;font-size:21px;color:#8a8a8a;max-width:380px;line-height:1.4">'
+          +'everything has been erased. the music stays open to everyone — no account needed.</div>'
+          +'<a href="/console.html#menu" style="font-size:9px;color:#000;background:#b6ff00;padding:13px 16px;text-decoration:none">◀ BACK TO THE CONSOLE</a></div>';
+      }catch(err){
+        $("delgo").disabled=false; $("delgo").textContent="ERASE EVERYTHING";
+        $("dmsg").textContent="✕ couldn't delete — email contact@onlyibee.com and we'll do it by hand_";
+      }
+    };
   }
 
   /* ================= views ================= */
@@ -1167,7 +1251,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   window.addEventListener("beforeunload",function(e){ if(DIRTY){e.preventDefault();e.returnValue="";} });
 })();
 </script>
-<script src="../assets/player.js?v=26"></script>
+<script src="../assets/player.js?v=27"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
 

@@ -57,9 +57,13 @@
     var sb=window.supabase.createClient(SB_URL,SB_KEY);
     sb.auth.getSession().then(function(res){
       if(!res.data.session){ finish(function(){locked(null);}); return; }        // not logged in
-      /* the owner's account: everything open */
-      var em=((res.data.session.user&&res.data.session.user.email)||'').toLowerCase();
-      if(em==='droguepuissance4@gmail.com'){ finish(unlock); return; }
+      /* The owner's account used to be unlocked by a hardcoded email compared here.
+         It was never a forgeable bypass (the session is signed), but it published
+         the one address that opens every door on the site, straight into a file
+         anyone can read — a standing phishing target for no benefit. The owner is
+         now a row in the VIP list instead (member/vip.sql), which grants the same
+         all-access inventory server-side, so owns() below answers true for them
+         exactly like it does for a pass holder. Nothing to special-case client-side. */
       sb.rpc("owns",{item:itemId}).then(function(r){
         finish(function(){ if(r.data===true) unlock(); else locked(false); });    // owns? play : locked
       }).catch(function(){ finish(function(){locked("error");}); });

@@ -140,22 +140,34 @@ h1{font-family:var(--px);font-size:clamp(13px,4vw,20px);letter-spacing:1px;line-
 
 /* ---- related pieces from the same drop ---- */
 .related{width:100%;margin-top:20px;border-top:2px solid var(--border);padding-top:22px;text-align:left}
-.relhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
-.relhead #relttl{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px}
-.relall{font-family:var(--px);font-size:8px;color:var(--dim);text-decoration:none;white-space:nowrap}
+/* the drop name can be long ("MORE FROM ICS CLOTHING V1 — AUTUMN 2025_") and the
+   pixel font is wide, so the title must be allowed to WRAP — min-width:0 lets the
+   flex item shrink below its content width, overflow-wrap breaks it if it still
+   can't fit. Without both, the header alone pushes the section off a phone. */
+.relhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px 12px;
+  flex-wrap:wrap;margin-bottom:14px}
+.relhead #relttl{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px;
+  min-width:0;flex:1 1 auto;line-height:1.7;overflow-wrap:anywhere}
+.relall{font-family:var(--px);font-size:8px;color:var(--dim);text-decoration:none;white-space:nowrap;flex:none}
 .relall:hover{color:var(--acid)}
-.relgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-@media(max-width:560px){.relgrid{grid-template-columns:repeat(2,1fr)}}
+/* minmax(0,1fr), NOT 1fr — same trap the radio browser hit (README §3.0). A grid
+   track sized 1fr still refuses to go below its content's min-content width, and
+   .rnm is white-space:nowrap, so a long piece name ("VIP ALL ICS CHARACTERS —
+   PINK") forced the columns to 239px+213px inside a 343px phone and ran the cards
+   off the screen. minmax(0,…) removes that floor; min-width:0 on the card and the
+   meta row lets the ellipsis actually engage instead of overflowing. */
+.relgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media(max-width:560px){.relgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
 .relcard{border:1px solid var(--border);background:var(--panel);text-decoration:none;color:var(--ink);
-  display:block;transition:border-color .2s,transform .15s}
+  display:block;min-width:0;transition:border-color .2s,transform .15s}
 .relcard:hover{border-color:var(--acid);transform:translateY(-3px)}
 .relcard .rsq{position:relative;aspect-ratio:1/1;background:#0a0a0c;overflow:hidden}
 .relcard .rsq img{width:100%;height:100%;object-fit:cover;display:block}
 .relcard .rno{position:absolute;top:5px;left:5px;font-family:var(--px);font-size:6px;
   letter-spacing:1px;padding:3px 4px;background:rgba(0,0,0,.72);color:var(--dim)}
-.relcard .rmeta{padding:8px;border-top:1px solid var(--border)}
+.relcard .rmeta{padding:8px;border-top:1px solid var(--border);min-width:0}
 .relcard .rnm{font-family:var(--px);font-size:6.5px;line-height:1.7;
-  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .relcard .rpr{font-family:var(--px);font-size:7px;color:var(--acid);margin-top:5px;display:block}
 .relcard.gone{opacity:.55}
 .relcard.gone .rsq img{filter:grayscale(1) brightness(.6)}
@@ -436,7 +448,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   }
 })();
 </script>
-<script src="../assets/player.js?v=26"></script>
+<script src="../assets/player.js?v=27"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
 <script src="/assets/pulse.js?v=3"></script>

@@ -559,14 +559,27 @@
     transition:background .2s,border-color .2s}
   footer .support:hover{background:#ffd60a;color:#000;border-color:#ffd60a}
   footer .cr{grid-column:3;justify-self:end;white-space:nowrap}
+  /* Column 1 is no longer empty: the legal links live there (2026-08-17). A privacy
+     notice has to be reachable from anywhere on the site, and this is the only
+     footer the console shows. Keeping them in column 1 leaves SUPPORT centred by
+     the same 1fr/auto/1fr trick described above. */
+  footer .legal{grid-column:1;justify-self:start;display:flex;gap:7px;white-space:nowrap}
+  footer .legal a{color:var(--dim);text-decoration:none}
+  footer .legal a:hover{color:var(--acid)}
+  footer .legal .sep{color:#333}
 
   @media(max-width:560px){
     header .sys{display:none}
     #engroot{height:calc(100dvh - 215px)}
     .eng-hud .r{display:none}
-    /* two items fit one line on a phone now, so the same centred grid holds */
-    footer{padding:8px 10px;gap:8px;font-size:7px}
+    /* Three items no longer fit one phone line, so the grid gives way to a centred
+       wrapping row — the columns would otherwise squeeze the legal links to nothing.
+       grid-column/justify-self are inert under flex, so they can stay above. */
+    footer{display:flex;flex-wrap:wrap;justify-content:center;
+      padding:9px 10px;gap:7px 10px;font-size:7px;text-align:center}
     footer .support{font-size:7px;padding:5px 8px}
+    footer .legal{order:3;flex-basis:100%;justify-content:center;font-size:7px}
+    footer .cr{order:2}
   }
 
   /* the ICS teaser strip above the inventory — a banner, deliberately not a hero */
@@ -912,6 +925,9 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
   </main>
 
   <footer>
+    <span class="legal">
+      <a href="legal/privacy/">PRIVACY</a><span class="sep">·</span><a href="legal/">RIGHTS</a><span class="sep">·</span><a href="legal/mentions/">LEGAL</a>
+    </span>
     <a class="support" href="support/" title="Support the art">SUPPORT THE ART</a>
     <span class="cr">© ONLYIBEE <span id="yr"></span></span>
   </footer>
@@ -2310,7 +2326,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
   });
 })();
 </script>
-<script src="assets/player.js?v=26"></script>
+<script src="assets/player.js?v=27"></script>
 <div id="icslbx"><img alt=""></div>
 <script>
 /* ICS process sketches — click a card to open it big, click/Esc closes */

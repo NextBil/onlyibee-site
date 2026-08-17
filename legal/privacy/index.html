@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
+  <title>PRIVACY — ONLYIBEE</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#888;--acid:#b6ff00;--gold:#ffd60a;--red:#ff2b2b;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace}*{box-sizing:border-box;margin:0;padding:0}body{min-height:100dvh;background:var(--bg);color:var(--ink);font:21px/1.42 var(--vt)}body:after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}header,footer{position:relative;z-index:1;display:flex;justify-content:space-between;gap:12px;padding:14px 18px;background:#000;border-bottom:2px solid var(--border);font:9px var(--px)}header a,footer a{color:var(--acid);text-decoration:none}header .back{color:var(--dim)}main{position:relative;z-index:1;width:min(760px,100%);margin:auto;padding:46px 18px 70px}.eyebrow{font:8px var(--px);color:var(--gold);margin-bottom:16px}.title{font:clamp(23px,6vw,40px)/1.22 var(--px);color:#fff;margin-bottom:22px}.title b{color:var(--acid);font-weight:normal}.intro{font-size:24px;color:#cfcfcf;margin-bottom:25px}.card{margin:14px 0;padding:20px;border:1px solid var(--border);border-top:3px solid var(--acid);background:var(--panel)}h2{font:10px/1.55 var(--px);color:var(--acid);margin-bottom:11px}p{margin:8px 0;color:#cecece}ul{margin:10px 0 4px 21px;color:#cecece}li{margin:5px 0}strong{font-weight:normal;color:#fff}a{color:var(--gold)}.notice{font:8px/1.8 var(--px);color:var(--dim);margin-top:24px}footer{border-top:2px solid var(--border);border-bottom:0;color:var(--dim);justify-content:center;flex-wrap:wrap;text-align:center}
+    /* privacy-only additions */
+    .fill{border-top-color:var(--red)}
+    .fill h2{color:var(--red)}
+    .fill .warn{font:8px/1.8 var(--px);color:var(--red);display:block;margin-bottom:10px}
+    .tw{overflow-x:auto;margin:12px 0;border:1px solid var(--border)}
+    table{border-collapse:collapse;width:100%;min-width:460px;font-size:19px}
+    th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:top;color:#cecece}
+    th{font:7px var(--px);color:var(--dim);background:#0a0a0a;letter-spacing:1px}
+    tr:last-child td{border-bottom:0}
+    td.k{color:#fff}
+    .good{color:var(--acid)}
+    @media(max-width:480px){main{padding-top:34px}.card{padding:16px}.intro{font-size:22px}}
+  </style>
+</head>
+<body>
+  <header><a href="/console.html">ONLY<span style="color:var(--red)">IBEE</span></a><a class="back" href="/legal/">◀ RIGHTS &amp; USE</a></header>
+  <main>
+    <div class="eyebrow">// PRIVACY NOTICE_</div>
+    <h1 class="title">WHAT WE KNOW <b>ABOUT YOU.</b></h1>
+    <p class="intro">Short version: we count visitors, we remember your account and your room, and if you order something we keep your address so we can post it to you. We don't run ads, we don't sell anything about you, and we don't store your IP address.</p>
+
+    <section class="card">
+      <h2>WHO IS RESPONSIBLE</h2>
+      <p>The data controller for onlyibee.com is <strong>Ibrahim AMIAN</strong>, publishing as <strong>Only Ibee</strong>, Paris, France. Contact for anything on this page: <a href="mailto:contact@onlyibee.com">contact@onlyibee.com</a>.</p>
+      <p>Full identity and contact details are held by the site's host and disclosed to any authority that requests them — see the <a href="/legal/mentions/">mentions légales</a>.</p>
+    </section>
+
+    <section class="card">
+      <h2>WHAT WE COLLECT, AND WHY</h2>
+      <div class="tw"><table>
+        <thead><tr><th>What</th><th>When</th><th>Why / legal basis</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Email address and password</td><td>Only if you create an account</td><td>To run your account. Performance of a contract. The password is handled and hashed by Supabase Auth — we never see it.</td></tr>
+          <tr><td class="k">Nickname, room layout, favourites, badges, listening counts</td><td>While you use your account</td><td>So your profile and room follow you between devices instead of dying with one browser. Performance of a contract.</td></tr>
+          <tr><td class="k">Name, email, postal address, order note</td><td>Only if you order something</td><td>To take the order and post the item. Performance of a contract, and a legal duty to keep sales records.</td></tr>
+          <tr><td class="k">A random visitor ID, the page you're on, timestamps</td><td>Every visit</td><td>To count how many people come and which songs get played. Legitimate interest in knowing whether the work reaches anyone.</td></tr>
+          <tr><td class="k">Approximate country and city</td><td>Every visit</td><td>Same. Worked out from your browser's own timezone setting — <span class="good">no location lookup, and your IP is not sent anywhere to get it</span>.</td></tr>
+          <tr><td class="k">A one-way hash of your IP</td><td>Every visit</td><td>Only to spot bot floods. It is a SHA-256 hash — it cannot be turned back into your IP, and <span class="good">the IP itself is never written down</span>.</td></tr>
+        </tbody>
+      </table></div>
+      <p>That's the whole list. There is no advertising network, no tracking pixel, no profiling, and no automated decision-making anywhere on this site.</p>
+    </section>
+
+    <section class="card">
+      <h2>HOW LONG WE KEEP IT</h2>
+      <ul>
+        <li><strong>Account and profile data</strong> — until you delete your account, then it goes immediately.</li>
+        <li><strong>Orders</strong> — kept while the order is live, then retained as accounting records for the period French law requires (10 years).</li>
+        <li><strong>Visit records</strong> — deleted automatically after 14 months.</li>
+        <li><strong>Song plays</strong> — deleted automatically after 14 months.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>WHO ELSE SEES IT</h2>
+      <p>We don't sell or share your data. A few services are involved in making the site work, and they see what they need to:</p>
+      <ul>
+        <li><strong>Supabase</strong> — the database and login system. Holds your account, profile and orders.</li>
+        <li><strong>GitHub Pages</strong> — serves the site's files. Sees your IP as part of delivering pages, as any web host does.</li>
+        <li><strong>PayPal and Stripe</strong> — only if you pay. You enter your card details on <em>their</em> pages; those details never touch this site and we never see them.</li>
+        <li><strong>YouTube</strong> — the TV page and video embeds, loaded in privacy-enhanced (no-cookie) mode.</li>
+        <li><strong>Google Fonts and jsDelivr</strong> — the site's fonts and a few code libraries are loaded from these, which means your browser contacts them and they see your IP.</li>
+      </ul>
+      <p>Some of these are outside the EU. They operate under the transfer safeguards their own terms describe.</p>
+    </section>
+
+    <section class="card">
+      <h2>COOKIES &amp; WHAT'S STORED ON YOUR DEVICE</h2>
+      <p><strong>This site sets no advertising or tracking cookies</strong>, which is why you aren't being asked to click a consent banner.</p>
+      <p>It does keep a few things in your browser's local storage so the site can work: your login session, your radio position and volume, your saved pieces, your badges, and a random visitor ID used only to avoid counting you twice. None of it is shared with anyone or used to follow you to other websites. Clearing your browser storage erases all of it.</p>
+    </section>
+
+    <section class="card">
+      <h2>YOUR RIGHTS</h2>
+      <p>Under the GDPR you can ask us to:</p>
+      <ul>
+        <li><strong>Show you</strong> the data we hold about you, as a copy.</li>
+        <li><strong>Correct</strong> anything wrong.</li>
+        <li><strong>Delete</strong> it — see below.</li>
+        <li><strong>Restrict</strong> or <strong>object to</strong> how we use it, including the visitor counting.</li>
+        <li><strong>Take it elsewhere</strong> in a portable format.</li>
+      </ul>
+      <p>The fastest way to delete everything: sign in and use <strong>DELETE MY PROFILE</strong> at the bottom of <a href="/room/">your profile</a>. It removes your account, nickname, room, saved pieces, badges and listening history straight away, and it cannot be undone.</p>
+      <p>Or email <a href="mailto:contact@onlyibee.com">contact@onlyibee.com</a> for any of the above and we'll answer within one month. If you think we've handled your data badly you can complain to the <a href="https://www.cnil.fr/">CNIL</a>, the French data-protection regulator.</p>
+    </section>
+
+    <section class="card">
+      <h2>UNDER 15s</h2>
+      <p>Accounts are not intended for children under 15. If you believe a child has made an account, email us and we'll remove it.</p>
+    </section>
+
+    <section class="card">
+      <h2>CHANGES</h2>
+      <p>If this notice changes in a way that matters, the date below changes with it. Nothing here applies retroactively to data already deleted.</p>
+    </section>
+
+    <p class="notice">LAST UPDATED: 17 AUGUST 2026 · This notice describes what the site actually does, checked against the code. It is not legal advice.</p>
+  </main>
+  <footer><a href="/legal/">RIGHTS &amp; USE</a> · <a href="/legal/mentions/">MENTIONS LÉGALES</a> · <a href="/support/">SUPPORT THE ART</a></footer>
+<script src="/assets/pulse.js?v=3"></script>
+</body>
+</html>

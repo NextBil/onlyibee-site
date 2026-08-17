@@ -920,8 +920,25 @@
   /* ---------- VIP welcome: a special hello for special people ----------
      Site-wide (player.js runs on every page's top window). When a VIP's session
      appears, a brief neon overlay says their line — once per visit; logging out
-     and back in says it again. Member grants live in member/vip.sql. */
-  var VIPS = { "najwa.barton@outlook.com": "welcome babe" };
+     and back in says it again. Member grants live in member/vip.sql.
+
+     ⚠ The email used to be written here in plain text. player.js loads on EVERY page,
+     so that published a real person's address — next to a private message — to anyone
+     who opened the source. The greeting is worth keeping; publishing her address is not.
+     Keyed on a SHA-256 of the lowercased address instead: same behaviour, but the source
+     no longer discloses who it is. (Someone who ALREADY knows the address could confirm
+     it by hashing — that is fine. The point is that the page stops handing it out.)
+     To add a VIP: node/python -c "hashlib.sha256(b'their@email').hexdigest()". */
+  var VIPS = { "d82b31810bbcd05ec6803ac28c285c2410b2ce149ebbb744adfe3b40f9cf7deb": "welcome babe" };
+  function sha256hex(s){
+    try{
+      if(!(window.crypto&&crypto.subtle)) return Promise.resolve("");
+      return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(function(b){
+        return Array.prototype.map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+      }).catch(function(){ return ""; });
+    }catch(e){ return Promise.resolve(""); }
+  }
+  var _vipH=null, _vipFor="";        // cached hash + the address it was computed for
   function sessEmail(){
     try{
       for(var i=0;i<localStorage.length;i++){
@@ -964,14 +981,18 @@
   }
   setInterval(function(){
     var em=sessEmail();
-    if(!em){ try{ sessionStorage.removeItem("ibee_vip_hi"); }catch(e){} return; }   // logged out → next login greets again
-    var msg=VIPS[em]; if(!msg) return;
+    if(!em){ try{ sessionStorage.removeItem("ibee_vip_hi"); }catch(e){} _vipH=null; _vipFor=""; return; }  // logged out → next login greets again
     /* the shell's PRESS START curtain sits above everything — wait until it's gone */
     var en=document.getElementById("enter");
     if(en && en.style.display!=="none" && en.offsetParent!==null) return;
+    /* hashing is async, and this ticks every 2.5s — so hash once per session and
+       reuse it, otherwise we'd fire a digest on every single tick for nothing */
+    if(_vipFor!==em){ _vipFor=em; _vipH=null; sha256hex(em).then(function(h){ if(_vipFor===em) _vipH=h; }); return; }
+    if(!_vipH) return;                                    // still hashing, or crypto unavailable
+    var msg=VIPS[_vipH]; if(!msg) return;
     try{
-      if(sessionStorage.getItem("ibee_vip_hi")===em) return;
-      sessionStorage.setItem("ibee_vip_hi",em);
+      if(sessionStorage.getItem("ibee_vip_hi")===_vipH) return;
+      sessionStorage.setItem("ibee_vip_hi",_vipH);        // the HASH, not the address
     }catch(e){ return; }
     vipGreet(msg);
   },2500);

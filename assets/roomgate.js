@@ -21,7 +21,6 @@
 
   var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
   var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
-  var OWNER="droguepuissance4@gmail.com";
 
   function ls(k){ try{return JSON.parse(localStorage.getItem(k)||"null");}catch(e){return null;} }
   function setls(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
@@ -115,12 +114,15 @@
     sb.auth.getSession().then(function(res){
       var sess=res.data.session;
       if(!sess){ lockMembers(); return; }                              // GUESTS ARE LOCKED OUT (2026-07-13)
-      var email=((sess.user&&sess.user.email)||"").toLowerCase();
       sb.rpc("my_profile").then(function(r){
         var prof=r&&r.data, picked=prof&&prof.room&&prof.room.env;
         if(picked) setls("ibee_room",picked);
-        if(email===OWNER){ startSync(prof&&prof.room_state); return; } // owner: full access
         if(picked===ENV){ startSync(prof&&prof.room_state); return; }  // this room is theirs
+        /* The owner used to be let through here by a hardcoded email. That address
+           is no longer shipped in this file — the owner is in the VIP list
+           (member/vip.sql), which puts every env-* item in their inventory, so the
+           owns() check just below opens the door for them the same way it does for
+           an arcade-pass holder. One code path instead of two. */
         /* not their picked room — but an ARCADE PASS (member/passes.sql) may have
            put this env in their inventory; owning env-<ENV> opens the door too */
         sb.rpc("owns",{item:"env-"+ENV}).then(function(o){

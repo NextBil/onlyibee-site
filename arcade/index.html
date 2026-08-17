@@ -409,24 +409,26 @@
       var sess=res.data.session;
       if(!sess) return;                              // not logged in → env rooms + games stay locked
       signedIn=true;
-      /* the owner's account: every room open, no inventory check needed */
-      var isOwner=((sess.user&&sess.user.email)||'').toLowerCase()==='droguepuissance4@gmail.com';
-      ownerAcct=isOwner;
       /* which room did they pick? (env) — only that one is theirs */
       sb.rpc("my_profile").then(function(p){
         var prof=p&&p.data; pickedRoom=(prof&&prof.room&&prof.room.env)||pickedRoom;
         render();
       }).catch(function(){});
-      if(isOwner){ GAMES.forEach(function(g){ if(g.item) owned[g.item]=true; }); render(); return; }
+      /* The owner's account used to be unlocked here by a hardcoded email, which
+         published the site's all-access address in a file anyone can read. The
+         owner is a VIP row now (member/vip.sql) — VIP grants every game and
+         environment into the real inventory, so my_inventory() below already
+         returns the whole shelf for them and needs no special case. */
       sb.rpc("my_inventory").then(function(r){
         (r.data||[]).forEach(function(it){ owned[it.id]=true; });
+        ownerAcct=GAMES.every(function(g){ return !g.item || owned[g.item]; });
         render();                                     // re-paint with real ownership
       }).catch(function(){});
     }).catch(function(){});
   });
 })();
 </script>
-<script src="../assets/player.js?v=26"></script>
+<script src="../assets/player.js?v=27"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
 <script src="/assets/pulse.js?v=3"></script>
