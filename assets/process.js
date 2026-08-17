@@ -144,10 +144,13 @@
     });
   }
 
-  /* a loop: no src until it is on screen, paused again when it leaves */
-  function loopVid(src,poster){
-    return '<video muted loop playsinline preload="none" poster="'+e2(poster)+'" '
-         + 'data-loop-src="'+e2(src)+'"></video>';
+  /* A loop: no src until it is on screen, paused again when it leaves. `controls`
+     is for the one film that has narration — it still starts on its own and
+     silent (muted is what browsers require to autoplay at all), and the controls
+     are how someone turns the sound on or scrubs it. */
+  function loopVid(src,poster,controls){
+    return '<video muted loop playsinline preload="none"'+(controls?" controls":"")
+         + ' poster="'+e2(poster)+'" data-loop-src="'+e2(src)+'"></video>';
   }
 
   /* A still, held back the same way. loading="lazy" is NOT enough here: an image
@@ -165,8 +168,7 @@
     var h = '<section class="hm" id="hmsec">'
       + '<h2>HOW I MAKE THE CLOTHES_</h2>'
       + '<div class="hmvids">'
-      + '<div class="vc"><video controls playsinline preload="none" '
-      +   'poster="'+IMG+'process-recap-poster.jpg" src="'+IMG+'process-recap.mp4"></video>'
+      + '<div class="vc">'+loopVid(IMG+"process-recap.mp4", IMG+"process-recap-poster.jpg", true)
       +   '<div class="vcap"><b>PROCESS RECAP</b><span>from the first sketch to the finished shirt_</span></div></div>'
       + '<div class="vc">'+loopVid(IMG+"embroidery-loop.mp4", IMG+"embroidery-poster.jpg")
       +   '<div class="vcap"><b>THE LOGO, STITCHED</b><span>thread going into the fabric, needle by needle_</span></div></div>'
@@ -209,7 +211,8 @@
      loops start playing (and pause again when they leave), the stills get their
      src once and are done with. No observer (old Safari) → load everything up
      front rather than show empty frames. */
-  var io=null;
+  var io=null, inview=[];
+  function play(v){ var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){}); }
   function start(el){
     if(el.tagName==="IMG"){
       if(!el.getAttribute("src")) el.src=el.getAttribute("data-img-src");
@@ -217,8 +220,18 @@
       return;
     }
     if(!el.getAttribute("src")) el.src=el.getAttribute("data-loop-src");
-    var pr=el.play(); if(pr&&pr.catch) pr.catch(function(){});
+    play(el);
   }
+  /* A play() on a hidden page is refused, and the observer will not fire again
+     for something that never stopped intersecting — so a page opened in a
+     background tab, or left behind a locked phone, would come back to a frozen
+     first frame. Retry whatever is still in view whenever the page returns. */
+  function wake(){
+    if(document.hidden) return;
+    for(var i=0;i<inview.length;i++) if(inview[i].paused) play(inview[i]);
+  }
+  document.addEventListener("visibilitychange",wake);
+  window.addEventListener("pageshow",wake);
   function arm(root){
     var held=root.querySelectorAll("video[data-loop-src],img[data-img-src]");
     if(!held.length) return;
@@ -228,8 +241,14 @@
     if(!io){
       io=new IntersectionObserver(function(entries){
         entries.forEach(function(en){
-          if(en.isIntersecting) start(en.target);
-          else if(en.target.tagName==="VIDEO" && !en.target.paused) en.target.pause();
+          var el=en.target, at=inview.indexOf(el);
+          if(en.isIntersecting){
+            if(el.tagName==="VIDEO" && at<0) inview.push(el);
+            start(el);
+          }else{
+            if(at>-1) inview.splice(at,1);
+            if(el.tagName==="VIDEO" && !el.paused) el.pause();
+          }
         });
       /* a little ahead of the scroll so a still is never caught half-drawn,
          and so a loop is already rolling by the time it is properly in view */
