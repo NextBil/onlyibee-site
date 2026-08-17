@@ -109,6 +109,10 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <a class="mback" href="../console.html#shop" data-back>◀ BACK</a>
 
   <div id="wrap"></div>
+
+  <!-- the shared process block (assets/process.js) — same section the vault and
+       the console show, so "made to order" means the same thing everywhere -->
+  <div id="howmade"></div>
 </main>
 <footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
 <div id="lbx"><button class="x" aria-label="close">✕</button><img id="lbxim" alt=""></div>
@@ -215,6 +219,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   document.addEventListener("keydown",function(ev){if(ev.key==="Escape"){lbx.classList.remove("on");lim.src="";}});
 })();
 </script>
+<script src="/assets/process.js?v=1"></script>
 <script src="../assets/player.js?v=27"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>

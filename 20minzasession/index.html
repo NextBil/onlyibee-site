@@ -564,6 +564,15 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
      ===================================================================== */
   var driving=false, cv=$("drive"), cx=cv.getContext("2d");
   var W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1), lights=[], stars=[], t0=0;
+  /* Why the road used to vanish: the browser suspends requestAnimationFrame the
+     moment the page is hidden — phone locked, tab switched, app backgrounded —
+     and this page is built to keep PLAYING through exactly that. The frame loop
+     died there, but `driving` stayed true, so startRoom() early-returned on the
+     way back and nothing ever restarted it: music, no road. The loop now carries
+     a generation token (only the newest one keeps drawing, so a re-kick can
+     never leave two loops running) and wake() re-kicks it whenever the page
+     comes back. */
+  var driveGen=0;
   function sizeDrive(){
     W=window.innerWidth||document.documentElement.clientWidth||screen.width||1280;
     H=window.innerHeight||document.documentElement.clientHeight||screen.height||720;
@@ -628,9 +637,9 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
     if(ember) ember.style.setProperty("--emb",beat.toFixed(3));
   }
 
-  function drawDrive(){
-    if(!driving) return;
-    requestAnimationFrame(drawDrive);
+  function drawDrive(gen){
+    if(!driving || gen!==driveGen) return;
+    requestAnimationFrame(function(){ drawDrive(gen); });
     stepBeat();
     cx.clearRect(0,0,W,H);
     var horizon=H*0.40, cxp=W/2;
@@ -675,13 +684,23 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
   }
   function startRoom(){
     if(driving) return; driving=true;
-    body.classList.add("playing"); sizeDrive(); lights=[]; drawDrive();
+    body.classList.add("playing"); sizeDrive(); lights=[]; drawDrive(++driveGen);
   }
   function stopRoom(){
-    if(!driving) return; driving=false;
+    if(!driving) return; driving=false; driveGen++;
     body.classList.remove("playing");
     setTimeout(function(){ if(!driving) cx.clearRect(0,0,cv.width,cv.height); },200);
   }
+  /* back from a lock screen / another tab: re-measure (the viewport may have
+     changed while we were away) and start a fresh generation. Harmless when the
+     loop is still alive — the old generation retires on its next frame. */
+  function wake(){
+    if(!driving || document.hidden) return;
+    sizeDrive(); drawDrive(++driveGen);
+  }
+  document.addEventListener("visibilitychange",wake);
+  window.addEventListener("pageshow",wake);
+  window.addEventListener("focus",wake);
 
   /* ---------- claim to collection ---------- */
   $("claimbtn").addEventListener("click",function(){

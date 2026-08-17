@@ -833,6 +833,12 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       </div>
       <div class="grid" id="shopgrid"></div>
       <div class="prose" style="margin-top:26px"><p>Every garment carries an NFC tag behind the monster head logo — scan it to verify it's real, see your number from the limited drop, and check your character's rarity and power level ♟️</p></div>
+
+      <!-- the shared process block (assets/process.js), same one the vault and the
+           folder pages carry. Its stills are loading="lazy" and its videos
+           preload="none", so sitting inside this hidden screen costs nothing
+           until the shop is actually opened. -->
+      <div id="howmade"></div>
     </section>
 
     <!-- ABOUT -->
@@ -2327,13 +2333,19 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
 })();
 </script>
 <script src="assets/player.js?v=27"></script>
+<script src="/assets/process.js?v=1"></script>
 <div id="icslbx"><img alt=""></div>
 <script>
-/* ICS process sketches — click a card to open it big, click/Esc closes */
+/* ICS process sketches — click a card to open it big, click/Esc closes.
+   Delegated rather than bound per link: the shop's process block (.hmshots,
+   injected by assets/process.js) doesn't exist yet when this runs, and a
+   direct binding would silently miss it and let the image navigate away. */
 (function(){
   var lbx=document.getElementById('icslbx'),im=lbx.querySelector('img');
-  document.querySelectorAll('#icsproc a').forEach(function(a){
-    a.addEventListener('click',function(ev){ev.preventDefault();im.src=a.getAttribute('href');lbx.classList.add('on');});
+  document.addEventListener('click',function(ev){
+    var a=ev.target.closest&&ev.target.closest('#icsproc a, .hmshots a');
+    if(!a) return;
+    ev.preventDefault();im.src=a.getAttribute('href');lbx.classList.add('on');
   });
   lbx.addEventListener('click',function(){lbx.classList.remove('on');im.src='';});
   document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){lbx.classList.remove('on');im.src='';}});
