@@ -1,0 +1,31 @@
+# ONLYIBEE — what must never reach the deployed site.
+# Added 2026-08-17 after the security audit found these being served publicly.
+#
+# GitHub Pages serves EVERY file in the repo as a static asset. There is no
+# server-side "private" folder — if it is committed, it is downloadable. These
+# entries are the difference between "local tooling" and "published".
+
+# ---- Backend setup scripts -------------------------------------------------
+# These were live at onlyibee.com/member/*.sql. They handed out the full schema,
+# every RPC name and signature, the bot-filter thresholds — and vip.sql published
+# a real person's private email address to anyone who asked for the URL.
+# Keep them locally; run them by pasting into the Supabase SQL editor.
+member/*.sql
+
+# ---- Local-only tools ------------------------------------------------------
+# IBEE STUDIO, the shop manager, the newsroom, the pass minter and the card
+# factory are authoring tools, not pages. shop-manager.html was reachable at
+# onlyibee.com/tools/shop-manager.html.
+tools/
+
+# ---- Docs ------------------------------------------------------------------
+# The README is the map of the whole system, including where the soft spots are.
+README.md
+member/SUPABASE-SETUP.md
+member/TALLY-SETUP.md
+
+# ---- Local scratch ---------------------------------------------------------
+PUSH-LIST-*.md
+.DS_Store
+**/.DS_Store
+.claude/
