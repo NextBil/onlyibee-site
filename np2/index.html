@@ -188,10 +188,13 @@ body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
 .win::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.17;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");background-size:150px 150px}
 .brk{position:absolute;width:15px;height:15px;border:2px solid var(--pink);z-index:3;opacity:.9}
-.brk.tl{top:6px;left:6px;border-right:0;border-bottom:0}
-.brk.tr{top:6px;right:6px;border-left:0;border-bottom:0}
-.brk.bl{bottom:6px;left:6px;border-right:0;border-top:0}
-.brk.br{bottom:6px;right:6px;border-left:0;border-top:0}
+/* NOTE: these corner classes are prefixed. Plain .tl/.tr/.bl/.br would
+   collide with .tr, the track row — the bracket then inherited the row
+   styling and the row's click binding. */
+.brk.k-tl{top:6px;left:6px;border-right:0;border-bottom:0}
+.brk.k-tr{top:6px;right:6px;border-left:0;border-bottom:0}
+.brk.k-bl{bottom:6px;left:6px;border-right:0;border-top:0}
+.brk.k-br{bottom:6px;right:6px;border-left:0;border-top:0}
 .win .rec{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;
   font-family:var(--px);font-size:6px;letter-spacing:1px;color:#fff;background:rgba(255,31,111,.9);
   padding:3px 6px;opacity:0;transition:opacity .3s}
@@ -412,7 +415,7 @@ body.neon #roomtag.gone{opacity:0}
           <video id="platevid" muted loop playsinline preload="none" aria-hidden="true"></video>
           <canvas id="platewave" width="600" height="80" aria-hidden="true"></canvas>
           <span class="rec" id="platerec">● REC</span>
-          <b class="brk tl"></b><b class="brk tr"></b><b class="brk bl"></b><b class="brk br"></b>
+          <b class="brk k-tl"></b><b class="brk k-tr"></b><b class="brk k-bl"></b><b class="brk k-br"></b>
         </div>
         <figcaption>
           <span class="ex" id="plateex">NO SIGNAL</span>
@@ -568,7 +571,7 @@ body.neon #roomtag.gone{opacity:0}
         +'<div class="win"><img alt="" loading="lazy">'
         +(i===0?'<video muted loop playsinline preload="none" aria-hidden="true"></video>':'')
         +'<span class="rec">● LIVE</span>'
-        +'<b class="brk tl"></b><b class="brk br"></b></div>'
+        +'<b class="brk k-tl"></b><b class="brk k-br"></b></div>'
         +'<span class="cap">CAM 0'+(i+1)+'</span></figure>';
     }
     wallEl.innerHTML=html;
@@ -713,7 +716,7 @@ body.neon #roomtag.gone{opacity:0}
     else r.control.play(ri);
     cur=i; rowState();
   }
-  Array.prototype.slice.call(document.querySelectorAll(".tr")).forEach(function(row){
+  Array.prototype.slice.call(tr.querySelectorAll(".tr")).forEach(function(row){
     row.addEventListener("click",function(){ play(+row.getAttribute("data-i")); });
   });
 
