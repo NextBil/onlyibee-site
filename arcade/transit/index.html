@@ -115,7 +115,7 @@
 <div id="milechip" class="ui" title="tap to name your car">YOUR LINE · 0 mi</div>
 <div id="hint" class="ui">ride the midnight line_ — tap a window to zone out · tap the seats to re-trim · tap the charm for a little magic · name your car below-left</div>
 
-<script src="../../assets/player.js?v=27"></script>
+<script src="../../assets/player.js?v=28"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
 <script src="../../assets/roomgate.js?v=2"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -155,8 +155,11 @@ function seedFor(s){var h=2166136261;s=s||'';for(var i=0;i<s.length;i++){h^=s.ch
 function slugNow(){var r=RAD();return r&&r.slug&&r.slug()||null}
 function songNow(){var r=RAD();try{return r&&r.song&&r.song()||null}catch(e){return null}}
 function hueNow(){var s=songNow();return s&&s.hue!=null?s.hue:75}
-function galNow(){var s=songNow();return (s&&s.g)||'rss'}
-var GALNAME={rss:'RARE SOUL SESSIONS',mzs:'20 MIN ZA SESSION',np:'NOUVEAUX PUNK',pp:'PPFDB 2',mv:'MINI VIBE',ddlf:'DEBUT DE LA FIN',bip:'BIPOLAIRE',vault:'THE VAULT'};
+/* the radio's song objects carry the album on `al` (`g` is the universe's field
+   name) — reading only `g` meant this never matched and the album themes below
+   never fired. Fixed 2026-08-19. */
+function galNow(){var s=songNow();return (s&&(s.al||s.g))||'np2'}
+var GALNAME={np2:'NOUVEAUX PUNK 2',np:'NOUVEAUX PUNK',mzs:'20 MIN ZA SESSION',vault:'THE VAULT'};
 
 /* ---------- stage ---------- */
 var W=384,H=216;
@@ -242,7 +245,11 @@ function safeTheme(t){
 var BUILTIN_THEMES={'album:np':{name:'☠ PUNK NIGHT LINE',skyTop:'#0c0416',skyMid:'#22081e',skyLow:'#42140a',
   skyAlpha:0.85,moonHue:26,moonFace:'pumpkin',windowHue:20,flyers:'bats',lightning:true,
   fogAlpha:0.05,fogHue:270,roofSign:'guitar',prop:'pumpkin',
-  led:'☠ NOUVEAUX PUNK NIGHT SERVICE  ⟶  NOW SHREDDING: ',moteHue:24}};
+  led:'☠ NOUVEAUX PUNK NIGHT SERVICE  ⟶  NOW SHREDDING: ',moteHue:24},
+ 'album:np2':{name:'💗 NEON PUNK LINE',skyTop:'#0b1719',skyMid:'#2a0a24',skyLow:'#8a0f45',
+  skyAlpha:0.88,moonHue:335,moonFace:'crescent',windowHue:332,flyers:'bats',lightning:false,
+  fogAlpha:0.06,fogHue:325,roofSign:'bars',prop:'lantern',
+  led:'💗 NOUVEAUX PUNK 2  ⟶  STILL IN THE PLASTIC: ',moteHue:335}};
 var TH=null,_thKey=null;
 function themeTick(){
   var key=null,raw=null,slug=slugNow(),gal=galNow();

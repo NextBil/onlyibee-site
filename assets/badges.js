@@ -39,9 +39,11 @@
     if(/^sb-.*-auth-token$/.test(k)){ var v=localStorage.getItem(k); if(v&&v!=="null") return true; } } }catch(e){} return false; }
   function eng10(){ try{ return localStorage.getItem("ibee_engine10")==="1"; }catch(e){ return false; } }
   /* room pages write these (they use their own audio, not IBEERADIO): the NP room
-     marks each distinct song felt in ibee_np_songs; the 20MZS room flags a full
+     marks each distinct song felt in ibee_np_songs, the NP2 room in ibee_np2_songs;
+     the 20MZS room flags a full
      20-min ride in ibee_mzs_full. We only READ them, so there's no write race. */
   function npSongsN(){ try{ var o=JSON.parse(localStorage.getItem("ibee_np_songs")||"{}")||{}; return nkeys(o); }catch(e){ return 0; } }
+  function np2SongsN(){ try{ var o=JSON.parse(localStorage.getItem("ibee_np2_songs")||"{}")||{}; return nkeys(o); }catch(e){ return 0; } }
   function mzsFull(){ try{ return localStorage.getItem("ibee_mzs_full")==="1"; }catch(e){ return false; } }
   function sav(){ try{ return JSON.parse(localStorage.getItem("ibee_sav")||"{}")||{}; }catch(e){ return {}; } }
   function playsTotal(){ var p=sav().plays||{},t=0; for(var k in p) t+=(+p[k]||0); return t; }
@@ -94,6 +96,8 @@
        logo (img) that falls back to the emoji until the PNG is deployed. ---- */
     {id:"true-punk",ico:"🎸",img:"/nouveauxpunk/np%20noit%20tr.png",n:"TRUE PUNK",d:"felt 7 tracks of NOUVEAUX PUNK",
       chk:function(P){return P.npSongs>=7;},pr:function(P){return Math.min(7,P.npSongs)+"/7 NP tracks";}},
+    {id:"neon-punk",ico:"💗",n:"NEON PUNK",d:"felt 7 tracks of NOUVEAUX PUNK 2",
+      chk:function(P){return P.np2Songs>=7;},pr:function(P){return Math.min(7,P.np2Songs)+"/7 NP2 tracks";}},
     {id:"certified-stoner",ico:"🌿",img:"/20minzasession/20%20min%20za%20logo.png",n:"CERTIFIED STONER",d:"rode the whole 20 MIN ZA SESSION",
       chk:function(P){return P.mzsFull;},pr:function(){return "ride the full 20-min take_";}},
     /* ---- hidden badges: pure luck, no task to chase. They show as "???" until
@@ -119,7 +123,7 @@
     return {listen:p.listen,night:p.night,full:p.full,best:p.best,shared:p.shared,chess:p.chess,
       nsongs:nkeys(p.songs),roomsN:nkeys(p.rooms),days:p.days,streak:streak(),
       plays:playsTotal(),vault:!!sav().vault,loggedIn:loggedIn(),eng10:eng10(),maxPlay:maxPlay,
-      npSongs:npSongsN(),mzsFull:mzsFull(),
+      npSongs:npSongsN(),np2Songs:np2SongsN(),mzsFull:mzsFull(),
       lucky:p.lucky||0,comet:p.comet||0,glitch:p.glitch||0};
   }
 
@@ -358,7 +362,7 @@
      single still gets its own "X just dropped on the radio" line. ---- */
   var KNOWN="ibee_news_known";
   function slugify(s){ return String(s||"").toLowerCase().replace(/\.(mp3|wav|m4a)$/,"").trim(); }
-  var GALNAME={rss:"RARE SOUL SESSIONS",np:"NOUVEAUX PUNK",mzs:"20 MIN ZA SESSION"};
+  var GALNAME={np:"NOUVEAUX PUNK",np2:"NOUVEAUX PUNK 2",mzs:"20 MIN ZA SESSION"};
   function detectDrops(){
     var ex=window.IBEE_SONGS_EXTRA; if(!ex) return;
     var songs=ex.songs||[], gals=ex.galaxies||[];

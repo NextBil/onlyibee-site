@@ -74,35 +74,22 @@
      `room` present ⇒ the album is a "special project" that has its own
      immersive page; those get a GO TO THE ROOM button by the player. -------- */
   var ALBUMS = {
-    rss: { name:"RARE SOUL SESSIONS", cover: ROOT+"assets/img/follow-me.jpg" },
+    /* `ib` is the unfiled fallback — every real record names its album below.
+       (RARE SOUL SESSIONS was retired 2026-08-19; the catalogue is the three
+       records now: NOUVEAUX PUNK, NOUVEAUX PUNK 2, 20 MIN ZA SESSION.) */
+    ib:  { name:"ONLY IBEE",          cover: ROOT+"assets/img/follow-me.jpg" },
     np:  { name:"NOUVEAUX PUNK",      cover: ROOT+"assets/img/nouveaux-punk.jpg",
-           room: ROOT+"nouveauxpunk/", galaxy:"np",  tint:"#ff2b2b" },
+           room: ROOT+"nouveauxpunk/", galaxy:"np",  tint:"#ff2b2b", tag:"THE EXPERIENCE" },
+    np2: { name:"NOUVEAUX PUNK 2",    cover: ROOT+"assets/img/nouveaux-punk-2.jpg",
+           room: ROOT+"np2/",          galaxy:"np2", tint:"#ff1f6f", tag:"THE SEQUEL" },
     mzs: { name:"20 MIN ZA SESSION",  cover: ROOT+"assets/img/20mzs-album.png",
            room: ROOT+"20minzasession/", galaxy:"mzs", tint:"#ff7a1a" }
   };
-  function album(id){ return ALBUMS[id] || ALBUMS.rss; }
+  function album(id){ return ALBUMS[id] || ALBUMS.ib; }
 
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback)
      al = album id (cover + name) · special albums also expose a ROOM. */
   var SONGS = [
-    {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210, al:"rss"},
-    {f:"bounceee.mp3",      r:"bounceee3.mp3",      n:"BOUNCEEE",        hue:285, al:"rss"},
-    {f:"callin-on-u.mp3",   r:"callin on u .mp3",   n:"CALLIN ON U",     hue:200, al:"rss"},
-    {f:"freestyle-sept9.mp3",r:"freestylesept9.mp3",n:"FREESTYLE SEPT9", hue:150, al:"rss"},
-    {f:"head.mp3",          r:"head .mp3",          n:"HEAD",            hue:120, al:"rss"},
-    {f:"lonely22.mp3",      r:"lonely22.mp3",       n:"LONELY22",        hue:230, al:"rss"},
-    {f:"maintenant.mp3",    r:"maintenant.mp3",     n:"MAINTENANT",      hue:40,  al:"rss"},
-    {f:"mix-100.mp3",       r:"mix 100.mp3",        n:"MIX 100",         hue:20,  al:"rss"},
-    {f:"nananannn.mp3",     r:"nananannn.mp3",      n:"NANANANNN",       hue:300, al:"rss"},
-    {f:"obsess.mp3",        r:"obsess.mp3",         n:"OBSESS",          hue:320, al:"rss"},
-    {f:"real-to-me.mp3",    r:"real to me .mp3",    n:"REAL TO ME",      hue:190, al:"rss", cover: ROOT+"assets/covers/real to me.jpg"},
-    {f:"ride-it.mp3",       r:"riddeit2.mp3",       n:"RIDE IT",         hue:265, al:"rss"},
-    {f:"right-middle.mp3",  r:"right middle.mp3",   n:"RIGHT MIDDLE",    hue:175, al:"rss"},
-    {f:"silouhette.mp3",    r:"silouhette.mp3",     n:"SILOUHETTE",      hue:250, al:"rss"},
-    {f:"strippin-down.mp3", r:"strippin down.mp3",  n:"STRIPPIN DOWN",   hue:340, al:"rss"},
-    {f:"to-our-pain.mp3",   r:"to our pain .mp3",   n:"TO OUR PAIN",     hue:0,   al:"rss"},
-    {f:"write-a-song.mp3",  r:"write a song v1.mp3",n:"WRITE A SONG",    hue:45,  al:"rss"},
-    {f:"yo-body.mp3",       r:"yo body .mp3",       n:"YO BODY",         hue:75,  al:"rss"},
     /* ---- special projects — playable on the radio AND have their own room ---- */
     {f:"20mzs.mp3",         r:"Only Ibee - 20MZS.mp3", n:"20 MIN ZA SESSION", hue:32, al:"mzs"}
   ];
@@ -110,7 +97,8 @@
      radio it shows as one album card whose action is "go to the room" (roomOnly).
      Any album with a `room` also gets a persistent GO TO THE ROOM button. */
   var ROOMS = [
-    {al:"np", roomOnly:true}
+    {al:"np", roomOnly:true},
+    {al:"np2", roomOnly:true}
   ];
   function songCover(s){ return s.cover || album(s.al).cover; }
 
@@ -349,7 +337,7 @@
         html += '<div class="rp-tile" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
           + '<div class="art'+(al.pad?" pad":"")+'">'+coverImg("", al.cover, 110)
           + '<span class="roomb">ROOM</span>'
-          + '<span class="gtag">ALBUM · THE EXPERIENCE</span></div>'
+          + '<span class="gtag">ALBUM · '+esc(al.tag||"THE EXPERIENCE")+'</span></div>'
           + '<div class="nm">'+esc(al.name)+'</div></div>';
       });
     } else {
@@ -375,7 +363,7 @@
         html += '<div class="rp-row" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
           + '<span class="no">EP</span>'
           + coverImg("rc", al.cover, 110)
-          + '<span class="rt"><span class="rn">'+esc(al.name)+'</span><span class="ra">the experience · tap for the room</span></span>'
+          + '<span class="rt"><span class="rn">'+esc(al.name)+'</span><span class="ra">'+esc((al.tag||"the experience").toLowerCase())+' · tap for the room</span></span>'
           + '<span class="rmroom">ROOM</span></div>';
       });
     }
@@ -536,6 +524,11 @@
     var cands = [BASE + "audio/songs/" + s.f, ROOT + s.f, ROOT + encodeURI(s.r)];
     /* 20mzs lives in assets/audio/ (not /songs/) and at the site root */
     if(s.al === "mzs"){ cands = [BASE + "audio/" + s.f, ROOT + s.f, ROOT + encodeURI(s.r)]; }
+    /* A record whose `r` is already a PATH (the NP and NP2 albums live in their
+       own folders) knows exactly where it is — try that first instead of eating
+       two guaranteed 404s per track on the way to it. The tidy-folder guesses
+       stay behind it as the fallback for everything else. */
+    if(s.r && s.r.indexOf("/") >= 0){ cands.unshift(ROOT + encodeURI(s.r)); }
     var ci = 0;
     audio.onerror = function(){
       ci++;
@@ -846,7 +839,7 @@
     rooms: function(){
       return ROOMS.map(function(r){
         var al = album(r.al);
-        return { id:r.al, name:al.name, cover:al.cover, room:al.room, tint:al.tint, pad:al.pad };
+        return { id:r.al, name:al.name, cover:al.cover, room:al.room, tint:al.tint, pad:al.pad, tag:al.tag };
       });
     },
     shuffled: function(){ return shuffle; },
@@ -1007,7 +1000,7 @@
     try{
       /* new albums first: a studio-founded galaxy (IBEE_SONGS_EXTRA.galaxies) is
          registered as an album here too, so its songs wear the real album name /
-         tint / cover on the radio instead of falling back to RARE SOUL SESSIONS
+         tint / cover on the radio instead of falling back to the unfiled album
          (the universe already knows these galaxies; the radio didn't). Built-in
          albums are never overridden. Optional per-galaxy `cover`/`tint`/`room`. */
       var GX = (window.IBEE_SONGS_EXTRA && window.IBEE_SONGS_EXTRA.galaxies) || [];
@@ -1025,7 +1018,7 @@
         if(!e || !e.f || !e.n) return;
         for(var i=0;i<SONGS.length;i++) if(SONGS[i].f === e.f) return;
         /* a studio song can name an album id (g) or bring its own cover */
-        var alId = e.g && ALBUMS[e.g] ? e.g : "rss";
+        var alId = e.g && ALBUMS[e.g] ? e.g : "ib";
         SONGS.push({ f:e.f, r:e.r || e.f, n:e.n, hue:(e.hue != null ? e.hue : 190),
           al:alId, cover:e.cover || "", locked:!!e.locked });
         added = true;

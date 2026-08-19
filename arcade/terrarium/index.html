@@ -112,7 +112,7 @@
   <div class="act"><button id="pqPlay">▶ PLAY & GROW</button><button class="alt" id="pqSpore">✦ SPORES</button></div>
 </div>
 
-<script src="../../assets/player.js?v=27"></script>
+<script src="../../assets/player.js?v=28"></script>
 <!-- gate.js removed 2026-07-13: this room is FREE (a pickable home room, no ownership gate) -->
 <script src="../../assets/roomgate.js?v=2"></script>
 <script>document.write('<script src="../../assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -159,7 +159,7 @@ for(var ts=0;ts<6;ts++)thSmoke.push({x:Math.random(),y:0.48+Math.random()*0.42,s
 function themeTick(dt){
   dt=Math.max(0,dt);THF=Math.max(0,Math.min(1,THF));
   var s=themeSongNow();
-  var want=s?(s.f==='drop-it.mp3'?'najwa':(s.g==='np'?'punk':null)):null;
+  var want=s?(s.f==='np2-04-drop-it.mp3'?'najwa':(/^np2?$/.test(s.al)?'punk':null)):null;
   if(want!==THN){THF-=dt*1.6;if(THF<=0){THF=0;THN=want;}}
   else if(THN)THF=Math.min(1,THF+dt*0.7);
   if(THN==='punk'&&THF>0){

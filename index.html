@@ -623,7 +623,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=27"></script>
+<script src="assets/player.js?v=28"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
@@ -634,7 +634,7 @@
 <!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
 <script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
-<script src="assets/badges.js?v=12"></script>
+<script src="assets/badges.js?v=13"></script>
 <!-- the unlock ladder: earn the rhythm games by playing (grants via grant_game, see member/unlocks.sql) -->
 <script src="assets/unlocks.js?v=1"></script>
 <script>
@@ -1018,7 +1018,7 @@
     tlbody.className = viewMode==='grid'?'grid':'';
     var html='',shown=0,i,cur=r.current?r.current():-1;
     for(i=0;i<r.count;i++){
-      var s=r.song(i)||{}, alb=r.album?r.album(i):null, aln=(alb&&alb.name)||'RARE SOUL SESSIONS';
+      var s=r.song(i)||{}, alb=r.album?r.album(i):null, aln=(alb&&alb.name)||'ONLY IBEE';
       if(!matchQ(s.n,aln))continue;
       if(favOnly&&!isFav(s.f))continue;
       shown++;
@@ -1056,13 +1056,13 @@
       if(viewMode==='grid'){
         html+='<div class="tl-tile" data-room="'+e3(rm.room)+'" style="--rt:'+tint+'">'
           +'<div class="art" style="background:'+vinyl(110)+'">'+cov
-          +'<span class="roomb">ROOM</span><span class="gtag">ALBUM · THE EXPERIENCE</span></div>'
+          +'<span class="roomb">ROOM</span><span class="gtag">ALBUM · '+e3(rm.tag||'THE EXPERIENCE')+'</span></div>'
           +'<div class="nm">'+e3(rm.name)+'</div></div>';
       } else {
         html+='<div class="tr" data-room="'+e3(rm.room)+'">'
           +'<span class="no">EP</span>'
           +'<span class="cv" style="background:'+vinyl(110)+'">'+cov+'</span>'
-          +'<span class="ti"><span class="tn">'+e3(rm.name)+'</span><span class="al">the experience · tap for the room</span></span>'
+          +'<span class="ti"><span class="tn">'+e3(rm.name)+'</span><span class="al">'+e3((rm.tag||'the experience').toLowerCase())+' · tap for the room</span></span>'
           +'<span class="rmroom">ROOM</span></div>';
       }
     });

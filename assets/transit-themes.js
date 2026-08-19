@@ -1,7 +1,7 @@
 /* IBEE TRANSIT THEMES — custom city skins for the MIDNIGHT TRANSIT room.
    HOW IT WORKS
    - Keys: "album:<galaxyId>" themes a whole album · "song:<file.mp3>" themes one song
-     (song beats album if both match). Galaxy ids: rss, mzs, np, pp, mv, ddlf, bip, vault
+     (song beats album if both match). Galaxy ids: np2, np, mzs, vault
      (+ any new album id you created in IBEE STUDIO).
    - The theme fades in while a matching record plays, fades out after.
    - Every field is OPTIONAL and validated by the game — wrong/missing values fall
@@ -13,8 +13,9 @@
 
 window.IBEE_TRANSIT_THEMES = {
 
-  /* DROP IT — pink city, hearts everywhere, "NAJWA U DA BEST" glowing in the sky */
-  "song:drop-it.mp3": {
+  /* DROP IT (NOUVEAUX PUNK 2, track 04) — pink city, hearts everywhere,
+     "NAJWA U DA BEST" glowing in the sky */
+  "song:np2-04-drop-it.mp3": {
     name: "💗 NAJWA LINE",
     skyTop: "#2a0a1e",
     skyMid: "#521230",
