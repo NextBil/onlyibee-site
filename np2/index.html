@@ -163,6 +163,70 @@ body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
 .tr.playing .bars i{background:var(--pink);animation-play-state:running;
   box-shadow:0 0 8px rgba(255,31,111,.7)}
 
+/* ---------- THE FEED — the archive console ----------
+   Every panel is a miniature of the sleeve: teal mount, the pink ONLY IBEE
+   band across the top, the picture in a window, credits underneath. Same
+   shrink-wrap sheen as the cover, so the whole page reads as one object. */
+.feed{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:760px){.feed{grid-template-columns:1fr}
+  .plate{max-width:460px;margin:0 auto;width:100%}}
+
+.sleeve{margin:0;background:var(--teal);border:1px solid #0a1719;padding:0 0 12px;
+  position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(0,0,0,.55)}
+.sleeve::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+  background:linear-gradient(112deg,transparent 36%,rgba(255,255,255,.15) 46%,
+             rgba(255,255,255,.03) 51%,rgba(255,255,255,.19) 58%,transparent 70%);
+  background-size:280% 100%;animation:wrap 9s linear infinite;mix-blend-mode:screen}
+.sband{background:var(--pink);padding:4px 0;overflow:hidden;white-space:nowrap;text-align:center;
+  box-shadow:0 0 16px rgba(255,31,111,.5)}
+.sband i{font-style:normal;font-family:var(--px);font-size:6px;color:#fff;letter-spacing:1px;padding:0 12px}
+.win{position:relative;aspect-ratio:1;margin:9px 9px 0;overflow:hidden;background:#060f10;
+  border:1px solid #2b4a4f}
+.win img,.win video{width:100%;height:100%;object-fit:cover;display:block}
+.win video{position:absolute;inset:0}
+/* archive grain, so a phone screenshot and a 2012 print sit in the same drawer */
+.win::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.17;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");background-size:150px 150px}
+.brk{position:absolute;width:15px;height:15px;border:2px solid var(--pink);z-index:3;opacity:.9}
+.brk.tl{top:6px;left:6px;border-right:0;border-bottom:0}
+.brk.tr{top:6px;right:6px;border-left:0;border-bottom:0}
+.brk.bl{bottom:6px;left:6px;border-right:0;border-top:0}
+.brk.br{bottom:6px;right:6px;border-left:0;border-top:0}
+.win .rec{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;
+  font-family:var(--px);font-size:6px;letter-spacing:1px;color:#fff;background:rgba(255,31,111,.9);
+  padding:3px 6px;opacity:0;transition:opacity .3s}
+.win.hot .rec,.win.live .rec{opacity:1;animation:blink 1.6s steps(1) infinite}
+#platewave{position:absolute;left:0;right:0;bottom:0;width:100%;height:34px;z-index:3;opacity:0;
+  transition:opacity .5s}
+body.neon #platewave{opacity:.9}
+
+.sleeve figcaption{display:block;padding:11px 12px 0;text-align:center;position:relative;z-index:4}
+.sleeve .ex{display:block;font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:1px;line-height:2}
+.sleeve .lb{display:block;color:#8fa8aa;font-size:16px;line-height:1.45;margin-top:5px}
+.sleeve .tc{display:block;font-family:var(--px);font-size:7px;color:var(--pink);margin-top:9px;letter-spacing:1px}
+
+/* the plate: slow ken-burns so a still is never quite still, and the window
+   breathes with the record once the neon is on */
+#plateimg{animation:kb 24s ease-in-out infinite alternate}
+@keyframes kb{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.15) translate(-2.5%,-2%)}}
+body.neon .plate .win{box-shadow:inset 0 0 calc(10px + var(--nb,0)*44px) rgba(255,31,111,.5)}
+.plate.off .win img{filter:grayscale(1) brightness(.5)}
+
+/* the wall: four cameras that keep cutting while you listen */
+.wall{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.wall .sleeve{padding-bottom:9px}
+.wall .win{margin:7px 7px 0}
+.wall .cap{display:block;font-family:var(--px);font-size:6px;color:#7f9698;text-align:center;
+  padding:8px 6px 0;letter-spacing:1px;position:relative;z-index:4;line-height:1.9}
+.wall .sband i{font-size:5px;padding:0 8px}
+
+/* a cut: the picture blows out for a frame, the way a camera switch does */
+.win.cut>img,.win.cut>video{animation:cutin .55s ease}
+@keyframes cutin{0%{filter:brightness(3.2) contrast(.35);transform:scale(1.07)}
+  38%{filter:brightness(.15) contrast(1.4)}100%{filter:none;transform:none}}
+/* …and on a heavy hit the whole console tears sideways for one frame */
+.feed.hit .win>img,.feed.hit .win>video{transform:translateX(3px) scaleX(1.012)}
+
 /* ---------- the surprises ---------- */
 .vault{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px}
 .slot{border:2px solid var(--border);background:var(--panel);padding:22px 12px 14px;
@@ -320,13 +384,44 @@ body.neon #roomtag.gone{opacity:0}
   <div class="meta">26 SIGNALS · STILL WRAPPED · ONLY IB</div>
   <div class="center"><span class="advisory">PARENTAL<br>ADVISORY<br>EXPLICIT CONTENT</span></div>
 
-  <!-- about -->
+  <!-- the statement — his words, unedited -->
   <div class="sec">
     <div class="sh"><span class="r">//</span> WHAT IS <span class="a">NP2</span>_</div>
     <div class="card prose">
-      <p>The first NOUVEAUX PUNK was a story that cried. <span class="a">NOUVEAUX PUNK 2</span> is what happens after — same kid, same bats on the shirt, older, louder, lit from the outside in <span class="r">neon pink</span>.</p>
-      <p>26 signals. Story by ONLY IB, co-executive produced by ARMETTA and MOONINMAY, art directed by ONLY IB, written by ONLY IB, based on the novel <span class="a">NOUVEAUX PUNK</span>.</p>
-      <p>Available everywhere. The <span class="r">exclusive surprises</span> only happen here — this page fills up as they open.</p>
+      <p><span class="a">26 songs for my 26 years.</span> Made between Toronto and Paris over 3 to 4 years.</p>
+      <p>The first one was chaos, not caring, made in the dark. <span class="r">I care even less now.</span> Facing the biggest emptiness and loneliness of my life.</p>
+      <p>This isn't for anyone's approval anymore, it's just <span class="a">proof of the work</span> I've put in these past years.</p>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       THE FEED — the archive, wired to whatever is playing. The plate
+       turns a new page for every track; the wall keeps cutting cameras.
+       Everything here is presented as a little NP2 sleeve: teal mount,
+       pink band across the top, photo in a window, credits underneath.
+       ================================================================== -->
+  <div class="sec">
+    <div class="sh">THE <span class="a">FEED</span>_</div>
+    <div class="ssub">every song opens a different page of the archive — press one and watch_</div>
+    <div class="feed">
+
+      <figure class="sleeve plate">
+        <div class="sband"><i>ONLY IBEE</i><i>ONLY IBEE</i><i>ONLY IBEE</i></div>
+        <div class="win">
+          <img id="plateimg" alt="" loading="lazy">
+          <video id="platevid" muted loop playsinline preload="none" aria-hidden="true"></video>
+          <canvas id="platewave" width="600" height="80" aria-hidden="true"></canvas>
+          <span class="rec" id="platerec">● REC</span>
+          <b class="brk tl"></b><b class="brk tr"></b><b class="brk bl"></b><b class="brk br"></b>
+        </div>
+        <figcaption>
+          <span class="ex" id="plateex">NO SIGNAL</span>
+          <span class="lb" id="platelbl">press a track and the archive opens_</span>
+          <span class="tc"><b id="platetc">0:00</b> · <b id="platebpm">—</b> BPM</span>
+        </figcaption>
+      </figure>
+
+      <div class="wall" id="wall"></div>
     </div>
   </div>
 
@@ -429,6 +524,165 @@ body.neon #roomtag.gone{opacity:0}
       +'<div class="stage">'+BAT+'</div><span class="qm">?</span>'
       +'<div class="nm">'+s[0]+'</div><div class="ds">'+s[1]+'</div></div>';
   }).join("");
+
+  /* =====================================================================
+     THE ARCHIVE — the pictures and the two reels, and the console that plays
+     them. Every track owns one exhibit for good (index i*5 mod 14 walks the
+     whole set before it repeats), so the page turns a different page of the
+     archive for each of the 26 songs instead of shuffling randomly at you.
+     ===================================================================== */
+  var IMG="../assets/img/np2/", VID="../assets/video/np2/";
+  var ARCHIVE=[
+    {f:"a01.jpg", ex:"EXHIBIT 01", lb:'the mark — "NEW PUNK", forearm'},
+    {f:"a02.jpg", ex:"CAM 01",     lb:"2024-09-21 · the living room"},
+    {f:"a03.jpg", ex:"CAM 01",     lb:"2024-09-21 · still up"},
+    {f:"a04.jpg", ex:"CAM 01",     lb:"2024-09-21 · mid-sentence"},
+    {f:"a05.jpg", ex:"CAM 01",     lb:"2024-09-21 · standing there"},
+    {f:"a06.jpg", ex:"CAM 01",     lb:"2024-09-21 · looking away"},
+    {v:"loop-pink.mp4", ex:"REEL 01", lb:"the pink room · 6s loop", pos:"32% center"},
+    {f:"a07.jpg", ex:"CAM 01",     lb:"2024-09-21 00:09:40 · peace"},
+    {f:"a08.jpg", ex:"EXHIBIT 08", lb:"school print · found in the album"},
+    {f:"a09.jpg", ex:"EXHIBIT 09", lb:"the same page, wider"},
+    {v:"loop-gold.mp4", ex:"REEL 02", lb:"between the two cities · 6s loop", pos:"38% center"},
+    {f:"a10.jpg", ex:"EXHIBIT 10", lb:"print · undated"},
+    {f:"a12.jpg", ex:"EXHIBIT 12", lb:"undated"}
+  ];
+  var STILLS=ARCHIVE.filter(function(a){return a.f;});
+  var REELS =ARCHIVE.filter(function(a){return a.v;});
+  function exhibitFor(i){ return ARCHIVE[((i*5)%ARCHIVE.length+ARCHIVE.length)%ARCHIVE.length]; }
+
+  var feedEl   = document.querySelector(".feed"),
+      plateEl  = document.querySelector(".plate"),
+      plateWin = plateEl.querySelector(".win"),
+      pImg=document.getElementById("plateimg"), pVid=document.getElementById("platevid"),
+      pEx=document.getElementById("plateex"),   pLbl=document.getElementById("platelbl"),
+      pTc=document.getElementById("platetc"),   pBpm=document.getElementById("platebpm"),
+      wave=document.getElementById("platewave"), wctx=wave.getContext("2d");
+
+  /* the wall: one live reel plus three stills that keep cutting */
+  var wallEl=document.getElementById("wall"), TILES=[];
+  (function buildWall(){
+    var html="";
+    for(var i=0;i<4;i++){
+      html+='<figure class="sleeve"><div class="sband"><i>ONLY IBEE</i><i>ONLY IBEE</i></div>'
+        +'<div class="win"><img alt="" loading="lazy">'
+        +(i===0?'<video muted loop playsinline preload="none" aria-hidden="true"></video>':'')
+        +'<span class="rec">● LIVE</span>'
+        +'<b class="brk tl"></b><b class="brk br"></b></div>'
+        +'<span class="cap">CAM 0'+(i+1)+'</span></figure>';
+    }
+    wallEl.innerHTML=html;
+    TILES=Array.prototype.map.call(wallEl.children,function(fig){
+      return { win:fig.querySelector(".win"), img:fig.querySelector("img"),
+               vid:fig.querySelector("video"), cap:fig.querySelector(".cap") };
+    });
+    /* seed the stills so the wall is furnished before anything plays */
+    for(var t=0;t<TILES.length;t++) setTile(TILES[t], STILLS[(t*3+2)%STILLS.length], true);
+    TILES[0].cap.textContent="REEL 01";
+  })();
+
+  function setTile(tile, item, silent){
+    if(!item) return;
+    tile.img.src=IMG+item.f;
+    tile.cap.textContent=item.ex;
+    if(!silent){ tile.win.classList.remove("cut"); void tile.win.offsetWidth; tile.win.classList.add("cut"); }
+  }
+
+  /* The reels are chosen eagerly but FETCHED lazily: `want` only becomes a real
+     `src` inside applyReels(), which does nothing until the room is lit. A
+     visitor who never presses play never downloads either video — 3.5MB that
+     would otherwise load on every visit for nothing. */
+  var wantReel=null, wantPlateVid=null, reelIx=-1;
+  function setReel(n){
+    var t=TILES[0], r=REELS[((n%REELS.length)+REELS.length)%REELS.length];
+    if(!t.vid || reelIx===n) return;
+    reelIx=n; wantReel=r;
+    t.cap.textContent=r.ex;
+    applyReels();
+  }
+  function applyReels(){
+    var t=TILES[0];
+    if(!lit){
+      try{ if(t.vid) t.vid.pause(); pVid.pause(); }catch(e){}
+      if(t.win) t.win.classList.remove("live");
+      plateWin.classList.remove("live");
+      return;
+    }
+    if(wantReel && t.vid){
+      if(t.vid.getAttribute("src")!==VID+wantReel.v){
+        t.vid.src=VID+wantReel.v;
+        t.vid.style.objectPosition=wantReel.pos||"center";
+        t.win.classList.remove("cut"); void t.win.offsetWidth; t.win.classList.add("cut");
+      }
+      t.vid.play().catch(function(){});
+      t.win.classList.add("live");
+    }
+    if(wantPlateVid){
+      if(pVid.getAttribute("src")!==VID+wantPlateVid.v){
+        pVid.src=VID+wantPlateVid.v;
+        pVid.style.objectPosition=wantPlateVid.pos||"center";
+      }
+      pVid.play().catch(function(){});
+      plateWin.classList.add("live");
+    }
+  }
+
+  /* ---- the plate: this track's page of the archive ---- */
+  var plateFor=-2;              /* -2 so the first paint (the STANDBY state) always runs */
+  function setPlate(i){
+    if(plateFor===i) return;
+    plateFor=i;
+    var a = i<0 ? null : exhibitFor(i);
+    plateWin.classList.remove("cut"); void plateWin.offsetWidth; plateWin.classList.add("cut");
+    if(!a){
+      plateEl.classList.add("off"); plateWin.classList.remove("live");
+      pImg.src="../assets/img/nouveaux-punk-2.jpg"; pImg.style.display="";
+      wantPlateVid=null; pVid.pause(); pVid.style.display="none";
+      pEx.textContent="NO SIGNAL"; pLbl.textContent="press a track and the archive opens_";
+      return;
+    }
+    plateEl.classList.remove("off");
+    if(a.v){
+      pImg.style.display="none"; pVid.style.display="";
+      wantPlateVid=a;
+    } else {
+      wantPlateVid=null; pVid.pause(); pVid.style.display="none";
+      pImg.style.display=""; pImg.src=IMG+a.f;
+      plateWin.classList.remove("live");
+    }
+    pEx.textContent=a.ex+" · TRACK "+(i<9?"0":"")+(i+1);
+    pLbl.textContent=a.lb;
+    setReel(i);                 // the wall's live camera follows the track too
+    applyReels();
+  }
+
+  /* the timecode, the BPM and the little waveform under the picture all read
+     the same pressed groove the room's lights do — no second source of truth */
+  function paintPlate(r,playing){
+    if(cur<0){ pTc.textContent="--:--"; pBpm.textContent="—"; return; }
+    var t=0,d=0; try{ t=r.audio.currentTime||0; d=r.audio.duration||0; }catch(e){}
+    pTc.textContent = fmt(t)+" / "+(d?fmt(d):"—");
+    var g=window.IBEE_BEAT?window.IBEE_BEAT[NP2[cur].f]:null;
+    pBpm.textContent = g&&g.bpm ? g.bpm : "—";
+  }
+  function drawWave(){
+    var g=(cur>=0&&window.IBEE_BEAT)?window.IBEE_BEAT[NP2[cur].f]:null;
+    var W=wave.width,H=wave.height;
+    wctx.clearRect(0,0,W,H);
+    if(!g||!lit) return;
+    var t=0; try{ t=RADIO().audio.currentTime||0; }catch(e){}
+    var here=Math.floor(t*g.r), N=68, half=N>>1;
+    for(var k=0;k<N;k++){
+      var idx=here-half+k;
+      if(idx<0||idx>=g.low.length) continue;
+      var v=parseInt(g.low.charAt(idx),36)/35;
+      var h=Math.max(2,v*H*0.92), x=k*(W/N), bw=(W/N)-2;
+      var now=Math.abs(k-half)<1.5;
+      wctx.fillStyle = now ? "rgba(232,220,18,.95)"
+                           : "rgba(255,31,111,"+(0.28+v*0.55).toFixed(2)+")";
+      wctx.fillRect(x,(H-h)/2,bw,h);
+    }
+  }
 
   /* ---- ONE RADIO, IN SYNC -------------------------------------------------
      Exactly the architecture the NOUVEAUX PUNK room uses. The 26 NP2 tracks
@@ -543,11 +797,25 @@ body.neon #roomtag.gone{opacity:0}
       lvl+=(0.3-lvl)*0.05;
     }
     document.documentElement.style.setProperty("--nb",nb.toFixed(3));
+    /* one-frame tear on a heavy hit — enough to feel, too short to annoy */
+    if(nb>0.72 && performance.now()-lastHit>900){
+      lastHit=performance.now();
+      feedEl.classList.add("hit");
+      setTimeout(function(){ feedEl.classList.remove("hit"); },70);
+    }
   }
+  var lastHit=0;
+  /* the wall cuts cameras every few seconds while a record is on air */
+  setInterval(function(){
+    if(!lit) return;
+    var t=1+Math.floor(Math.random()*(TILES.length-1));
+    setTile(TILES[t], STILLS[Math.floor(Math.random()*STILLS.length)]);
+  },5200);
   function draw(){
     if(!lit) return;
     requestAnimationFrame(draw);
     stepBeat();
+    drawWave();
     ctx.clearRect(0,0,W,H);
     var lean=(0.6+nb*3.2), spd=0.8+lvl*1.6;
     ctx.lineCap="round";
@@ -570,6 +838,7 @@ body.neon #roomtag.gone{opacity:0}
   function lightUp(){
     if(lit) return; lit=true;
     body.classList.add("neon");
+    applyReels();                 /* the reels only ever load once the room is lit */
     tagEl.classList.remove("gone");
     clearTimeout(tagT); tagT=setTimeout(function(){ tagEl.classList.add("gone"); },6500);
     size(); spawnBats(); draw();
@@ -577,6 +846,8 @@ body.neon #roomtag.gone{opacity:0}
   function lightDown(){
     if(!lit) return; lit=false;
     body.classList.remove("neon");
+    applyReels();                 /* …and they stop the moment it goes dark */
+    wctx.clearRect(0,0,wave.width,wave.height);
     setTimeout(function(){ if(!lit) ctx.clearRect(0,0,cv.width,cv.height); },200);
   }
 
@@ -588,6 +859,9 @@ body.neon #roomtag.gone{opacity:0}
     cur=idx;
     if(playing&&idx>=0){ lightUp(); accum(r); } else { lightDown(); lastT=-1; }
     rowState();
+    setPlate(idx);                 /* the archive keeps your page even when paused */
+    plateWin.classList.toggle("hot", playing&&idx>=0);
+    paintPlate(r, playing&&idx>=0);
   }
   setInterval(syncFromRadio,250);
   syncFromRadio();
