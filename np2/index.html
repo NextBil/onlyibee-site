@@ -164,64 +164,60 @@ body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
   box-shadow:0 0 8px rgba(255,31,111,.7)}
 
 /* ---------- THE FEED — the archive console ----------
-   Every panel is a miniature of the sleeve: teal mount, the pink ONLY IBEE
-   band across the top, the picture in a window, credits underneath. Same
-   shrink-wrap sheen as the cover, so the whole page reads as one object. */
+   Every archive picture is mounted as an ALTERNATIVE COVER: the real sleeve
+   artwork (assets/img/np2/np2-sleeve.png) is a transparent PNG carrying only
+   the pink ONLY IBEE band, the dripping wordmark and the PARENTAL ADVISORY
+   block — so it lays straight over the photograph and the picture reads
+   through everywhere else. Opaque regions, measured off the file's alpha:
+   band y 0-8%, wordmark y 16.5-24.2% (x 21.7-76.4%), advisory y 86.5-95.1%
+   (x 7.2-21.9%). Anything that must stay legible lives outside those. */
 .feed{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
 @media(max-width:760px){.feed{grid-template-columns:1fr}
   .plate{max-width:460px;margin:0 auto;width:100%}}
 
-.sleeve{margin:0;background:var(--teal);border:1px solid #0a1719;padding:0 0 12px;
-  position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(0,0,0,.55)}
-.sleeve::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
-  background:linear-gradient(112deg,transparent 36%,rgba(255,255,255,.15) 46%,
-             rgba(255,255,255,.03) 51%,rgba(255,255,255,.19) 58%,transparent 70%);
-  background-size:280% 100%;animation:wrap 9s linear infinite;mix-blend-mode:screen}
-.sband{background:var(--pink);padding:4px 0;overflow:hidden;white-space:nowrap;text-align:center;
-  box-shadow:0 0 16px rgba(255,31,111,.5)}
-.sband i{font-style:normal;font-family:var(--px);font-size:6px;color:#fff;letter-spacing:1px;padding:0 12px}
-.win{position:relative;aspect-ratio:1;margin:9px 9px 0;overflow:hidden;background:#060f10;
-  border:1px solid #2b4a4f}
-.win img,.win video{width:100%;height:100%;object-fit:cover;display:block}
-.win video{position:absolute;inset:0}
+.sleeve{margin:0;position:relative;padding:0 0 2px}
+.win{position:relative;aspect-ratio:1;overflow:hidden;background:#060f10;
+  box-shadow:0 14px 32px rgba(0,0,0,.55)}
+.win>img,.win>video{width:100%;height:100%;object-fit:cover;display:block}
+.win>video{position:absolute;inset:0}
+/* the sleeve itself, printed over the picture */
+.win .frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;
+  z-index:4;pointer-events:none}
 /* archive grain, so a phone screenshot and a 2012 print sit in the same drawer */
 .win::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.17;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");background-size:150px 150px}
-.brk{position:absolute;width:15px;height:15px;border:2px solid var(--pink);z-index:3;opacity:.9}
-/* NOTE: these corner classes are prefixed. Plain .tl/.tr/.bl/.br would
-   collide with .tr, the track row — the bracket then inherited the row
-   styling and the row's click binding. */
-.brk.k-tl{top:6px;left:6px;border-right:0;border-bottom:0}
-.brk.k-tr{top:6px;right:6px;border-left:0;border-bottom:0}
-.brk.k-bl{bottom:6px;left:6px;border-right:0;border-top:0}
-.brk.k-br{bottom:6px;right:6px;border-left:0;border-top:0}
-.win .rec{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:3;
-  font-family:var(--px);font-size:6px;letter-spacing:1px;color:#fff;background:rgba(255,31,111,.9);
+/* the shrink-wrap, still on: this record has never been opened */
+.win::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+  background:linear-gradient(112deg,transparent 36%,rgba(255,255,255,.15) 46%,
+             rgba(255,255,255,.03) 51%,rgba(255,255,255,.19) 58%,transparent 70%);
+  background-size:280% 100%;animation:wrap 9s linear infinite;mix-blend-mode:screen}
+/* clear of the band (0-8%) so it never fights the ONLY IBEE strip */
+.win .rec{position:absolute;top:10.5%;right:4%;z-index:6;
+  font-family:var(--px);font-size:6px;letter-spacing:1px;color:#fff;background:rgba(255,31,111,.92);
   padding:3px 6px;opacity:0;transition:opacity .3s}
 .win.hot .rec,.win.live .rec{opacity:1;animation:blink 1.6s steps(1) infinite}
-#platewave{position:absolute;left:0;right:0;bottom:0;width:100%;height:34px;z-index:3;opacity:0;
-  transition:opacity .5s}
-body.neon #platewave{opacity:.9}
+/* inset past the ADVISORY block, which owns the bottom-left 22% */
+#platewave{position:absolute;left:25%;right:3%;bottom:2.5%;width:72%;height:26px;z-index:6;
+  opacity:0;transition:opacity .5s}
+body.neon #platewave{opacity:.92}
 
-.sleeve figcaption{display:block;padding:11px 12px 0;text-align:center;position:relative;z-index:4}
+.sleeve figcaption{display:block;padding:11px 12px 0;text-align:center;position:relative;z-index:6}
 .sleeve .ex{display:block;font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:1px;line-height:2}
 .sleeve .lb{display:block;color:#8fa8aa;font-size:16px;line-height:1.45;margin-top:5px}
 .sleeve .tc{display:block;font-family:var(--px);font-size:7px;color:var(--pink);margin-top:9px;letter-spacing:1px}
 
-/* the plate: slow ken-burns so a still is never quite still, and the window
+/* the plate: slow ken-burns so a still is never quite still, and the sleeve
    breathes with the record once the neon is on */
 #plateimg{animation:kb 24s ease-in-out infinite alternate}
 @keyframes kb{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.15) translate(-2.5%,-2%)}}
-body.neon .plate .win{box-shadow:inset 0 0 calc(10px + var(--nb,0)*44px) rgba(255,31,111,.5)}
-.plate.off .win img{filter:grayscale(1) brightness(.5)}
+body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,111,.5),
+                                 0 14px 32px rgba(0,0,0,.55)}
+.plate.off .win>img{filter:grayscale(1) brightness(.5)}
 
 /* the wall: four cameras that keep cutting while you listen */
 .wall{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.wall .sleeve{padding-bottom:9px}
-.wall .win{margin:7px 7px 0}
 .wall .cap{display:block;font-family:var(--px);font-size:6px;color:#7f9698;text-align:center;
-  padding:8px 6px 0;letter-spacing:1px;position:relative;z-index:4;line-height:1.9}
-.wall .sband i{font-size:5px;padding:0 8px}
+  padding:8px 6px 0;letter-spacing:1px;position:relative;z-index:6;line-height:1.9}
 
 /* a cut: the picture blows out for a frame, the way a camera switch does */
 .win.cut>img,.win.cut>video{animation:cutin .55s ease}
@@ -230,25 +226,28 @@ body.neon .plate .win{box-shadow:inset 0 0 calc(10px + var(--nb,0)*44px) rgba(25
 /* …and on a heavy hit the whole console tears sideways for one frame */
 .feed.hit .win>img,.feed.hit .win>video{transform:translateX(3px) scaleX(1.012)}
 
-/* ---------- the surprises ---------- */
-.vault{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px}
-.slot{border:2px solid var(--border);background:var(--panel);padding:22px 12px 14px;
-  text-align:center;position:relative;overflow:hidden}
-.slot::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(118deg,transparent 40%,rgba(255,255,255,.09) 50%,transparent 60%);
-  background-size:280% 100%;animation:wrap 9s linear infinite}
-.slot .stage{width:104px;height:104px;margin:0 auto;display:flex;align-items:center;justify-content:center}
-.slot .stage svg{width:86px;height:auto;opacity:.32;
-  filter:drop-shadow(0 0 12px rgba(255,31,111,.55));animation:batflap 3.6s ease-in-out infinite}
-.slot:nth-child(2n) .stage svg{animation-duration:4.6s;animation-direction:reverse}
-.slot .qm{position:absolute;top:29%;left:50%;transform:translate(-50%,-50%);
-  font-family:var(--px);font-size:26px;color:var(--pink);
-  text-shadow:0 0 16px rgba(255,31,111,.8);animation:blink 1.2s steps(1) infinite}
-@keyframes blink{50%{opacity:.25}}
-.slot .lock{position:absolute;top:10px;right:10px;font-family:var(--px);font-size:7px;
-  color:var(--pink);border:1px solid var(--pink);padding:4px 6px;background:rgba(0,0,0,.8)}
-.slot .nm{font-family:var(--px);font-size:9px;line-height:1.8;margin-top:10px;color:var(--dim)}
-.slot .ds{color:#5f7477;font-size:16px;margin-top:6px;line-height:1.5}
+/* ---------- the surprises: the 15 T-SHIRTS ----------
+   Rendered live from assets/products-data.js (folder "15-tshirts") so the
+   room can never drift from the shop — prices, rarities, claimed state and
+   the drop's own status all come from the one catalogue file. */
+.teestrip{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--pink);
+  border:1px solid var(--pink);display:inline-block;padding:6px 9px;margin-bottom:16px}
+.tees{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:13px}
+.tee{display:block;text-decoration:none;border:2px solid var(--border);background:var(--panel);
+  position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.tee:hover{border-color:var(--pink);transform:translateY(-3px)}
+.tee .shot{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#0c1c1f}
+.tee .no,.tee .rt{position:absolute;top:8px;font-family:var(--px);font-size:6px;
+  letter-spacing:1px;padding:3px 5px;background:rgba(0,0,0,.75);z-index:2}
+.tee .no{left:8px;color:#fff}
+.tee .rt{right:8px;color:var(--rar,#9a9a9a);border:1px solid var(--rar,#9a9a9a)}
+.tee .nm{font-family:var(--px);font-size:7px;color:var(--ink);line-height:1.9;
+  padding:10px 10px 0;letter-spacing:1px}
+.tee .pr{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  padding:7px 10px 10px;color:var(--pink);font-size:17px}
+.tee .pr .one{font-family:var(--px);font-size:6px;color:#6f8688;letter-spacing:1px}
+.tee.taken{opacity:.55}
+.tee.taken .pr{color:#6f8688}
 
 /* ---------- actions ---------- */
 .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:46px}
@@ -346,7 +345,7 @@ body.neon #roomtag.gone{opacity:0}
 
 @media(max-width:700px){.batwrap{display:none}}
 @media(prefers-reduced-motion:reduce){
-  .band div,.cover,.cover::after,.slot::before,#wrapsheen,.glow,#bats .bat,#bats .bat svg,
+  .band div,.cover,.cover::after,.win::before,.win .frame,#wrapsheen,.glow,#bats .bat,#bats .bat svg,
   .batwrap svg,#tube{animation:none}
 }
 </style>
@@ -409,13 +408,12 @@ body.neon #roomtag.gone{opacity:0}
     <div class="feed">
 
       <figure class="sleeve plate">
-        <div class="sband"><i>ONLY IBEE</i><i>ONLY IBEE</i><i>ONLY IBEE</i></div>
         <div class="win">
           <img id="plateimg" alt="" loading="lazy">
           <video id="platevid" muted loop playsinline preload="none" aria-hidden="true"></video>
+          <img class="frame" src="../assets/img/np2/np2-sleeve.png" alt="" aria-hidden="true">
           <canvas id="platewave" width="600" height="80" aria-hidden="true"></canvas>
           <span class="rec" id="platerec">● REC</span>
-          <b class="brk k-tl"></b><b class="brk k-tr"></b><b class="brk k-bl"></b><b class="brk k-br"></b>
         </div>
         <figcaption>
           <span class="ex" id="plateex">NO SIGNAL</span>
@@ -435,15 +433,17 @@ body.neon #roomtag.gone{opacity:0}
     <div class="card" id="tracks"></div>
   </div>
 
-  <!-- surprises -->
+  <!-- surprises — the 15 T-SHIRTS, straight from the shop catalogue -->
   <div class="sec">
     <div class="sh">THE <span class="a">SURPRISES</span>_</div>
-    <div class="ssub">still in the plastic — each one cuts open on its own day_</div>
-    <div class="vault" id="vault"></div>
+    <div class="ssub" id="teesub">the 15 t-shirts — one of one, made to order_</div>
+    <div id="teestate"></div>
+    <div class="tees" id="tees"></div>
   </div>
 
   <div class="actions">
     <a class="btn" href="../console.html#music">▶ OPEN THE UNIVERSE</a>
+    <a class="btn alt" href="../drop/">▣ THE 15 T-SHIRTS</a>
     <a class="btn alt" href="../nouveauxpunk/">◀ CHAPTER ONE</a>
   </div>
 </main>
@@ -513,20 +513,50 @@ body.neon #roomtag.gone{opacity:0}
   });
   tr.innerHTML=html;
 
-  /* ---------- the sealed surprises ---------- */
-  var SLOTS=[
-    ["THE FILM","the visual piece for the sequel_"],
-    ["THE STUDIO TAPES","the takes that didn't make the sleeve_"],
-    ["THE RELICS","NP2 pieces — the bat shirt, and what comes with it_"],
-    ["CHAPTER TWO","the novel continues, page by page_"],
-    ["LIVE RITUAL","where the sequel happens in real life_"],
-    ["??????","not even the console knows what this one is_"]
-  ];
-  document.getElementById("vault").innerHTML=SLOTS.map(function(s){
-    return '<div class="slot"><span class="lock">SEALED</span>'
-      +'<div class="stage">'+BAT+'</div><span class="qm">?</span>'
-      +'<div class="nm">'+s[0]+'</div><div class="ds">'+s[1]+'</div></div>';
-  }).join("");
+  /* ---------- the surprises: the 15 T-SHIRTS ----------
+     The drop is the shop's own "15-tshirts" folder. Reading products-data.js
+     rather than restating it here means a price change, a claimed piece or the
+     drop opening all land on this page with no edit — the same contract the
+     shop screen and the drop page work under. If the file never arrives the
+     section says so instead of showing invented merch. */
+  var teesEl=document.getElementById("tees"), teeState=document.getElementById("teestate"),
+      teeSub=document.getElementById("teesub");
+  var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};
+  var RCOL ={c:"#9a9a9a",sr:"#e879c9",sdr:"#d9b36c",leg:"#b6ff00"};
+  function esc(t){ return String(t==null?"":t).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function buildTees(tries){
+    tries=tries||0;
+    var P=window.IBEE_PRODUCTS;
+    if(!P||!P.products){
+      if(tries<40){ setTimeout(function(){ buildTees(tries+1); },200); return; }
+      teeSub.textContent="the 15 t-shirts — open the drop to see them_";
+      return;
+    }
+    var folder=(P.folders||[]).filter(function(f){ return f.id==="15-tshirts"; })[0]||{};
+    var items=P.products.filter(function(p){ return p.folder==="15-tshirts"; })
+                        .sort(function(a,b){ return String(a.no||"").localeCompare(String(b.no||"")); });
+    if(!items.length){ teeSub.textContent="the 15 t-shirts — open the drop to see them_"; return; }
+
+    if(folder.sub) teeSub.textContent=folder.sub.toLowerCase()+" — tap a piece_";
+    var st={live:"\u25a3 THE FOLDER IS OPEN",soon:"\u25a3 OPENS SOON",closed:"\u25a3 CLOSED FOR NOW"}[folder.state];
+    teeState.innerHTML = st ? '<span class="teestrip">'+esc(st)+'</span>' : "";
+
+    teesEl.innerHTML=items.map(function(p){
+      var rar=p.r||"c", taken=!!(p.owner||p.out);
+      var shot=(p.imgs&&p.imgs[0])||"";
+      return '<a class="tee'+(taken?" taken":"")+'" style="--rar:'+RCOL[rar]+'" '
+        +'href="../product-page/?id='+encodeURIComponent(p.id)+'">'
+        +(shot?'<img class="shot" src="'+esc(shot)+'" alt="'+esc(p.n)+'" loading="lazy">'
+              :'<span class="shot"></span>')
+        +'<span class="no">'+esc(p.no||"")+' / '+items.length+'</span>'
+        +'<span class="rt">'+esc(RNAME[rar]||"COMMON")+'</span>'
+        +'<div class="nm">'+esc(p.n)+'</div>'
+        +'<div class="pr"><span>'+esc((p.cur||"\u20ac")+p.price)+'</span>'
+        +'<span class="one">'+(taken?"CLAIMED":"1 OF 1")+'</span></div></a>';
+    }).join("");
+  }
+  buildTees();
 
   /* =====================================================================
      THE ARCHIVE — the pictures and the two reels, and the console that plays
@@ -567,20 +597,19 @@ body.neon #roomtag.gone{opacity:0}
   (function buildWall(){
     var html="";
     for(var i=0;i<4;i++){
-      html+='<figure class="sleeve"><div class="sband"><i>ONLY IBEE</i><i>ONLY IBEE</i></div>'
-        +'<div class="win"><img alt="" loading="lazy">'
+      html+='<figure class="sleeve"><div class="win"><img alt="" loading="lazy">'
         +(i===0?'<video muted loop playsinline preload="none" aria-hidden="true"></video>':'')
-        +'<span class="rec">● LIVE</span>'
-        +'<b class="brk k-tl"></b><b class="brk k-br"></b></div>'
+        +'<img class="frame" src="'+IMG+'np2-sleeve.png" alt="" aria-hidden="true">'
+        +'<span class="rec">● LIVE</span></div>'
         +'<span class="cap">CAM 0'+(i+1)+'</span></figure>';
     }
     wallEl.innerHTML=html;
     TILES=Array.prototype.map.call(wallEl.children,function(fig){
-      return { win:fig.querySelector(".win"), img:fig.querySelector("img"),
+      return { win:fig.querySelector(".win"), img:fig.querySelector("img:not(.frame)"),
                vid:fig.querySelector("video"), cap:fig.querySelector(".cap") };
     });
     /* seed the stills so the wall is furnished before anything plays */
-    for(var t=0;t<TILES.length;t++) setTile(TILES[t], STILLS[(t*3+2)%STILLS.length], true);
+    for(var t=0;t<TILES.length;t++) setTile(TILES[t], STILLS[(t*4+2)%STILLS.length], true);
     TILES[0].cap.textContent="REEL 01";
   })();
 
@@ -812,7 +841,12 @@ body.neon #roomtag.gone{opacity:0}
   setInterval(function(){
     if(!lit) return;
     var t=1+Math.floor(Math.random()*(TILES.length-1));
-    setTile(TILES[t], STILLS[Math.floor(Math.random()*STILLS.length)]);
+    /* don't cut to a frame another camera is already showing — two crops of the
+       same photograph side by side just reads as a bug */
+    var on={}; TILES.forEach(function(x,i){ if(i!==t && x.img) on[(x.img.getAttribute("src")||"").split("/").pop()]=1; });
+    var free=STILLS.filter(function(a){ return !on[a.f]; });
+    if(!free.length) free=STILLS;
+    setTile(TILES[t], free[Math.floor(Math.random()*free.length)]);
   },5200);
   function draw(){
     if(!lit) return;
@@ -881,6 +915,7 @@ body.neon #roomtag.gone{opacity:0}
   });
 })();
 </script>
+<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script src="../assets/player.js?v=28"></script>
 <script src="../assets/badges.js?v=13"></script>
 <script src="/assets/stats-client.js?v=7"></script>
