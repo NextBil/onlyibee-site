@@ -212,7 +212,12 @@ body.neon #platewave{opacity:.92}
 @keyframes kb{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.15) translate(-2.5%,-2%)}}
 body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,111,.5),
                                  0 14px 32px rgba(0,0,0,.55)}
-.plate.off .win>img{filter:grayscale(1) brightness(.5)}
+/* STANDBY shows the real sleeve, so the overlay must come off — printing the
+   band/wordmark/advisory a second time over the cover that already has them
+   just reads as a broken image. The archive stills keep it; the cover doesn't
+   need it, it IS it. */
+.plate.off #plateimg{filter:grayscale(1) brightness(.5)}
+.plate.off .frame{display:none}
 
 /* the wall: four cameras that keep cutting while you listen */
 .wall{display:grid;grid-template-columns:1fr 1fr;gap:12px}
