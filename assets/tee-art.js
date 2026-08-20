@@ -70,6 +70,79 @@
     wave:function(i,a){var g="";for(var k=0;k<3;k++){g+='<path d="M6 '+(38+k*18)+'c11-13 22-13 33 0s22 13 33 0 22-13 22 0" fill="none" stroke="'+(k===1?a:i)+'" stroke-width="5" stroke-linecap="round"/>';}return g;},
     star:function(i,a){return '<path d="M50 4 62 38h36L69 59l11 35-30-22-30 22 11-35L2 38h36z" fill="'+i+'"/>'+
       '<path d="M50 22 56 40h19L60 51l6 19-16-12-16 12 6-19-15-11h19z" fill="'+a+'" opacity=".55"/>';},
+    /* ---- NOUVEAUX PUNK 2 capsule -------------------------------------
+       Drawn in the record's own language, colours sampled off the sleeve:
+       pink #ff1f6f · acid #e8dc12 · petrol #1a2d31 · sleeve black #0b1719.
+       Pair them from products-data.js, e.g. {motif:"np2bat", body:"#0b1719",
+       ink:"#ff1f6f"}. Every one fits the 100-box (checked with getBBox, so a
+       print never clips at the edge). ---- */
+/* 1. THE BAT — the exact silhouette already flying in the NP2 room, so the
+     shirt and the site wear the same mark. Drawn 120x44 and dropped into the
+     100-box, rather than redrawn: a second hand-made version would drift. */
+  np2bat:function(i,a){return '<g transform="translate(0 30) scale(0.8333)">'+
+    '<polygon fill="'+i+'" points="'+
+    '2,4 16,18 26,10 36,20 46,10 54,18 56,2 60,12 64,2 66,18 74,10 84,20 94,10 104,18 118,4 '+
+    '112,28 100,24 92,34 82,26 72,34 64,28 60,40 56,28 48,34 38,26 28,34 20,24 8,28"/></g>'+
+    '<rect x="0" y="76" width="100" height="4" fill="'+a+'" opacity=".85"/>';},
+
+  /* 2. NEW PUNK — the forearm tattoo: an x-eyed smiley, drawn with the wobble
+     of a hand rather than a compass. */
+  np2smiley:function(i,a){return ''+
+    '<path d="M50 8C27 8 9 26 9 49s18 41 41 41 41-18 41-41S73 8 50 8z" fill="none" stroke="'+i+'" stroke-width="5" stroke-linecap="round"/>'+
+    '<path d="M28 32l13 14M41 32L28 46" stroke="'+i+'" stroke-width="5.5" stroke-linecap="round"/>'+
+    '<path d="M59 32l13 14M72 32L59 46" stroke="'+i+'" stroke-width="5.5" stroke-linecap="round"/>'+
+    '<path d="M28 60c6 12 15 18 22 18s16-6 22-18" fill="none" stroke="'+a+'" stroke-width="5.5" stroke-linecap="round"/>';},
+
+  /* 3. ADVISORY — the sleeve's block, reset for the chest. The real mark is
+     white on black, so the type is always #fff: it does not follow the ink. */
+  np2advisory:function(i,a){return ''+
+    '<rect x="8" y="26" width="84" height="48" fill="'+i+'"/>'+
+    '<rect x="12" y="30" width="76" height="40" fill="none" stroke="#fff" stroke-width="1.6"/>'+
+    '<text x="50" y="41.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '+
+      'font-weight="700" font-size="7" letter-spacing="1.9" fill="#fff">PARENTAL</text>'+
+    '<text x="50" y="57" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '+
+      'font-weight="700" font-size="14.5" letter-spacing="-0.2" fill="#fff">ADVISORY</text>'+
+    '<text x="50" y="66.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '+
+      'font-weight="700" font-size="5.2" letter-spacing="0.9" fill="#fff">NOUVEAUX PUNK 2</text>';},
+
+  /* 4. THE BAND — the sleeve's ONLY IBEE strip, run across the chest. */
+  np2band:function(i,a){return ''+
+    '<rect x="0" y="33" width="100" height="34" fill="'+i+'"/>'+
+    '<rect x="0" y="29" width="100" height="2.5" fill="'+a+'" opacity=".75"/>'+
+    '<rect x="0" y="67.5" width="100" height="2.5" fill="'+a+'" opacity=".75"/>'+
+    '<text x="50" y="54.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '+
+      'font-weight="700" font-size="13" letter-spacing="0.5" fill="#fff">ONLY IBEE</text>';},
+
+  /* 5. CAM 01 — the frame the whole archive is shot through. The date is the
+     one actually burned into his camera stills, not a made-up prop. */
+  np2cam:function(i,a){return ''+
+    '<path d="M4 16V4h14M96 16V4H82M4 84v12h14M96 84v12H82" stroke="'+i+'" stroke-width="6" fill="none"/>'+
+    '<circle cx="24" cy="50" r="6.5" fill="#ff1f6f"/>'+
+    '<text x="37" y="54" font-family="Helvetica,Arial,sans-serif" font-weight="700" '+
+      'font-size="12" letter-spacing="1.4" fill="'+i+'">REC</text>'+
+    '<text x="50" y="72" text-anchor="middle" font-family="Courier New,Courier,monospace" '+
+      'font-size="8" letter-spacing="0.4" fill="'+a+'">2024-09-21</text>'+
+    '<text x="50" y="82" text-anchor="middle" font-family="Courier New,Courier,monospace" '+
+      'font-size="8" letter-spacing="0.4" fill="'+a+'">00:09:40</text>'+
+    '<rect x="18" y="28" width="64" height="2" fill="'+a+'" opacity=".5"/>';},
+
+  /* 6. 26 — twenty-six songs for twenty-six years, his line. Set as type so
+     the numerals stay true at any size instead of drifting as hand paths. */
+  np226:function(i,a){return ''+
+    '<text x="50" y="62" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '+
+      'font-weight="700" font-size="52" letter-spacing="-2" fill="'+i+'">26</text>'+
+    '<rect x="18" y="70" width="64" height="2.6" fill="'+a+'"/>'+
+    '<text x="50" y="83" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" '+
+      'font-weight="700" font-size="7.5" letter-spacing="2.2" fill="'+a+'">SONGS · YEARS</text>';},
+
+  /* 7. THE DRIP — the logotype's melt, on its own. */
+  np2drip:function(i,a){var g='<rect x="8" y="18" width="84" height="22" fill="'+i+'"/>';
+    var d=[[14,16],[26,30],[40,20],[52,38],[64,24],[76,34],[86,14]];
+    for(var k=0;k<d.length;k++){var x=d[k][0],h=d[k][1];
+      g+='<rect x="'+x+'" y="40" width="7" height="'+h+'" fill="'+i+'"/>'+
+         '<circle cx="'+(x+3.5)+'" cy="'+(40+h)+'" r="3.5" fill="'+i+'"/>';}
+    return g+'<rect x="8" y="18" width="84" height="4" fill="'+a+'" opacity=".8"/>';},
+
     grid:function(i,a){var g="";for(var k=0;k<5;k++){var v=10+k*20;
       g+='<path d="M'+v+' 8V92" stroke="'+i+'" stroke-width="3"/><path d="M8 '+v+'H92" stroke="'+i+'" stroke-width="3"/>';}
       return g+'<rect x="30" y="30" width="20" height="20" fill="'+a+'"/><rect x="50" y="50" width="20" height="20" fill="'+a+'" opacity=".6"/>';}
