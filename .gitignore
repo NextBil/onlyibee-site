@@ -1,3 +1,8 @@
 # macOS finder droppings — never part of the site
 .DS_Store
 **/.DS_Store
+
+# The README is the map of the whole system, including where the soft spots
+# are. GitHub Pages serves every committed file, so it stays in the working
+# copy ("website v2/README.md") and off the domain.
+README.md

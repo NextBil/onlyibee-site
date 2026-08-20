@@ -74,8 +74,23 @@
     return { v:a.v||b.v||1, earned:earned, evtT:mNum(a.evtT,b.evtT), prog:prog };
   }
 
+  /* THE FALL (np2/fall/): listens are a currency, so the merge must never lose
+     any — max on the coin, union on the levels you got out of, and the BETTER
+     (lower) time on each level's record. No new SQL: this rides the same
+     get_cloud/save_cloud blob everything else already uses. */
+  function mergeMaxNum(a,b){ return Math.max(+a||0, +b||0); }
+  function mergeOut(a,b){ var o={},k; a=a||{}; b=b||{};
+    for(k in a) o[k]=1; for(k in b) o[k]=1; return o; }
+  function mergeBestTimes(a,b){ var o={},k; a=a||{}; b=b||{};
+    for(k in a) o[k]=a[k];
+    for(k in b) o[k]=(o[k]==null? b[k] : Math.min(o[k], b[k]));
+    return o; }
+
   /* the tracked keys and how each one merges */
   var KEYS={
+    ibee_np2pts:      mergeMaxNum,
+    ibee_np2fall:     mergeBestTimes,
+    ibee_np2fall_out: mergeOut,
     ibee_favs:    mergeFavs,
     ibee_badges:  mergeBadges,
     ibee_aquapet: mergePet,

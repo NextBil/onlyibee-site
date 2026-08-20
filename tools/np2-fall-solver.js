@@ -26,6 +26,11 @@ global.addEventListener=()=>{}; global.localStorage={getItem:()=>null,setItem(){
 global.requestAnimationFrame=()=>{}; global.matchMedia=()=>({matches:false});
 global.devicePixelRatio=2; global.prompt=()=>null; global.alert=()=>{}; global.confirm=()=>false;
 global.performance={now:()=>0};
+/* the page reads the URL for a room code and the clipboard for sharing; the
+   harness only wants the generator, so give it just enough browser to boot */
+global.location={search:"",pathname:"/np2/fall/",origin:"https://onlyibee.com",hash:""};
+global.URLSearchParams=URLSearchParams;
+global.navigator={userAgent:"node",share:null,clipboard:null};
 Object.assign(global.window,{IBEERADIO:null,document:global.document,
   addEventListener:()=>{},localStorage:global.localStorage,supabase:null});
 eval(body);

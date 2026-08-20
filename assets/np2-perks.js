@@ -5,6 +5,7 @@
 
        2,600 LISTENS = 40% off everything. That is the cap.
        Getting out of a level is worth 100, so the record is exactly 2,600.
+       Every badge you already hold is worth 40 more.
 
    You earn LISTENS by falling (np2/fall/). They show as a yellow coin on
    the profile and beside every price. Nothing else to read.
@@ -47,11 +48,28 @@
     try{ var o=JSON.parse(localStorage.getItem(LS_OUT)||"{}")||{}; return Object.keys(o).length; }
     catch(e){ return 0; }
   }
-  function points(){ return readN(LS_PTS); }
+  /* ---- BADGES PAY OUT TOO -------------------------------------------------
+     A trophy you already earned should be worth something at the till. Each
+     badge in badges.js is worth BADGE_WORTH listens, counted live off the
+     badge state rather than copied — so nothing can drift out of sync and
+     nothing is double-credited when a new badge lands. */
+  var BADGE_WORTH=40;
+  function badges(){
+    try{
+      var B=window.IBEE_BADGES; if(!B||!B.state) return 0;
+      var st=B.state(); if(!st||!st.earned) return 0;
+      return Object.keys(st.earned).length;
+    }catch(e){ return 0; }
+  }
+  function badgeListens(){ return badges()*BADGE_WORTH; }
+
+  /* what you carry = what you fell for + what you already had */
+  function points(){ return readN(LS_PTS)+badgeListens(); }
+  function fallen(){ return readN(LS_PTS); }
 
   function add(n){
     if(!(n>0)) return points();
-    var t=points()+Math.round(n);
+    var t=readN(LS_PTS)+Math.round(n);
     try{ localStorage.setItem(LS_PTS,String(t)); }catch(e){}
     return t;
   }
@@ -133,6 +151,7 @@
   window.IBEE_PERKS={
     points:points, add:add, cleared:cleared, discount:discount, code:code,
     price:priceOf, money:money, render:render, COIN:COIN,
+    badges:badges, badgeListens:badgeListens, fallen:fallen, BADGE_WORTH:BADGE_WORTH,
     MAXPCT:MAXPCT, LEVELS:LEVELS, CLEAR:CLEAR, POINTS_FOR_MAX:POINTS_FOR_MAX
   };
   try{ document.addEventListener("DOMContentLoaded",function(){ render(); }); }catch(e){}

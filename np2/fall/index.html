@@ -1439,12 +1439,32 @@ function netTick(){
     q.x+=((q.tx-q.x)||0)*0.22; q.y+=((q.ty-q.y)||0)*0.22;
   }
 }
+/* ---- FALLING TOGETHER --------------------------------------------------
+   A code is a channel name; a link is a code someone can actually send.
+   Arriving with ?room=XXXX joins on load, so whoever you invited lands in your
+   pit without typing anything — they only have to pick the same song. */
+function setRoom(c){
+  roomCode=(c||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6)||null;
+  var b=document.getElementById("mkroom");
+  if(b) b.textContent = roomCode ? ("ROOM "+roomCode+" - SHARE") : "FALL WITH SOMEONE";
+  if(live && idx>=0) netJoin(idx);
+}
+(function(){
+  var q=new URLSearchParams(location.search).get("room");
+  if(q) setRoom(q);
+})();
 document.getElementById("mkroom").onclick=function(){
-  var c=prompt("a code you both type. you fall in the same pit, at the same time.\nblank makes one:","");
-  if(c===null) return;
-  c=(c||Math.random().toString(36).slice(2,6)).toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
-  if(!c) return; roomCode=c;
-  alert("ROOM "+c+"\n\nboth of you enter this code, then pick the same song.");
+  if(!roomCode) setRoom(Math.random().toString(36).slice(2,6));
+  var url=location.origin+location.pathname+"?room="+roomCode;
+  if(navigator.share){
+    navigator.share({title:"THE FALL", text:"fall with me - room "+roomCode, url:url}).catch(function(){});
+    return;
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(
+      function(){ flashMsg("LINK COPIED - SEND IT"); },
+      function(){ prompt("send this:", url); });
+  } else prompt("send this:", url);
 };
 
 /* =====================================================================
