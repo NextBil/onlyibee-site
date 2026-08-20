@@ -125,7 +125,7 @@ NP2.forEach((s,i)=>{
     "| wall",String(r.wallMargin).padStart(4),
     "| gates",String(r.gates).padStart(2),"slack",String(r.gateSlack).padStart(4),
     "| foes",String(r.foes).padStart(2),"slack",String(r.foeSlack).padStart(4),
-    "| cps",r.cps,
+    "| cps",r.cps,"pk",String(L.picks.length).padStart(2),"co",String(L.coins.length).padStart(2),
     "|",Math.round(L.dur)+"s");
 });
 console.log(bad? "\n*** "+bad+" NOT SURVIVABLE ***" : "\nALL 26 SURVIVABLE");

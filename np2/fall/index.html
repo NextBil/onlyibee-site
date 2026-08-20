@@ -129,6 +129,13 @@ header span{color:var(--dim);font-size:7px}
 
 #wake{position:fixed;inset:0;z-index:65;display:none;align-items:center;justify-content:center;
   background:rgba(5,8,10,.9);text-align:center}
+#board{max-width:330px;margin:18px auto 0;width:100%}
+#board .bh{font-family:var(--px);font-size:7px;letter-spacing:1px;color:#4d6a6d;
+  border-bottom:1px solid #1b2c2e;padding-bottom:6px;margin-bottom:6px}
+#board .br{display:flex;justify-content:space-between;gap:10px;padding:5px 0;
+  font-family:var(--px);font-size:8px;color:#8fa8aa;letter-spacing:1px}
+#board .br.me{color:var(--acid)}
+#board .br span:last-child{color:var(--pink)}
 #gmsg{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:34;
   font-family:var(--px);font-size:9px;letter-spacing:2px;color:var(--acid);
   background:rgba(0,0,0,.82);border:1px solid var(--acid);padding:8px 12px;
@@ -184,6 +191,7 @@ header span{color:var(--dim);font-size:7px}
   <div class="title" id="otitle">CAUGHT</div>
   <div class="tsub" id="osub"></div>
   <div class="blurb" id="oblurb"></div>
+  <div id="board"></div>
   <div class="row">
     <button class="btn" id="oagain">↻ FALL AGAIN</button>
     <button class="btn alt" id="onext">▼ DEEPER</button>
@@ -258,6 +266,40 @@ function zoneOf(i){ for(var z=0;z<ZONES.length;z++) if(i>=ZONES[z].from&&i<=ZONE
 /* THE WRITING. No NP2 lyrics are pressed on the site yet, so the fragments
    are HIS OWN statement from the room — his words, not invented ones. The
    moment lyrics-data.js gains np2 keys, the real lines take over. */
+/* A line after every level. The arc is the one he described: a kid with
+   dreams too big, brightness over loneliness, the drift into isolation, the
+   confrontation with "maybe none of it works", and a refusal to stop that is
+   not a victory. Written to be replaced — they are the easiest thing in the
+   game to rewrite in his own words. */
+var AFTER=[
+  "you were always going to end up down here.",
+  "you told everyone it would work. you meant it.",
+  "the money was never the point. saying it was, was easier.",
+  "you keep moving because still is worse.",
+  "somebody laughed. you built a year on that.",
+  "you wrote it down so it would exist outside your head.",
+  "you gave it to her before you knew what it was.",
+  "letting go is a skill nobody teaches you.",
+  "everything true was in the gaps.",
+  "you got what you asked for and it was quiet.",
+  "you wanted the room to look at you. it did.",
+  "alive is not the same as well.",
+  "she prayed for a version of you that never showed up.",
+  "you said no problem. it was a problem.",
+  "you performed it until it was true. almost.",
+  "you were surrounded. you were alone.",
+  "you moved like it was already yours.",
+  "you kept one hand on the door the whole time.",
+  "you meant every ugly word.",
+  "you asked for it. that is the part that stings.",
+  "it stopped making sense and you kept going.",
+  "maybe none of this works. maybe it never did.",
+  "nobody said you could. nobody said you could not.",
+  "you learned the whole thing by ear.",
+  "the third time alone is different from the first.",
+  "no name. no ending. you are still walking."
+];
+
 var STATEMENT=[
   "26 songs","for my 26 years","made between Toronto","and Paris",
   "over 3 to 4 years","the first one was chaos","not caring","made in the dark",
@@ -464,38 +506,42 @@ function build(slug, idx){
      Dying used to send you back to silence, which on a 4-minute track is a
      punishment nobody learns from. Land them on real section boundaries so a
      restart begins where the music begins something, not mid-phrase. */
-  var cps=[], want=(dur>150)?[0.34,0.66]:(dur>75?[0.5]:[]);
-  want.forEach(function(f){
-    var target=dur*f, bestT=target, bestD=1e9;
-    secs.forEach(function(se){
+  /* FOUR AT THE TOP, NONE AT THE BOTTOM. The safety net is the difficulty
+     curve: Abidjan catches you four times, and by the last two levels there is
+     nothing under you at all — the record has to be ridden in one piece. */
+  var nCps=Math.max(0, 4-Math.floor(idx/6));
+  var cps=[];
+  for(var ci3=1; ci3<=nCps; ci3++){
+    var target=dur*(ci3/(nCps+1)), bestT=target, bestD=1e9;
+    secs.forEach(function(se){                    /* snap to a real section */
       var st=se.s/20, d4=Math.abs(st-target);
-      if(st>12 && st<dur-25 && d4<bestD){ bestD=d4; bestT=st; }
+      if(st>10 && st<dur-18 && d4<bestD){ bestD=d4; bestT=st; }
     });
-    /* never open a checkpoint right on top of a gate */
+    /* Snapping to a section is a nicety, not a requirement: a song with four
+       sections was collapsing four checkpoints onto two. If the snap lands on
+       one we already have, keep the plain fraction instead — the count is what
+       was asked for, the musical landing is a bonus. */
+    if(cps.length && bestT-cps[cps.length-1]<=14) bestT=target;
     gates.forEach(function(G){ if(Math.abs(G.t-bestT)<2.2) bestT=G.t+2.6; });
-    if(!cps.length || bestT-cps[cps.length-1]>20) cps.push(bestT);
-  });
+    if(!cps.length || bestT-cps[cps.length-1]>10) cps.push(bestT);
+  }
 
   /* ---- WHAT IS IN THE PIT WITH YOU -------------------------------------
-     Two rules keep the guarantee intact:
-       · POWERS sit exactly on the channel centre, so picking one up is never
-         a risk — the shaft already asks you to be there.
-       · COINS sit off-centre, so they are the only thing in the game that
-         asks you to leave the safe line. That is the whole risk/reward.
-     Neither can be missed fatally; both are optional. */
+     POWERS sit exactly on the channel centre, so taking one is never a risk.
+     COINS sit off-centre — the only thing in the game that asks you to leave
+     the safe line. Neither can be missed fatally; both are optional. */
   var seed=(idx*2654435761)%100000;
-  var picks=[], KIND=["light","calm","ghost"];
-  var pEvery=Math.max(14, 34-idx*0.5);
-  for(var pt=16; pt<dur-14; pt+=pEvery*(0.75+rnd2(seed+pt)*0.6)){
+  var picks=[], KIND=["light","calm","ghost","iron","bloom"];
+  var pEvery=Math.max(11, 28-idx*0.4);
+  for(var pt=14; pt<dur-12; pt+=pEvery*(0.7+rnd2(seed+pt)*0.6)){
     var nearG=false;
     for(var z2=0;z2<gates.length;z2++) if(Math.abs(gates[z2].t-pt)<2.4) nearG=true;
     if(nearG) continue;
-    picks.push({t:pt, kind:KIND[Math.floor(rnd2(seed+pt*3.1)*KIND.length)], off:0, got:0});
+    picks.push({t:pt, kind:KIND[Math.floor(rnd2(seed+pt*3.1)*KIND.length)], got:0});
   }
   var coins=[];
-  for(var ct=8; ct<dur-8; ct+=3.1+rnd2(seed+ct*1.7)*3.4){
+  for(var ct=8; ct<dur-8; ct+=2.4+rnd2(seed+ct*1.7)*2.8){
     var ci=clamp(Math.round(ct/RES),0,steps-1);
-    /* far enough out to be a decision, never past the wall */
     var side=rnd2(seed+ct*5.9)>0.5?1:-1;
     coins.push({t:ct, off:side*Math.min(half[ci]*0.55, 13), got:0});
   }
@@ -535,7 +581,7 @@ var P={x:50, sy:0.62, vx:0, vy:0, limb:0, squash:0};
 var pulses=[], scars=[], motes=[], drift=[], ghosts=[], rec=[], recAt=0;
 var cpAt=0, gateHit={}, sparks=[];
 var pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
-var pow={light:0,calm:0,ghost:0};
+var pow={light:0,calm:0,ghost:0,iron:0};
 var collapse=0, holding=0, holdSide=0, glitch=0, fragT=0, fragIx=0, frags=[], gracet=0;
 var save=load(), started=0, deepest=0;
 
@@ -632,7 +678,7 @@ function start(i){
   pulses=[]; scars=[]; motes=[]; drift=[]; sparks=[]; rec=[]; recAt=0;
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
   pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
-  pow={light:0,calm:0,ghost:0};
+  pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
   P.vy=0; P.squash=0;
   seedDrift(lv);
   holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
@@ -663,7 +709,7 @@ function play(i,tries){
 }
 
 function finish(won){
-  live=false; ended=true; netLeave();
+  live=false; ended=true; netLeave(); saveBest(idx);
   fragEl.classList.remove("on");
   var last=(idx===25);
   var earned=0;
@@ -680,14 +726,32 @@ function finish(won){
   document.getElementById("otitle").textContent = won ? (last?"THE LIGHT":"OUT") : "CAUGHT";
   document.getElementById("osub").textContent = (idx<9?"0":"")+(idx+1)+" — "+NP2[idx][1].toUpperCase();
   var P2=window.IBEE_PERKS, dnow=P2?P2.discount():0;
+  var line=AFTER[idx]||"";
   document.getElementById("oblurb").innerHTML = won
-    ? (last
+    ? ('<i style="color:#93a8a9;display:block;margin-bottom:14px;font-style:normal">'
+       +line+'</i>')+(last
       ? "you are still walking.<br><br>not saved. not finished. still walking."
       : "you rode "+NP2[idx][1]+" all the way down and found the way out.<br>"+n+" of 26."
         +(earned?("<br><br><b style='color:#e8dc12;font-size:26px'>"
           +(P2?P2.COIN:"")+" +"+earned+"</b>"
           +(dnow?("<br><b style='color:#ff1f6f'>−"+dnow+"% OFF THE CLOTHES</b>"):"")):""))
     : "the collapse took you at "+fmt(songT())+".<br>the record starts again from silence.";
+  /* THE BOARD. Your best on this level, and anyone who was in the room with
+     you, deepest first. It is a ROOM board, not a world one — a global table
+     would need a real table in Supabase; broadcast is ephemeral by design. */
+  var rows=[{who:"YOU", d:Math.round(deepest), me:1}];
+  for(var pid in peers){ var q=peers[pid];
+    if(q.lv===idx) rows.push({who:pid.toUpperCase(), d:Math.round(q.depth||0), me:0}); }
+  var bestKey="ibee_np2fall_best";
+  var best={}; try{ best=JSON.parse(localStorage.getItem(bestKey)||"{}")||{}; }catch(e){}
+  if(!best[idx] || deepest>best[idx]){ best[idx]=Math.round(deepest);
+    try{ localStorage.setItem(bestKey,JSON.stringify(best)); }catch(e){} }
+  rows.sort(function(a,b){ return b.d-a.d; });
+  var bd=document.getElementById("board");
+  bd.innerHTML='<div class="bh">DEEPEST THIS ROOM</div>'+rows.map(function(r,i){
+      return '<div class="br'+(r.me?" me":"")+'"><span>'+(i+1)+'</span><span>'
+        +r.who+'</span><span>'+r.d+'m</span></div>'; }).join("")
+    +'<div class="bh" style="margin-top:12px">YOUR BEST HERE — '+(best[idx]||0)+'m</div>';
   document.getElementById("onext").style.display = (won&&!last)?"":"none";
   paintGrid(); paintPerk(); show(over);
   try{ var r=RADIO(); if(r&&r.playing()&&!won) r.control.pause(); }catch(e){}
@@ -734,8 +798,10 @@ wake.addEventListener("click",function(){
 /* =====================================================================
    9. STEP
    ===================================================================== */
-var POWCOL={light:"#e8dc12", calm:"#8fd0ff", ghost:"#ff5c9d"};
+var POWCOL={light:"#e8dc12", calm:"#8fd0ff", ghost:"#ff5c9d",
+            iron:"#ffffff", bloom:"#b6ff00"};
 function powCol(){
+  if(pow.iron>0)  return POWCOL.iron;
   if(pow.ghost>0) return POWCOL.ghost;
   if(pow.calm>0)  return POWCOL.calm;
   if(pow.light>0) return POWCOL.light;
@@ -786,11 +852,25 @@ function step(dt,t){
   if(!isFinite(P.sy)||!isFinite(P.x)||!isFinite(P.vx)||!isFinite(P.vy)){
     P.sy=0.62; P.x=ch.m; P.vx=0; P.vy=0;
   }
+  if(downed){
+    downT-=dt;
+    var mate2=peerAlive();
+    if(downT<=0){
+      if(mate2){
+        downed=0; gracet=1.2;
+        P.x=clamp(mate2.x, ch.m-ch.h*0.5, ch.m+ch.h*0.5);
+        P.sy=clamp(mate2.y, collapse+0.14, BOTMARGIN);
+        P.vx=0; P.vy=0;
+        flashMsg("BACK UP");
+      } else { finish(false); return; }        /* they went down too */
+    }
+    return;                                     /* nothing can touch you down here */
+  }
   if(gracet>0){ gracet-=dt; }
   else if(P.sy <= collapse+0.005){ die(t); return; }
 
   /* ---- walls ---- */
-  if(!isVoid && gracet<=0){
+  if(!isVoid && gracet<=0 && pow.iron<=0){
     var edge=Math.abs(P.x-ch.m)-(ch.h-PR);
     if(edge>0){
       if(pow.ghost>0){ pow.ghost=0; gracet=0.5; P.x=ch.m; P.vx=0; flashMsg("THE GHOST TOOK IT"); }
@@ -801,6 +881,7 @@ function step(dt,t){
   /* ---- powers tick down ---- */
   if(pow.light>0) pow.light-=dt;
   if(pow.calm>0)  pow.calm-=dt;
+  if(pow.iron>0)  pow.iron-=dt;
 
   /* ---- pick things up ---- */
   var pk, dxp, dyp;
@@ -810,9 +891,17 @@ function step(dt,t){
     dxp=P.x-chanAt(L,pk.t).m;
     if(Math.abs(dxp)<7){
       pk.got=1; pts.picks++;
-      if(pk.kind==="ghost") pow.ghost=1; else pow[pk.kind]=Math.max(pow[pk.kind],11);
-      flashMsg(pk.kind==="light"?"LIGHT — the dark opens":
-               pk.kind==="calm"?"CALM — it slows down":"GHOST — one mistake forgiven");
+      if(pk.kind==="ghost"){ pow.ghost=1; flashMsg("GHOST — one mistake forgiven"); }
+      else if(pk.kind==="iron"){ pow.iron=4; flashMsg("IRON — 4 SECONDS OF NOTHING TOUCHING YOU"); }
+      else if(pk.kind==="bloom"){
+        /* the whole shaft, lit at once, and it rains coins */
+        pulses.push({t:0,x:P.x,y:P.sy,r:0,max:150,life:1.6});
+        for(var bc=0;bc<9;bc++) L.coins.push({t:t+0.6+bc*0.32,
+          off:(rnd2(t*7+bc)-0.5)*chanAt(L,t+0.6+bc*0.32).h*1.1, got:0});
+        flashMsg("BLOOM — everything at once");
+      }
+      else { pow[pk.kind]=Math.max(pow[pk.kind],11);
+        flashMsg(pk.kind==="light"?"LIGHT — the dark opens":"CALM — it slows down"); }
       for(var sp2=0;sp2<14;sp2++) sparks.push({x:P.x,y:P.sy,vx:(Math.random()-0.5)*46,
         vy:(Math.random()-0.5)*34,a:1});
     }
@@ -835,6 +924,7 @@ function step(dt,t){
     var fx=fch.m + fo.side*Math.max(fch.h*(1-lunge), FOEMIN);
     var fy=P.sy + (fo.t-t)*SCROLL/(H/SC);
     var ddx=(P.x-fx), ddy=(P.sy-fy)*(H/SC);
+    if(pow.iron>0) continue;
     if(Math.sqrt(ddx*ddx+ddy*ddy) < PR+FOER){
       if(pow.ghost>0){ pow.ghost=0; flashMsg("THE GHOST TOOK IT"); }
       else { die(t); return; }
@@ -848,6 +938,7 @@ function step(dt,t){
       if(gateHit[gg]) continue;
       if(t>=G.t && t<G.t+0.12){
         gateHit[gg]=1;
+        if(pow.iron>0){ pts.gates++; continue; }
         var gc=chanAt(L,G.t).m;
         if(Math.abs(P.x-gc) > G.gap-PR){
           if(pow.ghost>0){ pow.ghost=0; flashMsg("THE GHOST TOOK IT"); }
@@ -1076,7 +1167,11 @@ function die(t){
   var back=0, k;
   for(k=0;k<L.cps.length;k++) if(t>L.cps[k]+0.4) back=L.cps[k];
   pts.deaths++;
-  if(back<=0){ finish(false); return; }
+  if(back<=0){
+    var mate=peerAlive();
+    if(mate){ goDown(mate); return; }          /* they can bring you back */
+    finish(false); return;
+  }
   cpAt=back; gracet=1.0; deaths++;
   P.sy=0.62; P.vy=0; P.vx=0; P.x=chanAt(L,back).m; P.squash=0;
   pulses=[]; sparks=[]; gateHit={};
@@ -1084,7 +1179,21 @@ function die(t){
   var r=RADIO(); try{ if(r) r.audio.currentTime=back; }catch(e){}
   flashMsg("CHECKPOINT — "+fmt(back));
 }
-var deaths=0;
+var deaths=0, downed=0, downT=0;
+/* SOMEONE ELSE STILL FALLING BRINGS YOU BACK. You go DOWN, not out — and if a
+   peer in this room is still alive, you are on your feet 2 seconds later at
+   their depth. Falling together should mean something more than seeing a
+   silhouette. Alone, down is still the end of the run. */
+function peerAlive(){
+  for(var id in peers){ var q=peers[id];
+    if(q.alive && Date.now()-q.seen<4000) return q; }
+  return null;
+}
+function goDown(mate){
+  downed=1; downT=2.0; deaths++;
+  P.vx=0; P.vy=0; pulses=[]; sparks=[];
+  flashMsg("DOWN — SOMEONE IS STILL FALLING");
+}
 var msgEl=null, msgT=null;
 function flashMsg(m){
   if(!msgEl){ msgEl=document.createElement("div"); msgEl.id="gmsg"; document.body.appendChild(msgEl); }
@@ -1281,7 +1390,16 @@ function draw(t){
   ctx.globalAlpha=1;
 
   /* ---- him ---- */
-  figure(P.x*SC, P.sy*H, 1, "#f0efe8", P.limb,
+  if(downed){
+    ctx.globalAlpha=0.35+0.25*Math.sin(t*9);
+    ctx.strokeStyle="#ff1f6f"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(P.x*SC,P.sy*H,10+6*Math.sin(t*4),0,6.2832); ctx.stroke();
+    ctx.globalAlpha=1;
+    ctx.fillStyle="#ff5c9d"; ctx.font="7px 'Press Start 2P',monospace"; ctx.textAlign="center";
+    ctx.fillText(Math.max(0,downT).toFixed(1), P.x*SC, P.sy*H-22);
+    ctx.textAlign="start";
+  }
+  figure(P.x*SC, P.sy*H, 1, downed?"rgba(240,239,232,0.35)":"#f0efe8", P.limb,
     {vy:P.vy, vx:P.vx, squash:P.squash, bass:L.lo[clamp(Math.floor(t*20),0,L.n-1)], power:powCol()});
 
   /* ---- degradation: scanlines always, tear and split as it gets worse ---- */
@@ -1391,9 +1509,29 @@ function loop(ts){
    12. GHOSTS — ambiguous on purpose. Some are your past falls, some are
    people falling right now. The game never tells you which.
    ===================================================================== */
+/* THE PACE GHOST. One of the shapes falling with you is your own best run on
+   this level — kept separately from the ambiguous ones and drawn in the album's
+   yellow, so it is the one you can actually chase. The others stay anonymous
+   on purpose; this one is meant to be recognised. */
+var bestGhost=null, bestDepth=0;
 function ghostsFor(i){
   try{ var all=JSON.parse(localStorage.getItem(LS+"_g")||"{}")||{}; ghosts=(all[i]||[]).slice(0,3); }
   catch(e){ ghosts=[]; }
+  bestGhost=null; bestDepth=0;
+  try{
+    var bg=JSON.parse(localStorage.getItem(LS+"_bg")||"{}")||{};
+    if(bg[i]&&bg[i].r&&bg[i].r.length){ bestGhost=bg[i].r; bestDepth=bg[i].d||0; }
+  }catch(e){}
+}
+/* saved on EVERY run, win or lose — the deepest you have ever got here is the
+   thing worth racing, and dying at 80% is still a pace to beat */
+function saveBest(i){
+  try{
+    var bg=JSON.parse(localStorage.getItem(LS+"_bg")||"{}")||{};
+    var cur=bg[i]&&bg[i].d||0;
+    if(deepest>cur){ bg[i]={d:Math.round(deepest), r:rec};
+      localStorage.setItem(LS+"_bg",JSON.stringify(bg)); }
+  }catch(e){}
 }
 function saveGhost(i){
   try{ var all=JSON.parse(localStorage.getItem(LS+"_g")||"{}")||{};
@@ -1423,6 +1561,7 @@ function netJoin(i){
         var d=m.payload; if(!d||d.id===myId) return;
         var q=peers[d.id]=peers[d.id]||{x:d.x,y:d.y};
         q.tx=d.x; q.ty=d.y; q.seen=Date.now();
+        q.alive=!!d.a; q.depth=d.d||0; q.lv=d.l;
       });
       chan.subscribe();
     }catch(e){}
@@ -1432,7 +1571,9 @@ function netLeave(){ try{ if(chan&&sb) sb.removeChannel(chan); }catch(e){} chan=
 function netTick(){
   var now=Date.now();
   if(chan && now-sendAt>110){ sendAt=now;
-    try{ chan.send({type:"broadcast",event:"p",payload:{id:myId,x:+P.x.toFixed(1),y:+P.sy.toFixed(3)}}); }catch(e){}
+    try{ chan.send({type:"broadcast",event:"p",payload:{
+      id:myId, x:+P.x.toFixed(1), y:+P.sy.toFixed(3),
+      a:(live&&!downed)?1:0, d:Math.round(deepest), l:idx }}); }catch(e){}
   }
   for(var id in peers){ var q=peers[id];
     if(now-q.seen>6000){ delete peers[id]; continue; }
