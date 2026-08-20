@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#05090a">
+<meta property="og:image" content="https://onlyibee.com/assets/img/nouveaux-punk-2.jpg">
+<meta property="og:title" content="THE DARK — NOUVEAUX PUNK 2">
+<meta property="og:description" content="26 levels. Each one is a song. The music is the ground and the only light.">
+<meta name="twitter:card" content="summary_large_image">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>THE DARK — NOUVEAUX PUNK 2 | ONLY IBEE</title>
+<meta name="description" content="THE DARK — the room below NOUVEAUX PUNK 2. 26 levels built from the record's own groove.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   THE DARK — the room below NOUVEAUX PUNK 2
+   ---------------------------------------------------------------------
+   There are no level files. Every level is GENERATED from the groove the
+   album already carries (assets/beat-data.js: low = bass, lvl = overall,
+   imp = how hard each instant hits, 20 samples a second). Same data in,
+   same level out, so everyone walks the identical cave and nothing had
+   to be authored or shipped.
+
+   Two layers, both driven by that groove:
+     TERRAIN — the bass lifts the floor, the level closes the ceiling in,
+               breaks drop the floor away, hits put spikes down.
+     LIGHT   — the world is black. The playhead throws light around where
+               the song currently is, each hit flashes it wider, and you
+               carry a small halo. Wander far from the music and you are
+               feeling your way in the dark.
+
+   Weight is deliberate: one canvas, one rAF, zero image assets, DPR
+   capped at 1.5 (the site already had memory trouble on iOS). It reads
+   the radio that is already playing rather than opening a second audio.
+   ===================================================================== */
+:root{
+  --bg:#05090a; --ink:#f0efe8; --dim:#6e8688;
+  --pink:#ff1f6f; --pink-hot:#ff5c9d; --acid:#e8dc12; --teal:#1a2d31;
+  --px:'Press Start 2P',monospace; --vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:19px}
+
+/* ---------- chrome ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;justify-content:space-between;
+  align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  font-family:var(--px);font-size:9px;pointer-events:none}
+header a{color:var(--acid);text-decoration:none;pointer-events:auto}
+header a .r{color:var(--pink)}
+header span{color:var(--dim);font-size:7px}
+
+#stage{position:fixed;inset:0;display:block;width:100%;height:100%}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;background:var(--bg)}
+
+/* ---------- overlays ---------- */
+.sheet{position:fixed;inset:0;z-index:60;background:rgba(5,9,10,.94);
+  display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(58px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}
+.sheet.hide{display:none}
+.title{font-family:var(--px);font-size:clamp(14px,5vw,24px);color:var(--acid);text-align:center;
+  letter-spacing:2px;text-shadow:0 0 20px rgba(232,220,18,.35),0 0 44px rgba(255,31,111,.4)}
+.tsub{font-family:var(--px);font-size:8px;color:var(--pink-hot);text-align:center;
+  margin-top:10px;letter-spacing:2px}
+.blurb{color:#9fb3b4;text-align:center;max-width:44ch;margin:14px auto 0;line-height:1.5;font-size:18px}
+
+/* the 26 — one slot per track */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;
+  max-width:760px;margin:22px auto 0;width:100%}
+.lv{border:1px solid #1d3438;background:#0a1416;padding:9px 8px;text-align:left;cursor:pointer;
+  position:relative;overflow:hidden;color:inherit;font:inherit;transition:border-color .15s,transform .15s}
+.lv:hover{border-color:var(--pink);transform:translateY(-2px)}
+.lv .n{font-family:var(--px);font-size:7px;color:#4d6a6d;letter-spacing:1px}
+.lv .t{font-size:16px;color:#c6d6d6;line-height:1.25;margin-top:6px;min-height:2.5em}
+.lv .m{font-family:var(--px);font-size:6px;color:var(--dim);letter-spacing:1px;margin-top:5px}
+.lv.done{border-color:#2f5a3a}
+.lv.done .n{color:var(--acid)}
+.lv.done .m{color:#63a06f}
+.lv .spark{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:linear-gradient(112deg,transparent 40%,rgba(255,31,111,.14) 50%,transparent 62%)}
+
+.row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:22px auto 0}
+.btn{font-family:var(--px);font-size:9px;padding:12px 15px;text-decoration:none;cursor:pointer;
+  background:var(--pink);color:#fff;border:1px solid var(--pink);box-shadow:0 0 16px rgba(255,31,111,.4)}
+.btn.alt{background:transparent;color:var(--acid);border-color:var(--acid);box-shadow:none}
+.btn.ghost{background:transparent;color:var(--dim);border-color:#25454a;box-shadow:none}
+.btn:active{transform:translateY(2px)}
+
+.hint{color:var(--dim);text-align:center;font-size:17px;margin-top:16px;line-height:1.6}
+.hint b{color:var(--pink-hot);font-weight:400}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;top:calc(38px + env(safe-area-inset-top));left:0;right:0;z-index:30;
+  display:flex;justify-content:space-between;align-items:center;padding:0 14px;
+  font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;pointer-events:none}
+#hud .l{color:var(--acid)} #hud .c{color:var(--pink)}
+#bar{position:fixed;left:0;right:0;top:calc(60px + env(safe-area-inset-top));height:2px;z-index:30;
+  background:#12211f;pointer-events:none}
+#bar i{display:block;height:100%;width:0;background:var(--pink);box-shadow:0 0 8px var(--pink)}
+#who{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:30;
+  font-family:var(--px);font-size:7px;color:var(--dim);letter-spacing:1px;text-align:right;
+  line-height:1.9;pointer-events:none}
+#who b{color:var(--pink-hot);font-weight:400}
+
+/* ---------- touch controls ---------- */
+#pad{position:fixed;inset:auto 0 0 0;z-index:35;display:none;
+  padding:0 14px calc(16px + env(safe-area-inset-bottom));justify-content:space-between;pointer-events:none}
+body.touch #pad{display:flex}
+#pad .side{display:flex;gap:10px;pointer-events:auto}
+#pad button{width:66px;height:66px;border-radius:50%;border:1px solid #2a4a4f;
+  background:rgba(10,20,22,.72);color:var(--ink);font-family:var(--px);font-size:13px;
+  backdrop-filter:blur(2px)}
+#pad button:active{background:rgba(255,31,111,.3);border-color:var(--pink)}
+#pad .jump{width:82px;height:82px;color:var(--pink);font-size:9px}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;top:calc(96px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-6px);
+  z-index:70;font-family:var(--px);font-size:9px;color:var(--ink);background:rgba(0,0,0,.9);
+  border:1px solid var(--pink);padding:10px 14px;opacity:0;transition:all .3s;pointer-events:none;
+  text-align:center;line-height:1.9;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(prefers-reduced-motion:reduce){.lv .spark{animation:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../" data-home>◀ <span class="r">NP2</span></a>
+  <span id="hdr">THE DARK</span>
+</header>
+
+<div id="stage"><canvas id="cv"></canvas></div>
+
+<div id="hud"><span class="l" id="hlv"></span><span class="c" id="htime"></span></div>
+<div id="bar"><i id="barfill"></i></div>
+<div id="who"></div>
+
+<div id="pad">
+  <div class="side"><button id="bl" aria-label="left">◀</button><button id="br" aria-label="right">▶</button></div>
+  <div class="side"><button id="bj" class="jump" aria-label="jump">JUMP</button></div>
+</div>
+
+<!-- ---------- the menu ---------- -->
+<div class="sheet" id="menu">
+  <div class="title">THE DARK</div>
+  <div class="tsub">— 26 LEVELS · ONE PER SONG —</div>
+  <div class="blurb">
+    There are no levels in here. Each one is built out of the track it plays —
+    the bass lifts the ground, the breaks drop it away, the hits put spikes down.
+    And it is pitch black: the music is the only thing that lights it.
+  </div>
+  <div class="grid" id="lvgrid"></div>
+  <div class="row">
+    <button class="btn alt" id="mkroom">▣ PLAY WITH SOMEONE</button>
+    <a class="btn ghost" href="../">◀ BACK TO THE ROOM</a>
+  </div>
+  <div class="hint" id="mhint">
+    move with <b>← →</b> or the pads · <b>space</b> to jump<br>
+    anyone else in the same level shows up beside you_
+  </div>
+</div>
+
+<!-- ---------- level end ---------- -->
+<div class="sheet hide" id="done">
+  <div class="title" id="dtitle">CLEARED</div>
+  <div class="tsub" id="dsub"></div>
+  <div class="blurb" id="dblurb"></div>
+  <div class="row">
+    <button class="btn" id="dnext">▶ NEXT SIGNAL</button>
+    <button class="btn alt" id="dagain">↻ AGAIN</button>
+    <button class="btn ghost" id="dmenu">◀ THE 26</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>document.write('<script src="../../assets/player.js?v=28"><\/script>')</script>
+<script src="../../assets/badges.js?v=13"></script>
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   0. THE RECORD — the same 26 tracks the room lists, in album order.
+   Slugs match assets/audio/np2/, which is what beat-data.js is keyed by.
+   ===================================================================== */
+var NP2=[
+  {f:"np2-01-all-i-need.mp3",        t:"All I Need"},
+  {f:"np2-02-okay.mp3",              t:"Okay"},
+  {f:"np2-03-money-upp.mp3",         t:"Money Upp"},
+  {f:"np2-04-drop-it.mp3",           t:"Drop It"},
+  {f:"np2-05-pikatchuu.mp3",         t:"Pikatchuu"},
+  {f:"np2-06-write-a-song.mp3",      t:"Write a Song"},
+  {f:"np2-07-u-mine.mp3",            t:"U Mine"},
+  {f:"np2-08-let-go.mp3",            t:"Let Go"},
+  {f:"np2-09-between-the-lines.mp3", t:"Between the Lines"},
+  {f:"np2-10-satisfied.mp3",         t:"Satisfied"},
+  {f:"np2-11-rockstar.mp3",          t:"Rockstar"},
+  {f:"np2-12-i-feel-alive.mp3",      t:"I Feel Alive"},
+  {f:"np2-13-mama-is-a-preacher.mp3",t:"Mama Is a Preacher"},
+  {f:"np2-14-pas-de-soucis.mp3",     t:"Pas de soucis"},
+  {f:"np2-15-spoof.mp3",             t:"Spoof"},
+  {f:"np2-16-benda.mp3",             t:"Benda"},
+  {f:"np2-17-buss-in-it-pitch.mp3",  t:"Buss In It"},
+  {f:"np2-18-cigarette.mp3",         t:"Cigarette"},
+  {f:"np2-19-da-shit.mp3",           t:"Da Shit"},
+  {f:"np2-20-damn.mp3",              t:"Damn"},
+  {f:"np2-21-deranger.mp3",          t:"Déranger"},
+  {f:"np2-22-epic-film.mp3",         t:"Epic Film"},
+  {f:"np2-23-illegal2.mp3",          t:"Illegal 2"},
+  {f:"np2-24-like-jimi-hendrix.mp3", t:"Like Jimi Hendrix"},
+  {f:"np2-25-lonely3.mp3",           t:"Lonely 3"},
+  {f:"np2-26-no-name.mp3",           t:"No Name"}
+];
+
+/* =====================================================================
+   1. WORLD CONSTANTS
+   Physics first, terrain second: the generator below is CLAMPED to what
+   these numbers can actually clear, so a level can never be impossible.
+   ===================================================================== */
+var CELL=7;                 /* world px per groove sample (20/s) -> 140 px/s of song */
+var WH=420;                 /* world height */
+var GROUND=344, CEIL0=44;   /* floor baseline, ceiling baseline */
+var PW=13, PH=22;           /* player box */
+var VX=152, GRAV=980, JUMP=352;   /* run speed, gravity, jump impulse */
+var MAXJUMP=JUMP*JUMP/(2*GRAV);           /* ~63px of height */
+var AIRTIME=2*JUMP/GRAV;                  /* ~0.72s aloft */
+/* A pit is capped at ~55% of a full running jump, not 90%. At 90% clearing one
+   demanded frame-perfect takeoff — which is not a fair ask in a level you can
+   only see when the music flashes. The margin IS the design. */
+var MAXGAP=Math.max(3,Math.floor(VX*AIRTIME*0.55/CELL)); /* samples of pit that are still jumpable */
+var STEP=13;                /* biggest floor rise you can just walk up */
+var SPIKEH=15;
+var CKPT=400;               /* checkpoint every 400 samples = 20s of song */
+var LS="ibee_np2dark";
+
+function v36(c){ return parseInt(c,36)/35; }
+function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+
+/* =====================================================================
+   2. THE GENERATOR — a level out of a groove.
+   Deterministic: no RNG seeded by anything but the audio itself, so your
+   level 07 and hers are the same cave down to the spike.
+   ===================================================================== */
+function build(slug){
+  var B=window.IBEE_BEAT||{}, g=B[slug];
+  if(!g||!g.low) return null;
+  var n=g.low.length, i;
+  var lo=new Float32Array(n), lv=new Float32Array(n), im=new Float32Array(n);
+  for(i=0;i<n;i++){
+    lo[i]=v36(g.low.charAt(i));
+    lv[i]=v36(g.lvl.charAt(i));
+    im[i]=g.imp?v36(g.imp.charAt(i)):0;
+  }
+  function smooth(a,r){
+    var out=new Float32Array(a.length);
+    for(var i2=0;i2<a.length;i2++){
+      var s2=0,c=0;
+      for(var k=-r;k<=r;k++){var j=i2+k; if(j>=0&&j<a.length){s2+=a[j];c++;}}
+      out[i2]=s2/c;
+    }
+    return out;
+  }
+  /* Everything below is RANKED INSIDE THE TRACK, never compared to a fixed
+     number. The pressed groove is normalised per song and `lvl` never even
+     reaches 0.55, so an absolute threshold like "quiet means < 0.17" fired on
+     a third of the record and turned whole songs into holes. Percentiles give
+     a loud song and a quiet song the same shape of level, while still letting
+     each song choose WHERE its holes and spikes fall. */
+  function pctl(arr,p){
+    var c=Array.prototype.slice.call(arr).sort(function(x,y){return x-y;});
+    return c[clamp(Math.floor(c.length*p),0,c.length-1)];
+  }
+  function norm(arr){
+    var lo5=pctl(arr,0.05), hi95=pctl(arr,0.95), d=(hi95-lo5)||1;
+    var out=new Float32Array(arr.length);
+    for(var k=0;k<arr.length;k++) out[k]=clamp((arr[k]-lo5)/d,0,1);
+    return out;
+  }
+  var sLo=norm(smooth(lo,4)), sLv=norm(smooth(lv,6));
+
+  var floor=new Float32Array(n), ceil=new Float32Array(n);
+  var spike=new Uint8Array(n), pit=new Uint8Array(n);
+
+  for(i=0;i<n;i++){
+    floor[i]=GROUND-sLo[i]*132;               /* bass lifts the ground */
+    ceil[i]=CEIL0+sLv[i]*76;                  /* loudness closes the roof */
+  }
+  /* a calm start and a clean run at the exit */
+  for(i=0;i<54;i++) floor[i]=floor[54];
+  for(i=n-46;i<n;i++) floor[i]=floor[n-47];
+
+  for(i=1;i<n;i++){
+    var d=floor[i]-floor[i-1];
+    if(d<-STEP) floor[i]=floor[i-1]-STEP;
+    if(d>STEP*2) floor[i]=floor[i-1]+STEP*2;
+  }
+  for(i=0;i<n;i++) if(floor[i]-ceil[i]<PH+MAXJUMP*0.62) ceil[i]=floor[i]-(PH+MAXJUMP*0.62);
+
+  /* ---- BREAKS BECOME PITS ----------------------------------------------
+     Candidates are the track's own quietest stretches. They are then capped
+     hard: at most MAXGAP wide (what a running jump actually clears), a fixed
+     budget per level, and never two without solid ground to land and set up
+     on between them. */
+  var qthr=pctl(sLv,0.12), runs=[], st=-1;
+  for(i=60;i<n-70;i++){
+    if(sLv[i]<=qthr){ if(st<0) st=i; }
+    else { if(st>=0 && i-st>=4) runs.push([st,i-1]); st=-1; }
+  }
+  if(st>=0 && n-70-st>=4) runs.push([st,n-71]);
+  runs.sort(function(x,y){ return (y[1]-y[0])-(x[1]-x[0]); });
+  var budget=clamp(Math.round(n/160),8,22), placed=[], used=0;
+  for(var r2=0;r2<runs.length && used<budget;r2++){
+    var a2=runs[r2][0], len=Math.min(runs[r2][1]-runs[r2][0]+1, MAXGAP);
+    var clash=false;
+    for(var q=0;q<placed.length;q++) if(Math.abs(a2-placed[q])<34){ clash=true; break; }
+    if(clash) continue;
+    /* both lips must be at a similar height — a hole you must clear AND climb
+       out of is where a generated level stops being fair */
+    if(Math.abs(floor[a2-1]-floor[Math.min(n-1,a2+len)])>24) continue;
+    for(var k2=0;k2<len;k2++) pit[a2+k2]=1;
+    placed.push(a2); used++;
+  }
+
+  /* ---- HITS BECOME SPIKES ----------------------------------------------
+     The hardest onsets in the track, by rank, with a budget and spacing so
+     you are never asked to clear two in one jump. */
+  /* Ballistics, so the generator can prove its own hazards. From a takeoff
+     sample j the feet follow  f(t) = floor[j] - JUMP*t + GRAV*t^2/2  and the
+     player covers VX*t, so sample k is reached at t = (k-j)*CELL/VX. A spike
+     is only allowed if SOME takeoff on solid ground clears its tip with room
+     to spare — that is what makes every level beatable by construction
+     instead of by hope. */
+  function clearsSpike(idx){
+    for(var j=idx-16;j<=idx-4;j++){
+      if(j<1) continue;
+      if(pit[j]||spike[j]) continue;
+      var ok=true;
+      for(var k=j+1;k<=idx+1 && ok;k++){
+        var t2=(k-j)*CELL/VX;
+        var feet=floor[j]-JUMP*t2+GRAV*t2*t2/2;
+        if(feet>floor[k]+1){ ok=false; break; }               /* back on the ground early */
+        if(k===idx && feet>floor[idx]-SPIKEH-3){ ok=false; }   /* clipped the tip */
+      }
+      if(ok) return true;
+    }
+    return false;
+  }
+  var ord=[];
+  for(i=70;i<n-60;i++) if(im[i]>0) ord.push(i);
+  ord.sort(function(x,y){ return im[y]-im[x]; });
+  var sbudget=clamp(Math.round(n/130),8,20), sp=[];
+  for(var o=0;o<ord.length && sp.length<sbudget;o++){
+    var idx=ord[o], bad=false;
+    if(pit[idx]||pit[idx-1]||pit[idx+1]||pit[idx-2]||pit[idx+2]) continue;
+    /* ONLY ON LEVEL GROUND. A spike part-way up a climb asks you to clear the
+       slope and the spike in one jump, and the ground under you is already
+       rising into your arc — the solver died 228 times on exactly one of
+       these before this rule existed. */
+    var lo2=1e9, hi2=-1e9;
+    for(var f2=-4;f2<=6;f2++){
+      var j2=clamp(idx+f2,0,n-1);
+      if(floor[j2]<lo2) lo2=floor[j2];
+      if(floor[j2]>hi2) hi2=floor[j2];
+    }
+    if(hi2-lo2>16) continue;
+    for(var w=0;w<sp.length;w++) if(Math.abs(idx-sp[w])<26){ bad=true; break; }
+    if(bad) continue;
+    if(!clearsSpike(idx)) continue;      /* unjumpable -> it simply is not placed */
+    spike[idx]=1; sp.push(idx);
+  }
+
+  /* A checkpoint is only a checkpoint if you can get moving from it. Requiring
+     a clear RUNWAY (not merely a clear pixel) is what stops a respawn landing
+     a few px in front of a spike, which death-loops forever. */
+  var RUNWAY=26, cks=[];
+  function clearFrom(c){
+    for(var k=0;k<RUNWAY;k++){ var j=c+k; if(j>=n) return true; if(pit[j]||spike[j]) return false; }
+    return true;
+  }
+  for(i=0;i<n;i+=CKPT){
+    var c=i, guard=0;
+    while(c<n-1 && !clearFrom(c) && guard++<n) c++;
+    cks.push(Math.min(c,n-2));
+  }
+  return {n:n, floor:floor, ceil:ceil, spike:spike, pit:pit, im:im, lv:sLv,
+          cks:cks, dur:n/20, w:n*CELL};
+}
+
+/* heightfield lookups */
+function idxAt(L,x){ return clamp(Math.floor(x/CELL),0,L.n-1); }
+function floorAt(L,x){ var i=idxAt(L,x); return L.pit[i]?WH+400:L.floor[i]; }
+function ceilAt(L,x){ return L.ceil[idxAt(L,x)]; }
+
+/* =====================================================================
+   3. STATE
+   ===================================================================== */
+var cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+var W=0,H=0,DPR=1;
+var L=null, lvIdx=-1, playing=false, rafOn=false;
+var P={x:0,y:0,vx:0,vy:0,onGround:false,face:1,dead:0};
+var ckAt=0, camX=0, light=null, started=0, cleared=false, grace=0;
+var keys={left:false,right:false,jump:false};
+var save=load();
+
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)||"{}")||{}; }catch(e){ return {}; } }
+function store(){ try{ localStorage.setItem(LS,JSON.stringify(save)); }catch(e){} }
+
+function RADIO(){ try{ return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null; }catch(e){ return null; } }
+/* ARMED — the level's whole clock is the record, so it must not read the
+   playhead until the radio is genuinely on THIS track. Without this the deck's
+   leftover position from another song is taken as our own: arriving at level 1
+   (2:10) while the radio sat at 3:13 ended the level the instant it opened. */
+var armed=false;
+function onThisTrack(){
+  var r=RADIO(); if(!r||lvIdx<0) return false;
+  try{ return r.slug()===NP2[lvIdx].f; }catch(e){ return false; }
+}
+function songT(){
+  if(!armed) return 0;
+  var r=RADIO(); try{ return r?(r.audio.currentTime||0):0; }catch(e){ return 0; }
+}
+
+function sizeCanvas(){
+  var s=document.getElementById("stage").getBoundingClientRect();
+  W=Math.max(320,Math.round(s.width)); H=Math.max(240,Math.round(s.height));
+  /* capped on purpose — a retina phone does not need a 3x backing store for
+     flat shapes, and this site has already been evicted by iOS for memory */
+  DPR=Math.min(1.5, window.devicePixelRatio||1);
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize",function(){ if(playing) sizeCanvas(); });
+
+/* =====================================================================
+   4. THE MENU — the 26
+   ===================================================================== */
+var grid=document.getElementById("lvgrid");
+function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function paintGrid(){
+  var B=window.IBEE_BEAT||{};
+  grid.innerHTML=NP2.map(function(s,i){
+    var g=B[s.f], dur=g?g.low.length/20:0, done=save[i];
+    return '<button class="lv'+(done?" done":"")+'" data-i="'+i+'">'+
+      '<span class="spark"></span>'+
+      '<div class="n">'+(i<9?"0":"")+(i+1)+'</div>'+
+      '<div class="t">'+s.t+'</div>'+
+      '<div class="m">'+(done?"CLEARED":(dur?fmt(dur):"—"))+'</div></button>';
+  }).join("");
+}
+grid.addEventListener("click",function(e){
+  var b=e.target.closest(".lv"); if(!b) return;
+  startLevel(+b.getAttribute("data-i"));
+});
+
+/* =====================================================================
+   5. START / END
+   ===================================================================== */
+var menu=document.getElementById("menu"), doneS=document.getElementById("done");
+function show(el){ menu.classList.add("hide"); doneS.classList.add("hide"); if(el) el.classList.remove("hide"); }
+
+function startLevel(i){
+  var lv=build(NP2[i].f);
+  if(!lv){ toast("that signal has no groove pressed yet_"); return; }
+  L=lv; lvIdx=i; cleared=false;
+  light=new Float32Array(L.n);
+  P.x=CELL*2; P.y=L.floor[0]-PH; P.vx=0; P.vy=0; P.dead=0; P.face=1;
+  ckAt=0; camX=0; started=Date.now(); armed=false; grace=0.6;
+  show(null);
+  sizeCanvas();
+  document.getElementById("hlv").textContent="SIGNAL "+(i<9?"0":"")+(i+1);
+  document.getElementById("hdr").textContent=NP2[i].t.toUpperCase();
+  ghostsFor(i);
+  netJoin(i);
+  playTrack(i,0);
+  playing=true;
+  if(!rafOn){ rafOn=true; requestAnimationFrame(loop); }
+}
+
+/* Put the deck on this level's track and rewind it, then wait until it is
+   really there before the level's clock starts. Entering a level is itself a
+   tap, so autoplay is allowed; if it still refuses we say so rather than
+   letting the level run on a clock that is not the song. */
+function playTrack(i,at,tries){
+  tries=tries||0;
+  var r=RADIO();
+  if(!r){ if(tries<40) setTimeout(function(){ playTrack(i,at,tries+1); },200); return; }
+  var ri=r.indexBySlug?r.indexBySlug(NP2[i].f):-1;
+  if(ri<0){ if(tries<40) setTimeout(function(){ playTrack(i,at,tries+1); },250); return; }
+  try{ if(r.current()!==ri || !r.playing()) r.control.play(ri); }catch(e){}
+  var settle=function(n){
+    if(lvIdx!==i) return;                       /* they left already */
+    var ok=false;
+    try{ ok = r.slug()===NP2[i].f && r.audio.readyState>0; }catch(e){}
+    if(ok){
+      try{ if(Math.abs((r.audio.currentTime||0)-(at||0))>0.6) r.audio.currentTime=at||0; }catch(e){}
+      armed=true;
+      return;
+    }
+    if(n<50) setTimeout(function(){ settle(n+1); },120);
+    else toast("the deck will not start on its own_<br>press \u25b6 on the radio", 5000);
+  };
+  settle(0);
+}
+
+function endLevel(win){
+  playing=false; cleared=!!win;
+  netLeave();
+  if(win){
+    var secs=(Date.now()-started)/1000;
+    if(!save[lvIdx] || secs<save[lvIdx]) save[lvIdx]=Math.round(secs);
+    store(); saveGhost(lvIdx);
+    try{
+      var o=JSON.parse(localStorage.getItem("ibee_np2dark_cleared")||"{}")||{};
+      o[lvIdx]=1; localStorage.setItem("ibee_np2dark_cleared",JSON.stringify(o));
+    }catch(e){}
+  }
+  var n=Object.keys(save).length;
+  document.getElementById("dtitle").textContent = win?"CLEARED":"THE DARK WON";
+  document.getElementById("dsub").textContent = (lvIdx<9?"0":"")+(lvIdx+1)+" — "+NP2[lvIdx].t.toUpperCase();
+  document.getElementById("dblurb").textContent = win
+    ? "you walked "+NP2[lvIdx].t+" end to end. "+n+" of 26 signals lit."
+    : "the record ran out before you did. it is still there — go again.";
+  document.getElementById("dnext").style.display = (lvIdx<25)?"":"none";
+  paintGrid(); show(doneS);
+}
+document.getElementById("dnext").onclick=function(){ startLevel(Math.min(25,lvIdx+1)); };
+document.getElementById("dagain").onclick=function(){ startLevel(lvIdx); };
+document.getElementById("dmenu").onclick=function(){ show(menu); };
+
+/* =====================================================================
+   6. PHYSICS
+   ===================================================================== */
+function respawn(){
+  var c=L.cks[ckAt]||0;
+  P.x=c*CELL; P.y=L.floor[c]-PH; P.vx=0; P.vy=0; P.dead=0; grace=0.6;
+  /* dying rewinds the record — the level IS the song, so it rolls back too */
+  if(armed){ var r=RADIO(); try{ if(r&&onThisTrack()) r.audio.currentTime=Math.max(0,c/20); }catch(e){} }
+}
+
+function step(dt){
+  var want=(keys.right?1:0)-(keys.left?1:0);
+  if(want) P.face=want;
+  P.vx=want*VX;
+
+  /* Horizontal. The step-up assist — being lifted onto ground that is a little
+     higher — must only happen with your feet down. Applying it in mid-air
+     snapped a jumping player back onto rising ground, which cancelled the jump
+     and dropped them straight onto the spike they were clearing. That single
+     line was every death in the solver. */
+  var nx=P.x+P.vx*dt;
+  if(nx>0 && nx<L.w-PW){
+    var fh=floorAt(L,nx+(want>0?PW:0));
+    if(P.onGround && fh <= P.y+PH-STEP && !L.pit[idxAt(L,nx)]){
+      P.x=nx; P.y=Math.min(P.y, fh-PH);          /* walk up the slope */
+    } else {
+      P.x=nx;
+    }
+  }
+
+  /* vertical */
+  P.vy+=GRAV*dt;
+  P.y+=P.vy*dt;
+  var ground=floorAt(L,P.x+PW/2);
+  if(P.y+PH>=ground && P.vy>=0){ P.y=ground-PH; P.vy=0; P.onGround=true; }
+  else P.onGround=false;
+  var roof=ceilAt(L,P.x+PW/2);
+  if(P.y<roof){ P.y=roof; if(P.vy<0) P.vy=0; }
+
+  if(keys.jump && P.onGround){ P.vy=-JUMP; P.onGround=false; }
+
+  /* hazards — spikes are off for a beat after you respawn */
+  if(grace>0) grace-=dt;
+  var i=idxAt(L,P.x+PW/2);
+  if(grace<=0 && L.spike[i] && P.y+PH > L.floor[i]-SPIKEH) P.dead=1;
+  if(P.y>WH+200) P.dead=1;
+  if(P.dead){ respawn(); flash(); }
+
+  /* checkpoints */
+  for(var c=ckAt+1;c<L.cks.length;c++) if(P.x/CELL>L.cks[c]) ckAt=c;
+
+  /* the exit */
+  if(P.x>L.w-CELL*8) endLevel(true);
+}
+
+/* =====================================================================
+   7. LIGHT — the second layer. Black world, three sources.
+   ===================================================================== */
+var beatPulse=0;
+function lightStep(dt,t){
+  var p=clamp(Math.floor(t*20),0,L.n-1);
+  var hit=L.im[p];
+  if(hit>0.45) beatPulse=Math.max(beatPulse,hit);
+  beatPulse*=Math.pow(0.06,dt);
+
+  var decay=Math.pow(0.22,dt);
+  for(var i=0;i<L.n;i++) light[i]*=decay;
+
+  /* (a) the playhead — the song lights where the song IS */
+  var reach=Math.round(34+beatPulse*90);
+  for(var k=-reach;k<=reach;k++){
+    var j=p+k; if(j<0||j>=L.n) continue;
+    var f=1-Math.abs(k)/reach;
+    var val=f*f*(0.5+beatPulse*0.5);
+    if(val>light[j]) light[j]=val;
+  }
+  /* (b) you carry a small halo, so you are never fully blind */
+  var pi=idxAt(L,P.x);
+  for(var k2=-16;k2<=16;k2++){
+    var j2=pi+k2; if(j2<0||j2>=L.n) continue;
+    var f2=(1-Math.abs(k2)/16)*0.5;
+    if(f2>light[j2]) light[j2]=f2;
+  }
+}
+function flash(){ beatPulse=1; }
+
+/* =====================================================================
+   8. RENDER
+   ===================================================================== */
+function draw(t){
+  var scale=H/WH;
+  var viewW=W/scale;
+  camX=clamp(P.x-viewW*0.42, 0, Math.max(0,L.w-viewW));
+
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.scale(scale,scale); ctx.translate(-camX,0);
+
+  var i0=clamp(Math.floor(camX/CELL)-1,0,L.n-1);
+  var i1=clamp(Math.ceil((camX+viewW)/CELL)+1,0,L.n-1);
+
+  /* terrain, drawn per column at the brightness the music has given it */
+  for(var i=i0;i<=i1;i++){
+    var a=light[i]; if(a<0.015) continue;
+    var x=i*CELL;
+    /* ceiling slab */
+    ctx.fillStyle="rgba(26,45,49,"+clamp(a*0.95,0,1).toFixed(3)+")";
+    ctx.fillRect(x,0,CELL+1,L.ceil[i]);
+    if(!L.pit[i]){
+      ctx.fillStyle="rgba(22,38,42,"+clamp(a*0.95,0,1).toFixed(3)+")";
+      ctx.fillRect(x,L.floor[i],CELL+1,WH-L.floor[i]);
+      /* the lip catches the light */
+      ctx.fillStyle="rgba(255,31,111,"+clamp(a*0.5,0,1).toFixed(3)+")";
+      ctx.fillRect(x,L.floor[i],CELL+1,2);
+      if(L.spike[i]){
+        ctx.fillStyle="rgba(255,92,157,"+clamp(a*0.95,0,1).toFixed(3)+")";
+        ctx.beginPath();
+        ctx.moveTo(x,L.floor[i]); ctx.lineTo(x+CELL/2,L.floor[i]-SPIKEH); ctx.lineTo(x+CELL,L.floor[i]);
+        ctx.closePath(); ctx.fill();
+      }
+    } else {
+      /* the edge of nothing */
+      ctx.fillStyle="rgba(232,220,18,"+clamp(a*0.30,0,1).toFixed(3)+")";
+      ctx.fillRect(x,L.floor[i]-1,CELL+1,1);
+    }
+    ctx.fillStyle="rgba(26,45,49,"+clamp(a*0.5,0,1).toFixed(3)+")";
+    ctx.fillRect(x,L.ceil[i],CELL+1,2);
+  }
+
+  /* the exit */
+  var ex=L.w-CELL*8;
+  if(ex>camX-40 && ex<camX+viewW+40){
+    var ea=clamp(light[L.n-9]||0.4,0.25,1);
+    ctx.fillStyle="rgba(232,220,18,"+(ea*0.8).toFixed(3)+")";
+    ctx.fillRect(ex,0,3,WH);
+  }
+
+  /* ghosts of past runs, then anyone here now, then you */
+  drawGhosts(t,scale);
+  drawPeers();
+
+  ctx.fillStyle="#05090a";
+  ctx.fillRect(P.x-1,P.y-1,PW+2,PH+2);
+  ctx.fillStyle="#f0efe8";
+  ctx.fillRect(P.x,P.y,PW,PH);
+  ctx.fillStyle="rgba(255,31,111,.9)";
+  ctx.fillRect(P.x+(P.face>0?PW-4:0),P.y+4,4,4);
+
+  ctx.restore();
+
+  /* vignette — everything outside the music falls away */
+  var vg=ctx.createRadialGradient(W/2,H/2,H*0.22,W/2,H/2,H*0.78);
+  vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,.82)");
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+
+/* =====================================================================
+   9. LOOP
+   ===================================================================== */
+var last=0;
+function loop(ts){
+  if(!playing){ rafOn=false; return; }
+  requestAnimationFrame(loop);
+  var dt=Math.min(0.05,(ts-last)/1000||0.016); last=ts;
+  var t=songT();
+
+  step(dt);
+  lightStep(dt,t);
+  draw(t);
+  recGhost(t);
+  netTick(t);
+
+  document.getElementById("htime").textContent=fmt(t)+" / "+fmt(L.dur);
+  document.getElementById("barfill").style.width=(100*clamp(P.x/L.w,0,1)).toFixed(1)+"%";
+
+  /* the record ran out — only meaningful once the deck is actually on it */
+  if(armed && L.dur && t>=L.dur-0.35 && !cleared) endLevel(false);
+}
+
+/* =====================================================================
+   10. GHOSTS — a run is x,y ten times a second. A 3 minute track is
+   about 1,800 points; three of them per level is a few KB.
+   ===================================================================== */
+var rec=[], recAt=0, ghosts=[];
+function recGhost(t){
+  if(t-recAt<0.1) return; recAt=t;
+  rec.push(Math.round(P.x),Math.round(P.y));
+}
+function ghostsFor(i){
+  rec=[]; recAt=0; ghosts=[];
+  try{
+    var all=JSON.parse(localStorage.getItem(LS+"_g")||"{}")||{};
+    ghosts=(all[i]||[]).slice(0,3);
+  }catch(e){ ghosts=[]; }
+}
+function saveGhost(i){
+  try{
+    var all=JSON.parse(localStorage.getItem(LS+"_g")||"{}")||{};
+    var arr=all[i]||[]; arr.unshift(rec); all[i]=arr.slice(0,3);
+    localStorage.setItem(LS+"_g",JSON.stringify(all));
+  }catch(e){}
+}
+function drawGhosts(t){
+  var f=Math.floor(t*10)*2;
+  for(var k=0;k<ghosts.length;k++){
+    var gr=ghosts[k]; if(!gr||f+1>=gr.length) continue;
+    var a=0.10+0.05*(ghosts.length-k);
+    var gi=idxAt(L,gr[f]);
+    a*=clamp(light[gi]*2,0.15,1);
+    ctx.fillStyle="rgba(240,239,232,"+a.toFixed(3)+")";
+    ctx.fillRect(gr[f],gr[f+1],PW,PH);
+  }
+}
+
+/* =====================================================================
+   11. THE OTHERS — Supabase Realtime broadcast. No table, no SQL: a
+   broadcast channel is ephemeral, so this needed nothing set up.
+   One channel per level, or per room code if you came here with someone.
+   ===================================================================== */
+var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
+var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+var sb=null, chan=null, peers={}, myId=Math.random().toString(36).slice(2,8), sendAt=0, roomCode=null;
+
+function loadSB(cb){
+  if(window.supabase&&window.supabase.createClient) return cb();
+  var s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload=cb; s.onerror=function(){cb();};
+  document.head.appendChild(s);
+}
+function netJoin(levelIdx){
+  netLeave();
+  loadSB(function(){
+    if(!(window.supabase&&window.supabase.createClient)) return;
+    try{
+      sb=sb||window.supabase.createClient(SB_URL,SB_KEY);
+      var name="np2dark-"+(roomCode?("r-"+roomCode):("l"+levelIdx));
+      chan=sb.channel(name,{config:{broadcast:{self:false}}});
+      chan.on("broadcast",{event:"p"},function(m){
+        var d=m.payload; if(!d||d.id===myId) return;
+        peers[d.id]=peers[d.id]||{};
+        var q=peers[d.id];
+        q.tx=d.x; q.ty=d.y; q.face=d.f; q.seen=Date.now();
+        if(q.x==null){ q.x=d.x; q.y=d.y; }
+      });
+      chan.subscribe(function(st){ if(st==="SUBSCRIBED") paintWho(); });
+    }catch(e){}
+  });
+}
+function netLeave(){
+  try{ if(chan&&sb) sb.removeChannel(chan); }catch(e){}
+  chan=null; peers={}; paintWho();
+}
+function netTick(t){
+  var now=Date.now();
+  /* ten a second is plenty — the draw interpolates between them */
+  if(chan && now-sendAt>100){
+    sendAt=now;
+    try{ chan.send({type:"broadcast",event:"p",
+      payload:{id:myId,x:Math.round(P.x),y:Math.round(P.y),f:P.face}}); }catch(e){}
+  }
+  for(var id in peers){
+    var q=peers[id];
+    if(now-q.seen>6000){ delete peers[id]; paintWho(); continue; }
+    q.x+=((q.tx-q.x)||0)*0.25;   /* smooth the 10Hz into 60 */
+    q.y+=((q.ty-q.y)||0)*0.25;
+  }
+}
+function drawPeers(){
+  for(var id in peers){
+    var q=peers[id];
+    var a=clamp(light[idxAt(L,q.x)]*1.6,0.2,1);
+    ctx.fillStyle="rgba(5,9,10,"+a.toFixed(3)+")";
+    ctx.fillRect(q.x-1,q.y-1,PW+2,PH+2);
+    ctx.fillStyle="rgba(255,92,157,"+a.toFixed(3)+")";
+    ctx.fillRect(q.x,q.y,PW,PH);
+  }
+}
+function paintWho(){
+  var n=Object.keys(peers).length;
+  document.getElementById("who").innerHTML =
+    (roomCode?("ROOM <b>"+roomCode+"</b><br>"):"") +
+    (n? ("<b>"+n+"</b> ALSO IN HERE") : "ALONE IN HERE");
+}
+setInterval(paintWho,1500);
+
+/* a room code puts two people in the same channel deliberately */
+document.getElementById("mkroom").onclick=function(){
+  var c=prompt("room code — share it, you both land in the same dark.\nleave blank to make one:","");
+  if(c===null) return;
+  c=(c||Math.random().toString(36).slice(2,6)).toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
+  if(!c) return;
+  roomCode=c; paintWho();
+  toast("ROOM "+c+"<br>pick a signal — anyone on this code joins you_",4200);
+};
+
+/* =====================================================================
+   12. INPUT
+   ===================================================================== */
+function key(e,down){
+  var k=e.key;
+  if(k==="ArrowLeft"||k==="a"||k==="A"){ keys.left=down; e.preventDefault(); }
+  else if(k==="ArrowRight"||k==="d"||k==="D"){ keys.right=down; e.preventDefault(); }
+  else if(k===" "||k==="ArrowUp"||k==="w"||k==="W"){ keys.jump=down; e.preventDefault(); }
+  else if(k==="Escape"&&down&&playing){ playing=false; netLeave(); show(menu); }
+}
+addEventListener("keydown",function(e){key(e,true);});
+addEventListener("keyup",function(e){key(e,false);});
+
+if(matchMedia("(pointer:coarse)").matches) document.body.classList.add("touch");
+function hold(id,prop){
+  var b=document.getElementById(id);
+  var on=function(e){ keys[prop]=true; e.preventDefault(); };
+  var off=function(e){ keys[prop]=false; e.preventDefault(); };
+  b.addEventListener("touchstart",on,{passive:false});
+  b.addEventListener("touchend",off,{passive:false});
+  b.addEventListener("touchcancel",off,{passive:false});
+  b.addEventListener("mousedown",on); addEventListener("mouseup",off);
+}
+hold("bl","left"); hold("br","right"); hold("bj","jump");
+
+/* =====================================================================
+   13. bits
+   ===================================================================== */
+var toastEl=document.getElementById("toast"),tt=null;
+function toast(m,d){ toastEl.innerHTML=m; toastEl.classList.add("show");
+  clearTimeout(tt); tt=setTimeout(function(){ toastEl.classList.remove("show"); }, d||3000); }
+
+/* beat-data self-loads with player.js; wait for it before drawing the menu */
+(function waitBeat(n){
+  if(window.IBEE_BEAT){ paintGrid(); return; }
+  if(n>60){ paintGrid(); return; }
+  setTimeout(function(){ waitBeat(n+1); },150);
+})(0);
+paintGrid();
+
+/* leaving the page must not leave a channel open */
+addEventListener("pagehide",netLeave);
+addEventListener("beforeunload",netLeave);
+})();
+</script>
+</body>
+</html>
