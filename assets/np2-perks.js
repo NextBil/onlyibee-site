@@ -1,13 +1,16 @@
 /* =====================================================================
-   IBEE PERKS — what falling is worth
+   LISTENS — the yellow coin
    ---------------------------------------------------------------------
-   THE FALL (np2/fall/) pays out points. Points buy a discount on the
-   clothes, capped at 40%, and clearing all 26 levels reaches the cap on
-   its own — everything else (threading gates, surviving a level without
-   dying, stopping to read the writing) only gets you there sooner.
+   One currency, one number, one rule:
 
-       discount% = min(40, floor(40 * points / POINTS_FOR_MAX))
-       POINTS_FOR_MAX = 26 * CLEAR = clearing every level, once.
+       2,600 LISTENS = 40% off everything. That is the cap.
+       Getting out of a level is worth 100, so the record is exactly 2,600.
+
+   You earn LISTENS by falling (np2/fall/). They show as a yellow coin on
+   the profile and beside every price. Nothing else to read.
+   ---------------------------------------------------------------------
+   Clearing all 26 reaches the cap on its own; coins picked up along the
+   way, clean runs and stopping to read only get you there sooner.
 
    ---------------------------------------------------------------------
    ⚠ READ THIS BEFORE TRUSTING THE NUMBER ON A PRICE TAG
@@ -28,7 +31,8 @@
   "use strict";
   if(window.IBEE_PERKS) return;
 
-  var LS_PTS="ibee_np2pts";          /* running total */
+  var LS_PTS="ibee_np2pts";          /* running total of LISTENS */
+  var COIN="\u25c9";                  /* the yellow coin */
   var LS_OUT="ibee_np2fall_out";     /* which levels are cleared */
   var LEVELS=26;
   var CLEAR=100;                     /* points for getting out of a level */
@@ -103,13 +107,13 @@
       el.innerHTML =
         '<s class="perk-was">'+money(p.was,cur)+'</s> '+
         '<span class="perk-now">'+money(p.now,cur)+'</span> '+
-        '<span class="perk-off">−'+d+'% · save '+money(p.saved,cur)+'</span>';
+        '<span class="perk-off">−'+d+'%</span>';
     }
     var tags=root.querySelectorAll("[data-perk-badge]");
     for(var k=0;k<tags.length;k++){
-      tags[k].textContent = d>0
-        ? (points()+" PTS · −"+d+"% · "+code())
-        : (points()+" PTS · fall to earn a discount");
+      tags[k].innerHTML = d>0
+        ? ('<b class="perk-coin">'+COIN+' '+points()+'</b> · −'+d+"% OFF")
+        : ('<b class="perk-coin">'+COIN+' '+points()+'</b> · FALL TO EARN');
     }
     return d;
   }
@@ -121,13 +125,14 @@
       ".perk-was{opacity:.5;text-decoration:line-through}"+
       ".perk-now{color:#ff1f6f}"+
       ".perk-off{font-family:'Press Start 2P',monospace;font-size:7px;letter-spacing:1px;"+
-        "color:#e8dc12;white-space:nowrap}";
+        "color:#e8dc12;white-space:nowrap}"+
+      ".perk-coin{color:#e8dc12;font-weight:400}";
     document.head.appendChild(css);
   }catch(e){}
 
   window.IBEE_PERKS={
     points:points, add:add, cleared:cleared, discount:discount, code:code,
-    price:priceOf, money:money, render:render,
+    price:priceOf, money:money, render:render, COIN:COIN,
     MAXPCT:MAXPCT, LEVELS:LEVELS, CLEAR:CLEAR, POINTS_FOR_MAX:POINTS_FOR_MAX
   };
   try{ document.addEventListener("DOMContentLoaded",function(){ render(); }); }catch(e){}

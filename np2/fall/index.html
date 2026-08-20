@@ -137,7 +137,10 @@ header span{color:var(--dim);font-size:7px}
 #perk{font-family:var(--px);font-size:8px;letter-spacing:1px;color:var(--acid);
   text-align:center;margin:16px auto 0;border:1px solid #2a4a2f;padding:9px 12px;
   display:inline-block;line-height:1.9}
-#perk b{color:var(--pink);font-weight:400}
+#perk b{color:var(--pink);font-weight:400;display:block;margin-top:7px}
+#perk .coin{color:var(--acid);font-size:12px}
+#perk .obar{height:3px;background:#22240f;margin:9px 0 0;overflow:hidden}
+#perk .obar i{display:block;height:100%;background:var(--acid);box-shadow:0 0 7px var(--acid)}
 #perkwrap{text-align:center}
 @media(prefers-reduced-motion:reduce){.lv{transition:none}}
 </style>
@@ -221,19 +224,33 @@ var NP2=[
   ["np2-25-lonely3.mp3","Lonely 3"],           ["np2-26-no-name.mp3","No Name"]
 ];
 
-/* zone: [name, firstLevel, wall, glow, pulseReach, pulseDecay, drift, wind, note] */
+/* THE PIT IS A ROUTE, NOT A DIFFICULTY CURVE.
+   Abidjan → Toronto → Paris → the stars → the void → the climb. The zones are
+   places now, because the record is about being from one and living in the
+   others. Each carries its own light, its own air, its own skyline drawn in
+   silhouette behind the shaft, and its own handling:
+     agile — how much steering it leaves you (the wander clamp reads this)
+     wide  — how open the shaft runs
+     reach/decay — how far your light throws and how fast it dies
+   Six worlds do all the work; the seed makes each of the 26 its own. */
 var ZONES=[
-  {id:"bright", n:"BRIGHT-FALL", from:0,  to:4,  wall:"#2a4a4e", glow:"#ffd9a8",
-   reach:1.00, decay:1.00, drift:0.00, wind:0.00, wide:1.22, agile:1.00},
-  {id:"water",  n:"WATER",       from:5,  to:9,  wall:"#1d3f52", glow:"#7fd4ff",
-   reach:0.66, decay:1.55, drift:0.55, wind:0.00, wide:1.18, agile:0.42},
-  {id:"wind",   n:"WIND",        from:10, to:14, wall:"#31463f", glow:"#b9f0c8",
-   reach:0.90, decay:1.12, drift:0.18, wind:1.00, wide:1.02, agile:0.78},
-  {id:"rain",   n:"RAIN",        from:15, to:19, wall:"#26343e", glow:"#9fb6c9",
-   reach:0.84, decay:1.22, drift:0.10, wind:0.32, wide:0.98, agile:0.90},
-  {id:"void",   n:"THE VOID",    from:20, to:21, wall:"#140d18", glow:"#ff5c9d",
+  {id:"abidjan", n:"ABIDJAN",     from:0,  to:3,
+   wall:"#6b5630", glow:"#ffc46b", sky:"#170f08", far:"#2a1f12", back:"palm",
+   reach:1.00, decay:1.00, drift:0.00, wind:0.10, wide:1.22, agile:1.00},
+  {id:"toronto", n:"TORONTO",     from:4,  to:8,
+   wall:"#33566f", glow:"#8fd0ff", sky:"#070d16", far:"#122032", back:"towers",
+   reach:0.92, decay:1.14, drift:0.10, wind:0.26, wide:1.06, agile:0.88},
+  {id:"paris",   n:"PARIS",       from:9,  to:13,
+   wall:"#5b5b68", glow:"#e6cf9a", sky:"#0d0d11", far:"#20202a", back:"roofs",
+   reach:0.86, decay:1.24, drift:0.14, wind:0.42, wide:1.00, agile:0.84},
+  {id:"stars",   n:"THE STARS",   from:14, to:18,
+   wall:"#463466", glow:"#c9b8ff", sky:"#05040d", far:"#150f28", back:"stars",
+   reach:0.70, decay:1.55, drift:0.55, wind:0.00, wide:1.26, agile:0.30},
+  {id:"void",    n:"THE VOID",    from:19, to:21,
+   wall:"#2a1c33", glow:"#ff5c9d", sky:"#06030a", far:"#120a16", back:"none",
    reach:1.30, decay:0.72, drift:0.00, wind:0.00, wide:1.60, agile:1.00},
-  {id:"climb",  n:"THE CLIMB",   from:22, to:25, wall:"#3a1c2a", glow:"#ff1f6f",
+  {id:"climb",   n:"THE CLIMB",   from:22, to:25,
+   wall:"#6b3349", glow:"#ff1f6f", sky:"#0a0509", far:"#1e0e17", back:"lights",
    reach:0.92, decay:1.05, drift:0.06, wind:0.44, wide:0.90, agile:0.86}
 ];
 function zoneOf(i){ for(var z=0;z<ZONES.length;z++) if(i>=ZONES[z].from&&i<=ZONES[z].to) return ZONES[z]; return ZONES[0]; }
@@ -270,9 +287,16 @@ var RISE=20;                /* letting go: units/s it gains on you */
 var TOPMARGIN=0.13, BOTMARGIN=0.86;   /* where you may live on screen */
 var RES=0.25;               /* channel resolution, seconds */
 var PR=2.6;                 /* player radius */
+var FOER=3.4;               /* enemy radius */
+/* An enemy may never come closer to the channel centre than this. As a
+   FRACTION of the half-width it looked safe and was not: in the narrow climb
+   0.55 of the half-width is ~5.5 units, and the kill radius is 6. The safe
+   line has to be safe in absolute units or it is not a safe line. */
+var FOEMIN=PR+FOER+3.5;
 var LS="ibee_np2fall";
 
 function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+function rnd2(x){ var v=Math.sin(x*12.9898)*43758.5453; return v-Math.floor(v); }
 function v36(c){ return parseInt(c,36)/35; }
 function lerp(a,b,t){ return a+(b-a)*t; }
 
@@ -452,8 +476,49 @@ function build(slug, idx){
     if(!cps.length || bestT-cps[cps.length-1]>20) cps.push(bestT);
   });
 
+  /* ---- WHAT IS IN THE PIT WITH YOU -------------------------------------
+     Two rules keep the guarantee intact:
+       · POWERS sit exactly on the channel centre, so picking one up is never
+         a risk — the shaft already asks you to be there.
+       · COINS sit off-centre, so they are the only thing in the game that
+         asks you to leave the safe line. That is the whole risk/reward.
+     Neither can be missed fatally; both are optional. */
+  var seed=(idx*2654435761)%100000;
+  var picks=[], KIND=["light","calm","ghost"];
+  var pEvery=Math.max(14, 34-idx*0.5);
+  for(var pt=16; pt<dur-14; pt+=pEvery*(0.75+rnd2(seed+pt)*0.6)){
+    var nearG=false;
+    for(var z2=0;z2<gates.length;z2++) if(Math.abs(gates[z2].t-pt)<2.4) nearG=true;
+    if(nearG) continue;
+    picks.push({t:pt, kind:KIND[Math.floor(rnd2(seed+pt*3.1)*KIND.length)], off:0, got:0});
+  }
+  var coins=[];
+  for(var ct=8; ct<dur-8; ct+=3.1+rnd2(seed+ct*1.7)*3.4){
+    var ci=clamp(Math.round(ct/RES),0,steps-1);
+    /* far enough out to be a decision, never past the wall */
+    var side=rnd2(seed+ct*5.9)>0.5?1:-1;
+    coins.push({t:ct, off:side*Math.min(half[ci]*0.55, 13), got:0});
+  }
+
+  /* ---- ENEMIES: only in the deep zones, and only ever at the walls -------
+     They cling to a wall and lunge inward, but never past 0.55 of the
+     half-width — the middle of the channel is always clean. That keeps the
+     level provably survivable while still making the edges hostile. */
+  /* THE VOID GETS NO ENEMIES, for the same reason it gets no gates: it takes
+     your steering away on purpose, so anything you must dodge is unfair. */
+  var foes=[];
+  if(Z.id==="stars"||Z.id==="climb"){
+    var fEvery=Math.max(9, 22-idx*0.4);
+    for(var ft=22; ft<dur-12; ft+=fEvery*(0.7+rnd2(seed+ft*2.3)*0.7)){
+      var fidx=clamp(Math.round(ft/RES),0,steps-1);
+      if(half[fidx] < FOEMIN+3) continue;       /* too tight a shaft to hold one */
+      foes.push({t:ft, side:(rnd2(seed+ft*7.1)>0.5?1:-1), ph:rnd2(seed+ft*11.7)*6.283});
+    }
+  }
+
   return {n:n, dur:dur, steps:steps, mid:mid, half:half, lo:sLo, lv:sLv, im:im,
-          secs:secs, zone:Z, depth:dur*SCROLL, gates:gates, cps:cps, seed:(idx*2654435761)%100000};
+          secs:secs, zone:Z, depth:dur*SCROLL, gates:gates, cps:cps, seed:seed,
+          picks:picks, coins:coins, foes:foes};
 }
 function chanAt(L,t){
   var f=clamp(t/RES,0,L.steps-1.001), i=Math.floor(f), k=f-i;
@@ -469,7 +534,8 @@ var L=null, idx=-1, live=false, rafOn=false, armed=false, ended=false;
 var P={x:50, sy:0.62, vx:0, vy:0, limb:0, squash:0};
 var pulses=[], scars=[], motes=[], drift=[], ghosts=[], rec=[], recAt=0;
 var cpAt=0, gateHit={}, sparks=[];
-var pts={gates:0,deaths:0,frags:0};
+var pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
+var pow={light:0,calm:0,ghost:0};
 var collapse=0, holding=0, holdSide=0, glitch=0, fragT=0, fragIx=0, frags=[], gracet=0;
 var save=load(), started=0, deepest=0;
 
@@ -496,14 +562,37 @@ addEventListener("resize",function(){ if(live) size(); });
    ===================================================================== */
 var grid=document.getElementById("lvgrid");
 function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
-function unlocked(i){ return i===0 || !!save[i-1] || !!save[i]; }
+/* One account walks in with the whole pit open — the owner needs to be able to
+   check level 23 without playing 22 first. Read off the Supabase session, so it
+   is the signed-in identity that unlocks, not a flag anyone can set. */
+var TESTERS=["droguepuissance4@gmail.com"];
+var allOpen=false;
+function checkTester(){
+  loadSB(function(){
+    if(!(window.supabase&&window.supabase.createClient)) return;
+    try{
+      sb=sb||window.supabase.createClient(SB_URL,SB_KEY);
+      sb.auth.getSession().then(function(r){
+        var em=r&&r.data&&r.data.session&&r.data.session.user&&r.data.session.user.email;
+        if(em && TESTERS.indexOf(String(em).toLowerCase())>=0){
+          allOpen=true; paintGrid();
+          flashMsg("TEST ACCOUNT — THE WHOLE PIT IS OPEN");
+        }
+      }).catch(function(){});
+    }catch(e){}
+  });
+}
+function unlocked(i){ return allOpen || i===0 || !!save[i-1] || !!save[i]; }
 function paintPerk(){
   var P2=window.IBEE_PERKS, el=document.getElementById("perk");
   if(!P2||!el) return;
-  var d=P2.discount(), pt=P2.points(), c=P2.cleared();
-  el.innerHTML = d>0
-    ? (pt+" PTS · "+c+"/26 OUT<br><b>−"+d+"% ON THE CLOTHES</b><br>CODE "+P2.code())
-    : (pt+" PTS · "+c+"/26 OUT<br>get out of a level to start earning_");
+  var d=P2.discount(), pt=P2.points();
+  /* three things, no paragraph: what you have, what it is worth, how far to max */
+  var pct=Math.min(100,100*pt/P2.POINTS_FOR_MAX);
+  el.innerHTML =
+    '<span class="coin">'+P2.COIN+" "+pt+'</span> LISTENS'
+    +'<div class="obar"><i style="width:'+pct.toFixed(1)+'%"></i></div>'
+    +(d>0 ? ('<b>−'+d+'% OFF THE CLOTHES</b>') : 'GET OUT OF A LEVEL TO EARN');
 }
 function paintGrid(){
   var B=window.IBEE_BEAT||{};
@@ -542,7 +631,8 @@ function start(i){
   P.x=chanAt(L,0).m; P.sy=0.62; P.vx=0; P.limb=0;
   pulses=[]; scars=[]; motes=[]; drift=[]; sparks=[]; rec=[]; recAt=0;
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
-  pts={gates:0,deaths:0,frags:0};
+  pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
+  pow={light:0,calm:0,ghost:0};
   P.vy=0; P.squash=0;
   seedDrift(lv);
   holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
@@ -580,7 +670,7 @@ function finish(won){
   if(won){
     /* what a run is worth. Clearing is the bulk of it so finishing the record
        reaches the cap on its own; the rest only gets you there sooner. */
-    earned = 100 + pts.gates*5 + pts.frags*2 + (deaths===0?50:0);
+    earned = 100 + pts.coins*4 + pts.gates*3 + pts.frags*2 + (deaths===0?50:0);
     try{ if(window.IBEE_PERKS) window.IBEE_PERKS.add(earned); }catch(e){}
     save[idx]=Math.round((Date.now()-started)/1000); store(); saveGhost(idx);
     try{ var o=JSON.parse(localStorage.getItem("ibee_np2fall_out")||"{}")||{};
@@ -594,9 +684,9 @@ function finish(won){
     ? (last
       ? "you are still walking.<br><br>not saved. not finished. still walking."
       : "you rode "+NP2[idx][1]+" all the way down and found the way out.<br>"+n+" of 26."
-        +(earned?("<br><br><b style='color:#e8dc12'>+"+earned+" PTS</b>"
-          +(dnow?(" · the clothes are <b style='color:#ff1f6f'>−"+dnow+"%</b> for you"
-                 +(P2&&P2.code()?(" · code <b style='color:#e8dc12'>"+P2.code()+"</b>"):"")):"")):""))
+        +(earned?("<br><br><b style='color:#e8dc12;font-size:26px'>"
+          +(P2?P2.COIN:"")+" +"+earned+"</b>"
+          +(dnow?("<br><b style='color:#ff1f6f'>−"+dnow+"% OFF THE CLOTHES</b>"):"")):""))
     : "the collapse took you at "+fmt(songT())+".<br>the record starts again from silence.";
   document.getElementById("onext").style.display = (won&&!last)?"":"none";
   paintGrid(); paintPerk(); show(over);
@@ -644,6 +734,13 @@ wake.addEventListener("click",function(){
 /* =====================================================================
    9. STEP
    ===================================================================== */
+var POWCOL={light:"#e8dc12", calm:"#8fd0ff", ghost:"#ff5c9d"};
+function powCol(){
+  if(pow.ghost>0) return POWCOL.ghost;
+  if(pow.calm>0)  return POWCOL.calm;
+  if(pow.light>0) return POWCOL.light;
+  return null;
+}
 var lastBeat=-1;
 function step(dt,t){
   var Z=L.zone, ch=chanAt(L,t);
@@ -653,8 +750,8 @@ function step(dt,t){
 
   /* ---- lean. Water keeps your momentum, wind leans on you. ---- */
   var want=holding?holdSide:0;
-  var accel=LATA*(Z.id==="water"?0.42:1);
-  var fric =(Z.id==="water"?1.1:6.5);
+  var accel=LATA*(Z.id==="stars"?0.42:1);
+  var fric =(Z.id==="stars"?1.1:6.5);
   P.vx += want*accel*dt;
   P.vx -= P.vx*Math.min(1,fric*dt);
   if(Z.wind){                                   /* doubt pushes sideways */
@@ -672,14 +769,15 @@ function step(dt,t){
      makes letting go feel like something leaving you rather than a number
      changing. Water is heavier still — it keeps whatever it already had. */
   var targetV=(push>0? SINK : -RISE);
-  P.vy += (targetV-P.vy)*Math.min(1,(Z.id==="water"?2.6:5.8)*dt);
+  P.vy += (targetV-P.vy)*Math.min(1,(Z.id==="stars"?2.6:5.8)*dt);
   P.sy += P.vy/(H/SC)*dt;
   if(P.sy>=BOTMARGIN && P.vy>0) P.squash=Math.min(1,P.squash+dt*6);
   else P.squash=Math.max(0,P.squash-dt*3);
   P.sy = clamp(P.sy, 0.02, BOTMARGIN);
 
   /* the collapse eats down the screen from above */
-  collapse = lerp(collapse, TOPMARGIN + (isVoid?0.06:0) + hit*0.03, 1-Math.pow(0.02,dt));
+  var ceilT=TOPMARGIN + (isVoid?0.06:0) + hit*0.03 - (pow.calm>0?0.07:0);
+  collapse = lerp(collapse, ceilT, 1-Math.pow(pow.calm>0?0.25:0.02,dt));
 
   /* Never let a bad number become a death. If sy or x ever goes non-finite the
      clamp below pins sy to its minimum, which reads as "caught at 0:00" — a
@@ -694,7 +792,53 @@ function step(dt,t){
   /* ---- walls ---- */
   if(!isVoid && gracet<=0){
     var edge=Math.abs(P.x-ch.m)-(ch.h-PR);
-    if(edge>0){ die(t); return; }
+    if(edge>0){
+      if(pow.ghost>0){ pow.ghost=0; gracet=0.5; P.x=ch.m; P.vx=0; flashMsg("THE GHOST TOOK IT"); }
+      else { die(t); return; }
+    }
+  }
+
+  /* ---- powers tick down ---- */
+  if(pow.light>0) pow.light-=dt;
+  if(pow.calm>0)  pow.calm-=dt;
+
+  /* ---- pick things up ---- */
+  var pk, dxp, dyp;
+  for(var pi=0;pi<L.picks.length;pi++){
+    pk=L.picks[pi]; if(pk.got) continue;
+    if(Math.abs(t-pk.t)>0.30) continue;
+    dxp=P.x-chanAt(L,pk.t).m;
+    if(Math.abs(dxp)<7){
+      pk.got=1; pts.picks++;
+      if(pk.kind==="ghost") pow.ghost=1; else pow[pk.kind]=Math.max(pow[pk.kind],11);
+      flashMsg(pk.kind==="light"?"LIGHT — the dark opens":
+               pk.kind==="calm"?"CALM — it slows down":"GHOST — one mistake forgiven");
+      for(var sp2=0;sp2<14;sp2++) sparks.push({x:P.x,y:P.sy,vx:(Math.random()-0.5)*46,
+        vy:(Math.random()-0.5)*34,a:1});
+    }
+  }
+  for(var ci2=0;ci2<L.coins.length;ci2++){
+    var cn=L.coins[ci2]; if(cn.got) continue;
+    if(Math.abs(t-cn.t)>0.26) continue;
+    if(Math.abs(P.x-(chanAt(L,cn.t).m+cn.off))<5.5){
+      cn.got=1; pts.coins++;
+      sparks.push({x:P.x,y:P.sy,vx:0,vy:-18,a:1});
+    }
+  }
+
+  /* ---- enemies: they hold the wall and reach in ---- */
+  if(gracet<=0) for(var fi=0;fi<L.foes.length;fi++){
+    var fo=L.foes[fi];
+    if(Math.abs(t-fo.t)>1.4) continue;
+    var fch=chanAt(L,t);
+    var lunge=Math.max(0,Math.sin((1.4-Math.abs(t-fo.t))*2.2))*0.55;
+    var fx=fch.m + fo.side*Math.max(fch.h*(1-lunge), FOEMIN);
+    var fy=P.sy + (fo.t-t)*SCROLL/(H/SC);
+    var ddx=(P.x-fx), ddy=(P.sy-fy)*(H/SC);
+    if(Math.sqrt(ddx*ddx+ddy*ddy) < PR+FOER){
+      if(pow.ghost>0){ pow.ghost=0; flashMsg("THE GHOST TOOK IT"); }
+      else { die(t); return; }
+    }
   }
 
   /* ---- gates: the bar is only survivable through its gap ---- */
@@ -705,7 +849,10 @@ function step(dt,t){
       if(t>=G.t && t<G.t+0.12){
         gateHit[gg]=1;
         var gc=chanAt(L,G.t).m;
-        if(Math.abs(P.x-gc) > G.gap-PR){ die(t); return; }
+        if(Math.abs(P.x-gc) > G.gap-PR){
+          if(pow.ghost>0){ pow.ghost=0; flashMsg("THE GHOST TOOK IT"); }
+          else { die(t); return; }
+        }
         pts.gates++;
         for(var sp=0;sp<10;sp++) sparks.push({x:P.x,y:P.sy,vx:(Math.random()-0.5)*40,
           vy:(Math.random()-0.5)*30,a:1});
@@ -716,7 +863,7 @@ function step(dt,t){
   /* ---- pulses. On the beat while you hold; the record is the torch. ---- */
   if(holding && s!==lastBeat && hit>0.16){
     lastBeat=s;
-    pulses.push({t:0, x:P.x, y:P.sy, r:0, max:(30+hit*34)*Z.reach, life:1});
+    pulses.push({t:0, x:P.x, y:P.sy, r:0, max:(30+hit*34)*Z.reach*(pow.light>0?2.1:1), life:1});
   }
   if(holding && Math.random()<dt*3.4){
     pulses.push({t:0, x:P.x, y:P.sy, r:0, max:22*Z.reach, life:0.7});
@@ -760,10 +907,99 @@ function step(dt,t){
    own air even though six zones do all the work.
    ===================================================================== */
 function rnd(seed){ var x=Math.sin(seed)*43758.5453; return x-Math.floor(x); }
+
+/* =====================================================================
+   THE HORIZON — what is behind the shaft
+   Drawn in silhouette, scrolling slower than the fall, so the pit reads as
+   a place rather than a corridor: palms in Abidjan, towers in Toronto,
+   zinc rooftops in Paris, constellations out in the stars, and the city
+   again on the climb — but pink this time, because you are going up.
+   All of it is paths and rectangles: no assets, no cost.
+   ===================================================================== */
+function drawBack(t,Z,seed){
+  if(Z.back==="none") return;
+  var par=(t*SCROLL*0.16)%(H/SC)*SC;           /* slow parallax */
+  ctx.save();
+  ctx.globalAlpha=0.5;
+  var base=H*0.80, i, x, w2, h2;
+
+  if(Z.back==="palm"){
+    ctx.strokeStyle=Z.far; ctx.lineWidth=2.2;
+    for(i=0;i<7;i++){
+      x=((rnd(seed+i*3.3)*1.4-0.2)*W + par*0.25)%(W*1.4)-W*0.2;
+      var ph=base+((par*0.5+i*160)%(H*1.2))-H*0.2, hh=42+rnd(seed+i*5.1)*46;
+      ctx.beginPath(); ctx.moveTo(x,ph); ctx.quadraticCurveTo(x+7,ph-hh*0.6,x+3,ph-hh); ctx.stroke();
+      for(var f=0;f<6;f++){                      /* fronds */
+        var a2=-Math.PI/2+(f-2.5)*0.42;
+        ctx.beginPath(); ctx.moveTo(x+3,ph-hh);
+        ctx.quadraticCurveTo(x+3+Math.cos(a2)*20,ph-hh+Math.sin(a2)*13,
+                             x+3+Math.cos(a2)*30,ph-hh+Math.sin(a2)*24);
+        ctx.stroke();
+      }
+    }
+  } else if(Z.back==="towers"||Z.back==="lights"){
+    var lit=(Z.back==="lights");
+    for(i=0;i<16;i++){
+      w2=16+rnd(seed+i*2.7)*34;
+      x=(i*W/9 + par*0.18)%(W+120)-60;
+      h2=50+rnd(seed+i*7.7)*H*0.30;
+      ctx.fillStyle=Z.far; ctx.globalAlpha=0.55;
+      ctx.fillRect(x, base-h2+((par*0.4)%H*0.2), w2, h2+H);
+      /* windows — the big city lights */
+      ctx.fillStyle=lit?"#ff1f6f":Z.glow; ctx.globalAlpha=0.16;
+      for(var wy=0;wy<h2-10;wy+=11) for(var wx=3;wx<w2-5;wx+=8){
+        if(rnd(seed+i*13.1+wy*0.7+wx)>0.55)
+          ctx.fillRect(x+wx, base-h2+wy+((par*0.4)%H*0.2), 3, 4);
+      }
+      if(i===5){                                  /* one tower stands taller */
+        ctx.fillStyle=Z.far; ctx.globalAlpha=0.55;
+        ctx.fillRect(x+w2*0.42, base-h2-70+((par*0.4)%H*0.2), 4, 74);
+      }
+    }
+  } else if(Z.back==="roofs"){
+    ctx.globalAlpha=0.5;
+    for(i=0;i<14;i++){
+      x=(i*W/7 + par*0.2)%(W+90)-45;
+      w2=30+rnd(seed+i*4.4)*40; h2=26+rnd(seed+i*6.6)*44;
+      var yb=base-h2+((par*0.45)%H*0.25);
+      ctx.fillStyle=Z.far;
+      ctx.beginPath();                            /* mansard */
+      ctx.moveTo(x,yb+h2); ctx.lineTo(x+4,yb+6); ctx.lineTo(x+w2-4,yb+6);
+      ctx.lineTo(x+w2,yb+h2); ctx.closePath(); ctx.fill();
+      ctx.fillRect(x+w2*0.3, yb-9, 4, 10);       /* chimney pots */
+      ctx.fillRect(x+w2*0.5, yb-12, 4, 13);
+      ctx.fillStyle=Z.glow; ctx.globalAlpha=0.13;
+      ctx.fillRect(x+7, yb+13, 5, 7);
+      ctx.globalAlpha=0.5;
+    }
+  } else if(Z.back==="stars"){
+    for(i=0;i<70;i++){
+      x=rnd(seed+i*1.7)*W;
+      var sy2=((rnd(seed+i*2.9)*H + par*0.5)%(H*1.2))-H*0.1;
+      var tw=0.25+0.65*Math.abs(Math.sin(t*1.4+i));
+      ctx.globalAlpha=tw*0.6;
+      ctx.fillStyle=i%9===0?Z.glow:"#e9e6ff";
+      var ss=i%9===0?2.2:1.2;
+      ctx.fillRect(x,sy2,ss,ss);
+    }
+    /* a couple of constellations, joined */
+    ctx.globalAlpha=0.16; ctx.strokeStyle=Z.glow; ctx.lineWidth=1;
+    for(var c3=0;c3<3;c3++){
+      ctx.beginPath();
+      for(var k3=0;k3<4;k3++){
+        var cx=rnd(seed+c3*31+k3*7)*W;
+        var cy=((rnd(seed+c3*17+k3*3)*H + par*0.5)%(H*1.2))-H*0.1;
+        if(k3===0) ctx.moveTo(cx,cy); else ctx.lineTo(cx,cy);
+      }
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
 function seedDrift(lv){
   drift=[];
-  var Z=lv.zone, sd=lv.seed, kinds={bright:"mote",water:"bubble",wind:"smoke",
-    rain:"rain",void:"word",climb:"ember"};
+  var Z=lv.zone, sd=lv.seed, kinds={abidjan:"leaf",toronto:"snow",paris:"rain",
+    stars:"star",void:"word",climb:"ember"};
   var kind=kinds[Z.id]||"mote";
   var count=Math.round(18+rnd(sd)*22);
   for(var i=0;i<count;i++){
@@ -864,7 +1100,7 @@ function draw(t){
   var Z=L.zone;
   ctx.setTransform(DPR,0,0,DPR,0,0);
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle="#05080a"; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=(L&&L.zone.sky)||"#05080a"; ctx.fillRect(0,0,W,H);
 
   var g=glitch;
   /* one shear for the whole frame — cheaper than per-layer, and it reads as
@@ -874,6 +1110,7 @@ function draw(t){
   }
 
   /* ---- the shaft, revealed only where a pulse has touched it ---- */
+  drawBack(t,Z,L.seed);
   drawDrift(t,Z);
 
   var rows=Math.round(H/6);
@@ -896,7 +1133,7 @@ function draw(t){
        paper and plays like a black screen — Dark Echo keeps your own footprints
        lit for exactly this reason. The pulses are the drama; this is the floor. */
     var near=1-clamp(Math.abs(sy-P.sy)*2.6,0,1);
-    lit=Math.max(lit, near*near*0.62);
+    lit=Math.max(lit, near*near*0.78);
     if(lit<=0.012) continue;
 
     var y=sy*H, a=clamp(lit,0,1);
@@ -905,10 +1142,10 @@ function draw(t){
     ctx.globalAlpha=a*0.92;
     ctx.fillRect(0,y,Math.max(0,lx),7);
     ctx.fillRect(rx,y,Math.max(0,W-rx),7);
-    ctx.globalAlpha=a;
+    ctx.globalAlpha=Math.min(1,a*1.25);
     ctx.fillStyle=Z.glow;
-    ctx.fillRect(Math.max(0,lx-2),y,2,7);
-    ctx.fillRect(rx,y,2,7);
+    ctx.fillRect(Math.max(0,lx-3),y,3,7);
+    ctx.fillRect(rx,y,3,7);
   }
   ctx.globalAlpha=1;
 
@@ -968,11 +1205,11 @@ function draw(t){
   var f=Math.floor(t*10)*2;
   for(var gi=0;gi<ghosts.length;gi++){
     var gr=ghosts[gi]; if(!gr||f+1>=gr.length) continue;
-    figure(gr[f]/10*SC, gr[f+1]/1000*H, 0.55, "rgba(240,239,232,0.13)", t*3+gi);
+    figure(gr[f]/10*SC, gr[f+1]/1000*H, 0.55, "rgba(240,239,232,0.13)", t*3+gi, {vy:SINK*0.6,vx:0,squash:0,bass:0});
   }
   for(var id in peers){
     var pe=peers[id];
-    figure(pe.x*SC, pe.y*H, 0.7, "rgba(255,92,157,0.30)", t*3);
+    figure(pe.x*SC, pe.y*H, 0.7, "rgba(255,92,157,0.30)", t*3, {vy:SINK*0.6,vx:0,squash:0,bass:0});
   }
 
   /* ---- the collapse ---- */
@@ -987,6 +1224,56 @@ function draw(t){
   ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
   ctx.globalAlpha=1;
 
+  /* ---- coins: the only thing that asks you off the safe line ---- */
+  for(var cd=0;cd<L.coins.length;cd++){
+    var CN=L.coins[cd]; if(CN.got) continue;
+    var csy2=P.sy+(CN.t-t)*SCROLL/(H/SC);
+    if(csy2<-0.06||csy2>1.06) continue;
+    var cx2=(chanAt(L,CN.t).m+CN.off)*SC, cy2=csy2*H;
+    var spin=Math.abs(Math.cos(t*3.4+CN.t));
+    ctx.globalAlpha=clamp(1-Math.abs(csy2-P.sy)*1.25,0.10,1);
+    ctx.fillStyle="#e8dc12";
+    ctx.beginPath(); ctx.ellipse(cx2,cy2,3.2*Math.max(0.22,spin),3.2,0,0,6.2832); ctx.fill();
+    ctx.globalAlpha*=0.45; ctx.strokeStyle="#fff6a8"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.ellipse(cx2,cy2,3.2*Math.max(0.22,spin),3.2,0,0,6.2832); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- powers, sitting on the safe line ---- */
+  for(var pd=0;pd<L.picks.length;pd++){
+    var PK=L.picks[pd]; if(PK.got) continue;
+    var psy=P.sy+(PK.t-t)*SCROLL/(H/SC);
+    if(psy<-0.06||psy>1.06) continue;
+    var pxx=chanAt(L,PK.t).m*SC, pyy=psy*H, col=POWCOL[PK.kind];
+    var pulse2=0.6+0.4*Math.sin(t*5+pd);
+    ctx.globalAlpha=clamp(1-Math.abs(psy-P.sy)*1.15,0.12,1)*pulse2;
+    ctx.strokeStyle=col; ctx.lineWidth=1.6;
+    ctx.beginPath(); ctx.arc(pxx,pyy,6.5,0,6.2832); ctx.stroke();
+    ctx.beginPath(); ctx.arc(pxx,pyy,2.4,0,6.2832); ctx.fillStyle=col; ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- enemies: they never leave their wall ---- */
+  for(var fd2=0;fd2<L.foes.length;fd2++){
+    var FO=L.foes[fd2];
+    if(Math.abs(t-FO.t)>1.6) continue;
+    var fch2=chanAt(L,t);
+    var lg=Math.max(0,Math.sin((1.4-Math.abs(t-FO.t))*2.2))*0.55;
+    var fxx=(fch2.m+FO.side*Math.max(fch2.h*(1-lg), FOEMIN))*SC;
+    var fyy=(P.sy+(FO.t-t)*SCROLL/(H/SC))*H;
+    ctx.globalAlpha=clamp(lg*2.2,0,1);
+    ctx.fillStyle="#ff1f6f";
+    var rr=3.4+lg*2;
+    ctx.beginPath(); ctx.arc(fxx,fyy,rr,0,6.2832); ctx.fill();
+    ctx.strokeStyle="#ff5c9d"; ctx.lineWidth=1;
+    for(var tk=0;tk<5;tk++){
+      var aa=FO.ph+tk*1.26+t*2;
+      ctx.beginPath(); ctx.moveTo(fxx,fyy);
+      ctx.lineTo(fxx+Math.cos(aa)*rr*2.1, fyy+Math.sin(aa)*rr*2.1); ctx.stroke();
+    }
+  }
+  ctx.globalAlpha=1;
+
   /* ---- sparks off a gate you just threaded ---- */
   for(var sq=0;sq<sparks.length;sq++){ var S=sparks[sq];
     ctx.globalAlpha=Math.max(0,S.a)*0.8; ctx.fillStyle="#e8dc12";
@@ -994,7 +1281,8 @@ function draw(t){
   ctx.globalAlpha=1;
 
   /* ---- him ---- */
-  figure(P.x*SC, P.sy*H, 1, "#f0efe8", P.limb);
+  figure(P.x*SC, P.sy*H, 1, "#f0efe8", P.limb,
+    {vy:P.vy, vx:P.vx, squash:P.squash, bass:L.lo[clamp(Math.floor(t*20),0,L.n-1)], power:powCol()});
 
   /* ---- degradation: scanlines always, tear and split as it gets worse ---- */
   ctx.globalAlpha=0.16; ctx.fillStyle="#000";
@@ -1015,26 +1303,71 @@ function draw(t){
   ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
 }
 
-/* the figure: no face, no identity. Limbs are driven by the record and the
-   lean, never by a clip — it should look like a person made of nothing. */
-function figure(px,py,scale,col,ph){
+/* =====================================================================
+   THE FIGURE
+   Two-bone limbs solved with a bit of inverse kinematics, so knees and
+   elbows actually bend instead of the whole arm being one stick. Nothing
+   here is a clip: the pose is built every frame out of what is true —
+   how fast he is falling, how hard he is leaning, what the bass is doing,
+   and whether he just took a landing. He still has no face.
+   ===================================================================== */
+function limb(ax,ay,bx,by,len1,len2,flip,col,wid){
+  /* where the joint has to be for both bones to reach — the elbow/knee */
+  var dx=bx-ax, dy=by-ay, d=Math.sqrt(dx*dx+dy*dy)||0.001;
+  d=Math.min(d,(len1+len2)*0.999);
+  var a1=Math.atan2(dy,dx);
+  var cosA=clamp((len1*len1+d*d-len2*len2)/(2*len1*d),-1,1);
+  var a2=Math.acos(cosA)*flip;
+  var jx=ax+Math.cos(a1+a2)*len1, jy=ay+Math.sin(a1+a2)*len1;
+  ctx.strokeStyle=col; ctx.lineWidth=wid; ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(jx,jy); ctx.lineTo(bx,by); ctx.stroke();
+  return [jx,jy];
+}
+function figure(px,py,scale,col,ph,st){
+  st=st||{vy:0,vx:0,squash:0,bass:0,power:null};
   var u=SC*scale;
-  var bob=Math.sin(ph)*0.20, sw=Math.sin(ph)*0.9, sw2=Math.cos(ph*1.1)*0.8;
+  var fall=clamp(st.vy/SINK,-1.4,1.6);          /* -1 rising … 1 sinking hard */
+  var lean=clamp(st.vx/LAT,-1,1);
+  var sq=st.squash||0;
+
+  /* the body reacts before the limbs do: rising pulls him tall and thin,
+     falling hard compresses him, leaning tips the whole spine */
+  var tall=1+(-fall*0.10)-sq*0.22;
+  var tilt=lean*0.42;
+  var bob=Math.sin(ph)*0.16*(1-sq);
+
+  var hipX=px+lean*0.7*u, hipY=py+(0.6+sq*0.5)*u*tall;
+  var shX =px-tilt*1.5*u, shY =py-(1.2)*u*tall+bob*u;
+  var hdX =shX-tilt*1.1*u, hdY=shY-(1.9)*u*tall;
+
   ctx.strokeStyle=col; ctx.lineWidth=Math.max(1,1.5*scale); ctx.lineCap="round";
-  ctx.beginPath();
-  var hx=px, hy=py-3.1*u;
-  ctx.arc(hx,hy,1.05*u,0,6.2832); ctx.stroke();           /* head, empty */
-  ctx.beginPath();
-  ctx.moveTo(hx,hy+1.05*u); ctx.lineTo(px,py+0.5*u+bob*u); /* spine */
-  ctx.moveTo(px,py-1.2*u+bob*u);                            /* arms */
-  ctx.lineTo(px-1.7*u+sw*u*0.5, py+0.3*u-sw*u*0.7);
-  ctx.moveTo(px,py-1.2*u+bob*u);
-  ctx.lineTo(px+1.7*u-sw*u*0.5, py+0.3*u+sw*u*0.7);
-  ctx.moveTo(px,py+0.5*u+bob*u);                            /* legs */
-  ctx.lineTo(px-1.3*u-sw2*u*0.6, py+2.7*u);
-  ctx.moveTo(px,py+0.5*u+bob*u);
-  ctx.lineTo(px+1.3*u+sw2*u*0.6, py+2.7*u);
-  ctx.stroke();
+
+  /* head — still empty */
+  ctx.beginPath(); ctx.arc(hdX,hdY,1.02*u,0,6.2832); ctx.stroke();
+  /* spine */
+  ctx.beginPath(); ctx.moveTo(hdX,hdY+1.02*u); ctx.lineTo(shX,shY); ctx.lineTo(hipX,hipY); ctx.stroke();
+
+  /* arms: they go UP when he is dropping — the body's own reflex — and they
+     trail behind the lean. The bass moves them, because it is his record. */
+  var reach=(1.6+fall*0.5+st.bass*0.5)*u;
+  var flap=Math.sin(ph*1.15)*0.5+st.bass*0.5;
+  var armY=shY-fall*0.9*u-flap*0.35*u;
+  limb(shX,shY, shX-reach-lean*0.5*u, armY, 1.05*u,1.05*u, 1, col, Math.max(1,1.35*scale));
+  limb(shX,shY, shX+reach-lean*0.5*u, armY+flap*0.2*u, 1.05*u,1.05*u,-1, col, Math.max(1,1.35*scale));
+
+  /* legs: they tuck as he falls faster and splay when he lands */
+  var stride=Math.cos(ph*0.9)*(0.5+Math.abs(lean))*u;
+  var footY=hipY+(2.15-fall*0.35+sq*0.5)*u;
+  limb(hipX,hipY, hipX-0.95*u-stride*0.5, footY, 1.16*u,1.16*u,-1, col, Math.max(1,1.4*scale));
+  limb(hipX,hipY, hipX+0.95*u+stride*0.5, footY-sq*0.2*u, 1.16*u,1.16*u, 1, col, Math.max(1,1.4*scale));
+
+  /* whatever he is carrying reads on the body, not in a corner of the HUD */
+  if(st.power){
+    ctx.globalAlpha=0.55+0.35*Math.sin(ph*4);
+    ctx.strokeStyle=st.power; ctx.lineWidth=Math.max(1,1.2*scale);
+    ctx.beginPath(); ctx.arc(px,py,3.3*u,0,6.2832); ctx.stroke();
+    ctx.globalAlpha=1;
+  }
 }
 
 /* =====================================================================
@@ -1121,14 +1454,14 @@ document.getElementById("mkroom").onclick=function(){
   if(window.IBEE_BEAT || k>60){ paintGrid(); return; }
   setTimeout(function(){ waitBeat(k+1); },150);
 })(0);
-paintGrid(); paintPerk();
+paintGrid(); paintPerk(); checkTester();
 addEventListener("pagehide",netLeave);
 addEventListener("beforeunload",netLeave);
 
 /* expose the generator so tools/np2-fall-solver.js can prove every level */
 window.__FALL={build:build, chanAt:chanAt, NP2:NP2, ZONES:ZONES,
   C:{VW:VW,SCROLL:SCROLL,LAT:LAT,LATA:LATA,SINK:SINK,RISE:RISE,
-     TOPMARGIN:TOPMARGIN,BOTMARGIN:BOTMARGIN,RES:RES,PR:PR}};
+     TOPMARGIN:TOPMARGIN,BOTMARGIN:BOTMARGIN,RES:RES,PR:PR,FOER:FOER,FOEMIN:FOEMIN}};
 })();
 </script>
 </body>
