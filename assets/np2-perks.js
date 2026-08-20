@@ -55,11 +55,19 @@
      nothing is double-credited when a new badge lands. */
   var BADGE_WORTH=40;
   function badges(){
+    /* Read the badge STORE, not the badge module. This file runs on the shop,
+       the drop, the product page and the game — badges.js is only loaded on
+       some of them, so depending on window.IBEE_BADGES silently paid out zero
+       exactly where the price tags are. localStorage is the shared truth. */
     try{
-      var B=window.IBEE_BADGES; if(!B||!B.state) return 0;
-      var st=B.state(); if(!st||!st.earned) return 0;
-      return Object.keys(st.earned).length;
-    }catch(e){ return 0; }
+      var st=JSON.parse(localStorage.getItem("ibee_badges")||"null");
+      if(st&&st.earned) return Object.keys(st.earned).length;
+    }catch(e){}
+    try{
+      var B=window.IBEE_BADGES;
+      if(B&&B.state){ var s2=B.state(); if(s2&&s2.earned) return Object.keys(s2.earned).length; }
+    }catch(e){}
+    return 0;
   }
   function badgeListens(){ return badges()*BADGE_WORTH; }
 
