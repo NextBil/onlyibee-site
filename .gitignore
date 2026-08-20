@@ -6,3 +6,9 @@
 # are. GitHub Pages serves every committed file, so it stays in the working
 # copy ("website v2/README.md") and off the domain.
 README.md
+
+# Backend setup scripts. These were live at onlyibee.com/member/*.sql in the
+# 2026-08-17 audit, handing out the schema, every RPC signature and a real
+# address. They stay in the working copy and get pasted into the Supabase SQL
+# editor by hand — never committed, never served.
+member/*.sql

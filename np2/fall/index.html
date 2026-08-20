@@ -736,9 +736,9 @@ function finish(won){
           +(P2?P2.COIN:"")+" +"+earned+"</b>"
           +(dnow?("<br><b style='color:#ff1f6f'>−"+dnow+"% OFF THE CLOTHES</b>"):"")):""))
     : "the collapse took you at "+fmt(songT())+".<br>the record starts again from silence.";
-  /* THE BOARD. Your best on this level, and anyone who was in the room with
-     you, deepest first. It is a ROOM board, not a world one — a global table
-     would need a real table in Supabase; broadcast is ephemeral by design. */
+  /* THE BOARD. The world board comes from the database (member/fall-scores.sql);
+     until that RPC exists, or while you are signed out, it falls back to the
+     room — whoever was actually falling with you. It never blanks. */
   var rows=[{who:"YOU", d:Math.round(deepest), me:1}];
   for(var pid in peers){ var q=peers[pid];
     if(q.lv===idx) rows.push({who:pid.toUpperCase(), d:Math.round(q.depth||0), me:0}); }
@@ -748,13 +748,48 @@ function finish(won){
     try{ localStorage.setItem(bestKey,JSON.stringify(best)); }catch(e){} }
   rows.sort(function(a,b){ return b.d-a.d; });
   var bd=document.getElementById("board");
-  bd.innerHTML='<div class="bh">DEEPEST THIS ROOM</div>'+rows.map(function(r,i){
-      return '<div class="br'+(r.me?" me":"")+'"><span>'+(i+1)+'</span><span>'
-        +r.who+'</span><span>'+r.d+'m</span></div>'; }).join("")
-    +'<div class="bh" style="margin-top:12px">YOUR BEST HERE — '+(best[idx]||0)+'m</div>';
+  function paintBoard(title, list){
+    bd.innerHTML='<div class="bh">'+title+'</div>'+list.map(function(r,i){
+        return '<div class="br'+(r.me?" me":"")+'"><span>'+(r.rank||i+1)+'</span><span>'
+          +r.who+'</span><span>'+r.d+'m</span></div>'; }).join("")
+      +'<div class="bh" style="margin-top:12px">YOUR BEST HERE — '+(best[idx]||0)+'m</div>';
+  }
+  paintBoard("DEEPEST THIS ROOM", rows);
+  postScore(idx, Math.round(deepest), won, save[idx]||null, paintBoard);
   document.getElementById("onext").style.display = (won&&!last)?"":"none";
   paintGrid(); paintPerk(); show(over);
   try{ var r=RADIO(); if(r&&r.playing()&&!won) r.control.pause(); }catch(e){}
+}
+/* ---- THE WORLD BOARD --------------------------------------------------
+   Post the run, then read the top ten back. Both are RPCs, called with the
+   member's own token — no service key anywhere, and the function returns
+   usernames only, never the account behind them. Signed out you can still
+   READ the board; you just cannot be on it. If the RPC is missing (the SQL
+   has not been run yet) this fails quietly and the room board stays. */
+function postScore(level, depth, cleared, secs, paint){
+  loadSB(function(){
+    if(!(window.supabase&&window.supabase.createClient)) return;
+    try{
+      sb=sb||window.supabase.createClient(SB_URL,SB_KEY);
+      sb.auth.getSession().then(function(r){
+        var signed=!!(r&&r.data&&r.data.session);
+        var after=function(){
+          sb.rpc("fall_top",{p_level:level,p_lim:10}).then(function(res){
+            if(res.error||!res.data||!res.data.length) return;
+            paint(signed?"THE WORLD — DEEPEST":"THE WORLD — DEEPEST (SIGN IN TO ENTER)",
+              res.data.map(function(row){
+                return {rank:row.rank, who:String(row.who).toUpperCase(),
+                        d:row.depth, me:!!row.me};
+              }));
+          }).catch(function(){});
+        };
+        if(!signed || !(depth>0)) return after();
+        sb.rpc("fall_submit",{p_level:level, p_depth:depth,
+          p_cleared:!!cleared, p_secs:secs||null})
+          .then(after).catch(after);
+      }).catch(function(){});
+    }catch(e){}
+  });
 }
 document.getElementById("oagain").onclick=function(){ start(idx); };
 document.getElementById("onext").onclick=function(){ start(Math.min(25,idx+1)); };
