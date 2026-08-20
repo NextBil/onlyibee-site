@@ -764,6 +764,15 @@
   /* first page: ?p= (deep-link/NFC) or the console */
   var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
   if(/^(https?:)?\/\//i.test(p)) p='console.html#menu';
+  /* ?p=blank and friends: iOS Safari reloads a tab it has evicted for memory,
+     and it restores the URL we last wrote. If that URL said p=blank the shell
+     booted its frame at /blank -> 404, which is how a listener ended up on a
+     dead page after a reload. Anything that is not a real page here is not a
+     destination — fall back to the console rather than shipping them nowhere.
+     (The matching guard in sync() below is what stops p=blank being written in
+     the first place; this one rescues URLs already in someone's history.) */
+  if(!/^[a-z0-9][a-z0-9\-_./]*(\.html)?(\?[^#]*)?(#.*)?$/i.test(p) ||
+     /^blank\b/i.test(p) || /^about:/i.test(p)) p='console.html#menu';
   /* profile === room (one page): old member/profile links land straight on room/ */
   p=p.replace(/^\/?member\/profile\/?(index\.html)?/i,'room/');
   frame.src=p;
@@ -779,7 +788,14 @@
   var lastRel=null;
   function sync(){
     try{
-      var l=frame.contentWindow.location, rel=(l.pathname+l.search+l.hash).replace(/^\//,'');
+      var l=frame.contentWindow.location;
+      /* Only a real page is worth recording. Mid-navigation, and after Safari
+         discards the frame, contentWindow.location is about:blank — whose
+         pathname is the string "blank". Writing that into ?p= poisoned the URL
+         for the next reload. Bail out and keep the last good one. */
+      if(!/^https?:$/.test(l.protocol)) return;
+      var rel=(l.pathname+l.search+l.hash).replace(/^\//,'');
+      if(!rel || /^blank$/i.test(rel)) return;
       /* A hash tweak on the same page is not a step — going "back" from
          console#ics should leave the console, not walk its screens one hash at
          a time. Only a different PAGE extends the trail. */
