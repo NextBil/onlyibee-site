@@ -175,6 +175,13 @@ body.touch #pad{display:flex}
   </div>
 </div>
 
+<div id="wake" style="position:fixed;inset:0;z-index:65;display:none;
+  align-items:center;justify-content:center;background:rgba(5,9,10,.86);text-align:center">
+  <div>
+    <div class="title" style="font-size:14px">TAP TO START</div>
+    <div class="hint" style="margin-top:12px">the level is the song —<br>it needs the record running_</div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script>document.write('<script src="../../assets/player.js?v=28"><\/script>')</script>
@@ -468,7 +475,7 @@ function startLevel(i){
   L=lv; lvIdx=i; cleared=false;
   light=new Float32Array(L.n);
   P.x=CELL*2; P.y=L.floor[0]-PH; P.vx=0; P.vy=0; P.dead=0; P.face=1;
-  ckAt=0; camX=0; started=Date.now(); armed=false; grace=0.6;
+  ckAt=0; camX=0; started=Date.now(); armed=false; grace=0.6; hideWake();
   show(null);
   sizeCanvas();
   document.getElementById("hlv").textContent="SIGNAL "+(i<9?"0":"")+(i+1);
@@ -497,11 +504,11 @@ function playTrack(i,at,tries){
     try{ ok = r.slug()===NP2[i].f && r.audio.readyState>0; }catch(e){}
     if(ok){
       try{ if(Math.abs((r.audio.currentTime||0)-(at||0))>0.6) r.audio.currentTime=at||0; }catch(e){}
-      armed=true;
+      armed=true; hideWake();
       return;
     }
     if(n<50) setTimeout(function(){ settle(n+1); },120);
-    else toast("the deck will not start on its own_<br>press \u25b6 on the radio", 5000);
+    else showWake();          /* iOS refused the autostart — ask for a real tap */
   };
   settle(0);
 }
@@ -825,6 +832,21 @@ document.getElementById("mkroom").onclick=function(){
   roomCode=c; paintWho();
   toast("ROOM "+c+"<br>pick a signal — anyone on this code joins you_",4200);
 };
+
+/* If the browser will not start audio on its own (iOS is strict about it),
+   the level would sit at 0:00 looking broken. Ask for one real tap instead. */
+var wake=document.getElementById("wake");
+function showWake(){ if(!armed && playing) wake.style.display="flex"; }
+function hideWake(){ wake.style.display="none"; }
+wake.addEventListener("click",function(){
+  hideWake();
+  var r=RADIO(); if(!r||lvIdx<0) return;
+  try{
+    var ri=r.indexBySlug?r.indexBySlug(NP2[lvIdx].f):-1;
+    if(ri>=0) r.control.play(ri);
+  }catch(e){}
+  playTrack(lvIdx,0);
+});
 
 /* =====================================================================
    12. INPUT
