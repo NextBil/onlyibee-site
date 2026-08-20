@@ -36,9 +36,9 @@ function fly(L,idx){
   const {VW,SCROLL,LAT,LATA,SINK,RISE,TOPMARGIN,BOTMARGIN,PR}=C;
   const H_over_SC = 844/(390/VW);          /* a real portrait phone, in world units */
   const isVoid = L.zone.id==="void";
-  let x=F.chanAt(L,0).m, sy=0.62, vx=0, collapse=0, t=0;
+  let x=F.chanAt(L,0).m, sy=0.62, vx=0, vy=0, collapse=0, t=0;
   const dt=1/60;
-  let minMargin=99, closest=99;
+  let minMargin=99, closest=99, gateSlack=99, gi=0;
   while(t<L.dur-0.25){
     t+=dt;
     const ch=F.chanAt(L,t);
@@ -50,7 +50,7 @@ function fly(L,idx){
     if(isVoid){ hold = (sy > TOPMARGIN+0.16) ? 1 : 0; side=0; }
     else {
       const err=ch.m-x;
-      side = Math.abs(err)<1.2 ? 0 : (err<0?-1:1);
+      side = Math.abs(err)<0.5 ? 0 : (err<0?-1:1);
       /* if the collapse is close, prioritise sinking (side 0 still sinks) */
       if(sy < collapse+0.10) side = Math.abs(err)<3 ? 0 : side;
     }
@@ -62,8 +62,11 @@ function fly(L,idx){
     vx = Math.max(-LAT,Math.min(LAT,vx));
     x  = Math.max(1,Math.min(VW-1,x+vx*dt));
 
+    /* mirror the game's eased vertical velocity, not the old instant rate */
     const push = isVoid ? (hold? -1 : 1) : (hold? 1 : -1);
-    sy += (push>0 ? SINK : -RISE)/H_over_SC*dt;
+    const targetV=(push>0? SINK : -RISE);
+    vy += (targetV-vy)*Math.min(1,(L.zone.id==="water"?2.6:5.8)*dt);
+    sy += vy/H_over_SC*dt;
     sy = Math.max(0.02,Math.min(BOTMARGIN,sy));
 
     collapse = collapse + ((TOPMARGIN+(isVoid?0.06:0)+hit*0.03)-collapse)*(1-Math.pow(0.02,dt));
@@ -76,8 +79,18 @@ function fly(L,idx){
       if(edge>0) return {ok:false,why:"wall",at:+t.toFixed(1),of:+L.dur.toFixed(0),over:+edge.toFixed(1)};
       closest=Math.min(closest,-edge);
     }
+    /* GATES — the new way to die, so the proof has to cover them */
+    while(gi<L.gates.length && t>=L.gates[gi].t){
+      const G=L.gates[gi], gc=F.chanAt(L,G.t).m;
+      const off=Math.abs(x-gc), room=G.gap-PR;
+      if(off>room) return {ok:false,why:"gate",at:+t.toFixed(1),of:+L.dur.toFixed(0),
+        n:gi,miss:+(off-room).toFixed(1)};
+      gateSlack=Math.min(gateSlack, room-off);
+      gi++;
+    }
   }
-  return {ok:true, vMargin:+minMargin.toFixed(3), wallMargin:+closest.toFixed(1)};
+  return {ok:true, vMargin:+minMargin.toFixed(3), wallMargin:+closest.toFixed(1),
+          gates:L.gates.length, gateSlack:+gateSlack.toFixed(1), cps:L.cps.length};
 }
 
 let bad=0;
@@ -89,8 +102,9 @@ NP2.forEach((s,i)=>{
   if(!r.ok){ bad++; console.log(String(i+1).padStart(2),"FAIL",z,s[1].padEnd(19),JSON.stringify(r)); }
   else console.log(String(i+1).padStart(2),"ok  ",z,s[1].padEnd(19),
     "secs",String(L.secs.length).padStart(2),
-    "| collapse margin",String(r.vMargin).padStart(5),
-    "| wall clearance",String(r.wallMargin).padStart(5),
+    "| wall",String(r.wallMargin).padStart(4),
+    "| gates",String(r.gates).padStart(2),"slack",String(r.gateSlack).padStart(4),
+    "| cps",r.cps,
     "|",Math.round(L.dur)+"s");
 });
 console.log(bad? "\n*** "+bad+" NOT SURVIVABLE ***" : "\nALL 26 SURVIVABLE");

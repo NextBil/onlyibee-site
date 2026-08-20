@@ -104,6 +104,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <div id="lbx"><button class="x" aria-label="close">✕</button><img id="lbxim" alt=""></div>
 
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="../assets/np2-perks.js?v=1"></script>
 <script>
 (function(){
   "use strict";
@@ -164,7 +165,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
         +'<div class="sq">'+sq+'<span class="rtag">'+(RNAME[p.r]||"COMMON")+'</span>'
         +(out?'<span class="sotag">SOLD OUT</span>':'')+'</div>'
         +'<div class="meta"><span class="nm">'+e2(p.n)+'</span>'
-        +'<span class="pr">'+e2((p.cur||"€")+p.price)+'</span></div></a>';
+        +'<span class="pr" data-perk-price="'+e2(p.price)+'" data-perk-cur="'+e2(p.cur||"€")+'">'
+        +e2((p.cur||"€")+p.price)+'</span></div></a>';
     }).join('')+'</div>';
   }
   /* THE PROCESS used to be built here, ICS folders only, with its own copy of
@@ -173,6 +175,8 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
      these folder pages and the console — and so every drop gets it, not only
      the ICS ones. */
   document.getElementById("wrap").innerHTML=head+note+grid;
+  /* the grid is built after products-data lands, so re-price it now */
+  try{ if(window.IBEE_PERKS) window.IBEE_PERKS.render(); }catch(e){}
   /* lightbox for the sketches. Delegated: the shared block is injected after
      this runs, so binding per link would miss it and the stills would navigate
      away from the page instead of opening. */

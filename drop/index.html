@@ -241,6 +241,7 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <footer id="foot">© ONLYIBEE — ONE OF ONE, MADE ONCE</footer>
 
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="../assets/np2-perks.js?v=1"></script>
 <script src="../assets/tee-art.js?v=2"></script>
 <script>
 (function(){
@@ -332,7 +333,8 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       +'<span class="rtag">'+(RNAME[rar]||"COMMON")+'</span>'
       +'<div class="stage"><div class="tw">'+art+'</div></div>'
       +'<div class="nm">'+e2(p.n)+'</div>'
-      +'<div class="pricerow"><span class="pr">'+e2((p.cur||"€")+p.price)+'</span>'
+      +'<div class="pricerow"><span class="pr" data-perk-price="'+e2(p.price)+'" data-perk-cur="'+e2(p.cur||"€")+'">'
+        +e2((p.cur||"€")+p.price)+'</span>'
       +'<span class="oneof">1 OF 1</span></div>'
       +'<div class="plate">'
         +'<div class="prow"><span class="k">OWNER</span>'+ownerV+'</div>'
@@ -343,6 +345,7 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   }
 
   var vault=document.getElementById("vault");
+  try{ setTimeout(function(){ if(window.IBEE_PERKS) window.IBEE_PERKS.render(); },0); }catch(e){}
   vault.innerHTML=items.length
     ? items.map(card).join('')
     : '<div style="grid-column:1/-1;text-align:center;padding:50px 0;font-family:var(--px);'

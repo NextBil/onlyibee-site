@@ -129,6 +129,16 @@ header span{color:var(--dim);font-size:7px}
 
 #wake{position:fixed;inset:0;z-index:65;display:none;align-items:center;justify-content:center;
   background:rgba(5,8,10,.9);text-align:center}
+#gmsg{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:34;
+  font-family:var(--px);font-size:9px;letter-spacing:2px;color:var(--acid);
+  background:rgba(0,0,0,.82);border:1px solid var(--acid);padding:8px 12px;
+  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#gmsg.on{opacity:1}
+#perk{font-family:var(--px);font-size:8px;letter-spacing:1px;color:var(--acid);
+  text-align:center;margin:16px auto 0;border:1px solid #2a4a2f;padding:9px 12px;
+  display:inline-block;line-height:1.9}
+#perk b{color:var(--pink);font-weight:400}
+#perkwrap{text-align:center}
 @media(prefers-reduced-motion:reduce){.lv{transition:none}}
 </style>
 </head>
@@ -154,6 +164,7 @@ header span{color:var(--dim);font-size:7px}
     what is coming down after you. <b>Let go</b> and the writing surfaces, but the
     collapse keeps falling and it is falling faster than you are.
   </div>
+  <div id="perkwrap"><div id="perk">— fall to earn —</div></div>
   <div class="grid" id="lvgrid"></div>
   <div class="row">
     <button class="btn alt" id="mkroom">▣ FALL WITH SOMEONE</button>
@@ -183,6 +194,7 @@ header span{color:var(--dim);font-size:7px}
 </div></div>
 
 <script>document.write('<script src="../../assets/player.js?v=28"><\/script>')</script>
+<script src="../../assets/np2-perks.js?v=1"></script>
 <script>
 (function(){
 "use strict";
@@ -390,8 +402,58 @@ function build(slug, idx){
     if(d3>maxD) mid[i]=mid[i-1]+maxD;
     if(d3<-maxD) mid[i]=mid[i-1]-maxD;
   }
+  /* ---- GATES ------------------------------------------------------------
+     A bar across the shaft with a gap in it, dropped on the track's hardest
+     moments. The gap is centred on the CHANNEL, never on the shaft — so it
+     always sits where you should already be, and the guarantee survives:
+     the thing that gets tighter is your precision, not your route. */
+  /* THE VOID GETS NO GATES. Down there the walls are gone and stillness is
+     what saves you — asking for lateral precision at the same time is asking
+     for a skill the zone has deliberately taken away. (The solver failed both
+     void levels by 5 and 11 units: not tuning, a contradiction.) */
+  var gates=[], ord=[];
+  for(i=Math.round(9/RES);i<steps-Math.round(6/RES) && Z.id!=="void";i++){
+    var si=clamp(Math.floor(i*RES*20),0,n-1);
+    if(im[si]>0) ord.push([i,im[si]]);
+  }
+  ord.sort(function(a,b){ return b[1]-a[1]; });
+  var gBudget=clamp(Math.round(dur/11),3,16);
+  for(var q=0;q<ord.length && gates.length<gBudget;q++){
+    var gi=ord[q][0], okg=true;
+    for(var w2=0;w2<gates.length;w2++) if(Math.abs(gi-gates[w2].i)<Math.round(4.5/RES)){ okg=false; break; }
+    if(!okg) continue;
+    /* NOT ON A BEND. The gap sits on the channel centre, so a gate placed where
+       the channel is swinging hard asks you to be somewhere you are still on
+       your way to. Only drop one where the shaft is running reasonably straight
+       — the solver was missing exactly these by under a unit. */
+    var a3=clamp(gi-3,0,steps-1), b3=clamp(gi+3,0,steps-1);
+    /* …and how straight is straight enough depends on the zone, for the same
+       reason the wander clamp does: in water you arrive late to everything. */
+    if(Math.abs(mid[b3]-mid[a3]) > 7*Z.agile) continue;
+        /* the gap must be a thing you aim at, not a frame-perfect input. Solver
+       was clearing these by 0-1 units, which is not a margin, it is luck. */
+    gates.push({ i:gi, t:gi*RES, gap:clamp(half[gi]*0.62, 11, 20) });
+  }
+  gates.sort(function(a,b){ return a.i-b.i; });
+
+  /* ---- CHECKPOINTS ------------------------------------------------------
+     Dying used to send you back to silence, which on a 4-minute track is a
+     punishment nobody learns from. Land them on real section boundaries so a
+     restart begins where the music begins something, not mid-phrase. */
+  var cps=[], want=(dur>150)?[0.34,0.66]:(dur>75?[0.5]:[]);
+  want.forEach(function(f){
+    var target=dur*f, bestT=target, bestD=1e9;
+    secs.forEach(function(se){
+      var st=se.s/20, d4=Math.abs(st-target);
+      if(st>12 && st<dur-25 && d4<bestD){ bestD=d4; bestT=st; }
+    });
+    /* never open a checkpoint right on top of a gate */
+    gates.forEach(function(G){ if(Math.abs(G.t-bestT)<2.2) bestT=G.t+2.6; });
+    if(!cps.length || bestT-cps[cps.length-1]>20) cps.push(bestT);
+  });
+
   return {n:n, dur:dur, steps:steps, mid:mid, half:half, lo:sLo, lv:sLv, im:im,
-          secs:secs, zone:Z, depth:dur*SCROLL};
+          secs:secs, zone:Z, depth:dur*SCROLL, gates:gates, cps:cps, seed:(idx*2654435761)%100000};
 }
 function chanAt(L,t){
   var f=clamp(t/RES,0,L.steps-1.001), i=Math.floor(f), k=f-i;
@@ -404,8 +466,10 @@ function chanAt(L,t){
 var cv=document.getElementById("cv"), ctx=cv.getContext("2d");
 var W=0,H=0,DPR=1,SC=1;
 var L=null, idx=-1, live=false, rafOn=false, armed=false, ended=false;
-var P={x:50, sy:0.62, vx:0, limb:0};
-var pulses=[], scars=[], motes=[], ghosts=[], rec=[], recAt=0;
+var P={x:50, sy:0.62, vx:0, vy:0, limb:0, squash:0};
+var pulses=[], scars=[], motes=[], drift=[], ghosts=[], rec=[], recAt=0;
+var cpAt=0, gateHit={}, sparks=[];
+var pts={gates:0,deaths:0,frags:0};
 var collapse=0, holding=0, holdSide=0, glitch=0, fragT=0, fragIx=0, frags=[], gracet=0;
 var save=load(), started=0, deepest=0;
 
@@ -433,6 +497,14 @@ addEventListener("resize",function(){ if(live) size(); });
 var grid=document.getElementById("lvgrid");
 function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
 function unlocked(i){ return i===0 || !!save[i-1] || !!save[i]; }
+function paintPerk(){
+  var P2=window.IBEE_PERKS, el=document.getElementById("perk");
+  if(!P2||!el) return;
+  var d=P2.discount(), pt=P2.points(), c=P2.cleared();
+  el.innerHTML = d>0
+    ? (pt+" PTS · "+c+"/26 OUT<br><b>−"+d+"% ON THE CLOTHES</b><br>CODE "+P2.code())
+    : (pt+" PTS · "+c+"/26 OUT<br>get out of a level to start earning_");
+}
 function paintGrid(){
   var B=window.IBEE_BEAT||{};
   grid.innerHTML=NP2.map(function(s,i){
@@ -450,8 +522,10 @@ grid.addEventListener("click",function(e){
 });
 document.getElementById("wipe").onclick=function(){
   if(!confirm("empty the pit? every level seals again.")) return;
-  save={}; store(); try{ localStorage.removeItem(LS+"_g"); }catch(e){}
-  paintGrid();
+  save={}; store();
+  try{ localStorage.removeItem(LS+"_g"); localStorage.removeItem("ibee_np2fall_out");
+    localStorage.removeItem("ibee_np2pts"); }catch(e){}
+  paintGrid(); paintPerk();
 };
 
 /* =====================================================================
@@ -466,7 +540,11 @@ function start(i){
   if(!lv){ return; }
   L=lv; idx=i; ended=false; armed=false;
   P.x=chanAt(L,0).m; P.sy=0.62; P.vx=0; P.limb=0;
-  pulses=[]; scars=[]; motes=[]; rec=[]; recAt=0; collapse=0; glitch=0; gracet=0.9;
+  pulses=[]; scars=[]; motes=[]; drift=[]; sparks=[]; rec=[]; recAt=0;
+  collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
+  pts={gates:0,deaths:0,frags:0};
+  P.vy=0; P.squash=0;
+  seedDrift(lv);
   holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
   frags=fragmentsFor(NP2[i][0]);
   ghostsFor(i); netJoin(i);
@@ -498,7 +576,12 @@ function finish(won){
   live=false; ended=true; netLeave();
   fragEl.classList.remove("on");
   var last=(idx===25);
+  var earned=0;
   if(won){
+    /* what a run is worth. Clearing is the bulk of it so finishing the record
+       reaches the cap on its own; the rest only gets you there sooner. */
+    earned = 100 + pts.gates*5 + pts.frags*2 + (deaths===0?50:0);
+    try{ if(window.IBEE_PERKS) window.IBEE_PERKS.add(earned); }catch(e){}
     save[idx]=Math.round((Date.now()-started)/1000); store(); saveGhost(idx);
     try{ var o=JSON.parse(localStorage.getItem("ibee_np2fall_out")||"{}")||{};
       o[idx]=1; localStorage.setItem("ibee_np2fall_out",JSON.stringify(o)); }catch(e){}
@@ -506,13 +589,17 @@ function finish(won){
   var n=Object.keys(save).length;
   document.getElementById("otitle").textContent = won ? (last?"THE LIGHT":"OUT") : "CAUGHT";
   document.getElementById("osub").textContent = (idx<9?"0":"")+(idx+1)+" — "+NP2[idx][1].toUpperCase();
+  var P2=window.IBEE_PERKS, dnow=P2?P2.discount():0;
   document.getElementById("oblurb").innerHTML = won
     ? (last
       ? "you are still walking.<br><br>not saved. not finished. still walking."
-      : "you rode "+NP2[idx][1]+" all the way down and found the way out.<br>"+n+" of 26.")
+      : "you rode "+NP2[idx][1]+" all the way down and found the way out.<br>"+n+" of 26."
+        +(earned?("<br><br><b style='color:#e8dc12'>+"+earned+" PTS</b>"
+          +(dnow?(" · the clothes are <b style='color:#ff1f6f'>−"+dnow+"%</b> for you"
+                 +(P2&&P2.code()?(" · code <b style='color:#e8dc12'>"+P2.code()+"</b>"):"")):"")):""))
     : "the collapse took you at "+fmt(songT())+".<br>the record starts again from silence.";
   document.getElementById("onext").style.display = (won&&!last)?"":"none";
-  paintGrid(); show(over);
+  paintGrid(); paintPerk(); show(over);
   try{ var r=RADIO(); if(r&&r.playing()&&!won) r.control.pause(); }catch(e){}
 }
 document.getElementById("oagain").onclick=function(){ start(idx); };
@@ -580,7 +667,15 @@ function step(dt,t){
      spends it. THE VOID INVERTS THIS: down there moving is what costs you
      and stillness is the only thing that keeps you ahead. ---- */
   var push = isVoid ? (holding? -1 : 1) : (holding? 1 : -1);
-  P.sy += (push>0 ? SINK : -RISE)/ (H/SC) * dt * (push>0?1:1);
+  /* A body, not a slider. The old version snapped straight to the target rate,
+     so the thumb felt like a switch; easing into it gives the fall weight and
+     makes letting go feel like something leaving you rather than a number
+     changing. Water is heavier still — it keeps whatever it already had. */
+  var targetV=(push>0? SINK : -RISE);
+  P.vy += (targetV-P.vy)*Math.min(1,(Z.id==="water"?2.6:5.8)*dt);
+  P.sy += P.vy/(H/SC)*dt;
+  if(P.sy>=BOTMARGIN && P.vy>0) P.squash=Math.min(1,P.squash+dt*6);
+  else P.squash=Math.max(0,P.squash-dt*3);
   P.sy = clamp(P.sy, 0.02, BOTMARGIN);
 
   /* the collapse eats down the screen from above */
@@ -590,16 +685,32 @@ function step(dt,t){
      clamp below pins sy to its minimum, which reads as "caught at 0:00" — a
      restart that kills you before you have touched anything. Recover instead,
      and give every level a moment on its feet before the collapse can bite. */
-  if(!isFinite(P.sy)||!isFinite(P.x)||!isFinite(P.vx)){
-    P.sy=0.62; P.x=ch.m; P.vx=0;
+  if(!isFinite(P.sy)||!isFinite(P.x)||!isFinite(P.vx)||!isFinite(P.vy)){
+    P.sy=0.62; P.x=ch.m; P.vx=0; P.vy=0;
   }
   if(gracet>0){ gracet-=dt; }
-  else if(P.sy <= collapse+0.005){ finish(false); return; }
+  else if(P.sy <= collapse+0.005){ die(t); return; }
 
   /* ---- walls ---- */
   if(!isVoid && gracet<=0){
     var edge=Math.abs(P.x-ch.m)-(ch.h-PR);
-    if(edge>0){ finish(false); return; }
+    if(edge>0){ die(t); return; }
+  }
+
+  /* ---- gates: the bar is only survivable through its gap ---- */
+  if(gracet<=0){
+    for(var gg=0;gg<L.gates.length;gg++){
+      var G=L.gates[gg];
+      if(gateHit[gg]) continue;
+      if(t>=G.t && t<G.t+0.12){
+        gateHit[gg]=1;
+        var gc=chanAt(L,G.t).m;
+        if(Math.abs(P.x-gc) > G.gap-PR){ die(t); return; }
+        pts.gates++;
+        for(var sp=0;sp<10;sp++) sparks.push({x:P.x,y:P.sy,vx:(Math.random()-0.5)*40,
+          vy:(Math.random()-0.5)*30,a:1});
+      }
+    }
   }
 
   /* ---- pulses. On the beat while you hold; the record is the torch. ---- */
@@ -627,6 +738,7 @@ function step(dt,t){
     if(!fragEl.classList.contains("on")){
       fragEl.textContent=frags[fragIx%frags.length]; fragIx++;
       fragEl.classList.add("on");
+      pts.frags++;
     }
   } else if(fragEl.classList.contains("on")) fragEl.classList.remove("on");
 
@@ -638,6 +750,110 @@ function step(dt,t){
   if(t-recAt>0.1){ recAt=t; rec.push(Math.round(P.x*10), Math.round(P.sy*1000)); }
 
   if(armed && t>=L.dur-0.25 && !ended) finish(true);
+}
+
+/* =====================================================================
+   THINGS THAT ARE NOT YOU
+   Bats, smoke, embers, rain. None of it collides — it is weather, and its
+   whole job is to make level 19 not feel like level 4. Density, kind and
+   drift all come off the zone and a per-level seed, so every song has its
+   own air even though six zones do all the work.
+   ===================================================================== */
+function rnd(seed){ var x=Math.sin(seed)*43758.5453; return x-Math.floor(x); }
+function seedDrift(lv){
+  drift=[];
+  var Z=lv.zone, sd=lv.seed, kinds={bright:"mote",water:"bubble",wind:"smoke",
+    rain:"rain",void:"word",climb:"ember"};
+  var kind=kinds[Z.id]||"mote";
+  var count=Math.round(18+rnd(sd)*22);
+  for(var i=0;i<count;i++){
+    drift.push({
+      kind:kind,
+      x:rnd(sd+i*1.7)*VW,
+      y:rnd(sd+i*3.1),
+      sp:0.25+rnd(sd+i*5.3)*1.1,          /* how fast it rides the fall */
+      sw:(rnd(sd+i*7.9)-0.5)*2.2,          /* sideways wander */
+      sz:0.5+rnd(sd+i*11.3)*1.4,
+      ph:rnd(sd+i*13.7)*6.283
+    });
+  }
+  /* bats only in some levels — they should feel like an event, not wallpaper */
+  if(rnd(sd+99)>0.45){
+    var bats=1+Math.round(rnd(sd+7)*3);
+    for(var b=0;b<bats;b++) drift.push({kind:"bat", x:rnd(sd+b*17.1)*VW,
+      y:rnd(sd+b*19.3), sp:1.6+rnd(sd+b*23.7)*1.8, sw:2.6, sz:1, ph:rnd(sd+b*29.1)*6.283});
+  }
+}
+function stepDrift(dt,t,Z){
+  for(var i=0;i<drift.length;i++){
+    var d=drift[i];
+    /* everything rides the shaft upward past you, at its own rate */
+    d.y -= (SCROLL/(H/SC))*dt*d.sp;
+    d.x += Math.sin(t*0.7+d.ph)*d.sw*dt*6;
+    if(d.kind==="smoke"||d.kind==="bubble") d.y -= 0.04*dt;
+    if(d.y<-0.15){ d.y=1.15; d.x=Math.random()*VW; }
+    if(d.x<-6) d.x=VW+6; if(d.x>VW+6) d.x=-6;
+  }
+}
+function drawDrift(t,Z){
+  for(var i=0;i<drift.length;i++){
+    var d=drift[i], x=d.x*SC, y=d.y*H;
+    if(y<-30||y>H+30) continue;
+    var a=0.20+0.18*Math.sin(t*2+d.ph);
+    ctx.globalAlpha=Math.max(0,a);
+    if(d.kind==="bat"){
+      ctx.fillStyle="rgba(255,31,111,0.5)";
+      var w=5*d.sz*SC*0.22, f=Math.sin(t*11+d.ph)*0.6+0.4;
+      ctx.beginPath();
+      ctx.moveTo(x-w,y); ctx.lineTo(x-w*0.4,y-w*0.5*f); ctx.lineTo(x,y);
+      ctx.lineTo(x+w*0.4,y-w*0.5*f); ctx.lineTo(x+w,y);
+      ctx.lineTo(x,y+w*0.35); ctx.closePath(); ctx.fill();
+    } else if(d.kind==="smoke"){
+      ctx.fillStyle=Z.glow; ctx.globalAlpha*=0.10;
+      ctx.beginPath(); ctx.arc(x,y,d.sz*9*SC*0.1,0,6.283); ctx.fill();
+    } else if(d.kind==="rain"){
+      ctx.strokeStyle=Z.glow; ctx.globalAlpha*=0.35; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-1,y+9*d.sz); ctx.stroke();
+    } else if(d.kind==="bubble"){
+      ctx.strokeStyle=Z.glow; ctx.globalAlpha*=0.28; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(x,y,d.sz*2.2*SC*0.1+1,0,6.283); ctx.stroke();
+    } else if(d.kind==="word"){
+      ctx.fillStyle="rgba(255,92,157,0.30)";
+      ctx.font=(7*d.sz)+"px monospace"; ctx.textAlign="center";
+      ctx.fillText("maybe", x, y);
+    } else if(d.kind==="ember"){
+      ctx.fillStyle=Z.glow; ctx.globalAlpha*=0.5;
+      ctx.fillRect(x,y,1.6*d.sz,1.6*d.sz);
+    } else {
+      ctx.fillStyle=Z.glow; ctx.globalAlpha*=0.30;
+      ctx.fillRect(x,y,1.4*d.sz,1.4*d.sz);
+    }
+  }
+  ctx.globalAlpha=1; ctx.textAlign="start";
+}
+
+/* A death is not the end of the record any more. Fall back to the last
+   checkpoint you actually reached and rewind the track to it — the song
+   restarts a section, not a life. Only dying before the first checkpoint
+   sends you back to silence. */
+function die(t){
+  var back=0, k;
+  for(k=0;k<L.cps.length;k++) if(t>L.cps[k]+0.4) back=L.cps[k];
+  pts.deaths++;
+  if(back<=0){ finish(false); return; }
+  cpAt=back; gracet=1.0; deaths++;
+  P.sy=0.62; P.vy=0; P.vx=0; P.x=chanAt(L,back).m; P.squash=0;
+  pulses=[]; sparks=[]; gateHit={};
+  for(k=0;k<L.gates.length;k++) if(L.gates[k].t<back) gateHit[k]=1;
+  var r=RADIO(); try{ if(r) r.audio.currentTime=back; }catch(e){}
+  flashMsg("CHECKPOINT — "+fmt(back));
+}
+var deaths=0;
+var msgEl=null, msgT=null;
+function flashMsg(m){
+  if(!msgEl){ msgEl=document.createElement("div"); msgEl.id="gmsg"; document.body.appendChild(msgEl); }
+  msgEl.textContent=m; msgEl.className="on";
+  clearTimeout(msgT); msgT=setTimeout(function(){ msgEl.className=""; },1600);
 }
 
 /* =====================================================================
@@ -658,6 +874,8 @@ function draw(t){
   }
 
   /* ---- the shaft, revealed only where a pulse has touched it ---- */
+  drawDrift(t,Z);
+
   var rows=Math.round(H/6);
   for(var r=0;r<rows;r++){
     var sy=r/rows;                                   /* 0 top … 1 bottom */
@@ -691,6 +909,41 @@ function draw(t){
     ctx.fillStyle=Z.glow;
     ctx.fillRect(Math.max(0,lx-2),y,2,7);
     ctx.fillRect(rx,y,2,7);
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- gates: a bar with a gap, drawn only where the light finds it ---- */
+  for(var gg=0;gg<L.gates.length;gg++){
+    var G=L.gates[gg];
+    var gsy = P.sy + (G.t - t)*SCROLL/(H/SC);
+    if(gsy<-0.12||gsy>1.12) continue;
+    var gy=gsy*H, gc=chanAt(L,G.t);
+    var lit2=clamp(1-Math.abs(gsy-P.sy)*1.7,0,1);
+    for(var pz=0;pz<pulses.length;pz++){
+      var qz=pulses[pz], dyz=(gsy-qz.y)*(H/SC);
+      var dz=Math.sqrt(dyz*dyz+(gc.m-qz.x)*(gc.m-qz.x));
+      if(Math.abs(dz-qz.r)<16) lit2=Math.max(lit2,qz.life);
+    }
+    if(lit2<=0.02) continue;
+    ctx.globalAlpha=clamp(lit2,0,1)*0.95;
+    ctx.fillStyle=gateHit[gg]?"#2b3a3c":"#ff1f6f";
+    var gl=(gc.m-G.gap)*SC, gr2=(gc.m+G.gap)*SC;
+    ctx.fillRect(Math.max(0,(gc.m-gc.h)*SC), gy-2, Math.max(0,gl-(gc.m-gc.h)*SC), 4);
+    ctx.fillRect(gr2, gy-2, Math.max(0,(gc.m+gc.h)*SC-gr2), 4);
+    ctx.globalAlpha=clamp(lit2,0,1)*0.5;
+    ctx.fillStyle="#e8dc12";
+    ctx.fillRect(gl-1.5,gy-5,3,10); ctx.fillRect(gr2-1.5,gy-5,3,10);
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- checkpoint markers: the line you fall back to ---- */
+  for(var cq=0;cq<L.cps.length;cq++){
+    var csy = P.sy + (L.cps[cq]-t)*SCROLL/(H/SC);
+    if(csy<-0.1||csy>1.1) continue;
+    ctx.globalAlpha=(t>L.cps[cq])?0.30:0.16;
+    ctx.strokeStyle="#e8dc12"; ctx.lineWidth=1; ctx.setLineDash([4,7]);
+    ctx.beginPath(); ctx.moveTo(0,csy*H); ctx.lineTo(W,csy*H); ctx.stroke();
+    ctx.setLineDash([]);
   }
   ctx.globalAlpha=1;
 
@@ -732,6 +985,12 @@ function draw(t){
   ctx.strokeStyle=Z.id==="void"?"#ff5c9d":"#ff1f6f";
   ctx.globalAlpha=0.30+Math.sin(t*7)*0.10;
   ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+  ctx.globalAlpha=1;
+
+  /* ---- sparks off a gate you just threaded ---- */
+  for(var sq=0;sq<sparks.length;sq++){ var S=sparks[sq];
+    ctx.globalAlpha=Math.max(0,S.a)*0.8; ctx.fillStyle="#e8dc12";
+    ctx.fillRect(S.x*SC,S.y*H,2,2); }
   ctx.globalAlpha=1;
 
   /* ---- him ---- */
@@ -862,7 +1121,7 @@ document.getElementById("mkroom").onclick=function(){
   if(window.IBEE_BEAT || k>60){ paintGrid(); return; }
   setTimeout(function(){ waitBeat(k+1); },150);
 })(0);
-paintGrid();
+paintGrid(); paintPerk();
 addEventListener("pagehide",netLeave);
 addEventListener("beforeunload",netLeave);
 

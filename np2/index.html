@@ -570,9 +570,11 @@ body.neon #roomtag.gone{opacity:0}
         +'<span class="no">'+esc(p.no||"")+' / '+items.length+'</span>'
         +'<span class="rt">'+esc(RNAME[rar]||"COMMON")+'</span>'
         +'<div class="nm">'+esc(p.n)+'</div>'
-        +'<div class="pr"><span>'+esc((p.cur||"\u20ac")+p.price)+'</span>'
+        +'<div class="pr"><span data-perk-price="'+esc(p.price)+'" data-perk-cur="'+esc(p.cur||"\u20ac")+'">'
+        +esc((p.cur||"\u20ac")+p.price)+'</span>'
         +'<span class="one">'+(taken?"CLAIMED":"1 OF 1")+'</span></div></a>';
     }).join("");
+    try{ if(window.IBEE_PERKS) window.IBEE_PERKS.render(teesEl); }catch(e){}
   }
   buildTees();
 
@@ -934,6 +936,7 @@ body.neon #roomtag.gone{opacity:0}
 })();
 </script>
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="../assets/np2-perks.js?v=1"></script>
 <script src="../assets/player.js?v=28"></script>
 <script src="../assets/badges.js?v=13"></script>
 <script src="/assets/stats-client.js?v=7"></script>

@@ -190,6 +190,11 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     background:transparent;color:var(--dim);border:1px solid var(--border)}
   .savebtn:hover{color:var(--acid);border-color:var(--acid)}
   .savebtn.on{color:#000;background:var(--acid);border-color:var(--acid)}
+.perknote{margin-top:10px;border:1px solid #e8dc12;padding:9px 11px;
+  font-family:'Press Start 2P',monospace;font-size:7px;line-height:2.1;
+  letter-spacing:1px;color:#e8dc12}
+.perknote b{color:#ff1f6f;font-weight:400}
+.perknote span{color:#7f9698}
 </style>
 <script src="/assets/cart.js?v=3"></script>
 </head>
@@ -234,6 +239,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 <footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
 
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script src="../assets/np2-perks.js?v=1"></script>
 <!-- draws made-to-order pieces that have no photo; must precede the renderer -->
 <script src="../assets/tee-art.js?v=2"></script>
 <script>
@@ -288,7 +294,10 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   /* the price always shows — even on sold pieces. It's part of the record of what
      the piece was; the SOLD OUT stamp + strike-through carry the status instead. */
   $("pprice").textContent=(p.cur||"€")+p.price;
+  $("pprice").setAttribute("data-perk-price", p.price);
+  $("pprice").setAttribute("data-perk-cur", p.cur||"€");
   $("pprice").className="price"+(out?" claimed":"");
+  try{ if(window.IBEE_PERKS) window.IBEE_PERKS.render(); }catch(e){}
   if(out){ $("claimtag").style.display=""; $("claimtag").textContent="SOLD OUT"; }
   /* how the piece was made is a property of its DROP, not of the site: the ICS
      archive is hand-made one by one, the vault is printed to order. Saying
@@ -352,7 +361,19 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
       +'<div class="closedbox">'+e2(FOLD.name||"THIS DROP")+' HASN\'T OPENED YET_<br>NOBODY OWNS THIS ONE — IT COULD BE YOU</div>';
     $("paynote").style.display="none";
   } else {
+    /* The button says the price you will actually be asked for. The perk is a
+       CODE you enter at checkout, not a silent re-price — see assets/np2-perks.js
+       for why a localStorage discount must never set an amount. */
     btns='<a class="paybtn card" href="checkout.html?id='+encodeURIComponent(p.id)+'">▶ BUY NOW — '+e2((p.cur||"€")+p.price)+'</a>';
+    try{
+      var PK=window.IBEE_PERKS, dd=PK?PK.discount():0;
+      if(dd>0){
+        var pp=PK.price(p.price), cu=p.cur||"€";
+        btns+='<div class="perknote">YOU FELL FOR THIS — <b>−'+dd+'%</b><br>'
+          +PK.money(pp.now,cu)+' with code <b>'+PK.code()+'</b> · saves '+PK.money(pp.saved,cu)
+          +'<br><span>enter the code at checkout</span></div>';
+      }
+    }catch(e){}
   }
   /* SAVE works in EVERY buy state — the first drop is closed and every piece is
      one-of-one, so "keep an eye on this" is the only action left to a visitor.
