@@ -116,6 +116,8 @@ header span{color:var(--dim);font-size:7px}
   display:flex;justify-content:space-between;padding:0 14px;font-family:var(--px);
   font-size:8px;color:#3f5658;letter-spacing:1px;pointer-events:none}
 #hud .a{color:var(--acid)}
+#hlives{color:var(--pink);letter-spacing:2px}
+#hlives.dim{color:#333}
 #depth{position:fixed;left:50%;transform:translateX(-50%);
   bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;
   font-family:var(--px);font-size:7px;color:#2f4446;letter-spacing:2px;pointer-events:none}
@@ -160,7 +162,7 @@ header span{color:var(--dim);font-size:7px}
 </header>
 
 <div id="stage"><canvas id="cv"></canvas></div>
-<div id="hud"><span class="a" id="hlv"></span><span id="hzone"></span></div>
+<div id="hud"><span class="a" id="hlv"></span><span id="hlives">♥♥♥</span><span id="hzone"></span></div>
 <div id="depth"></div>
 <div id="frag"></div>
 <div id="tap"></div>
@@ -402,7 +404,7 @@ function sections(lo,lv,im,n){
    4. THE SHAFT — the path is authored, the walls are the leftovers
    ===================================================================== */
 function build(slug, idx){
-  var B=window.IBEE_BEAT||{}, g=B[slug];
+  var B=BEAT()||{}, g=B[slug];
   if(!g||!g.low) return null;
   var n=g.low.length, i;
   var lo=new Float32Array(n), lv=new Float32Array(n), im=new Float32Array(n);
@@ -531,7 +533,7 @@ function build(slug, idx){
      COINS sit off-centre — the only thing in the game that asks you to leave
      the safe line. Neither can be missed fatally; both are optional. */
   var seed=(idx*2654435761)%100000;
-  var picks=[], KIND=["light","calm","ghost","iron","bloom"];
+  var picks=[], KIND=["light","calm","ghost","iron","bloom","guitar"];
   var pEvery=Math.max(11, 28-idx*0.4);
   for(var pt=14; pt<dur-12; pt+=pEvery*(0.7+rnd2(seed+pt)*0.6)){
     var nearG=false;
@@ -641,7 +643,7 @@ function paintPerk(){
     +(d>0 ? ('<b>−'+d+'% OFF THE CLOTHES</b>') : 'GET OUT OF A LEVEL TO EARN');
 }
 function paintGrid(){
-  var B=window.IBEE_BEAT||{};
+  var B=BEAT()||{};
   grid.innerHTML=NP2.map(function(s,i){
     var g=B[s[0]], d=g?g.low.length/20:0, done=!!save[i], open=unlocked(i), Z=zoneOf(i);
     return '<button class="lv'+(done?" done":"")+'" data-i="'+i+'"'+(open?"":" disabled")+'>'+
@@ -675,10 +677,11 @@ function start(i){
   if(!lv){ return; }
   L=lv; idx=i; ended=false; armed=false;
   P.x=chanAt(L,0).m; P.sy=0.62; P.vx=0; P.limb=0;
-  pulses=[]; scars=[]; motes=[]; drift=[]; sparks=[]; rec=[]; recAt=0;
+  pulses=[]; scars=[]; motes=[]; drift=[]; fallers=[]; sparks=[]; rec=[]; recAt=0;
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
   pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
+  lives=LIVES_MAX; paintLives();
   P.vy=0; P.squash=0;
   seedDrift(lv);
   holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
@@ -834,7 +837,7 @@ wake.addEventListener("click",function(){
    9. STEP
    ===================================================================== */
 var POWCOL={light:"#e8dc12", calm:"#8fd0ff", ghost:"#ff5c9d",
-            iron:"#ffffff", bloom:"#b6ff00"};
+            iron:"#ffffff", bloom:"#b6ff00", guitar:"#ff1f6f"};
 function powCol(){
   if(pow.iron>0)  return POWCOL.iron;
   if(pow.ghost>0) return POWCOL.ghost;
@@ -934,6 +937,14 @@ function step(dt,t){
         for(var bc=0;bc<9;bc++) L.coins.push({t:t+0.6+bc*0.32,
           off:(rnd2(t*7+bc)-0.5)*chanAt(L,t+0.6+bc*0.32).h*1.1, got:0});
         flashMsg("BLOOM — everything at once");
+      }
+      else if(pk.kind==="guitar"){
+        /* the guitar is a chord of powers: 3s untouchable, 4s slow, and
+           a wash of light while you carry it. Loud, but not unfair. */
+        pow.iron=Math.max(pow.iron,3); pow.calm=Math.max(pow.calm,4);
+        pow.light=Math.max(pow.light,6);
+        pulses.push({t:0,x:P.x,y:P.sy,r:0,max:120,life:1.2});
+        flashMsg("GUITAR — a chord, and the shaft is yours");
       }
       else { pow[pk.kind]=Math.max(pow[pk.kind],11);
         flashMsg(pk.kind==="light"?"LIGHT — the dark opens":"CALM — it slows down"); }
@@ -1122,6 +1133,7 @@ function drawBack(t,Z,seed){
   }
   ctx.restore();
 }
+var fallers=[];
 function seedDrift(lv){
   drift=[];
   var Z=lv.zone, sd=lv.seed, kinds={abidjan:"leaf",toronto:"snow",paris:"rain",
@@ -1147,6 +1159,21 @@ function seedDrift(lv){
   }
 }
 function stepDrift(dt,t,Z){
+  /* SIDE FALLERS — tiny silhouettes drifting past on the outside of the walls.
+     Purely decorative: they never touch the playfield, so they cannot make a
+     level unfair. Zone controls density and speed. */
+  var side_rate = ({abidjan:0.9, toronto:1.2, paris:1.4, stars:0.6, void:0.4, climb:1.6}[Z.id]||1.0);
+  if(Math.random() < dt*side_rate*0.7 && fallers.length<24){
+    var l = Math.random()<0.5;
+    fallers.push({side:l?-1:1, y:-0.08 - Math.random()*0.12,
+      vy:0.10+Math.random()*0.16, sway:Math.random()*6.283, sc:0.6+Math.random()*0.9,
+      col: (Math.random()<0.7 ? Z.glow : "#ff1f6f")});
+  }
+  for(var i=fallers.length-1;i>=0;i--){ var F=fallers[i];
+    F.y += F.vy*dt; F.sway += dt*1.4;
+    if(F.y>1.15) fallers.splice(i,1);
+  }
+
   for(var i=0;i<drift.length;i++){
     var d=drift[i];
     /* everything rides the shaft upward past you, at its own rate */
@@ -1158,6 +1185,25 @@ function stepDrift(dt,t,Z){
   }
 }
 function drawDrift(t,Z){
+  /* the outside-of-the-wall fallers — draw first so gates and walls sit over them */
+  for(var fi=0;fi<fallers.length;fi++){ var F=fallers[fi];
+    var wall_x = (F.side<0 ? 0 : W);
+    var lean = Math.sin(F.sway)*4;
+    var fx = wall_x + (F.side<0 ? -14 - lean : 14 + lean);
+    var fy = F.y*H;
+    var sc = F.sc;
+    ctx.globalAlpha=0.35;
+    ctx.strokeStyle=F.col; ctx.lineWidth=1.4;
+    /* stick figure, upside-down while falling */
+    ctx.beginPath();
+    ctx.arc(fx, fy-6*sc, 2*sc, 0, 6.2832); ctx.stroke();          /* head */
+    ctx.beginPath(); ctx.moveTo(fx, fy-4*sc); ctx.lineTo(fx, fy+4*sc); ctx.stroke();  /* body */
+    ctx.beginPath(); ctx.moveTo(fx-3*sc, fy-1*sc); ctx.lineTo(fx+3*sc, fy-1*sc); ctx.stroke();  /* arms */
+    ctx.beginPath(); ctx.moveTo(fx-2*sc, fy+8*sc); ctx.lineTo(fx, fy+4*sc);
+    ctx.lineTo(fx+2*sc, fy+8*sc); ctx.stroke();                   /* legs */
+  }
+  ctx.globalAlpha=1;
+
   for(var i=0;i<drift.length;i++){
     var d=drift[i], x=d.x*SC, y=d.y*H;
     if(y<-30||y>H+30) continue;
@@ -1198,23 +1244,35 @@ function drawDrift(t,Z){
    checkpoint you actually reached and rewind the track to it — the song
    restarts a section, not a life. Only dying before the first checkpoint
    sends you back to silence. */
+/* ---- LIVES ---------------------------------------------------------------
+   Three lives per run; every fall costs one. A life-cost sends you back to the
+   deepest checkpoint you passed — or, if you had not banked one yet, to the top
+   of the song. When lives hit zero the run ends the way it used to: silence,
+   from the very top. A friend still falling with you can revive you FOR FREE:
+   that path (goDown) does not spend a life. */
+function paintLives(){
+  var el=document.getElementById("hlives"); if(!el) return;
+  var h="♥".repeat(Math.max(0,lives)) + "♡".repeat(Math.max(0,LIVES_MAX-lives));
+  el.textContent=h; el.className = lives<=0 ? "dim" : "";
+}
 function die(t){
   var back=0, k;
   for(k=0;k<L.cps.length;k++) if(t>L.cps[k]+0.4) back=L.cps[k];
-  pts.deaths++;
-  if(back<=0){
-    var mate=peerAlive();
-    if(mate){ goDown(mate); return; }          /* they can bring you back */
-    finish(false); return;
-  }
-  cpAt=back; gracet=1.0; deaths++;
+  pts.deaths++; deaths++;
+  var mate=peerAlive();
+  if(mate){ goDown(mate); return; }           /* revive by teammate is still free */
+  lives--; paintLives();
+  if(lives<=0){ finish(false); return; }      /* three strikes: back to silence */
+  cpAt=back; gracet=1.0;
   P.sy=0.62; P.vy=0; P.vx=0; P.x=chanAt(L,back).m; P.squash=0;
   pulses=[]; sparks=[]; gateHit={};
   for(k=0;k<L.gates.length;k++) if(L.gates[k].t<back) gateHit[k]=1;
   var r=RADIO(); try{ if(r) r.audio.currentTime=back; }catch(e){}
-  flashMsg("CHECKPOINT — "+fmt(back));
+  flashMsg(back>0 ? ("CHECKPOINT — "+fmt(back)+"  ·  "+lives+" LEFT")
+                  : ("FROM THE TOP  ·  "+lives+" LEFT"));
 }
-var deaths=0, downed=0, downT=0;
+var LIVES_MAX=3;                       /* three lives per run */
+var deaths=0, lives=LIVES_MAX, downed=0, downT=0;
 /* SOMEONE ELSE STILL FALLING BRINGS YOU BACK. You go DOWN, not out — and if a
    peer in this room is still alive, you are on your feet 2 seconds later at
    their depth. Falling together should mean something more than seeing a
@@ -1392,8 +1450,16 @@ function draw(t){
     var pulse2=0.6+0.4*Math.sin(t*5+pd);
     ctx.globalAlpha=clamp(1-Math.abs(psy-P.sy)*1.15,0.12,1)*pulse2;
     ctx.strokeStyle=col; ctx.lineWidth=1.6;
-    ctx.beginPath(); ctx.arc(pxx,pyy,6.5,0,6.2832); ctx.stroke();
-    ctx.beginPath(); ctx.arc(pxx,pyy,2.4,0,6.2832); ctx.fillStyle=col; ctx.fill();
+    if(PK.kind==="guitar"){
+      /* a tiny neck-and-body — sitting on the safe line like every pickup */
+      ctx.fillStyle=col;
+      ctx.beginPath(); ctx.arc(pxx,pyy+4,4,0,6.2832); ctx.fill();       /* body */
+      ctx.fillRect(pxx-0.9,pyy-9,1.8,10);                                /* neck */
+      ctx.fillRect(pxx-3,pyy-11,6,1.2);                                  /* head */
+    } else {
+      ctx.beginPath(); ctx.arc(pxx,pyy,6.5,0,6.2832); ctx.stroke();
+      ctx.beginPath(); ctx.arc(pxx,pyy,2.4,0,6.2832); ctx.fillStyle=col; ctx.fill();
+    }
   }
   ctx.globalAlpha=1;
 
@@ -1646,8 +1712,19 @@ document.getElementById("mkroom").onclick=function(){
 /* =====================================================================
    14. boot
    ===================================================================== */
+/* ---- IBEE_BEAT lives on the SHELL window, not this iframe -------------
+   player.js self-loads assets/beat-data.js only in the top window (top !== self
+   makes it defer), so opening /np2/fall/ through the ONLYIBEE shell hands the
+   game an empty IBEE_BEAT — every build(slug) returns null and start() silently
+   bails. That is why the game did not launch from ?p=np2%2Ffall%2F. Every
+   IBEE_BEAT read walks to window.top first. */
+function BEAT(){
+  try{ if(window.IBEE_BEAT && Object.keys(window.IBEE_BEAT).length) return window.IBEE_BEAT; }catch(e){}
+  try{ if(window.top && window.top.IBEE_BEAT) return window.top.IBEE_BEAT; }catch(e){}
+  return null;
+}
 (function waitBeat(k){
-  if(window.IBEE_BEAT || k>60){ paintGrid(); return; }
+  if(BEAT() || k>120){ paintGrid(); return; }
   setTimeout(function(){ waitBeat(k+1); },150);
 })(0);
 paintGrid(); paintPerk(); checkTester();
