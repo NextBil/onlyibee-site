@@ -264,6 +264,11 @@ body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,1
   background:var(--pink);color:#fff;border:1px solid var(--pink);
   box-shadow:0 0 18px rgba(255,31,111,.45)}
 .btn.alt{background:transparent;color:var(--acid);border:1px solid var(--acid);box-shadow:none}
+/* the way down, under the sleeve */
+.btn.explore{display:inline-block;background:transparent;color:var(--acid);
+  border:1px solid var(--acid);box-shadow:none;letter-spacing:2px}
+.btn.explore:hover{background:var(--acid);color:#0b1719}
+body.neon .btn.explore{box-shadow:0 0 calc(6px + var(--nb,0)*26px) rgba(232,220,18,.5)}
 .btn:active{transform:translateY(2px)}
 #toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9500;
   font-family:var(--px);font-size:9px;color:var(--ink);
@@ -390,6 +395,10 @@ body.neon #roomtag.gone{opacity:0}
     </div>
     <div class="batwrap slow" id="bat2"></div>
   </div>
+  <div class="center" style="margin-top:18px">
+    <a class="btn explore" href="dark/">▼ EXPLORE — THE FALL</a>
+  </div>
+
   <h1>NOUVEAUX PUNK 2</h1>
   <div class="sub">— THE SEQUEL —</div>
   <div class="meta">26 SIGNALS · STILL WRAPPED · ONLY IB</div>

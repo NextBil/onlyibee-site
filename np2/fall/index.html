@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#05080a">
+<meta property="og:image" content="https://onlyibee.com/assets/img/nouveaux-punk-2.jpg">
+<meta property="og:title" content="THE FALL — NOUVEAUX PUNK 2">
+<meta property="og:description" content="26 songs. One fall. Hold to move and the dark opens; let go to read, and it costs you.">
+<meta name="twitter:card" content="summary_large_image">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>THE FALL — NOUVEAUX PUNK 2 | ONLY IBEE</title>
+<meta name="description" content="THE FALL — 26 levels, one per NOUVEAUX PUNK 2 song. Total darkness. Holding moves you and opens the dark; letting go shows you words and costs you ground.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   THE FALL — the pit under NOUVEAUX PUNK 2
+   =====================================================================
+   ONE RULE, EVERYWHERE: the song is the level. The camera falls at the
+   playhead, so a level is over exactly when its track is. You cannot get
+   ahead of the record and you cannot lag behind it — you can only choose
+   where you are inside it.
+
+   HOLD    → you push. You sink away from the collapse, you steer, and each
+             beat throws a pulse that paints the walls it touches.
+   RELEASE → you stop. A fragment of the writing surfaces. But the collapse
+             above keeps coming, and it is now coming for you.
+
+   So the only way to read the story is to give up ground to it. That is
+   the whole game, and it is the whole record.
+
+   WHY THE LEVELS ARE FAIR (this is the important bit)
+   The last build generated walls and hoped a path existed through them —
+   19 of 26 levels turned out to be unwinnable. Here the PATH IS GENERATED
+   FIRST: a channel wanders down the shaft, its lateral speed clamped to
+   less than the player's, and the walls are then hung either side of it.
+   A navigable route cannot fail to exist, because the route is the thing
+   that was authored and the walls are the leftovers.
+
+   WHY NOT WEB AUDIO
+   The obvious move is an AnalyserNode on the playing track. This site
+   already learned not to: iOS suspends an AudioContext on screen lock and
+   silences anything routed through it, which is why assets/beat-data.js
+   exists — low/lvl/imp pressed offline at 20 samples a second. That is
+   plenty for pulse geometry and limb animation once interpolated, and it
+   keeps the record playing on the lock screen. Desktop could run a live
+   analyser; it would not look better.
+
+   WHY NOT PIXI
+   ~120KB gzipped to draw a stick figure, a few rings and some line
+   segments — well under the hundred-odd moving objects where canvas 2D
+   starts to hurt. This page stays dependency-free like the rest of the
+   site, and iOS has already evicted this domain for memory once.
+   ===================================================================== */
+:root{
+  --bg:#05080a; --ink:#f0efe8; --dim:#63797b;
+  --pink:#ff1f6f; --pink-hot:#ff5c9d; --acid:#e8dc12;
+  --px:'Press Start 2P',monospace; --vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;
+  -webkit-user-select:none;user-select:none}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:19px}
+
+#stage{position:fixed;inset:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* player.js floats a radio chip bottom-right at z-index 8995. This page is
+   the transport and the whole screen is the controller — it cannot be here. */
+#radiochip,#radiopanel{display:none!important}
+
+header{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;
+  justify-content:space-between;align-items:center;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
+  font-family:var(--px);font-size:9px;pointer-events:none}
+header a{color:var(--acid);text-decoration:none;pointer-events:auto}
+header a .r{color:var(--pink)}
+header span{color:var(--dim);font-size:7px}
+
+/* ---------- sheets ---------- */
+.sheet{position:fixed;inset:0;z-index:60;background:rgba(5,8,10,.95);
+  display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(56px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom))}
+.sheet.hide{display:none}
+.title{font-family:var(--px);font-size:clamp(15px,6vw,26px);color:var(--acid);text-align:center;
+  letter-spacing:3px;text-shadow:0 0 22px rgba(232,220,18,.3),0 0 50px rgba(255,31,111,.38)}
+.tsub{font-family:var(--px);font-size:8px;color:var(--pink-hot);text-align:center;
+  margin-top:11px;letter-spacing:2px}
+.blurb{color:#93a8a9;text-align:center;max-width:42ch;margin:16px auto 0;line-height:1.55;font-size:18px}
+.blurb b{color:var(--ink);font-weight:400}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;
+  max-width:720px;margin:20px auto 0;width:100%}
+.lv{border:1px solid #16282b;background:#080f11;padding:8px 7px;text-align:left;cursor:pointer;
+  position:relative;overflow:hidden;color:inherit;font:inherit;transition:.15s}
+.lv:hover:not(:disabled){border-color:var(--pink);transform:translateY(-2px)}
+.lv:disabled{opacity:.34;cursor:not-allowed}
+.lv .n{font-family:var(--px);font-size:7px;color:#3f5658;letter-spacing:1px}
+.lv .t{font-size:15px;color:#b8c9c9;line-height:1.2;margin-top:5px;min-height:2.4em}
+.lv .z{font-family:var(--px);font-size:5px;letter-spacing:1px;margin-top:4px;color:var(--dim)}
+.lv.done{border-color:#2c5238}
+.lv.done .n{color:var(--acid)}
+
+.row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:20px auto 0}
+.btn{font-family:var(--px);font-size:9px;padding:13px 16px;text-decoration:none;cursor:pointer;
+  background:var(--pink);color:#fff;border:1px solid var(--pink);box-shadow:0 0 18px rgba(255,31,111,.4)}
+.btn.alt{background:transparent;color:var(--acid);border-color:var(--acid);box-shadow:none}
+.btn.ghost{background:transparent;color:var(--dim);border-color:#20383c;box-shadow:none}
+.btn:active{transform:translateY(2px)}
+.hint{color:var(--dim);text-align:center;font-size:17px;margin-top:15px;line-height:1.65}
+.hint b{color:var(--pink-hot);font-weight:400}
+
+/* ---------- in-game ---------- */
+#hud{position:fixed;top:calc(36px + env(safe-area-inset-top));left:0;right:0;z-index:30;
+  display:flex;justify-content:space-between;padding:0 14px;font-family:var(--px);
+  font-size:8px;color:#3f5658;letter-spacing:1px;pointer-events:none}
+#hud .a{color:var(--acid)}
+#depth{position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;
+  font-family:var(--px);font-size:7px;color:#2f4446;letter-spacing:2px;pointer-events:none}
+/* the writing, surfaced by letting go */
+#frag{position:fixed;left:50%;top:52%;transform:translate(-50%,-50%);z-index:31;
+  width:min(30ch,86vw);text-align:center;font-size:clamp(19px,5.6vw,26px);line-height:1.45;
+  color:#dfe9e6;opacity:0;transition:opacity .55s ease;pointer-events:none;
+  text-shadow:0 0 18px rgba(0,0,0,.9)}
+#frag.on{opacity:1}
+#tap{position:fixed;inset:0;z-index:36}
+
+#wake{position:fixed;inset:0;z-index:65;display:none;align-items:center;justify-content:center;
+  background:rgba(5,8,10,.9);text-align:center}
+@media(prefers-reduced-motion:reduce){.lv{transition:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../" data-home>◀ <span class="r">NP2</span></a>
+  <span id="hdr">THE FALL</span>
+</header>
+
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="hud"><span class="a" id="hlv"></span><span id="hzone"></span></div>
+<div id="depth"></div>
+<div id="frag"></div>
+<div id="tap"></div>
+
+<div class="sheet" id="menu">
+  <div class="title">THE FALL</div>
+  <div class="tsub">— 26 SONGS · ONE PIT —</div>
+  <div class="blurb">
+    You fell in. There is a way out and it is a long way down.<br><br>
+    <b>Hold anywhere</b> and you move — the beat throws light and you sink away from
+    what is coming down after you. <b>Let go</b> and the writing surfaces, but the
+    collapse keeps falling and it is falling faster than you are.
+  </div>
+  <div class="grid" id="lvgrid"></div>
+  <div class="row">
+    <button class="btn alt" id="mkroom">▣ FALL WITH SOMEONE</button>
+    <button class="btn ghost" id="wipe">RESET THE PIT</button>
+    <a class="btn ghost" href="../">◀ BACK TO THE ROOM</a>
+  </div>
+  <div class="hint">
+    one thumb. hold the left side to lean left, the right side to lean right_<br>
+    <b>the song is the level</b> — reach the light before it ends, or fall again from silence
+  </div>
+</div>
+
+<div class="sheet hide" id="over">
+  <div class="title" id="otitle">CAUGHT</div>
+  <div class="tsub" id="osub"></div>
+  <div class="blurb" id="oblurb"></div>
+  <div class="row">
+    <button class="btn" id="oagain">↻ FALL AGAIN</button>
+    <button class="btn alt" id="onext">▼ DEEPER</button>
+    <button class="btn ghost" id="omenu">◀ THE PIT</button>
+  </div>
+</div>
+
+<div id="wake"><div>
+  <div class="title" style="font-size:14px">TAP TO FALL</div>
+  <div class="hint" style="margin-top:12px">the level is the song —<br>it needs the record running_</div>
+</div></div>
+
+<script>document.write('<script src="../../assets/player.js?v=28"><\/script>')</script>
+<script>
+(function(){
+"use strict";
+
+/* =====================================================================
+   1. THE RECORD, AND THE PIT'S SHAPE
+   Six zones, not 26 skins. Depth is not a difficulty slope — each zone is
+   a different weather, and each song breathes its own dark→light→dark
+   inside it.
+   ===================================================================== */
+var NP2=[
+  ["np2-01-all-i-need.mp3","All I Need"],      ["np2-02-okay.mp3","Okay"],
+  ["np2-03-money-upp.mp3","Money Upp"],        ["np2-04-drop-it.mp3","Drop It"],
+  ["np2-05-pikatchuu.mp3","Pikatchuu"],        ["np2-06-write-a-song.mp3","Write a Song"],
+  ["np2-07-u-mine.mp3","U Mine"],              ["np2-08-let-go.mp3","Let Go"],
+  ["np2-09-between-the-lines.mp3","Between the Lines"], ["np2-10-satisfied.mp3","Satisfied"],
+  ["np2-11-rockstar.mp3","Rockstar"],          ["np2-12-i-feel-alive.mp3","I Feel Alive"],
+  ["np2-13-mama-is-a-preacher.mp3","Mama Is a Preacher"], ["np2-14-pas-de-soucis.mp3","Pas de soucis"],
+  ["np2-15-spoof.mp3","Spoof"],                ["np2-16-benda.mp3","Benda"],
+  ["np2-17-buss-in-it-pitch.mp3","Buss In It"],["np2-18-cigarette.mp3","Cigarette"],
+  ["np2-19-da-shit.mp3","Da Shit"],            ["np2-20-damn.mp3","Damn"],
+  ["np2-21-deranger.mp3","Déranger"],          ["np2-22-epic-film.mp3","Epic Film"],
+  ["np2-23-illegal2.mp3","Illegal 2"],         ["np2-24-like-jimi-hendrix.mp3","Like Jimi Hendrix"],
+  ["np2-25-lonely3.mp3","Lonely 3"],           ["np2-26-no-name.mp3","No Name"]
+];
+
+/* zone: [name, firstLevel, wall, glow, pulseReach, pulseDecay, drift, wind, note] */
+var ZONES=[
+  {id:"bright", n:"BRIGHT-FALL", from:0,  to:4,  wall:"#2a4a4e", glow:"#ffd9a8",
+   reach:1.00, decay:1.00, drift:0.00, wind:0.00, wide:1.22, agile:1.00},
+  {id:"water",  n:"WATER",       from:5,  to:9,  wall:"#1d3f52", glow:"#7fd4ff",
+   reach:0.66, decay:1.55, drift:0.55, wind:0.00, wide:1.18, agile:0.42},
+  {id:"wind",   n:"WIND",        from:10, to:14, wall:"#31463f", glow:"#b9f0c8",
+   reach:0.90, decay:1.12, drift:0.18, wind:1.00, wide:1.02, agile:0.78},
+  {id:"rain",   n:"RAIN",        from:15, to:19, wall:"#26343e", glow:"#9fb6c9",
+   reach:0.84, decay:1.22, drift:0.10, wind:0.32, wide:0.98, agile:0.90},
+  {id:"void",   n:"THE VOID",    from:20, to:21, wall:"#140d18", glow:"#ff5c9d",
+   reach:1.30, decay:0.72, drift:0.00, wind:0.00, wide:1.60, agile:1.00},
+  {id:"climb",  n:"THE CLIMB",   from:22, to:25, wall:"#3a1c2a", glow:"#ff1f6f",
+   reach:0.92, decay:1.05, drift:0.06, wind:0.44, wide:0.90, agile:0.86}
+];
+function zoneOf(i){ for(var z=0;z<ZONES.length;z++) if(i>=ZONES[z].from&&i<=ZONES[z].to) return ZONES[z]; return ZONES[0]; }
+
+/* THE WRITING. No NP2 lyrics are pressed on the site yet, so the fragments
+   are HIS OWN statement from the room — his words, not invented ones. The
+   moment lyrics-data.js gains np2 keys, the real lines take over. */
+var STATEMENT=[
+  "26 songs","for my 26 years","made between Toronto","and Paris",
+  "over 3 to 4 years","the first one was chaos","not caring","made in the dark",
+  "i care even less now","facing the biggest emptiness","and loneliness","of my life",
+  "this isn't for anyone's","approval anymore","it's just proof","of the work",
+  "i've put in","these past years"
+];
+function fragmentsFor(slug){
+  try{
+    var L=(window.IBEE_LYRICS||{})[slug];
+    if(L&&L.length) return L.slice();                       /* real lyrics win */
+  }catch(e){}
+  return STATEMENT;
+}
+
+/* =====================================================================
+   2. WORLD CONSTANTS
+   Virtual units, not pixels: the canvas maps 100 units wide to its width,
+   so the pit is the same pit on every screen.
+   ===================================================================== */
+var VW=100;                 /* world width in units */
+var SCROLL=30;              /* units of depth per second of song — the camera */
+var LAT=52;                 /* how fast you can lean, units/s */
+var LATA=250;               /* lean acceleration */
+var SINK=26;                /* holding: units/s you gain on the collapse */
+var RISE=20;                /* letting go: units/s it gains on you */
+var TOPMARGIN=0.13, BOTMARGIN=0.86;   /* where you may live on screen */
+var RES=0.25;               /* channel resolution, seconds */
+var PR=2.6;                 /* player radius */
+var LS="ibee_np2fall";
+
+function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+function v36(c){ return parseInt(c,36)/35; }
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+/* =====================================================================
+   3. SONG STRUCTURE — where the verses and the hooks are
+   A self-similarity matrix over the pressed groove, with a checkerboard
+   novelty kernel run down its diagonal; the peaks are section boundaries.
+   Standard MIR, cheap at this resolution (a 3-minute track is ~360 frames
+   at 2Hz, so the matrix is ~130k cells and builds in a few ms once).
+   This is what makes a verse feel like a verse: sparse sections open the
+   shaft out and slow the pressure, hooks close it in.
+   ===================================================================== */
+function sections(lo,lv,im,n){
+  var STEP=Math.round(1/(RES*2));                 /* ~2 feature frames a second */
+  var F=[], i, k;
+  for(i=0;i+STEP<=n;i+=STEP){
+    var a=0,b=0,c=0;
+    for(k=0;k<STEP;k++){ a+=lo[i+k]; b+=lv[i+k]; c+=im[i+k]; }
+    F.push([a/STEP,b/STEP,c/STEP]);
+  }
+  var m=F.length;
+  if(m<16) return [{s:0,e:n,energy:0.5}];
+  /* novelty down the diagonal of the SSM, kernel radius K */
+  var K=Math.max(4,Math.round(m*0.04)), nov=new Float32Array(m);
+  function d(p,q){ var x=F[p][0]-F[q][0], y=F[p][1]-F[q][1], z=F[p][2]-F[q][2];
+    return Math.sqrt(x*x+y*y+z*z); }
+  for(i=K;i<m-K;i++){
+    var same=0, cross=0;
+    for(var p=1;p<=K;p++) for(var q=1;q<=K;q++){
+      same += d(i-p,i-q) + d(i+p,i+q);            /* inside the two blocks */
+      cross+= d(i-p,i+q);                          /* across the boundary */
+    }
+    nov[i]=cross/(K*K) - same/(2*K*K);
+  }
+  /* peaks, spaced so a section is never shorter than ~8 seconds */
+  var minGap=Math.round(8/(RES*2)), peaks=[0], best;
+  var mx=0; for(i=0;i<m;i++) if(nov[i]>mx) mx=nov[i];
+  var thr=mx*0.34;
+  for(i=K;i<m-K;i++){
+    if(nov[i]<thr) continue;
+    if(nov[i]<nov[i-1]||nov[i]<nov[i+1]) continue;
+    if(i-peaks[peaks.length-1]<minGap) continue;
+    peaks.push(i);
+  }
+  peaks.push(m);
+  var out=[];
+  for(i=0;i<peaks.length-1;i++){
+    var s=peaks[i]*STEP, e=Math.min(n,peaks[i+1]*STEP), en=0, cnt=0;
+    for(k=peaks[i];k<peaks[i+1];k++){ en+=F[k][1]; cnt++; }
+    out.push({s:s,e:e,energy:cnt?en/cnt:0.4});
+  }
+  /* rank energy inside the track so a quiet song still has its own hooks */
+  var es=out.map(function(o){return o.energy;}).sort(function(a,b){return a-b;});
+  var lo25=es[Math.floor(es.length*0.25)]||0, hi75=es[Math.floor(es.length*0.75)]||1;
+  var span=(hi75-lo25)||1;
+  out.forEach(function(o){ o.rank=clamp((o.energy-lo25)/span,0,1); });
+  return out;
+}
+
+/* =====================================================================
+   4. THE SHAFT — the path is authored, the walls are the leftovers
+   ===================================================================== */
+function build(slug, idx){
+  var B=window.IBEE_BEAT||{}, g=B[slug];
+  if(!g||!g.low) return null;
+  var n=g.low.length, i;
+  var lo=new Float32Array(n), lv=new Float32Array(n), im=new Float32Array(n);
+  for(i=0;i<n;i++){
+    lo[i]=v36(g.low.charAt(i)); lv[i]=v36(g.lvl.charAt(i));
+    im[i]=g.imp?v36(g.imp.charAt(i)):0;
+  }
+  function norm(a,r){
+    var s=new Float32Array(a.length), i2, k;
+    for(i2=0;i2<a.length;i2++){ var t=0,c=0;
+      for(k=-r;k<=r;k++){ var j=i2+k; if(j>=0&&j<a.length){ t+=a[j]; c++; } }
+      s[i2]=t/c; }
+    var srt=Array.prototype.slice.call(s).sort(function(x,y){return x-y;});
+    var p5=srt[Math.floor(srt.length*0.05)], p95=srt[Math.floor(srt.length*0.95)], d=(p95-p5)||1;
+    for(i2=0;i2<s.length;i2++) s[i2]=clamp((s[i2]-p5)/d,0,1);
+    return s;
+  }
+  var sLo=norm(lo,3), sLv=norm(lv,5);
+  var secs=sections(sLo,sLv,im,n);
+
+  var dur=n/20, Z=zoneOf(idx);
+  var steps=Math.ceil(dur/RES)+2;
+  var mid=new Float32Array(steps), half=new Float32Array(steps);
+
+  /* section shape: a sparse verse opens out, a hook closes in */
+  function secAt(t){
+    var s=Math.floor(t*20);
+    for(var q=0;q<secs.length;q++) if(s>=secs[q].s&&s<secs[q].e) return secs[q];
+    return secs[secs.length-1]||{rank:0.5};
+  }
+  var phase=idx*1.7;
+  for(i=0;i<steps;i++){
+    var t=i*RES, s=clamp(Math.floor(t*20),0,n-1);
+    var sec=secAt(t), tight=sec.rank;                      /* 0 sparse … 1 hook */
+
+    /* the channel wanders on the bass, and on a slow sine so it is never
+       just noise — the song steers, the sine keeps it readable */
+    var w=(sLo[s]-0.5)*2;
+    mid[i]=50 + Math.sin(t*0.42+phase)*17 + w*13;
+
+    /* dark → light → dark inside every level, and again across the 26 */
+    var arc=Math.sin(Math.PI*clamp(t/dur,0,1));            /* 0 → 1 → 0 */
+    var deep=Math.sin(Math.PI*clamp((idx+1)/26,0,1));
+    var hw=25 - tight*9 - arc*3.5 - deep*2.2;
+    half[i]=clamp(hw*Z.wide, 11, 34);
+  }
+  /* THE GUARANTEE: the channel may never wander faster than the player can
+     follow it — and that budget is NOT a constant. Water hands you momentum
+     instead of control, so a wander that is nothing in the bright-fall is a
+     wall down there. Every zone declares how much steering it leaves you and
+     the channel is clamped to exactly that. (Found by the solver: all five
+     water levels failed on a wall by 0.2 units or less.) */
+  var maxD=LAT*RES*0.55*Z.agile;
+  for(i=1;i<steps;i++){
+    var d2=mid[i]-mid[i-1];
+    if(d2>maxD) mid[i]=mid[i-1]+maxD;
+    if(d2<-maxD) mid[i]=mid[i-1]-maxD;
+  }
+  for(i=0;i<steps;i++) mid[i]=clamp(mid[i], half[i]+3, VW-half[i]-3);
+  /* clamp again — the wall clamp above can reintroduce a jump */
+  for(i=1;i<steps;i++){
+    var d3=mid[i]-mid[i-1];
+    if(d3>maxD) mid[i]=mid[i-1]+maxD;
+    if(d3<-maxD) mid[i]=mid[i-1]-maxD;
+  }
+  return {n:n, dur:dur, steps:steps, mid:mid, half:half, lo:sLo, lv:sLv, im:im,
+          secs:secs, zone:Z, depth:dur*SCROLL};
+}
+function chanAt(L,t){
+  var f=clamp(t/RES,0,L.steps-1.001), i=Math.floor(f), k=f-i;
+  return { m:lerp(L.mid[i],L.mid[i+1],k), h:lerp(L.half[i],L.half[i+1],k) };
+}
+
+/* =====================================================================
+   5. STATE
+   ===================================================================== */
+var cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+var W=0,H=0,DPR=1,SC=1;
+var L=null, idx=-1, live=false, rafOn=false, armed=false, ended=false;
+var P={x:50, sy:0.62, vx:0, limb:0};
+var pulses=[], scars=[], motes=[], ghosts=[], rec=[], recAt=0;
+var collapse=0, holding=0, holdSide=0, glitch=0, fragT=0, fragIx=0, frags=[], gracet=0;
+var save=load(), started=0, deepest=0;
+
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)||"{}")||{}; }catch(e){ return {}; } }
+function store(){ try{ localStorage.setItem(LS,JSON.stringify(save)); }catch(e){} }
+function RADIO(){ try{ return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null; }catch(e){ return null; } }
+function onTrack(){ var r=RADIO(); if(!r||idx<0) return false;
+  try{ return r.slug()===NP2[idx][0]; }catch(e){ return false; } }
+function songT(){ if(!armed) return 0; var r=RADIO();
+  try{ return r?(r.audio.currentTime||0):0; }catch(e){ return 0; } }
+
+function size(){
+  var b=document.getElementById("stage").getBoundingClientRect();
+  W=Math.max(280,Math.round(b.width)); H=Math.max(360,Math.round(b.height));
+  DPR=Math.min(1.5, window.devicePixelRatio||1);
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  SC=W/VW;                                   /* units → px */
+}
+addEventListener("resize",function(){ if(live) size(); });
+
+/* =====================================================================
+   6. MENU
+   ===================================================================== */
+var grid=document.getElementById("lvgrid");
+function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+function unlocked(i){ return i===0 || !!save[i-1] || !!save[i]; }
+function paintGrid(){
+  var B=window.IBEE_BEAT||{};
+  grid.innerHTML=NP2.map(function(s,i){
+    var g=B[s[0]], d=g?g.low.length/20:0, done=!!save[i], open=unlocked(i), Z=zoneOf(i);
+    return '<button class="lv'+(done?" done":"")+'" data-i="'+i+'"'+(open?"":" disabled")+'>'+
+      '<div class="n">'+(i<9?"0":"")+(i+1)+'</div>'+
+      '<div class="t">'+(open?s[1]:"—")+'</div>'+
+      '<div class="z" style="color:'+(done?"#63a06f":Z.glow)+'">'+(done?"OUT":(open?Z.n:"SEALED"))+
+      (open&&d?" · "+fmt(d):"")+'</div></button>';
+  }).join("");
+}
+grid.addEventListener("click",function(e){
+  var b=e.target.closest(".lv"); if(!b||b.disabled) return;
+  start(+b.getAttribute("data-i"));
+});
+document.getElementById("wipe").onclick=function(){
+  if(!confirm("empty the pit? every level seals again.")) return;
+  save={}; store(); try{ localStorage.removeItem(LS+"_g"); }catch(e){}
+  paintGrid();
+};
+
+/* =====================================================================
+   7. START / END
+   ===================================================================== */
+var menu=document.getElementById("menu"), over=document.getElementById("over");
+var fragEl=document.getElementById("frag"), wake=document.getElementById("wake");
+function show(el){ menu.classList.add("hide"); over.classList.add("hide"); if(el) el.classList.remove("hide"); }
+
+function start(i){
+  var lv=build(NP2[i][0], i);
+  if(!lv){ return; }
+  L=lv; idx=i; ended=false; armed=false;
+  P.x=chanAt(L,0).m; P.sy=0.62; P.vx=0; P.limb=0;
+  pulses=[]; scars=[]; motes=[]; rec=[]; recAt=0; collapse=0; glitch=0; gracet=0.9;
+  holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
+  frags=fragmentsFor(NP2[i][0]);
+  ghostsFor(i); netJoin(i);
+  show(null); size(); wake.style.display="none";
+  document.getElementById("hlv").textContent=(i<9?"0":"")+(i+1)+" "+NP2[i][1].toUpperCase();
+  document.getElementById("hzone").textContent=L.zone.n;
+  document.getElementById("hdr").textContent="THE FALL";
+  play(i); started=Date.now(); live=true;
+  if(!rafOn){ rafOn=true; requestAnimationFrame(loop); }
+}
+
+function play(i,tries){
+  tries=tries||0; var r=RADIO();
+  if(!r){ if(tries<40) setTimeout(function(){ play(i,tries+1); },200); return; }
+  var ri=r.indexBySlug?r.indexBySlug(NP2[i][0]):-1;
+  if(ri<0){ if(tries<40) setTimeout(function(){ play(i,tries+1); },250); return; }
+  try{ if(r.current()!==ri || !r.playing()) r.control.play(ri); }catch(e){}
+  (function settle(k){
+    if(idx!==i) return;
+    var ok=false; try{ ok=r.slug()===NP2[i][0] && r.audio.readyState>0; }catch(e){}
+    if(ok){ try{ if((r.audio.currentTime||0)>0.6) r.audio.currentTime=0; }catch(e){}
+      armed=true; wake.style.display="none"; return; }
+    if(k<50) setTimeout(function(){ settle(k+1); },120);
+    else if(live && !armed) wake.style.display="flex";
+  })(0);
+}
+
+function finish(won){
+  live=false; ended=true; netLeave();
+  fragEl.classList.remove("on");
+  var last=(idx===25);
+  if(won){
+    save[idx]=Math.round((Date.now()-started)/1000); store(); saveGhost(idx);
+    try{ var o=JSON.parse(localStorage.getItem("ibee_np2fall_out")||"{}")||{};
+      o[idx]=1; localStorage.setItem("ibee_np2fall_out",JSON.stringify(o)); }catch(e){}
+  }
+  var n=Object.keys(save).length;
+  document.getElementById("otitle").textContent = won ? (last?"THE LIGHT":"OUT") : "CAUGHT";
+  document.getElementById("osub").textContent = (idx<9?"0":"")+(idx+1)+" — "+NP2[idx][1].toUpperCase();
+  document.getElementById("oblurb").innerHTML = won
+    ? (last
+      ? "you are still walking.<br><br>not saved. not finished. still walking."
+      : "you rode "+NP2[idx][1]+" all the way down and found the way out.<br>"+n+" of 26.")
+    : "the collapse took you at "+fmt(songT())+".<br>the record starts again from silence.";
+  document.getElementById("onext").style.display = (won&&!last)?"":"none";
+  paintGrid(); show(over);
+  try{ var r=RADIO(); if(r&&r.playing()&&!won) r.control.pause(); }catch(e){}
+}
+document.getElementById("oagain").onclick=function(){ start(idx); };
+document.getElementById("onext").onclick=function(){ start(Math.min(25,idx+1)); };
+document.getElementById("omenu").onclick=function(){ show(menu); };
+
+/* =====================================================================
+   8. INPUT — the whole screen is the controller
+   ===================================================================== */
+var tap=document.getElementById("tap");
+function down(x){
+  holding=1;
+  /* A dead band down the middle: on a phone you would otherwise never be able
+     to hold WITHOUT leaning, so simply staying alive would mean constantly
+     fighting your own thumb. Centre = sink straight, sides = lean. */
+  var d=(x-W*0.5)/W;
+  holdSide = Math.abs(d)<0.13 ? 0 : (d<0?-1:1);
+}
+function up(){ holding=0; holdSide=0; }
+tap.addEventListener("touchstart",function(e){ if(!live)return; down(e.touches[0].clientX); e.preventDefault(); },{passive:false});
+tap.addEventListener("touchend",function(e){ up(); e.preventDefault(); },{passive:false});
+tap.addEventListener("touchcancel",up,{passive:true});
+tap.addEventListener("mousedown",function(e){ if(!live)return; down(e.clientX); });
+addEventListener("mouseup",up);
+addEventListener("keydown",function(e){
+  if(e.key==="Escape"&&live){ live=false; netLeave(); show(menu); return; }
+  if(!live) return;
+  if(e.key==="ArrowLeft"||e.key==="a"){ holding=1; holdSide=-1; e.preventDefault(); }
+  if(e.key==="ArrowRight"||e.key==="d"){ holding=1; holdSide=1; e.preventDefault(); }
+  if(e.key===" "){ holding=1; holdSide=0; e.preventDefault(); }
+});
+addEventListener("keyup",function(e){
+  if(["ArrowLeft","ArrowRight","a","d"," "].indexOf(e.key)>=0) up();
+});
+wake.addEventListener("click",function(){
+  wake.style.display="none";
+  if(idx>=0){ var r=RADIO();
+    try{ var ri=r.indexBySlug(NP2[idx][0]); if(ri>=0) r.control.play(ri); }catch(e){}
+    play(idx); }
+});
+
+/* =====================================================================
+   9. STEP
+   ===================================================================== */
+var lastBeat=-1;
+function step(dt,t){
+  var Z=L.zone, ch=chanAt(L,t);
+  var s=clamp(Math.floor(t*20),0,L.n-1);
+  var hit=L.im[s], bass=L.lo[s];
+  var isVoid=(Z.id==="void");
+
+  /* ---- lean. Water keeps your momentum, wind leans on you. ---- */
+  var want=holding?holdSide:0;
+  var accel=LATA*(Z.id==="water"?0.42:1);
+  var fric =(Z.id==="water"?1.1:6.5);
+  P.vx += want*accel*dt;
+  P.vx -= P.vx*Math.min(1,fric*dt);
+  if(Z.wind){                                   /* doubt pushes sideways */
+    P.vx += Math.sin(t*0.9+idx)*Z.wind*26*dt;
+  }
+  P.vx=clamp(P.vx,-LAT,LAT);
+  P.x=clamp(P.x+P.vx*dt, 1, VW-1);
+
+  /* ---- ground. Holding buys you distance from the collapse; letting go
+     spends it. THE VOID INVERTS THIS: down there moving is what costs you
+     and stillness is the only thing that keeps you ahead. ---- */
+  var push = isVoid ? (holding? -1 : 1) : (holding? 1 : -1);
+  P.sy += (push>0 ? SINK : -RISE)/ (H/SC) * dt * (push>0?1:1);
+  P.sy = clamp(P.sy, 0.02, BOTMARGIN);
+
+  /* the collapse eats down the screen from above */
+  collapse = lerp(collapse, TOPMARGIN + (isVoid?0.06:0) + hit*0.03, 1-Math.pow(0.02,dt));
+
+  /* Never let a bad number become a death. If sy or x ever goes non-finite the
+     clamp below pins sy to its minimum, which reads as "caught at 0:00" — a
+     restart that kills you before you have touched anything. Recover instead,
+     and give every level a moment on its feet before the collapse can bite. */
+  if(!isFinite(P.sy)||!isFinite(P.x)||!isFinite(P.vx)){
+    P.sy=0.62; P.x=ch.m; P.vx=0;
+  }
+  if(gracet>0){ gracet-=dt; }
+  else if(P.sy <= collapse+0.005){ finish(false); return; }
+
+  /* ---- walls ---- */
+  if(!isVoid && gracet<=0){
+    var edge=Math.abs(P.x-ch.m)-(ch.h-PR);
+    if(edge>0){ finish(false); return; }
+  }
+
+  /* ---- pulses. On the beat while you hold; the record is the torch. ---- */
+  if(holding && s!==lastBeat && hit>0.16){
+    lastBeat=s;
+    pulses.push({t:0, x:P.x, y:P.sy, r:0, max:(30+hit*34)*Z.reach, life:1});
+  }
+  if(holding && Math.random()<dt*3.4){
+    pulses.push({t:0, x:P.x, y:P.sy, r:0, max:22*Z.reach, life:0.7});
+  }
+  for(var p=pulses.length-1;p>=0;p--){
+    var q=pulses[p];
+    q.t+=dt; q.r+=(q.max*1.7)*dt;
+    q.life-=dt*0.62*Z.decay;
+    if(q.life<=0||q.r>q.max*1.35) pulses.splice(p,1);
+  }
+  /* scars: brief proof you were here */
+  if(holding && Math.random()<dt*9) scars.push({x:P.x,y:P.sy,a:0.5});
+  for(var c=scars.length-1;c>=0;c--){ scars[c].y-= (SCROLL/(H/SC))*dt; scars[c].a-=dt*0.20;
+    if(scars[c].a<=0||scars[c].y<-0.1) scars.splice(c,1); }
+
+  /* ---- the writing, only when you stop ---- */
+  if(!holding){ fragT+=dt; } else if(fragT>0){ fragT=Math.max(0,fragT-dt*3); }
+  if(fragT>0.42){
+    if(!fragEl.classList.contains("on")){
+      fragEl.textContent=frags[fragIx%frags.length]; fragIx++;
+      fragEl.classList.add("on");
+    }
+  } else if(fragEl.classList.contains("on")) fragEl.classList.remove("on");
+
+  /* limbs read the record, not a clip */
+  P.limb += dt*(4.5+bass*9+Math.abs(P.vx)*0.06);
+  glitch = clamp((idx/25)*0.85 + hit*0.35, 0, 1.25);
+
+  deepest=Math.max(deepest, t*SCROLL);
+  if(t-recAt>0.1){ recAt=t; rec.push(Math.round(P.x*10), Math.round(P.sy*1000)); }
+
+  if(armed && t>=L.dur-0.25 && !ended) finish(true);
+}
+
+/* =====================================================================
+   10. DRAW
+   ===================================================================== */
+function wallXAt(t){ return chanAt(L,t); }
+function draw(t){
+  var Z=L.zone;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#05080a"; ctx.fillRect(0,0,W,H);
+
+  var g=glitch;
+  /* one shear for the whole frame — cheaper than per-layer, and it reads as
+     the picture itself degrading rather than an effect laid on top */
+  if(g>0.25 && Math.random()<0.06){
+    ctx.setTransform(DPR,0,0,DPR,(Math.random()-0.5)*g*7*DPR,0);
+  }
+
+  /* ---- the shaft, revealed only where a pulse has touched it ---- */
+  var rows=Math.round(H/6);
+  for(var r=0;r<rows;r++){
+    var sy=r/rows;                                   /* 0 top … 1 bottom */
+    var wt=t + (sy-P.sy)*(H/SC)/SCROLL;              /* song-time of this row */
+    if(wt<0||wt>L.dur+1) continue;
+    var ch=wallXAt(wt);
+    var lit=0;
+    for(var p=0;p<pulses.length;p++){
+      var q=pulses[p];
+      var dy=(sy-q.y)*(H/SC);
+      var dxl=Math.abs((ch.m-ch.h)-q.x), dxr=Math.abs((ch.m+ch.h)-q.x);
+      var dl=Math.sqrt(dy*dy+dxl*dxl), dr=Math.sqrt(dy*dy+dxr*dxr);
+      var band=10;
+      if(Math.abs(dl-q.r)<band) lit=Math.max(lit, q.life*(1-Math.abs(dl-q.r)/band));
+      if(Math.abs(dr-q.r)<band) lit=Math.max(lit, q.life*(1-Math.abs(dr-q.r)/band));
+    }
+    /* You always see a little around yourself. Total darkness sounds good on
+       paper and plays like a black screen — Dark Echo keeps your own footprints
+       lit for exactly this reason. The pulses are the drama; this is the floor. */
+    var near=1-clamp(Math.abs(sy-P.sy)*2.6,0,1);
+    lit=Math.max(lit, near*near*0.62);
+    if(lit<=0.012) continue;
+
+    var y=sy*H, a=clamp(lit,0,1);
+    var lx=(ch.m-ch.h)*SC, rx=(ch.m+ch.h)*SC;
+    ctx.fillStyle=Z.wall;
+    ctx.globalAlpha=a*0.92;
+    ctx.fillRect(0,y,Math.max(0,lx),7);
+    ctx.fillRect(rx,y,Math.max(0,W-rx),7);
+    ctx.globalAlpha=a;
+    ctx.fillStyle=Z.glow;
+    ctx.fillRect(Math.max(0,lx-2),y,2,7);
+    ctx.fillRect(rx,y,2,7);
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- pulse rings themselves ---- */
+  for(var p2=0;p2<pulses.length;p2++){
+    var q2=pulses[p2];
+    ctx.strokeStyle=Z.glow; ctx.globalAlpha=q2.life*0.30;
+    ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.arc(q2.x*SC, q2.y*H, q2.r*SC, 0, 6.2832); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- scars ---- */
+  for(var c2=0;c2<scars.length;c2++){
+    var sc=scars[c2];
+    ctx.fillStyle=Z.glow; ctx.globalAlpha=sc.a*0.32;
+    ctx.fillRect(sc.x*SC-1, sc.y*H, 2, 2);
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- ghosts: maybe you, maybe someone, never says ---- */
+  var f=Math.floor(t*10)*2;
+  for(var gi=0;gi<ghosts.length;gi++){
+    var gr=ghosts[gi]; if(!gr||f+1>=gr.length) continue;
+    figure(gr[f]/10*SC, gr[f+1]/1000*H, 0.55, "rgba(240,239,232,0.13)", t*3+gi);
+  }
+  for(var id in peers){
+    var pe=peers[id];
+    figure(pe.x*SC, pe.y*H, 0.7, "rgba(255,92,157,0.30)", t*3);
+  }
+
+  /* ---- the collapse ---- */
+  var cy=collapse*H;
+  var grd=ctx.createLinearGradient(0,0,0,cy+26);
+  grd.addColorStop(0,"rgba(0,0,0,1)");
+  grd.addColorStop(0.72,"rgba(0,0,0,.92)");
+  grd.addColorStop(1,"rgba(0,0,0,0)");
+  ctx.fillStyle=grd; ctx.fillRect(0,0,W,cy+26);
+  ctx.strokeStyle=Z.id==="void"?"#ff5c9d":"#ff1f6f";
+  ctx.globalAlpha=0.30+Math.sin(t*7)*0.10;
+  ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
+  ctx.globalAlpha=1;
+
+  /* ---- him ---- */
+  figure(P.x*SC, P.sy*H, 1, "#f0efe8", P.limb);
+
+  /* ---- degradation: scanlines always, tear and split as it gets worse ---- */
+  ctx.globalAlpha=0.16; ctx.fillStyle="#000";
+  for(var y2=0;y2<H;y2+=3) ctx.fillRect(0,y2,W,1);
+  ctx.globalAlpha=1;
+  if(g>0.35 && Math.random()<0.10){
+    var ty=Math.random()*H, th=6+Math.random()*g*26;
+    try{
+      var slice=ctx.getImageData(0,ty*DPR,cv.width,th*DPR);
+      ctx.putImageData(slice,(Math.random()-0.5)*g*22*DPR, ty*DPR);
+    }catch(e){}
+  }
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+
+  /* vignette */
+  var vg=ctx.createRadialGradient(W/2,H*0.55,H*0.16,W/2,H*0.55,H*0.82);
+  vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,.72)");
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+
+/* the figure: no face, no identity. Limbs are driven by the record and the
+   lean, never by a clip — it should look like a person made of nothing. */
+function figure(px,py,scale,col,ph){
+  var u=SC*scale;
+  var bob=Math.sin(ph)*0.20, sw=Math.sin(ph)*0.9, sw2=Math.cos(ph*1.1)*0.8;
+  ctx.strokeStyle=col; ctx.lineWidth=Math.max(1,1.5*scale); ctx.lineCap="round";
+  ctx.beginPath();
+  var hx=px, hy=py-3.1*u;
+  ctx.arc(hx,hy,1.05*u,0,6.2832); ctx.stroke();           /* head, empty */
+  ctx.beginPath();
+  ctx.moveTo(hx,hy+1.05*u); ctx.lineTo(px,py+0.5*u+bob*u); /* spine */
+  ctx.moveTo(px,py-1.2*u+bob*u);                            /* arms */
+  ctx.lineTo(px-1.7*u+sw*u*0.5, py+0.3*u-sw*u*0.7);
+  ctx.moveTo(px,py-1.2*u+bob*u);
+  ctx.lineTo(px+1.7*u-sw*u*0.5, py+0.3*u+sw*u*0.7);
+  ctx.moveTo(px,py+0.5*u+bob*u);                            /* legs */
+  ctx.lineTo(px-1.3*u-sw2*u*0.6, py+2.7*u);
+  ctx.moveTo(px,py+0.5*u+bob*u);
+  ctx.lineTo(px+1.3*u+sw2*u*0.6, py+2.7*u);
+  ctx.stroke();
+}
+
+/* =====================================================================
+   11. LOOP
+   ===================================================================== */
+var last=0;
+function loop(ts){
+  if(!live){ rafOn=false; return; }
+  requestAnimationFrame(loop);
+  var dt=Math.min(0.05,(ts-last)/1000||0.016); last=ts;
+  var t=songT();
+  if(armed) step(dt,t);
+  if(!live) return;
+  draw(t);
+  netTick();
+  document.getElementById("depth").textContent =
+    Math.round(deepest)+"m · "+fmt(t)+" / "+fmt(L.dur);
+}
+
+/* =====================================================================
+   12. GHOSTS — ambiguous on purpose. Some are your past falls, some are
+   people falling right now. The game never tells you which.
+   ===================================================================== */
+function ghostsFor(i){
+  try{ var all=JSON.parse(localStorage.getItem(LS+"_g")||"{}")||{}; ghosts=(all[i]||[]).slice(0,3); }
+  catch(e){ ghosts=[]; }
+}
+function saveGhost(i){
+  try{ var all=JSON.parse(localStorage.getItem(LS+"_g")||"{}")||{};
+    var a=all[i]||[]; a.unshift(rec); all[i]=a.slice(0,3);
+    localStorage.setItem(LS+"_g",JSON.stringify(all)); }catch(e){}
+}
+
+/* =====================================================================
+   13. THE OTHERS — Supabase Realtime broadcast, no table and no SQL.
+   ===================================================================== */
+var SB_URL="https://hloxwicoeahczifshyoe.supabase.co", SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+var sb=null, chan=null, peers={}, myId=Math.random().toString(36).slice(2,8), sendAt=0, roomCode=null;
+function loadSB(cb){
+  if(window.supabase&&window.supabase.createClient) return cb();
+  var s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload=cb; s.onerror=function(){cb();}; document.head.appendChild(s);
+}
+function netJoin(i){
+  netLeave();
+  loadSB(function(){
+    if(!(window.supabase&&window.supabase.createClient)) return;
+    try{
+      sb=sb||window.supabase.createClient(SB_URL,SB_KEY);
+      chan=sb.channel("np2fall-"+(roomCode?("r-"+roomCode):("l"+i)),{config:{broadcast:{self:false}}});
+      chan.on("broadcast",{event:"p"},function(m){
+        var d=m.payload; if(!d||d.id===myId) return;
+        var q=peers[d.id]=peers[d.id]||{x:d.x,y:d.y};
+        q.tx=d.x; q.ty=d.y; q.seen=Date.now();
+      });
+      chan.subscribe();
+    }catch(e){}
+  });
+}
+function netLeave(){ try{ if(chan&&sb) sb.removeChannel(chan); }catch(e){} chan=null; peers={}; }
+function netTick(){
+  var now=Date.now();
+  if(chan && now-sendAt>110){ sendAt=now;
+    try{ chan.send({type:"broadcast",event:"p",payload:{id:myId,x:+P.x.toFixed(1),y:+P.sy.toFixed(3)}}); }catch(e){}
+  }
+  for(var id in peers){ var q=peers[id];
+    if(now-q.seen>6000){ delete peers[id]; continue; }
+    q.x+=((q.tx-q.x)||0)*0.22; q.y+=((q.ty-q.y)||0)*0.22;
+  }
+}
+document.getElementById("mkroom").onclick=function(){
+  var c=prompt("a code you both type. you fall in the same pit, at the same time.\nblank makes one:","");
+  if(c===null) return;
+  c=(c||Math.random().toString(36).slice(2,6)).toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
+  if(!c) return; roomCode=c;
+  alert("ROOM "+c+"\n\nboth of you enter this code, then pick the same song.");
+};
+
+/* =====================================================================
+   14. boot
+   ===================================================================== */
+(function waitBeat(k){
+  if(window.IBEE_BEAT || k>60){ paintGrid(); return; }
+  setTimeout(function(){ waitBeat(k+1); },150);
+})(0);
+paintGrid();
+addEventListener("pagehide",netLeave);
+addEventListener("beforeunload",netLeave);
+
+/* expose the generator so tools/np2-fall-solver.js can prove every level */
+window.__FALL={build:build, chanAt:chanAt, NP2:NP2, ZONES:ZONES,
+  C:{VW:VW,SCROLL:SCROLL,LAT:LAT,LATA:LATA,SINK:SINK,RISE:RISE,
+     TOPMARGIN:TOPMARGIN,BOTMARGIN:BOTMARGIN,RES:RES,PR:PR}};
+})();
+</script>
+</body>
+</html>
