@@ -1252,7 +1252,7 @@ footer a:hover{color:var(--acid)}
   window.addEventListener("beforeunload",function(e){ if(DIRTY){e.preventDefault();e.returnValue="";} });
 })();
 </script>
-<script src="../assets/player.js?v=28"></script>
+<script src="../assets/player.js?v=29"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
 
@@ -1416,7 +1416,7 @@ footer a:hover{color:var(--acid)}
        cache written before this existed. */
     var ART={'ics-chess':'/assets/chess/knight1.png',
              'np-album':'/assets/img/np-cover.jpg',
-             'mzs-album':'/assets/img/20mzs-album.png'};
+             'mzs-album':'/assets/img/20mzs-album.jpg'};
     host.innerHTML=items.slice(0,6).map(function(x){
       var r=String(x.r||'common').replace(/[^a-z]/g,''), src=x.src||ART[x.id];
       var art=src?'<img src="'+src+'" alt="" loading="lazy">':'<i class="pkdot"></i>';

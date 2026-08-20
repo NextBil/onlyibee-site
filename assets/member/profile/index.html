@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
-<meta name="theme-color" content="#070707">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex">
-<title>MY PROFILE — ONLY IBEE</title>
-<!-- 2026-07-13: the profile and the room were merged into ONE concept — the room
-     page IS the profile now (identity, collection, badges, groove). This URL is kept
-     as a contract (the shell pill, NFC, old links point here) and redirects to /room/. -->
-<link rel="canonical" href="https://onlyibee.com/room/">
-<script>location.replace("../../room/"+location.search+location.hash);</script>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<style>
-:root{--acid:#b6ff00;--red:#ff2b2b;--px:'Press Start 2P',monospace}
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#070707;color:#e8e8e8;font-family:var(--px);min-height:100dvh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
-p{font-size:11px;color:var(--acid);letter-spacing:2px;line-height:1.8}
-a{font-size:9px;color:var(--acid);border:1px solid var(--acid);padding:14px 18px;text-decoration:none}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONLY IBEE</title>
+<!-- ===================================================================
+     THIS IS NOT A PAGE. It is a redirect standing on the grave of one.
+
+     An old drag-upload copied the whole site into assets/, so onlyibee.com
+     served a second, frozen ONLY IBEE at onlyibee.com/assets/... — with the
+     old catalogue still in it (RARE SOUL SESSIONS, the retired galaxies).
+     iOS Safari shows only the hostname in the address bar, so anyone who
+     landed here from an old link or a search result saw "onlyibee.com" and
+     a site that was months out of date, with no way to tell.
+
+     Every one of those copies is now a redirect to the page that is real.
+     Do not restore content here. If you are adding a page, add it at the
+     ROOT, never under assets/ — assets/ is for files, not pages.
+     =================================================================== -->
+<link rel="canonical" href="https://onlyibee.com/member/profile/">
+<meta name="robots" content="noindex,follow">
+<meta http-equiv="refresh" content="0; url=/member/profile/">
+<script>location.replace("/member/profile/"+location.search+location.hash);</script>
+<style>html,body{height:100%;margin:0;background:#0a0a0a;color:#b6ff00;
+  font-family:'Press Start 2P',ui-monospace,monospace;display:flex;
+  align-items:center;justify-content:center;text-align:center}
+a{color:#ff2b2b}</style>
 </head>
-<body>
-<p>OPENING YOUR PROFILE…</p>
-<a href="../../room/">▶ MY PROFILE + ROOM</a>
-<script src="/assets/stats-client.js?v=7"></script>
-<script src="/assets/pulse.js?v=2"></script>
-</body>
+<body><div style="font-size:11px;line-height:2.2">
+MOVED_<br><a href="/member/profile/">GO TO ONLYIBEE</a>
+</div></body>
 </html>

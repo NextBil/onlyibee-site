@@ -34,10 +34,16 @@
      an extra <script> tag; everything degrades gracefully if it's missing. */
   try{
     var bsc = document.createElement("script");
-    /* clock-stamped so a freshly-pushed beat-data.js is fetched immediately —
-       no manual ?v bumping. Loaded once per page (the shell persists), so this
-       is cheap. Old ?v=N versioning retired; IBEE STUDIO just replaces the file. */
-    bsc.src = BASE + "beat-data.js?cb=" + Date.now();
+    /* Stamped per BROWSING SESSION, not per load. A fresh stamp still picks up a
+       newly pushed beat-data.js the next time the site is opened, so IBEE STUDIO
+       still just replaces the file — but Date.now() meant this 300KB file could
+       never be cached, and iOS re-downloads it every time it reloads a tab it
+       evicted for memory. sessionStorage survives that reload; the tab reuses
+       the copy it already has. Old ?v=N versioning stays retired. */
+    var stamp;
+    try{ stamp = sessionStorage.getItem("ibee_cb"); if(!stamp){ stamp = String(Date.now()); sessionStorage.setItem("ibee_cb", stamp); } }
+    catch(e){ stamp = String(Date.now()); }
+    bsc.src = BASE + "beat-data.js?cb=" + stamp;
     document.head.appendChild(bsc);
   }catch(e){}
   /* extra records pressed in IBEE STUDIO (assets/songs-extra.js →
@@ -82,7 +88,7 @@
            room: ROOT+"nouveauxpunk/", galaxy:"np",  tint:"#ff2b2b", tag:"THE EXPERIENCE" },
     np2: { name:"NOUVEAUX PUNK 2",    cover: ROOT+"assets/img/nouveaux-punk-2.jpg",
            room: ROOT+"np2/",          galaxy:"np2", tint:"#ff1f6f", tag:"THE SEQUEL" },
-    mzs: { name:"20 MIN ZA SESSION",  cover: ROOT+"assets/img/20mzs-album.png",
+    mzs: { name:"20 MIN ZA SESSION",  cover: ROOT+"assets/img/20mzs-album.jpg",
            room: ROOT+"20minzasession/", galaxy:"mzs", tint:"#ff7a1a" }
   };
   function album(id){ return ALBUMS[id] || ALBUMS.ib; }
@@ -286,9 +292,23 @@
       +"%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='hsl("+(hue||190)+",90%25,55%25)' stroke-width='3'/%3E"
       +"%3Ccircle cx='50' cy='50' r='7' fill='hsl("+(hue||190)+",90%25,55%25)'/%3E%3C/svg%3E";
   }
-  function coverImg(cls, src, hue){
-    return '<img class="'+cls+'" alt="" loading="lazy" src="'+src+'" '
-      +'onerror="this.onerror=null;this.src=\''+fallbackCover(hue)+'\'">';
+  /* ---- COVER SIZE ---------------------------------------------------------
+     Safari decodes an <img> at its NATURAL size and holds that bitmap for as
+     long as the element lives — the drawn size is irrelevant. The radio panel
+     lists 65 records at 34x34; pointed at the full covers that is hundreds of
+     megabytes of decoded art in one tab, which is what makes iOS announce
+     "this webpage was reloaded". assets/img/thumb (128px) and assets/img/mid
+     (384px) hold generated copies under the SAME filename, so picking a size
+     is a path rewrite — and the full-size file is the first onerror fallback,
+     so a cover with no thumb still shows. Rebuild with tools/make-thumbs.sh. */
+  function sized(u, bucket){
+    var m = String(u||"").match(/^((?:[^?#]*\/)?assets\/(?:img|covers)\/)([^\/?#]+)$/);
+    return m ? m[1]+bucket+"/"+m[2] : u;
+  }
+  function coverImg(cls, src, hue, bucket){
+    var small = sized(src, bucket||"thumb"), esc2 = function(x){ return String(x).replace(/'/g,"%27"); };
+    return '<img class="'+cls+'" alt="" loading="lazy" decoding="async" src="'+small+'" '
+      +'onerror="if(this.src.indexOf(\''+esc2(small)+'\')>-1&&\''+esc2(small)+'\'!==\''+esc2(src)+'\'){this.src=\''+esc2(src)+'\';return;}this.onerror=null;this.src=\''+fallbackCover(hue)+'\'">';
   }
 
   /* ---------- favourites: hearts saved on this device (ibee_favs = {slug:1}) ---------- */
@@ -320,7 +340,7 @@
         var padc = al.pad ? " pad" : "";
         html += '<div class="rp-tile'+(i===cur?" now":"")+(s.locked?" locked":"")+'" data-i="'+i+'"'
           + (al.room?' style="--rt:'+(al.tint||"#ff2b2b")+'"':'')+'>'
-          + '<div class="art'+padc+'">'+coverImg("", songCover(s), s.hue)
+          + '<div class="art'+padc+'">'+coverImg("", songCover(s), s.hue, "mid")
           + (i===cur?'<span class="gnow">NOW</span>':'')
           + (s.locked?LOCK_BIG:'')
           + (al.room?'<span class="roomb">ROOM</span>':'')
@@ -335,7 +355,7 @@
         if(favOnly) return;
         shown++;
         html += '<div class="rp-tile" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
-          + '<div class="art'+(al.pad?" pad":"")+'">'+coverImg("", al.cover, 110)
+          + '<div class="art'+(al.pad?" pad":"")+'">'+coverImg("", al.cover, 110, "mid")
           + '<span class="roomb">ROOM</span>'
           + '<span class="gtag">ALBUM · '+esc(al.tag||"THE EXPERIENCE")+'</span></div>'
           + '<div class="nm">'+esc(al.name)+'</div></div>';
@@ -349,7 +369,7 @@
         html += '<div class="rp-row'+(i===cur?" now":"")+(s2.locked?" locked":"")+'" data-i="'+i+'"'
           + (al2.room?' style="--rt:'+(al2.tint||"#ff2b2b")+'"':'')+'>'
           + '<span class="no">'+String(i+1).padStart(2,"0")+'</span>'
-          + coverImg("rc", songCover(s2), s2.hue)
+          + coverImg("rc", songCover(s2), s2.hue, "thumb")
           + '<span class="rt"><span class="rn">'+esc(s2.n)+'</span><span class="ra">'+esc(al2.name)+'</span></span>'
           + '<span class="fv'+(isFav(s2.f)?" on":"")+'" data-fv="'+i+'" title="favourite">♥</span>'
           + (s2.locked?LOCK_SVG:(al2.room?'<span class="rmroom">ROOM</span>':''))
@@ -362,7 +382,7 @@
         shown++;
         html += '<div class="rp-row" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
           + '<span class="no">EP</span>'
-          + coverImg("rc", al.cover, 110)
+          + coverImg("rc", al.cover, 110, "thumb")
           + '<span class="rt"><span class="rn">'+esc(al.name)+'</span><span class="ra">'+esc((al.tag||"the experience").toLowerCase())+' · tap for the room</span></span>'
           + '<span class="rmroom">ROOM</span></div>';
       });
@@ -482,9 +502,11 @@
     var s = SONGS[cur], al = album(s.al);
     $("rp-title").textContent = s.n;
     $("rp-album").innerHTML = esc(al.name) + ' <span class="browse">· tap to browse</span>';
-    var cov = $("rp-cover");
-    cov.onerror = function(){ cov.onerror=null; cov.src = fallbackCover(s.hue); };
-    cov.src = songCover(s);
+    var cov = $("rp-cover"), full = songCover(s), small = sized(full, "mid");
+    /* 52px on screen: the 384px copy is plenty, and the full file is the first
+       thing tried if that copy is missing. */
+    cov.onerror = function(){ if(cov.src.indexOf(small)>-1 && small!==full){ cov.src=full; return; } cov.onerror=null; cov.src = fallbackCover(s.hue); };
+    cov.src = small;
     cov.style.padding = al.pad ? "6px" : "0";
     cov.style.background = al.pad ? "radial-gradient(circle at 50% 40%,#241207,#0a0604)" : "#111";
     paintRoomBtn(al);

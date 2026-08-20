@@ -1,223 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
-<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-<meta name="theme-color" content="#070707">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>THE DROP — ONLY IBEE</title>
-<meta name="description" content="ONLY IBEE — UTOPIE clothing drops. Each piece unique, made only once.">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-<!--
-  Generic FOLDER (drop) page: shop/?f=<folder id>.
-  Renders every product whose folder matches, from assets/products-data.js
-  (window.IBEE_PRODUCTS.folders + .products). Products with no folder fall
-  into the first folder. Same retro style as the console shop.
--->
-<style>
-:root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
-  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
-  --px:'Press Start 2P',monospace;--vt:'VT323',monospace}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
-  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
-  border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
-header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
-main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-index:2;animation:crtin .3s ease-out}
-@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
-.crumbs{font-family:var(--px);font-size:8px;margin-bottom:20px}
-.crumbs a{color:var(--dim);text-decoration:none}.crumbs a:hover{color:var(--acid)}
-.fhead{border:2px solid var(--border);background:linear-gradient(180deg,#101010,#0b0b0b);padding:20px;margin-bottom:24px}
-.fhead.r-leg{border-color:#4d6600}.fhead.r-sdr{border-color:#5c4b2c}
-.fhead h1{font-family:var(--px);font-size:clamp(14px,4vw,22px);color:var(--ink);line-height:1.5}
-.fhead .proto{display:inline-block;margin-top:12px;font-family:var(--px);font-size:9px;color:#0a0a0a;
-  background:var(--gold);padding:7px 10px;letter-spacing:1px}
-.fhead.r-leg .proto{background:var(--acid)}
-.fhead .cnt{color:var(--dim);font-size:19px;margin-top:12px}
-/* COLLECTION CLOSED — a compact gold stamp, not a wide banner. It sits tight under
-   this drop's header so it reads as "THIS drop is closed", never as a whole-store
-   notice. Gold, not red: the drop is over, nothing is broken. */
-.closednote{display:inline-flex;align-items:center;gap:9px;margin:-14px 0 22px;padding:9px 12px;
-  border:1px solid var(--gold);background:#1a1204}
-.closednote b{font-family:var(--px);font-size:9px;color:var(--gold);letter-spacing:1px;white-space:nowrap}
-.closednote span{color:var(--dim);font-size:17px;line-height:1.3}
-@media(max-width:560px){.closednote{display:flex;align-items:flex-start;flex-direction:column;gap:6px}}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
-.item{border:2px solid var(--border);background:var(--panel);text-decoration:none;color:var(--ink);
-  display:block;transition:transform .15s,border-color .2s,box-shadow .2s}
-.item:hover{transform:translateY(-3px)}
-.item .sq{position:relative;aspect-ratio:1/1;background:#0a0a0c;overflow:hidden}
-.item .sq img{width:100%;height:100%;object-fit:cover;display:block}
-.item .sq .noimg{color:var(--dim);font-family:var(--px);font-size:8px;text-align:center;line-height:2;padding:8px;
-  display:flex;align-items:center;justify-content:center;height:100%}
-.item .rtag{position:absolute;top:8px;left:8px;font-family:var(--px);font-size:7px;letter-spacing:1px;
-  padding:5px 6px;background:rgba(0,0,0,.7)}
-.item .meta{padding:10px;border-top:2px solid var(--border);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.item .nm{font-family:var(--px);font-size:8px;line-height:1.7}
-.item .pr{font-family:var(--px);font-size:9px;color:var(--acid);white-space:nowrap}
-.item.r-c:hover{border-color:#9a9a9a}.item.r-c .rtag{color:#9a9a9a}
-.item.r-sr{border-color:#5c3350}.item.r-sr .rtag{color:#e879c9}.item.r-sr:hover{border-color:#e879c9;box-shadow:0 0 16px rgba(232,121,201,.35)}
-.item.r-sdr{border-color:#5c4b2c}.item.r-sdr .rtag{color:#d9b36c}.item.r-sdr:hover{border-color:#d9b36c;box-shadow:0 0 16px rgba(217,179,108,.4)}
-.item.r-leg{border-color:#4d6600}.item.r-leg .rtag{color:var(--acid)}.item.r-leg:hover{border-color:var(--acid)}
-/* Sold out still deserves to be SEEN — these are one-of-ones and the archive
-   is half the reason to visit. Enough desaturation to read as gone, not so
-   much that the piece disappears. */
-.item.soldout{opacity:.92}.item.soldout .sq img{filter:grayscale(.45) brightness(.92)}.item.soldout .pr{color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(255,43,43,.75)}
-.sotag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);
-  font-family:var(--px);font-size:9px;letter-spacing:1px;color:#fff;background:var(--red);
-  border:2px solid #ff7b7b;padding:8px 11px;box-shadow:0 0 18px rgba(255,43,43,.55);white-space:nowrap}
-.notfound{font-family:var(--px);font-size:11px;color:var(--red);line-height:2;padding:40px 0;text-align:center}
-/* ---- THE PROCESS (ICS folders): sketches + making-of + nfc demo ---- */
-.proc{margin-top:34px;border-top:2px solid var(--border);padding-top:26px}
-.proc h2{font-family:var(--px);font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:6px}
-.proc .sub2{color:var(--dim);line-height:1.4;margin-bottom:18px;max-width:640px}
-.proc h3{font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:1px;margin:22px 0 10px}
-.vidrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.vcard{border:2px solid var(--border);background:var(--panel)}
-.vcard video{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}
-.vcard.wide video{aspect-ratio:5/4}
-.vcard .cap{padding:10px;border-top:2px solid var(--border)}
-.vcard .cap b{font-family:var(--px);font-size:8px;color:var(--ink);display:block;line-height:1.7}
-.vcard .cap span{color:var(--dim);font-size:17px;line-height:1.3;display:block;margin-top:4px}
-.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.sgrid a{border:2px solid var(--border);background:var(--panel);display:block;position:relative;transition:border-color .2s,transform .15s}
-.sgrid a:hover{border-color:var(--gold);transform:translateY(-3px)}
-.sgrid img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;filter:saturate(1.02)}
-.sgrid .snm{font-family:var(--px);font-size:6px;color:var(--dim);padding:7px 8px;line-height:1.6}
-/* lightbox */
-#lbx{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9500;display:none;align-items:center;justify-content:center;cursor:zoom-out}
-#lbx.on{display:flex}
-#lbx img{max-width:94vw;max-height:90vh;border:2px solid var(--border)}
-#lbx .x{position:absolute;top:14px;right:16px;font-family:var(--px);font-size:12px;color:var(--red);background:none;border:0;cursor:pointer}
-footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-align:center}
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONLY IBEE</title>
+<!-- ===================================================================
+     THIS IS NOT A PAGE. It is a redirect standing on the grave of one.
 
-.mback{display:inline-block;font-family:'Press Start 2P',monospace;font-size:9px;color:#7a7a7a;text-decoration:none;border:1px solid #2a2a2a;padding:8px 12px;margin:0 0 14px 18px;position:relative;z-index:60;cursor:pointer}
-.mback:hover{color:#b6ff00;border-color:#b6ff00}
-</style>
+     An old drag-upload copied the whole site into assets/, so onlyibee.com
+     served a second, frozen ONLY IBEE at onlyibee.com/assets/... — with the
+     old catalogue still in it (RARE SOUL SESSIONS, the retired galaxies).
+     iOS Safari shows only the hostname in the address bar, so anyone who
+     landed here from an old link or a search result saw "onlyibee.com" and
+     a site that was months out of date, with no way to tell.
+
+     Every one of those copies is now a redirect to the page that is real.
+     Do not restore content here. If you are adding a page, add it at the
+     ROOT, never under assets/ — assets/ is for files, not pages.
+     =================================================================== -->
+<link rel="canonical" href="https://onlyibee.com/shop/">
+<meta name="robots" content="noindex,follow">
+<meta http-equiv="refresh" content="0; url=/shop/">
+<script>location.replace("/shop/"+location.search+location.hash);</script>
+<style>html,body{height:100%;margin:0;background:#0a0a0a;color:#b6ff00;
+  font-family:'Press Start 2P',ui-monospace,monospace;display:flex;
+  align-items:center;justify-content:center;text-align:center}
+a{color:#ff2b2b}</style>
 </head>
-<body>
-<header>
-  <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
-  <span>DROP.SYS</span>
-</header>
-<main>
-<a class="mback" href="../console.html#shop" data-back>◀ BACK</a>
-
-  <div id="wrap"></div>
-</main>
-<footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
-<div id="lbx"><button class="x" aria-label="close">✕</button><img id="lbxim" alt=""></div>
-
-<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
-<script>
-(function(){
-  "use strict";
-  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-  var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};
-  var D=window.IBEE_PRODUCTS||{};
-  var folders=D.folders||[], products=D.products||[];
-  var fid=decodeURIComponent((new RegExp("[?&]f=([^&]+)").exec(location.search)||[])[1]||"");
-  /* folder ids that were renamed — old links (shared, bookmarked, in someone's
-     history) must keep landing on the right drop instead of an empty folder. */
-  var ALIAS={"ics-v1-autumn-2024":"ics-v1-autumn-2025","ics-v3":"ics-v2"};
-  if(ALIAS[fid]) fid=ALIAS[fid];
-  /* No ?f= → land on the first folder that actually HAS pieces, not whichever
-     folder happens to sit first. The teaser drop leads the shop for hype, and a
-     bare /shop/ link must still open a real drop rather than a sealed empty one. */
-  if(!fid && folders.length){
-    var firstReal=null;
-    folders.forEach(function(f){
-      if(firstReal) return;
-      if(!f.hype && products.some(function(p){ return p.folder===f.id; })) firstReal=f.id;
-    });
-    fid=firstReal||folders[0].id;
-  }
-  var fd=null; folders.forEach(function(f){ if(f.id===fid) fd=f; });
-  /* a drop with its own page owns the whole presentation — send the generic list
-     there so one drop never has two different-looking front doors */
-  if(fd&&fd.page){ location.replace("../"+fd.page); return; }
-  if(!fd) fd={id:fid||"all",name:"THE SHOP",sub:"",tint:"leg"};
-  /* every product now carries an explicit folder; this fallback only catches a
-     legacy record that predates that, and points it at the first real drop. */
-  var defId=fid;
-  var items=products.filter(function(p){ return (p.folder||defId)===fd.id; });
-
-  document.title=fd.name+" — ONLY IBEE";
-  var head='<div class="fhead r-'+(fd.tint||'leg')+'"><h1>'+e2(fd.name)+'</h1>'
-    +(fd.sub?'<div class="proto">'+e2(fd.sub)+'</div>':'')
-    +'<div class="cnt">'+items.length+' piece'+(items.length===1?'':'s')+' · each made once, then never again_</div></div>';
-  /* ---- drops that are over: browsable, not buyable. Add a folder id here when its
-     drop closes; the product pages carry their own CLOSED flag. ---- */
-  /* drop state lives in the data (folder.state) so the shop, the product pages
-     and the vault can never disagree about whether something is selling */
-  var note = fd.state==="closed"
-    ? '<div class="closednote"><b>◼ CLOSED FOR NOW</b>'
-      +'<span>the shop is taking a break — reopens soon_</span></div>'
-    : fd.state==="soon"
-    ? '<div class="closednote"><b>◆ OPENS SOON</b>'
-      +'<span>this drop hasn\'t opened yet — nothing claimed_</span></div>'
-    : '';
-  var grid;
-  if(!items.length){
-    grid='<div class="notfound">✕ NOTHING IN THIS FOLDER YET_<br><br>stay tuned — the drop is loading_</div>';
-  } else {
-    grid='<div class="grid">'+items.map(function(p){
-      var out=!!p.out, cls="item r-"+(p.r||"c")+(out?" soldout":"");
-      var sq=(p.imgs&&p.imgs[0])?'<img loading="lazy" src="'+e2(p.imgs[0])+'" alt="'+e2(p.n)+'">'
-        :'<div class="noimg">NO VISUAL<br>TAP TO VIEW</div>';
-      return '<a class="'+cls+'" href="../product-page/?id='+encodeURIComponent(p.id)+'">'
-        +'<div class="sq">'+sq+'<span class="rtag">'+(RNAME[p.r]||"COMMON")+'</span>'
-        +(out?'<span class="sotag">SOLD OUT</span>':'')+'</div>'
-        +'<div class="meta"><span class="nm">'+e2(p.n)+'</span>'
-        +'<span class="pr">'+e2((p.cur||"€")+p.price)+'</span></div></a>';
-    }).join('')+'</div>';
-  }
-  /* ---- THE PROCESS: only on ICS drop folders ---- */
-  var proc="";
-  if(/^ics/.test(fd.id)){
-    var P="../assets/img/ics-process/";
-    var sketches=[
-      ["process-sketches-spread.jpg","FIRST PEN SKETCHES"],
-      ["process-sketch-kings-mask.jpg","KING NANNAN + THE MASK"],
-      ["process-sketch-eiffel-knight.jpg","EIFFEL TOWER KNIGHT"],
-      ["process-sketch-hippo-knight.jpg","HIPPO KNIGHT — BAOULE MYTH"],
-      ["process-sketch-beebee.jpg","BEEBEE — MIMI'S BROTHER"],
-      ["process-photoshop-mask.jpg","INKING IN PHOTOSHOP"],
-      ["process-photoshop-swordy.jpg","SWORDY + SWORDA IN COLOR"],
-      ["process-beebee-final.jpg","BEEBEE — FINAL CARD"]
-    ];
-    proc='<section class="proc"><h2>THE PROCESS_</h2>'
-      +'<div class="sub2">every ICS character starts as a pen sketch, gets inked + colored in photoshop, '
-      +'then pressed onto the fabric by hand. one by one. that’s why each piece is made only once_</div>'
-      +'<h3>▸ MAKING OF</h3><div class="vidrow">'
-      +'<div class="vcard"><video controls playsinline preload="none" poster="'+P+'process-recap-poster.jpg" src="'+P+'process-recap.mp4"></video>'
-      +'<div class="cap"><b>PROCESS RECAP</b><span>from first sketch to finished shirt — how the clothes get made_</span></div></div>'
-      +'<div class="vcard wide"><video controls playsinline preload="none" poster="'+P+'process-nfc-demo-poster.jpg" src="'+P+'process-nfc-demo.mp4"></video>'
-      +'<div class="cap"><b>SCAN THE SHIRT</b><span>every piece has a chip inside — tap your phone on it and it unlocks the universe_</span></div></div>'
-      +'</div>'
-      +'<h3>▸ THE SKETCHES</h3><div class="sgrid">'
-      +sketches.map(function(s){
-        return '<a href="'+P+s[0]+'" data-lbx><img loading="lazy" src="'+P+s[0]+'" alt="'+e2(s[1])+'"><div class="snm">'+e2(s[1])+'</div></a>';
-      }).join('')+'</div></section>';
-  }
-  document.getElementById("wrap").innerHTML=head+note+grid+proc;
-  /* lightbox for the sketches */
-  var lbx=document.getElementById("lbx"),lim=document.getElementById("lbxim");
-  document.querySelectorAll("[data-lbx]").forEach(function(a){
-    a.addEventListener("click",function(ev){ev.preventDefault();lim.src=a.getAttribute("href");lbx.classList.add("on");});
-  });
-  lbx.addEventListener("click",function(){lbx.classList.remove("on");lim.src="";});
-  document.addEventListener("keydown",function(ev){if(ev.key==="Escape"){lbx.classList.remove("on");lim.src="";}});
-})();
-</script>
-<script src="../assets/player.js?v=25"></script>
-<script src="/assets/stats-client.js?v=7"></script>
-<script src="../assets/nav.js?v=1"></script>
-<script src="/assets/pulse.js?v=2"></script>
-</body>
+<body><div style="font-size:11px;line-height:2.2">
+MOVED_<br><a href="/shop/">GO TO ONLYIBEE</a>
+</div></body>
 </html>

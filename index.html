@@ -623,7 +623,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=28"></script>
+<script src="assets/player.js?v=29"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
@@ -967,15 +967,41 @@
     return (name||'').toLowerCase().indexOf(q)>=0 || (alb||'').toLowerCase().indexOf(q)>=0; }
   function vinyl(hue){ return 'radial-gradient(circle,hsl('+(hue||75)+',85%,55%) 0 20%,#070707 22% 28%,#161616 30% 100%)'; }
   /* cover art: song's own picture → its ALBUM cover → legacy assets/covers/<name>.jpg|png → vinyl */
-  function coverCands(s,alb){
+  /* ---- COVER SIZE: never hand a phone a 1400px cover for a 34px row --------
+     Safari decodes an <img> at its NATURAL size, not the size it is drawn at,
+     and keeps that bitmap alive as long as the element is. The radio lists 65
+     rows; at full size that is roughly half a gigabyte of decoded art sitting in
+     one tab, which is exactly what makes iOS say "this webpage was reloaded".
+     assets/img/thumb (128px) and assets/img/mid (384px) hold generated copies
+     under the SAME filename, so asking for a size is a path rewrite — and the
+     full-size file stays in the candidate list right behind it, so a cover with
+     no thumb still shows. Regenerate with tools/make-thumbs.sh. */
+  function sized(u,bucket){
+    var m=String(u||'').match(/^((?:[^?#]*\/)?assets\/(?:img|covers)\/)([^\/?#]+)$/);
+    return m ? m[1]+bucket+'/'+m[2] : u;
+  }
+  function coverCands(s,alb,bucket){
+    bucket=bucket||'thumb';
     var base=(s.f||'').replace(/\.[a-z0-9]+$/i,''), rbase=(s.r||'').replace(/\.[a-z0-9]+$/i,''), c=[];
-    if(s.cover)c.push(encodeURI(s.cover));
-    if(alb&&alb.cover)c.push(encodeURI(alb.cover));
-    if(base){c.push('assets/covers/'+encodeURI(base)+'.jpg');c.push('assets/covers/'+encodeURI(base)+'.png');}
-    if(rbase&&rbase!==base)c.push('assets/covers/'+encodeURI(rbase)+'.jpg');
+    function push(p){ var t=sized(p,bucket); if(t!==p)c.push(encodeURI(t)); c.push(encodeURI(p)); }
+    if(s.cover)push(s.cover);
+    if(alb&&alb.cover)push(alb.cover);
+    if(base){push('assets/covers/'+base+'.jpg');push('assets/covers/'+base+'.png');}
+    if(rbase&&rbase!==base)push('assets/covers/'+rbase+'.jpg');
     return c;
   }
-  function imgTag(cands){ return cands.length?'<img alt="" loading="lazy" src="'+cands[0]+'" data-alt="'+cands.slice(1).join('|')+'">':''; }
+  function imgTag(cands){ return cands.length?'<img alt="" loading="lazy" decoding="async" src="'+cands[0]+'" data-alt="'+cands.slice(1).join('|')+'">':''; }
+  /* The candidate chain was written but never walked — nothing listened, so the
+     first miss just left a blank square. It is load-bearing now that a thumb
+     comes first, so walk it: <img> error does not bubble, hence the capture
+     phase, and one listener covers every list in the shell. */
+  document.addEventListener('error',function(ev){
+    var im=ev.target; if(!im||im.tagName!=='IMG')return;
+    var rest=im.getAttribute('data-alt'); if(!rest)return;
+    var a=rest.split('|'), next=a.shift();
+    if(a.length)im.setAttribute('data-alt',a.join('|')); else im.removeAttribute('data-alt');
+    if(next)im.src=next;
+  },true);
   var playCounts={},playStatsReady=false;
   function playsLabel(slug){ return playStatsReady?'<span class="pc">'+((playCounts[slug]||0).toLocaleString())+' PLAYS</span>':''; }
   function refreshSongCounts(){
@@ -1008,7 +1034,7 @@
     host.innerHTML=favCard+out.map(function(a){
       var on = query && a.name.toLowerCase()===query.toLowerCase();
       return '<button class="alb'+(on?' on':'')+'" data-alb="'+esc(a.name)+'" title="'+esc(a.name)+'">'
-        +'<span class="ac">'+(a.cover?'<img src="'+esc(a.cover)+'" alt="" loading="lazy">':'')+'</span>'
+        +'<span class="ac">'+(a.cover?'<img src="'+esc(sized(a.cover,'mid'))+'" alt="" loading="lazy" decoding="async" data-alt="'+esc(a.cover)+'">':'')+'</span>'
         +'<span class="an">'+esc(a.name)+'</span>'
         +'<span class="aq">'+a.ref.n+' TRACKS</span></button>';
     }).join('');
@@ -1038,7 +1064,7 @@
       if(!matchQ(s.n,aln))continue;
       if(favOnly&&!isFav(s.f))continue;
       shown++;
-      var img0=imgTag(coverCands(s,alb)), room=alb&&alb.room, tint=(alb&&alb.tint)||'#ff2b2b';
+      var img0=imgTag(coverCands(s,alb,viewMode==='grid'?'mid':'thumb')), room=alb&&alb.room, tint=(alb&&alb.tint)||'#ff2b2b';
       /* ♥ and ⓘ sit together on the row: one saves the record, the other tells
          you about it. The ⓘ used to be a badge on the player's cover, which put
          it nowhere near the record it described. */
@@ -1068,7 +1094,9 @@
       if(!matchQ(rm.name,rm.name))return;
       if(favOnly)return;
       shown++;
-      var tint=rm.tint||'#ff2b2b', cov=rm.cover?'<img alt="" loading="lazy" src="'+encodeURI(rm.cover)+'">':'';
+      var tint=rm.tint||'#ff2b2b';
+      function rcov(bk){ return rm.cover?'<img alt="" loading="lazy" decoding="async" src="'+encodeURI(sized(rm.cover,bk))+'" data-alt="'+encodeURI(rm.cover)+'">':''; }
+      var cov=rcov(viewMode==='grid'?'mid':'thumb');
       if(viewMode==='grid'){
         html+='<div class="tl-tile" data-room="'+e3(rm.room)+'" style="--rt:'+tint+'">'
           +'<div class="art" style="background:'+vinyl(110)+'">'+cov
@@ -1286,8 +1314,10 @@
     var hue=(s&&s.hue!=null)?s.hue:75;
     pcover.style.background='radial-gradient(circle,hsl('+hue+',85%,55%) 0 20%,#070707 22% 28%,#141414 30% 100%)';
     var alb=r.album?r.album(i):null, cov=(s&&s.cover)||(alb&&alb.cover)||'';
-    if(cov){ pcoverimg.onerror=function(){pcoverimg.style.display='none';};
-      pcoverimg.style.display='block'; pcoverimg.src=cov; }
+    /* 36px in the bar — the 128px copy, with the full file as the first retry. */
+    if(cov){ var small=sized(cov,'thumb');
+      pcoverimg.onerror=function(){ if(small!==cov&&pcoverimg.src.indexOf(small)>-1){pcoverimg.src=cov;return;} pcoverimg.onerror=null; pcoverimg.style.display='none'; };
+      pcoverimg.style.display='block'; pcoverimg.src=small; }
     else pcoverimg.style.display='none';
   }
   var wasPlaying=null, player=document.getElementById('player');

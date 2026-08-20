@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "ibee", "runtimeExecutable": "sh", "runtimeArgs": ["-c", "cd '/private/tmp/claude-501/-Users-amianibrahim-Documents-try-not-to-laugh/2b8f1cdc-0a81-43da-ab5a-b0a626e93f84/scratchpad/site' && exec python3 -m http.server 8899"], "port": 8899 }
+  ]
+}

@@ -1,238 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
-<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-<meta name="theme-color" content="#070707">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-<title>MY COLLECTION — THE FREQUENCY | ONLY IBEE</title>
-<meta name="robots" content="noindex">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
-  --cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:19px;min-height:100dvh;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
-  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:2px solid var(--border);
-  font-family:var(--px);font-size:10px;position:relative;z-index:50}
-header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
-main{max-width:820px;margin:0 auto;padding:22px 16px 60px;position:relative;z-index:2}
-h1{font-family:var(--px);font-size:clamp(15px,5vw,24px);color:var(--acid);letter-spacing:2px;text-align:center;
-  text-shadow:0 0 18px rgba(182,255,0,.5)}
-.progress{text-align:center;color:var(--dim);font-family:var(--px);font-size:9px;letter-spacing:1px;margin:12px 0 4px}
-.pbar{max-width:340px;height:9px;border:1px solid var(--border);margin:0 auto 22px;padding:1px}
-.pbar i{display:block;height:100%;width:0;background:var(--acid);box-shadow:0 0 8px rgba(182,255,0,.6);transition:width 1s ease}
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONLY IBEE</title>
+<!-- ===================================================================
+     THIS IS NOT A PAGE. It is a redirect standing on the grave of one.
 
-/* ---- the shelf: rows of physically-distinct objects, each rotating ---- */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 8px}
-.slot{padding:10px 6px 16px;text-align:center;position:relative;
-  border-bottom:2px solid #16161b;background:linear-gradient(180deg,transparent 60%,rgba(255,255,255,.02))}
-/* rotating 3D artifact (fake-voxel extrusion of the object's art) */
-.artstage{perspective:620px;width:116px;height:116px;margin:0 auto}
-.art3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spin3d 6.5s linear infinite}
-.art3d .f,.art3d .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.art3d .f img,.art3d .b img{width:100%;height:100%}
-.art3d .b{transform:rotateY(180deg);filter:brightness(.55)}
-@keyframes spin3d{from{transform:rotateX(8deg) rotateY(0deg)}to{transform:rotateX(8deg) rotateY(360deg)}}
-.art3d.mystery .f img,.art3d.mystery .b img{filter:grayscale(1) brightness(.2)}
-.slot.r-common.owned .artstage{filter:drop-shadow(0 0 9px rgba(182,255,0,.3))}
-.slot.r-rare.owned .artstage{filter:drop-shadow(0 0 12px rgba(38,224,255,.4))}
-.slot.r-epic.owned .artstage{filter:drop-shadow(0 0 14px rgba(255,43,214,.45))}
-.slot.r-legendary.owned .artstage{filter:drop-shadow(0 0 16px rgba(255,214,10,.5))}
-.qmark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:var(--px);font-size:30px;color:#333;pointer-events:none}
-.ped{width:78px;height:13px;margin:-4px auto 8px;border-radius:50%;
-  background:radial-gradient(ellipse,rgba(110,110,110,.2),transparent 70%);animation:pulse 3.4s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scaleX(1);opacity:.8}50%{transform:scaleX(.72);opacity:.45}}
-.slot.r-common.owned .ped{background:radial-gradient(ellipse,rgba(182,255,0,.28),transparent 70%)}
-.slot.r-rare.owned .ped{background:radial-gradient(ellipse,rgba(38,224,255,.3),transparent 70%)}
-.slot.r-epic.owned .ped{background:radial-gradient(ellipse,rgba(255,43,214,.32),transparent 70%)}
-.slot.r-legendary.owned .ped{background:radial-gradient(ellipse,rgba(255,214,10,.34),transparent 70%)}
-.slot .nm{font-family:var(--px);font-size:9px;line-height:1.5;min-height:26px}
-.slot.owned .nm{color:var(--ink)}.slot .nm.locked{color:#3a3a3a}
-.rz{font-family:var(--px);font-size:7px;letter-spacing:1px;padding:3px 6px;border:1px solid;display:inline-block;margin:8px 0 2px}
-.r-common .rz{color:#9a9a9a;border-color:#444}.r-rare .rz{color:var(--cyan);border-color:#123a44}
-.r-epic .rz{color:var(--pink);border-color:#4a1240}.r-legendary .rz{color:var(--gold);border-color:#4a3a12}
-.val{color:var(--dim);font-size:15px}
-.enter{display:block;margin-top:10px;font-family:var(--px);font-size:8px;padding:9px;background:var(--acid);color:#000;text-decoration:none}
-.locktag{margin-top:10px;font-family:var(--px);font-size:8px;color:var(--red);display:flex;align-items:center;justify-content:center;gap:5px}
-.locktag svg{width:11px;height:11px}
-/* login */
-.login{max-width:420px;margin:8px auto 24px;border:1px solid var(--border);background:rgba(14,14,14,.9);padding:16px;text-align:center}
-.login .h{font-family:var(--px);font-size:9px;color:var(--acid);margin-bottom:10px}
-.login p{color:var(--dim);margin-bottom:10px}
-.login input{width:100%;background:#050505;border:1px solid var(--border);color:var(--acid);font-family:var(--vt);font-size:18px;padding:11px;margin-bottom:8px}
-.login button{width:100%;font-family:var(--px);font-size:10px;padding:13px;background:var(--acid);color:#000;border:0;cursor:pointer}
-.msg{color:var(--dim);font-size:16px;margin-top:8px}
-.sess{text-align:center;color:var(--dim);font-size:15px;margin-bottom:16px}
-.sess a{color:var(--acid)}
-/* back to the profile — always lands on YOUR annex (history.back when we came from it,
-   so the exact same profile page + params are restored) */
-.backbtn{display:inline-block;font-family:var(--px);font-size:8px;color:var(--acid);
-  border:1px solid var(--acid);padding:10px 12px;text-decoration:none;letter-spacing:1px;margin-bottom:14px}
-.backbtn:hover{background:#131a00}
-.backbtn:active{transform:translateY(2px)}
-footer{text-align:center;padding:16px;font-family:var(--px);font-size:8px;color:var(--dim)}
-</style>
+     An old drag-upload copied the whole site into assets/, so onlyibee.com
+     served a second, frozen ONLY IBEE at onlyibee.com/assets/... — with the
+     old catalogue still in it (RARE SOUL SESSIONS, the retired galaxies).
+     iOS Safari shows only the hostname in the address bar, so anyone who
+     landed here from an old link or a search result saw "onlyibee.com" and
+     a site that was months out of date, with no way to tell.
+
+     Every one of those copies is now a redirect to the page that is real.
+     Do not restore content here. If you are adding a page, add it at the
+     ROOT, never under assets/ — assets/ is for files, not pages.
+     =================================================================== -->
+<link rel="canonical" href="https://onlyibee.com/member/inventory/">
+<meta name="robots" content="noindex,follow">
+<meta http-equiv="refresh" content="0; url=/member/inventory/">
+<script>location.replace("/member/inventory/"+location.search+location.hash);</script>
+<style>html,body{height:100%;margin:0;background:#0a0a0a;color:#b6ff00;
+  font-family:'Press Start 2P',ui-monospace,monospace;display:flex;
+  align-items:center;justify-content:center;text-align:center}
+a{color:#ff2b2b}</style>
 </head>
-<body>
-<header>
-  <a href="../../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
-  <span><a href="../../room/" style="color:var(--acid);text-decoration:none">☺ PROFILE</a> · COLLECTION.SYS</span>
-</header>
-<main>
-  <a class="backbtn" id="backprof" href="../../room/">◀ BACK TO MY PROFILE</a>
-  <h1>MY COLLECTION</h1>
-  <div class="progress" id="prog">SYNCING THE VAULT…</div>
-  <div class="pbar"><i id="pfill"></i></div>
-  <div class="sess" id="sess"></div>
-  <div id="loginbox"></div>
-  <div class="grid" id="grid"></div>
-</main>
-<footer>© ONLYIBEE — THE FREQUENCY · EVERY PIECE EARNED</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(function(){
-  "use strict";
-  var $=function(id){return document.getElementById(id);};
-  var SB_URL="https://hloxwicoeahczifshyoe.supabase.co";
-  var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
-  var sb=window.supabase.createClient(SB_URL,SB_KEY);
-  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-  var LOCK="<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><rect x='5' y='11' width='14' height='9' rx='2' fill='currentColor'/>"
-    +"<path d='M8 11V7.5a4 4 0 0 1 8 0V11' stroke='currentColor' stroke-width='2.2' fill='none' stroke-linecap='round'/>"
-    +"<circle cx='12' cy='15' r='1.5' fill='#050505'/></svg>";
-
-  /* ---- the artifact library: each collectible is a physically distinct object,
-     drawn flat then extruded into a rotating 3D piece (floppy, cassette, CRT…) ---- */
-  var V="viewBox='0 0 100 100'", NS="xmlns='http://www.w3.org/2000/svg'";
-  var FORMS={
-    floppy:"<svg "+NS+" "+V+"><path d='M22 16 h48 l12 12 v56 h-60 z' fill='#3b46a8' stroke='#0a0d2a' stroke-width='3'/><rect x='32' y='16' width='34' height='24' fill='#c9ccdd' stroke='#0a0d2a' stroke-width='2'/><rect x='48' y='18' width='11' height='20' fill='#7c81a6'/><rect x='28' y='50' width='46' height='30' fill='#e8e4cf' stroke='#0a0d2a' stroke-width='2'/><rect x='32' y='55' width='38' height='5' fill='#ff2b2b'/><line x1='32' y1='66' x2='70' y2='66' stroke='#0a0d2a' stroke-width='2'/><line x1='32' y1='72' x2='60' y2='72' stroke='#0a0d2a' stroke-width='2'/></svg>",
-    cassette:"<svg "+NS+" "+V+"><rect x='8' y='28' width='84' height='44' rx='5' fill='#15151d' stroke='#b6ff00' stroke-width='3'/><rect x='16' y='35' width='68' height='19' rx='2' fill='#050505' stroke='#333' stroke-width='1.5'/><circle cx='36' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='64' cy='45' r='8' fill='#222' stroke='#b6ff00' stroke-width='2'/><circle cx='36' cy='45' r='2.5' fill='#b6ff00'/><circle cx='64' cy='45' r='2.5' fill='#b6ff00'/><rect x='28' y='60' width='44' height='7' fill='#ff2bd6'/><rect x='40' y='68' width='6' height='4' fill='#555'/><rect x='54' y='68' width='6' height='4' fill='#555'/></svg>",
-    vhs:"<svg "+NS+" "+V+"><rect x='12' y='24' width='76' height='52' rx='3' fill='#0e0e12' stroke='#26e0ff' stroke-width='3'/><rect x='22' y='30' width='56' height='20' fill='#e8e4cf'/><rect x='24' y='33' width='40' height='5' fill='#ff2b2b'/><line x1='24' y1='43' x2='72' y2='43' stroke='#555' stroke-width='2'/><rect x='30' y='56' width='40' height='14' rx='2' fill='#050505' stroke='#26e0ff' stroke-width='1.5'/><rect x='34' y='60' width='14' height='6' fill='#1a1a1a'/><rect x='52' y='60' width='14' height='6' fill='#1a1a1a'/></svg>",
-    crt:"<svg "+NS+" "+V+"><line x1='40' y1='28' x2='30' y2='12' stroke='#7a7a7a' stroke-width='2'/><line x1='50' y1='28' x2='62' y2='12' stroke='#7a7a7a' stroke-width='2'/><rect x='12' y='28' width='60' height='54' rx='6' fill='#2a2a2a' stroke='#0a0a0a' stroke-width='3'/><rect x='18' y='34' width='42' height='40' rx='3' fill='#0a1a10' stroke='#b6ff00' stroke-width='2'/><path d='M22 40 q18 6 34 0' stroke='#b6ff00' stroke-width='2' fill='none' opacity='.55'/><rect x='64' y='34' width='22' height='48' rx='3' fill='#1a1a1a' stroke='#0a0a0a' stroke-width='2'/><circle cx='75' cy='44' r='3' fill='#b6ff00'/><circle cx='75' cy='54' r='3' fill='#7a7a7a'/><rect x='70' y='62' width='10' height='4' fill='#7a7a7a'/></svg>",
-    ufo:"<svg "+NS+" "+V+"><path d='M34 50 a16 11 0 0 1 32 0 z' fill='#0a1a24' stroke='#26e0ff' stroke-width='2'/><ellipse cx='50' cy='44' rx='13' ry='7' fill='#26e0ff' opacity='.5'/><ellipse cx='50' cy='58' rx='38' ry='12' fill='#8a8f9e' stroke='#26e0ff' stroke-width='2.5'/><circle cx='28' cy='60' r='3' fill='#ff2bd6'/><circle cx='42' cy='63' r='3' fill='#b6ff00'/><circle cx='58' cy='63' r='3' fill='#ffd60a'/><circle cx='72' cy='60' r='3' fill='#ff2bd6'/></svg>",
-    skull:"<svg "+NS+" "+V+"><path d='M50 16 C28 16 20 34 22 52 c1 8 6 12 10 14 v10 h8 v-6 h6 v6 h8 v-6 h6 v6 h8 v-10 c4-2 9-6 10-14 C82 34 72 16 50 16 Z' fill='#0a0a0a' stroke='#ff2bd6' stroke-width='3'/><circle cx='38' cy='46' r='8' fill='#ff2bd6'/><circle cx='62' cy='46' r='8' fill='#ff2bd6'/><circle cx='38' cy='46' r='3' fill='#0a0a0a'/><circle cx='62' cy='46' r='3' fill='#0a0a0a'/><path d='M46 58 l4 7 l4-7 z' fill='#ff2bd6'/></svg>",
-    bee:"<svg "+NS+" "+V+"><ellipse cx='34' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='66' cy='42' rx='15' ry='10' fill='#fff' stroke='#0a0a0a' stroke-width='2' opacity='.85'/><ellipse cx='50' cy='58' rx='20' ry='24' fill='#ffd60a' stroke='#0a0a0a' stroke-width='3'/><rect x='31' y='48' width='38' height='7' fill='#0a0a0a'/><rect x='31' y='62' width='38' height='7' fill='#0a0a0a'/><circle cx='50' cy='30' r='11' fill='#0a0a0a'/><circle cx='46' cy='29' r='2.5' fill='#fff'/><circle cx='54' cy='29' r='2.5' fill='#fff'/><line x1='44' y1='21' x2='41' y2='13' stroke='#0a0a0a' stroke-width='2'/><line x1='56' y1='21' x2='59' y2='13' stroke='#0a0a0a' stroke-width='2'/></svg>",
-    flower:"<svg "+NS+" "+V+"><line x1='50' y1='56' x2='50' y2='88' stroke='#2e7d32' stroke-width='4'/><path d='M50 62 l-12 8 M50 70 l12 8' stroke='#2e7d32' stroke-width='3'/><g fill='#b6ff00' stroke='#143a00' stroke-width='2'><ellipse cx='50' cy='24' rx='8' ry='14'/><ellipse cx='72' cy='38' rx='14' ry='8'/><ellipse cx='28' cy='38' rx='14' ry='8'/><ellipse cx='62' cy='54' rx='9' ry='12'/><ellipse cx='38' cy='54' rx='9' ry='12'/></g><circle cx='50' cy='40' r='11' fill='#ff2bd6' stroke='#143a00' stroke-width='2'/><circle cx='50' cy='40' r='3' fill='#0a0a0a'/></svg>",
-    heart:"<svg "+NS+" "+V+"><path d='M50 32 C43 18 22 19 21 37 C20 53 46 66 50 84 Z' fill='#ff2b2b' stroke='#5a0d0d' stroke-width='2.5'/><path d='M50 32 C57 18 78 19 79 37 C80 53 54 66 50 84 Z' fill='#c81f1f' stroke='#5a0d0d' stroke-width='2.5'/><path d='M50 32 l-6 12 l9 9 l-7 10 l6 12' fill='none' stroke='#0a0a0a' stroke-width='3'/></svg>",
-    disc:"<svg "+NS+" "+V+"><circle cx='50' cy='50' r='34' fill='#1a1a22' stroke='#b6ff00' stroke-width='3'/><circle cx='50' cy='50' r='30' fill='none' stroke='#26e0ff' stroke-width='1' opacity='.5'/><path d='M50 20 a30 30 0 0 1 26 15' stroke='#ff2bd6' stroke-width='3' fill='none'/><circle cx='50' cy='50' r='10' fill='#070707' stroke='#b6ff00' stroke-width='2'/><circle cx='50' cy='50' r='3' fill='#b6ff00'/></svg>",
-    engine:"<svg "+NS+" "+V+"><ellipse cx='50' cy='54' rx='42' ry='14' fill='none' stroke='#26e0ff' stroke-width='2.5' opacity='.8'/><circle cx='50' cy='50' r='24' fill='#0e0e12' stroke='#b6ff00' stroke-width='3'/><circle cx='50' cy='50' r='17' fill='none' stroke='#2a2a2a' stroke-width='1.5'/><circle cx='50' cy='50' r='11' fill='none' stroke='#333' stroke-width='1'/><circle cx='50' cy='50' r='6' fill='#b6ff00'/><circle cx='50' cy='50' r='2' fill='#070707'/><rect x='48.6' y='26' width='2.8' height='6' fill='#ff2b2b'/><circle cx='86' cy='47' r='3.5' fill='#ff2bd6'/><circle cx='14' cy='60' r='3' fill='#ffd60a'/></svg>"
-  };
-  /* which physical object each item is (add clothes/rares later → new forms) */
-  var SHAPES={"game-runner":"bee","game-rush":"cassette","game-tiles":"floppy",
-    "env-aqua":"ufo","env-bedroom":"crt","env-terrarium":"flower","env-transit":"vhs",
-    "universe-engine":"engine","ics-chess":"img:../../assets/chess/knight1.png",
-    "np-album":"img:../../assets/img/np-cover.jpg","mzs-album":"img:../../assets/img/20mzs-album.png"};
-
-  function artifact(formKey, owned){
-    var src=(formKey&&formKey.indexOf("img:")===0)
-      ? formKey.slice(4)
-      : "data:image/svg+xml,"+encodeURIComponent(FORMS[formKey]||FORMS.disc);
-    return "<div class='artstage'><div class='art3d"+(owned?"":" mystery")+"'>"
-      +'<div class="f"><img alt="" src="'+src+'"></div><div class="b"><img alt="" src="'+src+'"></div></div>'
-      +(owned?"":"<div class='qmark'>?</div>")+"</div>";
-  }
-
-  function slot(it, owned){
-    var rar=it.rarity||'common', cls='slot r-'+rar+(owned?' owned':'');
-    var form=SHAPES[it.id]||'disc', name=(owned||it.showname)?e2(it.name):'???', cta;
-    if(owned){
-      if(it.type==='game'||it.type==='environment'||it.type==='engine'||it.type==='album') cta='<a class="enter" href="../../'+e2(it.payload)+'">▶ ENTER</a>';
-      else if(it.payload) cta='<a class="enter" href="'+e2(it.payload)+'" download>⬇ GET</a>';
-      else cta='<div class="locktag">IN INVENTORY</div>';
-    } else cta='<div class="locktag">'+LOCK+' '+(it.lockhint||'LOCKED')+'</div>';
-    return '<div class="'+cls+'">'+artifact(form,owned)+'<div class="ped"></div>'
-      +'<div class="nm'+(owned?'':' locked')+'">'+name+'</div>'
-      +'<div class="rz">'+rar.toUpperCase()+'</div>'
-      +'<div class="val">value '+(it.value||0)+'</div>'+cta+'</div>';
-  }
-
-  function renderLogin(show){
-    if(!show){ $("loginbox").innerHTML=''; return; }
-    $("loginbox").innerHTML='<div class="login"><div class="h">// LOG IN TO REVEAL YOUR COLLECTION_</div>'
-      +'<input id="em" type="email" placeholder="email" inputmode="email" autocomplete="email">'
-      +'<input id="pw" type="password" placeholder="password" autocomplete="current-password" style="margin-bottom:8px">'
-      +'<button id="go">▶ ENTER</button><div class="msg" id="m"></div></div>';
-    $("pw").addEventListener("keydown",function(e){ if(e.key==="Enter") $("go").click(); });
-    $("go").onclick=async function(){
-      var em=($("em").value||'').trim(), pw=($("pw").value||'');
-      if(!/.+@.+\..+/.test(em)){$("m").textContent='enter your email_';return;}
-      if(pw.length<6){$("m").textContent='password: 6+ characters_';return;}
-      $("go").disabled=true;$("m").textContent='…';
-      await sb.auth.signUp({email:em,password:pw});
-      var sess=(await sb.auth.getSession()).data.session;
-      if(!sess){ var si=await sb.auth.signInWithPassword({email:em,password:pw});
-        if(si.error){$("m").textContent=/confirm/i.test(si.error.message)?'✉ confirm your email first_':'✕ '+si.error.message;$("go").disabled=false;return;} }
-      /* onAuthStateChange re-runs boot() and reveals the collection */
-    };
-  }
-
-  async function boot(){
-    var sess=(await sb.auth.getSession()).data.session;
-    var cat=(await sb.from('items').select('*').eq('active',true).order('value')).data||[];
-    /* the GALAXYS ENGINE is part of the collection too — not a DB item:
-       it unlocks by signing in + feeling a track for 10s (player.js's ibee_engine10 flag) */
-    var eng10=false; try{ eng10=localStorage.getItem("ibee_engine10")==="1"; }catch(e){}
-    cat.unshift({id:"universe-engine",name:"GALAXYS ENGINE",rarity:"legendary",value:"∞",
-      type:"engine",payload:"#playing",showname:true,lockhint:"10s OF MUSIC + SIGN IN"});
-    /* ICS CHESS is in EVERY collection — always free, now music-reactive */
-    cat.splice(1,0,{id:"ics-chess",name:"ICS CHESS",rarity:"rare",value:"FREE",
-      type:"game",payload:"chess/",showname:true});
-    /* NOUVEAUX PUNK — the full album (27 tracks on its page), free for members */
-    cat.splice(2,0,{id:"np-album",name:"NOUVEAUX PUNK — THE EXPERIENCE",rarity:"epic",value:"FREE",
-      type:"album",payload:"nouveauxpunk/",showname:true,lockhint:"SIGN IN — IT'S FREE"});
-    /* 20 MIN ZA SESSION — the one-take stoner cassette, free for members */
-    cat.splice(3,0,{id:"mzs-album",name:"20 MIN ZA SESSION",rarity:"epic",value:"FREE",
-      type:"album",payload:"20minzasession/",showname:true,lockhint:"SIGN IN — IT'S FREE"});
-    var owned={};
-    owned["ics-chess"]={id:"ics-chess"};                      /* everyone's, always */
-    if(sess) owned["np-album"]={id:"np-album"};               /* every member's */
-    if(sess) owned["mzs-album"]={id:"mzs-album"};             /* every member's */
-    if(sess&&eng10) owned["universe-engine"]={id:"universe-engine"};
-    /* the owner's account: the whole shelf is theirs */
-    var isOwner=!!sess&&((sess.user.email||'').toLowerCase()==='droguepuissance4@gmail.com');
-    if(isOwner) cat.forEach(function(it){ owned[it.id]=owned[it.id]||{id:it.id}; });
-    if(sess){
-      var inv=await sb.rpc('my_inventory');
-      (inv.data||[]).forEach(function(it){owned[it.id]=it;});
-      $("sess").innerHTML='signed in · '+e2(sess.user.email||'member')+' · <a href="#" id="lo">log out</a>';
-      $("lo").onclick=function(e){e.preventDefault();sb.auth.signOut().then(function(){location.reload();});};
-      renderLogin(false);
-    } else {
-      $("sess").textContent='';
-      renderLogin(true);
-    }
-    var nOwned=Object.keys(owned).length, total=cat.length, val=0;
-    cat.forEach(function(it){ if(owned[it.id]&&typeof it.value==='number') val+=it.value; });
-    $("prog").textContent="COLLECTED "+nOwned+" / "+total+"  ·  TOTAL VALUE "+val;
-    $("pfill").style.width=(total?nOwned/total*100:0)+"%";
-    $("grid").innerHTML=cat.map(function(it){return slot(it, !!owned[it.id]);}).join('');
-  }
-  sb.auth.onAuthStateChange(function(){ boot(); });
-  boot();
-
-  /* BACK TO MY PROFILE: when we arrived FROM the profile, real history.back() restores
-     the exact same profile page (same URL + params) instead of a fresh load; any other
-     entry path just follows the link to /room/ (which is always YOUR profile). */
-  $("backprof").addEventListener("click",function(e){
-    try{
-      if(document.referrer && /\/room\//.test(document.referrer) && history.length>1){
-        e.preventDefault(); history.back();
-      }
-    }catch(err){}
-  });
-})();
-</script>
-<script src="../../assets/player.js?v=25"></script>
-<script src="/assets/stats-client.js?v=7"></script>
-<script src="../../assets/nav.js?v=1"></script>
-<script src="/assets/pulse.js?v=2"></script>
-</body>
+<body><div style="font-size:11px;line-height:2.2">
+MOVED_<br><a href="/member/inventory/">GO TO ONLYIBEE</a>
+</div></body>
 </html>
