@@ -122,6 +122,13 @@ body.touch #pad{display:flex}
   text-align:center;line-height:1.9;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* player.js floats its own radio chip at right:14px/bottom:60px with z-index
+   8995 — which landed exactly on the JUMP pad, so every jump opened the radio
+   instead. This page IS the transport: it picks the track, shows it in the HUD
+   and has its own tap-to-start. The chip has no job here. (The shell hides
+   these the same way for the same reason.) */
+#radiochip,#radiopanel{display:none!important}
+
 @media(prefers-reduced-motion:reduce){.lv .spark{animation:none}}
 </style>
 </head>
