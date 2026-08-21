@@ -265,64 +265,10 @@ body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,1
   box-shadow:0 0 18px rgba(255,31,111,.45)}
 .btn.alt{background:transparent;color:var(--acid);border:1px solid var(--acid);box-shadow:none}
 /* the way down, under the sleeve */
-/* THE GIFT — a wrapped-present card CTA for the game. All shapes; no assets. */
-.gift-cta{position:relative;display:inline-flex;align-items:center;gap:14px;
-  padding:12px 22px 12px 12px;text-decoration:none;
-  background:linear-gradient(135deg, #1a2d31 0%, #0b1719 60%, #240914 100%);
-  border:2px solid var(--pink);
-  box-shadow:0 0 24px rgba(255,31,111,.35), inset 0 0 18px rgba(232,220,18,.08);
-  border-radius:2px;overflow:hidden;isolation:isolate;
-  animation:giftPulse 2.6s ease-in-out infinite}
-.gift-cta::before,.gift-cta::after{content:"";position:absolute;background:var(--acid);
-  opacity:.85;pointer-events:none;z-index:0}
-.gift-cta::before{top:0;bottom:0;left:50%;width:3px;transform:translateX(-50%);
-  box-shadow:0 0 10px rgba(232,220,18,.55)}
-.gift-cta::after{left:0;right:0;top:50%;height:3px;transform:translateY(-50%);
-  box-shadow:0 0 10px rgba(232,220,18,.55)}
-.gift-cta .sheen{position:absolute;inset:0;background:linear-gradient(105deg,
-  transparent 40%,rgba(255,255,255,.22) 50%,transparent 60%);
-  transform:translateX(-120%);animation:giftSheen 3.4s linear infinite;
-  pointer-events:none;z-index:3;mix-blend-mode:screen}
-.gift-cta .ribbon{position:absolute;top:8px;right:-32px;transform:rotate(35deg);
-  background:var(--pink);color:#fff;font-family:var(--px);font-size:7px;
-  letter-spacing:2px;padding:3px 34px;box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:4}
-.gift-cta .giftbow{position:absolute;top:-14px;left:50%;transform:translateX(-50%);
-  width:36px;height:36px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));
-  animation:giftBow 2.4s ease-in-out infinite}
-.gift-cta .giftbow svg{width:100%;height:100%;display:block}
-.gift-cta .thumb{position:relative;z-index:2;width:82px;height:100px;flex:none;
-  border:1px solid rgba(232,220,18,.4);
-  box-shadow:0 4px 10px rgba(0,0,0,.6),0 0 12px rgba(255,31,111,.25)}
-.gift-cta .thumb svg{width:100%;height:100%;display:block}
-.gift-cta .text{position:relative;z-index:2;display:flex;flex-direction:column;
-  gap:4px;text-align:left;padding:6px 4px}
-.gift-cta .ttl{font-family:var(--px);font-size:14px;color:#ff1f6f;letter-spacing:2px;
-  text-shadow:0 0 12px rgba(255,31,111,.55)}
-.gift-cta .sub2{font-family:var(--vt),monospace;font-size:14px;color:#93a8a9;letter-spacing:1px}
-.gift-cta .cta{font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:2px;
-  margin-top:4px;text-shadow:0 0 10px rgba(232,220,18,.6)}
-.gift-cta:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(255,31,111,.55),
-  inset 0 0 22px rgba(232,220,18,.15)}
-.gift-cta:hover .giftbow{transform:translateX(-50%) scale(1.15)}
-.gift-cta:hover .cta{color:#fff}
-body.neon .gift-cta{box-shadow:0 0 calc(20px + var(--nb,0)*32px) rgba(255,31,111,.55),
-  inset 0 0 18px rgba(232,220,18,.1)}
-@keyframes giftPulse{
-  0%,100%{border-color:var(--pink)}
-  50%    {border-color:var(--acid)}
-}
-@keyframes giftSheen{
-  0%  {transform:translateX(-120%)}
-  70% {transform:translateX(120%)}
-  100%{transform:translateX(120%)}
-}
-@keyframes giftBow{
-  0%,100%{transform:translateX(-50%) scale(1)}
-  50%    {transform:translateX(-50%) scale(1.08) rotate(-3deg)}
-}
-@media(prefers-reduced-motion:reduce){
-  .gift-cta,.gift-cta .sheen,.gift-cta .giftbow{animation:none}
-}
+.btn.explore{display:inline-block;background:transparent;color:var(--acid);
+  border:1px solid var(--acid);box-shadow:none;letter-spacing:2px}
+.btn.explore:hover{background:var(--acid);color:#0b1719}
+body.neon .btn.explore{box-shadow:0 0 calc(6px + var(--nb,0)*26px) rgba(232,220,18,.5)}
 .btn:active{transform:translateY(2px)}
 #toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:9500;
   font-family:var(--px);font-size:9px;color:var(--ink);
@@ -449,60 +395,8 @@ body.neon #roomtag.gone{opacity:0}
     </div>
     <div class="batwrap slow" id="bat2"></div>
   </div>
-  <!-- ---- THE FALL — a wrapped-gift CTA for the game ------------------
-       Not a text button: a small card that shows what you're about to open.
-       Left = pit thumbnail with a stick figure and speed streaks; right =
-       name + tagline + arrow. A rotated ribbon tag says OPEN ME, a shimmer
-       sweep runs across, and the whole card pulses with the neon frame
-       when the room is on. Clicking it goes straight into the game. -->
-  <div class="center" style="margin-top:24px">
-    <a class="gift-cta" href="fall/" aria-label="Play THE FALL — a game made from NP2">
-      <span class="ribbon">OPEN ME</span>
-      <span class="giftbow" aria-hidden="true">
-        <svg viewBox="0 0 40 40"><g fill="#ff1f6f">
-          <ellipse cx="14" cy="14" rx="8" ry="6"/><ellipse cx="26" cy="14" rx="8" ry="6"/>
-          <circle cx="20" cy="14" r="4" fill="#ffb0c8"/>
-          <rect x="18" y="18" width="4" height="14" fill="#ff1f6f"/>
-        </g></svg>
-      </span>
-      <span class="thumb" aria-hidden="true">
-        <svg viewBox="0 0 90 110">
-          <defs>
-            <linearGradient id="pitg" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stop-color="#1a2d31"/>
-              <stop offset="1" stop-color="#04070a"/>
-            </linearGradient>
-          </defs>
-          <rect width="90" height="110" fill="url(#pitg)"/>
-          <!-- pit walls closing in -->
-          <path d="M0,0 L18,0 C34,30 8,66 24,110 L0,110 Z" fill="#0b1719"/>
-          <path d="M90,0 L72,0 C56,30 82,66 66,110 L90,110 Z" fill="#0b1719"/>
-          <!-- gates -->
-          <path d="M22 30 H36 M56 30 H72 M20 60 H34 M58 60 H70" stroke="#ff1f6f" stroke-width="1.4" opacity=".85"/>
-          <!-- upside-down stick figure mid-fall (his head at the bottom of the icon) -->
-          <g stroke="#e8dc12" stroke-width="1.6" fill="none">
-            <circle cx="45" cy="70" r="3.5" fill="#e8dc12"/>
-            <line x1="45" y1="66" x2="45" y2="52"/>
-            <line x1="45" y1="60" x2="37" y2="54"/>
-            <line x1="45" y1="60" x2="53" y2="54"/>
-            <line x1="45" y1="52" x2="40" y2="46"/>
-            <line x1="45" y1="52" x2="50" y2="46"/>
-          </g>
-          <!-- speed streaks streaming upward -->
-          <g stroke="#f0efe8" stroke-linecap="round" opacity=".55">
-            <line x1="41" y1="80" x2="41" y2="90" stroke-width=".8"/>
-            <line x1="49" y1="82" x2="49" y2="94" stroke-width=".8"/>
-            <line x1="45" y1="86" x2="45" y2="100" stroke-width=".9"/>
-          </g>
-        </svg>
-      </span>
-      <span class="text">
-        <b class="ttl">THE FALL</b>
-        <span class="sub2">a game from the record</span>
-        <span class="cta">▼ FALL IN</span>
-      </span>
-      <span class="sheen" aria-hidden="true"></span>
-    </a>
+  <div class="center" style="margin-top:18px">
+    <a class="btn explore" href="dark/">▼ EXPLORE — THE FALL</a>
   </div>
 
   <h1>NOUVEAUX PUNK 2</h1>
@@ -734,18 +628,8 @@ body.neon #roomtag.gone{opacity:0}
       return { win:fig.querySelector(".win"), img:fig.querySelector("img:not(.frame)"),
                vid:fig.querySelector("video"), cap:fig.querySelector(".cap") };
     });
-    /* the three fixed default exhibits — his picks. The mark on his forearm,
-       the school print found in the album, and exhibit 10 (an undated print).
-       Slot 0 is REEL 01 (video) and gets set below. */
-    var DEFAULTS=["a01.jpg","a08.jpg","a10.jpg"];
-    function findStill(name){
-      for(var i=0;i<STILLS.length;i++) if(STILLS[i].f===name) return STILLS[i];
-      return null;
-    }
-    for(var t=1;t<TILES.length;t++){
-      var pick = findStill(DEFAULTS[t-1]) || STILLS[(t*4+2)%STILLS.length];
-      setTile(TILES[t], pick, true);
-    }
+    /* seed the stills so the wall is furnished before anything plays */
+    for(var t=0;t<TILES.length;t++) setTile(TILES[t], STILLS[(t*4+2)%STILLS.length], true);
     TILES[0].cap.textContent="REEL 01";
   })();
 
