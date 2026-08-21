@@ -664,6 +664,17 @@ function build(slug, idx){
     caches.push({t:st, off:sside*Math.min(half[sti]*0.30,7.5), got:0});
   }
 
+  /* SIGNAL TARGETS drift through every world. They are harmless, colourful
+     things to shoot between real threats, so the new shoot move stays fun
+     from the very first level. */
+  var targets=[];
+  for(var tt=11; tt<dur-8; tt+=Math.max(6.4,10.5-idx*0.12)+rnd2(seed+tt*3.7)*3.2){
+    var ti=clamp(Math.round(tt/RES),0,steps-1);
+    var tside=rnd2(seed+tt*4.1)>0.5?1:-1;
+    targets.push({t:tt, off:tside*Math.min(half[ti]*0.42,10), got:0,
+      kind:rnd2(seed+tt*5.3)>0.56?"drone":"orb", ph:rnd2(seed+tt)*6.283});
+  }
+
   /* ---- ENEMIES ----------------------------------------------------------
      The first scouts arrive in Toronto, then each world adds a new kind.
      They remain wall creatures, but their frequency rises as the album goes
@@ -680,17 +691,20 @@ function build(slug, idx){
       else if(idx>=14) kind=roll<0.48?"wisp":(roll<0.80?"spike":"scout");
       else if(idx>=9) kind=roll<0.56?"spike":"scout";
       foes.push({t:ft, side:(rnd2(seed+ft*7.1)>0.5?1:-1), ph:rnd2(seed+ft*11.7)*6.283,
-        kind:kind, r:kind==="brute"?4.8:(kind==="wisp"?3.0:(kind==="spike"?3.8:3.4))});
+        kind:kind, r:kind==="brute"?5.8:(kind==="wisp"?3.8:(kind==="spike"?4.5:4.1))});
     }
   }
 
   return {n:n, dur:dur, steps:steps, mid:mid, half:half, lo:sLo, lv:sLv, im:im,
           secs:secs, zone:Z, depth:dur*SCROLL, gates:gates, cps:cps, seed:seed,
-          picks:picks, coins:coins, relics:relics, caches:caches, foes:foes};
+          picks:picks, coins:coins, relics:relics, caches:caches, targets:targets, foes:foes};
 }
 function chanAt(L,t){
   var f=clamp(t/RES,0,L.steps-1.001), i=Math.floor(f), k=f-i;
   return { m:lerp(L.mid[i],L.mid[i+1],k), h:lerp(L.half[i],L.half[i+1],k) };
+}
+function targetX(L,T,t){
+  return chanAt(L,T.t).m+T.off+Math.sin(t*3.2+T.ph)*(T.kind==="drone"?2.5:1.4);
 }
 
 /* =====================================================================
@@ -702,11 +716,11 @@ var L=null, idx=-1, live=false, rafOn=false, armed=false, ended=false;
 var P={x:50, sy:0.62, vx:0, vy:0, limb:0, squash:0};
 var pulses=[], scars=[], motes=[], drift=[], ghosts=[], rec=[], recAt=0, shots=[];
 var cpAt=0, gateHit={}, sparks=[];
-var pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,shots:0,score:0};
+var pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,targets:0,shots:0,score:0};
 var pow={light:0,calm:0,ghost:0,iron:0};
 var collapse=0, holding=0, holdSide=0, glitch=0, fragT=0, fragIx=0, frags=[], gracet=0;
 var trails=[];
-var dashT=0, shotCd=0;
+var dashT=0, shotCd=0, shootCombo=0, comboUntil=0;
 var lastTapT=0, lastTapSide=null;
 var cpAnnounced={}, saidHalf=false, saidClose=false, saidLast=false, lastCloseT=-99, cleanGates=0;
 var save=load(), started=0, deepest=0;
@@ -899,7 +913,7 @@ function start(i){
   P.x=chanAt(L,0).m; P.sy=0.62; P.vx=0; P.limb=0;
   pulses=[]; scars=[]; motes=[]; drift=[]; fallers=[]; sparks=[]; shots=[]; rec=[]; recAt=0;
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
-  pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,shots:0,score:0};
+  pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,targets:0,shots:0,score:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
   lives=LIVES_MAX; myDeaths=0; mateDeaths=0; myBonus=0; mateBonus=0;
   /* mateDeaths gets carried across levels within a room — do NOT reset it
@@ -909,7 +923,7 @@ function start(i){
   P.vy=0; P.squash=0;
   seedDrift(lv);
   holding=0; holdSide=0; shotCd=0; fragT=0; fragIx=0; deepest=0; paintScore();
-  trails=[]; dashT=0; lastTapT=0; lastTapSide=null;
+  trails=[]; dashT=0; shootCombo=0; comboUntil=0; lastTapT=0; lastTapSide=null;
   cpAnnounced={}; saidHalf=false; saidClose=false; saidLast=false; lastCloseT=-99; cleanGates=0;
   if(idx===2) setTimeout(function(){ flashMsg("NEW MOVE — DOUBLE TAP CENTRE TO SHOOT"); },900);
   if(idx===5) setTimeout(function(){ flashMsg("NEW MOVE — DOUBLE TAP A SIDE TO DASH"); },900);
@@ -1103,7 +1117,7 @@ function down(x){
 function up(){ holding=0; holdSide=0; }
 function paintScore(){
   var el=document.getElementById("hscore"); if(!el) return;
-  el.textContent="SCORE "+String(pts.score||0).padStart(6,"0")+" · ✦ "+(pts.relics||0)+" ◈ "+(pts.caches||0);
+  el.textContent="SCORE "+String(pts.score||0).padStart(6,"0")+" · ✦ "+(pts.relics||0)+" ◈ "+(pts.caches||0)+(shootCombo>1?" · ×"+shootCombo:"");
 }
 function addScore(n){ pts.score=(pts.score||0)+n; paintScore(); }
 function shoot(){
@@ -1347,6 +1361,27 @@ function step(dt,t){
     if(shot.life<=0||shot.y>1.12) shots.splice(si2,1);
   }
 
+  /* Shooting a drifting target starts a short combo window. It rewards a
+     confident run without making missed shots punish the player. */
+  if(comboUntil<t && shootCombo){ shootCombo=0; paintScore(); }
+  for(var ti2=0;ti2<L.targets.length;ti2++){
+    var target=L.targets[ti2]; if(target.got||Math.abs(t-target.t)>1.4) continue;
+    var tx=targetX(L,target,t), ty=P.sy+(target.t-t)*SCROLL/(H/SC);
+    for(var ts2=shots.length-1;ts2>=0;ts2--){
+      var bolt=shots[ts2];
+      if(Math.hypot(bolt.x-tx,(bolt.y-ty)*(H/SC))<4.8){
+        target.got=1; shots.splice(ts2,1); pts.targets++;
+        shootCombo=Math.min(9,shootCombo+1); comboUntil=t+2.8;
+        var targetScore=(target.kind==="drone"?40:25)*shootCombo;
+        addScore(targetScore);
+        for(var pop=0;pop<10;pop++) sparks.push({x:tx,y:ty,vx:(Math.random()-.5)*60,
+          vy:(Math.random()-.5)*60,a:1,col:target.kind==="drone"?"#8fd0ff":"#e8dc12"});
+        flashMsg(target.kind==="drone"?"DRONE POP · +"+targetScore:"SIGNAL HIT · +"+targetScore);
+        break;
+      }
+    }
+  }
+
   /* ---- enemies: they hold the wall and reach in ---- */
   if(gracet<=0) for(var fi=0;fi<L.foes.length;fi++){
     var fo=L.foes[fi];
@@ -1458,12 +1493,12 @@ function rnd(seed){ var x=Math.sin(seed)*43758.5453; return x-Math.floor(x); }
    Deterministic (seed + depth index) so both mates see the same skulls
    at the same seconds; silhouetted so nothing outshines the game grid. */
 var PROPS={
-  abidjan:["mask","root","hut"],
-  toronto:["rail","tag","letter"],
-  paris:  ["tile","stone","arrow"],
-  stars:  ["sat","meteor","spike"],
-  void:   ["skull","spine","web","teeth"],
-  climb:  ["chain","torch","crack"]
+  abidjan:["mask","root","hut","beetle","buried"],
+  toronto:["rail","tag","letter","pipe","rat"],
+  paris:  ["tile","stone","arrow","buried","hand"],
+  stars:  ["sat","meteor","spike","fossil"],
+  void:   ["skull","spine","web","teeth","worm","eye","grave"],
+  climb:  ["chain","torch","crack","hand","skull"]
 };
 function drawProp(kind, x, y){
   ctx.save();
@@ -1475,6 +1510,45 @@ function drawProp(kind, x, y){
     ctx.fillStyle="#000"; ctx.globalAlpha=0.55;
     ctx.fillRect(x-2.1,y-0.6,1.4,1.4); ctx.fillRect(x+0.7,y-0.6,1.4,1.4);
     ctx.fillRect(x-0.6,y+1.7,1.2,0.8);
+  } else if(kind==="buried"){
+    /* a half-covered skull and ribs — the wall has swallowed someone */
+    ctx.fillStyle="rgba(205,195,165,.58)";
+    ctx.beginPath(); ctx.arc(x,y+2,4.6,Math.PI,6.2832); ctx.fill();
+    ctx.strokeStyle="rgba(205,195,165,.48)";
+    for(var br=0;br<4;br++){ ctx.beginPath(); ctx.arc(x-7+br*4,y+6,3,3.4,6.0); ctx.stroke(); }
+  } else if(kind==="worm"){
+    ctx.strokeStyle="rgba(255,92,157,.62)"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(x-8,y+3);
+    for(var wr=0;wr<4;wr++) ctx.quadraticCurveTo(x-6+wr*4,y-4+(wr%2)*8,x-4+wr*4,y+2);
+    ctx.stroke();
+    ctx.fillStyle="rgba(255,220,230,.72)"; ctx.beginPath(); ctx.arc(x+8,y+2,1.6,0,6.2832); ctx.fill();
+  } else if(kind==="eye"){
+    ctx.fillStyle="rgba(255,92,157,.58)"; ctx.beginPath(); ctx.ellipse(x,y,7,3.6,0,0,6.2832); ctx.fill();
+    ctx.fillStyle="#05080a"; ctx.beginPath(); ctx.ellipse(x,y,1.4,3,0,0,6.2832); ctx.fill();
+  } else if(kind==="grave"){
+    ctx.fillStyle="rgba(130,110,145,.5)"; ctx.fillRect(x-4,y-4,8,9);
+    ctx.beginPath(); ctx.arc(x,y-4,4,Math.PI,0); ctx.fill();
+    ctx.strokeStyle="rgba(230,210,245,.38)"; ctx.beginPath(); ctx.moveTo(x-2,y); ctx.lineTo(x+2,y); ctx.moveTo(x,y-2); ctx.lineTo(x,y+2); ctx.stroke();
+  } else if(kind==="hand"){
+    ctx.strokeStyle="rgba(210,200,180,.62)"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(x,y+6); ctx.lineTo(x,y-2);
+    for(var hn=-2;hn<=2;hn+=1.3){ ctx.moveTo(x,y-1); ctx.lineTo(x+hn*1.6,y-6-Math.abs(hn)); }
+    ctx.stroke();
+  } else if(kind==="rat"){
+    ctx.fillStyle="rgba(180,190,200,.52)"; ctx.beginPath(); ctx.ellipse(x,y,5,2.5,0,0,6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+4,y-1,1.7,0,6.2832); ctx.fill();
+    ctx.strokeStyle="rgba(180,190,200,.52)"; ctx.beginPath(); ctx.moveTo(x-5,y); ctx.quadraticCurveTo(x-10,y-5,x-11,y+1); ctx.stroke();
+  } else if(kind==="beetle"){
+    ctx.fillStyle="rgba(232,220,18,.55)"; ctx.beginPath(); ctx.ellipse(x,y,3.5,5,0,0,6.2832); ctx.fill();
+    ctx.strokeStyle="rgba(232,220,18,.5)";
+    for(var bt=-1;bt<=1;bt++){ ctx.beginPath(); ctx.moveTo(x+bt*2,y); ctx.lineTo(x+bt*4,y+4); ctx.stroke(); }
+  } else if(kind==="pipe"){
+    ctx.strokeStyle="rgba(120,170,180,.5)"; ctx.lineWidth=2.4;
+    ctx.beginPath(); ctx.moveTo(x-7,y-6); ctx.lineTo(x,y-6); ctx.lineTo(x,y+5); ctx.lineTo(x+7,y+5); ctx.stroke();
+  } else if(kind==="fossil"){
+    ctx.strokeStyle="rgba(201,184,255,.5)";
+    ctx.beginPath(); ctx.arc(x,y,6,0.2,5.7); ctx.stroke();
+    for(var fs=0;fs<5;fs++){ var fa=fs*1.25; ctx.beginPath(); ctx.moveTo(x+Math.cos(fa)*3,y+Math.sin(fa)*3); ctx.lineTo(x+Math.cos(fa)*7,y+Math.sin(fa)*7); ctx.stroke(); }
   } else if(kind==="spine"){
     for(var i=0;i<5;i++){ ctx.beginPath(); ctx.arc(x,y-6+i*3,1.4,0,6.2832); ctx.stroke(); }
   } else if(kind==="web"){
@@ -1551,8 +1625,11 @@ function drawProp(kind, x, y){
 }
 function drawSideProps(t,Z,seed){
   var pr=PROPS[Z.id]||[]; if(!pr.length) return;
-  var span=5.5, baseIdx=Math.floor((t-2)/span);
-  for(var k=0;k<7;k++){
+  /* The descent visibly gets more crowded and strange. Early landscapes have
+     room to breathe; the Void and Climb are packed with things in the walls. */
+  var span=({abidjan:6.2,toronto:5.4,paris:4.7,stars:4.3,void:3.1,climb:3.7}[Z.id]||5),
+      baseIdx=Math.floor((t-2)/span), count=Z.id==="void"?12:(Z.id==="climb"?10:8);
+  for(var k=0;k<count;k++){
     var pi=baseIdx+k, ts=pi*span + rnd(seed+pi*11.3)*3.6;
     if(ts<2 || ts>L.dur-2) continue;
     var sy2=P.sy+(ts-t)*SCROLL/(H/SC);
@@ -2070,7 +2147,8 @@ function draw(t){
       /* a five-point star with rays that pulse — the rarest drop */
       ctx.fillStyle=col;
       ctx.beginPath();
-      var rO=(6.6+Math.sin(t*7+pd)*0.6)*VIS, rI=2.6*VIS;
+      /* Big enough to read as a rare, game-changing pickup at a glance. */
+      var rO=(10.2+Math.sin(t*7+pd)*0.9)*VIS, rI=4.1*VIS;
       for(var sp3=0;sp3<10;sp3++){
         var ang = -Math.PI/2 + sp3*Math.PI/5, rr2 = (sp3%2)?rI:rO;
         var xx=pxx+Math.cos(ang)*rr2, yy=pyy+Math.sin(ang)*rr2;
@@ -2082,13 +2160,32 @@ function draw(t){
       var glow=(0.5+0.5*Math.sin(t*4+pd));
       ctx.globalAlpha*=0.4+0.5*glow;
       for(var rk=0;rk<8;rk++){
-        var a2=rk*Math.PI/4+t*0.4, r1=8*VIS, r2=(12+glow*4)*VIS;
+        var a2=rk*Math.PI/4+t*0.4, r1=12*VIS, r2=(18+glow*5)*VIS;
         ctx.beginPath(); ctx.moveTo(pxx+Math.cos(a2)*r1, pyy+Math.sin(a2)*r1);
         ctx.lineTo(pxx+Math.cos(a2)*r2, pyy+Math.sin(a2)*r2); ctx.stroke();
       }
     } else {
       ctx.beginPath(); ctx.arc(pxx,pyy,6.5*VIS,0,6.2832); ctx.stroke();
       ctx.beginPath(); ctx.arc(pxx,pyy,2.4*VIS,0,6.2832); ctx.fillStyle=col; ctx.fill();
+    }
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- drifting signal targets: shoot for score and combos ---- */
+  for(var td=0;td<L.targets.length;td++){
+    var TG=L.targets[td]; if(TG.got) continue;
+    var tsy=P.sy+(TG.t-t)*SCROLL/(H/SC);
+    if(tsy<-0.08||tsy>1.08) continue;
+    var txx=targetX(L,TG,t)*SC, tyy=tsy*H, trr=(TG.kind==="drone"?5.7:4.3)*VIS;
+    ctx.globalAlpha=clamp(1-Math.abs(tsy-P.sy)*1.1,0.25,1);
+    ctx.strokeStyle=TG.kind==="drone"?"#8fd0ff":"#e8dc12"; ctx.lineWidth=1.3*VIS;
+    if(TG.kind==="drone"){
+      ctx.save(); ctx.translate(txx,tyy); ctx.rotate(t*2+TG.ph);
+      ctx.strokeRect(-trr,-trr,trr*2,trr*2); ctx.restore();
+      ctx.beginPath(); ctx.arc(txx,tyy,trr*.32,0,6.2832); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(txx,tyy,trr,0,6.2832); ctx.stroke();
+      ctx.beginPath(); ctx.arc(txx,tyy,trr*.35,0,6.2832); ctx.fillStyle="#fff6a8"; ctx.fill();
     }
   }
   ctx.globalAlpha=1;
