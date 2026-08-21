@@ -206,6 +206,11 @@ header span{color:var(--dim);font-size:7px}
 #perk .obar{height:3px;background:#22240f;margin:9px 0 0;overflow:hidden}
 #perk .obar i{display:block;height:100%;background:var(--acid);box-shadow:0 0 7px var(--acid)}
 #perkwrap{text-align:center}
+@media (min-width:900px){
+  #hud{top:52px;padding:0 28px;font-size:10px}
+  #hlives{font-size:15px;letter-spacing:3px}
+  #depth{bottom:20px;font-size:9px}
+}
 @media(prefers-reduced-motion:reduce){.lv{transition:none}}
 </style>
 </head>
@@ -217,7 +222,7 @@ header span{color:var(--dim);font-size:7px}
 </header>
 
 <div id="stage"><canvas id="cv"></canvas></div>
-<div id="hud"><span class="a" id="hlv"></span><span id="hlives">♥♥♥</span><span id="hzone"></span></div>
+<div id="hud"><span class="a" id="hlv"></span><span id="hscore">SCORE 000000 · ✦ 0</span><span id="hlives">♥♥♥</span><span id="hzone"></span></div>
 <div id="matechip" style="display:none"></div>
 <div id="depth"></div>
 <div id="frag"></div>
@@ -246,7 +251,7 @@ header span{color:var(--dim);font-size:7px}
   <div class="hint">
     one thumb. hold the left side to lean left, the right side to lean right_<br>
     <b>the song is the level</b> — reach the light before it ends, or fall again from silence<br>
-    <span style="color:#93a8a9">unlocks: <b style="color:#e8dc12">L3</b> double-tap centre to BRAKE · <b style="color:#e8dc12">L6</b> double-tap a side to DASH</span>
+  <span style="color:#93a8a9">laptop: <b style="color:#e8dc12">↓</b> to SHOOT · <b style="color:#e8dc12">← →</b> to steer · <b style="color:#e8dc12">L3</b> double-tap centre to SHOOT · <b style="color:#e8dc12">L6</b> double-tap a side to DASH</span>
   </div>
 </div>
 
@@ -640,25 +645,48 @@ function build(slug, idx){
     coins.push({t:ct, off:side*Math.min(half[ci]*0.55, 13), got:0});
   }
 
-  /* ---- ENEMIES: only in the deep zones, and only ever at the walls -------
-     They cling to a wall and lunge inward, but never past 0.55 of the
-     half-width — the middle of the channel is always clean. That keeps the
-     level provably survivable while still making the edges hostile. */
-  /* THE VOID GETS NO ENEMIES, for the same reason it gets no gates: it takes
-     your steering away on purpose, so anything you must dodge is unfair. */
+  /* RELICS are optional discoveries just beyond the safe line. Each one is
+     a small detour with a real score reward, giving the fall an explorer's
+     route alongside the direct path to the light. */
+  var relics=[];
+  for(var rt=28; rt<dur-16; rt+=Math.max(24,dur/3)+rnd2(seed+rt*4)*7){
+    var ri=clamp(Math.round(rt/RES),0,steps-1);
+    var rside=rnd2(seed+rt*8.3)>0.5?1:-1;
+    relics.push({t:rt, off:rside*Math.min(half[ri]*0.46,11), got:0});
+  }
+
+  /* SIGNAL CACHES are close enough to tempt a detour without becoming a
+     trap. Finding one gives score and a short burst of light. */
+  var caches=[];
+  for(var st=18; st<dur-10; st+=Math.max(19,dur/4)+rnd2(seed+st*9.2)*5){
+    var sti=clamp(Math.round(st/RES),0,steps-1);
+    var sside=rnd2(seed+st*6.4)>0.5?1:-1;
+    caches.push({t:st, off:sside*Math.min(half[sti]*0.30,7.5), got:0});
+  }
+
+  /* ---- ENEMIES ----------------------------------------------------------
+     The first scouts arrive in Toronto, then each world adds a new kind.
+     They remain wall creatures, but their frequency rises as the album goes
+     deeper. The Void stays quiet: that level deliberately inverts movement,
+     so adding a dodge test there would be unfair rather than difficult. */
   var foes=[];
-  if(Z.id==="stars"||Z.id==="climb"||Z.id==="paris"){
-    var fEvery=Math.max(7, 22-idx*0.55);
-    for(var ft=22; ft<dur-12; ft+=fEvery*(0.7+rnd2(seed+ft*2.3)*0.7)){
+  if(idx>=6 && Z.id!=="void"){
+    var fEvery=Math.max(4.8, 18.5-idx*0.62);
+    for(var ft=15; ft<dur-10; ft+=fEvery*(0.72+rnd2(seed+ft*2.3)*0.58)){
       var fidx=clamp(Math.round(ft/RES),0,steps-1);
       if(half[fidx] < FOEMIN+3) continue;       /* too tight a shaft to hold one */
-      foes.push({t:ft, side:(rnd2(seed+ft*7.1)>0.5?1:-1), ph:rnd2(seed+ft*11.7)*6.283});
+      var roll=rnd2(seed+ft*13.1), kind="scout";
+      if(idx>=22) kind=roll<0.38?"brute":(roll<0.72?"wisp":"spike");
+      else if(idx>=14) kind=roll<0.48?"wisp":(roll<0.80?"spike":"scout");
+      else if(idx>=9) kind=roll<0.56?"spike":"scout";
+      foes.push({t:ft, side:(rnd2(seed+ft*7.1)>0.5?1:-1), ph:rnd2(seed+ft*11.7)*6.283,
+        kind:kind, r:kind==="brute"?4.8:(kind==="wisp"?3.0:(kind==="spike"?3.8:3.4))});
     }
   }
 
   return {n:n, dur:dur, steps:steps, mid:mid, half:half, lo:sLo, lv:sLv, im:im,
           secs:secs, zone:Z, depth:dur*SCROLL, gates:gates, cps:cps, seed:seed,
-          picks:picks, coins:coins, foes:foes};
+          picks:picks, coins:coins, relics:relics, caches:caches, foes:foes};
 }
 function chanAt(L,t){
   var f=clamp(t/RES,0,L.steps-1.001), i=Math.floor(f), k=f-i;
@@ -669,16 +697,16 @@ function chanAt(L,t){
    5. STATE
    ===================================================================== */
 var cv=document.getElementById("cv"), ctx=cv.getContext("2d");
-var W=0,H=0,DPR=1,SC=1;
+var W=0,H=0,DPR=1,SC=1,VIS=1;
 var L=null, idx=-1, live=false, rafOn=false, armed=false, ended=false;
 var P={x:50, sy:0.62, vx:0, vy:0, limb:0, squash:0};
-var pulses=[], scars=[], motes=[], drift=[], ghosts=[], rec=[], recAt=0;
+var pulses=[], scars=[], motes=[], drift=[], ghosts=[], rec=[], recAt=0, shots=[];
 var cpAt=0, gateHit={}, sparks=[];
-var pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
+var pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,shots:0,score:0};
 var pow={light:0,calm:0,ghost:0,iron:0};
 var collapse=0, holding=0, holdSide=0, glitch=0, fragT=0, fragIx=0, frags=[], gracet=0;
 var trails=[];
-var brakeT=0, dashT=0;
+var dashT=0, shotCd=0;
 var lastTapT=0, lastTapSide=null;
 var cpAnnounced={}, saidHalf=false, saidClose=false, saidLast=false, lastCloseT=-99, cleanGates=0;
 var save=load(), started=0, deepest=0;
@@ -698,6 +726,9 @@ function size(){
   cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
   SC=W/VW;                                   /* units → px */
+  /* A laptop spreads the same game world across more pixels. Boost the
+     important in-world objects so pickups and enemies stay easy to read. */
+  VIS=W>=1200 ? 2.05 : (W>=820 ? 1.70 : 1);
 }
 addEventListener("resize",function(){ if(live) size(); });
 
@@ -866,9 +897,9 @@ function start(i){
   if(!lv){ return; }
   L=lv; idx=i; ended=false; armed=false;
   P.x=chanAt(L,0).m; P.sy=0.62; P.vx=0; P.limb=0;
-  pulses=[]; scars=[]; motes=[]; drift=[]; fallers=[]; sparks=[]; rec=[]; recAt=0;
+  pulses=[]; scars=[]; motes=[]; drift=[]; fallers=[]; sparks=[]; shots=[]; rec=[]; recAt=0;
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
-  pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
+  pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,shots:0,score:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
   lives=LIVES_MAX; myDeaths=0; mateDeaths=0; myBonus=0; mateBonus=0;
   /* mateDeaths gets carried across levels within a room — do NOT reset it
@@ -877,11 +908,15 @@ function start(i){
   paintLives(); lobbyReady=false;
   P.vy=0; P.squash=0;
   seedDrift(lv);
-  holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
-  trails=[]; brakeT=0; dashT=0; lastTapT=0; lastTapSide=null;
+  holding=0; holdSide=0; shotCd=0; fragT=0; fragIx=0; deepest=0; paintScore();
+  trails=[]; dashT=0; lastTapT=0; lastTapSide=null;
   cpAnnounced={}; saidHalf=false; saidClose=false; saidLast=false; lastCloseT=-99; cleanGates=0;
-  if(idx===2) setTimeout(function(){ flashMsg("NEW MOVE — DOUBLE TAP CENTRE TO BRAKE"); },900);
+  if(idx===2) setTimeout(function(){ flashMsg("NEW MOVE — DOUBLE TAP CENTRE TO SHOOT"); },900);
   if(idx===5) setTimeout(function(){ flashMsg("NEW MOVE — DOUBLE TAP A SIDE TO DASH"); },900);
+  if(idx===6) setTimeout(function(){ flashMsg("SCOUTS AHEAD — SHOOT WITH ↓"); },1500);
+  if(idx===9) setTimeout(function(){ flashMsg("SPIKES ARE FASTER — KEEP FIRING"); },1500);
+  if(idx===14) setTimeout(function(){ flashMsg("WISPS LUNGE FURTHER — CLEAR THE PATH"); },1500);
+  if(idx===22) setTimeout(function(){ flashMsg("BRUTES AHEAD — THEY ARE WORTH +175"); },1500);
   frags=fragmentsFor(NP2[i][0]);
   ghostsFor(i); netJoin(i);
   show(null); size(); wake.style.display="none";
@@ -1054,7 +1089,7 @@ function down(x){
   var now=Date.now(), gap=now-lastTapT;
   if(gap<320 && lastTapSide!==null){
     if(lastTapSide===0 && holdSide===0 && idx>=2){
-      brakeT=1.1; flashMsg("BRAKE");
+      shoot();
     } else if(lastTapSide===holdSide && holdSide!==0 && idx>=5){
       P.vx = holdSide*LAT*1.6; dashT=0.35;
       for(var d2=0;d2<6;d2++){ trails.push({x:P.x-holdSide*d2*0.6, ts:songT(), a:1, wide:1}); }
@@ -1066,6 +1101,26 @@ function down(x){
   }
 }
 function up(){ holding=0; holdSide=0; }
+function paintScore(){
+  var el=document.getElementById("hscore"); if(!el) return;
+  el.textContent="SCORE "+String(pts.score||0).padStart(6,"0")+" · ✦ "+(pts.relics||0)+" ◈ "+(pts.caches||0);
+}
+function addScore(n){ pts.score=(pts.score||0)+n; paintScore(); }
+function shoot(){
+  if(!live||!armed||downed||shotCd>0) return;
+  shotCd=0.16;
+  /* Bend toward the nearest visible threat so shooting feels good on a
+     keyboard without demanding a pixel-perfect line-up. */
+  var aimX=P.x, nearest=1e9, now=songT();
+  if(L&&L.foes) for(var ai=0;ai<L.foes.length;ai++){
+    var foe=L.foes[ai]; if(foe.dead||foe.t<now-0.1||foe.t>now+1.55) continue;
+    var ach=chanAt(L,foe.t), ad=Math.abs(foe.t-now);
+    if(ad<nearest){ nearest=ad; aimX=ach.m+foe.side*Math.max(ach.h*0.63,FOEMIN); }
+  }
+  shots.push({x:P.x,y:P.sy+0.018,vx:clamp((aimX-P.x)*1.7,-28,28),vy:1.32,life:1.35});
+  for(var sh=0;sh<5;sh++) sparks.push({x:P.x,y:P.sy,vx:(Math.random()-0.5)*28,
+    vy:12+Math.random()*18,a:1,col:"#b6ff00"});
+}
 tap.addEventListener("touchstart",function(e){ if(!live)return; down(e.touches[0].clientX); e.preventDefault(); },{passive:false});
 tap.addEventListener("touchend",function(e){ up(); e.preventDefault(); },{passive:false});
 tap.addEventListener("touchcancel",up,{passive:true});
@@ -1077,6 +1132,7 @@ addEventListener("keydown",function(e){
   if(e.key==="ArrowLeft"||e.key==="a"){ holding=1; holdSide=-1; e.preventDefault(); }
   if(e.key==="ArrowRight"||e.key==="d"){ holding=1; holdSide=1; e.preventDefault(); }
   if(e.key===" "){ holding=1; holdSide=0; e.preventDefault(); }
+  if(e.key==="ArrowDown"){ shoot(); e.preventDefault(); }
 });
 addEventListener("keyup",function(e){
   if(["ArrowLeft","ArrowRight","a","d"," "].indexOf(e.key)>=0) up();
@@ -1129,10 +1185,6 @@ function step(dt,t){
      makes letting go feel like something leaving you rather than a number
      changing. Water is heavier still — it keeps whatever it already had. */
   var targetV=(push>0? SINK : -RISE);
-  if(brakeT>0){
-    brakeT-=dt;
-    targetV = isVoid ? SINK*1.15 : -RISE*0.85;
-  }
   if(dashT>0){ dashT-=dt; }
   P.vy += (targetV-P.vy)*Math.min(1,(Z.id==="stars"?2.6:5.8)*dt);
   P.sy += P.vy/(H/SC)*dt;
@@ -1211,6 +1263,7 @@ function step(dt,t){
   if(pow.light>0) pow.light-=dt;
   if(pow.calm>0)  pow.calm-=dt;
   if(pow.iron>0)  pow.iron-=dt;
+  if(shotCd>0) shotCd-=dt;
 
   /* ---- pick things up ---- */
   var pk, dxp, dyp;
@@ -1265,21 +1318,60 @@ function step(dt,t){
     if(Math.abs(t-cn.t)>0.26) continue;
     if(Math.abs(P.x-(chanAt(L,cn.t).m+cn.off))<5.5){
       cn.got=1; pts.coins++;
+      addScore(10);
       sparks.push({x:P.x,y:P.sy,vx:0,vy:-18,a:1});
     }
+  }
+
+  for(var ri2=0;ri2<L.relics.length;ri2++){
+    var relic=L.relics[ri2]; if(relic.got||Math.abs(t-relic.t)>0.30) continue;
+    if(Math.abs(P.x-(chanAt(L,relic.t).m+relic.off))<6){
+      relic.got=1; pts.relics++; addScore(75);
+      pulses.push({t:0,x:P.x,y:P.sy,r:0,max:68,life:0.9});
+      flashMsg("RELIC FOUND · +75");
+    }
+  }
+
+  for(var si3=0;si3<L.caches.length;si3++){
+    var cache=L.caches[si3]; if(cache.got||Math.abs(t-cache.t)>0.30) continue;
+    if(Math.abs(P.x-(chanAt(L,cache.t).m+cache.off))<6){
+      cache.got=1; pts.caches++; addScore(35); pow.light=Math.max(pow.light,2.5);
+      pulses.push({t:0,x:P.x,y:P.sy,r:0,max:54,life:0.75});
+      flashMsg("SIGNAL CACHE · +35");
+    }
+  }
+
+  /* Shots head down-screen toward the threats rising from below. */
+  for(var si2=shots.length-1;si2>=0;si2--){
+    var shot=shots[si2]; shot.x+=shot.vx*dt; shot.y+=shot.vy*dt; shot.life-=dt;
+    if(shot.life<=0||shot.y>1.12) shots.splice(si2,1);
   }
 
   /* ---- enemies: they hold the wall and reach in ---- */
   if(gracet<=0) for(var fi=0;fi<L.foes.length;fi++){
     var fo=L.foes[fi];
+    if(fo.dead) continue;
     if(Math.abs(t-fo.t)>1.4) continue;
     var fch=chanAt(L,t);
-    var lunge=Math.max(0,Math.sin((1.4-Math.abs(t-fo.t))*2.2))*0.55;
+    var lunge=Math.max(0,Math.sin((1.4-Math.abs(t-fo.t))*2.2))*
+      (fo.kind==="wisp"?0.70:(fo.kind==="spike"?0.62:(fo.kind==="brute"?0.50:0.52)));
     var fx=fch.m + fo.side*Math.max(fch.h*(1-lunge), FOEMIN);
     var fy=P.sy + (fo.t-t)*SCROLL/(H/SC);
+    for(var sj=shots.length-1;sj>=0;sj--){
+      var bullet=shots[sj];
+      if(Math.hypot(bullet.x-fx,(bullet.y-fy)*(H/SC))<(fo.r||FOER)+2.2){
+        var bounty=fo.kind==="brute"?175:(fo.kind==="wisp"?125:100);
+        fo.dead=1; shots.splice(sj,1); pts.shots++; addScore(bounty);
+        for(var blast=0;blast<16;blast++) sparks.push({x:fx,y:fy,
+          vx:(Math.random()-0.5)*70,vy:(Math.random()-0.5)*70,a:1,col:"#b6ff00"});
+        flashMsg(fo.kind.toUpperCase()+" DOWN · +"+bounty);
+        break;
+      }
+    }
+    if(fo.dead) continue;
     var ddx=(P.x-fx), ddy=(P.sy-fy)*(H/SC);
     if(pow.iron>0) continue;
-    if(Math.sqrt(ddx*ddx+ddy*ddy) < PR+FOER){
+    if(Math.sqrt(ddx*ddx+ddy*ddy) < PR+(fo.r||FOER)){
       if(pow.ghost>0){ pow.ghost=0; flashMsg("THE GHOST TOOK IT"); }
       else { die(t); return; }
     }
@@ -1907,9 +1999,36 @@ function draw(t){
     var spin=Math.abs(Math.cos(t*3.4+CN.t));
     ctx.globalAlpha=clamp(1-Math.abs(csy2-P.sy)*1.25,0.10,1);
     ctx.fillStyle="#e8dc12";
-    ctx.beginPath(); ctx.ellipse(cx2,cy2,3.2*Math.max(0.22,spin),3.2,0,0,6.2832); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx2,cy2,3.2*VIS*Math.max(0.22,spin),3.2*VIS,0,0,6.2832); ctx.fill();
     ctx.globalAlpha*=0.45; ctx.strokeStyle="#fff6a8"; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.ellipse(cx2,cy2,3.2*Math.max(0.22,spin),3.2,0,0,6.2832); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx2,cy2,3.2*VIS*Math.max(0.22,spin),3.2*VIS,0,0,6.2832); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- relics: optional discoveries off the main route ---- */
+  for(var rd=0;rd<L.relics.length;rd++){
+    var RL=L.relics[rd]; if(RL.got) continue;
+    var rsy=P.sy+(RL.t-t)*SCROLL/(H/SC);
+    if(rsy<-0.06||rsy>1.06) continue;
+    var rxx=(chanAt(L,RL.t).m+RL.off)*SC, ryy=rsy*H, rs=5.4*VIS;
+    ctx.globalAlpha=clamp(1-Math.abs(rsy-P.sy)*1.15,0.18,1);
+    ctx.fillStyle="#b6ff00"; ctx.save(); ctx.translate(rxx,ryy); ctx.rotate(t*1.8+rd);
+    ctx.fillRect(-rs/2,-rs/2,rs,rs); ctx.restore();
+    ctx.strokeStyle="#efffc3"; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(rxx,ryy,rs*1.25,0,6.2832); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- signal caches: small supply crates from the lost route ---- */
+  for(var scd=0;scd<L.caches.length;scd++){
+    var CA=L.caches[scd]; if(CA.got) continue;
+    var csy3=P.sy+(CA.t-t)*SCROLL/(H/SC);
+    if(csy3<-0.06||csy3>1.06) continue;
+    var cxx=(chanAt(L,CA.t).m+CA.off)*SC, cyy=csy3*H, cs=7.2*VIS;
+    ctx.globalAlpha=clamp(1-Math.abs(csy3-P.sy)*1.15,0.18,1);
+    ctx.fillStyle="#8fd0ff"; ctx.fillRect(cxx-cs/2,cyy-cs/2,cs,cs);
+    ctx.strokeStyle="#e5fbff"; ctx.lineWidth=1.2*VIS;
+    ctx.strokeRect(cxx-cs/2,cyy-cs/2,cs,cs);
+    ctx.fillStyle="#05080a"; ctx.fillRect(cxx-cs*.16,cyy-cs*.16,cs*.32,cs*.32);
   }
   ctx.globalAlpha=1;
 
@@ -1925,33 +2044,33 @@ function draw(t){
     if(PK.kind==="guitar"){
       /* a tiny neck-and-body — sitting on the safe line like every pickup */
       ctx.fillStyle=col;
-      ctx.beginPath(); ctx.arc(pxx,pyy+4,4,0,6.2832); ctx.fill();       /* body */
-      ctx.fillRect(pxx-0.9,pyy-9,1.8,10);                                /* neck */
-      ctx.fillRect(pxx-3,pyy-11,6,1.2);                                  /* head */
+      ctx.beginPath(); ctx.arc(pxx,pyy+4*VIS,4*VIS,0,6.2832); ctx.fill(); /* body */
+      ctx.fillRect(pxx-0.9*VIS,pyy-9*VIS,1.8*VIS,10*VIS);                  /* neck */
+      ctx.fillRect(pxx-3*VIS,pyy-11*VIS,6*VIS,1.2*VIS);                    /* head */
     } else if(PK.kind==="heart"){
       /* larger heart + a soft outer glow ring so it pops off the walls */
       var beat=0.5+0.5*Math.sin(t*4+pd);
       /* outer glow — thin ring that pulses with the beat */
       ctx.save();
       ctx.globalAlpha=clamp(1-Math.abs(psy-P.sy)*1.15,0.12,1)*(0.35+beat*0.4);
-      ctx.strokeStyle=col; ctx.lineWidth=1.4;
-      ctx.beginPath(); ctx.arc(pxx,pyy,11+beat*2,0,6.2832); ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=1.4*VIS;
+      ctx.beginPath(); ctx.arc(pxx,pyy,(11+beat*2)*VIS,0,6.2832); ctx.stroke();
       ctx.restore();
       /* the heart itself: slightly bigger, filled with the coin pink */
       ctx.fillStyle=col;
       ctx.beginPath();
-      ctx.moveTo(pxx, pyy+7);
-      ctx.bezierCurveTo(pxx-11, pyy-1, pxx-9, pyy-11, pxx, pyy-4);
-      ctx.bezierCurveTo(pxx+9, pyy-11, pxx+11, pyy-1, pxx, pyy+7);
+      ctx.moveTo(pxx, pyy+7*VIS);
+      ctx.bezierCurveTo(pxx-11*VIS, pyy-1*VIS, pxx-9*VIS, pyy-11*VIS, pxx, pyy-4*VIS);
+      ctx.bezierCurveTo(pxx+9*VIS, pyy-11*VIS, pxx+11*VIS, pyy-1*VIS, pxx, pyy+7*VIS);
       ctx.fill();
       /* highlight */
       ctx.globalAlpha*=0.75; ctx.fillStyle="#ffb0c8";
-      ctx.beginPath(); ctx.arc(pxx-3,pyy-4,1.6,0,6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(pxx-3*VIS,pyy-4*VIS,1.6*VIS,0,6.2832); ctx.fill();
     } else if(PK.kind==="super"){
       /* a five-point star with rays that pulse — the rarest drop */
       ctx.fillStyle=col;
       ctx.beginPath();
-      var rO=6.6+Math.sin(t*7+pd)*0.6, rI=2.6;
+      var rO=(6.6+Math.sin(t*7+pd)*0.6)*VIS, rI=2.6*VIS;
       for(var sp3=0;sp3<10;sp3++){
         var ang = -Math.PI/2 + sp3*Math.PI/5, rr2 = (sp3%2)?rI:rO;
         var xx=pxx+Math.cos(ang)*rr2, yy=pyy+Math.sin(ang)*rr2;
@@ -1963,13 +2082,13 @@ function draw(t){
       var glow=(0.5+0.5*Math.sin(t*4+pd));
       ctx.globalAlpha*=0.4+0.5*glow;
       for(var rk=0;rk<8;rk++){
-        var a2=rk*Math.PI/4+t*0.4, r1=8, r2=12+glow*4;
+        var a2=rk*Math.PI/4+t*0.4, r1=8*VIS, r2=(12+glow*4)*VIS;
         ctx.beginPath(); ctx.moveTo(pxx+Math.cos(a2)*r1, pyy+Math.sin(a2)*r1);
         ctx.lineTo(pxx+Math.cos(a2)*r2, pyy+Math.sin(a2)*r2); ctx.stroke();
       }
     } else {
-      ctx.beginPath(); ctx.arc(pxx,pyy,6.5,0,6.2832); ctx.stroke();
-      ctx.beginPath(); ctx.arc(pxx,pyy,2.4,0,6.2832); ctx.fillStyle=col; ctx.fill();
+      ctx.beginPath(); ctx.arc(pxx,pyy,6.5*VIS,0,6.2832); ctx.stroke();
+      ctx.beginPath(); ctx.arc(pxx,pyy,2.4*VIS,0,6.2832); ctx.fillStyle=col; ctx.fill();
     }
   }
   ctx.globalAlpha=1;
@@ -1977,27 +2096,50 @@ function draw(t){
   /* ---- enemies: they never leave their wall ---- */
   for(var fd2=0;fd2<L.foes.length;fd2++){
     var FO=L.foes[fd2];
+    if(FO.dead) continue;
     if(Math.abs(t-FO.t)>1.6) continue;
     var fch2=chanAt(L,t);
-    var lg=Math.max(0,Math.sin((1.4-Math.abs(t-FO.t))*2.2))*0.55;
+    var lg=Math.max(0,Math.sin((1.4-Math.abs(t-FO.t))*2.2))*
+      (FO.kind==="wisp"?0.70:(FO.kind==="spike"?0.62:(FO.kind==="brute"?0.50:0.52)));
     var fxx=(fch2.m+FO.side*Math.max(fch2.h*(1-lg), FOEMIN))*SC;
     var fyy=(P.sy+(FO.t-t)*SCROLL/(H/SC))*H;
     ctx.globalAlpha=clamp(lg*2.2,0,1);
-    ctx.fillStyle="#ff1f6f";
-    var rr=3.4+lg*2;
+    var enemyCol=FO.kind==="wisp"?"#c9b8ff":(FO.kind==="spike"?"#ff5c9d":(FO.kind==="brute"?"#ff3b42":"#ff1f6f"));
+    ctx.fillStyle=enemyCol;
+    var rr=((FO.r||FOER)+lg*2)*VIS;
     ctx.beginPath(); ctx.arc(fxx,fyy,rr,0,6.2832); ctx.fill();
-    ctx.strokeStyle="#ff5c9d"; ctx.lineWidth=1;
-    for(var tk=0;tk<5;tk++){
-      var aa=FO.ph+tk*1.26+t*2;
+    ctx.strokeStyle=FO.kind==="brute"?"#ffc46b":enemyCol; ctx.lineWidth=1.1*VIS;
+    var tentacles=FO.kind==="brute"?8:(FO.kind==="spike"?6:5);
+    for(var tk=0;tk<tentacles;tk++){
+      var aa=FO.ph+tk*(6.283/tentacles)+t*(FO.kind==="wisp"?4:2);
       ctx.beginPath(); ctx.moveTo(fxx,fyy);
-      ctx.lineTo(fxx+Math.cos(aa)*rr*2.1, fyy+Math.sin(aa)*rr*2.1); ctx.stroke();
+      var reach=FO.kind==="brute"?2.5:(FO.kind==="wisp"?2.8:2.1);
+      ctx.lineTo(fxx+Math.cos(aa)*rr*reach, fyy+Math.sin(aa)*rr*reach); ctx.stroke();
     }
+    /* A unique mark makes each type recognisable in the dark. */
+    ctx.fillStyle="#fff";
+    if(FO.kind==="spike"){
+      ctx.beginPath(); ctx.moveTo(fxx,fyy-rr*.62); ctx.lineTo(fxx+rr*.55,fyy+rr*.52);
+      ctx.lineTo(fxx-rr*.55,fyy+rr*.52); ctx.closePath(); ctx.fill();
+    } else if(FO.kind==="brute"){
+      ctx.fillRect(fxx-rr*.55,fyy-rr*.18,rr*1.1,rr*.36);
+    } else {
+      ctx.beginPath(); ctx.arc(fxx,fyy,Math.max(1.4,rr*.25),0,6.2832); ctx.fill();
+    }
+  }
+  ctx.globalAlpha=1;
+
+  /* ---- shots: bright traces fired with Down Arrow ---- */
+  for(var sd=0;sd<shots.length;sd++){
+    var SH=shots[sd];
+    ctx.globalAlpha=clamp(SH.life*1.2,0,1); ctx.strokeStyle="#b6ff00"; ctx.lineWidth=2.4*VIS;
+    ctx.beginPath(); ctx.moveTo(SH.x*SC,SH.y*H-11*VIS); ctx.lineTo(SH.x*SC,SH.y*H+6*VIS); ctx.stroke();
   }
   ctx.globalAlpha=1;
 
   /* ---- sparks off a gate you just threaded ---- */
   for(var sq=0;sq<sparks.length;sq++){ var S=sparks[sq];
-    ctx.globalAlpha=Math.max(0,S.a)*0.8; ctx.fillStyle="#e8dc12";
+    ctx.globalAlpha=Math.max(0,S.a)*0.8; ctx.fillStyle=S.col||"#e8dc12";
     ctx.fillRect(S.x*SC,S.y*H,2,2); }
   ctx.globalAlpha=1;
 
