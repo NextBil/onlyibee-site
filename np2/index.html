@@ -734,8 +734,18 @@ body.neon #roomtag.gone{opacity:0}
       return { win:fig.querySelector(".win"), img:fig.querySelector("img:not(.frame)"),
                vid:fig.querySelector("video"), cap:fig.querySelector(".cap") };
     });
-    /* seed the stills so the wall is furnished before anything plays */
-    for(var t=0;t<TILES.length;t++) setTile(TILES[t], STILLS[(t*4+2)%STILLS.length], true);
+    /* the three fixed default exhibits — his picks. The mark on his forearm,
+       the school print found in the album, and exhibit 10 (an undated print).
+       Slot 0 is REEL 01 (video) and gets set below. */
+    var DEFAULTS=["a01.jpg","a08.jpg","a10.jpg"];
+    function findStill(name){
+      for(var i=0;i<STILLS.length;i++) if(STILLS[i].f===name) return STILLS[i];
+      return null;
+    }
+    for(var t=1;t<TILES.length;t++){
+      var pick = findStill(DEFAULTS[t-1]) || STILLS[(t*4+2)%STILLS.length];
+      setTile(TILES[t], pick, true);
+    }
     TILES[0].cap.textContent="REEL 01";
   })();
 
