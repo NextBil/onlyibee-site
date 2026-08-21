@@ -216,6 +216,9 @@ header span{color:var(--dim);font-size:7px}
     <button class="btn" id="oagain">↻ FALL AGAIN</button>
     <button class="btn alt" id="onext">▼ DEEPER</button>
     <button class="btn ghost" id="omenu">◀ THE PIT</button>
+    <!-- Only visible in a room: replaces the solo buttons so both mates
+         can only advance together. When both press READY, both start. -->
+    <button class="btn" id="oready" style="display:none">READY FOR NEXT</button>
   </div>
 </div>
 
@@ -466,7 +469,7 @@ function build(slug, idx){
     /* dark → light → dark inside every level, and again across the 26 */
     var arc=Math.sin(Math.PI*clamp(t/dur,0,1));            /* 0 → 1 → 0 */
     var deep=Math.sin(Math.PI*clamp((idx+1)/26,0,1));
-    var hw=25 - tight*9 - arc*3.5 - deep*2.2;
+    var hw=25 - tight*9 - arc*3.5 - deep*2.2 - idx*0.10;   /* narrower as you go */
     half[i]=clamp(hw*Z.wide, 11, 34);
   }
   /* THE GUARANTEE: the channel may never wander faster than the player can
@@ -552,7 +555,7 @@ function build(slug, idx){
      the safe line. Neither can be missed fatally; both are optional. */
   var seed=(idx*2654435761)%100000;
   var picks=[], KIND=["light","calm","ghost","iron","bloom","guitar"];
-  var pEvery=Math.max(11, 28-idx*0.4);
+  var pEvery=Math.max(8, 26-idx*0.55);                     /* pickups get thicker */
   for(var pt=14; pt<dur-12; pt+=pEvery*(0.7+rnd2(seed+pt)*0.6)){
     var nearG=false;
     for(var z2=0;z2<gates.length;z2++) if(Math.abs(gates[z2].t-pt)<2.4) nearG=true;
@@ -560,7 +563,7 @@ function build(slug, idx){
     picks.push({t:pt, kind:KIND[Math.floor(rnd2(seed+pt*3.1)*KIND.length)], got:0});
   }
   var coins=[];
-  for(var ct=8; ct<dur-8; ct+=2.4+rnd2(seed+ct*1.7)*2.8){
+  for(var ct=8; ct<dur-8; ct+=Math.max(1.6, 2.4 - idx*0.03)+rnd2(seed+ct*1.7)*2.4){  /* denser coins */
     var ci=clamp(Math.round(ct/RES),0,steps-1);
     var side=rnd2(seed+ct*5.9)>0.5?1:-1;
     coins.push({t:ct, off:side*Math.min(half[ci]*0.55, 13), got:0});
@@ -573,8 +576,8 @@ function build(slug, idx){
   /* THE VOID GETS NO ENEMIES, for the same reason it gets no gates: it takes
      your steering away on purpose, so anything you must dodge is unfair. */
   var foes=[];
-  if(Z.id==="stars"||Z.id==="climb"){
-    var fEvery=Math.max(9, 22-idx*0.4);
+  if(Z.id==="stars"||Z.id==="climb"||Z.id==="paris"){
+    var fEvery=Math.max(7, 22-idx*0.55);
     for(var ft=22; ft<dur-12; ft+=fEvery*(0.7+rnd2(seed+ft*2.3)*0.7)){
       var fidx=clamp(Math.round(ft/RES),0,steps-1);
       if(half[fidx] < FOEMIN+3) continue;       /* too tight a shaft to hold one */
@@ -718,7 +721,11 @@ function start(i){
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
   pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
-  lives=LIVES_MAX; paintLives(); lobbyReady=false;
+  lives=LIVES_MAX; myDeaths=0; mateDeaths=0;
+  /* mateDeaths gets carried across levels within a room — do NOT reset it
+     here, because the mate might already have died in their own start attempt
+     and their `dt` broadcast could arrive before ours. */
+  paintLives(); lobbyReady=false;
   P.vy=0; P.squash=0;
   seedDrift(lv);
   holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
@@ -749,8 +756,17 @@ function play(i,tries){
 }
 
 function finish(won){
-  live=false; ended=true; netLeave(); saveBest(idx);
+  live=false; ended=true; saveBest(idx);
   var mc=document.getElementById("matechip"); if(mc) mc.style.display="none";
+  /* room-aware: DO NOT close the channel — keep the lobby up so we can
+     synchronise the next level. Solo runs still tear down the channel. */
+  if(!roomCode){ netLeave(); }
+  else{
+    try{ if(chan) chan.send({type:"broadcast",event:"fn",payload:{id:myId,level:idx,won:!!won}}); }catch(e){}
+    /* preload the next chosen level so a READY does the right thing */
+    chosenLevel = (won && idx<25) ? (idx+1) : idx;
+    lobbyReady=false;
+  }
   fragEl.classList.remove("on");
   var last=(idx===25);
   var earned=0;
@@ -798,6 +814,13 @@ function finish(won){
   paintBoard("DEEPEST THIS ROOM", rows);
   postScore(idx, Math.round(deepest), won, save[idx]||null, paintBoard);
   document.getElementById("onext").style.display = (won&&!last)?"":"none";
+  /* room mode: replace the solo buttons with the shared READY */
+  var rr=document.getElementById("oready");
+  if(roomCode){
+    document.getElementById("oagain").style.display="none";
+    document.getElementById("onext").style.display="none";
+    rr.style.display=""; rr.classList.remove("on"); rr.textContent="READY FOR NEXT";
+  } else if(rr) rr.style.display="none";
   paintGrid(); paintPerk(); show(over);
   try{ var r=RADIO(); if(r&&r.playing()&&!won) r.control.pause(); }catch(e){}
 }
@@ -835,6 +858,16 @@ function postScore(level, depth, cleared, secs, paint){
 document.getElementById("oagain").onclick=function(){ start(idx); };
 document.getElementById("onext").onclick=function(){ start(Math.min(25,idx+1)); };
 document.getElementById("omenu").onclick=function(){ show(menu); if(roomCode){ lobbyReady=false; netJoin(0); paintLobby(); } };
+document.getElementById("oready").onclick=function(){
+  if(!roomCode) return;
+  lobbyReady=!lobbyReady;
+  document.getElementById("oready").classList.toggle("on", lobbyReady);
+  document.getElementById("oready").textContent = lobbyReady ? "READY — WAITING FOR MATE" : "READY FOR NEXT";
+  broadcastLobby();
+  if(lobbyReady && mateReady && chosenLevel>=0 && mateLevel===chosenLevel) start(chosenLevel);
+  /* auto-jump when the mate already finished the same level, even if
+     their ready hasn't landed yet — but only if BOTH are ready */
+};
 
 /* =====================================================================
    8. INPUT — the whole screen is the controller
@@ -1290,27 +1323,44 @@ function drawDrift(t,Z){
    that path (goDown) does not spend a life. */
 function paintLives(){
   var el=document.getElementById("hlives"); if(!el) return;
-  var h="♥".repeat(Math.max(0,lives)) + "♡".repeat(Math.max(0,LIVES_MAX-lives));
-  el.textContent=h; el.className = lives<=0 ? "dim" : "";
+  var L=sharedLives();
+  var h="♥".repeat(L) + "♡".repeat(Math.max(0,LIVES_MAX-L));
+  el.textContent=h; el.className = L<=0 ? "dim" : "";
 }
 function die(t){
   var back=0, k;
   for(k=0;k<L.cps.length;k++) if(t>L.cps[k]+0.4) back=L.cps[k];
   pts.deaths++; deaths++;
+  /* one death spends one shared life. Broadcast our count so the mate's
+     hearts update on their screen too. */
+  myDeaths++; broadcastDeaths(); paintLives();
+  var alive = sharedLives();
+  if(alive<=0){ finish(false); return; }
+  /* mate is falling → revive at their position 2s later */
   var mate=peerAlive();
-  if(mate){ goDown(mate); return; }           /* revive by teammate is still free */
-  lives--; paintLives();
-  if(lives<=0){ finish(false); return; }      /* three strikes: back to silence */
+  if(mate){ goDown(mate); return; }
+  /* alone: back to the nearest checkpoint you passed, or the top */
   cpAt=back; gracet=1.0;
   P.sy=0.62; P.vy=0; P.vx=0; P.x=chanAt(L,back).m; P.squash=0;
   pulses=[]; sparks=[]; gateHit={};
   for(k=0;k<L.gates.length;k++) if(L.gates[k].t<back) gateHit[k]=1;
   var r=RADIO(); try{ if(r) r.audio.currentTime=back; }catch(e){}
-  flashMsg(back>0 ? ("CHECKPOINT — "+fmt(back)+"  ·  "+lives+" LEFT")
-                  : ("FROM THE TOP  ·  "+lives+" LEFT"));
+  flashMsg(back>0 ? ("CHECKPOINT — "+fmt(back)+"  ·  "+alive+" LEFT")
+                  : ("FROM THE TOP  ·  "+alive+" LEFT"));
 }
 var LIVES_MAX=3;                       /* three lives per run */
 var deaths=0, lives=LIVES_MAX, downed=0, downT=0;
+/* Shared lives in a room: track OUR death count and the mate's. Both
+   sides broadcast their own counter, both converge with a max(), and the
+   pool is LIVES_MAX minus the sum. Idempotent: even if the network drops
+   a message or duplicates one, and even if both players die on the same
+   frame, everyone eventually agrees. */
+var myDeaths=0, mateDeaths=0;
+function sharedLives(){ return Math.max(0, LIVES_MAX - myDeaths - mateDeaths); }
+function broadcastDeaths(){
+  if(!chan) return;
+  try{ chan.send({type:"broadcast",event:"dt",payload:{id:myId, deaths:myDeaths, level:idx}}); }catch(e){}
+}
 /* SOMEONE ELSE STILL FALLING BRINGS YOU BACK. You go DOWN, not out — and if a
    peer in this room is still alive, you are on your feet 2 seconds later at
    their depth. Falling together should mean something more than seeing a
@@ -1606,6 +1656,12 @@ function limb(ax,ay,bx,by,len1,len2,flip,col,wid){
 }
 function figure(px,py,scale,col,ph,st){
   st=st||{vy:0,vx:0,squash:0,bass:0,power:null};
+  /* UPSIDE DOWN. You are falling head-first: the anchor stays where the game
+     already thinks the body is (px,py), everything from here down draws in
+     the figure's own frame and then a scale(1,-1) around that anchor flips
+     the whole rig on render. All the trig, IK, lean and bass logic stays
+     the same — it just draws upside down. */
+  ctx.save(); ctx.translate(px,py); ctx.scale(1,-1); ctx.translate(-px,-py);
   var u=SC*scale;
   var fall=clamp(st.vy/SINK,-1.4,1.6);          /* -1 rising … 1 sinking hard */
   var lean=clamp(st.vx/LAT,-1,1);
@@ -1649,6 +1705,7 @@ function figure(px,py,scale,col,ph,st){
     ctx.beginPath(); ctx.arc(px,py,3.3*u,0,6.2832); ctx.stroke();
     ctx.globalAlpha=1;
   }
+  ctx.restore();
 }
 
 /* =====================================================================
@@ -1719,6 +1776,7 @@ function loadSB(cb){
    your chosen level; nothing starts until both mates are on the same level
    with READY pressed. */
 var chosenLevel=-1, lobbyReady=false;
+var mateFinished=null;
 var mateReady=false, mateLevel=-1, mateSeen=0;
 function mateHere(){ return mateSeen && Date.now()-mateSeen<9000; }
 function broadcastLobby(){
@@ -1772,6 +1830,22 @@ function netJoin(i){
       });
       chan.on("broadcast",{event:"lb"},function(m){
         var d=m.payload; if(!d||d.id===myId) return; onLobby(d);
+      });
+      chan.on("broadcast",{event:"dt"},function(m){
+        var d=m.payload; if(!d||d.id===myId) return;
+        /* monotonic max — no bookkeeping needed, no double-count possible */
+        if(typeof d.deaths==="number" && d.deaths>mateDeaths){
+          mateDeaths=d.deaths; paintLives();
+          if(live && sharedLives()<=0){ finish(false); }
+        }
+      });
+      /* finish handshake — one side finishing announces the level and
+         whether they got out. Both mates re-open the lobby at the next
+         level so a shared READY starts the next fall together. */
+      chan.on("broadcast",{event:"fn"},function(m){
+        var d=m.payload; if(!d||d.id===myId) return;
+        mateFinished = {level:d.level, won:!!d.won, at:Date.now()};
+        paintLobby();
       });
       chan.subscribe(function(status){
         if(status==="SUBSCRIBED") broadcastLobby();
