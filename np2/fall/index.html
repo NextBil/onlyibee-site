@@ -128,6 +128,21 @@ header span{color:var(--dim);font-size:7px}
 .lv.done::before{background:var(--acid);border-color:var(--acid);box-shadow:0 0 10px rgba(182,255,0,.6),0 0 0 3px #05080a}
 .lv.done .n{color:var(--acid)}
 .lv.done .st{color:var(--acid)}
+/* MULTI-COLUMN LAYOUT on wider screens — the map wraps into columns on
+   laptops so 26 tiles do not force endless scrolling. The dashed spine
+   and the tile dots read as a subway only in single-column mode, so we
+   drop them when there is more than one column. Chapter headers still
+   span every column, marking the transitions across the wider grid. */
+@media (min-width:820px){
+  .grid{grid-template-columns:1fr 1fr;column-gap:14px;padding-left:0;max-width:920px;padding:0 8px}
+  .grid::before{display:none}
+  .lv::before{display:none}
+  .grid .zh{grid-column:1 / -1;margin-top:20px}
+  .grid .zh .dot{display:none}
+}
+@media (min-width:1200px){
+  .grid{grid-template-columns:1fr 1fr 1fr;max-width:1200px}
+}
 
 .row{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:20px auto 0}
 .btn{font-family:var(--px);font-size:9px;padding:13px 16px;text-decoration:none;cursor:pointer;
@@ -1026,7 +1041,7 @@ function down(x){
       brakeT=1.1; flashMsg("BRAKE");
     } else if(lastTapSide===holdSide && holdSide!==0 && idx>=5){
       P.vx = holdSide*LAT*1.6; dashT=0.35;
-      for(var d2=0;d2<6;d2++){ trails.push({x:P.x-holdSide*d2*0.6, sy:P.sy, a:1, wide:1}); }
+      for(var d2=0;d2<6;d2++){ trails.push({x:P.x-holdSide*d2*0.6, ts:songT(), a:1, wide:1}); }
       flashMsg("DASH");
     }
     lastTapT=0; lastTapSide=null;
@@ -1120,12 +1135,20 @@ function step(dt,t){
   if(!isFinite(P.sy)||!isFinite(P.x)||!isFinite(P.vx)||!isFinite(P.vy)){
     P.sy=0.62; P.x=ch.m; P.vx=0; P.vy=0;
   }
-  if(live && !downed && Math.abs(P.vx) > LAT*0.18){
-    trails.push({x:P.x, sy:P.sy, a:1, wide:0});
-    if(trails.length>28) trails.shift();
+  /* SPEED STREAKS — captured at the CURRENT song time. Each frame the
+     draw pass turns that timestamp into a screen y, which slides UP as
+     time passes — the world falls down past the camera, so the streaks
+     recede up like real air rushing past a body in free-fall.           */
+  if(live && !downed){
+    var vmag=Math.abs(P.vx)/LAT;
+    /* softer: one streak per frame only when actively moving hard, none when idle */
+    if(vmag>0.25){
+      trails.push({x:P.x+(Math.random()-0.5)*1.4, ts:t, a:1, wide:0});
+    }
+    if(trails.length>28) trails.splice(0, trails.length-28);
   }
   for(var tr=trails.length-1;tr>=0;tr--){
-    trails[tr].a -= dt*(trails[tr].wide?2.2:3.2);
+    trails[tr].a -= dt*(trails[tr].wide?1.8:2.2);
     if(trails[tr].a<=0) trails.splice(tr,1);
   }
   if(L.cps){
@@ -1964,11 +1987,29 @@ function draw(t){
     ctx.fillText(Math.max(0,downT).toFixed(1), P.x*SC, P.sy*H-22);
     ctx.textAlign="start";
   }
+  /* SPEED STREAKS — position from the song-time delta so the streak
+     visibly slides UP on screen as it ages, and the streak length grows
+     with age so it reads as motion, not a fading dot. */
+  ctx.strokeStyle="#f0efe8"; ctx.lineCap="round";
   for(var trI=0;trI<trails.length;trI++){ var TR=trails[trI];
-    ctx.globalAlpha=Math.max(0,TR.a)*0.55;
-    ctx.fillStyle="#f0efe8";
-    var trs=(TR.wide?3.4:2.2)+TR.a*1.6;
-    ctx.beginPath(); ctx.arc(TR.x*SC, TR.sy*H, trs, 0, 6.2832); ctx.fill();
+    var age = TR.ts!=null ? (t - TR.ts) : 0;                /* seconds old */
+    var sy2 = TR.ts!=null ? (P.sy + (TR.ts - t)*SCROLL/(H/SC)) : (TR.sy||P.sy);
+    if(sy2<-0.08 || sy2>1.10) continue;
+    ctx.globalAlpha=Math.max(0,TR.a)*0.28;
+    if(TR.wide){
+      /* DASH burst still visible, just a touch less alpha */
+      ctx.fillStyle="#f0efe8";
+      ctx.beginPath(); ctx.arc(TR.x*SC, sy2*H, 2.6+TR.a*1.4, 0, 6.2832); ctx.fill();
+      continue;
+    }
+    /* short vertical streak — thinner, shorter, fades to nothing */
+    var len = Math.min(9, 2 + age*20);
+    ctx.lineWidth = 0.8 + TR.a*0.3;
+    var xx = TR.x*SC;
+    ctx.beginPath();
+    ctx.moveTo(xx, sy2*H);
+    ctx.lineTo(xx, sy2*H - len);   /* streak goes UPWARD from the point */
+    ctx.stroke();
   }
   ctx.globalAlpha=1;
 
