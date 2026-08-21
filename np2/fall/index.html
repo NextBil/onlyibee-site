@@ -554,13 +554,25 @@ function build(slug, idx){
      COINS sit off-centre — the only thing in the game that asks you to leave
      the safe line. Neither can be missed fatally; both are optional. */
   var seed=(idx*2654435761)%100000;
-  var picks=[], KIND=["light","calm","ghost","iron","bloom","guitar"];
+  var picks=[], KIND=["light","calm","ghost","iron","bloom","guitar","heart","super"];
+  /* NOT uniform. A pickup that ADDS A LIFE or gives you 5s of nothing
+     touching you is stronger than one that lights the shaft, so it has to
+     be rarer or the game is a video. The array below picks by weight —
+     lights and calms are the everyday find, hearts and supers are the
+     ones you tell your mate about. */
+  var KIND_W=[22, 16, 14, 10, 6, 4, 12, 6];    /* sums to 90 */
+  function pickKind(r){
+    var w=0, i2; for(i2=0;i2<KIND_W.length;i2++) w+=KIND_W[i2];
+    var q=r*w, acc=0;
+    for(i2=0;i2<KIND_W.length;i2++){ acc+=KIND_W[i2]; if(q<acc) return KIND[i2]; }
+    return KIND[0];
+  }
   var pEvery=Math.max(8, 26-idx*0.55);                     /* pickups get thicker */
   for(var pt=14; pt<dur-12; pt+=pEvery*(0.7+rnd2(seed+pt)*0.6)){
     var nearG=false;
     for(var z2=0;z2<gates.length;z2++) if(Math.abs(gates[z2].t-pt)<2.4) nearG=true;
     if(nearG) continue;
-    picks.push({t:pt, kind:KIND[Math.floor(rnd2(seed+pt*3.1)*KIND.length)], got:0});
+    picks.push({t:pt, kind:pickKind(rnd2(seed+pt*3.1)), got:0});
   }
   var coins=[];
   for(var ct=8; ct<dur-8; ct+=Math.max(1.6, 2.4 - idx*0.03)+rnd2(seed+ct*1.7)*2.4){  /* denser coins */
@@ -721,7 +733,7 @@ function start(i){
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
   pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
-  lives=LIVES_MAX; myDeaths=0; mateDeaths=0;
+  lives=LIVES_MAX; myDeaths=0; mateDeaths=0; myBonus=0; mateBonus=0;
   /* mateDeaths gets carried across levels within a room — do NOT reset it
      here, because the mate might already have died in their own start attempt
      and their `dt` broadcast could arrive before ours. */
@@ -908,9 +920,10 @@ wake.addEventListener("click",function(){
    9. STEP
    ===================================================================== */
 var POWCOL={light:"#e8dc12", calm:"#8fd0ff", ghost:"#ff5c9d",
-            iron:"#ffffff", bloom:"#b6ff00", guitar:"#ff1f6f"};
+            iron:"#ffffff", bloom:"#b6ff00", guitar:"#ff1f6f",
+            heart:"#ff2b6b", super:"#e8dc12"};
 function powCol(){
-  if(pow.iron>0)  return POWCOL.iron;
+  if(pow.iron>0)  return POWCOL.iron;    /* super uses pow.iron under the hood — same shield */
   if(pow.ghost>0) return POWCOL.ghost;
   if(pow.calm>0)  return POWCOL.calm;
   if(pow.light>0) return POWCOL.light;
@@ -1016,6 +1029,23 @@ function step(dt,t){
         pow.light=Math.max(pow.light,6);
         pulses.push({t:0,x:P.x,y:P.sy,r:0,max:120,life:1.2});
         flashMsg("GUITAR — a chord, and the shaft is yours");
+      }
+      else if(pk.kind==="heart"){
+        /* +1 to the shared pool. If both mates are already at the cap,
+           the heart still lands as a bright pulse — never nothing. */
+        var pre=sharedLives();
+        myBonus++; broadcastDeaths(); paintLives();
+        pulses.push({t:0,x:P.x,y:P.sy,r:0,max:130,life:1.2});
+        var post=sharedLives();
+        flashMsg(post>pre ? ("+1 LIFE  ·  "+post+" IN THE POOL")
+                          : "HEART — YOU ARE AT THE CAP");
+      }
+      else if(pk.kind==="super"){
+        /* five seconds of nothing touching you — spikes, gates, enemies,
+           walls. The stronger cousin of IRON. */
+        pow.iron=Math.max(pow.iron,5);
+        pulses.push({t:0,x:P.x,y:P.sy,r:0,max:170,life:1.6});
+        flashMsg("SUPER — 5 SECONDS OF INVINCIBLE");
       }
       else { pow[pk.kind]=Math.max(pow[pk.kind],11);
         flashMsg(pk.kind==="light"?"LIGHT — the dark opens":"CALM — it slows down"); }
@@ -1356,10 +1386,19 @@ var deaths=0, lives=LIVES_MAX, downed=0, downT=0;
    a message or duplicates one, and even if both players die on the same
    frame, everyone eventually agrees. */
 var myDeaths=0, mateDeaths=0;
-function sharedLives(){ return Math.max(0, LIVES_MAX - myDeaths - mateDeaths); }
+/* HEARTS you pick up ADD to the shared pool. Each side keeps its own
+   monotonic bonus counter; the total pool is LIVES_MAX + both bonuses
+   - both deaths. Same convergence guarantees as the death counter —
+   duplicate/dropped broadcasts do not double-count. */
+var myBonus=0, mateBonus=0;
+var LIVES_CAP=6;
+function sharedLives(){
+  return Math.max(0, Math.min(LIVES_CAP, LIVES_MAX + myBonus + mateBonus - myDeaths - mateDeaths));
+}
 function broadcastDeaths(){
   if(!chan) return;
-  try{ chan.send({type:"broadcast",event:"dt",payload:{id:myId, deaths:myDeaths, level:idx}}); }catch(e){}
+  try{ chan.send({type:"broadcast",event:"dt",payload:{
+    id:myId, deaths:myDeaths, bonus:myBonus, level:idx}}); }catch(e){}
 }
 /* SOMEONE ELSE STILL FALLING BRINGS YOU BACK. You go DOWN, not out — and if a
    peer in this room is still alive, you are on your feet 2 seconds later at
@@ -1568,6 +1607,37 @@ function draw(t){
       ctx.beginPath(); ctx.arc(pxx,pyy+4,4,0,6.2832); ctx.fill();       /* body */
       ctx.fillRect(pxx-0.9,pyy-9,1.8,10);                                /* neck */
       ctx.fillRect(pxx-3,pyy-11,6,1.2);                                  /* head */
+    } else if(PK.kind==="heart"){
+      /* two lobes and a point — a proper heart, not a ringed dot */
+      ctx.fillStyle=col;
+      ctx.beginPath();
+      ctx.moveTo(pxx, pyy+5);
+      ctx.bezierCurveTo(pxx-8, pyy-1, pxx-7, pyy-8, pxx, pyy-3);
+      ctx.bezierCurveTo(pxx+7, pyy-8, pxx+8, pyy-1, pxx, pyy+5);
+      ctx.fill();
+      /* highlight so it reads against the pit walls */
+      ctx.globalAlpha*=0.7; ctx.fillStyle="#ffb0c8";
+      ctx.beginPath(); ctx.arc(pxx-2.5,pyy-3,1.1,0,6.2832); ctx.fill();
+    } else if(PK.kind==="super"){
+      /* a five-point star with rays that pulse — the rarest drop */
+      ctx.fillStyle=col;
+      ctx.beginPath();
+      var rO=6.6+Math.sin(t*7+pd)*0.6, rI=2.6;
+      for(var sp3=0;sp3<10;sp3++){
+        var ang = -Math.PI/2 + sp3*Math.PI/5, rr2 = (sp3%2)?rI:rO;
+        var xx=pxx+Math.cos(ang)*rr2, yy=pyy+Math.sin(ang)*rr2;
+        if(sp3===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+      }
+      ctx.closePath(); ctx.fill();
+      /* thin rays out from the star */
+      ctx.strokeStyle=col; ctx.lineWidth=1;
+      var glow=(0.5+0.5*Math.sin(t*4+pd));
+      ctx.globalAlpha*=0.4+0.5*glow;
+      for(var rk=0;rk<8;rk++){
+        var a2=rk*Math.PI/4+t*0.4, r1=8, r2=12+glow*4;
+        ctx.beginPath(); ctx.moveTo(pxx+Math.cos(a2)*r1, pyy+Math.sin(a2)*r1);
+        ctx.lineTo(pxx+Math.cos(a2)*r2, pyy+Math.sin(a2)*r2); ctx.stroke();
+      }
     } else {
       ctx.beginPath(); ctx.arc(pxx,pyy,6.5,0,6.2832); ctx.stroke();
       ctx.beginPath(); ctx.arc(pxx,pyy,2.4,0,6.2832); ctx.fillStyle=col; ctx.fill();
@@ -1834,10 +1904,10 @@ function netJoin(i){
       chan.on("broadcast",{event:"dt"},function(m){
         var d=m.payload; if(!d||d.id===myId) return;
         /* monotonic max — no bookkeeping needed, no double-count possible */
-        if(typeof d.deaths==="number" && d.deaths>mateDeaths){
-          mateDeaths=d.deaths; paintLives();
-          if(live && sharedLives()<=0){ finish(false); }
-        }
+        var changed=false;
+        if(typeof d.deaths==="number" && d.deaths>mateDeaths){ mateDeaths=d.deaths; changed=true; }
+        if(typeof d.bonus==="number"  && d.bonus >mateBonus ){ mateBonus =d.bonus;  changed=true; }
+        if(changed){ paintLives(); if(live && sharedLives()<=0){ finish(false); } }
       });
       /* finish handshake — one side finishing announces the level and
          whether they got out. Both mates re-open the lobby at the next
