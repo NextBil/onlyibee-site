@@ -117,6 +117,19 @@ header span{color:var(--dim);font-size:7px}
   font-size:8px;color:#3f5658;letter-spacing:1px;pointer-events:none}
 #hud .a{color:var(--acid)}
 #hlives{color:var(--pink);letter-spacing:2px}
+#lobby{margin:14px auto 0;text-align:center;max-width:420px;border:1px solid #2a4a2f;padding:12px;background:rgba(11,23,25,.4)}
+#lstatus{font-family:var(--px);font-size:9px;letter-spacing:1px;color:#9ac0a3;line-height:1.9;margin-bottom:10px}
+#lstatus .wait{color:#8f7d3f}
+#lstatus .on{color:var(--acid)}
+#lstatus .code{color:#ff5c9d;font-size:11px;letter-spacing:2px}
+#lready{background:#333;border-color:#555;box-shadow:none;color:#888}
+#lready:not(:disabled){background:var(--acid);color:#000;border-color:var(--acid);box-shadow:0 0 14px rgba(182,255,0,.35)}
+#lready.on{background:transparent;color:var(--acid);border-color:var(--acid)}
+#lready.on::before{content:'✓ '}
+#matechip{position:fixed;right:14px;z-index:33;font-family:var(--px);font-size:8px;letter-spacing:1px;background:rgba(0,0,0,.82);border:1px solid #ff5c9d;color:#ff5c9d;padding:6px 8px;pointer-events:none}
+#matechip.top{top:calc(66px + env(safe-area-inset-top))}
+#matechip.bot{bottom:calc(66px + env(safe-area-inset-bottom))}
+.lv.picked{border-color:var(--acid) !important;box-shadow:0 0 12px rgba(182,255,0,.4)}
 #hlives.dim{color:#333}
 #depth{position:fixed;left:50%;transform:translateX(-50%);
   bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;
@@ -163,6 +176,7 @@ header span{color:var(--dim);font-size:7px}
 
 <div id="stage"><canvas id="cv"></canvas></div>
 <div id="hud"><span class="a" id="hlv"></span><span id="hlives">♥♥♥</span><span id="hzone"></span></div>
+<div id="matechip" style="display:none"></div>
 <div id="depth"></div>
 <div id="frag"></div>
 <div id="tap"></div>
@@ -182,6 +196,10 @@ header span{color:var(--dim);font-size:7px}
     <button class="btn alt" id="mkroom">▣ FALL WITH SOMEONE</button>
     <button class="btn ghost" id="wipe">RESET THE PIT</button>
     <a class="btn ghost" href="../">◀ BACK TO THE ROOM</a>
+  </div>
+  <div id="lobby" style="display:none">
+    <div id="lstatus"></div>
+    <button class="btn" id="lready" disabled>READY</button>
   </div>
   <div class="hint">
     one thumb. hold the left side to lean left, the right side to lean right_<br>
@@ -655,8 +673,27 @@ function paintGrid(){
 }
 grid.addEventListener("click",function(e){
   var b=e.target.closest(".lv"); if(!b||b.disabled) return;
-  start(+b.getAttribute("data-i"));
+  var i=+b.getAttribute("data-i");
+  if(roomCode){
+    chosenLevel=i; lobbyReady=false;
+    broadcastLobby(); paintLobby();
+    return;
+  }
+  start(i);
 });
+document.addEventListener("click",function(e){
+  var t=e.target; if(!t||t.id!=="lready"||t.disabled) return;
+  lobbyReady=!lobbyReady; broadcastLobby(); paintLobby();
+  if(lobbyReady && mateReady && chosenLevel>=0 && mateLevel===chosenLevel) start(chosenLevel);
+});
+/* keep a lobby heartbeat going: our one-shot broadcast on SUBSCRIBED gets
+   missed by whoever subscribed a moment later, so re-announce every 3s while
+   sitting on the menu with a room open. Also re-announce on receipt of any
+   mate signal so the handshake completes fast the very first time. */
+setInterval(function(){
+  if(!roomCode) return;
+  if(!live){ paintLobby(); broadcastLobby(); }
+}, 2500);
 document.getElementById("wipe").onclick=function(){
   if(!confirm("empty the pit? every level seals again.")) return;
   save={}; store();
@@ -681,7 +718,7 @@ function start(i){
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
   pts={gates:0,deaths:0,frags:0,coins:0,picks:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
-  lives=LIVES_MAX; paintLives();
+  lives=LIVES_MAX; paintLives(); lobbyReady=false;
   P.vy=0; P.squash=0;
   seedDrift(lv);
   holding=0; holdSide=0; fragT=0; fragIx=0; deepest=0;
@@ -713,6 +750,7 @@ function play(i,tries){
 
 function finish(won){
   live=false; ended=true; netLeave(); saveBest(idx);
+  var mc=document.getElementById("matechip"); if(mc) mc.style.display="none";
   fragEl.classList.remove("on");
   var last=(idx===25);
   var earned=0;
@@ -796,7 +834,7 @@ function postScore(level, depth, cleared, secs, paint){
 }
 document.getElementById("oagain").onclick=function(){ start(idx); };
 document.getElementById("onext").onclick=function(){ start(Math.min(25,idx+1)); };
-document.getElementById("omenu").onclick=function(){ show(menu); };
+document.getElementById("omenu").onclick=function(){ show(menu); if(roomCode){ lobbyReady=false; netJoin(0); paintLobby(); } };
 
 /* =====================================================================
    8. INPUT — the whole screen is the controller
@@ -1409,9 +1447,33 @@ function draw(t){
     var gr=ghosts[gi]; if(!gr||f+1>=gr.length) continue;
     figure(gr[f]/10*SC, gr[f+1]/1000*H, 0.55, "rgba(240,239,232,0.13)", t*3+gi, {vy:SINK*0.6,vx:0,squash:0,bass:0});
   }
+  /* THE OTHER PLAYER — placed on MY screen at their real depth relative
+     to me: ahead of me appears below, behind appears above. Off-screen either
+     way, the #matechip DOM tag shows the metre delta so it still reads as a
+     race. Uses their broadcast songT (pe.st), not just their sy. */
+  var mateOnScreen=false, mateDeltaM=0, mateOffTop=false, anyMate=false;
   for(var id in peers){
-    var pe=peers[id];
-    figure(pe.x*SC, pe.y*H, 0.7, "rgba(255,92,157,0.30)", t*3, {vy:SINK*0.6,vx:0,squash:0,bass:0});
+    var pe=peers[id]; if(pe.lv!==idx) continue;
+    anyMate=true;
+    var dtT=(pe.st||t) - t;
+    var pySy = P.sy + dtT*SCROLL/(H/SC);
+    mateDeltaM = Math.round(dtT*SCROLL);
+    if(pySy>-0.05 && pySy<1.06){
+      mateOnScreen=true;
+      figure(pe.x*SC, pySy*H, 0.7, "rgba(255,92,157,0.85)", t*3, {vy:SINK*0.6,vx:0,squash:0,bass:0});
+      ctx.globalAlpha=0.35; ctx.strokeStyle="#ff5c9d"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(pe.x*SC, pySy*H-3, 12, 0, 6.2832); ctx.stroke();
+      ctx.globalAlpha=1;
+    } else mateOffTop = pySy<0;
+  }
+  var mc=document.getElementById("matechip");
+  if(mc){
+    if(!anyMate) mc.style.display="none";
+    else{
+      mc.style.display="block";
+      mc.className = mateOnScreen ? "top" : (mateOffTop?"top":"bot");
+      mc.textContent = (mateOnScreen ? "" : (mateOffTop?"▲ ":"▼ ")) + "MATE  " + (mateDeltaM>0?"+":"") + mateDeltaM + "m";
+    }
   }
 
   /* ---- the collapse ---- */
@@ -1651,6 +1713,49 @@ function loadSB(cb){
   s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   s.onload=cb; s.onerror=function(){cb();}; document.head.appendChild(s);
 }
+/* ---- LOBBY STATE ---------------------------------------------------
+   Once a room code exists we keep a live channel open so both players see
+   each other on the menu, not just in the pit. Tapping a level marks it as
+   your chosen level; nothing starts until both mates are on the same level
+   with READY pressed. */
+var chosenLevel=-1, lobbyReady=false;
+var mateReady=false, mateLevel=-1, mateSeen=0;
+function mateHere(){ return mateSeen && Date.now()-mateSeen<9000; }
+function broadcastLobby(){
+  if(!chan) return;
+  try{ chan.send({type:"broadcast",event:"lb",payload:{
+    id:myId, ready:!!lobbyReady, level:chosenLevel }}); }catch(e){}
+}
+function paintLobby(){
+  var el=document.getElementById("lobby"); if(!el) return;
+  if(!roomCode){ el.style.display="none"; return; }
+  el.style.display="block";
+  var st=document.getElementById("lstatus"), rb=document.getElementById("lready");
+  var here=mateHere();
+  var lvl = chosenLevel>=0
+    ? ((chosenLevel<9?"0":"")+(chosenLevel+1)+" "+NP2[chosenLevel][1].toUpperCase())
+    : "TAP A LEVEL";
+  var mstate = !here ? "<span class=\"wait\">WAITING FOR MATE</span>"
+             : (mateReady && mateLevel===chosenLevel && chosenLevel>=0)
+               ? "<span class=\"on\">MATE READY</span>"
+             : "<span class=\"on\">MATE IN</span>";
+  st.innerHTML = '<span class="code">ROOM '+roomCode+'</span> · '+mstate+'<br>'+lvl;
+  rb.disabled = !here || chosenLevel<0;
+  rb.classList.toggle("on", lobbyReady);
+  [].forEach.call(grid.querySelectorAll(".lv.picked"), function(b){ b.classList.remove("picked"); });
+  if(chosenLevel>=0){
+    var b=grid.querySelector('.lv[data-i="'+chosenLevel+'"]');
+    if(b) b.classList.add("picked");
+  }
+}
+function onLobby(d){
+  mateReady=!!d.ready; mateLevel=(typeof d.level==="number")?d.level:-1; mateSeen=Date.now();
+  paintLobby();
+  if(!live && lobbyReady && mateReady && chosenLevel>=0 && mateLevel===chosenLevel){
+    start(chosenLevel);
+  }
+}
+
 function netJoin(i){
   netLeave();
   loadSB(function(){
@@ -1662,9 +1767,15 @@ function netJoin(i){
         var d=m.payload; if(!d||d.id===myId) return;
         var q=peers[d.id]=peers[d.id]||{x:d.x,y:d.y};
         q.tx=d.x; q.ty=d.y; q.seen=Date.now();
-        q.alive=!!d.a; q.depth=d.d||0; q.lv=d.l;
+        q.alive=!!d.a; q.depth=d.d||0; q.lv=d.l; q.st=d.st||0;
+        mateSeen=Date.now(); if(!live){ paintLobby(); broadcastLobby(); }
       });
-      chan.subscribe();
+      chan.on("broadcast",{event:"lb"},function(m){
+        var d=m.payload; if(!d||d.id===myId) return; onLobby(d);
+      });
+      chan.subscribe(function(status){
+        if(status==="SUBSCRIBED") broadcastLobby();
+      });
     }catch(e){}
   });
 }
@@ -1674,7 +1785,8 @@ function netTick(){
   if(chan && now-sendAt>110){ sendAt=now;
     try{ chan.send({type:"broadcast",event:"p",payload:{
       id:myId, x:+P.x.toFixed(1), y:+P.sy.toFixed(3),
-      a:(live&&!downed)?1:0, d:Math.round(deepest), l:idx }}); }catch(e){}
+      a:(live&&!downed)?1:0, d:Math.round(deepest), l:idx,
+      st:+songT().toFixed(2) }}); }catch(e){}
   }
   for(var id in peers){ var q=peers[id];
     if(now-q.seen>6000){ delete peers[id]; continue; }
@@ -1688,7 +1800,11 @@ function netTick(){
 function setRoom(c){
   roomCode=(c||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6)||null;
   var b=document.getElementById("mkroom");
-  if(b) b.textContent = roomCode ? ("ROOM "+roomCode+" - SHARE") : "FALL WITH SOMEONE";
+  if(b) b.textContent = roomCode ? ("ROOM "+roomCode+" — SHARE") : "▣ FALL WITH SOMEONE";
+  lobbyReady=false; mateReady=false; mateLevel=-1; mateSeen=0;
+  paintLobby();
+  if(roomCode) netJoin(idx>=0?idx:0);
+  else netLeave();
   if(live && idx>=0) netJoin(idx);
 }
 (function(){
