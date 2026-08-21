@@ -603,7 +603,7 @@ function build(slug, idx){
      be rarer or the game is a video. The array below picks by weight —
      lights and calms are the everyday find, hearts and supers are the
      ones you tell your mate about. */
-  var KIND_W=[22, 16, 14, 10, 6, 4, 12, 6];    /* sums to 90 */
+  var KIND_W=[22, 16, 14, 10, 6, 4, 18, 6];    /* sums to 96 — heart bumped to 18 so early levels actually see one */
   function pickKind(r){
     var w=0, i2; for(i2=0;i2<KIND_W.length;i2++) w+=KIND_W[i2];
     var q=r*w, acc=0;
@@ -617,6 +617,22 @@ function build(slug, idx){
     if(nearG) continue;
     picks.push({t:pt, kind:pickKind(rnd2(seed+pt*3.1)), got:0});
   }
+  /* GUARANTEE at least one HEART every level. The weighted picker can
+     miss on early levels that only earn one or two pickup slots (13%
+     × 1 pick = "you never saw a heart"), which is exactly the report we
+     just got. Plant one if the random didn't. */
+  (function ensureHeart(){
+    for(var hi=0;hi<picks.length;hi++) if(picks[hi].kind==="heart") return;
+    if(picks.length){
+      /* convert the middle pick so nothing near the start / end gets stolen */
+      picks[Math.floor(picks.length/2)].kind="heart";
+      return;
+    }
+    /* no picks at all → find a safe song-time and plant one */
+    var ht=Math.max(14, dur*0.55);
+    for(var g3=0;g3<gates.length;g3++) if(Math.abs(gates[g3].t-ht)<2.4) ht += 3.5;
+    if(ht>0 && ht<dur-6) picks.push({t:ht, kind:"heart", got:0});
+  })();
   var coins=[];
   for(var ct=8; ct<dur-8; ct+=Math.max(1.6, 2.4 - idx*0.03)+rnd2(seed+ct*1.7)*2.4){  /* denser coins */
     var ci=clamp(Math.round(ct/RES),0,steps-1);
@@ -1913,16 +1929,24 @@ function draw(t){
       ctx.fillRect(pxx-0.9,pyy-9,1.8,10);                                /* neck */
       ctx.fillRect(pxx-3,pyy-11,6,1.2);                                  /* head */
     } else if(PK.kind==="heart"){
-      /* two lobes and a point — a proper heart, not a ringed dot */
+      /* larger heart + a soft outer glow ring so it pops off the walls */
+      var beat=0.5+0.5*Math.sin(t*4+pd);
+      /* outer glow — thin ring that pulses with the beat */
+      ctx.save();
+      ctx.globalAlpha=clamp(1-Math.abs(psy-P.sy)*1.15,0.12,1)*(0.35+beat*0.4);
+      ctx.strokeStyle=col; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.arc(pxx,pyy,11+beat*2,0,6.2832); ctx.stroke();
+      ctx.restore();
+      /* the heart itself: slightly bigger, filled with the coin pink */
       ctx.fillStyle=col;
       ctx.beginPath();
-      ctx.moveTo(pxx, pyy+5);
-      ctx.bezierCurveTo(pxx-8, pyy-1, pxx-7, pyy-8, pxx, pyy-3);
-      ctx.bezierCurveTo(pxx+7, pyy-8, pxx+8, pyy-1, pxx, pyy+5);
+      ctx.moveTo(pxx, pyy+7);
+      ctx.bezierCurveTo(pxx-11, pyy-1, pxx-9, pyy-11, pxx, pyy-4);
+      ctx.bezierCurveTo(pxx+9, pyy-11, pxx+11, pyy-1, pxx, pyy+7);
       ctx.fill();
-      /* highlight so it reads against the pit walls */
-      ctx.globalAlpha*=0.7; ctx.fillStyle="#ffb0c8";
-      ctx.beginPath(); ctx.arc(pxx-2.5,pyy-3,1.1,0,6.2832); ctx.fill();
+      /* highlight */
+      ctx.globalAlpha*=0.75; ctx.fillStyle="#ffb0c8";
+      ctx.beginPath(); ctx.arc(pxx-3,pyy-4,1.6,0,6.2832); ctx.fill();
     } else if(PK.kind==="super"){
       /* a five-point star with rays that pulse — the rarest drop */
       ctx.fillStyle=col;
