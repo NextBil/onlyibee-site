@@ -21,7 +21,7 @@
     var body={session_id:sid,event_type:type,page:page||"shell",active_seconds:Math.round(active),metadata:props||{}};
     active=0;
     try{ fetch(SB_URL+"/rest/v1/analytics_events",{method:"POST",keepalive:!!keep,
-      headers:{"apikey":SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(body)}).catch(function(){}); }catch(e){}
+      headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify(body)}).catch(function(){}); }catch(e){}
   }
   function setPage(next){
     next=clean(next); if(!next||next===page)return;
