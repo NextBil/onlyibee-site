@@ -626,6 +626,8 @@
 <script src="assets/player.js?v=29"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
+<!-- anonymous site analytics: page activity, exits and meaningful interactions -->
+<script src="assets/analytics.js?v=2"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
 <script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
@@ -661,6 +663,7 @@
   NAV.forEach(function(it){var b=document.createElement('button');b.textContent=it.n;
     b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
     b.onclick=function(){ var tg=NAV_TGT[it.n];
+      if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('navigation',{destination:it.u});
       if(tg&&window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget(tg);
       /* The CRT boot-in is for ARRIVING at the site, not for moving around it.
          Now that pages have no back buttons, this bar is the only way between
@@ -698,6 +701,7 @@
       : '<button class="login" id="acctbtn" title="Join / log in" aria-label="Join">'+ICO_USER+'</button>';
     /* profile === room now (one concept, 2026-07-13): the pill opens the member's room/profile */
     document.getElementById('acctbtn').onclick=function(){
+      if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('account_open',{destination:on?'room/':'member/'});
       /* opening the profile is what "seeing" the saved pieces means — clear the
          dot here, not on save, or it would never show in the first place */
       if(window.IBEE_CART) window.IBEE_CART.markSeen();
@@ -783,6 +787,15 @@
        opening SHOP from its cartridge looked like a different place than pressing
        SHOP in the header. Re-sync on the frame's own hash changes. */
     try{ frame.contentWindow.addEventListener('hashchange',sync); }catch(e){}
+    /* Framed rooms do not bubble clicks to the shell. Record only the kind of
+       control and its destination — never form values, copied text or URLs with
+       query parameters. This answers which links/buttons actually get used. */
+    try{ frame.contentDocument.addEventListener('click',function(ev){
+      var el=ev.target&&ev.target.closest&&ev.target.closest('a,button'); if(!el) return;
+      var dest=''; try{ if(el.href) dest=new URL(el.href,location.href).pathname.replace(/^\//,''); }catch(e){}
+      var label=(el.getAttribute('data-analytics')||el.id||el.tagName||'control').slice(0,60);
+      if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('interaction',{control:label.toLowerCase(),destination:dest});
+    }); }catch(e){}
   });
 
   var lastRel=null;
@@ -810,6 +823,7 @@
       try{ if(frame.contentWindow.IBEE_NAV) frame.contentWindow.IBEE_NAV.refresh(); }catch(e){}
       if(frame.contentDocument&&frame.contentDocument.title) document.title=frame.contentDocument.title;
       var path=l.pathname.replace(/^\//,''), hash=l.hash;
+      if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.page(path+(hash||''));
       document.querySelectorAll('#nav button').forEach(function(b,i){
         var u=new URL(NAV[i].u, location.href);
         b.classList.toggle('on', u.pathname.replace(/^\//,'')===path && (!u.hash||u.hash===hash));
