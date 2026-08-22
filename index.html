@@ -788,13 +788,20 @@
        SHOP in the header. Re-sync on the frame's own hash changes. */
     try{ frame.contentWindow.addEventListener('hashchange',sync); }catch(e){}
     /* Framed rooms do not bubble clicks to the shell. Record only the kind of
-       control and its destination — never form values, copied text or URLs with
-       query parameters. This answers which links/buttons actually get used. */
+       control and its destination. The one approved query exception is a public
+       product ID, so the owner can see which products get opened; pass codes and
+       every other query value are deliberately excluded. */
     try{ frame.contentDocument.addEventListener('click',function(ev){
       var el=ev.target&&ev.target.closest&&ev.target.closest('a,button'); if(!el) return;
-      var dest=''; try{ if(el.href) dest=new URL(el.href,location.href).pathname.replace(/^\//,''); }catch(e){}
+      var dest='', product=''; try{ if(el.href){ var clickUrl=new URL(el.href,location.href);
+        dest=clickUrl.pathname.replace(/^\//,'');
+        if(/(^|\/)product-page\/?$/.test(clickUrl.pathname)) product=(clickUrl.searchParams.get('id')||'').slice(0,80);
+      }}catch(e){}
       var label=(el.getAttribute('data-analytics')||el.id||el.tagName||'control').slice(0,60);
-      if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('interaction',{control:label.toLowerCase(),destination:dest});
+      if(window.IBEE_ANALYTICS){
+        if(product) window.IBEE_ANALYTICS.event('product_click',{product_id:product,destination:dest});
+        else window.IBEE_ANALYTICS.event('interaction',{control:label.toLowerCase(),destination:dest});
+      }
     }); }catch(e){}
   });
 
