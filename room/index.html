@@ -181,6 +181,9 @@ main{flex:1;width:100%;max-width:680px;padding:18px 14px 90px;display:flex;flex-
 .idband .logout{font-family:var(--px);font-size:7px;color:var(--dim);cursor:pointer;text-decoration:none;
   border:1px solid var(--border);padding:8px 9px;align-self:flex-start;white-space:nowrap}
 .idband .logout:hover{color:var(--red);border-color:#3a1414}
+.idband .analytics{font-family:var(--px);font-size:7px;color:var(--acid);text-decoration:none;
+  border:1px solid rgba(232,220,18,.45);padding:8px 9px;align-self:flex-start;white-space:nowrap}
+.idband .analytics:hover{background:var(--acid);color:#050505}
 .avpick{width:100%;border:1px solid var(--border);background:rgba(14,14,14,.92);padding:12px;
   display:none;flex-wrap:wrap;gap:9px;justify-content:center}
 .avpick.open{display:flex}
@@ -211,13 +214,15 @@ footer a:hover{color:var(--acid)}
    Red-edged and last on the page so it never reads as an ordinary control. The
    confirm step asks the member to TYPE their own nickname: a second button is
    one mis-tap away from erasing an account, a typed word is not. */
-.box.danger{border-color:#3a1414;margin-top:26px}
+.box.danger{border-color:#3a1414;margin-top:18px;padding:10px 12px}
 .box.danger .h{color:var(--red)}
-.dnote{font-size:16px;color:var(--dim);line-height:1.45;margin-bottom:9px}
+.box.danger .h{font-size:8px;margin-bottom:6px}
+.dnote{font-size:14px;color:var(--dim);line-height:1.35;margin:0 0 8px}
 .dnote strong{color:var(--ink);font-weight:normal}
-.dnote.dim{font-size:15px;color:#5e5e5e}
+.dnote.dim{font-size:13px;color:#5e5e5e}
 .dnote a{color:var(--dim)}
-.dbtn{font-family:var(--px);font-size:8px;letter-spacing:1px;padding:11px 13px;cursor:pointer;
+.dmore{margin:0 0 8px;color:#5e5e5e;font-size:13px;line-height:1.35}.dmore summary{cursor:pointer;color:#777;font-family:var(--px);font-size:7px}.dmore p{margin:7px 0 0}
+.dbtn{font-family:var(--px);font-size:7px;letter-spacing:1px;padding:9px 10px;cursor:pointer;
   background:transparent;color:#8a5252;border:1px solid #3a1414}
 .dbtn:hover{color:var(--red);border-color:var(--red)}
 .dbtn.go{background:var(--red);color:#000;border-color:var(--red)}
@@ -255,6 +260,7 @@ footer a:hover{color:var(--acid)}
       <div class="em" id="idem"></div>
       <div class="since" id="idsince"></div>
     </div>
+    <a class="analytics" id="analytics" href="../member/analytics/" style="display:none">ANALYTICS</a>
     <a class="logout" id="logout" href="#">LOG OUT</a>
   </div>
   <div class="avpick crtin" id="avpick"></div>
@@ -300,8 +306,8 @@ footer a:hover{color:var(--acid)}
        confused, and only one of them is reversible. Own profile only. -->
   <div class="box crtin danger" id="dangerbox" style="display:none">
     <div class="h">// LEAVE_</div>
-    <p class="dnote">Deleting your profile removes your account, your codename, your annex, your saved pieces, your badges and your listening history. Your nickname goes back in the pool. <strong>This cannot be undone.</strong></p>
-    <p class="dnote dim">Orders you've placed are kept — French law requires sales records to be held for 10 years. Everything else goes immediately. See the <a href="/legal/privacy/">privacy notice</a>.</p>
+    <p class="dnote">Remove your account and annex. <strong>This cannot be undone.</strong></p>
+    <details class="dmore"><summary>WHAT WILL BE REMOVED?</summary><p>Your codename, saved pieces, badges and listening history go immediately. Orders stay for the legally required 10 years. See the <a href="/legal/privacy/">privacy notice</a>.</p></details>
     <button class="dbtn" id="delbtn">DELETE MY PROFILE</button>
     <div class="dconfirm" id="dconfirm" style="display:none">
       <p class="dnote">Type <strong id="dword">—</strong> to confirm.</p>
@@ -1004,6 +1010,9 @@ footer a:hover{color:var(--acid)}
     var since=prof.since?new Date(prof.since).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}):"";
     $("idsince").textContent="codename "+codename+(since?" · since "+since:"");
     $("idband").style.display=""; avPaint();
+    /* Owner tools belong only to the signed-in member's own room — visitors
+       never see a route to the private analytics dashboard. */
+    $("analytics").style.display=ISMINE?"":"none";
     $("logout").onclick=function(ev){ ev.preventDefault(); if(sb)sb.auth.signOut().then(function(){location.reload();}); };
     wireDelete(prof);
   }
