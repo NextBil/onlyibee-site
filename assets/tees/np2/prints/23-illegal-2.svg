@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOUVEAUX PUNK 2 — THE 26 · ILLEGAL 2
+     Stencil, taped off. The 2 is the record's, not the track's.
+     Ink #ff1f6f on the #f2f0f1 (white) blank. Vector, transparent ground,
+     drawn 100x100 and scaled to 3000x3000 so it goes to DTF film at
+     any size with no resampling.
+     !! CONTAINS LIVE TEXT. Convert type to outlines before sending to
+        the printer, or the shop may substitute a different face. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" viewBox="0 0 100 100">
+  <title>NOUVEAUX PUNK 2 — ILLEGAL 2</title>
+  <g><rect x="6" y="24" width="88" height="52" fill="none" stroke="#ff1f6f" stroke-width="3"/><rect x="12" y="21" width="9" height="6" fill="#fff"/><rect x="28" y="21" width="9" height="6" fill="#fff"/><rect x="44" y="21" width="9" height="6" fill="#fff"/><rect x="60" y="21" width="9" height="6" fill="#fff"/><rect x="76" y="21" width="9" height="6" fill="#fff"/><rect x="92" y="21" width="9" height="6" fill="#fff"/><rect x="12" y="73" width="9" height="6" fill="#fff"/><rect x="28" y="73" width="9" height="6" fill="#fff"/><rect x="44" y="73" width="9" height="6" fill="#fff"/><rect x="60" y="73" width="9" height="6" fill="#fff"/><rect x="76" y="73" width="9" height="6" fill="#fff"/><rect x="92" y="73" width="9" height="6" fill="#fff"/><text x="50.5" y="52" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="15" letter-spacing="1" fill="#ff1f6f">ILLEGAL</text><text x="50" y="68" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="13" letter-spacing="0" fill="#0b1719">2</text></g>
+</svg>

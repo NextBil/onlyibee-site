@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOUVEAUX PUNK 2 — THE 26 · DA SHIT
+     Slab type, dripping. Read it from across the room.
+     Ink #e8dc12 on the #bd2c29 (red) blank. Vector, transparent ground,
+     drawn 100x100 and scaled to 3000x3000 so it goes to DTF film at
+     any size with no resampling.
+     !! CONTAINS LIVE TEXT. Convert type to outlines before sending to
+        the printer, or the shop may substitute a different face. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" viewBox="0 0 100 100">
+  <title>NOUVEAUX PUNK 2 — DA SHIT</title>
+  <g><rect x="6" y="30" width="88" height="30" fill="#e8dc12"/><rect x="12" y="60" width="4.6" height="12.84" fill="#e8dc12"/><circle cx="14.3" cy="72.84" r="2.3" fill="#e8dc12"/><rect x="24" y="60" width="4.6" height="16.03" fill="#e8dc12"/><circle cx="26.3" cy="76.03" r="2.3" fill="#e8dc12"/><rect x="36" y="60" width="4.6" height="15.788" fill="#e8dc12"/><circle cx="38.3" cy="75.788" r="2.3" fill="#e8dc12"/><rect x="48" y="60" width="4.6" height="9.826" fill="#e8dc12"/><circle cx="50.3" cy="69.826" r="2.3" fill="#e8dc12"/><rect x="60" y="60" width="4.6" height="22.432" fill="#e8dc12"/><circle cx="62.3" cy="82.432" r="2.3" fill="#e8dc12"/><rect x="72" y="60" width="4.6" height="22.454" fill="#e8dc12"/><circle cx="74.3" cy="82.454" r="2.3" fill="#e8dc12"/><rect x="84" y="60" width="4.6" height="12.532" fill="#e8dc12"/><circle cx="86.3" cy="72.532" r="2.3" fill="#e8dc12"/><text x="50.25" y="53" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="19" letter-spacing="0.5" fill="#7a0f0d">DA SHIT</text><rect x="6" y="30" width="88" height="4" fill="#fff" opacity=".45"/><text x="51.6" y="90" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5" letter-spacing="3.2" fill="#e8dc12">NOUVEAUX PUNK 2</text></g>
+</svg>

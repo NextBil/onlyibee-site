@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOUVEAUX PUNK 2 — THE 26 · U MINE
+     The heart the pit drops when it decides to keep you alive.
+     Ink #ff1f6f on the #c2c1a6 (sage) blank. Vector, transparent ground,
+     drawn 100x100 and scaled to 3000x3000 so it goes to DTF film at
+     any size with no resampling.
+     !! CONTAINS LIVE TEXT. Convert type to outlines before sending to
+        the printer, or the shop may substitute a different face. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" viewBox="0 0 100 100">
+  <title>NOUVEAUX PUNK 2 — U MINE</title>
+  <g><circle cx="50" cy="50" r="34" fill="none" stroke="#ff1f6f" stroke-width="1.4" opacity=".55"/><circle cx="50" cy="50" r="40" fill="none" stroke="#ff1f6f" stroke-width="0.9" opacity=".3"/><path transform="translate(50 49) scale(0.54) translate(-50 -50)" d="M50 88C24 68 10 54 10 36 10 24 20 14 32 14c8 0 14 4 18 10 4-6 10-10 18-10 12 0 22 10 22 22 0 18-14 32-40 52z" fill="#ff1f6f"/><path d="M34 36c4-4 9-5 13-3" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".7"/><text x="52.1" y="92" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="7.4" letter-spacing="4.2" fill="#0b1719">U MINE</text></g>
+</svg>

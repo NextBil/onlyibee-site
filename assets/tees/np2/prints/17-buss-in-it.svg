@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOUVEAUX PUNK 2 capsule - THE BAT
+     Print artwork, vector, transparent ground.
+     Ink #ff1f6f on a #0b1719 (black) blank.
+     Drawn 100x100 and scaled to 3000x3000, so it goes to DTF film at any
+     size with no resampling. Identical paths to the site mockup.
+     Paths only - no fonts to go wrong at the printer. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" viewBox="0 0 100 100">
+  <title>NOUVEAUX PUNK 2 - THE BAT</title>
+  <g><g transform="translate(0 30) scale(0.8333)"><polygon fill="#ff1f6f" points="2,4 16,18 26,10 36,20 46,10 54,18 56,2 60,12 64,2 66,18 74,10 84,20 94,10 104,18 118,4 112,28 100,24 92,34 82,26 72,34 64,28 60,40 56,28 48,34 38,26 28,34 20,24 8,28"/></g><rect x="0" y="76" width="100" height="4" fill="#ff84b0" opacity=".85"/></g>
+</svg>

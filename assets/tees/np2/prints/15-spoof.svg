@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOUVEAUX PUNK 2 capsule - ADVISORY
+     Print artwork, vector, transparent ground.
+     Ink #0b1719 on a #efece4 (bone) blank.
+     Drawn 100x100 and scaled to 3000x3000, so it goes to DTF film at any
+     size with no resampling. Identical paths to the site mockup.
+     !! CONTAINS LIVE TEXT (Helvetica/Arial/Courier). Convert type to
+        outlines in Illustrator/Affinity before sending to the printer, or
+        the shop may substitute a different face. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" viewBox="0 0 100 100">
+  <title>NOUVEAUX PUNK 2 - ADVISORY</title>
+  <g><rect x="8" y="26" width="84" height="48" fill="#0b1719"/><rect x="12" y="30" width="76" height="40" fill="none" stroke="#fff" stroke-width="1.6"/><text x="50" y="41.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="7" letter-spacing="1.9" fill="#fff">PARENTAL</text><text x="50" y="57" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="14.5" letter-spacing="-0.2" fill="#fff">ADVISORY</text><text x="50" y="66.5" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5.2" letter-spacing="0.9" fill="#fff">NOUVEAUX PUNK 2</text></g>
+</svg>

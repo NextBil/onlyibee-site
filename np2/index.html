@@ -235,8 +235,8 @@ body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,1
 /* …and on a heavy hit the whole console tears sideways for one frame */
 .feed.hit .win>img,.feed.hit .win>video{transform:translateX(3px) scaleX(1.012)}
 
-/* ---------- the surprises: the 15 T-SHIRTS ----------
-   Rendered live from assets/products-data.js (folder "15-tshirts") so the
+/* ---------- the surprises: the 26 T-SHIRTS ----------
+   Rendered live from assets/products-data.js (folder "np2-26") so the
    room can never drift from the shop — prices, rarities, claimed state and
    the drop's own status all come from the one catalogue file. */
 .teestrip{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--pink);
@@ -557,17 +557,17 @@ body.neon #roomtag.gone{opacity:0}
     <div class="card" id="tracks"></div>
   </div>
 
-  <!-- surprises — the 15 T-SHIRTS, straight from the shop catalogue -->
+  <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
   <div class="sec">
     <div class="sh">THE <span class="a">SURPRISES</span>_</div>
-    <div class="ssub" id="teesub">the 15 t-shirts — one of one, made to order_</div>
+    <div class="ssub" id="teesub">twenty-six shirts, one per track — one of one, made to order_</div>
     <div id="teestate"></div>
     <div class="tees" id="tees"></div>
   </div>
 
   <div class="actions">
     <a class="btn" href="../console.html#music">▶ OPEN THE UNIVERSE</a>
-    <a class="btn alt" href="../drop/">▣ THE 15 T-SHIRTS</a>
+    <a class="btn alt" href="../drop/">▣ THE 26 T-SHIRTS</a>
     <a class="btn alt" href="../nouveauxpunk/">◀ CHAPTER ONE</a>
   </div>
 </main>
@@ -637,8 +637,10 @@ body.neon #roomtag.gone{opacity:0}
   });
   tr.innerHTML=html;
 
-  /* ---------- the surprises: the 15 T-SHIRTS ----------
-     The drop is the shop's own "15-tshirts" folder. Reading products-data.js
+  /* ---------- the surprises: the 26 T-SHIRTS ----------
+     The drop is the shop's own "np2-26" folder — one shirt per track on the
+     record, which is why the count matches the tracklist above it. Reading
+     products-data.js
      rather than restating it here means a price change, a claimed piece or the
      drop opening all land on this page with no edit — the same contract the
      shop screen and the drop page work under. If the file never arrives the
@@ -654,13 +656,13 @@ body.neon #roomtag.gone{opacity:0}
     var P=window.IBEE_PRODUCTS;
     if(!P||!P.products){
       if(tries<40){ setTimeout(function(){ buildTees(tries+1); },200); return; }
-      teeSub.textContent="the 15 t-shirts — open the drop to see them_";
+      teeSub.textContent="the 26 t-shirts — open the drop to see them_";
       return;
     }
-    var folder=(P.folders||[]).filter(function(f){ return f.id==="15-tshirts"; })[0]||{};
-    var items=P.products.filter(function(p){ return p.folder==="15-tshirts"; })
+    var folder=(P.folders||[]).filter(function(f){ return f.id==="np2-26"; })[0]||{};
+    var items=P.products.filter(function(p){ return p.folder==="np2-26"; })
                         .sort(function(a,b){ return String(a.no||"").localeCompare(String(b.no||"")); });
-    if(!items.length){ teeSub.textContent="the 15 t-shirts — open the drop to see them_"; return; }
+    if(!items.length){ teeSub.textContent="the 26 t-shirts — open the drop to see them_"; return; }
 
     if(folder.sub) teeSub.textContent=folder.sub.toLowerCase()+" — tap a piece_";
     var st={live:"\u25a3 THE FOLDER IS OPEN",soon:"\u25a3 OPENS SOON",closed:"\u25a3 CLOSED FOR NOW"}[folder.state];
@@ -668,10 +670,15 @@ body.neon #roomtag.gone{opacity:0}
 
     teesEl.innerHTML=items.map(function(p){
       var rar=p.r||"c", taken=!!(p.owner||p.out);
+      /* 26 tiles at 148px. Safari decodes at NATURAL size, so these read the
+         400px sibling under mockups/thumb/ and only fall back to the full
+         mockup if it is missing. */
       var shot=(p.imgs&&p.imgs[0])||"";
+      var th=shot.replace(/\/mockups\/([^\/]+)$/,"/mockups/thumb/$1");
       return '<a class="tee'+(taken?" taken":"")+'" style="--rar:'+RCOL[rar]+'" '
         +'href="../product-page/?id='+encodeURIComponent(p.id)+'">'
-        +(shot?'<img class="shot" src="'+esc(shot)+'" alt="'+esc(p.n)+'" loading="lazy">'
+        +(shot?'<img class="shot" src="'+esc(th)+'" alt="'+esc(p.n)+'" loading="lazy" decoding="async"'
+              +' onerror="if(this.src.indexOf(\'/thumb/\')>-1)this.src=\''+esc(shot)+'\'">'
               :'<span class="shot"></span>')
         +'<span class="no">'+esc(p.no||"")+' / '+items.length+'</span>'
         +'<span class="rt">'+esc(RNAME[rar]||"COMMON")+'</span>'

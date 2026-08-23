@@ -1214,7 +1214,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       var PEEK=4, SNIP=4, html="";
       FOLDERS.forEach(function(fd){
         var items=SHOP.filter(function(it){ return (it.folder||defId)===fd.id; });
-        /* a drop can own a bespoke page (folder.page) — the 15 T-SHIRTS vault is a
+        /* a drop can own a bespoke page (folder.page) — the 26 T-SHIRTS vault is a
            display, not a list, so it does not use the generic shop/?f= grid */
         var href=fd.page?fd.page:("shop/?f="+encodeURIComponent(fd.id));
         if(fd.hype||!items.length){

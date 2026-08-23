@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOUVEAUX PUNK 2 — THE 26 · LET GO
+     The faller, head-down, arms open. Nothing is holding on.
+     Ink #e8dc12 on the #0b1719 (black) blank. Vector, transparent ground,
+     drawn 100x100 and scaled to 3000x3000 so it goes to DTF film at
+     any size with no resampling.
+     !! CONTAINS LIVE TEXT. Convert type to outlines before sending to
+        the printer, or the shop may substitute a different face. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" viewBox="0 0 100 100">
+  <title>NOUVEAUX PUNK 2 — LET GO</title>
+  <g><polygon points="43.52,68.6 56.48,68.6 55.28,37.4 44.72,37.4" fill="#e8dc12"/><rect x="47.96" y="68.6" width="4.08" height="6" fill="#e8dc12"/><circle cx="50" cy="80.6" r="6.24" fill="#e8dc12"/><polyline points="44.24,66.2 33.2,58.7987 27.2,47.5436" fill="none" stroke="#e8dc12" stroke-width="3.84" stroke-linecap="round" stroke-linejoin="round"/><polyline points="45.44,38.6 36.8,28.2536 41.333,16.667" fill="none" stroke="#ff1f6f" stroke-width="4.32" stroke-linecap="round" stroke-linejoin="round"/><polyline points="55.76,66.2 66.8,58.0013 72.8,46.4564" fill="none" stroke="#e8dc12" stroke-width="3.84" stroke-linecap="round" stroke-linejoin="round"/><polyline points="54.56,38.6 63.2,24.9464 58.667,12.533" fill="none" stroke="#ff1f6f" stroke-width="4.32" stroke-linecap="round" stroke-linejoin="round"/><text x="52.5" y="95" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="7" letter-spacing="5" fill="#ff1f6f">LET GO</text></g>
+</svg>

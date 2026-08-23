@@ -18,11 +18,11 @@ window.IBEE_PRODUCTS={
  },
  "folders": [
   {
-   "id": "15-tshirts",
-   "name": "15 T-SHIRTS",
-   "sub": "PARIS 2026 · ONE OF ONE · MADE TO ORDER",
+   "id": "np2-26",
+   "name": "26 T-SHIRTS",
+   "sub": "NOUVEAUX PUNK 2 · ONE PER TRACK · ONE OF ONE",
    "tint": "sdr",
-   "hype": 0,
+   "hype": 1,
    "state": "soon",
    "page": "drop/",
    "made": "print"
@@ -47,39 +47,21 @@ window.IBEE_PRODUCTS={
  ],
  "products": [
   {
-   "id": "tee-mimi",
-   "folder": "15-tshirts",
-   "n": "MIMI",
+   "id": "tee-np2-all-i-need",
+   "folder": "np2-26",
+   "n": "ALL I NEED",
    "no": "01",
    "one": 1,
    "price": 60,
-   "cur": "€",
-   "r": "sdr",
-   "out": 0,
-   "owner": null,
-   "acquired": null,
-   "desc": "Mimi. The tower of the set — she was on paper before anything else in ICS existed.\n\nMADE BY HAND_ pen sketch, inked in Photoshop, printed to DTF film and pressed onto the blank by hand. One shirt, one pass, no ganging it up with anything else. The ONLYIBEE mark is embroidered, not printed. The ICS monster patch goes on last, stitched by hand.\n\nPRINTED ONCE_ VAULT 01/15 — PARIS 2026. This design gets printed a single time and then retired. No second run. No restock. Not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nAUTHENTICATION_ the NFC chip lives inside the monster patch. Tap your phone on it: it verifies the piece is real, shows 01/15 and its rarity, and opens its page on onlyibee.com with your name on it.",
-   "imgs": ["/assets/tees/mockups/mimi.jpg"],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-nannan",
-   "folder": "15-tshirts",
-   "n": "NAN-NAN — CHEF EN BAOULE",
-   "no": "02",
-   "one": 1,
-   "price": 75,
    "cur": "€",
    "r": "leg",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "NAN-NAN, the King. A king with trust issues — he been thru a lot and would rather not speak on it.\n\nMADE BY HAND_ drawn in pen, inked and coloured in Photoshop, pressed onto the blank by hand from DTF film. The crown highlights are painted on after the press, so the gold sits on top of the print instead of inside it. Embroidered ONLYIBEE mark. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 02/15 — PARIS 2026. Legendary tier. One print, then the file is retired. No second run, no restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. The King doesn't exist as a shirt until someone claims him. 7–14 days from claim to the post office.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: real or not real, 02/15, rarity and power level, and a link straight to this page on onlyibee.com carrying your name.",
-   "imgs": ["/assets/tees/mockups/nannan.jpg"],
+   "desc": "The Goli mask, red and gold, printed big and left alone. It is the face this whole thing started behind.\n\nPRESSED ONCE_ 01/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is ALL I NEED. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, natural. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 01/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/01-all-i-need.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -87,19 +69,65 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-coeur-dollar",
-   "folder": "15-tshirts",
-   "n": "CŒUR / DOLLAR",
+   "id": "tee-np2-okay",
+   "folder": "np2-26",
+   "n": "OKAY",
+   "no": "02",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "c",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The record's shrug, set in the sleeve's logotype and left to run down the chest.\n\nPRESSED ONCE_ 02/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is OKAY. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 02/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/02-okay.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-money-upp",
+   "folder": "np2-26",
+   "n": "MONEY UPP",
    "no": "03",
    "one": 1,
-   "price": 55,
+   "price": 60,
+   "cur": "€",
+   "r": "c",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "Five bars and an arrow. The only graph on the record that goes up.\n\nPRESSED ONCE_ 03/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is MONEY UPP. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, clay. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 03/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/03-money-upp.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-drop-it",
+   "folder": "np2-26",
+   "n": "DROP IT",
+   "no": "04",
+   "one": 1,
+   "price": 60,
    "cur": "€",
    "r": "sr",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "A cracked heart held together with a dollar bill. Small chest print, loud idea.\n\nMADE BY HAND_ inked in Photoshop, printed to DTF and hand-pressed small and high on the chest — the placement is set by eye, not by a jig. The crack is painted in by hand after the press, so no two strokes of it exist anywhere else. Monster patch stitched on.\n\nPRINTED ONCE_ VAULT 03/15 — PARIS 2026. Printed a single time, then retired. There is no restock and there will not be one.\n\nMADE TO ORDER_ commissioned, not shipped from stock. It gets made after you claim it: 7–14 days on the table, then it ships from Paris.\n\nAUTHENTICATION_ NFC chip in the patch. Tap your phone on it to verify the piece, pull up 03/15 and its rarity, and land on its page on onlyibee.com.",
-   "imgs": ["/assets/tees/mockups/coeur-dollar.jpg"],
+   "desc": "The dripping logotype off the sleeve, isolated to a bar and seven runs. Paths only — nothing to go wrong at the printer.\n\nPRESSED ONCE_ 04/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is DROP IT. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, natural. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 04/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/04-drop-it.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -107,39 +135,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-abla",
-   "folder": "15-tshirts",
-   "n": "ABLA — REINE EN BAOULE",
-   "no": "04",
-   "one": 1,
-   "price": 75,
-   "cur": "€",
-   "r": "leg",
-   "out": 0,
-   "owner": null,
-   "acquired": null,
-   "desc": "ABLA, the Queen. She represents the mothers and fertility — wise, very caring, big attitude.\n\nMADE BY HAND_ pen sketch, inked in Photoshop, hand-pressed from DTF film onto one blank. Her jewellery is picked out in paint by hand after the press. The ONLYIBEE mark is embroidered. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 04/15 — PARIS 2026. Legendary tier. One print of this design, ever, then it's retired out of the vault. No restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. She's made for the person who claims her — 7–14 days, then out of Paris.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, shows 04/15, rarity and power level, opens this page on onlyibee.com with your name on it.",
-   "imgs": ["/assets/tees/mockups/abla.jpg"],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-np-rouge",
-   "folder": "15-tshirts",
-   "n": "NOUVEAUX PUNK — ROUGE",
+   "id": "tee-np2-pikatchuu",
+   "folder": "np2-26",
+   "n": "PIKATCHUU",
    "no": "05",
    "one": 1,
-   "price": 65,
+   "price": 60,
    "cur": "€",
-   "r": "sdr",
+   "r": "c",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "NOUVEAUX PUNK — the bats and the manifesto, yellow on red. Punk ça veut dire voyou en anglais.\n\nMADE BY HAND_ inked in Photoshop, printed to DTF and pressed by hand across the full front. The bats get hand-painted edges after the press so they bleed off the print the way they do on the cover. Embroidered ONLYIBEE mark, monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 05/15 — PARIS 2026. Printed once, retired once claimed. No second run, no restock, no reprint in another colourway.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Press, paint, needle — all of it happens after the claim. 7–14 days.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone: it verifies the piece, shows 05/15 and its rarity, and opens the NOUVEAUX PUNK page on onlyibee.com.",
-   "imgs": ["/assets/tees/mockups/nouveaux-punk-rouge.jpg"],
+   "desc": "The bolt, doubled: acid over pink, offset so it looks like it moved while you were reading it.\n\nPRESSED ONCE_ 05/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is PIKATCHUU. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 05/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/05-pikatchuu.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -147,9 +157,9 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-onlyibee-engine",
-   "folder": "15-tshirts",
-   "n": "ONLYIBEE — ENGINE",
+   "id": "tee-np2-write-a-song",
+   "folder": "np2-26",
+   "n": "WRITE A SONG",
    "no": "06",
    "one": 1,
    "price": 60,
@@ -158,8 +168,10 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "The wordmark taken straight off the site — ONLY in acid, IBEE in red. Engine for art and discovery.\n\nMADE BY HAND_ the mark is embroidered directly onto the chest, thread over fabric, not pressed. The engine block underneath it is DTF, applied by hand in a second pass and lined up against the stitching by eye. Monster patch sewn on last.\n\nPRINTED ONCE_ VAULT 06/15 — PARIS 2026. One make of this design, then it's out of the vault for good. No restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Embroidery gets set up per shirt — 7–14 days from claim to shipment.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: proof the piece is real, 06/15, rarity, and a direct line back to onlyibee.com.",
-   "imgs": ["/assets/tees/mockups/onlyibee-engine.jpg"],
+   "desc": "The ONLYIBEE pixel mark, full width, with ENGINE FOR ART AND DISCOVERY set under the rule.\n\nPRESSED ONCE_ 06/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is WRITE A SONG. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, white. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 06/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/06-write-a-song.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -167,9 +179,9 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-utopie-pluie",
-   "folder": "15-tshirts",
-   "n": "UTOPIE — LA PLUIE",
+   "id": "tee-np2-u-mine",
+   "folder": "np2-26",
+   "n": "U MINE",
    "no": "07",
    "one": 1,
    "price": 60,
@@ -178,8 +190,10 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "UTOPIE — the pixel umbrella with the rain coming down through it. One red drop in the whole storm.\n\nMADE BY HAND_ inked in Photoshop, printed to DTF and hand-pressed. The single red drop is painted on by hand after the press — one drop, one shirt, done with a brush. Embroidered ONLYIBEE mark. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 07/15 — PARIS 2026. Printed a single time and retired. No restock, ever.\n\nMADE TO ORDER_ commissioned, not shipped from stock. The storm doesn't exist on fabric until you claim it. 7–14 days, then it ships from Paris.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone on it to verify the piece, see 07/15 and its rarity, and open its page on onlyibee.com under your name.",
-   "imgs": ["/assets/tees/mockups/utopie-pluie.jpg"],
+   "desc": "The heart THE FALL drops when the pit decides to keep you alive, printed at chest size inside its own two rings.\n\nPRESSED ONCE_ 07/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is U MINE. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, sage. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 07/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/07-u-mine.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -187,10 +201,32 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-utopie-pt",
-   "folder": "15-tshirts",
-   "n": "UTOPIE — PARIS/TORONTO",
+   "id": "tee-np2-let-go",
+   "folder": "np2-26",
+   "n": "LET GO",
    "no": "08",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sdr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The faller out of THE FALL — head-down, arms swept back, knees broken outward. Nothing is holding on.\n\nPRESSED ONCE_ 08/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is LET GO. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 08/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/08-let-go.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-between-the-lines",
+   "folder": "np2-26",
+   "n": "BETWEEN THE LINES",
+   "no": "09",
    "one": 1,
    "price": 60,
    "cur": "€",
@@ -198,8 +234,10 @@ window.IBEE_PRODUCTS={
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "UTOPIE — the lockup. Umbrella, wordmark, two cities, and the promise underneath: each piece made once.\n\nMADE BY HAND_ hand-pressed DTF across the chest, then PARIS and TORONTO embroidered underneath it in thread so the two cities sit raised off the print. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 08/15 — PARIS 2026. Printed one time, then retired. No second run and no restock — the shirt says it, so it has to be true.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Press first, embroidery after, both after you claim it. 7–14 days.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece is real, shows 08/15 and its rarity, and opens this page on onlyibee.com with your name on it.",
-   "imgs": ["/assets/tees/mockups/utopie-paris-toronto.jpg"],
+   "desc": "Two pit walls closing to a gap, and something small going through it.\n\nPRESSED ONCE_ 09/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is BETWEEN THE LINES. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, white. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 09/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/09-between-the-lines.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -207,59 +245,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-goli",
-   "folder": "15-tshirts",
-   "n": "GOLI",
-   "no": "09",
-   "one": 1,
-   "price": 65,
-   "cur": "€",
-   "r": "sdr",
-   "out": 0,
-   "owner": null,
-   "acquired": null,
-   "desc": "GOLI in full. This guy does bare stuff we can't understand — just don't wake him up at night.\n\nMADE BY HAND_ pen sketch, inked in Photoshop, hand-pressed from DTF onto one blank. The mask is gone over with paint after the press so the face carries texture the file doesn't have. Embroidered ONLYIBEE mark, monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 09/15 — PARIS 2026. One print, then retired. No restock, no reissue.\n\nMADE TO ORDER_ commissioned, not shipped from stock. He gets made after the claim — 7–14 days on the table, then out of Paris.\n\nAUTHENTICATION_ NFC chip in the patch. Tap your phone: real-or-fake, 09/15, rarity and power level, straight through to onlyibee.com.",
-   "imgs": ["/assets/tees/mockups/goli.jpg"],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-goli-masque",
-   "folder": "15-tshirts",
-   "n": "GOLI — LE MASQUE",
+   "id": "tee-np2-satisfied",
+   "folder": "np2-26",
+   "n": "SATISFIED",
    "no": "10",
    "one": 1,
-   "price": 65,
-   "cur": "€",
-   "r": "sdr",
-   "out": 0,
-   "owner": null,
-   "acquired": null,
-   "desc": "GOLI — the mask alone, blown up big. The Baoulé face that started the whole crew.\n\nMADE BY HAND_ hand-pressed DTF, oversized on the front, aligned by eye — at this size there's no hiding a crooked pass. The mask lines are picked out in paint afterwards by hand. Embroidered ONLYIBEE mark. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 10/15 — PARIS 2026. Printed once, retired once claimed. No second run.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is pre-made. 7–14 days from your claim to the shipment.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, shows 10/15 and its rarity, opens the mask's page on onlyibee.com with your name on it.",
-   "imgs": ["/assets/tees/mockups/goli-masque.jpg"],
-   "pay": {
-    "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "tee-utopie-dreamland",
-   "folder": "15-tshirts",
-   "n": "UTOPIE — DREAMLAND",
-   "no": "11",
-   "one": 1,
-   "price": 55,
+   "price": 60,
    "cur": "€",
    "r": "c",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "UTOPIE — the clean umbrella mark and one line: somewhere in Dreamland…\n\nMADE BY HAND_ the quietest one in the vault. Small hand-pressed DTF umbrella, the line set underneath it, nothing else on the shirt. The mark is embroidered. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 11/15 — PARIS 2026. One print of this design and then it's retired. No restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. It gets made after you claim it — 7–14 days, then it ships from Paris.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone on it: verifies the piece, shows 11/15 and its rarity, and opens its page on onlyibee.com under your name.",
-   "imgs": ["/assets/tees/mockups/utopie-dreamland.jpg"],
+   "desc": "The X-eyed face from the capsule's second print, kept exactly as it was drawn.\n\nPRESSED ONCE_ 10/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is SATISFIED. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 10/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/10-satisfied.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -267,19 +267,43 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-swordy",
-   "folder": "15-tshirts",
-   "n": "SWORDY",
+   "id": "tee-np2-rockstar",
+   "folder": "np2-26",
+   "n": "ROCKSTAR",
+   "no": "11",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The ONLY IBEE band off the top of the sleeve, run straight across the chest like a marquee.\n\nPRESSED ONCE_ 11/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is ROCKSTAR. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 11/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/11-rockstar.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-i-feel-alive",
+   "folder": "np2-26",
+   "n": "I FEEL ALIVE",
    "no": "12",
    "one": 1,
-   "price": 65,
+   "price": 60,
    "cur": "€",
-   "r": "sdr",
+   "r": "c",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "SWORDY — the knight on his hippo. The King granted these guys total freedom; they'll woop you on sight.\n\nMADE BY HAND_ drawn in pen, inked in Photoshop, hand-pressed from DTF. The blade is painted in after the press so it catches light off the fabric. Embroidered ONLYIBEE mark, monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 12/15 — PARIS 2026. Printed a single time, then retired out of the vault. No second run, no restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. He rides out after someone claims him — 7–14 days.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, pulls 12/15, rarity and power level, and links back to onlyibee.com.",
-   "imgs": ["/assets/tees/mockups/swordy.jpg"],
+   "desc": "One beat, read straight off the meter, with a small pink heart at the end of the trace.\n\nPRESSED ONCE_ 12/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is I FEEL ALIVE. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 12/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/12-i-feel-alive.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -287,19 +311,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-np-neon",
-   "folder": "15-tshirts",
-   "n": "NOUVEAUX PUNK — NEON",
+   "id": "tee-np2-mama-is-a-preacher",
+   "folder": "np2-26",
+   "n": "MAMA IS A PREACHER",
    "no": "13",
    "one": 1,
-   "price": 75,
+   "price": 60,
    "cur": "€",
-   "r": "leg",
+   "r": "sr",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "NOUVEAUX PUNK — the same manifesto, pink bats on deep green, glowing. The loudest thing in the vault.\n\nMADE BY HAND_ inked in Photoshop, hand-pressed from DTF, then the neon is pushed further with paint on top of the print — that glow is pigment, not a filter. The mark is embroidered. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 13/15 — PARIS 2026. Legendary tier. Printed once, then retired. No restock, no colourway two.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Press, paint, dry, stitch — 7–14 days after the claim, then it leaves Paris.\n\nAUTHENTICATION_ NFC chip in the monster patch. Tap your phone: verifies the piece, shows 13/15 and its rarity, and opens the NOUVEAUX PUNK page on onlyibee.com with your name on it.",
-   "imgs": ["/assets/tees/mockups/nouveaux-punk-neon.jpg"],
+   "desc": "A voice with rays coming off it and two rules under it. The loudest room on the record.\n\nPRESSED ONCE_ 13/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is MAMA IS A PREACHER. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, sage. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 13/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/13-mama-is-a-preacher.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -307,19 +333,21 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-20mzs",
-   "folder": "15-tshirts",
-   "n": "20 MIN ZA SESSION",
+   "id": "tee-np2-pas-de-soucis",
+   "folder": "np2-26",
+   "n": "PAS DE SOUCIS",
    "no": "14",
    "one": 1,
-   "price": 75,
+   "price": 60,
    "cur": "€",
-   "r": "leg",
+   "r": "c",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "20 MIN ZA SESSION, worn. One take, twenty minutes, no skips — the tape that never got a second run.\n\nMADE BY HAND_ hand-pressed DTF on the front, the session title embroidered in thread, and the tape marks painted in by hand after the press. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 14/15 — PARIS 2026. Legendary tier. One print, then retired. The session didn't get a second run and neither does the shirt.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Made after the claim: 7–14 days on the table, then out of Paris.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, shows 14/15 and its rarity, and opens the session's page on onlyibee.com with your name on it.",
-   "imgs": ["/assets/tees/mockups/20mzs-worn.jpg"],
+   "desc": "Three words, wet. The most French thing on the sleeve.\n\nPRESSED ONCE_ 14/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is PAS DE SOUCIS. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, natural. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 14/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/14-pas-de-soucis.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",
@@ -327,19 +355,263 @@ window.IBEE_PRODUCTS={
    }
   },
   {
-   "id": "tee-nanap",
-   "folder": "15-tshirts",
-   "n": "NANAP",
+   "id": "tee-np2-spoof",
+   "folder": "np2-26",
+   "n": "SPOOF",
    "no": "15",
    "one": 1,
-   "price": 65,
+   "price": 60,
+   "cur": "€",
+   "r": "sr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The advisory block off the bottom-left corner of the sleeve, blown up until it is the whole shirt.\n\nPRESSED ONCE_ 15/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is SPOOF. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, natural. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 15/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/15-spoof.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-benda",
+   "folder": "np2-26",
+   "n": "BENDA",
+   "no": "16",
+   "one": 1,
+   "price": 60,
    "cur": "€",
    "r": "sdr",
    "out": 0,
    "owner": null,
    "acquired": null,
-   "desc": "NANAP. The cutest therapist in town — she hates onions, loves garlic, and never misses a nap or a soft cookie.\n\nMADE BY HAND_ pen sketch, inked in Photoshop, hand-pressed from DTF onto a sand blank. Her glasses and the lab coat are picked out in paint after the press, so the white sits on top of the print instead of inside it. Embroidered ONLYIBEE mark. Monster patch stitched on last.\n\nPRINTED ONCE_ VAULT 15/15 — PARIS 2026. Last number in the drop. One print of this design, then it is retired. No restock.\n\nMADE TO ORDER_ commissioned, not shipped from stock. She gets made after you claim her — 7–14 days on the table, then out of Paris.\n\nAUTHENTICATION_ NFC chip inside the monster patch. Tap it: verifies the piece, shows 15/15 and its rarity, and opens her page on onlyibee.com with your name on it.",
-   "imgs": ["/assets/tees/mockups/nanap.jpg"],
+   "desc": "26 SONGS · YEARS. The collection's own mark, and the only piece that counts the others.\n\nPRESSED ONCE_ 16/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is BENDA. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 16/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/16-benda.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-buss-in-it",
+   "folder": "np2-26",
+   "n": "BUSS IN IT",
+   "no": "17",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The bat swarm, pink, going off across the chest over a single lighter rule.\n\nPRESSED ONCE_ 17/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is BUSS IN IT. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 17/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/17-buss-in-it.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-cigarette",
+   "folder": "np2-26",
+   "n": "CIGARETTE",
+   "no": "18",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "c",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "Held, lit, not smoked. The ember is the only pink on the shirt.\n\nPRESSED ONCE_ 18/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is CIGARETTE. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, clay. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 18/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/18-cigarette.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-da-shit",
+   "folder": "np2-26",
+   "n": "DA SHIT",
+   "no": "19",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "Acid slab type on red, dripping. Meant to be read from across the room.\n\nPRESSED ONCE_ 19/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is DA SHIT. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, red. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 19/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/19-da-shit.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-damn",
+   "folder": "np2-26",
+   "n": "DAMN",
+   "no": "20",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "leg",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "NOUVEAUX PUNK in pink bats on pine green, with the definition of the word set underneath in acid.\n\nPRESSED ONCE_ 20/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is DAMN. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, pine green. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 20/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/20-damn.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-deranger",
+   "folder": "np2-26",
+   "n": "DÉRANGER",
+   "no": "21",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "leg",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The same swarm on red, bats gone black. The first of the two that were printed before the 26 existed.\n\nPRESSED ONCE_ 21/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is DÉRANGER. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, red. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 21/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/21-deranger.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-epic-film",
+   "folder": "np2-26",
+   "n": "EPIC FILM",
+   "no": "22",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The viewfinder: crop marks, a REC dot and a timecode. 00:09:40.\n\nPRESSED ONCE_ 22/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is EPIC FILM. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 22/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/22-epic-film.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-illegal-2",
+   "folder": "np2-26",
+   "n": "ILLEGAL 2",
+   "no": "23",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "c",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "Stencil in a taped-off frame. The 2 belongs to the record, not the track.\n\nPRESSED ONCE_ 23/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is ILLEGAL 2. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, white. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 23/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/23-illegal-2.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-like-jimi-hendrix",
+   "folder": "np2-26",
+   "n": "LIKE JIMI HENDRIX",
+   "no": "24",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sdr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "A neck on fire. The tribute is in the flame, not the face.\n\nPRESSED ONCE_ 24/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is LIKE JIMI HENDRIX. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, black. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 24/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/24-like-jimi-hendrix.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-lonely-3",
+   "folder": "np2-26",
+   "n": "LONELY 3",
+   "no": "25",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "sdr",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "One figure, printed small on purpose, with the whole shirt left empty around it.\n\nPRESSED ONCE_ 25/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is LONELY 3. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, natural. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 25/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/25-lonely-3.jpg"
+   ],
+   "pay": {
+    "wix": "",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "tee-np2-no-name",
+   "folder": "np2-26",
+   "n": "NO NAME",
+   "no": "26",
+   "one": 1,
+   "price": 60,
+   "cur": "€",
+   "r": "leg",
+   "out": 0,
+   "owner": null,
+   "acquired": null,
+   "desc": "The NOUVEAUX PUNK 2 sleeve with the photograph taken out of it — the band, the logotype, the advisory, and nothing in the middle.\n\nPRESSED ONCE_ 26/26 — PARIS 2026. One shirt per track on NOUVEAUX PUNK 2, and this one is NO NAME. The design is printed a single time and then retired. No second run, no restock, not reissued on another colour.\n\nMADE TO ORDER_ commissioned, not shipped from stock. Nothing is sitting in a box waiting for you — the press heats up after you claim it. 7–14 days on the table, then it leaves Paris.\n\nTHE BLANK_ heavyweight oversized cotton, natural. Ink is DTF film, pressed by hand.\n\nAUTHENTICATION_ the NFC chip lives inside the label. Tap your phone on it: it verifies the piece is real, shows 26/26 and its rarity, and opens its page on onlyibee.com with your name on it.",
+   "imgs": [
+    "/assets/tees/np2/mockups/26-no-name.jpg"
+   ],
    "pay": {
     "wix": "",
     "stripe": "",

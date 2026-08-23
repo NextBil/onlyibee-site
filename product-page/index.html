@@ -411,9 +411,14 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     $("relall").href=seeAll;
     grid.innerHTML=sibs.map(function(x){
       var im=(x.imgs&&x.imgs[0])||"";
+      /* four thumbnails in a strip — read the 400px sibling where one exists
+         (Safari decodes at natural size, and four 1200px mockups cost ~23MB
+         of bitmap for squares rendered at a fifth of that). */
+      var rth=im.replace(/\/mockups\/([^\/]+)$/,"/mockups/thumb/$1");
       var gone=!!x.out;
       return '<a class="relcard'+(gone?' gone':'')+'" href="./?id='+encodeURIComponent(x.id)+'">'
-        +'<div class="rsq">'+(im?'<img loading="lazy" src="'+e2(im)+'" alt="'+e2(x.n)+'">':'')
+        +'<div class="rsq">'+(im?'<img loading="lazy" decoding="async" src="'+e2(rth)+'" alt="'+e2(x.n)+'"'
+             +' onerror="if(this.src.indexOf(\'/thumb/\')>-1)this.src=\''+e2(im)+'\'">':'')
         +(x.no?'<span class="rno">'+e2(x.no)+'</span>':'')+'</div>'
         +'<div class="rmeta"><span class="rnm">'+e2(x.n)+'</span>'
         +'<span class="rpr">'+e2((x.cur||"€")+x.price)+'</span></div></a>';

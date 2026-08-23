@@ -7,17 +7,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>THE VAULT — ONLY IBEE</title>
-<meta name="description" content="One-of-one t-shirts, made to order. Pressed, embroidered and stitched by hand after you claim it — 7–14 days. Each design is printed a single time and then retired forever.">
+<meta name="description" content="Twenty-six one-of-one t-shirts, one for every track on NOUVEAUX PUNK 2. Pressed by hand after you claim it — 7–14 days. Each design is printed a single time and then retired forever.">
 <meta property="og:title" content="THE VAULT — ONE OF ONE, MADE TO ORDER">
 <meta property="og:description" content="Nothing sits in stock. Your piece gets made after you claim it, printed once, then never again.">
 <meta property="og:image" content="https://onlyibee.com/assets/img/og-default.png">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <!--
-  THE VAULT — shop/?f=15-tshirts has a dedicated home here because this drop is
+  THE VAULT — shop/?f=np2-26 has a dedicated home here because this drop is
   a display, not a list: every piece is 1 of 1, so the page's job is to make each
   one feel singular and claimable rather than to compare a grid of options.
-  Data comes from assets/products-data.js (folder id "15-tshirts"); the shirts
-  themselves are drawn by assets/tee-art.js from each product's own colours.
+  Data comes from assets/products-data.js (folder id "np2-26", formerly
+  "15-tshirts"); a piece with no photograph yet falls back to a shirt drawn
+  by assets/tee-art.js from its own colours.
 -->
 <style>
 :root{
@@ -203,13 +204,13 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     <div class="bulbs" id="bulbs" aria-hidden="true"></div>
     <h1 id="dropname">THE VAULT</h1>
     <div class="sub"><span>ONE OF ONE ·</span> <span>MADE TO ORDER ·</span> <span>NEVER AGAIN</span></div>
-    <div class="tag">you claim a <b>single design</b>, then it gets pressed, painted<br>
-      and stitched <b>by hand</b> — 7–14 days — and retired forever.</div>
+    <div class="tag"><b>one shirt for every track</b> on NOUVEAUX PUNK 2. you claim<br>
+      a single design, it gets pressed <b>by hand</b> — 7–14 days — and retired forever.</div>
     <div class="odo" id="odo" aria-label="pieces remaining"></div>
   </section>
 
   <div class="rules">
-    <div class="rule"><b>◆ 1 OF 1</b><span>one print per design. when it's claimed, the design is retired.</span></div>
+    <div class="rule"><b>◆ 1 OF 1</b><span>one print per design, one design per track. when it's claimed, it's retired.</span></div>
     <div class="rule"><b>◆ MADE TO ORDER</b><span>commissioned, not shipped from stock. 7–14 days on the table, then it leaves paris.</span></div>
     <div class="rule"><b>◆ YOUR NAME</b><span>the owner is printed on this site, publicly, with the date.</span></div>
     <div class="rule"><b>◆ NO RESTOCK</b><span>no second run, no "back in stock". ever.</span></div>
@@ -220,13 +221,15 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   <details class="how">
     <summary>HOW IT WORKS_<span class="hint"><i class="lbl"></i><i class="pm"></i></span></summary>
     <div class="howbody">
-    <div class="s">no warehouse, no leftover boxes of unsold shirts. every piece is drawn in pen,
-      inked in photoshop, then pressed, painted and stitched by hand after someone claims it —
-      which is exactly why there's only ever one.</div>
+    <div class="s">twenty-six songs, twenty-six shirts, and the artwork is the record's own:
+      the sleeve's pink band, its dripping logotype, its advisory block, and the pit out of
+      THE FALL. no warehouse, no leftover boxes — every piece is drawn as vector, printed to
+      dtf film and pressed by hand after someone claims it, which is exactly why there's only
+      ever one.</div>
     <div class="steps">
       <div class="step"><div class="n">01</div><b>PICK YOUR ONE</b><span>every design here is unclaimed until it isn't. first one there takes it.</span></div>
-      <div class="step"><div class="n">02</div><b>IT GETS MADE</b><span>pressed from dtf film by hand, painted where the design calls for it, the mark embroidered, the ics monster patch stitched on last. 7–14 days, then it leaves paris.</span></div>
-      <div class="step"><div class="n">03</div><b>TAP THE PATCH</b><span>the nfc chip lives in the monster patch. tap your phone on it — it verifies the piece and drops it into your collection. the code works by hand too.</span></div>
+      <div class="step"><div class="n">02</div><b>IT GETS MADE</b><span>pressed from dtf film by hand onto a heavyweight oversized blank, in the colour that design was drawn for. 7–14 days on the table, then it leaves paris.</span></div>
+      <div class="step"><div class="n">03</div><b>TAP THE LABEL</b><span>the nfc chip lives in the label. tap your phone on it — it verifies the piece, shows which of the 26 it is, and drops it into your collection. the code works by hand too.</span></div>
       <div class="step"><div class="n">04</div><b>YOUR NAME STAYS</b><span>this page shows who owns it and when they got it. permanently.</span></div>
     </div>
     </div>
@@ -265,9 +268,13 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
              sdr:"rgba(217,179,108,.32)",leg:"rgba(182,255,0,.30)"};
 
   var D=window.IBEE_PRODUCTS||{};
-  var FOLDER="15-tshirts";
-  var fd=(D.folders||[]).filter(function(f){return f.id===FOLDER;})[0]||{name:"THE VAULT"};
-  var items=(D.products||[]).filter(function(p){return p.folder===FOLDER;});
+  /* The drop grew from 15 pieces to 26 and changed id with it. Links to the
+     old id are already out in the world (and on printed cards), so both
+     resolve here rather than landing on an empty shelf. */
+  var FOLDER="np2-26", LEGACY="15-tshirts";
+  function inDrop(x){ return x===FOLDER||x===LEGACY; }
+  var fd=(D.folders||[]).filter(function(f){return inDrop(f.id);})[0]||{name:"THE VAULT"};
+  var items=(D.products||[]).filter(function(p){return inDrop(p.folder);});
 
   /* the title comes from the data so the count can never contradict the grid —
      the page said "15" while 14 pieces were on the shelf before this. */
@@ -318,8 +325,16 @@ footer{padding:18px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     /* real mockups win over the drawn placeholder — a piece only falls back to
        tee-art.js if it has no photograph yet */
     var shot=(p.imgs&&p.imgs[0])||null;
+    /* The shelf shows 26 shirts at ~300px. Safari decodes an <img> at its
+       NATURAL size, not its CSS size, so pointing these at the 1200px detail
+       files would cost ~150MB of decoded bitmap in one tab and get the page
+       reloaded out from under the visitor on a phone. Each mockup therefore
+       has a 400px sibling under mockups/thumb/, and the full file is only the
+       fallback if that sibling is ever missing. */
+    var thumb=shot?shot.replace(/\/mockups\/([^\/]+)$/,'/mockups/thumb/$1'):null;
     var art=shot
-      ? '<img class="teeshot" src="'+e2(shot)+'" alt="'+e2(p.n)+'" loading="lazy">'
+      ? '<img class="teeshot" src="'+e2(thumb)+'" alt="'+e2(p.n)+'" loading="lazy" '
+        +'decoding="async" onerror="if(this.src.indexOf(\'/thumb/\')>-1)this.src=\''+e2(shot)+'\'">'
       : (window.IBEE_TEE?window.IBEE_TEE.svg(p):'');
     var ownerV=taken
       ? '<span class="v taken">@'+e2(p.owner||"CLAIMED")+'</span>'

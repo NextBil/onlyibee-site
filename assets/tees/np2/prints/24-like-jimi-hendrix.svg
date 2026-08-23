@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOUVEAUX PUNK 2 — THE 26 · LIKE JIMI HENDRIX
+     A neck on fire. The tribute is in the flame, not the face.
+     Ink #ff1f6f on the #0b1719 (black) blank. Vector, transparent ground,
+     drawn 100x100 and scaled to 3000x3000 so it goes to DTF film at
+     any size with no resampling.
+     !! CONTAINS LIVE TEXT. Convert type to outlines before sending to
+        the printer, or the shop may substitute a different face. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="3000" viewBox="0 0 100 100">
+  <title>NOUVEAUX PUNK 2 — LIKE JIMI HENDRIX</title>
+  <g><path d="M50 2c9 22-16 29-16 49 0 9 6 16 14 19-4-10 1-18 9-22-2 13 13 17 13 31 0 13-10 23-20 23-18 0-31-14-31-34C19 42 41 31 50 2z" fill="#ff1f6f"/><path d="M50 22c5 14-9 19-9 32 0 6 3 10 8 12-2-7 1-12 5-15-1 9 8 11 8 20 0 8-6 15-12 15-11 0-19-9-19-22 0-19 13-27 19-42z" fill="#e8dc12"/><rect x="72" y="18" width="6" height="52" transform="rotate(12 75 44)" fill="#efece4"/><rect x="72" y="24" width="6" height="1.2" transform="rotate(12 75 44)" fill="#0b1719"/><rect x="72" y="31" width="6" height="1.2" transform="rotate(12 75 44)" fill="#0b1719"/><rect x="72" y="38" width="6" height="1.2" transform="rotate(12 75 44)" fill="#0b1719"/><rect x="72" y="45" width="6" height="1.2" transform="rotate(12 75 44)" fill="#0b1719"/><rect x="72" y="52" width="6" height="1.2" transform="rotate(12 75 44)" fill="#0b1719"/><rect x="72" y="59" width="6" height="1.2" transform="rotate(12 75 44)" fill="#0b1719"/><text x="51.3" y="92" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="5.8" letter-spacing="2.6" fill="#e8dc12">LIKE JIMI HENDRIX</text></g>
+</svg>
