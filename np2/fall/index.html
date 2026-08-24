@@ -733,7 +733,7 @@ function targetX(L,T,t){
    5. STATE
    ===================================================================== */
 var cv=document.getElementById("cv"), ctx=cv.getContext("2d");
-var W=0,H=0,DPR=1,SC=1,VIS=1;
+var W=0,H=0,DPR=1,SC=1,VIS=1,PZOOM=1;
 var L=null, idx=-1, live=false, rafOn=false, armed=false, ended=false;
 var P={x:50, sy:0.62, vx:0, vy:0, limb:0, squash:0};
 var pulses=[], scars=[], motes=[], drift=[], ghosts=[], rec=[], recAt=0, shots=[];
@@ -763,8 +763,16 @@ function size(){
   ctx.setTransform(DPR,0,0,DPR,0,0);
   SC=W/VW;                                   /* units → px */
   /* A laptop spreads the same game world across more pixels. Boost the
-     important in-world objects so pickups and enemies stay easy to read. */
-  VIS=W>=1200 ? 2.05 : (W>=820 ? 1.70 : 1);
+     important in-world objects so pickups and enemies stay easy to read.
+     A PHONE has the opposite problem: the whole 100-unit width is crushed
+     into a narrow screen, so the faller and everything hostile read tiny.
+     The horizontal field can't be cropped (gates/enemies sit across the full
+     width — cropping would hide them and break the solver), so instead we
+     ZOOM the DRAWN SIZES: objects (VIS) and the cast (PZOOM) grow while their
+     world positions and hitboxes stay exactly the same. Narrower = more zoom. */
+  var narrow = W < 640;
+  VIS   = W>=1200 ? 2.05 : (W>=820 ? 1.70 : (narrow ? 1.36 : 1.12));
+  PZOOM = W>=820  ? 1    : (narrow ? 1.36 : 1.12);
 }
 addEventListener("resize",function(){ if(live) size(); });
 
@@ -931,13 +939,13 @@ function show(el){ menu.classList.add("hide"); over.classList.add("hide"); if(el
 function start(i){
   var lv=build(NP2[i][0], i);
   if(!lv){ return; }
-  L=lv; idx=i; ended=false; armed=false;
+  L=lv; idx=i; ended=false; armed=false; resetCheat();
   P.x=chanAt(L,0).m; P.sy=0.62; P.vx=0; P.limb=0;
   pulses=[]; scars=[]; motes=[]; drift=[]; fallers=[]; sparks=[]; shots=[]; rec=[]; recAt=0;
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
   pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,targets:0,shots:0,score:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
-  lives=LIVES_MAX; myDeaths=0; mateDeaths=0; myBonus=0; mateBonus=0;
+  lives=LIVES_MAX; myDeaths=0; mateDeaths=0; myBonus=0; mateBonus=0; lowT=0; cbCool=0;
   /* mateDeaths gets carried across levels within a room — do NOT reset it
      here, because the mate might already have died in their own start attempt
      and their `dt` broadcast could arrive before ours. */
@@ -1069,6 +1077,82 @@ function finish(won){
   paintGrid(); paintPerk(); show(over);
   try{ var r=RADIO(); if(r&&r.playing()&&!won) r.control.pause(); }catch(e){}
 }
+
+/* =====================================================================
+   ANTI-CHEAT — THE FALL IS THE SONG
+   The camera falls at the playhead (`songT()` is literally `audio.currentTime`),
+   so the radio transport is the one thing that could forge depth: change the
+   record and you are falling to a track the pit was not built from; drag the
+   scrubber forward and you teleport down the shaft for free. Both are watched
+   every armed frame and both VOID the run — no score posted, no best saved.
+   The scrub test compares the song's advance against REAL wall-clock time
+   (not the clamped frame `dt`), so a lag spike or a backgrounded tab — where
+   audio can only ever advance at or below real time — never trips it; only a
+   genuine jump past what time actually elapsed does.
+   ===================================================================== */
+var _ckT=-1, _ckWall=0;
+function resetCheat(){ _ckT=-1; _ckWall=0; }
+function cheatCheck(t){
+  var r=RADIO(); if(!r) return true;
+  /* 1. the record was swapped out from under the fall */
+  try{ var sg=r.slug();
+    if(sg && sg!==NP2[idx][0]){
+      voidRun("you changed the record.<br>the pit only falls to <b>"+NP2[idx][1].toUpperCase()+"</b>.");
+      return false;
+    }
+  }catch(e){}
+  /* 2. the playhead jumped further than time could carry it — a scrub */
+  var now=performance.now();
+  if(_ckT>=0){
+    var real=(now-_ckWall)/1000, rate=1;
+    try{ rate=r.audio.playbackRate||1; }catch(e){}
+    var jump=t-_ckT, expect=real*rate;
+    /* Only judge a jump that happened WITHIN a normal frame. A gap over 2s means
+       the tab was backgrounded or badly hitched — audio may have kept playing,
+       stalled, or the song may have looped; none of that is a scrub, so we just
+       resync and move on. A real drag of the scrubber happens live, in one frame. */
+    if(real<=2){
+      if(jump > expect + 1.2){
+        voidRun("you skipped ahead in the record.<br>the fall is the song — you cannot scrub past it.");
+        return false;
+      }
+      if(jump < -0.6){
+        voidRun("you jumped back in the record.<br>the fall does not rewind.");
+        return false;
+      }
+    }
+  }
+  _ckT=t; _ckWall=now;
+  return true;
+}
+/* end a run WITHOUT rewarding it — like a loss, but nothing is scored or saved */
+function voidRun(reason){
+  if(ended) return;
+  live=false; ended=true; armed=false;
+  var mc=document.getElementById("matechip"); if(mc) mc.style.display="none";
+  fragEl.classList.remove("on");
+  if(roomCode){
+    try{ if(chan) chan.send({type:"broadcast",event:"fn",payload:{id:myId,level:idx,won:false}}); }catch(e){}
+    lobbyReady=false;
+  } else netLeave();
+  try{ var r=RADIO(); if(r&&r.playing()) r.control.pause(); }catch(e){}
+  document.getElementById("otitle").textContent="VOID";
+  document.getElementById("osub").textContent=(idx<9?"0":"")+(idx+1)+" — "+NP2[idx][1].toUpperCase();
+  document.getElementById("oblurb").innerHTML=reason+
+    "<br><br>the pit does not count a run you did not fall. hold the line — fall it for real.";
+  document.getElementById("board").innerHTML="";
+  document.getElementById("onext").style.display="none";
+  var rr=document.getElementById("oready");
+  if(roomCode){
+    document.getElementById("oagain").style.display="none";
+    if(rr){ rr.style.display=""; rr.classList.remove("on"); rr.textContent="READY FOR NEXT"; }
+  } else {
+    document.getElementById("oagain").style.display="";
+    if(rr) rr.style.display="none";
+  }
+  paintGrid(); paintPerk(); show(over);
+}
+
 /* ---- THE WORLD BOARD --------------------------------------------------
    Post the run, then read the top ten back. Both are RPCs, called with the
    member's own token — no service key anywhere, and the function returns
@@ -1300,6 +1384,28 @@ function step(dt,t){
   if(pow.calm>0)  pow.calm-=dt;
   if(pow.iron>0)  pow.iron-=dt;
   if(shotCd>0) shotCd-=dt;
+
+  /* ---- COMEBACK HEART — the pit rewards hanging on ----
+     Down to 1 or 2 lives and still falling after a few seconds on the brink,
+     a BIG heart drops on the safe line a couple of seconds ahead — reachable,
+     not automatic; you still have to steer to it. A cooldown stops it chaining,
+     and it never spawns so late in the song that you can't get there. Climb
+     back above 2 and the timer forgets, so it only ever helps a real comeback. */
+  if(cbCool>0) cbCool-=dt;
+  var lifeNow=sharedLives();
+  if(lifeNow>=1 && lifeNow<=2){
+    if(cbCool<=0){
+      lowT+=dt;
+      if(lowT>=4){
+        if(t+2.4 < L.dur-3){
+          L.picks.push({t:t+2.4, kind:"heart", got:0, boon:1});
+          flashMsg("HOLD THE LINE — A HEART IS COMING");
+          cbCool=18;
+        }
+        lowT=0;
+      }
+    }
+  } else { lowT=0; }
 
   /* ---- pick things up ---- */
   var pk, dxp, dyp;
@@ -1891,6 +1997,9 @@ function die(t){
 }
 var LIVES_MAX=3;                       /* three lives per run */
 var deaths=0, lives=LIVES_MAX, downed=0, downT=0;
+/* COMEBACK HEART: seconds survived at 1–2 lives, and a cooldown so the mercy
+   drop can't chain. Reset each run and each time you climb back above 2. */
+var lowT=0, cbCool=0;
 /* Shared lives in a room: track OUR death count and the mate's. Both
    sides broadcast their own counter, both converge with a max(), and the
    pool is LIVES_MAX minus the sum. Idempotent: even if the network drops
@@ -2046,7 +2155,7 @@ function draw(t){
   var f=Math.floor(t*10)*2;
   for(var gi=0;gi<ghosts.length;gi++){
     var gr=ghosts[gi]; if(!gr||f+1>=gr.length) continue;
-    figure(gr[f]/10*SC, gr[f+1]/1000*H, 0.55, "rgba(240,239,232,0.13)", t*3+gi, {vy:SINK*0.6,vx:0,squash:0,bass:0});
+    figure(gr[f]/10*SC, gr[f+1]/1000*H, 0.55*PZOOM, "rgba(240,239,232,0.13)", t*3+gi, {vy:SINK*0.6,vx:0,squash:0,bass:0});
   }
   /* THE OTHER PLAYER — placed on MY screen at their real depth relative
      to me: ahead of me appears below, behind appears above. Off-screen either
@@ -2061,7 +2170,7 @@ function draw(t){
     mateDeltaM = Math.round(dtT*SCROLL);
     if(pySy>-0.05 && pySy<1.06){
       mateOnScreen=true;
-      figure(pe.x*SC, pySy*H, 0.7, "rgba(255,92,157,0.85)", t*3, {vy:SINK*0.6,vx:0,squash:0,bass:0});
+      figure(pe.x*SC, pySy*H, 0.7*PZOOM, "rgba(255,92,157,0.85)", t*3, {vy:SINK*0.6,vx:0,squash:0,bass:0});
       ctx.globalAlpha=0.35; ctx.strokeStyle="#ff5c9d"; ctx.lineWidth=1;
       ctx.beginPath(); ctx.arc(pe.x*SC, pySy*H-3, 12, 0, 6.2832); ctx.stroke();
       ctx.globalAlpha=1;
@@ -2147,24 +2256,28 @@ function draw(t){
       ctx.fillRect(pxx-0.9*VIS,pyy-9*VIS,1.8*VIS,10*VIS);                  /* neck */
       ctx.fillRect(pxx-3*VIS,pyy-11*VIS,6*VIS,1.2*VIS);                    /* head */
     } else if(PK.kind==="heart"){
-      /* larger heart + a soft outer glow ring so it pops off the walls */
+      /* larger heart + a soft outer glow ring so it pops off the walls.
+         A COMEBACK heart (`boon`) is drawn markedly bigger with a double ring
+         so a player on the brink can't miss the way out. */
       var beat=0.5+0.5*Math.sin(t*4+pd);
-      /* outer glow — thin ring that pulses with the beat */
+      var hs=PK.boon?1.75:1;
+      /* outer glow — thin ring(s) that pulse with the beat */
       ctx.save();
       ctx.globalAlpha=clamp(1-Math.abs(psy-P.sy)*1.15,0.12,1)*(0.35+beat*0.4);
-      ctx.strokeStyle=col; ctx.lineWidth=1.4*VIS;
-      ctx.beginPath(); ctx.arc(pxx,pyy,(11+beat*2)*VIS,0,6.2832); ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=1.4*VIS*hs;
+      ctx.beginPath(); ctx.arc(pxx,pyy,(11+beat*2)*VIS*hs,0,6.2832); ctx.stroke();
+      if(PK.boon){ ctx.beginPath(); ctx.arc(pxx,pyy,(16+beat*3)*VIS*hs,0,6.2832); ctx.stroke(); }
       ctx.restore();
       /* the heart itself: slightly bigger, filled with the coin pink */
       ctx.fillStyle=col;
       ctx.beginPath();
-      ctx.moveTo(pxx, pyy+7*VIS);
-      ctx.bezierCurveTo(pxx-11*VIS, pyy-1*VIS, pxx-9*VIS, pyy-11*VIS, pxx, pyy-4*VIS);
-      ctx.bezierCurveTo(pxx+9*VIS, pyy-11*VIS, pxx+11*VIS, pyy-1*VIS, pxx, pyy+7*VIS);
+      ctx.moveTo(pxx, pyy+7*VIS*hs);
+      ctx.bezierCurveTo(pxx-11*VIS*hs, pyy-1*VIS*hs, pxx-9*VIS*hs, pyy-11*VIS*hs, pxx, pyy-4*VIS*hs);
+      ctx.bezierCurveTo(pxx+9*VIS*hs, pyy-11*VIS*hs, pxx+11*VIS*hs, pyy-1*VIS*hs, pxx, pyy+7*VIS*hs);
       ctx.fill();
       /* highlight */
       ctx.globalAlpha*=0.75; ctx.fillStyle="#ffb0c8";
-      ctx.beginPath(); ctx.arc(pxx-3*VIS,pyy-4*VIS,1.6*VIS,0,6.2832); ctx.fill();
+      ctx.beginPath(); ctx.arc(pxx-3*VIS*hs,pyy-4*VIS*hs,1.6*VIS*hs,0,6.2832); ctx.fill();
     } else if(PK.kind==="super"){
       /* a five-point star with rays that pulse — the rarest drop */
       ctx.fillStyle=col;
@@ -2301,9 +2414,9 @@ function draw(t){
   var _pst={vy:P.vy, vx:P.vx, squash:P.squash, bass:L.lo[clamp(Math.floor(t*20),0,L.n-1)], power:powCol()};
   var _C=charCur();
   if(_C && _C.img && _C.img._ok){
-    drawChar(_C, P.x*SC, P.sy*H, 1, P.limb, _pst, downed?0.4:1);
+    drawChar(_C, P.x*SC, P.sy*H, PZOOM, P.limb, _pst, downed?0.4:1);
   } else {
-    figure(P.x*SC, P.sy*H, 1, downed?"rgba(240,239,232,0.35)":"#f0efe8", P.limb, _pst);
+    figure(P.x*SC, P.sy*H, PZOOM, downed?"rgba(240,239,232,0.35)":"#f0efe8", P.limb, _pst);
   }
 
   /* ---- degradation: scanlines always, tear and split as it gets worse ---- */
@@ -2531,6 +2644,7 @@ function loop(ts){
   requestAnimationFrame(loop);
   var dt=Math.min(0.05,(ts-last)/1000||0.016); last=ts;
   var t=songT();
+  if(armed && !cheatCheck(t)) return;   /* changed the record or scrubbed → void */
   if(armed) step(dt,t);
   if(!live) return;
   draw(t);
