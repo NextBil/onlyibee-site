@@ -1992,6 +1992,12 @@ function die(t){
   pulses=[]; sparks=[]; gateHit={};
   for(k=0;k<L.gates.length;k++) if(L.gates[k].t<back) gateHit[k]=1;
   var r=RADIO(); try{ if(r) r.audio.currentTime=back; }catch(e){}
+  /* THIS is a legitimate, game-initiated rewind — dying sends you back to the
+     last checkpoint. The anti-cheat watches for exactly this kind of backward
+     jump in the playhead, so we resync it here or a normal death reads as a
+     scrub and voids the run. Every game-initiated seek MUST be followed by
+     resetCheat() for the same reason. */
+  resetCheat();
   flashMsg(back>0 ? ("CHECKPOINT — "+fmt(back)+"  ·  "+alive+" LEFT")
                   : ("FROM THE TOP  ·  "+alive+" LEFT"));
 }
