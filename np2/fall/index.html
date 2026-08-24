@@ -945,7 +945,7 @@ function start(i){
   collapse=0; glitch=0; gracet=0.9; cpAt=0; gateHit={}; deaths=0;
   pts={gates:0,deaths:0,frags:0,coins:0,picks:0,relics:0,caches:0,targets:0,shots:0,score:0};
   pow={light:0,calm:0,ghost:0,iron:0}; downed=0; downT=0;
-  lives=LIVES_MAX; myDeaths=0; mateDeaths=0; myBonus=0; mateBonus=0; lowT=0; cbCool=0;
+  lives=LIVES_MAX; myDeaths=0; mateDeaths=0; myBonus=0; mateBonus=0; lowT=0; cbCool=0; evNameShown=false;
   /* mateDeaths gets carried across levels within a room — do NOT reset it
      here, because the mate might already have died in their own start attempt
      and their `dt` broadcast could arrive before ours. */
@@ -2051,6 +2051,168 @@ function flashMsg(m){
    10. DRAW
    ===================================================================== */
 function wallXAt(t){ return chanAt(L,t); }
+/* =====================================================================
+   ZONE EVENTS — one signature set-piece per zone, tied to a flagship song and
+   a moment inside it. THE POINT: make Abidjan / Toronto / Paris / the Stars /
+   the Void / the Climb feel like PLACES you survived, not skins.
+
+   ⚠ FAIRNESS: an event is pure spectacle + telegraph. It never blocks the
+   channel, never spawns a hazard, never touches the physics — so `build()` and
+   `tools/np2-fall-solver.js` stay valid and nobody dies to a surprise. The
+   danger it adds is felt, not real. (Escalating a specific one into a true
+   boss later means feeding its hazards through `build()` so the solver sees
+   them — never bolt a killable thing on here.)
+
+   Keyed by LEVEL INDEX (a flagship per zone). `at` is [start,end] as a fraction
+   of the song; the warning runs EV_TELE seconds before it. Add a row to give
+   another song its own moment. =====================================================================*/
+var EV_TELE=3.0;
+var EVENTS={
+  2:  {id:"shadow", name:"THE ANCESTOR",          tele:"SOMETHING VAST BELOW",   at:[0.34,0.60]},
+  7:  {id:"tower",  name:"THE TOWER COMES DOWN",   tele:"THE TOWER IS FALLING",   at:[0.42,0.64]},
+  10: {id:"swarm",  name:"THE MURMUR",             tele:"THE SKY IS MOVING",      at:[0.36,0.58]},
+  15: {id:"moon",   name:"THE WATCHER",            tele:"IT IS LOOKING AT YOU",   at:[0.30,0.62]},
+  19: {id:"maw",    name:"THE COLLAPSE WAKES",     tele:"IT HAS A FACE NOW",      at:[0.38,0.68]},
+  25: {id:"giant",  name:"THE LIGHT REACHES BACK", tele:"SOMETHING AT THE TOP",   at:[0.40,0.66]}
+};
+var evNameShown=false;
+function evBass(t){ return L.lo[clamp(Math.floor(t*20),0,L.n-1)]||0; }
+function evNow(t){
+  var ev=EVENTS[idx]; if(!ev||!L) return null;
+  var t0=ev.at[0]*L.dur, t1=ev.at[1]*L.dur;
+  if(t>=t0 && t<=t1) return {ev:ev, phase:"on", p:(t-t0)/Math.max(0.001,t1-t0)};
+  if(t>=t0-EV_TELE && t<t0) return {ev:ev, phase:"tele", p:(t-(t0-EV_TELE))/EV_TELE};
+  return null;
+}
+/* the in-world set-pieces, drawn behind the shaft (the maw rides the collapse
+   layer instead — see draw()). Each takes phase-progress p, an ease that goes
+   0→1→0 across the window, and the current bass. */
+function evShadow(t,p,ease,bass,Z){
+  var cx=W*0.5, base=H*(1.28-0.6*ease), w=W*0.66, h=H;
+  ctx.globalAlpha=0.55*ease; ctx.fillStyle="#000";
+  ctx.beginPath(); ctx.ellipse(cx,base,w*0.5,h*0.34,0,Math.PI,2*Math.PI); ctx.fill();
+  ctx.fillRect(cx-w*0.5,base,w,h);
+  ctx.lineWidth=W*0.03; ctx.strokeStyle="#000"; ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.moveTo(cx-w*0.26,base-h*0.28); ctx.quadraticCurveTo(cx-w*0.55,base-h*0.5,cx-w*0.36,base-h*0.62);
+  ctx.moveTo(cx+w*0.26,base-h*0.28); ctx.quadraticCurveTo(cx+w*0.55,base-h*0.5,cx+w*0.36,base-h*0.62);
+  ctx.stroke();
+  var eg=Z.glow||"#ffc46b";
+  ctx.globalAlpha=(0.45+0.55*Math.abs(Math.sin(t*3)))*ease;
+  ctx.fillStyle=eg; ctx.shadowColor=eg; ctx.shadowBlur=22*(1+bass);
+  var ey=base-h*0.18, es=W*0.02*(1+bass*0.5);
+  ctx.beginPath(); ctx.arc(cx-w*0.15,ey,es,0,6.2832); ctx.arc(cx+w*0.15,ey,es,0,6.2832); ctx.fill();
+  ctx.shadowBlur=0; ctx.globalAlpha=1;
+}
+function evTower(t,p,ease,bass,Z){
+  var baseX=W*0.15, baseY=H*0.92, ang=-0.04+p*p*1.55;
+  ctx.save(); ctx.translate(baseX,baseY); ctx.rotate(ang);
+  ctx.globalAlpha=0.9; ctx.fillStyle=Z.far||"#122032";
+  var tw=W*0.05, th=H*0.72;
+  ctx.fillRect(-tw*0.5,-th,tw,th);
+  ctx.fillRect(-tw*1.7,-th*0.6,tw*3.4,th*0.055);
+  ctx.beginPath(); ctx.moveTo(-tw*0.5,-th); ctx.lineTo(0,-th-H*0.13); ctx.lineTo(tw*0.5,-th); ctx.fill();
+  ctx.globalAlpha=0.7*(1-p); ctx.fillStyle=Z.glow||"#8fd0ff";
+  for(var wy=0.12;wy<0.92;wy+=0.13) ctx.fillRect(-tw*0.22,-th*wy,tw*0.44,2);
+  ctx.restore();
+  if(p>0.35){ ctx.globalAlpha=0.30*(p-0.35); ctx.fillStyle="#6a5a48";
+    ctx.beginPath(); ctx.ellipse(baseX+W*0.22,baseY,W*0.32*p,H*0.06,0,0,6.2832); ctx.fill(); }
+  ctx.globalAlpha=1;
+}
+function evSwarm(t,p,ease,bass,Z){
+  var n=54, gx=-W*0.2+p*W*1.4, gy=H*(0.18+0.22*Math.sin(p*3.2));
+  ctx.globalAlpha=0.7*ease; ctx.strokeStyle="#0a0a0a"; ctx.lineWidth=2; ctx.lineCap="round";
+  for(var i=0;i<n;i++){
+    var a=i*2.3999, bx=gx+Math.cos(a)*W*0.17*(0.4+(i%7)/7)+Math.sin(t*6+i)*3,
+        by=gy+Math.sin(a)*H*0.11+Math.cos(t*5+i)*3, fl=6+3*Math.sin(t*10+i);
+    ctx.beginPath(); ctx.moveTo(bx-fl,by+2); ctx.lineTo(bx,by-2); ctx.lineTo(bx+fl,by+2); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+}
+function evMoon(t,p,ease,bass,Z){
+  var mx=W*0.78, my=H*0.25, R=Math.min(W,H)*0.34*(0.8+0.2*ease);
+  var gr=ctx.createRadialGradient(mx,my,R*0.4,mx,my,R*1.9);
+  gr.addColorStop(0,"rgba(201,184,255,"+(0.30*ease).toFixed(3)+")"); gr.addColorStop(1,"rgba(201,184,255,0)");
+  ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(mx,my,R*1.9,0,6.2832); ctx.fill();
+  ctx.globalAlpha=0.92*ease; ctx.fillStyle="#d9d2ff";
+  ctx.beginPath(); ctx.arc(mx,my,R,0,6.2832); ctx.fill();
+  var open=clamp((ease-0.4)/0.6,0,1);
+  if(open>0){
+    ctx.globalAlpha=open;
+    var irx=mx+(P.x/VW-0.5)*R*0.75, iry=my+(P.sy-0.5)*R*0.45;
+    ctx.fillStyle="#1a1030"; ctx.beginPath(); ctx.ellipse(mx,my,R*0.72,R*0.42,0,0,6.2832); ctx.fill();
+    ctx.fillStyle=Z.glow||"#c9b8ff"; ctx.beginPath(); ctx.arc(irx,iry,R*0.2*(1+bass*0.3),0,6.2832); ctx.fill();
+    ctx.fillStyle="#000"; ctx.beginPath(); ctx.arc(irx,iry,R*0.09,0,6.2832); ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+function evGiant(t,p,ease,bass,Z){
+  var gr=ctx.createLinearGradient(0,0,0,H*0.5);
+  gr.addColorStop(0,"rgba(255,140,180,"+(0.35*ease).toFixed(3)+")"); gr.addColorStop(1,"rgba(255,140,180,0)");
+  ctx.fillStyle=gr; ctx.fillRect(0,0,W,H*0.5);
+  var reach=ease, cx=W*0.5, topY=-H*0.12+reach*H*0.42, palmW=W*0.3, palmH=H*0.2;
+  ctx.globalAlpha=0.9*ease; ctx.fillStyle="#12060c";
+  ctx.beginPath(); ctx.ellipse(cx,topY+palmH,palmW*0.5,palmH*0.5,0,0,6.2832); ctx.fill();
+  ctx.lineCap="round"; ctx.strokeStyle="#12060c";
+  for(var f=-2;f<=2;f++){
+    ctx.lineWidth=W*0.035;
+    ctx.beginPath(); ctx.moveTo(cx+f*palmW*0.22,topY+palmH*0.7);
+    ctx.lineTo(cx+f*palmW*0.22+f*W*0.02*reach, topY+palmH+palmH*1.15*reach*(1+Math.abs(f)*0.1));
+    ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+}
+function drawEventBack(t){
+  var e=evNow(t); if(!e||e.phase!=="on") return;
+  if(!evNameShown){ flashMsg(e.ev.name); evNameShown=true; }
+  if(e.ev.id==="maw") return;                 /* the maw draws on the collapse */
+  var ease=Math.sin(e.p*Math.PI), bass=evBass(t), Z=L.zone;
+  ctx.save();
+  if(e.ev.id==="shadow") evShadow(t,e.p,ease,bass,Z);
+  else if(e.ev.id==="tower") evTower(t,e.p,ease,bass,Z);
+  else if(e.ev.id==="swarm") evSwarm(t,e.p,ease,bass,Z);
+  else if(e.ev.id==="moon") evMoon(t,e.p,ease,bass,Z);
+  else if(e.ev.id==="giant") evGiant(t,e.p,ease,bass,Z);
+  ctx.restore();
+}
+/* the collapse grows a face during THE VOID's event — teeth on the kill line
+   (their tips just below it, so the menace never undersells where death is)
+   and two eyes above. Called from inside the collapse render with cy = line. */
+function drawMaw(t,cy){
+  var e=evNow(t); if(!e||e.phase!=="on"||e.ev.id!=="maw") return;
+  var ease=Math.sin(e.p*Math.PI), bass=evBass(t);
+  ctx.save();
+  ctx.globalAlpha=(0.55+0.45*Math.abs(Math.sin(t*4)))*ease;
+  ctx.fillStyle="#ff5c9d"; ctx.shadowColor="#ff5c9d"; ctx.shadowBlur=18;
+  var ey=cy-26-8*bass, es=7*(1+bass*0.4);
+  ctx.beginPath(); ctx.arc(W*0.4,ey,es,0,6.2832); ctx.arc(W*0.6,ey,es,0,6.2832); ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.globalAlpha=0.92*ease; ctx.fillStyle="#0a0208";
+  var step=Math.max(20,W/16);
+  for(var tx=0;tx<W;tx+=step){
+    var td=10+8*Math.abs(Math.sin(tx*0.05+t*2));
+    ctx.beginPath(); ctx.moveTo(tx,cy-1); ctx.lineTo(tx+step*0.8,cy-1);
+    ctx.lineTo(tx+step*0.4,cy-1+td); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore(); ctx.globalAlpha=1;
+}
+/* the topmost layer: the WARNING. A big in-world telegraph before the event
+   lands, so danger is read, not sprung (item #5). */
+function drawEventFore(t){
+  var e=evNow(t); if(!e||e.phase!=="tele") return;
+  var k=e.p, pulse=0.5+0.5*Math.sin(t*12);
+  ctx.save();
+  ctx.globalAlpha=0.5*pulse; ctx.fillStyle="#ff1f6f";
+  ctx.fillRect(0,0,W,6); ctx.fillRect(0,H-6,W,6);
+  var fs=Math.min(H*0.05,34); ctx.font=fs+"px 'VT323',monospace";
+  while(ctx.measureText(e.ev.tele).width>W*0.9 && fs>12){ fs-=2; ctx.font=fs+"px 'VT323',monospace"; }
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.globalAlpha=clamp(k*2.2,0,1)*(0.75+0.25*pulse);
+  ctx.fillStyle="rgba(0,0,0,0.65)"; ctx.fillText(e.ev.tele,W/2+2,H*0.28+2);
+  ctx.fillStyle="#ff8db4"; ctx.fillText(e.ev.tele,W/2,H*0.28);
+  ctx.restore(); ctx.globalAlpha=1;
+}
+
 function draw(t){
   var Z=L.zone;
   ctx.setTransform(DPR,0,0,DPR,0,0);
@@ -2068,6 +2230,7 @@ function draw(t){
   drawBack(t,Z,L.seed);
   drawSideProps(t,Z,L.seed);
   drawDrift(t,Z);
+  drawEventBack(t);                 /* the zone's set-piece, behind the shaft */
 
   var rows=Math.round(H/6);
   for(var r=0;r<rows;r++){
@@ -2203,6 +2366,7 @@ function draw(t){
   ctx.globalAlpha=0.30+Math.sin(t*7)*0.10;
   ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(W,cy); ctx.stroke();
   ctx.globalAlpha=1;
+  drawMaw(t,cy);                     /* THE VOID: the collapse grows a face */
 
   /* ---- coins: the only thing that asks you off the safe line ---- */
   for(var cd=0;cd<L.coins.length;cd++){
@@ -2442,6 +2606,8 @@ function draw(t){
   var vg=ctx.createRadialGradient(W/2,H*0.55,H*0.16,W/2,H*0.55,H*0.82);
   vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,.72)");
   ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+
+  drawEventFore(t);                  /* the warning, on top of everything */
 }
 
 /* =====================================================================
