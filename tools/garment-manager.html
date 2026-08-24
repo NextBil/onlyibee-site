@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GARMENT MANAGER — ONLY IBEE</title>
+<!--
+  Internal tool. Edits the living-garment layer.
+  LOAD  reads assets/products-data.js + assets/garments-data.js.
+  EDIT  each piece: owner, status, the yearly refresh timeline, provenance.
+  EXPORT builds assets/garments-data.js — copy/download it, drop it in, done.
+  Nothing here writes to a server; it just authors the data file.
+-->
+<style>
+:root{--bg:#0a0a0a;--panel:#141414;--ink:#e8e8e8;--dim:#888;--acid:#b6ff00;--gold:#ffd60a;
+  --cyan:#26e0ff;--red:#ff4444;--border:#2a2a2a;--mono:ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.5}
+header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+header h1{font-size:15px;margin:0;color:var(--acid);letter-spacing:1px}
+header .sp{flex:1}
+button{font-family:var(--mono);font-size:13px;padding:8px 12px;background:#1c1c1c;color:var(--ink);
+  border:1px solid var(--border);cursor:pointer}
+button:hover{border-color:var(--acid)}
+button.p{background:var(--acid);color:#0a0a0a;border-color:var(--acid);font-weight:700}
+button.g{color:var(--gold);border-color:#4a3a12}
+button.r{color:var(--red);border-color:#4a1212}
+.wrap{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:calc(100vh - 55px)}
+.side{border-right:1px solid var(--border);padding:12px;overflow:auto}
+.side h2{font-size:11px;color:var(--dim);letter-spacing:1px;margin:6px 2px 10px}
+.gitem{padding:9px 10px;border:1px solid var(--border);margin-bottom:7px;cursor:pointer;background:#101010}
+.gitem:hover{border-color:var(--acid)}
+.gitem.on{border-color:var(--acid);background:#0e1405}
+.gitem .s{color:var(--acid);font-weight:700}
+.gitem .n{color:var(--dim);font-size:12px}
+.gitem .st{font-size:10px;color:#666;letter-spacing:1px}
+.main{padding:16px 18px 60px;overflow:auto}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.f{display:flex;flex-direction:column;gap:4px}
+.f label{font-size:11px;color:var(--dim);letter-spacing:1px}
+.f input,.f select,.f textarea{font-family:var(--mono);font-size:13px;background:#101010;color:var(--ink);
+  border:1px solid var(--border);padding:8px}
+.f input:focus,.f textarea:focus,.f select:focus{outline:none;border-color:var(--acid)}
+.f.grow{flex:1;min-width:200px}
+textarea{width:100%;resize:vertical}
+fieldset{border:1px solid var(--border);margin:16px 0;padding:12px}
+legend{color:var(--gold);font-size:12px;letter-spacing:1px;padding:0 6px}
+.ent{border:1px solid var(--border);padding:10px;margin-bottom:10px;background:#101010}
+.ent .eh{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.ent .eh .v{color:var(--acid);font-weight:700}
+.ent .eh .sp{flex:1}
+.ent img.pv{width:70px;height:52px;object-fit:cover;border:1px solid var(--border);background:#000}
+.provrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.hint{color:var(--dim);font-size:12px;margin:6px 0}
+.empty{color:var(--dim);padding:40px;text-align:center}
+#exportBox{position:fixed;inset:5% 5% 5% 5%;background:#0d0d0d;border:1px solid var(--acid);z-index:50;
+  display:none;flex-direction:column;padding:14px}
+#exportBox textarea{flex:1;font-size:12px;white-space:pre;background:#000;color:var(--acid)}
+.ok{color:var(--acid)} .warn{color:var(--gold)}
+</style>
+</head>
+<body>
+<header>
+  <h1>◈ GARMENT MANAGER</h1>
+  <span id="status" class="hint" style="margin:0"></span>
+  <span class="sp"></span>
+  <button id="newBtn">+ NEW GARMENT</button>
+  <button id="exportBtn" class="p">EXPORT DATA FILE</button>
+</header>
+<div class="wrap">
+  <div class="side">
+    <h2>PIECES</h2>
+    <div id="list"></div>
+  </div>
+  <div class="main" id="main">
+    <div class="empty" id="empty">Pick a piece on the left, or start a new one.</div>
+    <div id="editor" style="display:none"></div>
+  </div>
+</div>
+
+<div id="exportBox">
+  <div class="row" style="margin-bottom:8px"><b class="ok">assets/garments-data.js</b><span class="sp"></span>
+    <button onclick="copyExport()">COPY</button>
+    <button class="g" onclick="downloadExport()">DOWNLOAD</button>
+    <button class="r" onclick="document.getElementById('exportBox').style.display='none'">CLOSE</button></div>
+  <textarea id="exportText" readonly></textarea>
+  <div class="hint">Copy this over <b>assets/garments-data.js</b> and deploy. It goes live in ~1 min (clock-stamped load, no version bump).</div>
+</div>
+
+<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="../assets/garments-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var PRODUCTS=((window.IBEE_PRODUCTS||{}).products)||[];
+var DATA=JSON.parse(JSON.stringify((window.IBEE_GARMENTS||{garments:{}}).garments||{}));
+var cur=null;   /* current serial being edited */
+
+function setStatus(m,cls){ $("status").innerHTML='<span class="'+(cls||'')+'">'+m+'</span>'; }
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+function pname(pid){ for(var i=0;i<PRODUCTS.length;i++) if(PRODUCTS[i].id===pid) return PRODUCTS[i].n; return pid||"—"; }
+function pimg(pid){ for(var i=0;i<PRODUCTS.length;i++) if(PRODUCTS[i].id===pid) return (PRODUCTS[i].imgs||[])[0]||""; return ""; }
+function nextSerial(){
+  var max=0; for(var k in DATA){ var m=/(\d+)$/.exec(k); if(m) max=Math.max(max,+m[1]); }
+  return "IBEE-"+String(max+1).padStart(4,"0");
+}
+function today(){ return new Date().toISOString().slice(0,10); }
+
+function renderList(){
+  var keys=Object.keys(DATA).sort();
+  $("list").innerHTML = keys.length ? keys.map(function(s){
+    var g=DATA[s];
+    return '<div class="gitem'+(s===cur?' on':'')+'" data-s="'+esc(s)+'">'
+      +'<div class="s">'+esc(s)+'</div><div class="n">'+esc(pname(g.pid))+'</div>'
+      +'<div class="st">@'+esc(g.owner||"—")+' · '+esc((g.status||"owned").toUpperCase())+' · '+((g.history||[]).length)+' ENTR'+(((g.history||[]).length)===1?'Y':'IES')+'</div></div>';
+  }).join("") : '<div class="hint">No garments yet.</div>';
+  Array.prototype.forEach.call($("list").querySelectorAll(".gitem"),function(el){
+    el.onclick=function(){ cur=el.getAttribute("data-s"); renderList(); renderEditor(); };
+  });
+}
+
+function prodOptions(sel){
+  return PRODUCTS.map(function(p){
+    return '<option value="'+esc(p.id)+'"'+(p.id===sel?' selected':'')+'>'+esc(p.n)+' ('+esc(p.id)+')</option>';
+  }).join("");
+}
+
+function renderEditor(){
+  var g=DATA[cur]; if(!g){ $("editor").style.display="none"; $("empty").style.display="block"; return; }
+  $("empty").style.display="none"; $("editor").style.display="block";
+  var h=(g.history||[]), prov=(g.provenance||[]);
+  var html='';
+  html+='<div class="row">'
+    +'<div class="f"><label>SERIAL (identity)</label><input id="fSerial" value="'+esc(g.serial||cur)+'" style="width:150px"></div>'
+    +'<div class="f grow"><label>PIECE (from catalog)</label><select id="fPid">'+prodOptions(g.pid)+'</select></div>'
+    +'</div>';
+  html+='<div class="row">'
+    +'<div class="f"><label>OWNER (handle)</label><input id="fOwner" value="'+esc(g.owner||"")+'" style="width:150px"></div>'
+    +'<div class="f"><label>ACQUIRED</label><input id="fAcq" type="date" value="'+esc(g.acquired||"")+'"></div>'
+    +'<div class="f"><label>STATUS</label><select id="fStatus">'
+      +['owned','resale','refresh'].map(function(s){return '<option'+(g.status===s?' selected':'')+'>'+s+'</option>';}).join("")+'</select></div>'
+    +'<div class="f"><label>NEXT REFRESH DUE (optional)</label><input id="fDue" type="date" value="'+esc(g.nextDue||"")+'"></div>'
+    +'</div>';
+
+  /* provenance */
+  html+='<fieldset><legend>PROVENANCE — ownership chain (oldest first)</legend><div id="provWrap"></div>'
+    +'<button onclick="addProv()">+ owner</button>'
+    +'<button class="g" onclick="transfer()">↦ TRANSFER (sell it on)</button>'
+    +'<div class="hint">TRANSFER appends the new owner, sets them as current, and dates it — the resale keeps the whole history.</div></fieldset>';
+
+  /* history */
+  html+='<fieldset><legend>THE HISTORY — the yearly refresh timeline (oldest first)</legend><div id="histWrap"></div>'
+    +'<button class="p" onclick="addHist()">+ REFRESH ENTRY</button>'
+    +'<div class="hint">v1 is birth. Each send-back adds the next version with a fresh photo.</div></fieldset>';
+
+  html+='<div class="row"><button class="r" onclick="delGarment()">DELETE THIS GARMENT</button>'
+    +'<a href="../garment/?id='+encodeURIComponent(g.serial||cur)+'" target="_blank"><button>OPEN ITS PASSPORT ↗</button></a></div>';
+
+  $("editor").innerHTML=html;
+  bindTop(); renderProv(); renderHist();
+}
+
+function bindTop(){
+  var g=DATA[cur];
+  $("fSerial").onchange=function(){
+    var ns=this.value.trim(); if(!ns||ns===cur) return;
+    DATA[ns]=g; delete DATA[cur]; g.serial=ns; cur=ns; renderList(); renderEditor();
+  };
+  $("fPid").onchange=function(){ g.pid=this.value; renderList(); };
+  $("fOwner").oninput=function(){ g.owner=this.value; };
+  $("fAcq").onchange=function(){ g.acquired=this.value; };
+  $("fStatus").onchange=function(){ g.status=this.value; renderList(); };
+  $("fDue").onchange=function(){ g.nextDue=this.value; };
+}
+
+function renderProv(){
+  var g=DATA[cur]; g.provenance=g.provenance||[];
+  $("provWrap").innerHTML=g.provenance.map(function(o,i){
+    return '<div class="provrow"><input data-i="'+i+'" data-k="owner" value="'+esc(o.owner||"")+'" placeholder="owner" style="width:150px">'
+      +'<input data-i="'+i+'" data-k="from" type="date" value="'+esc(o.from||"")+'">'
+      +'<button class="r" data-del="'+i+'">✕</button></div>';
+  }).join("");
+  Array.prototype.forEach.call($("provWrap").querySelectorAll("input"),function(el){
+    el.oninput=function(){ g.provenance[+el.getAttribute("data-i")][el.getAttribute("data-k")]=el.value; };
+  });
+  Array.prototype.forEach.call($("provWrap").querySelectorAll("[data-del]"),function(b){
+    b.onclick=function(){ g.provenance.splice(+b.getAttribute("data-del"),1); renderProv(); };
+  });
+}
+window.addProv=function(){ var g=DATA[cur]; g.provenance=g.provenance||[]; g.provenance.push({owner:g.owner||"",from:today()}); renderProv(); };
+window.transfer=function(){
+  var g=DATA[cur]; var who=prompt("New owner handle:"); if(!who) return;
+  var when=prompt("Date acquired (YYYY-MM-DD):",today())||today();
+  g.provenance=g.provenance||[]; g.provenance.push({owner:who,from:when});
+  g.owner=who; g.acquired=when; g.status="owned";
+  renderList(); renderEditor(); setStatus("Transferred to @"+esc(who),"ok");
+};
+
+function renderHist(){
+  var g=DATA[cur]; g.history=g.history||[];
+  $("histWrap").innerHTML=g.history.map(function(e,i){
+    return '<div class="ent">'
+      +'<div class="eh"><span class="v">'+esc(e.v||("v"+(i+1)))+(i===0?' · BORN':'')+'</span>'
+        +'<img class="pv" src="'+esc(e.img||"")+'" onerror="this.style.opacity=.2">'
+        +'<span class="sp"></span>'
+        +(i>0?'<button data-up="'+i+'">↑</button>':'')
+        +'<button class="r" data-delh="'+i+'">DELETE</button></div>'
+      +'<div class="row">'
+        +'<div class="f"><label>VERSION</label><input data-i="'+i+'" data-k="v" value="'+esc(e.v||"")+'" style="width:70px"></div>'
+        +'<div class="f"><label>DATE</label><input data-i="'+i+'" data-k="date" type="date" value="'+esc(e.date||"")+'"></div>'
+        +'<div class="f grow"><label>TITLE</label><input data-i="'+i+'" data-k="title" value="'+esc(e.title||"")+'"></div>'
+      +'</div>'
+      +'<div class="row"><div class="f grow"><label>PHOTO URL</label><input data-i="'+i+'" data-k="img" value="'+esc(e.img||"")+'" placeholder="/assets/garments/ibee-0001-v2.jpg"></div></div>'
+      +'<div class="row"><div class="f grow"><label>NOTE — what changed / the story</label><textarea data-i="'+i+'" data-k="note" rows="2">'+esc(e.note||"")+'</textarea></div></div>'
+    +'</div>';
+  }).join("") || '<div class="hint">No entries yet — add the birth (v1) first.</div>';
+  Array.prototype.forEach.call($("histWrap").querySelectorAll("[data-k]"),function(el){
+    var ev=(el.tagName==="TEXTAREA"||el.type!=="date")?"input":"change";
+    el.addEventListener(ev,function(){
+      g.history[+el.getAttribute("data-i")][el.getAttribute("data-k")]=el.value;
+      if(el.getAttribute("data-k")==="img"){ var im=el.closest(".ent").querySelector("img.pv"); im.src=el.value; im.style.opacity=1; }
+    });
+  });
+  Array.prototype.forEach.call($("histWrap").querySelectorAll("[data-delh]"),function(b){
+    b.onclick=function(){ g.history.splice(+b.getAttribute("data-delh"),1); renderHist(); renderList(); };
+  });
+  Array.prototype.forEach.call($("histWrap").querySelectorAll("[data-up]"),function(b){
+    b.onclick=function(){ var i=+b.getAttribute("data-up"); var a=g.history; var t=a[i-1];a[i-1]=a[i];a[i]=t; renderHist(); };
+  });
+}
+window.addHist=function(){
+  var g=DATA[cur]; g.history=g.history||[];
+  var n=g.history.length;
+  g.history.push({ date:today(), v:"v"+(n+1), title:n===0?"PRESSED":"REFRESH "+n,
+    note:"", img:n===0?pimg(g.pid):"" });
+  renderHist(); renderList();
+};
+window.delGarment=function(){ if(!confirm("Delete "+cur+"?")) return; delete DATA[cur]; cur=null; renderList(); renderEditor(); };
+
+$("newBtn").onclick=function(){
+  var s=nextSerial();
+  DATA[s]={ pid:PRODUCTS[0]?PRODUCTS[0].id:"", serial:s, owner:"", acquired:today(), status:"owned",
+    provenance:[], history:[] };
+  cur=s; renderList(); renderEditor(); setStatus("New garment "+s,"ok");
+};
+
+/* EXPORT — rebuild the data file exactly like the committed one */
+$("exportBtn").onclick=function(){
+  var body=JSON.stringify({v:1,garments:DATA},null,2);
+  var head='/* =====================================================================\n'
+    +'   IBEE GARMENTS — the living-garment layer (window.IBEE_GARMENTS).\n'
+    +'   Each entry is ONE physical piece: its owner, its ownership chain, and a\n'
+    +'   photographed history of every yearly refresh. Keyed by serial; `pid`\n'
+    +'   points at products-data.js. Authored in tools/garment-manager.html.\n'
+    +'   Buy it once. Wear it for years. We keep evolving it.\n'
+    +'   ===================================================================== */\n'
+    +'window.IBEE_GARMENTS = '+body+';\n';
+  $("exportText").value=head;
+  $("exportBox").style.display="flex";
+};
+window.copyExport=function(){ var t=$("exportText"); t.select(); document.execCommand("copy"); setStatus("Copied.","ok"); };
+window.downloadExport=function(){
+  var blob=new Blob([$("exportText").value],{type:"text/javascript"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="garments-data.js"; a.click();
+};
+
+setStatus(Object.keys(DATA).length+" garment(s) loaded · "+PRODUCTS.length+" catalog pieces","ok");
+renderList();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#070707">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>PASSPORT — ONLY IBEE</title>
+<meta name="description" content="Every ONLY IBEE piece is one of one, owned by name, and evolved once a year. This is its passport — who owns it, and everything it has become.">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<!--
+  THE PASSPORT — garment/?id=<serial>
+  Merges the living-garment layer (assets/garments-data.js, window.IBEE_GARMENTS)
+  with the catalog (assets/products-data.js) for name/rarity/first images.
+  Public by design: the piece's identity, its current owner, and the full
+  photographed history of every yearly refresh — the thing that makes it
+  collectible and resellable. Edited in tools/garment-manager.html.
+-->
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#2a2a2a;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
+header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
+main{flex:1;width:100%;max-width:680px;padding:20px 16px 70px;display:flex;flex-direction:column;
+  gap:16px;position:relative;z-index:2;animation:crtin .3s ease-out}
+@keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
+.mback{align-self:flex-start;font-family:var(--px);font-size:8px;color:var(--dim);text-decoration:none}
+.mback:hover{color:var(--acid)}
+
+/* ---- identity header ---- */
+.idcard{border:2px solid var(--border);background:linear-gradient(180deg,#101010,#0a0a0a);padding:16px}
+.idcard .serial{font-family:var(--px);font-size:clamp(15px,6vw,26px);color:var(--acid);letter-spacing:2px;
+  text-shadow:0 0 18px rgba(182,255,0,.28)}
+.idcard .pname{font-size:24px;color:var(--ink);margin-top:8px;line-height:1.1}
+.idcard .idmeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.badge{font-family:var(--px);font-size:8px;letter-spacing:1px;padding:5px 8px;border:1px solid var(--border);color:var(--dim)}
+.badge.one{color:var(--gold);border-color:#4a3a12}
+.rz-c{color:var(--cyan);border-color:#123a4a}.rz-sr{color:var(--acid);border-color:#2a4a12}
+.rz-sdr{color:var(--pink);border-color:#4a1240}.rz-leg{color:var(--gold);border-color:#4a3a12}
+
+/* ---- hero ---- */
+.hero{width:100%;aspect-ratio:1/1;border:2px solid var(--border);background:#0a0a0c;overflow:hidden;position:relative}
+.hero img{width:100%;height:100%;object-fit:contain;display:block}
+.hero .now{position:absolute;bottom:10px;left:10px;font-family:var(--px);font-size:8px;letter-spacing:1px;
+  padding:6px 8px;background:rgba(0,0,0,.72);border:1px solid var(--border);color:var(--acid)}
+
+/* ---- owner plate ---- */
+.owner{border:1px solid var(--acid);background:linear-gradient(180deg,#0d1405,#0a0a0a);padding:14px}
+.owner.resale{border-color:var(--gold);background:linear-gradient(180deg,#15110a,#0a0a0a)}
+.owner.refresh{border-color:var(--cyan);background:linear-gradient(180deg,#08151a,#0a0a0a)}
+.owner .oh{font-family:var(--px);font-size:8px;letter-spacing:2px;color:var(--acid)}
+.owner.resale .oh{color:var(--gold)}.owner.refresh .oh{color:var(--cyan)}
+.owner .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:10px}
+.owner .row .k{font-family:var(--px);font-size:8px;color:#555;letter-spacing:1px}
+.owner .row .v{font-size:22px;color:var(--ink)}
+.owner .who{font-size:30px;color:var(--acid);line-height:1}
+.owner.resale .who{color:var(--gold)}
+.owner .stat{font-family:var(--px);font-size:8px;letter-spacing:1px;margin-top:10px;padding-top:10px;border-top:1px solid #1c1c1c;color:var(--dim)}
+
+/* ---- section heads ---- */
+.sh{font-family:var(--px);font-size:10px;letter-spacing:2px;color:var(--dim);margin:4px 2px 0}
+.sh b{color:var(--acid)}
+
+/* ---- the history timeline ---- */
+.timeline{position:relative;padding-left:26px}
+.timeline::before{content:"";position:absolute;left:8px;top:6px;bottom:26px;width:2px;
+  background:repeating-linear-gradient(to bottom,rgba(182,255,0,.5) 0 6px,transparent 6px 12px)}
+.tl{position:relative;margin-bottom:16px}
+.tl::before{content:"";position:absolute;left:-26px;top:6px;width:14px;height:14px;border-radius:50%;
+  background:#0a0a0a;border:3px solid var(--acid);box-shadow:0 0 0 3px #070707}
+.tl.born::before{background:var(--acid)}
+.tl .card{border:1px solid var(--border);background:var(--panel);overflow:hidden}
+.tl .shot{width:100%;aspect-ratio:4/3;background:#0a0a0c;overflow:hidden}
+.tl .shot img{width:100%;height:100%;object-fit:cover;display:block}
+.tl .body{padding:12px}
+.tl .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.tl .ver{font-family:var(--px);font-size:9px;color:var(--acid);letter-spacing:1px}
+.tl .date{font-family:var(--px);font-size:8px;color:#555;letter-spacing:1px}
+.tl .ttl{font-size:22px;color:var(--ink);margin-top:6px;line-height:1.1}
+.tl .note{color:var(--dim);margin-top:6px;line-height:1.4}
+/* the ghost node — the next refresh, not done yet */
+.tl.due::before{border-color:var(--gold);background:#0a0a0a}
+.tl.due .card{border-style:dashed;border-color:#4a3a12;background:linear-gradient(180deg,#12100a,#0a0a0a)}
+.tl.due .ver{color:var(--gold)}
+
+/* ---- provenance ---- */
+.prov{border:1px solid var(--border);background:var(--panel);padding:14px}
+.prov .chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.prov .who{font-size:20px;color:var(--ink)}
+.prov .arw{color:#444;font-family:var(--px);font-size:9px}
+.prov .yr{color:#555;font-size:15px}
+
+/* ---- the program + actions ---- */
+.program{border:1px solid var(--acid);background:linear-gradient(180deg,#0d1405,#0a0a0a);padding:16px}
+.program .tag{font-size:24px;color:var(--acid);line-height:1.15;text-shadow:0 0 16px rgba(182,255,0,.25)}
+.program ul{list-style:none;margin:12px 0 0;display:flex;flex-direction:column;gap:8px}
+.program li{color:var(--dim);line-height:1.4;padding-left:16px;position:relative}
+.program li::before{content:"→";position:absolute;left:0;color:var(--acid)}
+.program li b{color:var(--ink);font-weight:400}
+.acts{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.btn{font-family:var(--px);font-size:9px;padding:12px 14px;text-decoration:none;cursor:pointer;
+  background:var(--acid);color:#07120a;border:1px solid var(--acid)}
+.btn.alt{background:transparent;color:var(--gold);border-color:var(--gold)}
+.btn.ghost{background:transparent;color:var(--dim);border-color:var(--border)}
+.btn:active{transform:translateY(1px)}
+.hint{color:#555;font-size:16px;margin-top:10px;line-height:1.5}
+.hint code{color:var(--acid)}
+
+.notfound{margin:60px auto;text-align:center;font-family:var(--px);font-size:11px;color:var(--red);line-height:2}
+.notfound a{color:var(--acid);text-decoration:none}
+footer{width:100%;text-align:center;padding:16px;border-top:2px solid var(--border);
+  font-family:var(--px);font-size:8px;color:#444;position:relative;z-index:2}
+</style>
+</head>
+<body>
+<header>
+  <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
+  <span>PASSPORT.SYS</span>
+</header>
+
+<main id="main">
+  <a class="mback" href="../console.html#shop" data-back>◀ BACK</a>
+  <div id="wrap" style="display:none;flex-direction:column;gap:16px"></div>
+  <div class="notfound" id="notfound" style="display:none">✕ NO SUCH PIECE_<br><br>
+    <a href="../console.html#shop">◀ BACK TO THE SHOP</a></div>
+</main>
+
+<footer>© ONLYIBEE — UTOPIE™ · ONE OF ONE · OWNED, NOT CONSUMED</footer>
+
+<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="../assets/garments-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>
+(function(){
+  "use strict";
+  /* Where "refresh / custom / resale" requests go. Set this to your email and
+     the buttons become one-tap mailto with the serial pre-filled. Leave empty
+     and they still explain the program and point people to the NFC label. */
+  var CONTACT = "";
+
+  function e2(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+  var RNAME={c:"COMMON",sr:"SUPER RARE",sdr:"SUPER DUPER RARE",leg:"LEGENDARY"};
+  var $=function(id){return document.getElementById(id);};
+  var id=decodeURIComponent((new RegExp("[?&]id=([^&]+)").exec(location.search)||[])[1]||"").trim();
+
+  var G=(window.IBEE_GARMENTS||{}).garments||{};
+  var P=(window.IBEE_PRODUCTS||{}).products||[];
+  function prod(pid){ for(var i=0;i<P.length;i++) if(P[i].id===pid) return P[i]; return null; }
+
+  var g=G[id];
+  /* also allow ?id=<product id> to resolve to its garment, so a product page
+     and its passport can share a link */
+  if(!g){ for(var k in G){ if(G[k].pid===id){ g=G[k]; break; } } }
+
+  if(!g){ $("notfound").style.display="block"; return; }
+  var p=prod(g.pid)||{};
+
+  function fmtDate(iso){
+    if(!iso) return "—";
+    var d=new Date(iso+"T00:00:00"); if(isNaN(d)) return iso;
+    return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase();
+  }
+  function yr(iso){ var d=new Date(iso+"T00:00:00"); return isNaN(d)?"":d.getFullYear(); }
+  function addYear(iso,n){ var d=new Date(iso+"T00:00:00"); if(isNaN(d)) return null;
+    d.setFullYear(d.getFullYear()+(n||1)); return d.toISOString().slice(0,10); }
+  function yearsBetween(iso){ if(!iso) return 0; var d=new Date(iso+"T00:00:00");
+    return Math.max(0, Math.floor((Date.now()-d.getTime())/(365.25*24*3600*1000))); }
+
+  var hist=(g.history||[]).slice().sort(function(a,b){return (a.date<b.date?-1:1);});
+  var latest=hist.length?hist[hist.length-1]:null;
+  var heroImg=(latest&&latest.img)||(p.imgs&&p.imgs[0])||"";
+  var refreshes=Math.max(0,hist.length-1);           /* v1 is birth, not a refresh */
+  var age=yearsBetween(g.acquired);
+  var statusLabel={owned:"WORN & KEPT",resale:"LISTED — PASSING IT ON",refresh:"SENT BACK — EVOLVING NOW"}[g.status]||"OWNED";
+
+  /* next refresh due: explicit nextDue, else last history date + 1 year */
+  var due=g.nextDue||(latest?addYear(latest.date,1):(g.acquired?addYear(g.acquired,1):null));
+  var overdue=due && (new Date(due+"T00:00:00").getTime() < Date.now());
+
+  var rcls="rz-"+(p.r||"c");
+  var out=[];
+
+  /* identity */
+  out.push('<div class="idcard">'
+    +'<div class="serial">'+e2(g.serial||id)+'</div>'
+    +'<div class="pname">'+e2(p.n||"—")+'</div>'
+    +'<div class="idmeta">'
+      +(p.no?'<span class="badge">'+e2(p.no)+(function(){var m=String(p.folder||'').match(/(\d+)$/);return m?'/'+m[1]:'';})()+'</span>':'')
+      +'<span class="badge one">ONE OF ONE</span>'
+      +'<span class="badge '+rcls+'">'+(RNAME[p.r]||"")+'</span>'
+    +'</div></div>');
+
+  /* hero */
+  if(heroImg) out.push('<div class="hero"><img src="'+e2(heroImg)+'" alt="'+e2(p.n)+'">'
+    +'<span class="now">'+(latest?e2(latest.v)+' · NOW':'NOW')+'</span></div>');
+
+  /* owner plate */
+  out.push('<div class="owner '+e2(g.status||"owned")+'">'
+    +'<div class="oh">OWNED BY</div>'
+    +'<div class="who">@'+e2(g.owner||"—")+'</div>'
+    +'<div class="row"><span class="k">SINCE</span><span class="v">'+fmtDate(g.acquired)+'</span></div>'
+    +'<div class="stat">'+statusLabel+'  ·  '+age+' YR'+(age===1?'':'S')+' IN THE WORLD  ·  '+refreshes+' REFRESH'+(refreshes===1?'':'ES')+'</div>'
+  +'</div>');
+
+  /* the history */
+  out.push('<div class="sh">// THE <b>HISTORY</b> — everything it has become_</div>');
+  out.push('<div class="timeline">');
+  hist.forEach(function(h,i){
+    out.push('<div class="tl'+(i===0?' born':'')+'">'
+      +'<div class="card">'
+        +(h.img?'<div class="shot"><img src="'+e2(h.img)+'" alt="'+e2(h.title)+'" loading="lazy"></div>':'')
+        +'<div class="body">'
+          +'<div class="top"><span class="ver">'+e2(h.v||('v'+(i+1)))+(i===0?' · BORN':'')+'</span><span class="date">'+fmtDate(h.date)+'</span></div>'
+          +'<div class="ttl">'+e2(h.title||'')+'</div>'
+          +(h.note?'<div class="note">'+e2(h.note)+'</div>':'')
+        +'</div>'
+      +'</div></div>');
+  });
+  /* the ghost node: the next refresh, waiting to happen */
+  if(due && g.status!=="refresh"){
+    out.push('<div class="tl due">'
+      +'<div class="card"><div class="body">'
+        +'<div class="top"><span class="ver">v'+(hist.length+1)+' · NEXT</span><span class="date">'+fmtDate(due)+'</span></div>'
+        +'<div class="ttl">'+(overdue?'REFRESH DUE NOW':'THE NEXT REFRESH')+'</div>'
+        +'<div class="note">'+(overdue
+            ? 'Send it back — this year’s refresh is ready to be made. Included; you cover the shipping.'
+            : 'Once a year it comes home and we evolve it. Included with the piece — you only pay the shipping.')+'</div>'
+      +'</div></div></div>');
+  }
+  out.push('</div>');
+
+  /* provenance */
+  var prov=g.provenance||[];
+  if(prov.length){
+    var chain=prov.map(function(o){ return '<span class="who">@'+e2(o.owner)+'</span>'
+      +(o.from?' <span class="yr">'+yr(o.from)+'</span>':''); }).join('<span class="arw"> → </span>');
+    out.push('<div class="prov"><div class="sh" style="margin:0">// PROVENANCE_</div>'
+      +'<div class="chain">'+chain+'</div>'
+      +(prov.length<2?'<div class="hint" style="margin-top:8px">First owner. Its whole story is still being written.</div>':'')
+    +'</div>');
+  }
+
+  /* the program + actions */
+  var mail=function(kind,label){
+    var subj=kind+" — "+(g.serial||id);
+    if(CONTACT) return '<a class="btn '+(kind==="CUSTOM"?"alt":(kind==="RESALE"?"ghost":""))+'" href="mailto:'+CONTACT+'?subject='+encodeURIComponent(subj)+'">'+label+'</a>';
+    return '<a class="btn '+(kind==="CUSTOM"?"alt":(kind==="RESALE"?"ghost":""))+'" href="../console.html#shop">'+label+'</a>';
+  };
+  out.push('<div class="program">'
+    +'<div class="tag">Buy it once.<br>Wear it for years.<br>We keep evolving it.</div>'
+    +'<ul>'
+      +'<li>Every piece is <b>one of one</b>, claimed by name, and its life is public — this page.</li>'
+      +'<li><b>Once a year</b> you send it back and we refresh it. The standard refresh is <b>included</b>; you cover shipping.</li>'
+      +'<li>Want it taken somewhere new? <b>Custom modifications</b> on request, for a fee.</li>'
+      +'<li>Every refresh is photographed and added here, so the piece only gets <b>deeper</b>.</li>'
+      +'<li>Pass it on whenever — it resells <b>with its entire history</b>, provenance and all.</li>'
+    +'</ul>'
+    +'<div class="acts">'
+      +mail("REFRESH","↻ REQUEST REFRESH")
+      +mail("CUSTOM","✎ CUSTOM MOD")
+      +mail("RESALE","→ LIST FOR RESALE")
+    +'</div>'
+    +(CONTACT?'':'<div class="hint">To start a refresh, tap the NFC label inside the piece — or set a contact email in <code>garment/index.html</code> to turn these into one-tap requests.</div>')
+  +'</div>');
+
+  $("wrap").innerHTML=out.join("");
+  $("wrap").style.display="flex";
+  document.title=(g.serial||id)+" — "+(p.n||"PASSPORT")+" · ONLY IBEE";
+})();
+</script>
+<script src="../assets/nav.js?v=1"></script>
+</body>
+</html>
