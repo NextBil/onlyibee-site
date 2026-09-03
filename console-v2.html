@@ -144,7 +144,7 @@ body:not(.booting) .pressplay{opacity:0}
 .usearch{flex:1}
 .usearch input{width:100%;font-family:var(--vt);font-size:18px;background:#0e0e0e;color:var(--ink);border:1px solid var(--border);padding:9px 12px}
 .usearch input:focus{outline:none;border-color:var(--acid)}
-#ugrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;padding:14px 14px 140px}
+#ugrid{position:absolute;inset:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;padding:14px 14px 140px}
 .ucard{cursor:pointer;border:1px solid var(--border);background:#0b0b0b;overflow:hidden;transition:.15s}
 .ucard:hover{border-color:var(--acid);transform:translateY(-3px)}
 .ucard .uc{width:100%;aspect-ratio:1/1;background:#000 center/cover no-repeat;position:relative}
@@ -167,6 +167,15 @@ body:not(.booting) .pressplay{opacity:0}
 #udet .lyr{margin-top:22px;border-top:1px solid var(--border);padding-top:16px}
 .lyrh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
 #dlyr{font-size:19px;line-height:1.75;color:#cfcfcf;white-space:pre-line}
+
+/* galaxy stage inside the universe */
+#unistage{flex:1;position:relative;overflow:hidden;background:#050506}
+#unicv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.uhint{position:absolute;left:0;right:0;bottom:130px;text-align:center;font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--dim);pointer-events:none}
+.utoggle{font-family:var(--px);font-size:8px;color:var(--acid);background:none;border:1px solid var(--border);padding:9px 10px;cursor:pointer;flex:none}
+.utoggle:hover{border-color:var(--acid)}
+#uni.listmode #unicv,#uni.listmode .uhint{display:none}
+#uni:not(.listmode) #ugrid{display:none}
 </style>
 </head>
 <body>
@@ -245,8 +254,13 @@ body:not(.booting) .pressplay{opacity:0}
     <button class="uback" id="uback">◀</button>
     <span class="utitle">THE UNIVERSE</span>
     <span class="usearch"><input id="usq" placeholder="⌕ search songs, albums, vibes…" autocomplete="off"></span>
+    <button class="utoggle" id="utoggle">▦ LIST</button>
   </div>
-  <div id="ugrid"></div>
+  <div id="unistage">
+    <canvas id="unicv"></canvas>
+    <div id="ugrid"></div>
+    <div class="uhint">a galaxy per record · a planet per song · tap one to open it</div>
+  </div>
   <div id="udet">
     <div class="dh" id="dhero"><button class="dclose" id="dclose">◀ BACK</button></div>
     <div class="db">
@@ -332,7 +346,7 @@ body:not(.booting) .pressplay{opacity:0}
     if(!document.body.classList.contains("playing")){ document.body.style.setProperty("--beat",0); return; }
     var kick=Math.pow(Math.max(0,Math.sin(t/340)),3);
     var b=kick*(0.7+0.3*Math.sin(t/1900));
-    document.body.style.setProperty("--beat", b.toFixed(3));
+    curBeat=b; document.body.style.setProperty("--beat", b.toFixed(3));
   })(0);
 
   /* THE UNIVERSE — a mini-spotify that is the radio: search, covers, lyrics, info */
@@ -360,19 +374,72 @@ body:not(.booting) .pressplay{opacity:0}
       : '<div style="grid-column:1/-1;color:var(--dim);font-family:var(--px);font-size:9px;padding:40px 0;text-align:center">nothing here_</div>';
     [].forEach.call($("ugrid").querySelectorAll(".ucard"),function(el){ el.onclick=function(){ openDet(SONGS[+el.getAttribute("data-i")]); }; });
   }
-  function openUni(){ $("uni").classList.add("on"); renderUni($("usq").value); }
-  function closeUni(){ $("udet").classList.remove("on"); $("uni").classList.remove("on"); }
+
+  /* ===== THE GALAXY — the physics engine kept, songs orbiting as planets ===== */
+  var GX=[{name:"NOUVEAUX PUNK",hue:110},{name:"20 MIN ZA SESSION",hue:78}];
+  SONGS.forEach(function(s,i){ s.g=/20 ?min|20mzs/i.test(s.a)?1:0; });
+  var cv=$("unicv"), cx=cv.getContext("2d"), CW=0,CH=0,DPR=1, uniOpen=false, hoverP=null, uq="", planets=[], suns=[];
+  var stars=[]; for(var k=0;k<80;k++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()});
+  function sizeCv(){ var r=$("unistage").getBoundingClientRect(); if(!r.width)return;
+    CW=r.width; CH=r.height; DPR=Math.min(2,window.devicePixelRatio||1);
+    cv.width=CW*DPR; cv.height=CH*DPR; cx.setTransform(DPR,0,0,DPR,0,0); layout(); }
+  function layout(){
+    suns=[{hue:GX[0].hue,x:CW*0.5,y:CH*0.33,name:GX[0].name},{hue:GX[1].hue,x:CW*0.5,y:CH*0.72,name:GX[1].name}];
+    var ring=[0,0];
+    planets=SONGS.map(function(s,i){ var g=s.g; var n=ring[g]++;
+      return {s:s,g:g,ang:Math.random()*6.283,rad:40+ (n%4)*30 + (n%2)*8,
+        spd:(0.4+Math.random()*0.5)*(n%2?1:-1), size:7+Math.min(6,String(s.pl).length), x:0,y:0}; });
+  }
+  function frame(){
+    if(!uniOpen) return; requestAnimationFrame(frame);
+    cx.clearRect(0,0,CW,CH); cx.fillStyle="#050506"; cx.fillRect(0,0,CW,CH);
+    stars.forEach(function(st){ st.y+=0.0003+st.z*0.0006; if(st.y>1)st.y=0;
+      cx.globalAlpha=0.15+st.z*0.5; cx.fillStyle="#fff"; cx.fillRect(st.x*CW,st.y*CH,1.3,1.3); });
+    cx.globalAlpha=1;
+    var beat=curBeat;
+    suns.forEach(function(sn){
+      var R=24+beat*10, grd=cx.createRadialGradient(sn.x,sn.y,3,sn.x,sn.y,R*2.8);
+      grd.addColorStop(0,"hsla("+sn.hue+",90%,62%,.85)"); grd.addColorStop(1,"hsla("+sn.hue+",90%,50%,0)");
+      cx.fillStyle=grd; cx.beginPath(); cx.arc(sn.x,sn.y,R*2.8,0,6.283); cx.fill();
+      cx.fillStyle="hsl("+sn.hue+",85%,58%)"; cx.beginPath(); cx.arc(sn.x,sn.y,10+beat*4,0,6.283); cx.fill();
+      cx.fillStyle="rgba(255,255,255,.7)"; cx.font="7px 'Press Start 2P',monospace"; cx.textAlign="center";
+      cx.fillText(sn.name, sn.x, sn.y+R*2.2);
+    });
+    planets.forEach(function(pl){ var sn=suns[pl.g]; pl.ang+=pl.spd*0.012;
+      pl.x=sn.x+Math.cos(pl.ang)*pl.rad; pl.y=sn.y+Math.sin(pl.ang)*pl.rad*0.55;
+      var match=!uq||(pl.s.n+" "+pl.s.a).toLowerCase().indexOf(uq)>-1;
+      cx.globalAlpha=match?0.14:0.05; cx.strokeStyle="hsl("+sn.hue+",70%,55%)"; cx.lineWidth=1;
+      cx.beginPath(); cx.ellipse(sn.x,sn.y,pl.rad,pl.rad*0.55,0,0,6.283); cx.stroke();
+      var sz=(pl.size*0.5)*(1+beat*0.55), hue=sn.hue+(pl.g?46:-34);
+      cx.globalAlpha=match?1:0.16;
+      if(pl===hoverP){ cx.fillStyle="hsla("+hue+",90%,65%,.4)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz+6,0,6.283); cx.fill(); }
+      cx.fillStyle="hsl("+hue+",85%,"+(match?63:46)+"%)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz,0,6.283); cx.fill();
+      cx.fillStyle="rgba(255,255,255,.85)"; cx.beginPath(); cx.arc(pl.x-sz*0.3,pl.y-sz*0.3,sz*0.28,0,6.283); cx.fill();
+      if(match && pl===hoverP){ cx.fillStyle="#fff"; cx.font="8px 'Press Start 2P',monospace"; cx.textAlign="center"; cx.fillText(pl.s.n,pl.x,pl.y-sz-9); }
+      cx.globalAlpha=1;
+    });
+  }
+  function pick(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){ var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;} });
+    return (best && bd < (best.size*0.5+16))?best:null; }
+  cv.addEventListener("click",function(e){ var r=cv.getBoundingClientRect(); var pl=pick(e.clientX-r.left,e.clientY-r.top); if(pl) openDet(pl.s); });
+  cv.addEventListener("mousemove",function(e){ var r=cv.getBoundingClientRect(); hoverP=pick(e.clientX-r.left,e.clientY-r.top); cv.style.cursor=hoverP?"pointer":"default"; });
+  window.addEventListener("resize",function(){ if(uniOpen) sizeCv(); });
+
+  function openUni(){ $("uni").classList.add("on"); $("uni").classList.remove("listmode"); uniOpen=true; renderUni(uq);
+    setTimeout(function(){ sizeCv(); frame(); },30); }
+  function closeUni(){ uniOpen=false; $("udet").classList.remove("on"); $("uni").classList.remove("on"); }
   function openDet(s){
     $("dhero").style.backgroundImage="url("+s.c+")";
     $("dti").textContent=s.n; $("dar").textContent=s.a;
-    $("dinfo").textContent=s.len+"  \u00b7  "+s.pl+" plays  \u00b7  press \u25B6 to hear it";
-    $("dlyr").textContent=LY;
-    $("udet").classList.add("on");
+    $("dinfo").textContent=s.len+"  ·  "+s.pl+" plays  ·  press ▶ to hear it";
+    $("dlyr").textContent=LY; $("udet").classList.add("on");
     $("dplay").onclick=function(){ $("ti").textContent=s.n; $("disc").style.backgroundImage="url("+s.c+")"; setPlay(true); toast("NOW PLAYING  "+s.n+"_"); };
   }
   $("uback").onclick=closeUni;
   $("dclose").onclick=function(){ $("udet").classList.remove("on"); };
-  $("usq").oninput=function(){ renderUni(this.value); };
+  $("usq").oninput=function(){ uq=this.value.toLowerCase(); renderUni(uq); };
+  $("utoggle").onclick=function(){ var list=$("uni").classList.toggle("listmode");
+    this.textContent=list?"🪐 GALAXY":"▦ LIST"; if(!list) setTimeout(sizeCv,20); else renderUni(uq); };
   renderUni("");
 })();
 </script>
