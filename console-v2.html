@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>ONLY IBEE OS — console v2 (prototype)</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070707;--panel:#0e0e0e;--panel2:#141414;--ink:#e8e8e8;--dim:#7a7a7a;
+  --acid:#b6ff00;--red:#ff2b2b;--cyan:#26e0ff;--pink:#ff2bd6;--gold:#ffd60a;--border:#242424;
+  --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:
+   radial-gradient(1200px 600px at 50% -10%, rgba(38,224,255,.06), transparent 60%),
+   var(--bg);
+  color:var(--ink);font-family:var(--vt);font-size:20px;overflow-x:hidden;
+  min-height:100dvh;display:flex;flex-direction:column}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.26) 0 1px,transparent 1px 3px)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.5) 100%)}
+
+/* ---------- top status bar ---------- */
+.top{display:flex;align-items:center;gap:12px;padding:12px 16px calc(10px);
+  border-bottom:2px solid var(--border);position:relative;z-index:5}
+.brand{font-family:var(--px);font-size:12px;letter-spacing:1px;color:var(--acid)}
+.brand .r{color:var(--red)}
+.top .sp{flex:1}
+.chip{font-family:var(--px);font-size:8px;letter-spacing:1px;color:var(--dim);
+  border:1px solid var(--border);padding:6px 8px;display:flex;align-items:center;gap:6px;background:#0a0a0a}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 7px var(--acid);
+  animation:blink 1.4s steps(1) infinite}
+.chip.coin{color:var(--gold)}.chip.coin .dot{background:var(--gold);box-shadow:0 0 7px var(--gold)}
+@keyframes blink{50%{opacity:.25}}
+
+/* ---------- greeting ---------- */
+.hello{padding:16px 16px 4px;position:relative;z-index:5}
+.hello h1{font-family:var(--px);font-size:13px;letter-spacing:1px;color:var(--ink);line-height:1.7}
+.hello .s{color:var(--dim);font-size:18px;margin-top:6px}
+
+/* ---------- the box grid ---------- */
+.grid{flex:1;display:grid;gap:12px;padding:14px 16px 150px;position:relative;z-index:5;
+  grid-template-columns:repeat(2,1fr);align-content:start;max-width:1100px;margin:0 auto;width:100%}
+@media(min-width:720px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1040px){.grid{grid-template-columns:repeat(3,1fr);gap:16px}}
+
+.box{position:relative;border:2px solid var(--border);background:
+   radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--ac) 12%, transparent), transparent 60%),
+   linear-gradient(180deg,#111,#0a0a0a);
+  padding:14px 13px 13px;cursor:pointer;overflow:hidden;
+  transition:transform .16s cubic-bezier(.2,.8,.2,1),border-color .16s,box-shadow .16s;
+  display:flex;flex-direction:column;min-height:186px}
+.box::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac);opacity:.85}
+.box:hover,.box:focus-visible,.box.on{transform:translateY(-4px) scale(1.015);border-color:var(--ac);
+  box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 26px color-mix(in srgb,var(--ac) 30%,transparent);outline:none}
+.box .head{display:flex;align-items:center;gap:10px}
+
+/* the rotating 3D voxel icon — kept from the current menu */
+.ico{width:44px;height:44px;flex:none;perspective:220px}
+.ico .o3{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;
+  animation:spin 5.5s linear infinite}
+.ico .o3 span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:30px;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--ac) 60%,transparent))}
+@keyframes spin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
+.box:hover .ico .o3,.box.on .ico .o3{animation-duration:2.4s}
+.nm{font-family:var(--px);font-size:12px;letter-spacing:1px;color:var(--ink)}
+.tag{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--ac);margin-top:6px}
+.desc{color:var(--dim);font-size:16px;line-height:1.3;margin-top:8px}
+
+/* the snippet — a peek at what's inside */
+.snip{margin-top:auto;display:flex;gap:6px;padding-top:12px}
+.snip .t{flex:1;aspect-ratio:1/1;border:1px solid var(--border);background:#050505 center/cover no-repeat;
+  position:relative;overflow:hidden}
+.snip .t.txt{display:flex;align-items:center;justify-content:center;font-family:var(--px);
+  font-size:7px;color:var(--dim);text-align:center;line-height:1.5;padding:4px}
+.snip .more{flex:none;width:30%;display:flex;align-items:center;justify-content:center;
+  border:1px dashed #2b2b2b;color:var(--ac);font-family:var(--px);font-size:8px;background:#070707}
+.arrow{position:absolute;top:12px;right:12px;font-family:var(--px);font-size:11px;color:var(--ac);
+  opacity:0;transform:translateX(-4px);transition:.16s}
+.box:hover .arrow,.box.on .arrow{opacity:1;transform:translateX(0)}
+
+/* per-category accent */
+.box.music{--ac:var(--acid)} .box.rooms{--ac:var(--cyan)} .box.shop{--ac:var(--pink)}
+.box.ics{--ac:var(--gold)} .box.tv{--ac:var(--red)} .box.member{--ac:#5ad17a}
+
+/* ---------- the radio dock ---------- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:linear-gradient(180deg,#0c0c0c,#070707);border-top:2px solid var(--acid);
+  box-shadow:0 -10px 30px rgba(0,0,0,.6),0 -1px 0 rgba(182,255,0,.35);
+  padding:calc(10px) 12px calc(10px + env(safe-area-inset-bottom))}
+.dock .row{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.disc{width:56px;height:56px;flex:none;border-radius:50%;position:relative;cursor:pointer;
+  background:#000 center/cover no-repeat;border:2px solid #333;
+  box-shadow:0 0 0 4px #0a0a0a,0 0 16px rgba(0,0,0,.8);overflow:hidden}
+.disc::after{content:"";position:absolute;inset:42% 42%;border-radius:50%;background:#0a0a0a;
+  border:2px solid #2a2a2a}
+.disc.spin{animation:vinyl 3.6s linear infinite}
+@keyframes vinyl{to{transform:rotate(360deg)}}
+.meta{flex:1;min-width:0}
+.meta .lab{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--acid)}
+.meta .ti{font-size:22px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.meta .by{font-size:15px;color:var(--dim)}
+.wave{display:flex;align-items:flex-end;gap:2px;height:16px;margin-top:6px}
+.wave i{width:3px;background:var(--acid);opacity:.65;height:30%}
+.playing .wave i{animation:eq .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.1s}.wave i:nth-child(3){animation-delay:.25s}
+.wave i:nth-child(4){animation-delay:.05s}.wave i:nth-child(5){animation-delay:.3s}
+.wave i:nth-child(6){animation-delay:.18s}.wave i:nth-child(7){animation-delay:.12s}
+.wave i:nth-child(8){animation-delay:.28s}.wave i:nth-child(9){animation-delay:.08s}
+.wave i:nth-child(10){animation-delay:.22s}.wave i:nth-child(11){animation-delay:.15s}
+.wave i:nth-child(12){animation-delay:.32s}
+@keyframes eq{0%,100%{height:20%}50%{height:100%}}
+.ctrls{display:flex;align-items:center;gap:8px;flex:none}
+.ctrls button{font-family:var(--vt);background:transparent;border:none;color:var(--dim);cursor:pointer;
+  font-size:22px;padding:6px}
+.ctrls button:hover{color:var(--ink)}
+.play{width:52px;height:52px;border:2px solid var(--acid)!important;border-radius:50%;
+  color:#07120a!important;background:var(--acid)!important;font-size:20px!important;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(182,255,0,.5)}
+.play:active{transform:translateY(1px)}
+.dock .bar{max-width:1100px;margin:8px auto 0;height:4px;background:#1a1a1a;position:relative;cursor:pointer}
+.dock .bar i{position:absolute;left:0;top:0;bottom:0;width:34%;background:var(--acid);box-shadow:0 0 8px var(--acid)}
+.dock .bar i::after{content:"";position:absolute;right:-4px;top:-3px;width:9px;height:9px;border-radius:50%;background:#fff}
+.tapme{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-family:var(--px);
+  font-size:6.5px;letter-spacing:1px;color:#07120a;background:var(--acid);padding:3px 8px}
+
+@media(max-width:520px){ .meta .ti{font-size:19px} .disc{width:48px;height:48px} .play{width:46px;height:46px} }
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(20px);z-index:80;
+  font-family:var(--px);font-size:9px;letter-spacing:1px;color:#07120a;background:var(--acid);
+  padding:12px 16px;opacity:0;transition:.2s;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="brand">ONLY<span class="r">IBEE</span> OS</span>
+  <span class="chip coin"><span class="dot"></span>◈ 340 LISTENS</span>
+  <span class="sp"></span>
+  <span class="chip"><span class="dot"></span>SIGNAL LIVE</span>
+</div>
+
+<div class="hello">
+  <h1>GOOD EVENING_</h1>
+  <div class="s">pick a cartridge — everything here plays to the same record.</div>
+</div>
+
+<main class="grid" id="grid">
+
+  <button class="box music on" data-go="music">
+    <div class="head">
+      <span class="ico"><span class="o3"><span>🪐</span></span></span>
+      <div><div class="nm">MUSIC</div><div class="tag">35 RECORDS</div></div>
+    </div>
+    <div class="desc">galaxies of releases — planets you can play.</div>
+    <div class="snip">
+      <span class="t" style="background-image:url(https://onlyibee.com/assets/img/nouveaux-punk.jpg)"></span>
+      <span class="t" style="background-image:url(https://onlyibee.com/assets/img/np-cover.jpg)"></span>
+      <span class="t" style="background-image:url(https://onlyibee.com/assets/img/20mzs-album.jpg)"></span>
+      <span class="more">+32</span>
+    </div>
+    <span class="arrow">ENTER ▶</span>
+  </button>
+
+  <button class="box rooms" data-go="rooms">
+    <div class="head">
+      <span class="ico"><span class="o3"><span>🎮</span></span></span>
+      <div><div class="nm">ROOMS</div><div class="tag">GAMES + ROOMS</div></div>
+    </div>
+    <div class="desc">arcade games and rooms that grow with you.</div>
+    <div class="snip">
+      <span class="t" style="background-image:url(https://onlyibee.com/arcade/covers/ics-chess.png)"></span>
+      <span class="t" style="background-image:url(https://onlyibee.com/arcade/covers/aqua-bass.png)"></span>
+      <span class="t" style="background-image:url(https://onlyibee.com/arcade/covers/neon-run.png)"></span>
+      <span class="more">+7</span>
+    </div>
+    <span class="arrow">ENTER ▶</span>
+  </button>
+
+  <button class="box shop" data-go="shop">
+    <div class="head">
+      <span class="ico"><span class="o3"><span>👕</span></span></span>
+      <div><div class="nm">SHOP</div><div class="tag">ONE OF ONE</div></div>
+    </div>
+    <div class="desc">hand-made pieces. each one made only once.</div>
+    <div class="snip">
+      <span class="t" style="background-image:url(https://static.wixstatic.com/media/0fcae7_37851d102940464786ec570c169480c3~mv2.png/v1/fit/w_300,h_300,q_85/file.png)"></span>
+      <span class="t" style="background-image:url(https://static.wixstatic.com/media/0fcae7_adcaa115259d490e8398a7ac610aa9da~mv2.jpg/v1/fit/w_300,h_300,q_85/file.jpg)"></span>
+      <span class="t" style="background-image:url(https://static.wixstatic.com/media/0fcae7_972f431666f0430f9db44278283ba9e2~mv2.jpg/v1/fit/w_300,h_300,q_85/file.jpg)"></span>
+      <span class="more">+44</span>
+    </div>
+    <span class="arrow">ENTER ▶</span>
+  </button>
+
+  <button class="box ics" data-go="ics">
+    <div class="head">
+      <span class="ico"><span class="o3"><span>♟️</span></span></span>
+      <div><div class="nm">ICS</div><div class="tag">PROJECT 03</div></div>
+    </div>
+    <div class="desc">meet the characters. play them as chess.</div>
+    <div class="snip">
+      <span class="t" style="background-image:url(https://onlyibee.com/assets/chess/queen.png);background-size:contain"></span>
+      <span class="t" style="background-image:url(https://onlyibee.com/assets/chess/king.png);background-size:contain"></span>
+      <span class="t" style="background-image:url(https://onlyibee.com/assets/chess/knight1.png);background-size:contain"></span>
+      <span class="more">+5</span>
+    </div>
+    <span class="arrow">ENTER ▶</span>
+  </button>
+
+  <button class="box tv" data-go="tv">
+    <div class="head">
+      <span class="ico"><span class="o3"><span>📺</span></span></span>
+      <div><div class="nm">TV</div><div class="tag">VIDEOS</div></div>
+    </div>
+    <div class="desc">clips, visuals and the occasional broadcast.</div>
+    <div class="snip">
+      <span class="t txt">▶ NOW<br>SHOWING</span>
+      <span class="t" style="background-image:url(https://onlyibee.com/assets/img/20mzs-album.jpg)"></span>
+      <span class="more">+</span>
+    </div>
+    <span class="arrow">ENTER ▶</span>
+  </button>
+
+  <button class="box member" data-go="member">
+    <div class="head">
+      <span class="ico"><span class="o3"><span>🪪</span></span></span>
+      <div><div class="nm">YOU</div><div class="tag">YOUR CARD</div></div>
+    </div>
+    <div class="desc">your card, your rank, your one room.</div>
+    <div class="snip">
+      <span class="t txt" style="color:var(--gold)">◈<br>340</span>
+      <span class="t txt" style="color:var(--acid)">RANK<br>04</span>
+      <span class="t txt">YOUR<br>ROOM</span>
+    </div>
+    <span class="arrow">ENTER ▶</span>
+  </button>
+
+</main>
+
+<!-- ===== the radio dock — always here, always tappable ===== -->
+<div class="dock" id="dock">
+  <span class="tapme">TAP TO OPEN THE PLAYER</span>
+  <div class="row">
+    <span class="disc spin" id="disc" style="background-image:url(https://onlyibee.com/assets/img/20mzs-album.jpg)"></span>
+    <div class="meta" id="meta">
+      <div class="lab">◉ NOW PLAYING</div>
+      <div class="ti" id="ti">20 MIN ZA SESSION</div>
+      <div class="wave" id="wave"></div>
+    </div>
+    <div class="ctrls">
+      <button id="prev" title="previous">⏮</button>
+      <button class="play" id="play" title="play/pause">▶</button>
+      <button id="next" title="next">⏭</button>
+    </div>
+  </div>
+  <div class="bar" id="bar"><i id="fill"></i></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  /* waveform bars */
+  var wave=$("wave"); for(var i=0;i<12;i++){ var b=document.createElement("i"); b.style.height=(20+Math.random()*70)+"%"; wave.appendChild(b); }
+
+  function toast(m){ var t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove("on");},1300); }
+
+  /* box selection + open (prototype: just a toast, real one would navigate) */
+  var boxes=[].slice.call(document.querySelectorAll(".box"));
+  boxes.forEach(function(bx){
+    bx.addEventListener("mouseenter",function(){ boxes.forEach(function(b){b.classList.remove("on");}); bx.classList.add("on"); });
+    bx.addEventListener("click",function(){ toast("OPENING  "+bx.querySelector(".nm").textContent+"_"); });
+  });
+
+  /* radio dock */
+  var TRACKS=[
+    {t:"20 MIN ZA SESSION", art:"https://onlyibee.com/assets/img/20mzs-album.jpg"},
+    {t:"NOUVEAUX PUNK — SI JAMAIS", art:"https://onlyibee.com/assets/img/nouveaux-punk.jpg"},
+    {t:"NOUVEAUX PUNK — DU LOVE", art:"https://onlyibee.com/assets/img/np-cover.jpg"}
+  ];
+  var idx=0, playing=true;
+  function paint(){ var tr=TRACKS[idx]; $("ti").textContent=tr.t; $("disc").style.backgroundImage="url("+tr.art+")"; }
+  function setPlay(p){ playing=p; $("play").textContent=p?"❚❚":"▶"; $("dock").classList.toggle("playing",p);
+    $("disc").classList.toggle("spin",p); }
+  $("play").addEventListener("click",function(e){ e.stopPropagation(); setPlay(!playing); toast(playing?"PLAY ▶":"PAUSED ❚❚"); });
+  $("next").addEventListener("click",function(e){ e.stopPropagation(); idx=(idx+1)%TRACKS.length; paint(); toast("NEXT ⏭"); });
+  $("prev").addEventListener("click",function(e){ e.stopPropagation(); idx=(idx-1+TRACKS.length)%TRACKS.length; paint(); toast("PREV ⏮"); });
+  $("disc").addEventListener("click",function(e){ e.stopPropagation(); toast("OPENING THE PLAYER_"); });
+  $("meta").addEventListener("click",function(){ toast("OPENING THE PLAYER_"); });
+  document.querySelector(".tapme").addEventListener("click",function(){ toast("OPENING THE PLAYER_"); });
+
+  /* fake progress */
+  var pct=34; setInterval(function(){ if(!playing) return; pct+=0.4; if(pct>100)pct=0; $("fill").style.width=pct+"%"; },160);
+  $("bar").addEventListener("click",function(ev){ var r=this.getBoundingClientRect(); pct=(ev.clientX-r.left)/r.width*100; $("fill").style.width=pct+"%"; toast("SEEK_"); });
+
+  paint(); setPlay(true);
+})();
+</script>
+</body>
+</html>
