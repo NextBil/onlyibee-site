@@ -57,6 +57,20 @@
     xsc.onload = function(){ addExtras(); };
     document.head.appendChild(xsc);
   }catch(e){}
+  /* owner flag: NOUVEAUX PUNK 2 is private for now — its songs are kept OUT of
+     the radio for everyone (see addExtras) and folded back in only when the
+     owner account is confirmed. owner.js resolves that once and fires the event
+     we listen for below. Remove this + the np2 guards in addExtras to go public. */
+  try{
+    var osc = document.createElement("script");
+    osc.src = BASE + "owner.js?cb=" + Date.now();
+    document.head.appendChild(osc);
+  }catch(e){}
+  try{
+    document.addEventListener("ibee-owner", function(ev){
+      if(ev && ev.detail){ window.IBEE_SHOW_NP2 = true; try{ addExtras(); }catch(e){} }
+    });
+  }catch(e){}
   /* cloud save: sync favourites / badges / room progress to the signed-in ACCOUNT
      so they follow the member across devices (assets/cloudsync.js self-guards to
      the top window; needs member/cloud-sync.sql). Loaded once here so no page needs
@@ -1025,9 +1039,13 @@
          tint / cover on the radio instead of falling back to the unfiled album
          (the universe already knows these galaxies; the radio didn't). Built-in
          albums are never overridden. Optional per-galaxy `cover`/`tint`/`room`. */
+      /* NP2 is private for now: its album + songs are hidden from the radio
+         until owner.js confirms the owner account (window.IBEE_SHOW_NP2). */
+      var HIDE_NP2 = !window.IBEE_SHOW_NP2;
       var GX = (window.IBEE_SONGS_EXTRA && window.IBEE_SONGS_EXTRA.galaxies) || [];
       GX.forEach(function(ga){
         if(!ga || !ga.id || ALBUMS[ga.id]) return;
+        if(HIDE_NP2 && ga.id==="np2") return;
         var a = { name: ga.name || String(ga.id).toUpperCase() };
         if(ga.cover) a.cover = ga.cover;      // else songs use own cover / hue disc
         if(ga.tint)  a.tint  = ga.tint;
@@ -1038,6 +1056,7 @@
       var added = false;
       X.forEach(function(e){
         if(!e || !e.f || !e.n) return;
+        if(HIDE_NP2 && e.g==="np2") return;                 // NP2 hidden until owner
         for(var i=0;i<SONGS.length;i++) if(SONGS[i].f === e.f) return;
         /* a studio song can name an album id (g) or bring its own cover */
         var alId = e.g && ALBUMS[e.g] ? e.g : "ib";

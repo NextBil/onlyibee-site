@@ -1,0 +1,52 @@
+/* ============================================================
+   ONLYIBEE — OWNER FLAG (2026-08-24)
+   One shared answer to "is the current visitor the owner?", so private things
+   (right now: the NP2 songs in the radio) can hide from everyone else and show
+   only for the owner account — without every consumer running its own auth.
+
+   Resolves ONCE off the Supabase session email, then:
+     • window.IBEE_IS_OWNER  = true | false   (null until resolved)
+     • window.IBEE_SHOW_NP2  = true           (only when owner)
+     • fires document event "ibee-owner" (detail = isOwner)
+     • window.IBEE_OWNER_READY(cb) — cb(isOwner), immediately if already known.
+
+   Soft flag for presentation only; real data stays protected by RLS. To make
+   NP2 public again, just stop hiding it in player.js (and drop privategate on
+   the /np2/ pages). ============================================ */
+(function(){
+  "use strict";
+  if(window.IBEE_OWNER_READY) return;                 // already loaded once
+  var OWNER  = "droguepuissance4@gmail.com";
+  var SB_URL = "https://hloxwicoeahczifshyoe.supabase.co";
+  var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
+
+  var resolved=false, isOwner=false, queue=[];
+  window.IBEE_IS_OWNER = null;
+  window.IBEE_OWNER_READY = function(cb){ if(resolved){ try{cb(isOwner);}catch(e){} } else queue.push(cb); };
+
+  function settle(v){
+    if(resolved) return;
+    resolved=true; isOwner=!!v;
+    window.IBEE_IS_OWNER = isOwner;
+    if(isOwner) window.IBEE_SHOW_NP2 = true;
+    try{ document.dispatchEvent(new CustomEvent("ibee-owner",{detail:isOwner})); }catch(e){}
+    queue.forEach(function(cb){ try{cb(isOwner);}catch(e){} }); queue=[];
+  }
+
+  function loadSB(cb){
+    if(window.supabase&&window.supabase.createClient) return cb();
+    var s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    s.onload=cb; s.onerror=function(){cb();}; document.head.appendChild(s);
+  }
+  loadSB(function(){
+    if(!(window.supabase&&window.supabase.createClient)){ settle(false); return; }
+    try{
+      var sb=window.supabase.createClient(SB_URL,SB_KEY);
+      sb.auth.getSession().then(function(res){
+        var em=res&&res.data&&res.data.session&&res.data.session.user&&res.data.session.user.email;
+        settle(!!em && String(em).toLowerCase()===OWNER.toLowerCase());
+      }).catch(function(){ settle(false); });
+    }catch(e){ settle(false); }
+  });
+})();
