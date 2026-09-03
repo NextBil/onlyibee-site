@@ -116,6 +116,57 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
   font-family:var(--px);font-size:9px;letter-spacing:1px;color:#07120a;background:var(--acid);padding:12px 16px;
   opacity:0;transition:.2s;pointer-events:none}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* --- BOOT: dark until you press play --- */
+body.booting .top,body.booting .hello,body.booting .grid{opacity:.12;filter:saturate(.2) blur(.5px);pointer-events:none;transition:opacity .5s,filter .5s}
+body.booting .disc,body.booting .meta,body.booting #prev,body.booting #next,body.booting .bar,body.booting .tapme{opacity:.16;pointer-events:none;transition:.4s}
+body.booting .dock{box-shadow:none;border-top-color:#1a1a1a}
+body.booting .play{animation:beckon 1.15s ease-in-out infinite;box-shadow:0 0 34px var(--acid),0 0 74px rgba(182,255,0,.6)}
+@keyframes beckon{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.pressplay{position:fixed;left:0;right:0;bottom:120px;z-index:59;text-align:center;font-family:var(--px);
+  font-size:9px;letter-spacing:2px;color:var(--acid);pointer-events:none;transition:.4s;text-shadow:0 0 12px rgba(182,255,0,.5)}
+body:not(.booting) .pressplay{opacity:0}
+
+/* --- REACTIVITY: things move to the music --- */
+.playing .peek{transform:scale(calc(1 + var(--beat,0)*.035));transition:transform .08s linear}
+.playing .box.rooms .peek{transform:scale(calc(1 + var(--beat,0)*.075)) translateY(calc(var(--beat,0)*-3px))}
+.playing .box .ico{transform:translateY(calc(var(--beat,0)*-2px))}
+.playing .disc{box-shadow:0 0 0 4px #0a0a0a,0 0 calc(6px + var(--beat,0)*20px) rgba(182,255,0,.55)}
+.playing .hello h1{text-shadow:0 0 calc(var(--beat,0)*16px) rgba(182,255,0,.45)}
+
+/* --- MUSIC UNIVERSE: a mini-spotify that IS the radio --- */
+#uni{position:fixed;inset:0;z-index:75;background:#050506;display:flex;flex-direction:column;overflow:hidden;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+#uni.on{transform:translateY(0)}
+#uni .uhead{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:2px solid var(--border)}
+.uback{font-family:var(--px);font-size:11px;color:var(--acid);background:none;border:none;cursor:pointer;padding:4px 6px}
+.utitle{font-family:var(--px);font-size:10px;letter-spacing:1px;color:var(--ink)}
+.usearch{flex:1}
+.usearch input{width:100%;font-family:var(--vt);font-size:18px;background:#0e0e0e;color:var(--ink);border:1px solid var(--border);padding:9px 12px}
+.usearch input:focus{outline:none;border-color:var(--acid)}
+#ugrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;padding:14px 14px 140px}
+.ucard{cursor:pointer;border:1px solid var(--border);background:#0b0b0b;overflow:hidden;transition:.15s}
+.ucard:hover{border-color:var(--acid);transform:translateY(-3px)}
+.ucard .uc{width:100%;aspect-ratio:1/1;background:#000 center/cover no-repeat;position:relative}
+.ucard .uc::after{content:"\25B6";position:absolute;right:6px;bottom:6px;width:20px;height:20px;line-height:20px;text-align:center;
+  font-size:9px;color:#07120a;background:var(--acid);opacity:0;transition:.15s}
+.ucard:hover .uc::after{opacity:1}
+.ucard .un{font-family:var(--vt);font-size:16px;color:var(--ink);padding:7px 8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ucard .ua{font-family:var(--px);font-size:6px;color:var(--dim);padding:0 8px 9px;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#udet{position:absolute;inset:0;z-index:76;background:#070708;transform:translateY(100%);transition:transform .28s;display:flex;flex-direction:column;overflow-y:auto}
+#udet.on{transform:translateY(0)}
+#udet .dh{position:relative;height:42vh;min-height:230px;background:#000 center/cover no-repeat;flex:none}
+#udet .dh::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,#070708)}
+.dclose{position:absolute;top:14px;left:14px;z-index:2;font-family:var(--px);font-size:9px;color:#fff;background:rgba(0,0,0,.6);border:1px solid var(--border);padding:9px 11px;cursor:pointer}
+#udet .db{padding:0 18px 140px;margin-top:-46px;position:relative;z-index:2}
+#udet .dti{font-family:var(--px);font-size:15px;color:#fff;line-height:1.5}
+#udet .dar{font-family:var(--px);font-size:8px;color:var(--acid);margin-top:9px;letter-spacing:1px}
+#udet .dinfo{color:var(--dim);font-size:16px;margin-top:9px}
+.dplay{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--px);font-size:10px;color:#07120a;background:var(--acid);border:none;padding:13px 18px;cursor:pointer}
+.dplay:active{transform:translateY(1px)}
+#udet .lyr{margin-top:22px;border-top:1px solid var(--border);padding-top:16px}
+.lyrh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
+#dlyr{font-size:19px;line-height:1.75;color:#cfcfcf;white-space:pre-line}
 </style>
 </head>
 <body>
@@ -188,6 +239,24 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 
 </main>
 
+<div class="pressplay">▶  PRESS PLAY TO WAKE THE CONSOLE</div>
+<div id="uni">
+  <div class="uhead">
+    <button class="uback" id="uback">◀</button>
+    <span class="utitle">THE UNIVERSE</span>
+    <span class="usearch"><input id="usq" placeholder="⌕ search songs, albums, vibes…" autocomplete="off"></span>
+  </div>
+  <div id="ugrid"></div>
+  <div id="udet">
+    <div class="dh" id="dhero"><button class="dclose" id="dclose">◀ BACK</button></div>
+    <div class="db">
+      <div class="dti" id="dti"></div><div class="dar" id="dar"></div>
+      <div class="dinfo" id="dinfo"></div>
+      <button class="dplay" id="dplay">▶ PLAY</button>
+      <div class="lyr"><div class="lyrh">LYRICS</div><span id="dlyr"></span></div>
+    </div>
+  </div>
+</div>
 <div class="dock" id="dock">
   <span class="tapme">TAP TO OPEN THE PLAYER</span>
   <div class="row">
@@ -233,7 +302,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
   var boxes=[].slice.call(document.querySelectorAll('.box'));
   boxes.forEach(function(bx){
     bx.addEventListener('click',function(e){
-      if(e.target.classList.contains('en')){ toast("OPENING  "+bx.querySelector('.nm').textContent+"_"); return; }
+      if(e.target.classList.contains('en')){ if(bx.classList.contains('music')){ openUni(); } else { toast("OPENING  "+bx.querySelector('.nm').textContent+"_"); } return; }
       var open=bx.classList.contains('sel');
       boxes.forEach(function(b){ b.classList.remove('sel'); });
       if(!open) bx.classList.add('sel');
@@ -248,15 +317,63 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
               {t:"NOUVEAUX PUNK — DU LOVE",a:"https://onlyibee.com/assets/img/np-cover.jpg"}];
   var idx=0, playing=true;
   function paint(){ $("ti").textContent=TRACKS[idx].t; $("disc").style.backgroundImage="url("+TRACKS[idx].a+")"; }
-  function setPlay(p){ playing=p; $("play").textContent=p?"❚❚":"▶"; $("dock").classList.toggle("playing",p); $("disc").classList.toggle("spin",p); }
-  $("play").onclick=function(e){e.stopPropagation();setPlay(!playing);};
+  function setPlay(p){ playing=p; $("play").textContent=p?"❚❚":"▶"; $("dock").classList.toggle("playing",p); $("disc").classList.toggle("spin",p); document.body.classList.toggle("playing",p); }
+  $("play").onclick=function(e){e.stopPropagation(); if(document.body.classList.contains("booting")){ document.body.classList.remove("booting"); setPlay(true); return; } setPlay(!playing);};
   $("next").onclick=function(e){e.stopPropagation();idx=(idx+1)%TRACKS.length;paint();toast("NEXT ⏭");};
   $("prev").onclick=function(e){e.stopPropagation();idx=(idx-1+TRACKS.length)%TRACKS.length;paint();toast("PREV ⏮");};
   $("disc").onclick=$("meta").onclick=function(){toast("OPENING THE PLAYER_");};
   document.querySelector('.tapme').onclick=function(){toast("OPENING THE PLAYER_");};
   var pct=34; setInterval(function(){ if(!playing)return; pct+=0.4; if(pct>100)pct=0; $("fill").style.width=pct+"%"; },160);
   $("bar").onclick=function(ev){ var r=this.getBoundingClientRect(); pct=(ev.clientX-r.left)/r.width*100; $("fill").style.width=pct+"%"; };
-  paint(); setPlay(true);
+  paint(); setPlay(false); document.body.classList.add("booting");
+
+  /* things move to the music — a fake beat drives a --beat var while playing */
+  (function loop(t){ requestAnimationFrame(loop);
+    if(!document.body.classList.contains("playing")){ document.body.style.setProperty("--beat",0); return; }
+    var kick=Math.pow(Math.max(0,Math.sin(t/340)),3);
+    var b=kick*(0.7+0.3*Math.sin(t/1900));
+    document.body.style.setProperty("--beat", b.toFixed(3));
+  })(0);
+
+  /* THE UNIVERSE — a mini-spotify that is the radio: search, covers, lyrics, info */
+  var NPC="https://onlyibee.com/assets/img/nouveaux-punk.jpg",
+      NP2C="https://onlyibee.com/assets/img/np-cover.jpg",
+      MZS="https://onlyibee.com/assets/img/20mzs-album.jpg";
+  var LY="you keep moving because still is worse.\nsomebody laughed — you built a year on that.\nyou wrote it down so it would exist outside your head.\neverything true was in the gaps.";
+  var SONGS=[
+    {n:"SI JAMAIS",a:"NOUVEAUX PUNK",c:NPC,len:"1:46",pl:"12.4k"},
+    {n:"DU LOVE",a:"NOUVEAUX PUNK",c:NP2C,len:"2:42",pl:"9.1k"},
+    {n:"GET LOOSE",a:"NOUVEAUX PUNK",c:NPC,len:"3:03",pl:"7.8k"},
+    {n:"TOUJOURS",a:"NOUVEAUX PUNK",c:NP2C,len:"3:37",pl:"15.2k"},
+    {n:"LOST IN THE WORLD",a:"NOUVEAUX PUNK",c:NPC,len:"3:03",pl:"6.6k"},
+    {n:"DANS LA STREET",a:"NOUVEAUX PUNK",c:NP2C,len:"1:50",pl:"5.0k"},
+    {n:"20 MIN ZA SESSION",a:"20MZS · ONE TAKE",c:MZS,len:"20:00",pl:"22.9k"},
+    {n:"CALL IT A DAY",a:"20 MIN ZA SESSION",c:MZS,len:"2:10",pl:"4.3k"},
+    {n:"WISH I WAS LYING",a:"20 MIN ZA SESSION",c:MZS,len:"2:55",pl:"3.7k"},
+    {n:"ON MY MIND",a:"20 MIN ZA SESSION",c:MZS,len:"4:16",pl:"8.2k"}
+  ];
+  function card(s,i){ return '<div class="ucard" data-i="'+i+'"><div class="uc" style="background-image:url('+s.c+')"></div>'
+    +'<div class="un">'+s.n+'</div><div class="ua">'+s.a+'</div></div>'; }
+  function renderUni(q){ q=(q||"").toLowerCase();
+    var list=SONGS.map(function(s,i){return {s:s,i:i};}).filter(function(o){ return !q || (o.s.n+" "+o.s.a).toLowerCase().indexOf(q)>-1; });
+    $("ugrid").innerHTML = list.length ? list.map(function(o){return card(o.s,o.i);}).join("")
+      : '<div style="grid-column:1/-1;color:var(--dim);font-family:var(--px);font-size:9px;padding:40px 0;text-align:center">nothing here_</div>';
+    [].forEach.call($("ugrid").querySelectorAll(".ucard"),function(el){ el.onclick=function(){ openDet(SONGS[+el.getAttribute("data-i")]); }; });
+  }
+  function openUni(){ $("uni").classList.add("on"); renderUni($("usq").value); }
+  function closeUni(){ $("udet").classList.remove("on"); $("uni").classList.remove("on"); }
+  function openDet(s){
+    $("dhero").style.backgroundImage="url("+s.c+")";
+    $("dti").textContent=s.n; $("dar").textContent=s.a;
+    $("dinfo").textContent=s.len+"  \u00b7  "+s.pl+" plays  \u00b7  press \u25B6 to hear it";
+    $("dlyr").textContent=LY;
+    $("udet").classList.add("on");
+    $("dplay").onclick=function(){ $("ti").textContent=s.n; $("disc").style.backgroundImage="url("+s.c+")"; setPlay(true); toast("NOW PLAYING  "+s.n+"_"); };
+  }
+  $("uback").onclick=closeUni;
+  $("dclose").onclick=function(){ $("udet").classList.remove("on"); };
+  $("usq").oninput=function(){ renderUni(this.value); };
+  renderUni("");
 })();
 </script>
 </body>
