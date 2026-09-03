@@ -1164,6 +1164,12 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
        product pages (product-page/?id=…) instead of the old Wix store */
     var LIVE=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.products)||null;
     var FOLDERS=(window.IBEE_PRODUCTS&&window.IBEE_PRODUCTS.folders)||null;
+    /* NP2 drop is private for now — hide the folder + its tees from the shop for
+       everyone but the owner (renderShop is re-run on the "ibee-owner" event). */
+    if(!window.IBEE_SHOW_NP2){
+      if(LIVE)    LIVE   =LIVE.filter(function(pr){return pr.folder!=="np2-26";});
+      if(FOLDERS) FOLDERS=FOLDERS.filter(function(f){return f.id!=="np2-26";});
+    }
     if(LIVE&&LIVE.length) SHOP=LIVE.map(function(pr){
       return {n:pr.n,p:(pr.cur||"€")+pr.price,r:pr.r||"c",
         u:pr.id,i:(pr.imgs&&pr.imgs[0])||null,out:pr.out?1:0,self:1,folder:pr.folder||null,
@@ -1310,6 +1316,8 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     sc.onload=sc.onerror=function(){ shopState=2; renderShop(); };
     document.head.appendChild(sc);
   }
+  /* owner confirmed → re-render the shelf so the private NP2 drop appears */
+  document.addEventListener("ibee-owner",function(ev){ if(ev&&ev.detail&&shopState===2) renderShop(); });
 
   /* =======================================================
      ENGINE — the music universe
@@ -1328,8 +1336,10 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     /* The catalogue, 2026-08-19: three records and the hidden vault. RARE SOUL
        SESSIONS and the four placeholder galaxies (PPFDB 2, MINI VIBE, DEBUT DE
        LA FIN, BIPOLAIRE — planets but never any audio) were retired here. */
+    /* NP2 is private for now — it is NOT seeded into the galaxies here, and its
+       planets are skipped in the merge below; addNP2() folds it back in only for
+       the owner account (window.IBEE_SHOW_NP2 / the "ibee-owner" event). */
     var GALX=[
-      {id:"np2",name:"NOUVEAUX PUNK 2",sub:"THE SEQUEL",hue:335},
       {id:"np",name:"NOUVEAUX PUNK",sub:"ROCK RNB BLUES · 2022",hue:110},
       {id:"mzs",name:"20 MIN ZA SESSION",sub:"ONE TAKE · 20 MINUTES",hue:75},
       {id:"vault",name:"THE VAULT",sub:"ENCRYPTED SECTOR",hue:285,hidden:true}
@@ -1348,17 +1358,38 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       var XSE=window.IBEE_SONGS_EXTRA||{};
       (XSE.galaxies||[]).forEach(function(ga){
         if(!ga||!ga.id)return;
+        if(ga.id==="np2"&&!window.IBEE_SHOW_NP2)return;   // NP2 private until owner
         for(var gi=0;gi<GALX.length;gi++)if(GALX[gi].id===ga.id)return;
         GALX.push({id:ga.id,name:ga.name||ga.id.toUpperCase(),sub:ga.sub||"NEW TRANSMISSION",hue:(ga.hue!=null?ga.hue:190)});
       });
       (XSE.songs||[]).forEach(function(e){
         if(!e||!e.f)return;
+        if(e.g==="np2"&&!window.IBEE_SHOW_NP2)return;      // NP2 planets private until owner
         for(var ti=0;ti<TRACKS.length;ti++)if(TRACKS[ti].file&&slugOf(TRACKS[ti])===e.f)return;
         var gOk=false;for(var g2=0;g2<GALX.length;g2++)if(GALX[g2].id===e.g){gOk=true;break;}
         TRACKS.push({id:"x-"+e.f.replace(/\.[a-z0-9]+$/,""),g:gOk?e.g:GALX[0].id,name:e.n||e.f,
           file:"assets/audio/songs/"+e.f,alt:e.r||e.f,len:e.len||180,hue:(e.hue!=null?e.hue:190),cover:e.cover||undefined});
       });
     }catch(e){}
+
+    /* NP2 reveal: fold the private galaxy + its planets back in, but only for
+       the owner account. Additive + idempotent; the render loop redraws from
+       GALX every frame, so clearing galaxyGeo is enough to make it appear. */
+    function addNP2(){
+      for(var q=0;q<GALX.length;q++) if(GALX[q].id==="np2") return;   // already in
+      GALX.unshift({id:"np2",name:"NOUVEAUX PUNK 2",sub:"THE SEQUEL",hue:335});
+      try{ var X2=window.IBEE_SONGS_EXTRA||{};
+        (X2.songs||[]).forEach(function(e){
+          if(!e||!e.f||e.g!=="np2")return;
+          for(var ti=0;ti<TRACKS.length;ti++)if(TRACKS[ti].file&&slugOf(TRACKS[ti])===e.f)return;
+          TRACKS.push({id:"x-"+e.f.replace(/\.[a-z0-9]+$/,""),g:"np2",name:e.n||e.f,
+            file:"assets/audio/songs/"+e.f,alt:e.r||e.f,len:e.len||180,hue:(e.hue!=null?e.hue:190),cover:e.cover||undefined});
+        });
+      }catch(e){}
+      galaxyGeo=null;   // force a re-layout so the new galaxy shows next frame
+    }
+    if(window.IBEE_SHOW_NP2) addNP2();
+    document.addEventListener("ibee-owner",function(ev){ if(ev&&ev.detail) addNP2(); });
 
     /* ---------- state ---------- */
     var view="galaxy",curG=null,planets=[],playing=null,gridMode=false,ghost=null,lastGhostId=null;

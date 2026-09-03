@@ -30,7 +30,7 @@
      "<div style=\"position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)\"></div>"
     +"<div style=\"font-family:'Press Start 2P',monospace;font-size:clamp(13px,5vw,18px);color:#ff2bd6;letter-spacing:3px;text-shadow:0 0 18px rgba(255,43,214,.45)\">NOUVEAUX PUNK 2</div>"
     +"<div style=\"font-family:'Press Start 2P',monospace;font-size:11px;color:#b6ff00;letter-spacing:3px\">COMING SOON</div>"
-    +"<div style=\"font-family:'VT323',monospace;font-size:21px;color:#9a9a9a;max-width:340px;line-height:1.4\">this one isn’t open yet_<br>the fall is being tuned. it’s coming.</div>"
+    +"<div style=\"font-family:'VT323',monospace;font-size:21px;color:#9a9a9a;max-width:340px;line-height:1.4\">this one isn’t open yet_<br>it’s being tuned. it’s coming.</div>"
     +"<a href=\"/console.html#menu\" style=\"font-family:'Press Start 2P',monospace;font-size:10px;padding:14px 16px;text-decoration:none;border:1px solid #2a2a2a;color:#7a7a7a;margin-top:4px\">◀ BACK TO ONLYIBEE</a>"
     +"<div id=\"pgw\" style=\"font-family:'VT323',monospace;font-size:14px;color:#3a3a3a;margin-top:6px;letter-spacing:1px\">checking access_</div>";
   function mount(){ (document.body||document.documentElement).appendChild(ov); }

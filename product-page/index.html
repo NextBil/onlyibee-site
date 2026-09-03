@@ -242,6 +242,8 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
 
 <footer>© ONLYIBEE — UTOPIE™ · EACH PIECE UNIQUE, MADE ONLY ONCE</footer>
 
+<!-- owner flag early so a private NP2 tee resolves before the product renders -->
+<script src="../assets/owner.js?v=1"></script>
 <script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>document.write('<script src="../assets/garments-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script src="../assets/np2-perks.js?v=2"></script>
@@ -270,6 +272,15 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var D=window.IBEE_PRODUCTS||{};
   var all=D.products||[];
   var p=null; all.forEach(function(x){ if(x.id===id) p=x; });
+
+  /* NP2 tees are a private drop for now — a direct link reads as NOT FOUND for
+     everyone but the owner. If the owner is confirmed a moment later (owner.js
+     resolves async), reload once so the piece renders (the session cache then
+     makes it synchronous, so no loop). */
+  if(p && p.folder==="np2-26" && !window.IBEE_SHOW_NP2){
+    document.addEventListener("ibee-owner",function(ev){ if(ev&&ev.detail) location.reload(); });
+    p=null;
+  }
 
   if(!p){ $("notfound").style.display=""; return; }
   document.title=p.n+" — ONLY IBEE";

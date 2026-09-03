@@ -24,11 +24,19 @@
   window.IBEE_IS_OWNER = null;
   window.IBEE_OWNER_READY = function(cb){ if(resolved){ try{cb(isOwner);}catch(e){} } else queue.push(cb); };
 
+  /* Session cache — once the owner is confirmed, later pages in the same tab
+     know it SYNCHRONOUSLY (before the async check comes back), so a page that
+     renders once (e.g. product-page) shows private things without a reload.
+     Only ever set on the owner's own device; a visitor never has it. */
+  var CACHE="ibee_own";
+  try{ if(sessionStorage.getItem(CACHE)==="1") window.IBEE_SHOW_NP2 = true; }catch(e){}
+
   function settle(v){
     if(resolved) return;
     resolved=true; isOwner=!!v;
     window.IBEE_IS_OWNER = isOwner;
     if(isOwner) window.IBEE_SHOW_NP2 = true;
+    try{ sessionStorage.setItem(CACHE, isOwner?"1":"0"); }catch(e){}
     try{ document.dispatchEvent(new CustomEvent("ibee-owner",{detail:isOwner})); }catch(e){}
     queue.forEach(function(cb){ try{cb(isOwner);}catch(e){} }); queue=[];
   }
