@@ -375,59 +375,104 @@ body:not(.booting) .pressplay{opacity:0}
     [].forEach.call($("ugrid").querySelectorAll(".ucard"),function(el){ el.onclick=function(){ openDet(SONGS[+el.getAttribute("data-i")]); }; });
   }
 
-  /* ===== THE GALAXY — the physics engine kept, songs orbiting as planets ===== */
-  var GX=[{name:"NOUVEAUX PUNK",hue:110},{name:"20 MIN ZA SESSION",hue:78}];
-  SONGS.forEach(function(s,i){ s.g=/20 ?min|20mzs/i.test(s.a)?1:0; });
-  var cv=$("unicv"), cx=cv.getContext("2d"), CW=0,CH=0,DPR=1, uniOpen=false, hoverP=null, uq="", planets=[], suns=[];
-  var stars=[]; for(var k=0;k<80;k++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()});
+  /* ===== THE UNIVERSE — the galaxy engine's own model, kept:
+     a PICKER of spinning spiral galaxies (one per record) -> tap to ENTER a
+     galaxy -> its songs drift as planets -> tap a planet to play + open its
+     page. Search + LIST layer over it. Same two-level flow as console.html. */
+  var GAL=[{name:"NOUVEAUX PUNK",hue:110,sub:"ROCK RNB BLUES",cv:NPC},
+           {name:"20 MIN ZA SESSION",hue:78,sub:"ONE TAKE",cv:MZS}];
+  GAL.forEach(function(g){ g.img=new Image(); g.img._ok=false; g.img.onload=function(){this._ok=true;}; g.img.src=g.cv; });
+  SONGS.forEach(function(s){ s.g=/20 ?min|20mzs/i.test(s.a)?1:0; });
+  var cv=$("unicv"), cx=cv.getContext("2d"), CW=0,CH=0,DPR=1;
+  var uniOpen=false, mode="galaxy", curG=-1, gxs=[], planets=[], hoverP=null, hoverG=-1, uq="", lastT=0;
+  var stars=[]; for(var k=0;k<90;k++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()});
+  var utitle=document.querySelector(".utitle"), uhint=document.querySelector(".uhint");
+
+  function buildGx(){ gxs=GAL.map(function(g,i){ var arms=2+i, dots=[];
+    for(var d=0;d<110;d++){ var t=(d+3)/110, arm=d%arms;
+      dots.push({ang:t*Math.PI*3.4+arm*(6.283/arms), rad:t, sz:Math.random()*1.4+0.5, jit:(Math.random()-0.5)*8}); }
+    return {g:g,i:i,spin:Math.random()*6.283,dots:dots,x:0,y:0,r:0,count:SONGS.filter(function(s){return s.g===i;}).length}; }); }
   function sizeCv(){ var r=$("unistage").getBoundingClientRect(); if(!r.width)return;
-    CW=r.width; CH=r.height; DPR=Math.min(2,window.devicePixelRatio||1);
-    cv.width=CW*DPR; cv.height=CH*DPR; cx.setTransform(DPR,0,0,DPR,0,0); layout(); }
-  function layout(){
-    suns=[{hue:GX[0].hue,x:CW*0.5,y:CH*0.33,name:GX[0].name},{hue:GX[1].hue,x:CW*0.5,y:CH*0.72,name:GX[1].name}];
-    var ring=[0,0];
-    planets=SONGS.map(function(s,i){ var g=s.g; var n=ring[g]++;
-      return {s:s,g:g,ang:Math.random()*6.283,rad:40+ (n%4)*30 + (n%2)*8,
-        spd:(0.4+Math.random()*0.5)*(n%2?1:-1), size:7+Math.min(6,String(s.pl).length), x:0,y:0}; });
-  }
-  function frame(){
-    if(!uniOpen) return; requestAnimationFrame(frame);
-    cx.clearRect(0,0,CW,CH); cx.fillStyle="#050506"; cx.fillRect(0,0,CW,CH);
+    CW=r.width;CH=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
+    cv.width=CW*DPR;cv.height=CH*DPR;cx.setTransform(DPR,0,0,DPR,0,0);
+    var R=Math.min(CW,CH)*0.19; gxs.forEach(function(gd,i){ gd.x=CW*0.5; gd.y=CH*(0.32+i*0.40); gd.r=R; }); }
+  function imgCover(img,dx,dy,d){ if(!img||!img._ok)return false; var iw=img.naturalWidth,ih=img.naturalHeight,s=Math.max(d/iw,d/ih),sw=d/s,sh=d/s; cx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,dx,dy,d,d); return true; }
+  function drawStars(beat){ cx.fillStyle="#050506";cx.fillRect(0,0,CW,CH);
     stars.forEach(function(st){ st.y+=0.0003+st.z*0.0006; if(st.y>1)st.y=0;
-      cx.globalAlpha=0.15+st.z*0.5; cx.fillStyle="#fff"; cx.fillRect(st.x*CW,st.y*CH,1.3,1.3); });
-    cx.globalAlpha=1;
-    var beat=curBeat;
-    suns.forEach(function(sn){
-      var R=24+beat*10, grd=cx.createRadialGradient(sn.x,sn.y,3,sn.x,sn.y,R*2.8);
-      grd.addColorStop(0,"hsla("+sn.hue+",90%,62%,.85)"); grd.addColorStop(1,"hsla("+sn.hue+",90%,50%,0)");
-      cx.fillStyle=grd; cx.beginPath(); cx.arc(sn.x,sn.y,R*2.8,0,6.283); cx.fill();
-      cx.fillStyle="hsl("+sn.hue+",85%,58%)"; cx.beginPath(); cx.arc(sn.x,sn.y,10+beat*4,0,6.283); cx.fill();
-      cx.fillStyle="rgba(255,255,255,.7)"; cx.font="7px 'Press Start 2P',monospace"; cx.textAlign="center";
-      cx.fillText(sn.name, sn.x, sn.y+R*2.2);
-    });
-    planets.forEach(function(pl){ var sn=suns[pl.g]; pl.ang+=pl.spd*0.012;
-      pl.x=sn.x+Math.cos(pl.ang)*pl.rad; pl.y=sn.y+Math.sin(pl.ang)*pl.rad*0.55;
+      cx.globalAlpha=(0.15+st.z*0.5)*(0.6+beat*0.6); cx.fillStyle="#fff"; cx.fillRect(st.x*CW,st.y*CH,1.3,1.3);}); cx.globalAlpha=1; }
+  function drawGalaxies(beat){ cx.textAlign="center";
+    gxs.forEach(function(gd){ gd.spin+=0.0016+beat*0.003; var hue=gd.g.hue;
+      var core=cx.createRadialGradient(gd.x,gd.y,0,gd.x,gd.y,gd.r);
+      core.addColorStop(0,"hsla("+hue+",90%,70%,"+(0.4+beat*0.3).toFixed(3)+")");
+      core.addColorStop(.3,"hsla("+hue+",80%,55%,.12)"); core.addColorStop(1,"hsla("+hue+",70%,45%,0)");
+      cx.fillStyle=core; cx.beginPath(); cx.arc(gd.x,gd.y,gd.r,0,6.283); cx.fill();
+      var cr=gd.r*0.52;
+      cx.save(); cx.beginPath(); cx.arc(gd.x,gd.y,cr,0,6.283); cx.clip();
+      if(!imgCover(gd.g.img,gd.x-cr,gd.y-cr,cr*2)){ cx.fillStyle="hsl("+hue+",70%,30%)"; cx.fillRect(gd.x-cr,gd.y-cr,cr*2,cr*2); }
+      cx.globalAlpha=0.18; cx.fillStyle="hsl("+hue+",80%,50%)"; cx.fillRect(gd.x-cr,gd.y-cr,cr*2,cr*2); cx.globalAlpha=1;
+      cx.restore();
+      cx.strokeStyle="hsla("+hue+",90%,66%,.55)"; cx.lineWidth=1.6; cx.beginPath(); cx.arc(gd.x,gd.y,cr,0,6.283); cx.stroke();
+      cx.fillStyle="#0a0a0a"; cx.beginPath(); cx.arc(gd.x,gd.y,cr*0.15,0,6.283); cx.fill();
+      cx.save(); cx.translate(gd.x,gd.y); cx.rotate(gd.spin);
+      gd.dots.forEach(function(dt){ var x=Math.cos(dt.ang)*dt.rad*gd.r, y=Math.sin(dt.ang)*dt.rad*gd.r*0.62+dt.jit*0.5;
+        cx.globalAlpha=0.5+0.5*Math.sin(performance.now()*0.002+dt.ang*3); cx.fillStyle="hsl("+hue+",85%,72%)"; cx.fillRect(x,y,dt.sz,dt.sz); });
+      cx.restore(); cx.globalAlpha=1;
+      var ly=gd.y+gd.r*0.80, name=gd.g.name, sub=gd.g.sub+" · "+gd.count+" signals";
+      cx.font="9px 'Press Start 2P',monospace"; var w1=cx.measureText(name).width;
+      cx.font="14px VT323,monospace"; var w2=cx.measureText(sub).width; var pw=Math.max(w1,w2)+22;
+      cx.fillStyle="rgba(4,4,8,.8)"; cx.fillRect(gd.x-pw/2,ly,pw,38);
+      cx.strokeStyle=(hoverG===gd.i)?"hsla("+hue+",90%,62%,.65)":"rgba(255,255,255,.1)"; cx.lineWidth=1; cx.strokeRect(gd.x-pw/2,ly,pw,38);
+      cx.font="9px 'Press Start 2P',monospace"; cx.fillStyle="#f2f2f2"; cx.fillText(name,gd.x,ly+15);
+      cx.font="14px VT323,monospace"; cx.fillStyle="#9fa0a2"; cx.fillText(sub,gd.x,ly+31); });
+  }
+  function makePlanet(s,n){ var sz=n>12?9:n>8?11:15;
+    return {s:s,x:40+Math.random()*(CW-80),y:90+Math.random()*(CH-230),
+      vx:(Math.random()-.5)*16,vy:(Math.random()-.5)*16,ph:Math.random()*6.283,rot:Math.random()*6.283,bell:sz+Math.random()*3}; }
+  function enterGalaxy(i){ mode="system"; curG=i;
+    var list=SONGS.filter(function(s){return s.g===i;});
+    planets=list.map(function(s){return makePlanet(s,list.length);}); setTitle(); }
+  function exitGalaxies(){ mode="galaxy"; curG=-1; setTitle(); }
+  function setTitle(){ if(utitle) utitle.textContent = mode==="system"?GAL[curG].name:"THE UNIVERSE";
+    if(uhint) uhint.textContent = mode==="system"?"tap a record to play  ·  ◀ for the galaxies":"a galaxy per record · tap one to enter";
+    $("uback").textContent = mode==="system"?"◀ GALAXIES":"◀"; }
+  function drawSystem(beat,dt){ var g=GAL[curG];
+    var core=cx.createRadialGradient(CW/2,CH*0.42,0,CW/2,CH*0.42,Math.max(CW,CH)*0.65);
+    core.addColorStop(0,"hsla("+g.hue+",80%,50%,.06)"); core.addColorStop(1,"hsla("+g.hue+",80%,50%,0)");
+    cx.fillStyle=core; cx.fillRect(0,0,CW,CH); cx.textAlign="center";
+    planets.forEach(function(pl){ pl.x+=pl.vx*dt; pl.y+=pl.vy*dt; pl.ph+=dt*1.5;
+      var pX=30,pT=54,pB=120;
+      if(pl.x<pX){pl.x=pX;pl.vx*=-1;} if(pl.x>CW-pX){pl.x=CW-pX;pl.vx*=-1;}
+      if(pl.y<pT){pl.y=pT;pl.vy*=-1;} if(pl.y>CH-pB){pl.y=CH-pB;pl.vy*=-1;}
       var match=!uq||(pl.s.n+" "+pl.s.a).toLowerCase().indexOf(uq)>-1;
-      cx.globalAlpha=match?0.14:0.05; cx.strokeStyle="hsl("+sn.hue+",70%,55%)"; cx.lineWidth=1;
-      cx.beginPath(); cx.ellipse(sn.x,sn.y,pl.rad,pl.rad*0.55,0,0,6.283); cx.stroke();
-      var sz=(pl.size*0.5)*(1+beat*0.55), hue=sn.hue+(pl.g?46:-34);
+      var sz=(pl.bell*0.6)*(1+beat*0.5)+Math.sin(pl.ph)*1.2, hue=g.hue;
       cx.globalAlpha=match?1:0.16;
-      if(pl===hoverP){ cx.fillStyle="hsla("+hue+",90%,65%,.4)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz+6,0,6.283); cx.fill(); }
-      cx.fillStyle="hsl("+hue+",85%,"+(match?63:46)+"%)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz,0,6.283); cx.fill();
-      cx.fillStyle="rgba(255,255,255,.85)"; cx.beginPath(); cx.arc(pl.x-sz*0.3,pl.y-sz*0.3,sz*0.28,0,6.283); cx.fill();
-      if(match && pl===hoverP){ cx.fillStyle="#fff"; cx.font="8px 'Press Start 2P',monospace"; cx.textAlign="center"; cx.fillText(pl.s.n,pl.x,pl.y-sz-9); }
+      if(pl===hoverP){ cx.fillStyle="hsla("+hue+",90%,66%,.35)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz+7,0,6.283); cx.fill(); }
+      pl.rot+=dt*(playing?2.2:0.5);
+      cx.save(); cx.translate(pl.x,pl.y); cx.rotate(pl.rot);
+      cx.beginPath(); cx.arc(0,0,sz,0,6.283); cx.clip();
+      if(!imgCover(g.img,-sz,-sz,sz*2)){ cx.fillStyle="hsl("+hue+",85%,55%)"; cx.fillRect(-sz,-sz,sz*2,sz*2); }
+      cx.restore();
+      cx.strokeStyle="hsl("+hue+",90%,"+(match?68:48)+"%)"; cx.lineWidth=1.4; cx.beginPath(); cx.arc(pl.x,pl.y,sz,0,6.283); cx.stroke();
+      cx.fillStyle="#0a0a0a"; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.26,0,6.283); cx.fill();
+      cx.strokeStyle="hsla("+hue+",60%,62%,.6)"; cx.lineWidth=1; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.26,0,6.283); cx.stroke();
       cx.globalAlpha=1;
+      if(pl===hoverP||(uq&&match)){ cx.fillStyle=pl===hoverP?"#fff":"rgba(255,255,255,.75)"; cx.font="7px 'Press Start 2P',monospace"; cx.fillText(pl.s.n,pl.x,pl.y-sz-8); }
     });
   }
-  function pick(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){ var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;} });
-    return (best && bd < (best.size*0.5+16))?best:null; }
-  cv.addEventListener("click",function(e){ var r=cv.getBoundingClientRect(); var pl=pick(e.clientX-r.left,e.clientY-r.top); if(pl) openDet(pl.s); });
-  cv.addEventListener("mousemove",function(e){ var r=cv.getBoundingClientRect(); hoverP=pick(e.clientX-r.left,e.clientY-r.top); cv.style.cursor=hoverP?"pointer":"default"; });
+  function frame(t){ if(!uniOpen)return; requestAnimationFrame(frame);
+    var dt=Math.min(0.05,((t-lastT)/1000)||0.016); lastT=t; var beat=curBeat;
+    if(!CW){ sizeCv(); } drawStars(beat);
+    if(mode==="galaxy") drawGalaxies(beat); else drawSystem(beat,dt); }
+  function galaxyAt(mx,my){ for(var i=0;i<gxs.length;i++){ if(Math.hypot(mx-gxs[i].x,my-gxs[i].y)<gxs[i].r*1.05) return i; } return -1; }
+  function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.6+16))?best:null; }
+  cv.addEventListener("click",function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    if(mode==="galaxy"){ var gi=galaxyAt(mx,my); if(gi>=0) enterGalaxy(gi); }
+    else { var pl=planetAt(mx,my); if(pl){ $("ti").textContent=pl.s.n; $("disc").style.backgroundImage="url("+pl.s.c+")"; setPlay(true); openDet(pl.s); } } });
+  cv.addEventListener("mousemove",function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    if(mode==="galaxy"){ hoverG=galaxyAt(mx,my); cv.style.cursor=hoverG>=0?"pointer":"default"; }
+    else { hoverP=planetAt(mx,my); cv.style.cursor=hoverP?"pointer":"default"; } });
   window.addEventListener("resize",function(){ if(uniOpen) sizeCv(); });
 
-  function openUni(){ $("uni").classList.add("on"); $("uni").classList.remove("listmode"); uniOpen=true; renderUni(uq);
-    setTimeout(function(){ sizeCv(); frame(); },30); }
-  function closeUni(){ uniOpen=false; $("udet").classList.remove("on"); $("uni").classList.remove("on"); }
   function openDet(s){
     $("dhero").style.backgroundImage="url("+s.c+")";
     $("dti").textContent=s.n; $("dar").textContent=s.a;
@@ -435,12 +480,14 @@ body:not(.booting) .pressplay{opacity:0}
     $("dlyr").textContent=LY; $("udet").classList.add("on");
     $("dplay").onclick=function(){ $("ti").textContent=s.n; $("disc").style.backgroundImage="url("+s.c+")"; setPlay(true); toast("NOW PLAYING  "+s.n+"_"); };
   }
-  $("uback").onclick=closeUni;
+  function openUni(){ $("uni").classList.add("on"); $("uni").classList.remove("listmode"); uniOpen=true; mode="galaxy"; curG=-1;
+    buildGx(); setTitle(); renderUni(uq); lastT=0; setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
+  function closeUni(){ uniOpen=false; $("udet").classList.remove("on"); $("uni").classList.remove("on"); }
+  $("uback").onclick=function(){ if(mode==="system") exitGalaxies(); else closeUni(); };
   $("dclose").onclick=function(){ $("udet").classList.remove("on"); };
   $("usq").oninput=function(){ uq=this.value.toLowerCase(); renderUni(uq); };
   $("utoggle").onclick=function(){ var list=$("uni").classList.toggle("listmode");
     this.textContent=list?"🪐 GALAXY":"▦ LIST"; if(!list) setTimeout(sizeCv,20); else renderUni(uq); };
-  renderUni("");
 })();
 </script>
 </body>
