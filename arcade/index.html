@@ -403,6 +403,12 @@
   /* fast path: the profile page stashes the pick in localStorage */
   try{ var _pr=localStorage.getItem("ibee_room"); if(_pr)pickedRoom=_pr; }catch(e){}
   render();                                          // paint instantly (chess free, rest shown locked)
+  /* THE FALL x NP2 is private (ships as SOON). owner.js fires "ibee-owner" true
+     for the owner — and for everyone once NP2 is launched (switch ① in owner.js)
+     — so this flips the tile to a live, clickable room. */
+  document.addEventListener("ibee-owner",function(ev){
+    if(ev&&ev.detail){ GAMES.forEach(function(g){ if(g.private) g.status="live"; }); render(); }
+  });
 
   function loadSB(cb){
     if(window.supabase&&window.supabase.createClient) return cb();

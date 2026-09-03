@@ -15,6 +15,14 @@
    effect by deleting the tag). ============================================ */
 (function(){
   "use strict";
+  /* ============================================================
+     LAUNCH SWITCH ②  — flip to true to drop the COMING-SOON cover on all the
+     pages that include this file (/np2/, /np2/fall/, /drop/) for EVERYONE.
+     (Switch ① — the radio / universe / shop / product pages / ROOMS tile — is
+     NP2_LAUNCHED in assets/owner.js.) ============================================ */
+  var LAUNCHED = false;
+  if(LAUNCHED) return;                            // no cover — the page is public
+
   var OWNER  = "droguepuissance4@gmail.com";
   var SB_URL = "https://hloxwicoeahczifshyoe.supabase.co";
   var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";

@@ -41,6 +41,21 @@
     queue.forEach(function(cb){ try{cb(isOwner);}catch(e){} }); queue=[];
   }
 
+  /* ============================================================
+     LAUNCH SWITCH ①  — flip to true to make NOUVEAUX PUNK 2 public for EVERYONE.
+     Opens the radio songs, the Music-Universe galaxy, the shop grid, and the
+     product pages in one line, and un-locks THE FALL tile in ROOMS. (The three
+     covered pages — /np2/, /np2/fall/, /drop/ — are switch ② in privategate.js.)
+     ============================================================ */
+  var NP2_LAUNCHED = false;
+  if(NP2_LAUNCHED){
+    window.IBEE_SHOW_NP2 = true;                 // synchronous — product-page reads this at render
+    resolved = true; isOwner = false; window.IBEE_IS_OWNER = false;   // public, not "owner"
+    try{ document.dispatchEvent(new CustomEvent("ibee-owner",{detail:true})); }catch(e){}
+    queue.forEach(function(cb){ try{cb(true);}catch(e){} }); queue=[];
+    return;                                       // skip the auth check entirely
+  }
+
   function loadSB(cb){
     if(window.supabase&&window.supabase.createClient) return cb();
     var s=document.createElement("script");
