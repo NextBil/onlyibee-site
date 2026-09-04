@@ -174,9 +174,16 @@ body:not(.booting) .pressplay{opacity:0}
 #uni .uhead{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:2px solid var(--border)}
 .uback{font-family:var(--px);font-size:11px;color:var(--acid);background:none;border:none;cursor:pointer;padding:4px 6px}
 .utitle{font-family:var(--px);font-size:10px;letter-spacing:1px;color:var(--ink)}
-.usearch{flex:1}
-.usearch input{width:100%;font-family:var(--vt);font-size:18px;background:#0e0e0e;color:var(--ink);border:1px solid var(--border);padding:9px 12px}
+.usearch{flex:1;min-width:0}
+.usearch input{width:100%;font-family:var(--vt);font-size:18px;background:#0e0e0e;color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:9px 12px}
 .usearch input:focus{outline:none;border-color:var(--acid)}
+/* phones: hide the big THE UNIVERSE title so the search box gets real width */
+@media(max-width:560px){
+  #uni .uhead{gap:7px;padding:10px}
+  .utitle{display:none}
+  .usearch input{font-size:16px;padding:10px 12px}
+  .uback{font-size:10px}.utoggle{padding:9px 8px}
+}
 #ugrid{position:absolute;inset:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;padding:14px 14px 140px}
 .ucard{cursor:pointer;border:1px solid var(--border);background:#0b0b0b;overflow:hidden;transition:.15s}
 .ucard:hover{border-color:var(--acid);transform:translateY(-3px)}
@@ -238,8 +245,16 @@ body:not(.booting) .pressplay{opacity:0}
 #uni.listmode #unicv,#uni.listmode .uhint{display:none}
 #uni:not(.listmode) #ugrid{display:none}
 /* while typing in the search, results from the whole library overlay the universe */
-#uni.searching #ugrid{display:grid!important;background:rgba(5,5,8,.95);z-index:5}
+/* SEARCH RESULTS = a clean vertical list with square covers (not the card grid) */
+#uni.searching #ugrid{display:block!important;background:rgba(5,5,8,.96);z-index:5;padding:12px 12px 140px}
 #uni.searching .uhint{display:none}
+#uni.searching .ucard{display:grid;grid-template-columns:56px 1fr;column-gap:12px;align-items:center;
+  border:1px solid var(--border);border-radius:12px;background:#0c0c0c;padding:8px 10px;margin:0 0 8px;overflow:hidden}
+#uni.searching .ucard:hover{border-color:var(--acid)}
+#uni.searching .ucard .uc{grid-row:1/3;width:56px;height:56px;aspect-ratio:auto;border-radius:8px;background-size:cover}
+#uni.searching .ucard .uc::after{display:none}
+#uni.searching .ucard .un{grid-column:2;align-self:end;padding:0;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#uni.searching .ucard .ua{grid-column:2;align-self:start;padding:2px 0 0;font-size:7px}
 
 /* ---- network chip + thin strip ---- */
 .chip.net{color:var(--red);text-decoration:none}
@@ -766,7 +781,7 @@ html.framed .hello{padding-top:16px}
     [].forEach.call($("ugrid").querySelectorAll(".ucard"),function(el){ el.onclick=function(){
       var slug=el.getAttribute("data-slug");
       $("uni").classList.remove("searching"); $("usq").value=""; uq="";
-      window.openSongPage(slug); }; });
+      window.openSongPage(slug, true); }; });   /* tapping a result plays it */
   }
 
   /* ===== THE UNIVERSE — the real galaxy-engine model + physics, kept:
@@ -822,12 +837,16 @@ html.framed .hello{padding-top:16px}
   function drawStars(beat){ cx.fillStyle="#050506";cx.fillRect(0,0,CW,CH);
     stars.forEach(function(st){ st.y+=0.0003+st.z*0.0006; if(st.y>1)st.y=0;
       cx.globalAlpha=(0.15+st.z*0.5)*(0.6+beat*0.6); cx.fillStyle="#fff"; cx.fillRect(st.x*CW,st.y*CH,1.3,1.3);}); cx.globalAlpha=1; }
-  function drawGalaxies(beat){ cx.textAlign="center";
-    gxs.forEach(function(gd){ gd.spin+=0.0016+beat*0.003; var hue=gd.g.hue;
+  function playingGalaxy(){ var R=RADIO(); if(!R||!R.playing())return -1; var s=songBySlug(R.slug()); return s?s.g:-1; }
+  function drawGalaxies(beat){ cx.textAlign="center"; var pg=playingGalaxy();
+    gxs.forEach(function(gd){ var np=(gd.i===pg); gd.spin+=0.0016+beat*0.003+(np?0.004+beat*0.012:0); var hue=gd.g.hue;
       var core=cx.createRadialGradient(gd.x,gd.y,0,gd.x,gd.y,gd.r);
-      core.addColorStop(0,"hsla("+hue+",90%,70%,"+(0.4+beat*0.3).toFixed(3)+")");
-      core.addColorStop(.3,"hsla("+hue+",80%,55%,.12)"); core.addColorStop(1,"hsla("+hue+",70%,45%,0)");
+      core.addColorStop(0,"hsla("+hue+",90%,70%,"+(0.4+beat*0.3+(np?0.22+beat*0.35:0)).toFixed(3)+")");
+      core.addColorStop(.3,"hsla("+hue+",80%,55%,"+(np?0.2:0.12)+")"); core.addColorStop(1,"hsla("+hue+",70%,45%,0)");
       cx.fillStyle=core; cx.beginPath(); cx.arc(gd.x,gd.y,gd.r,0,6.283); cx.fill();
+      /* the galaxy that's PLAYING gets a pulsing ring so you can see the music lives in it */
+      if(np){ cx.strokeStyle="hsla("+hue+",95%,66%,"+(0.35+beat*0.5).toFixed(3)+")"; cx.lineWidth=2+beat*4;
+        cx.beginPath(); cx.arc(gd.x,gd.y,gd.r*0.62+beat*8,0,6.283); cx.stroke(); }
       var cr=gd.r*0.52;
       cx.save(); cx.beginPath(); cx.arc(gd.x,gd.y,cr,0,6.283); cx.clip();
       if(!imgCover(gd.g.img,gd.x-cr,gd.y-cr,cr*2)){ cx.fillStyle="hsl("+hue+",70%,30%)"; cx.fillRect(gd.x-cr,gd.y-cr,cr*2,cr*2); }
@@ -838,11 +857,11 @@ html.framed .hello{padding-top:16px}
       gd.dots.forEach(function(dt){ var x=Math.cos(dt.ang)*dt.rad*gd.r, y=Math.sin(dt.ang)*dt.rad*gd.r*0.62+dt.jit*0.5;
         cx.globalAlpha=0.5+0.5*Math.sin(performance.now()*0.002+dt.ang*3); cx.fillStyle="hsl("+hue+",85%,72%)"; cx.fillRect(x,y,dt.sz,dt.sz); });
       cx.restore(); cx.globalAlpha=1;
-      var ly=gd.y+gd.r*0.80, name=gd.g.name, sub=gd.g.sub+" · "+gd.count+" signals";
+      var ly=gd.y+gd.r*0.80, name=gd.g.name, sub=np?("◉ NOW PLAYING · "+gd.count+" signals"):(gd.g.sub+" · "+gd.count+" signals");
       cx.font="9px 'Press Start 2P',monospace"; var w1=cx.measureText(name).width;
       cx.font="14px VT323,monospace"; var w2=cx.measureText(sub).width; var pw=Math.max(w1,w2)+22;
       cx.fillStyle="rgba(4,4,8,.8)"; cx.fillRect(gd.x-pw/2,ly,pw,38);
-      cx.strokeStyle=(hoverG===gd.i)?"hsla("+hue+",90%,62%,.65)":"rgba(255,255,255,.1)"; cx.lineWidth=1; cx.strokeRect(gd.x-pw/2,ly,pw,38);
+      cx.strokeStyle=np?"hsla("+hue+",95%,62%,.85)":(hoverG===gd.i)?"hsla("+hue+",90%,62%,.65)":"rgba(255,255,255,.1)"; cx.lineWidth=np?1.5:1; cx.strokeRect(gd.x-pw/2,ly,pw,38);
       cx.font="9px 'Press Start 2P',monospace"; cx.fillStyle="#f2f2f2"; cx.fillText(name,gd.x,ly+15);
       cx.font="14px VT323,monospace"; cx.fillStyle="#9fa0a2"; cx.fillText(sub,gd.x,ly+31); });
   }
@@ -1059,11 +1078,12 @@ html.framed .hello{padding-top:16px}
      site never opens a second, different universe. */
   window.openUniverse=function(){ openUni(); };
   /* the radio-list info button opens THIS song's full universe page */
-  window.openSongPage=function(slug){ if(!SONGS.length) buildLibrary();
+  window.openSongPage=function(slug,play){ if(!SONGS.length) buildLibrary();
     var s=songBySlug(slug); if(!s){ openUni(); return; }
     if(!uniOpen) openUni();
     if(mode!=="system"||curG!==s.g) enterGalaxy(s.g);
     var pl=planetBySlug(slug); if(pl){ aligned=false; perf=pl; assignOrbits(); }
+    if(play) playSong(s);        /* play it so the performing planet == the song on the player */
     openDet(s); };
   var _sm=/#song=([^&]+)/i.exec(location.hash);
   if(_sm){ setTimeout(function(){ window.openSongPage(decodeURIComponent(_sm[1])); },80); }
