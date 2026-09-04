@@ -153,9 +153,18 @@ body:not(.booting) .pressplay{opacity:0}
 .ucard:hover .uc::after{opacity:1}
 .ucard .un{font-family:var(--vt);font-size:16px;color:var(--ink);padding:7px 8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ucard .ua{font-family:var(--px);font-size:6px;color:var(--dim);padding:0 8px 9px;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#udet{position:absolute;inset:0;z-index:76;background:#070708;transform:translateY(100%);transition:transform .28s;display:flex;flex-direction:column;overflow-y:auto}
+#udet{position:absolute;left:0;right:0;bottom:0;top:auto;height:64%;z-index:76;background:#070708;
+  border-top:2px solid var(--acid);box-shadow:0 -14px 44px rgba(0,0,0,.65);
+  transform:translateY(100%);transition:transform .28s;display:flex;flex-direction:column;overflow-y:auto}
 #udet.on{transform:translateY(0)}
-#udet .dh{position:relative;height:42vh;min-height:230px;background:#000 center/cover no-repeat;flex:none}
+#udet .dh{position:relative;height:22vh;min-height:140px;background:#000 center/cover no-repeat;flex:none}
+/* album cover header on the planet page (spotify vibe) */
+#unihdr{position:absolute;top:0;left:0;right:0;z-index:4;display:none;align-items:center;gap:12px;padding:12px 14px;
+  background:linear-gradient(180deg,rgba(5,5,6,.94),rgba(5,5,6,.5) 65%,transparent);pointer-events:none}
+#uni.sys #unihdr{display:flex}
+#unihdr .hc{width:54px;height:54px;flex:none;background:#000 center/cover no-repeat;border:1px solid var(--border);box-shadow:0 0 16px rgba(0,0,0,.7)}
+#unihdr .ht{font-family:var(--px);font-size:11px;color:#fff;line-height:1.5}
+#unihdr .hs{font-family:var(--px);font-size:7px;color:var(--acid);margin-top:6px;letter-spacing:1px}
 #udet .dh::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,#070708)}
 .dclose{position:absolute;top:14px;left:14px;z-index:2;font-family:var(--px);font-size:9px;color:#fff;background:rgba(0,0,0,.6);border:1px solid var(--border);padding:9px 11px;cursor:pointer}
 #udet .db{padding:0 18px 140px;margin-top:-46px;position:relative;z-index:2}
@@ -258,6 +267,7 @@ body:not(.booting) .pressplay{opacity:0}
   </div>
   <div id="unistage">
     <canvas id="unicv"></canvas>
+    <div id="unihdr"><div class="hc" id="hdrc"></div><div><div class="ht" id="hdrt"></div><div class="hs">ALBUM · tap a record to play</div></div></div>
     <div id="ugrid"></div>
     <div class="uhint">a galaxy per record · a planet per song · tap one to open it</div>
   </div>
@@ -375,19 +385,19 @@ body:not(.booting) .pressplay{opacity:0}
     [].forEach.call($("ugrid").querySelectorAll(".ucard"),function(el){ el.onclick=function(){ openDet(SONGS[+el.getAttribute("data-i")]); }; });
   }
 
-  /* ===== THE UNIVERSE — the galaxy engine's own model, kept:
-     a PICKER of spinning spiral galaxies (one per record) -> tap to ENTER a
-     galaxy -> its songs drift as planets -> tap a planet to play + open its
-     page. Search + LIST layer over it. Same two-level flow as console.html. */
+  /* ===== THE UNIVERSE — the real galaxy-engine model + physics, kept:
+     picker of spiral galaxies (cover as a record in the core) -> ENTER -> songs
+     as disc-planets that WANDER; play one and it floats to centre while the rest
+     ORBIT it; tap the void to re-align. Same as console.html's stepPlanet. ===== */
   var GAL=[{name:"NOUVEAUX PUNK",hue:110,sub:"ROCK RNB BLUES",cv:NPC},
            {name:"20 MIN ZA SESSION",hue:78,sub:"ONE TAKE",cv:MZS}];
   GAL.forEach(function(g){ g.img=new Image(); g.img._ok=false; g.img.onload=function(){this._ok=true;}; g.img.src=g.cv; });
   SONGS.forEach(function(s){ s.g=/20 ?min|20mzs/i.test(s.a)?1:0; });
   var cv=$("unicv"), cx=cv.getContext("2d"), CW=0,CH=0,DPR=1;
-  var uniOpen=false, mode="galaxy", curG=-1, gxs=[], planets=[], hoverP=null, hoverG=-1, uq="", lastT=0;
+  var uniOpen=false, mode="galaxy", curG=-1, perf=null, gxs=[], planets=[], hoverP=null, hoverG=-1, uq="", lastT=0;
   var stars=[]; for(var k=0;k<90;k++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()});
   var utitle=document.querySelector(".utitle"), uhint=document.querySelector(".uhint");
-
+  function imgCover(img,dx,dy,d){ if(!img||!img._ok)return false; var iw=img.naturalWidth,ih=img.naturalHeight,s=Math.max(d/iw,d/ih),sw=d/s,sh=d/s; cx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,dx,dy,d,d); return true; }
   function buildGx(){ gxs=GAL.map(function(g,i){ var arms=2+i, dots=[];
     for(var d=0;d<110;d++){ var t=(d+3)/110, arm=d%arms;
       dots.push({ang:t*Math.PI*3.4+arm*(6.283/arms), rad:t, sz:Math.random()*1.4+0.5, jit:(Math.random()-0.5)*8}); }
@@ -396,7 +406,6 @@ body:not(.booting) .pressplay{opacity:0}
     CW=r.width;CH=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
     cv.width=CW*DPR;cv.height=CH*DPR;cx.setTransform(DPR,0,0,DPR,0,0);
     var R=Math.min(CW,CH)*0.19; gxs.forEach(function(gd,i){ gd.x=CW*0.5; gd.y=CH*(0.32+i*0.40); gd.r=R; }); }
-  function imgCover(img,dx,dy,d){ if(!img||!img._ok)return false; var iw=img.naturalWidth,ih=img.naturalHeight,s=Math.max(d/iw,d/ih),sw=d/s,sh=d/s; cx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,dx,dy,d,d); return true; }
   function drawStars(beat){ cx.fillStyle="#050506";cx.fillRect(0,0,CW,CH);
     stars.forEach(function(st){ st.y+=0.0003+st.z*0.0006; if(st.y>1)st.y=0;
       cx.globalAlpha=(0.15+st.z*0.5)*(0.6+beat*0.6); cx.fillStyle="#fff"; cx.fillRect(st.x*CW,st.y*CH,1.3,1.3);}); cx.globalAlpha=1; }
@@ -409,8 +418,7 @@ body:not(.booting) .pressplay{opacity:0}
       var cr=gd.r*0.52;
       cx.save(); cx.beginPath(); cx.arc(gd.x,gd.y,cr,0,6.283); cx.clip();
       if(!imgCover(gd.g.img,gd.x-cr,gd.y-cr,cr*2)){ cx.fillStyle="hsl("+hue+",70%,30%)"; cx.fillRect(gd.x-cr,gd.y-cr,cr*2,cr*2); }
-      cx.globalAlpha=0.18; cx.fillStyle="hsl("+hue+",80%,50%)"; cx.fillRect(gd.x-cr,gd.y-cr,cr*2,cr*2); cx.globalAlpha=1;
-      cx.restore();
+      cx.globalAlpha=0.16; cx.fillStyle="hsl("+hue+",80%,50%)"; cx.fillRect(gd.x-cr,gd.y-cr,cr*2,cr*2); cx.globalAlpha=1; cx.restore();
       cx.strokeStyle="hsla("+hue+",90%,66%,.55)"; cx.lineWidth=1.6; cx.beginPath(); cx.arc(gd.x,gd.y,cr,0,6.283); cx.stroke();
       cx.fillStyle="#0a0a0a"; cx.beginPath(); cx.arc(gd.x,gd.y,cr*0.15,0,6.283); cx.fill();
       cx.save(); cx.translate(gd.x,gd.y); cx.rotate(gd.spin);
@@ -426,61 +434,89 @@ body:not(.booting) .pressplay{opacity:0}
       cx.font="14px VT323,monospace"; cx.fillStyle="#9fa0a2"; cx.fillText(sub,gd.x,ly+31); });
   }
   function makePlanet(s,n){ var sz=n>12?9:n>8?11:15;
-    return {s:s,x:40+Math.random()*(CW-80),y:90+Math.random()*(CH-230),
-      vx:(Math.random()-.5)*16,vy:(Math.random()-.5)*16,ph:Math.random()*6.283,rot:Math.random()*6.283,bell:sz+Math.random()*3}; }
-  function enterGalaxy(i){ mode="system"; curG=i;
-    var list=SONGS.filter(function(s){return s.g===i;});
-    planets=list.map(function(s){return makePlanet(s,list.length);}); setTitle(); }
-  function exitGalaxies(){ mode="galaxy"; curG=-1; setTitle(); }
-  function setTitle(){ if(utitle) utitle.textContent = mode==="system"?GAL[curG].name:"THE UNIVERSE";
-    if(uhint) uhint.textContent = mode==="system"?"tap a record to play  ·  ◀ for the galaxies":"a galaxy per record · tap one to enter";
-    $("uback").textContent = mode==="system"?"◀ GALAXIES":"◀"; }
-  function drawSystem(beat,dt){ var g=GAL[curG];
-    var core=cx.createRadialGradient(CW/2,CH*0.42,0,CW/2,CH*0.42,Math.max(CW,CH)*0.65);
+    return {s:s,x:40+Math.random()*(CW-80),y:110+Math.random()*(CH-260),vx:0,vy:0,
+      heading:Math.random()*6.283,phase:Math.random()*6.283,drift:Math.random()*100,spin:Math.random()*6.283,
+      bell:sz+Math.random()*3,driftMult:0.6+Math.random()*0.8,
+      orbR:0,orbA:0,orbDir:Math.random()<0.5?-1:1,orbSpeed:0.006+Math.random()*0.005,perfScale:1}; }
+  function assignOrbits(){ if(!perf)return; var others=planets.filter(function(p){return p!==perf;});
+    var maxR=Math.min(CW,CH)*0.4;
+    others.forEach(function(p,i){ var t=others.length>1?i/(others.length-1):0; p.orbR=70+t*(maxR-70); p.orbA=Math.atan2(p.y-perf.y,p.x-perf.x); }); }
+  function stepPlanet(pl,dt,beat){ var pf=perf, dtms=dt*1000, step=Math.min(3,dtms/16), W=CW,H=CH;
+    pl.phase+=dtms*0.002; pl.drift+=dtms*0.0009; pl.spin+=0.02+beat*(pf===pl?0.14:0.05);
+    pl.perfScale+=((pf===pl?1.5:1)-pl.perfScale)*Math.min(1,0.05*step);
+    if(pf===pl){ var cx0=W*0.5,cy0=H*0.5;
+      pl.x+=(cx0-pl.x)*Math.min(1,0.05*step)+Math.sin(pl.drift*0.7)*0.35*step;
+      pl.y+=(cy0-pl.y)*Math.min(1,0.05*step)+Math.cos(pl.drift*0.6)*0.35*step; return; }
+    if(pf){ pl.orbA+=pl.orbDir*pl.orbSpeed*step*(1+beat*1.6); var rr=pl.orbR*(1+beat*0.12);
+      var tx=pf.x+Math.cos(pl.orbA)*rr, ty=pf.y+Math.sin(pl.orbA)*rr;
+      pl.x+=(tx-pl.x)*Math.min(1,0.09*step); pl.y+=(ty-pl.y)*Math.min(1,0.09*step);
+      pl.x=Math.max(26,Math.min(W-26,pl.x)); pl.y=Math.max(80,Math.min(H-30,pl.y)); return; }
+    var t2=pl.drift, wAng=Math.sin(t2*0.5)+0.5*Math.sin(t2*1.27+1.7)+0.28*Math.sin(t2*0.21+4);
+    pl.heading+=wAng*0.012*step;
+    var thrust=Math.pow(Math.max(0,Math.sin(pl.phase)),3)*0.5*pl.driftMult;
+    pl.vx+=Math.cos(pl.heading)*thrust*step; pl.vy+=Math.sin(pl.heading)*thrust*step;
+    var m=70,pad=28,ceil=80,floor=H-30;
+    if(pl.x<pad+m)pl.vx+=(pad+m-pl.x)/m*0.06*step; if(pl.x>W-pad-m)pl.vx-=(pl.x-(W-pad-m))/m*0.06*step;
+    if(pl.y<ceil+m)pl.vy+=(ceil+m-pl.y)/m*0.06*step; if(pl.y>floor-m)pl.vy-=(pl.y-(floor-m))/m*0.06*step;
+    var drag=Math.pow(0.93,step); pl.vx*=drag;pl.vy*=drag;
+    var sp=Math.hypot(pl.vx,pl.vy); if(sp>1.4){pl.vx*=1.4/sp;pl.vy*=1.4/sp;}
+    pl.x+=pl.vx*step;pl.y+=pl.vy*step;
+    if(pl.x<pad){pl.x=pad;pl.vx*=0.4} if(pl.x>W-pad){pl.x=W-pad;pl.vx*=0.4}
+    if(pl.y<ceil){pl.y=ceil;pl.vy*=0.4} if(pl.y>floor){pl.y=floor;pl.vy*=0.4}
+  }
+  function drawSystem(dt,beat){ var g=GAL[curG];
+    var core=cx.createRadialGradient(CW/2,CH*0.5,0,CW/2,CH*0.5,Math.max(CW,CH)*0.65);
     core.addColorStop(0,"hsla("+g.hue+",80%,50%,.06)"); core.addColorStop(1,"hsla("+g.hue+",80%,50%,0)");
     cx.fillStyle=core; cx.fillRect(0,0,CW,CH); cx.textAlign="center";
-    planets.forEach(function(pl){ pl.x+=pl.vx*dt; pl.y+=pl.vy*dt; pl.ph+=dt*1.5;
-      var pX=30,pT=54,pB=120;
-      if(pl.x<pX){pl.x=pX;pl.vx*=-1;} if(pl.x>CW-pX){pl.x=CW-pX;pl.vx*=-1;}
-      if(pl.y<pT){pl.y=pT;pl.vy*=-1;} if(pl.y>CH-pB){pl.y=CH-pB;pl.vy*=-1;}
-      var match=!uq||(pl.s.n+" "+pl.s.a).toLowerCase().indexOf(uq)>-1;
-      var sz=(pl.bell*0.6)*(1+beat*0.5)+Math.sin(pl.ph)*1.2, hue=g.hue;
+    planets.forEach(function(pl){ stepPlanet(pl,dt,beat); });
+    planets.forEach(function(pl){ var perfP=(pl===perf), match=!uq||(pl.s.n+" "+pl.s.a).toLowerCase().indexOf(uq)>-1;
+      var sz=(pl.bell*0.7)*pl.perfScale*(1+beat*(perfP?0.5:0.22));
       cx.globalAlpha=match?1:0.16;
-      if(pl===hoverP){ cx.fillStyle="hsla("+hue+",90%,66%,.35)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz+7,0,6.283); cx.fill(); }
-      pl.rot+=dt*(playing?2.2:0.5);
-      cx.save(); cx.translate(pl.x,pl.y); cx.rotate(pl.rot);
+      if(perfP){ cx.strokeStyle="hsla("+g.hue+",95%,66%,"+(0.3+beat*0.5).toFixed(3)+")"; cx.lineWidth=1.5+beat*2.5;
+        cx.beginPath(); cx.arc(pl.x,pl.y,sz+7+beat*6,0,6.283); cx.stroke(); }
+      else if(pl===hoverP){ cx.fillStyle="hsla("+g.hue+",90%,66%,.35)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz+7,0,6.283); cx.fill(); }
+      cx.save(); cx.translate(pl.x,pl.y); cx.rotate(pl.spin);
       cx.beginPath(); cx.arc(0,0,sz,0,6.283); cx.clip();
-      if(!imgCover(g.img,-sz,-sz,sz*2)){ cx.fillStyle="hsl("+hue+",85%,55%)"; cx.fillRect(-sz,-sz,sz*2,sz*2); }
+      if(!imgCover(g.img,-sz,-sz,sz*2)){ cx.fillStyle="hsl("+g.hue+",85%,55%)"; cx.fillRect(-sz,-sz,sz*2,sz*2); }
       cx.restore();
-      cx.strokeStyle="hsl("+hue+",90%,"+(match?68:48)+"%)"; cx.lineWidth=1.4; cx.beginPath(); cx.arc(pl.x,pl.y,sz,0,6.283); cx.stroke();
+      cx.strokeStyle="hsl("+g.hue+",90%,"+(match?68:48)+"%)"; cx.lineWidth=1.4; cx.beginPath(); cx.arc(pl.x,pl.y,sz,0,6.283); cx.stroke();
       cx.fillStyle="#0a0a0a"; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.26,0,6.283); cx.fill();
-      cx.strokeStyle="hsla("+hue+",60%,62%,.6)"; cx.lineWidth=1; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.26,0,6.283); cx.stroke();
+      cx.strokeStyle="hsla("+g.hue+",60%,62%,.6)"; cx.lineWidth=1; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.26,0,6.283); cx.stroke();
       cx.globalAlpha=1;
-      if(pl===hoverP||(uq&&match)){ cx.fillStyle=pl===hoverP?"#fff":"rgba(255,255,255,.75)"; cx.font="7px 'Press Start 2P',monospace"; cx.fillText(pl.s.n,pl.x,pl.y-sz-8); }
+      if(perfP||pl===hoverP||(uq&&match)){ cx.fillStyle=perfP?"#fff":"rgba(255,255,255,.8)"; cx.font="7px 'Press Start 2P',monospace"; cx.fillText(pl.s.n,pl.x,pl.y-sz-9); }
     });
   }
   function frame(t){ if(!uniOpen)return; requestAnimationFrame(frame);
     var dt=Math.min(0.05,((t-lastT)/1000)||0.016); lastT=t; var beat=curBeat;
     if(!CW){ sizeCv(); } drawStars(beat);
-    if(mode==="galaxy") drawGalaxies(beat); else drawSystem(beat,dt); }
+    if(mode==="galaxy") drawGalaxies(beat); else drawSystem(dt,beat); }
   function galaxyAt(mx,my){ for(var i=0;i<gxs.length;i++){ if(Math.hypot(mx-gxs[i].x,my-gxs[i].y)<gxs[i].r*1.05) return i; } return -1; }
-  function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.6+16))?best:null; }
+  function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.7*best.perfScale+16))?best:null; }
   cv.addEventListener("click",function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
-    if(mode==="galaxy"){ var gi=galaxyAt(mx,my); if(gi>=0) enterGalaxy(gi); }
-    else { var pl=planetAt(mx,my); if(pl){ $("ti").textContent=pl.s.n; $("disc").style.backgroundImage="url("+pl.s.c+")"; setPlay(true); openDet(pl.s); } } });
+    if(mode==="galaxy"){ var gi=galaxyAt(mx,my); if(gi>=0) enterGalaxy(gi); return; }
+    var pl=planetAt(mx,my);
+    if(pl){ perf=pl; assignOrbits(); $("ti").textContent=pl.s.n; $("disc").style.backgroundImage="url("+pl.s.c+")"; setPlay(true); openDet(pl.s); }
+    else if(perf){ assignOrbits(); toast("ALIGNED_"); } });
   cv.addEventListener("mousemove",function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
     if(mode==="galaxy"){ hoverG=galaxyAt(mx,my); cv.style.cursor=hoverG>=0?"pointer":"default"; }
     else { hoverP=planetAt(mx,my); cv.style.cursor=hoverP?"pointer":"default"; } });
   window.addEventListener("resize",function(){ if(uniOpen) sizeCv(); });
 
+  function setTitle(){ if(utitle) utitle.textContent = mode==="system"?GAL[curG].name:"THE UNIVERSE";
+    if(uhint) uhint.textContent = mode==="system"?"tap a record to play  ·  tap the void to align  ·  ◀ galaxies":"a galaxy per record · tap one to enter";
+    $("uback").textContent = mode==="system"?"◀ GALAXIES":"◀"; }
+  function enterGalaxy(i){ mode="system"; curG=i; perf=null;
+    var list=SONGS.filter(function(s){return s.g===i;});
+    planets=list.map(function(s){return makePlanet(s,list.length);});
+    $("uni").classList.add("sys"); $("hdrc").style.backgroundImage="url("+GAL[i].cv+")"; $("hdrt").textContent=GAL[i].name;
+    setTitle(); }
+  function exitGalaxies(){ mode="galaxy"; curG=-1; perf=null; $("uni").classList.remove("sys"); $("udet").classList.remove("on"); setTitle(); }
   function openDet(s){
-    $("dhero").style.backgroundImage="url("+s.c+")";
-    $("dti").textContent=s.n; $("dar").textContent=s.a;
-    $("dinfo").textContent=s.len+"  ·  "+s.pl+" plays  ·  press ▶ to hear it";
+    $("dhero").style.backgroundImage="url("+s.c+")"; $("dti").textContent=s.n; $("dar").textContent=s.a;
+    $("dinfo").textContent=s.len+"  ·  "+s.pl+" plays  ·  the planets keep orbiting behind_";
     $("dlyr").textContent=LY; $("udet").classList.add("on");
-    $("dplay").onclick=function(){ $("ti").textContent=s.n; $("disc").style.backgroundImage="url("+s.c+")"; setPlay(true); toast("NOW PLAYING  "+s.n+"_"); };
-  }
-  function openUni(){ $("uni").classList.add("on"); $("uni").classList.remove("listmode"); uniOpen=true; mode="galaxy"; curG=-1;
+    $("dplay").onclick=function(){ $("ti").textContent=s.n; $("disc").style.backgroundImage="url("+s.c+")"; setPlay(true); toast("NOW PLAYING  "+s.n+"_"); }; }
+  function openUni(){ $("uni").classList.add("on"); $("uni").classList.remove("listmode","sys"); uniOpen=true; mode="galaxy"; curG=-1; perf=null;
     buildGx(); setTitle(); renderUni(uq); lastT=0; setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
   function closeUni(){ uniOpen=false; $("udet").classList.remove("on"); $("uni").classList.remove("on"); }
   $("uback").onclick=function(){ if(mode==="system") exitGalaxies(); else closeUni(); };
