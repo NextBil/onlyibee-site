@@ -55,10 +55,12 @@
     border-radius:13px;padding:6px 10px 5px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
     transition:color .15s,background .15s,border-color .15s,box-shadow .15s}
   #nav button .nvxwrap{width:26px;height:26px;perspective:150px}
-  #nav .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;animation:navspin 5.5s linear infinite}
+  #nav .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(8deg)}
+  /* only the SELECTED tab's icon spins — the rest stay still (lighter on CPU) */
+  #nav button.on .nvx{animation:navspin 3.4s linear infinite}
   #nav .nvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
   @keyframes navspin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
-  #nav button:hover .nvx,#nav button.on .nvx{animation-duration:2.4s}
+  @media(hover:hover){ #nav button:hover .nvx{animation:navspin 2.4s linear infinite} }
   #nav .nvlab{font-size:7px;letter-spacing:.5px}
   #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
   #nav button.on{color:#07120a;background:var(--acid);border-color:var(--acid);
@@ -81,7 +83,7 @@
     display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px 5px;border-radius:13px;
     border:1px solid var(--border);background:#0d0d0d;color:var(--dim)}
   #acct .nvxwrap{width:26px;height:26px;perspective:150px}
-  #acct .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;animation:navspin 5.5s linear infinite}
+  #acct .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(8deg)}
   #acct .nvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
   #acct button:hover{color:var(--ink);border-color:#3a3a3a}#acct button:hover .nvx{animation-duration:2.4s}
   #bar #acct button.login{color:var(--gold);border-color:#3a3200}
@@ -788,6 +790,9 @@
 <script src="assets/badges.js?v=13"></script>
 <!-- the unlock ladder: earn the rhythm games by playing (grants via grant_game, see member/unlocks.sql) -->
 <script src="assets/unlocks.js?v=1"></script>
+<!-- MINE (purple cashew) discount currency: accrues while you LISTEN. Loaded in the
+     shell so listening is counted once (top window) no matter what page is framed. -->
+<script src="assets/np2-perks.js?v=3"></script>
 <script>
 (function(){
   /* if the shell ever loads inside the frame (a link hit the root) → show the console instead */

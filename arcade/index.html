@@ -164,6 +164,17 @@
   #gateladder .lw{font-family:var(--vt);font-size:15px;color:var(--dim,#7a7a7a);line-height:1.4}
 </style>
 <script defer src="/assets/console-nav.js"></script>
+<style>
+  .earnbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    margin:12px 0 4px;padding:11px 14px;border:1px solid #2e2148;border-radius:12px;
+    background:linear-gradient(180deg,#120c1e,#0c0a12);text-decoration:none;
+    box-shadow:0 0 18px rgba(176,107,255,.14)}
+  .earnbar .eb-t{font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;color:#c79bff}
+  .earnbar .eb-b{font-family:'Press Start 2P',monospace;font-size:9px;color:#e8e8e8}
+  .earnbar:hover{border-color:#b06bff}
+</style>
+<!-- MINE (purple cashew) discount readout on the ROOMS hub -->
+<script defer src="../assets/np2-perks.js?v=3"></script>
 </head>
 <body>
   <header>
@@ -176,6 +187,7 @@
 
     <div class="scrtitle">ONLYIBEE <span class="n">ROOMS</span></div>
     <div class="scrsub">creative, artistic ways to listen — pick a room · free play_</div>
+    <a class="earnbar" href="../shop/" title="Your cashew discount"><span class="eb-t">PLAY &amp; EARN DISCOUNTS</span><span class="eb-b" data-perk-badge>—</span></a>
     <div class="storebar"><div class="run"><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span><span class="c">★ NOW IN STORE</span><span>ICS CHESS</span><span>RUN BEEBEE!</span><span>MIMI GUITAR RUSH</span><span class="r">NEW</span><span>MIMI MUSIC TILES</span><span class="r">NEW</span><span class="y">★ FREE PLAY — INSERT COIN</span></div></div>
     <div id="store"></div>
   </main>

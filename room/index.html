@@ -326,7 +326,7 @@ footer a:hover{color:var(--acid)}
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/assets/np2-perks.js?v=2"></script>
+<script src="/assets/np2-perks.js?v=3"></script>
 <!-- the news feed + badge catalog + unread inbox (framed copy = catalog only; the shell tracks) -->
 <script>document.write('<script src="../assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script src="../assets/badges.js?v=13"></script>
@@ -1278,16 +1278,17 @@ footer a:hover{color:var(--acid)}
     if(!box){
       var st=document.createElement('style');
       st.textContent=
-        '#listensec{border:1px solid #3a3a1e;background:#0d0f08;padding:14px 15px;margin:14px 0}'
+        '#listensec{border:1px solid #2e2148;background:#0c0a12;padding:14px 15px;margin:14px 0}'
        +'#listensec .lrow{display:flex;align-items:baseline;justify-content:space-between;gap:10px}'
-       +'#listencoin{font-family:"Press Start 2P",monospace;font-size:15px;color:#e8dc12;'
-       +'text-shadow:0 0 14px rgba(232,220,18,.45)}'
+       +'#listencoin{font-family:"Press Start 2P",monospace;font-size:15px;color:#c79bff;'
+       +'text-shadow:0 0 14px rgba(176,107,255,.45);display:flex;align-items:center;gap:8px}'
+       +'#listencoin .cashew{width:18px;height:18px}'
        +'#listenoff{font-family:"Press Start 2P",monospace;font-size:11px;color:#ff1f6f}'
-       +'#listenbar{height:4px;background:#22240f;margin-top:11px;overflow:hidden}'
-       +'#listenbar i{display:block;height:100%;background:#e8dc12;box-shadow:0 0 8px #e8dc12}'
-       +'#listenfoot{font-family:"Press Start 2P",monospace;font-size:6px;color:#6f7a4a;'
+       +'#listenbar{height:4px;background:#1a1526;margin-top:11px;overflow:hidden}'
+       +'#listenbar i{display:block;height:100%;background:#b06bff;box-shadow:0 0 8px #b06bff}'
+       +'#listenfoot{font-family:"Press Start 2P",monospace;font-size:6px;color:#7a6f95;'
        +'letter-spacing:1px;margin-top:9px;line-height:2}'
-       +'#listenfoot a{color:#e8dc12;text-decoration:none}';
+       +'#listenfoot a{color:#b06bff;text-decoration:none}';
       document.head.appendChild(st);
       box=document.createElement('div'); box.id='listensec';
       box.innerHTML='<div class="lrow"><span id="listencoin"></span><span id="listenoff"></span></div>'
@@ -1298,15 +1299,15 @@ footer a:hover{color:var(--acid)}
       else main.insertBefore(box, main.firstChild);
     }
     var n=P.points(), d=P.discount(), pct=Math.min(100, 100*n/P.POINTS_FOR_MAX);
-    document.getElementById('listencoin').textContent=P.COIN+' '+n+' LISTENS';
+    document.getElementById('listencoin').innerHTML=P.COIN+' '+n+' CASHEWS';
     document.getElementById('listenoff').textContent=d>0?('−'+d+'% OFF'):'—';
     document.getElementById('listenbar').firstChild.style.width=pct.toFixed(1)+'%';
     document.getElementById('listenfoot').innerHTML = d>=P.MAXPCT
       ? 'MAXED · CODE '+P.code()
-      : (d>0 ? ('CODE '+P.code()+' · <a href="/np2/fall/">FALL FOR MORE ▼</a>')
-             : '<a href="/np2/fall/">FALL TO EARN ▼</a>');
+      : (d>0 ? ('CODE '+P.code()+' · listen &amp; play to earn more ▶')
+             : 'play music, play the rooms & games to earn ▼');
   }
-  paint();
+  paint(); setInterval(paint,1500);   /* tick live while cashews accrue */
 })();
 
 /* ---- COLLECTION, at the top of the profile ----

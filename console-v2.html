@@ -865,10 +865,14 @@ html.framed .hello{padding-top:16px}
       cx.font="9px 'Press Start 2P',monospace"; cx.fillStyle="#f2f2f2"; cx.fillText(name,gd.x,ly+15);
       cx.font="14px VT323,monospace"; cx.fillStyle="#9fa0a2"; cx.fillText(sub,gd.x,ly+31); });
   }
+  /* old galaxy-engine feature restored: a record GROWS with how many times you've
+     played it (from ibee_sav.plays), up to +60% at 10 plays */
+  function playsOf(slug){ try{ var s=JSON.parse(localStorage.getItem("ibee_sav")||"{}"); var p=s&&s.plays&&(s.plays[slug]||s.plays[(slug||"").replace(/\.mp3$/,"")]); return p>0?p:0; }catch(e){ return 0; } }
   function makePlanet(s,n){ var sz=n>12?13:n>8?17:22, W=CW||360, H=CH||620;
+    var grow=1+Math.min(10,playsOf(s.slug))*0.06;      /* 1.0 .. 1.6 */
     return {s:s,x:40+Math.random()*(W-80),y:110+Math.random()*Math.max(120,(H-260)),vx:0,vy:0,
       heading:Math.random()*6.283,phase:Math.random()*6.283,drift:Math.random()*100,spin:Math.random()*6.283,
-      bell:sz+Math.random()*3,driftMult:0.6+Math.random()*0.8,
+      bell:(sz+Math.random()*3)*grow,driftMult:0.6+Math.random()*0.8,
       orbR:0,orbA:0,orbDir:Math.random()<0.5?-1:1,orbSpeed:0.006+Math.random()*0.005,perfScale:1}; }
   function assignOrbits(){ if(!perf)return; var others=planets.filter(function(p){return p!==perf;});
     /* orbit well clear of the (enlarged) performer so they never sit on top of it */

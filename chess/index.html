@@ -185,6 +185,7 @@ footer{margin-top:20px;color:var(--dim);font-size:16px;text-align:center;padding
 .icsback:hover{color:#b6ff00;border-color:#b6ff00}
 </style>
 <script defer src="/assets/console-nav.js"></script>
+<script defer src="../assets/np2-perks.js?v=3"></script>
 </head>
 <body>
 <header>
@@ -470,11 +471,18 @@ function commit(from,mv,promoT){
     gameOver=true;
     if(chk){
       status.textContent='CHECKMATE!';
-      /* badge event: the human (green) checkmated the CPU */
-      if(mode==='ai'&&mover==='w'){try{localStorage.setItem("ibee_badge_evt",JSON.stringify({k:"chess",t:Date.now()}));}catch(e){}}
+      /* badge event + cashew discount: the human (green) checkmated the CPU.
+         hard(LV3)=40% off · normal(LV2)=15% · easy(LV1)=3% */
+      var wonPct=0;
+      if(mode==='ai'&&mover==='w'){
+        try{localStorage.setItem("ibee_badge_evt",JSON.stringify({k:"chess",t:Date.now()}));}catch(e){}
+        wonPct=level>=3?40:level===2?15:3;
+        try{ var P=(window.top&&window.top.IBEE_PERKS)||window.IBEE_PERKS; if(P&&P.awardPct) P.awardPct(wonPct); }catch(e){}
+      }
       FX.mate();
       setTimeout(function(){
-        showBanner('<img src="'+ART[mover].K+'" alt="">K.O.!!!<br><span style="font-size:12px;letter-spacing:2px">'+(mover==='w'?'GREEN':'RED')+' WINS THE SET</span>',true);
+        showBanner('<img src="'+ART[mover].K+'" alt="">K.O.!!!<br><span style="font-size:12px;letter-spacing:2px">'+(mover==='w'?'GREEN':'RED')+' WINS THE SET</span>'
+          +(wonPct>0?'<br><span style="font-size:11px;letter-spacing:1px;color:#b06bff">🟣 −'+wonPct+'% CASHEW DISCOUNT EARNED</span>':''),true);
       },700);
     }
     else{status.textContent='STALEMATE';showBanner('STALEMATE — DRAW');}
