@@ -1692,6 +1692,11 @@
   /* ---- PRESS START intro: the play button starts the music AND enters the site.
      This is the one deliberate autostart — a real tap/keypress, so browsers allow it. ---- */
   var enter=document.getElementById('enter');
+  /* Deep-link arrival (a shared link / search result opened /?p=<page>): the
+     visitor already chose a page, so skip the PRESS START boot and drop them
+     straight onto it inside the shell. Radio stays paused until they tap play. */
+  try{ var _pp=new URLSearchParams(location.search).get('p');
+    if(enter && _pp && !/^console-v2\.html/i.test(_pp)){ enter.style.display='none'; enter=null; } }catch(e){}
   if(enter){
     /* pin the boot play button exactly over the real player ► button */
     var ep=document.getElementById('enterplay');

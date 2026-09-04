@@ -18,14 +18,35 @@
   "use strict";
   if(window.__ibeeConsoleNav) return; window.__ibeeConsoleNav=1;
 
-  /* never inside the shell frame (it has its own nav), never twice */
+  /* never inside the shell frame — the shell owns the nav + the bottom player,
+     and this is what stops a redirect loop (framed pages just render normally) */
   try{ if(window.top!==window.self) return; }catch(e){}
   if(window.IBEE_NO_CONSOLE_NAV) return;
 
-  /* is this the main menu? then no nav — the page is the menu */
+  /* is this the shell / main menu itself? then do nothing */
   var p=(location.pathname||"/").toLowerCase();
   var isHome = p==="/" || /\/(index|console|console-v2)\.html$/.test(p);
   if(isHome) return;
+
+  /* ---- ONE nav, ONE player, everywhere ---------------------------------------
+     Every content page is meant to live INSIDE the shell (index.html), which
+     carries the single top nav and the persistent bottom player. Opened directly
+     (a shared link, a search result), a page would otherwise show its own nav and
+     the player would collapse to a chip. So send a real top-level visitor into the
+     shell, framing THIS page: /?p=<path>. The standalone HTML still serves for
+     crawlers (they read it before this runs; canonical stays on the real URL).
+     Pages that must stay bare (checkout, popups) opt out with <body data-nonav>. */
+  try{
+    if(document.body && document.body.hasAttribute("data-nonav")) { /* fall through to render */ }
+    else {
+      var rel=(location.pathname||"/").replace(/^\//,"")+location.search+location.hash;
+      if(rel && !/^\?/.test(rel)){
+        location.replace("/?p="+encodeURIComponent(rel));
+        return;
+      }
+    }
+  }catch(e){}
+  return;   /* redirector only — the floating pill below is retired (one nav lives in the shell) */
 
   /* the same voxel icons the homepage uses */
   var SVG={
