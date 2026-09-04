@@ -48,15 +48,19 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 /* a box is mostly a big preview; text hides until you tap it */
 /* squares by default (only TV is a rectangle). No colour strip — a soft resting
    glow in the box's colour, and the border LIGHTS UP when you tap it. */
+/* the border is dark when nothing plays; when music plays every tile lights up in
+   the CURRENT SONG'S colour (--songhue), pulsing to the beat. Tapping lights it brighter. */
 .box{--ac:var(--acid);position:relative;border:2px solid #1c1c1c;background:#0a0a0a;overflow:hidden;
   border-radius:20px;cursor:pointer;aspect-ratio:1/1;
-  box-shadow:0 5px 18px rgba(0,0,0,.45),0 0 15px color-mix(in srgb,var(--ac) 12%,transparent);
-  transition:transform .16s cubic-bezier(.2,.8,.2,1),border-color .18s,box-shadow .18s}
-.box:hover{transform:translateY(-3px) scale(1.01);border-color:color-mix(in srgb,var(--ac) 40%,#1c1c1c);
-  box-shadow:0 12px 30px rgba(0,0,0,.55),0 0 22px color-mix(in srgb,var(--ac) 24%,transparent)}
-.box.sel{transform:translateY(-4px) scale(1.012);border-color:var(--ac);
-  box-shadow:0 14px 36px rgba(0,0,0,.6),0 0 36px color-mix(in srgb,var(--ac) 60%,transparent),
-             inset 0 0 0 1px color-mix(in srgb,var(--ac) 40%,transparent);outline:none}
+  box-shadow:0 5px 18px rgba(0,0,0,.45);
+  transition:transform .16s cubic-bezier(.2,.8,.2,1),border-color .25s,box-shadow .25s}
+body.playing .box{border-color:hsla(var(--songhue,110),85%,58%,.5);
+  box-shadow:0 5px 18px rgba(0,0,0,.45),0 0 20px hsla(var(--songhue,110),85%,58%,calc(.16 + var(--beat,0)*.28))}
+.box:hover{transform:translateY(-3px) scale(1.01);border-color:hsla(var(--songhue,110),85%,62%,.8);
+  box-shadow:0 12px 30px rgba(0,0,0,.55),0 0 24px hsla(var(--songhue,110),85%,60%,.3)}
+.box.sel{transform:translateY(-4px) scale(1.012);border-color:hsl(var(--songhue,110),90%,60%);
+  box-shadow:0 14px 36px rgba(0,0,0,.6),0 0 36px hsla(var(--songhue,110),90%,60%,.55),
+             inset 0 0 0 1px hsla(var(--songhue,110),90%,60%,.4);outline:none}
 .box.wide{grid-column:1 / -1;aspect-ratio:auto;min-height:200px;border-radius:24px}
 
 .peek{position:absolute;inset:0;background:#050505 center/cover no-repeat;background-image:var(--img)}
@@ -191,6 +195,11 @@ body:not(.booting) .pressplay{opacity:0}
 #udet.on{transform:translateY(0);opacity:1;pointer-events:auto}
 #udet .db{position:relative;z-index:2}
 .dh,.dclose{display:none}
+/* window-style close on the song page */
+.dx{position:absolute;top:12px;right:12px;z-index:6;width:34px;height:34px;border-radius:10px;
+  background:rgba(6,6,9,.72);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:14px;cursor:pointer;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);box-shadow:0 3px 12px rgba(0,0,0,.55)}
+.dx:hover{border-color:var(--acid);color:var(--acid)}
 #udet .dti{font-family:var(--px);font-size:15px;color:#fff;line-height:1.5;text-shadow:0 2px 12px #000}
 #udet .dar{font-family:var(--px);font-size:8px;color:var(--acid);margin-top:9px;letter-spacing:1px}
 #udet .dinfo{color:#b9b9bd;font-size:15px;margin-top:9px}
@@ -348,14 +357,15 @@ body:not(.booting) .pressplay{opacity:0}
 .trlinks .sep{color:#333} .trlinks .cr{margin-left:auto;color:#555}
 /* phones: stack the footer so SUPPORT fills the width instead of leaving gaps */
 @media(max-width:560px){
-  .systray{padding:16px 14px 130px}
-  .systray .tray{flex-direction:column;align-items:stretch;gap:10px}
-  .trbtn{justify-content:center}
-  .plats2{margin-left:0;justify-content:center;gap:10px}
-  .trlinks{flex-direction:column;align-items:center;gap:9px;text-align:center}
-  .trlinks .sup{width:100%;text-align:center;padding:11px}
-  .trlinks .sep{display:none}
-  .trlinks .cr{margin-left:0}
+  .systray{padding:12px 12px 116px}
+  .systray .tray{flex-wrap:wrap;justify-content:center;gap:8px}
+  .trbtn{font-size:8px;padding:8px 11px}                 /* ABOUT smaller */
+  .plats2{margin-left:0;justify-content:center;gap:8px}
+  .plats2 a{width:30px;height:30px}
+  .trlinks{margin-top:10px;flex-wrap:wrap;justify-content:center;gap:6px 8px}
+  .trlinks .sup{font-size:7px;padding:6px 9px}           /* SUPPORT smaller */
+  .trlinks .sep{display:inline}                          /* keep CONTACT · PRIVACY · RIGHTS inline */
+  .trlinks .cr{margin-left:0;flex-basis:100%;text-align:center;margin-top:2px}
 }
 
 /* ABOUT overlay */
@@ -431,12 +441,9 @@ html.framed .hello{padding-top:16px}
   </button>
 
   <button class="box shop" data-ico="shop">
-    <div class="peek"><div class="mosaic">
-      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_37851d102940464786ec570c169480c3~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
-      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_ee7534e7c94d430ab3305ae6ad4cb50c~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
-      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_761d9cf263d44e1fa1d18b6dd298bd30~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
-      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_4321ba1c23e349e9ad06e323e4145e49~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
-    </div></div>
+    <video class="tvvid" muted loop playsinline autoplay preload="auto"
+      src="https://onlyibee.com/assets/video/ics-teaser.mp4"></video>
+    <div class="peek" style="background:none"></div>
     <span class="ico"></span>
     <span class="nm">SHOP</span><span class="cnt">47 ▸</span>
     <div class="info"><div class="tg">UTOPIE · ONE OF ONE</div>
@@ -538,6 +545,7 @@ html.framed .hello{padding-top:16px}
     <div class="uhint">a galaxy per record · a planet per song · tap one to open it</div>
   </div>
   <div id="udet">
+    <button class="dx" id="dx" aria-label="Close">✕</button>
     <div class="dh" id="dhero"><button class="dclose" id="dclose">◀ BACK</button></div>
     <div class="db">
       <div class="dti" id="dti"></div><div class="dar" id="dar"></div>
@@ -610,7 +618,7 @@ html.framed .hello{padding-top:16px}
      we hide our own copies and let its skeleton wrap us — the radio logic is the
      shell's, untouched. Standalone, we show our own chrome. */
   if(framed()) document.documentElement.classList.add("framed");
-  var DEST={rooms:"arcade/",shop:"shop/",ics:"chess/",tv:"tv/",you:"member/"};
+  var DEST={rooms:"arcade/",shop:"console.html#shop",ics:"chess/",tv:"tv/",you:"member/"};
   function navTo(rel){ rel=rel.replace(/^\//,"");
     try{ if(framed()&&window.top.IBEE_SHELL&&window.top.IBEE_SHELL.navigate){ window.top.IBEE_SHELL.navigate(rel); return; } }catch(e){}
     location.href="/"+rel; }
@@ -681,10 +689,12 @@ html.framed .hello{padding-top:16px}
   if(!framed()) document.body.classList.add("booting");
   setInterval(syncDock, 350);
 
-  /* things move to the music — the REAL per-song groove drives --beat */
+  /* things move to the music — the REAL per-song groove drives --beat, and the
+     current song's colour drives --songhue (the menu borders light up in it) */
   (function loop(){ requestAnimationFrame(loop);
     var R=RADIO(); var b=(R&&R.beat)?(R.beat()||0):0;
-    curBeat=b; document.body.style.setProperty("--beat", b.toFixed(3));
+    curBeat=b; var rs=document.documentElement.style; rs.setProperty("--beat", b.toFixed(3));
+    if(R){ var i=R.current(); if(i>=0){ var so=R.song(i)||{}, hue=(so.hue!=null)?so.hue:(hueFromTint((R.album?R.album(i):{}).tint)); if(hue!=null) rs.setProperty("--songhue", hue); } }
   })();
 
   /* THE UNIVERSE — a mini-spotify that is the radio: search, covers, lyrics, info */
@@ -796,7 +806,8 @@ html.framed .hello{padding-top:16px}
   function sizeCv(){ var r=$("unistage").getBoundingClientRect(); if(!r.width)return;
     CW=r.width;CH=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
     cv.width=CW*DPR;cv.height=CH*DPR;cx.setTransform(DPR,0,0,DPR,0,0);
-    var R=Math.min(CW,CH)*0.19; gxs.forEach(function(gd,i){ gd.x=CW*0.5; gd.y=CH*(0.32+i*0.40); gd.r=R; }); }
+    var R=Math.min(CW,CH)*0.19, n=gxs.length||1, sp=Math.min(CH*0.42,CH/(n+0.25)), y0=CH*0.5-(n-1)*sp/2;
+    gxs.forEach(function(gd,i){ gd.x=CW*0.5; gd.y=y0+i*sp; gd.r=R; }); }
   function drawStars(beat){ cx.fillStyle="#050506";cx.fillRect(0,0,CW,CH);
     stars.forEach(function(st){ st.y+=0.0003+st.z*0.0006; if(st.y>1)st.y=0;
       cx.globalAlpha=(0.15+st.z*0.5)*(0.6+beat*0.6); cx.fillStyle="#fff"; cx.fillRect(st.x*CW,st.y*CH,1.3,1.3);}); cx.globalAlpha=1; }
@@ -824,21 +835,22 @@ html.framed .hello{padding-top:16px}
       cx.font="9px 'Press Start 2P',monospace"; cx.fillStyle="#f2f2f2"; cx.fillText(name,gd.x,ly+15);
       cx.font="14px VT323,monospace"; cx.fillStyle="#9fa0a2"; cx.fillText(sub,gd.x,ly+31); });
   }
-  function makePlanet(s,n){ var sz=n>12?9:n>8?11:15;
-    return {s:s,x:40+Math.random()*(CW-80),y:110+Math.random()*(CH-260),vx:0,vy:0,
+  function makePlanet(s,n){ var sz=n>12?13:n>8?17:22, W=CW||360, H=CH||620;
+    return {s:s,x:40+Math.random()*(W-80),y:110+Math.random()*Math.max(120,(H-260)),vx:0,vy:0,
       heading:Math.random()*6.283,phase:Math.random()*6.283,drift:Math.random()*100,spin:Math.random()*6.283,
       bell:sz+Math.random()*3,driftMult:0.6+Math.random()*0.8,
       orbR:0,orbA:0,orbDir:Math.random()<0.5?-1:1,orbSpeed:0.006+Math.random()*0.005,perfScale:1}; }
   function assignOrbits(){ if(!perf)return; var others=planets.filter(function(p){return p!==perf;});
-    var maxR=Math.min(CW,CH)*0.4;
-    others.forEach(function(p,i){ var t=others.length>1?i/(others.length-1):0; p.orbR=70+t*(maxR-70); p.orbA=Math.atan2(p.y-perf.y,p.x-perf.x); }); }
+    /* orbit well clear of the (enlarged) performer so they never sit on top of it */
+    var minR=Math.max(110,perf.bell*2.4), maxR=Math.min(CW,CH)*0.46;
+    others.forEach(function(p,i){ var t=others.length>1?i/(others.length-1):0; p.orbR=minR+t*(Math.max(maxR,minR+40)-minR); p.orbA=Math.atan2(p.y-perf.y,p.x-perf.x); }); }
   /* ALIGN = snap every record into a tidy grid (rows centred) and hold it */
   function alignGrid(){ aligned=true; perf=null; detOpen=false; $("udet").classList.remove("on");
-    var n=planets.length, cols=Math.max(1,Math.round(Math.sqrt(n*CW/Math.max(1,CH*0.62)))), rows=Math.ceil(n/cols);
-    var top=CH*0.24, bot=CH-70, gh=bot-top, colW=Math.min((CW-52)/cols, 120);
+    var n=planets.length, cols=Math.max(2,Math.round(Math.sqrt(n*CW/Math.max(1,CH*0.6)))), rows=Math.ceil(n/cols);
+    var top=CH*0.15, bot=CH-56, gh=bot-top, colW=Math.min((CW-28)/cols,132), rowH=gh/rows;
     planets.forEach(function(p,i){ var r=Math.floor(i/cols), inRow=Math.min(cols,n-r*cols), c=i-r*cols;
-      p.gx=CW*0.5+(c-(inRow-1)/2)*colW;
-      p.gy=top+gh*((r+0.5)/rows); });
+      p.gx=CW*0.5+(c-(inRow-1)/2)*colW; p.gy=top+rowH*(r+0.5);
+      p.cellW=colW-8; p.gcap=Math.min(colW*0.30,rowH*0.32); });   /* cap size so title fits under it */
     setTitle(); }
   function stepPlanet(pl,dt,beat){ var pf=perf, dtms=dt*1000, step=Math.min(3,dtms/16), W=CW,H=CH;
     pl.phase+=dtms*0.002; pl.drift+=dtms*0.0009; pl.spin+=0.02+beat*(pf===pl?0.14:0.05);
@@ -866,27 +878,45 @@ html.framed .hello{padding-top:16px}
     if(pl.x<pad){pl.x=pad;pl.vx*=0.4} if(pl.x>W-pad){pl.x=W-pad;pl.vx*=0.4}
     if(pl.y<ceil){pl.y=ceil;pl.vy*=0.4} if(pl.y>floor){pl.y=floor;pl.vy*=0.4}
   }
+  function fitText(txt,maxw,size){ cx.font=size+"px 'Press Start 2P',monospace";
+    if(cx.measureText(txt).width<=maxw) return txt; var t=txt;
+    while(t.length>1 && cx.measureText(t+"…").width>maxw) t=t.slice(0,-1); return t+"…"; }
+  function plLabel(x,y,txt,size,strong){
+    cx.font=size+"px 'Press Start 2P',monospace"; cx.textAlign="center";
+    var w=cx.measureText(txt).width;
+    cx.fillStyle="rgba(3,3,7,"+(strong?0.82:0.5)+")"; cx.fillRect(x-w/2-5,y-size,w+10,size+7);
+    cx.fillStyle=strong?"#fff":"rgba(228,228,233,.85)"; cx.fillText(txt,x,y+1); }
+  function drawDisc(pl,perfP,g,beat){
+    var match=!uq||(pl.s.n+" "+pl.s.a).toLowerCase().indexOf(uq)>-1;
+    var sz=(pl.bell*0.82)*pl.perfScale*(1+beat*(perfP?0.5:0.22));
+    if(aligned && pl.gcap) sz=Math.min(sz,pl.gcap);   /* keep grid cells tidy */
+    cx.globalAlpha=match?1:0.16;
+    if(perfP){ cx.strokeStyle="hsla("+g.hue+",95%,66%,"+(0.3+beat*0.5).toFixed(3)+")"; cx.lineWidth=1.5+beat*2.5;
+      cx.beginPath(); cx.arc(pl.x,pl.y,sz+8+beat*7,0,6.283); cx.stroke(); }
+    else if(pl===hoverP){ cx.fillStyle="hsla("+g.hue+",90%,66%,.35)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz+7,0,6.283); cx.fill(); }
+    cx.save(); cx.translate(pl.x,pl.y); cx.rotate(pl.spin);
+    cx.beginPath(); cx.arc(0,0,sz,0,6.283); cx.clip();
+    if(!imgCover(g.img,-sz,-sz,sz*2)){ cx.fillStyle="hsl("+g.hue+",85%,55%)"; cx.fillRect(-sz,-sz,sz*2,sz*2); }
+    cx.restore();
+    cx.strokeStyle="hsl("+g.hue+",90%,"+(match?68:48)+"%)"; cx.lineWidth=1.6; cx.beginPath(); cx.arc(pl.x,pl.y,sz,0,6.283); cx.stroke();
+    cx.fillStyle="#0a0a0a"; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.24,0,6.283); cx.fill();
+    cx.strokeStyle="hsla("+g.hue+",60%,62%,.6)"; cx.lineWidth=1; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.24,0,6.283); cx.stroke();
+    cx.globalAlpha=1;
+    /* title attached under each planet. In GRID mode every one shows, truncated to
+       its cell so they never overlap. Free-floating in a crowded galaxy, only the
+       performer + hovered one label so the loose ones don't pile into a blur. */
+    if(match && (perfP || pl===hoverP || aligned || planets.length<=12)){
+      var lsz=perfP?9:6, txt=(aligned&&pl.cellW)?fitText(pl.s.n,pl.cellW,lsz):pl.s.n;
+      plLabel(pl.x, pl.y+sz+(perfP?18:10), txt, lsz, perfP);
+    } }
   function drawSystem(dt,beat){ var g=GAL[curG];
     var core=cx.createRadialGradient(CW/2,CH*0.5,0,CW/2,CH*0.5,Math.max(CW,CH)*0.65);
     core.addColorStop(0,"hsla("+g.hue+",80%,50%,.06)"); core.addColorStop(1,"hsla("+g.hue+",80%,50%,0)");
     cx.fillStyle=core; cx.fillRect(0,0,CW,CH); cx.textAlign="center";
     planets.forEach(function(pl){ stepPlanet(pl,dt,beat); });
-    planets.forEach(function(pl){ var perfP=(pl===perf), match=!uq||(pl.s.n+" "+pl.s.a).toLowerCase().indexOf(uq)>-1;
-      var sz=(pl.bell*0.7)*pl.perfScale*(1+beat*(perfP?0.5:0.22));
-      cx.globalAlpha=match?1:0.16;
-      if(perfP){ cx.strokeStyle="hsla("+g.hue+",95%,66%,"+(0.3+beat*0.5).toFixed(3)+")"; cx.lineWidth=1.5+beat*2.5;
-        cx.beginPath(); cx.arc(pl.x,pl.y,sz+7+beat*6,0,6.283); cx.stroke(); }
-      else if(pl===hoverP){ cx.fillStyle="hsla("+g.hue+",90%,66%,.35)"; cx.beginPath(); cx.arc(pl.x,pl.y,sz+7,0,6.283); cx.fill(); }
-      cx.save(); cx.translate(pl.x,pl.y); cx.rotate(pl.spin);
-      cx.beginPath(); cx.arc(0,0,sz,0,6.283); cx.clip();
-      if(!imgCover(g.img,-sz,-sz,sz*2)){ cx.fillStyle="hsl("+g.hue+",85%,55%)"; cx.fillRect(-sz,-sz,sz*2,sz*2); }
-      cx.restore();
-      cx.strokeStyle="hsl("+g.hue+",90%,"+(match?68:48)+"%)"; cx.lineWidth=1.4; cx.beginPath(); cx.arc(pl.x,pl.y,sz,0,6.283); cx.stroke();
-      cx.fillStyle="#0a0a0a"; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.26,0,6.283); cx.fill();
-      cx.strokeStyle="hsla("+g.hue+",60%,62%,.6)"; cx.lineWidth=1; cx.beginPath(); cx.arc(pl.x,pl.y,sz*0.26,0,6.283); cx.stroke();
-      cx.globalAlpha=1;
-      if(perfP||pl===hoverP||(uq&&match)){ cx.fillStyle=perfP?"#fff":"rgba(255,255,255,.8)"; cx.font="7px 'Press Start 2P',monospace"; cx.fillText(pl.s.n,pl.x,pl.y-sz-9); }
-    });
+    /* draw orbiting planets first, the performer LAST so it (and its title) sit on top */
+    planets.forEach(function(pl){ if(pl!==perf) drawDisc(pl,false,g,beat); });
+    if(perf) drawDisc(perf,true,g,beat);
   }
   function frame(t){ if(!uniOpen)return; requestAnimationFrame(frame);
     var dt=Math.min(0.05,((t-lastT)/1000)||0.016); lastT=t; var beat=curBeat;
@@ -979,6 +1009,7 @@ html.framed .hello{padding-top:16px}
     renderUni(uq); setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
   function closeUni(){ uniOpen=false; detOpen=false; klStop(); $("udet").classList.remove("on"); $("uni").classList.remove("on","det"); }
   $("uback").onclick=function(){ if(detOpen) closeDet(); else if(mode==="system") exitGalaxies(); else closeUni(); };
+  $("dx").onclick=function(e){ e.stopPropagation(); closeDet(); };
   $("hdrc").onclick=function(){ if(curG>=0) openAlbum(curG); };
   $("albclose").onclick=closeAlbum; $("ualbum").onclick=function(e){ if(e.target===this) closeAlbum(); };
   $("usq").oninput=function(){ uq=this.value.toLowerCase(); renderUni(uq); };

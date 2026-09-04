@@ -10,7 +10,7 @@
    Business "Client ID") turns on real on-page PayPal checkout for everything. Seeded 2026-07-12 from the old Wix
    store (JSON-LD scrape: names, prices, descriptions, galleries, stock).
    ===================================================================== */
-window.IBEE_PRODUCTS={
+window.IBEE_PRODUCTS = {
  "v": 1,
  "pay_config": {
   "paypalClientId": "Aayna5QBBdxQnJaXasgKfksTCamcKUk-HvCNLTcmBWgiQNQO2fm2MoipQUS6grC0GUgO3zvs1vfzUY51",
@@ -614,50 +614,6 @@ window.IBEE_PRODUCTS={
    ],
    "pay": {
     "wix": "",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "all-ics-pink",
-   "folder": "ics-v1-autumn-2025",
-   "n": "VIP ALL ICS CHARACTERS — PINK",
-   "price": 270,
-   "cur": "€",
-   "r": "leg",
-   "out": 0,
-   "desc": "One of the 2 rarest T-shirts, 100% cotton, Fabric Patch with embroidered ICS logo. simple, nothing fancy... except it has all the characters pressed together! Showing the full chess set. This isn't just a T-shirt, it's the meaning behind months of work making ICS (Ibee's Chess Set) real. You're buying the story, not just the shirt. Scan and unlock something special... we'll let you discover what it is",
-   "imgs": [
-    "https://static.wixstatic.com/media/0fcae7_37851d102940464786ec570c169480c3~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_ee7534e7c94d430ab3305ae6ad4cb50c~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_761d9cf263d44e1fa1d18b6dd298bd30~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_4321ba1c23e349e9ad06e323e4145e49~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_60e367af59f64fe8a9329c50eaf578c3~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_8974181f0f4549ca9d66ae07c5373220~mv2.png/v1/fit/w_800,h_800,q_90/file.png"
-   ],
-   "pay": {
-    "wix": "https://nebuladirection.wixsite.com/mysite/product-page/all-ics-pink",
-    "stripe": "",
-    "paypal": ""
-   }
-  },
-  {
-   "id": "all-ics-black",
-   "folder": "ics-v1-autumn-2025",
-   "n": "VIP ALL ICS CHARACTERS — BLACK",
-   "price": 250,
-   "cur": "€",
-   "r": "leg",
-   "out": 0,
-   "desc": "One of the 2 rarest T-shirts a black greyish, 100% cotton, Fabric patch with logo embroidered nothing fancy... except it has all the characters pressed together! showing the full chess set. This isn't just a T-shirt, it's the meaning behind months of work making ICS (Ibee's Chess Set) real. You're buying the story, not just the shirt. Scan and unlock something special... we'll let you discover what it is",
-   "imgs": [
-    "https://static.wixstatic.com/media/0fcae7_74736ab412fb4ae98569b023169de0b1~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_950b095bef594fe6a86821ef5c9ebe99~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_03a6e41d2dae4c5e86c816fbdb1fd202~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
-    "https://static.wixstatic.com/media/0fcae7_b362e10a938d4b11a2bc24a695be186e~mv2.png/v1/fit/w_800,h_800,q_90/file.png"
-   ],
-   "pay": {
-    "wix": "https://nebuladirection.wixsite.com/mysite/product-page/all-ics-black",
     "stripe": "",
     "paypal": ""
    }
@@ -1656,6 +1612,50 @@ window.IBEE_PRODUCTS={
    ],
    "pay": {
     "wix": "https://nebuladirection.wixsite.com/mysite/product-page/racing-tshirt-only-ibee",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "all-ics-pink",
+   "folder": "ics-v1-autumn-2025",
+   "n": "VIP ALL ICS CHARACTERS — PINK",
+   "price": 270,
+   "cur": "€",
+   "r": "leg",
+   "out": 0,
+   "desc": "One of the 2 rarest T-shirts, 100% cotton, Fabric Patch with embroidered ICS logo. simple, nothing fancy... except it has all the characters pressed together! Showing the full chess set. This isn't just a T-shirt, it's the meaning behind months of work making ICS (Ibee's Chess Set) real. You're buying the story, not just the shirt. Scan and unlock something special... we'll let you discover what it is",
+   "imgs": [
+    "https://static.wixstatic.com/media/0fcae7_37851d102940464786ec570c169480c3~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_ee7534e7c94d430ab3305ae6ad4cb50c~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_761d9cf263d44e1fa1d18b6dd298bd30~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_4321ba1c23e349e9ad06e323e4145e49~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_60e367af59f64fe8a9329c50eaf578c3~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_8974181f0f4549ca9d66ae07c5373220~mv2.png/v1/fit/w_800,h_800,q_90/file.png"
+   ],
+   "pay": {
+    "wix": "https://nebuladirection.wixsite.com/mysite/product-page/all-ics-pink",
+    "stripe": "",
+    "paypal": ""
+   }
+  },
+  {
+   "id": "all-ics-black",
+   "folder": "ics-v1-autumn-2025",
+   "n": "VIP ALL ICS CHARACTERS — BLACK",
+   "price": 250,
+   "cur": "€",
+   "r": "leg",
+   "out": 0,
+   "desc": "One of the 2 rarest T-shirts a black greyish, 100% cotton, Fabric patch with logo embroidered nothing fancy... except it has all the characters pressed together! showing the full chess set. This isn't just a T-shirt, it's the meaning behind months of work making ICS (Ibee's Chess Set) real. You're buying the story, not just the shirt. Scan and unlock something special... we'll let you discover what it is",
+   "imgs": [
+    "https://static.wixstatic.com/media/0fcae7_74736ab412fb4ae98569b023169de0b1~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_950b095bef594fe6a86821ef5c9ebe99~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_03a6e41d2dae4c5e86c816fbdb1fd202~mv2.png/v1/fit/w_800,h_800,q_90/file.png",
+    "https://static.wixstatic.com/media/0fcae7_b362e10a938d4b11a2bc24a695be186e~mv2.png/v1/fit/w_800,h_800,q_90/file.png"
+   ],
+   "pay": {
+    "wix": "https://nebuladirection.wixsite.com/mysite/product-page/all-ics-black",
     "stripe": "",
     "paypal": ""
    }

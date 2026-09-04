@@ -63,31 +63,31 @@
   #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
   #nav button.on{color:#07120a;background:var(--acid);border-color:var(--acid);
     box-shadow:0 0 16px rgba(182,255,0,.4)}
-  /* NETWORK is a compact blinking chip (a live-signal dot + small label), pinned
-     in the bar next to the account pill — cooler and saves space, like the
-     console-v2 status bar. Self-contained styling (it lives outside #nav). */
-  button[data-nav="NETWORK"]{display:flex;flex-direction:row;align-items:center;gap:6px;flex:none;align-self:center;
-    padding:9px 11px;border:1px solid #3a2020;border-radius:11px;background:#0d0808;cursor:pointer;
-    font-family:var(--px);font-size:7px;letter-spacing:1px;color:#c98a8a;white-space:nowrap}
-  button[data-nav="NETWORK"] .nvxwrap{display:none}
-  button[data-nav="NETWORK"]::before{content:"";width:6px;height:6px;border-radius:50%;flex:none;
-    background:var(--red);box-shadow:0 0 8px var(--red);animation:navblink 1.4s steps(1) infinite}
-  button[data-nav="NETWORK"]:hover{color:#fff;border-color:var(--red)}
-  button[data-nav="NETWORK"].on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 16px rgba(255,43,43,.45)}
-  button[data-nav="NETWORK"].on::before{background:#fff;box-shadow:0 0 8px #fff}
-  @keyframes navblink{50%{opacity:.25}}
-  @media(max-width:560px){ button[data-nav="NETWORK"] .nvlab{display:none} button[data-nav="NETWORK"]{padding:9px}
+  /* NETWORK is a compact chip carrying its own spinning signal-bars icon, pinned
+     in the bar next to the account pill — saves space. Self-contained styling. */
+  button[data-nav="NETWORK"]{display:flex;flex-direction:column;align-items:center;gap:3px;flex:none;align-self:center;
+    padding:6px 9px 5px;border:1px solid var(--border);border-radius:13px;background:#0d0d0d;cursor:pointer;
+    font-family:var(--px);font-size:6px;letter-spacing:.5px;color:var(--dim);white-space:nowrap}
+  button[data-nav="NETWORK"] .nvxwrap{display:block;width:24px;height:24px;perspective:150px}
+  button[data-nav="NETWORK"]:hover{color:var(--ink);border-color:#3a3a3a}
+  button[data-nav="NETWORK"].on{background:var(--cyan);border-color:var(--cyan);color:#00121a;box-shadow:0 0 14px rgba(38,224,255,.4)}
+  @media(max-width:560px){ button[data-nav="NETWORK"] .nvlab{display:none} button[data-nav="NETWORK"]{padding:6px 7px}
     #bar{gap:4px;padding:7px 6px} #nav{gap:4px}
     #nav button{padding:5px 7px 4px;border-radius:11px}
     #nav button .nvxwrap{width:22px;height:22px} #nav .nvlab{font-size:6px} }
-  /* ---- account pill: pinned outside the scrolling nav — always reachable, anywhere on the site ---- */
-  #acct{flex:none;border-left:1px solid var(--border)}
-  #acct button{font-family:var(--px);font-size:9px;padding:13px 12px;cursor:pointer;white-space:nowrap;
-    display:flex;align-items:center;gap:6px;height:100%}
-  #bar #acct button.login{background:#ffd60a!important;color:#000!important;border:0}
-  #bar #acct button.login:hover{background:#ffe166!important}
-  #acct button.me{background:transparent;color:var(--acid);border:0}
-  #acct button.me:hover{color:#fff}
+  /* ---- account pill: a rotating profile icon, matching the nav chips ---- */
+  #acct{flex:none;align-self:center}
+  #acct button{position:relative;font-family:var(--px);font-size:7px;letter-spacing:.5px;cursor:pointer;white-space:nowrap;
+    display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px 5px;border-radius:13px;
+    border:1px solid var(--border);background:#0d0d0d;color:var(--dim)}
+  #acct .nvxwrap{width:26px;height:26px;perspective:150px}
+  #acct .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;animation:navspin 5.5s linear infinite}
+  #acct .nvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+  #acct button:hover{color:var(--ink);border-color:#3a3a3a}#acct button:hover .nvx{animation-duration:2.4s}
+  #bar #acct button.login{color:var(--gold);border-color:#3a3200}
+  #acct button.me{color:#5ad17a}
+  #acct .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:transparent}
+  @media(max-width:560px){ #acct .nvlab{display:none} #acct button{padding:6px 7px} }
   #acct .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 6px var(--acid);flex:none}
   #acct svg{width:11px;height:11px;flex:none}
 
@@ -103,6 +103,7 @@
      lifted just off the page black so you can feel you are INSIDE something
      rather than looking at a dropdown over the page. */
   #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;overscroll-behavior:contain;transform:translateZ(0);
     background:linear-gradient(180deg,
       hsla(var(--rh),var(--rs),11%,.985), hsla(var(--rh),var(--rs),8%,.985));
     border:1px solid hsla(var(--rh),var(--rs),55%,.5);border-bottom:0;
@@ -161,8 +162,13 @@
   #tracklist .tr .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.6)}
   /* radio list = mini-Spotify with the dock's motion: rows lift + zoom on hover,
      and the NOW-PLAYING cover becomes a spinning vinyl disc */
-  #tracklist .tr{border-radius:12px;transition:background .15s,transform .15s,box-shadow .15s}
-  #tracklist .tr:hover{transform:translateX(3px) scale(1.012);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+  #tracklist .tr{border-radius:12px;transition:background .15s}
+  /* the lift+zoom is nice with a mouse but repaints every row during momentum
+     scroll on a phone (lag) — so give it only to hover-capable devices */
+  @media(hover:hover){
+    #tracklist .tr{transition:background .15s,transform .15s,box-shadow .15s}
+    #tracklist .tr:hover{transform:translateX(3px) scale(1.012);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+  }
   #tracklist .tr .cv{transition:border-radius .35s,border-color .35s,box-shadow .35s}
   #tracklist .tr.now .cv{border-radius:50%;border:2px solid var(--acid);
     box-shadow:0 0 0 2px #0a0a0a,0 0 12px rgba(182,255,0,.4);animation:pcvspin 3.6s linear infinite}
@@ -362,6 +368,14 @@
     .pl-row button.main{width:44px;height:44px;font-size:15px}
     #seek{height:3px}
     .tapme{font-size:6px;padding:3px 9px;top:-8px}
+  }
+  /* laptop: center the player content in a tidy max-width so the transport isn't
+     shoved to the far right and the meta doesn't stretch across the whole screen */
+  @media(min-width:760px){
+    #player{justify-content:center;column-gap:20px}
+    .pl-top{flex:0 1 560px}
+    #seek{flex:1 1 100%;max-width:920px;margin:2px auto 0}
+    #bottom.listopen .pl-row{max-width:920px;margin:4px auto 0}
   }
   #nowbtn .bd{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;
     box-shadow:0 0 8px var(--red);transform:scale(var(--b,.5));transition:transform .07s}
@@ -781,12 +795,12 @@
 
   /* ---- section nav (fills the bar) ---- */
   var NAV=[
-    {n:'CONSOLE', u:'console-v2.html'},
+    {n:'HOME',    u:'console-v2.html'},
+    {n:'MUSIC',   u:'console-v2.html#universe'},
     {n:'ROOMS',   u:'arcade/'},
     {n:'SHOP',    u:'console.html#shop'},
     {n:'TV',      u:'tv/'},
-    {n:'ICS',     u:'console.html#ics'},
-    {n:'NETWORK', u:'stats/'}
+    {n:'ICS',     u:'console.html#ics'}
   ];
   /* (lyrics left the nav — the spinning book in the player opens the overlay) */
   var navEl=document.getElementById('nav');
@@ -794,12 +808,14 @@
   var NAV_TGT={SHOP:'shop',TV:'tv'};
   /* the top nav is the spinning voxel icons — same look as the console menu */
   var NAVICO={
-    CONSOLE:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><ellipse cx='8' cy='8' rx='7' ry='2.3' fill='none' stroke='#26e0ff' stroke-width='.7' transform='rotate(-18 8 8)'/><circle cx='8' cy='8' r='4' fill='#161616' stroke='#b6ff00' stroke-width='.7'/><circle cx='6.5' cy='6.7' r='.9' fill='#b6ff00'/><circle cx='9.4' cy='9' r='.6' fill='#ff2bd6'/></svg>",
+    HOME:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 2 L14 7 V14 H10 V10 H6 V14 H2 V7 Z' fill='#161616' stroke='#b6ff00' stroke-width='.7'/><rect x='6.6' y='10.4' width='2.8' height='3.6' fill='#b6ff00' opacity='.85'/></svg>",
+    MUSIC:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><ellipse cx='8' cy='8' rx='7' ry='2.3' fill='none' stroke='#26e0ff' stroke-width='.7' transform='rotate(-18 8 8)'/><circle cx='8' cy='8' r='4' fill='#161616' stroke='#b6ff00' stroke-width='.7'/><circle cx='6.5' cy='6.7' r='.9' fill='#b6ff00'/><circle cx='9.4' cy='9' r='.6' fill='#ff2bd6'/></svg>",
     ROOMS:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M5 5 H11 C13 5 13.4 6.2 13.9 8 L14.7 11.4 C15 13.1 13.3 13.7 12.2 12.5 L10.3 10.4 H5.7 L3.8 12.5 C2.7 13.7 1 13.1 1.3 11.4 L2.1 8 C2.6 6.2 3 5 5 5 Z' fill='#161616' stroke='#26e0ff' stroke-width='.6'/><rect x='3.9' y='7.35' width='2.5' height='.8' fill='#26e0ff'/><rect x='4.75' y='6.5' width='.8' height='2.5' fill='#26e0ff'/><circle cx='11' cy='7.9' r='.55' fill='#b6ff00'/></svg>",
     SHOP:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='#ff2bd6' stroke='#3a0030' stroke-width='.5'/><rect x='6.6' y='7' width='2.8' height='2.8' fill='#161616'/></svg>",
     TV:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4.4 3.1 7.2 5.4 8.8 5.4 11.6 3.1' stroke='#ff2b2b' stroke-width='.9' fill='none'/><rect x='1.5' y='5' width='13' height='9' rx='1.2' fill='#161616' stroke='#ff2b2b' stroke-width='.7'/><rect x='2.7' y='6.2' width='8.6' height='6.6' fill='#26e0ff' opacity='.85'/></svg>",
     ICS:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2 12 L3 5 L6 8 L8 3 L10 8 L13 5 L14 12 Z' fill='#161616' stroke='#ffd60a' stroke-width='.7'/><rect x='2.4' y='11.6' width='11.2' height='2.2' fill='#ffd60a'/></svg>",
-    NETWORK:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='9' width='2.4' height='5' fill='#ff2b2b'/><rect x='5.4' y='6.5' width='2.4' height='7.5' fill='#ff2b2b'/><rect x='8.8' y='4' width='2.4' height='10' fill='#b6ff00'/><rect x='12.2' y='1.6' width='2.4' height='12.4' fill='#b6ff00'/></svg>"
+    NETWORK:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='9' width='2.4' height='5' fill='#ff2b2b'/><rect x='5.4' y='6.5' width='2.4' height='7.5' fill='#ff2b2b'/><rect x='8.8' y='4' width='2.4' height='10' fill='#b6ff00'/><rect x='12.2' y='1.6' width='2.4' height='12.4' fill='#b6ff00'/></svg>",
+    PROFILE:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='1.5' y='3.5' width='13' height='9' rx='1.1' fill='#161616' stroke='#5ad17a' stroke-width='.7'/><circle cx='5' cy='7' r='1.7' fill='#5ad17a'/><path d='M2.6 11.1 a2.5 2.5 0 0 1 4.8 0 Z' fill='#5ad17a'/><rect x='8.4' y='5.6' width='4.6' height='.9' fill='#b6ff00'/><rect x='8.4' y='7.5' width='4.6' height='.9' fill='#555'/></svg>"
   };
   function navVox(svg){ var w=document.createElement('span'); w.className='nvx';
     var uri="data:image/svg+xml,"+encodeURIComponent(svg), z=[-3.2,-1.9,-.6,.6,1.9,3.2];
@@ -811,6 +827,9 @@
     b.appendChild(ic); b.appendChild(lb);
     b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
     b.onclick=function(){ var tg=NAV_TGT[it.n];
+      /* MUSIC opens the ONE universe; if the front page is already framed, open
+         it in place instead of reloading it */
+      if(it.n==='MUSIC'){ try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openUniverse){ fw.openUniverse(); return; } }catch(e){} }
       if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('navigation',{destination:it.u});
       if(tg&&window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget(tg);
       /* The CRT boot-in is for ARRIVING at the site, not for moving around it.
@@ -847,9 +866,9 @@
   var acctOn=null;
   function renderAcct(){
     var on=memberSession(); if(on===acctOn) return; acctOn=on;
-    acctEl.innerHTML = on
-      ? '<button class="me" id="acctbtn"><span class="dot"></span>PROFILE</button>'
-      : '<button class="login" id="acctbtn" title="Join / log in" aria-label="Join">'+ICO_USER+'</button>';
+    acctEl.innerHTML = '<button class="'+(on?'me':'login')+'" id="acctbtn" title="'+(on?'Profile':'Join / log in')+'" aria-label="'+(on?'Profile':'Join')+'">'
+      +'<span class="dot"></span><span class="nvxwrap acctico"></span><span class="nvlab">'+(on?'PROFILE':'JOIN')+'</span></button>';
+    try{ document.getElementById('acctbtn').querySelector('.acctico').appendChild(navVox(NAVICO.PROFILE)); }catch(e){}
     /* profile === room now (one concept, 2026-07-13): the pill opens the member's room/profile */
     document.getElementById('acctbtn').onclick=function(){
       if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('account_open',{destination:on?'room/':'member/'});
@@ -1484,8 +1503,10 @@
     var slug=(r&&r.song)?((r.song(i)||{}).f||''):'';
     /* the info button opens the ONE music page — the universe song page in
        console-v2 (listening infos + the record's soul + karaoke). */
+    /* on the front page, open the rich universe song page (closes back to it);
+       anywhere else, show the info card as an overlay so the visitor stays exactly
+       on the page they were on and can just close it. */
     try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openSongPage&&slug){ setTL(false); fw.openSongPage(slug); return; } }catch(err){}
-    if(slug){ setTL(false); navigate('console-v2.html#song='+encodeURIComponent(slug)); return; }
     openSongInfo();
   },true);
   document.getElementById('songinfoclose').onclick=closeSongInfo;songinfo.onclick=function(e){if(e.target===songinfo)closeSongInfo();};
