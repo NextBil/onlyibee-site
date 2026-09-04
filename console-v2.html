@@ -433,15 +433,6 @@ html.framed .hello{padding-top:16px}
       <a class="en">ENTER ▶</a></div>
   </button>
 
-  <button class="box rooms" data-ico="rooms" style="--img:url(https://onlyibee.com/arcade/covers/midnight-transit.png)">
-    <div class="peek"></div>
-    <span class="ico"></span>
-    <span class="nm">ROOMS</span><span class="cnt">10 ▸</span>
-    <div class="info"><div class="tg">VISUALIZERS</div>
-      <div class="ds">creative, playable ways to hear the music.</div>
-      <a class="en">ENTER ▶</a></div>
-  </button>
-
   <button class="box shop" data-ico="shop">
     <video class="tvvid" muted loop playsinline autoplay preload="auto"
       src="https://onlyibee.com/assets/video/ics-teaser.mp4"></video>
@@ -450,6 +441,20 @@ html.framed .hello{padding-top:16px}
     <span class="nm">SHOP</span><span class="cnt">47 ▸</span>
     <div class="info"><div class="tg">UTOPIE · ONE OF ONE</div>
       <div class="ds">hand-made pieces. each one made only once.</div>
+      <a class="en">ENTER ▶</a></div>
+  </button>
+
+  <button class="box rooms" data-ico="rooms">
+    <div class="peek"><div class="mosaic">
+      <i style="background-image:url(https://onlyibee.com/arcade/covers/midnight-transit.png)"></i>
+      <i style="background-image:url(https://onlyibee.com/arcade/covers/terrarium.png)"></i>
+      <i style="background-image:url(https://onlyibee.com/arcade/covers/lofi-bedroom.png)"></i>
+      <i style="background-image:url(https://onlyibee.com/arcade/covers/aqua-bass.png)"></i>
+    </div></div>
+    <span class="ico"></span>
+    <span class="nm">ROOMS</span><span class="cnt">10 ▸</span>
+    <div class="info"><div class="tg">VISUALIZERS</div>
+      <div class="ds">creative, playable ways to hear the music.</div>
       <a class="en">ENTER ▶</a></div>
   </button>
 
@@ -1059,45 +1064,9 @@ html.framed .hello{padding-top:16px}
   $("about").addEventListener("click",function(e){ if(e.target===this) $("abback").click(); });
   var yrEl=$("yr"); if(yrEl) yrEl.textContent=new Date().getFullYear();
 
-  /* SHOP box: rotate through the pieces on display every few seconds */
-  (function(){ var tiles=document.querySelectorAll('.box.shop .mosaic i'); if(!tiles.length) return;
-    var bases=["0fcae7_37851d102940464786ec570c169480c3~mv2.png","0fcae7_ee7534e7c94d430ab3305ae6ad4cb50c~mv2.png",
-      "0fcae7_761d9cf263d44e1fa1d18b6dd298bd30~mv2.png","0fcae7_4321ba1c23e349e9ad06e323e4145e49~mv2.png",
-      "0fcae7_60e367af59f64fe8a9329c50eaf578c3~mv2.png","0fcae7_8974181f0f4549ca9d66ae07c5373220~mv2.png",
-      "0fcae7_74736ab412fb4ae98569b023169de0b1~mv2.png","0fcae7_950b095bef594fe6a86821ef5c9ebe99~mv2.png",
-      "0fcae7_0110281ce37e47d0980744ca340aeaad~mv2.png","0fcae7_03a6e41d2dae4c5e86c816fbdb1fd202~mv2.png",
-      "0fcae7_048211393a8e443a9ebdde0aea1da395~mv2.png","0fcae7_0bb90d6afb2f40ce92ea33c85fd292fd~mv2.png"];
-    function url(b){ var ext=b.slice(b.lastIndexOf(".")+1); return "https://static.wixstatic.com/media/"+b+"/v1/fit/w_400,h_400,q_85/file."+ext; }
-    bases.forEach(function(b){ var im=new Image(); im.src=url(b); });   // warm the cache
-    var pos=4;
-    setInterval(function(){ if(document.body.classList.contains("booting")) return;
-      var t=tiles[Math.floor(Math.random()*tiles.length)]; var b=bases[pos%bases.length]; pos++;
-      t.style.transition="opacity .4s"; t.style.opacity=".25";
-      setTimeout(function(){ t.style.backgroundImage="url("+url(b)+")"; t.style.opacity="1"; },420);
-    }, 2600);
-  })();
-
-  /* MUSIC + ROOMS previews cycle through their projects every few seconds */
-  function rotatePeek(sel, urls, every, offset){ var box=document.querySelector(sel); if(!box) return;
-    var peek=box.querySelector('.peek'); if(!peek) return;
-    urls.forEach(function(u){ var im=new Image(); im.src=u; });   // warm cache
-    peek.style.transition="opacity .5s"; var i=0;
-    setInterval(function(){ if(document.body.classList.contains("booting")) return;
-      i=(i+1)%urls.length; peek.style.opacity=".25";
-      setTimeout(function(){ peek.style.backgroundImage="url("+urls[i]+")"; peek.style.opacity="1"; },500);
-    }, every);
-  }
-  rotatePeek('.box.music', [
-    "https://onlyibee.com/assets/img/nouveaux-punk.jpg",
-    "https://onlyibee.com/assets/img/20mzs-album.jpg",
-    "https://onlyibee.com/assets/img/np-cover.jpg"
-  ], 3400);
-  rotatePeek('.box.rooms', [
-    "https://onlyibee.com/arcade/covers/midnight-transit.png",
-    "https://onlyibee.com/arcade/covers/terrarium.png",
-    "https://onlyibee.com/arcade/covers/aqua-bass.png",
-    "https://onlyibee.com/arcade/covers/lofi-bedroom.png"
-  ], 3800);
+  /* All menu thumbnails are now fixed (MUSIC = Nouveaux Punk cover, ROOMS = a
+     collage, SHOP = the shop loop) — no image-swap timers, so the page stays
+     light on CPU/battery. The rotating previews were removed. */
 })();
 </script>
 </body>
