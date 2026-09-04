@@ -205,9 +205,9 @@
                inset 0 1px 0 hsla(var(--rh),var(--rs),60%,.22);
     transition:background .6s ease,border-color .6s ease,box-shadow .6s ease}
   body.radioon #player{
-    border-top-color:hsla(var(--rh),var(--rs),58%,.95);
-    box-shadow:0 -8px 30px hsla(var(--rh),var(--rs),55%,calc(.16 + var(--beat,0)*.20)),
-               inset 0 1px 0 hsla(var(--rh),var(--rs),70%,.45)}
+    border-top-color:hsla(var(--rh),var(--rs),58%,.7);
+    box-shadow:0 -6px 20px hsla(var(--rh),var(--rs),55%,calc(.08 + var(--beat,0)*.10)),
+               inset 0 1px 0 hsla(var(--rh),var(--rs),70%,.28)}
 
   /* ---- power-up: the machine loading ----
      One sweep of light travelling the width of the player the moment a record
@@ -270,6 +270,15 @@
     color:hsla(var(--rh),calc(var(--rs) + 8%),86%,1);font-family:var(--px);font-size:9px;
     cursor:pointer;text-align:left;padding:0;text-shadow:0 0 10px hsla(var(--rh),var(--rs),60%,.35)}
   #nowbtn #rt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* console-v2 dock feel: a little beat-reactive equaliser next to the title */
+  .peq{display:none;align-items:flex-end;gap:2px;height:12px;flex:none;margin-left:2px}
+  body.radioon .peq{display:inline-flex}
+  .peq i{width:2.5px;height:30%;background:hsla(var(--rh),var(--rs),62%,.9);
+    box-shadow:0 0 5px hsla(var(--rh),var(--rs),55%,.5);animation:peqb .9s ease-in-out infinite;
+    transform:scaleY(calc(.4 + var(--beat,0)*1.6));transform-origin:bottom}
+  .peq i:nth-child(2){animation-delay:.15s}.peq i:nth-child(3){animation-delay:.3s}
+  .peq i:nth-child(4){animation-delay:.08s}.peq i:nth-child(5){animation-delay:.22s}
+  @keyframes peqb{0%,100%{height:25%}50%{height:100%}}
   #nowbtn .bd{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;
     box-shadow:0 0 8px var(--red);transform:scale(var(--b,.5));transition:transform .07s}
   #time{font-family:var(--px);font-size:8px;color:hsla(var(--rh),var(--rs),72%,.85);flex:none}
@@ -609,7 +618,7 @@
     <div id="player">
       <div class="pl-top">
         <span id="pcover"><img alt="" id="pcoverimg"></span>
-        <button id="nowbtn" title="open the radio"><span class="bd"></span><span id="rt">RADIO</span></button>
+        <button id="nowbtn" title="open the radio"><span class="bd"></span><span id="rt">RADIO</span><span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
         <span id="time">0:00 / --:--</span>
         <span class="hint">ALL SONGS</span><span class="chev">▲</span>
       </div>

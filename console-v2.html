@@ -841,6 +841,7 @@ html.framed .hello{padding-top:16px}
   function frame(t){ if(!uniOpen)return; requestAnimationFrame(frame);
     var dt=Math.min(0.05,((t-lastT)/1000)||0.016); lastT=t; var beat=curBeat;
     if(!CW){ sizeCv(); } drawStars(beat);
+    if(mode==="system" && !detOpen && !aligned) syncPerformer();   /* follow the radio */
     if(mode==="galaxy") drawGalaxies(beat); else drawSystem(dt,beat); }
   function galaxyAt(mx,my){ for(var i=0;i<gxs.length;i++){ if(Math.hypot(mx-gxs[i].x,my-gxs[i].y)<gxs[i].r*1.05) return i; } return -1; }
   function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.7*best.perfScale+16))?best:null; }
@@ -863,11 +864,20 @@ html.framed .hello{padding-top:16px}
       : "tap a record to zoom in  ·  tap the void to align  ·  ◀ galaxies";
     $("uni").classList.toggle("det",detOpen);
     $("uback").textContent = mode==="system"?"◀ GALAXIES":"◀"; }
-  function enterGalaxy(i){ mode="system"; curG=i; perf=null; detOpen=false; aligned=false; $("udet").classList.remove("on");
+  /* keep the universe in sync with the radio: the track that's PLAYING is the
+     performer in the centre. Follows the radio when it changes tracks, but leaves
+     a song page or a manual FREE alone until the next track. */
+  function planetBySlug(slug){ for(var i=0;i<planets.length;i++){ if(planets[i].s.slug===slug) return planets[i]; } return null; }
+  var lastSyncSlug=null;
+  function syncPerformer(force){ if(mode!=="system") return; var R=RADIO(); if(!R) return;
+    var slug=R.slug(); if(!slug){ return; }
+    if(!force && slug===lastSyncSlug) return; lastSyncSlug=slug;
+    var pl=planetBySlug(slug); if(pl && pl!==perf){ aligned=false; perf=pl; assignOrbits(); } }
+  function enterGalaxy(i){ mode="system"; curG=i; perf=null; detOpen=false; aligned=false; lastSyncSlug=null; $("udet").classList.remove("on");
     var list=SONGS.filter(function(s){return s.g===i;});
     planets=list.map(function(s){return makePlanet(s,list.length);});
     $("uni").classList.add("sys"); $("hdrc").style.backgroundImage="url("+GAL[i].cv+")"; $("hdrt").textContent=GAL[i].name;
-    setTitle(); }
+    syncPerformer(true); setTitle(); }
   function exitGalaxies(){ mode="galaxy"; curG=-1; perf=null; detOpen=false; aligned=false; klStop(); $("uni").classList.remove("sys"); $("udet").classList.remove("on"); setTitle(); }
   function statRow(k,v){ return '<div class="st"><b>'+v+'</b><span>'+k+'</span></div>'; }
   function dash(v){ return (v==null||v==="")?"—":v; }
@@ -891,8 +901,12 @@ html.framed .hello{padding-top:16px}
     $("ualbum").classList.add("on"); }
   function closeAlbum(){ $("ualbum").classList.remove("on"); }
   function openUni(){ if(!SONGS.length) buildLibrary();
-    $("uni").classList.add("on"); $("uni").classList.remove("listmode","sys"); uniOpen=true; mode="galaxy"; curG=-1; perf=null;
-    buildGx(); setTitle(); renderUni(uq); lastT=0; setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
+    $("uni").classList.add("on"); $("uni").classList.remove("listmode","sys"); uniOpen=true; lastT=0;
+    buildGx();
+    var cur=radioSong();
+    if(cur){ enterGalaxy(cur.g); }                 /* jump into the playing track's galaxy, centred */
+    else { mode="galaxy"; curG=-1; perf=null; setTitle(); }
+    renderUni(uq); setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
   function closeUni(){ uniOpen=false; detOpen=false; klStop(); $("udet").classList.remove("on"); $("uni").classList.remove("on","det"); }
   $("uback").onclick=function(){ if(detOpen) closeDet(); else if(mode==="system") exitGalaxies(); else closeUni(); };
   $("hdrc").onclick=function(){ if(curG>=0) openAlbum(curG); };

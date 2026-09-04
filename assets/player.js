@@ -826,17 +826,17 @@
     var hue = cur >= 0 ? SONGS[cur].hue : 75;
     /* overall brightness of the neon frame — kept low enough to read the page
        under it for a long session rather than for a first impression */
-    var a = Math.min(1, 0.025 + beat*0.20 + level*0.07);
+    var a = Math.min(1, 0.02 + beat*0.11 + level*0.04);
     var root = document.documentElement.style;
     if(playing || beat > 0.02){
-      nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.65).toFixed(3)+")";
+      nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.42).toFixed(3)+")";
       /* narrow screens get a tighter radius: a blur sized for a laptop is a big
          slice of a phone's width and washes the middle of the display */
       var narrow = (window.innerWidth||9999) < 600;
-      var blur = narrow ? (3+beat*9) : (6+beat*18);
+      var blur = narrow ? (2+beat*5) : (4+beat*10);
       nf.style.boxShadow =
-        "inset 0 0 "+blur+"px hsla("+hue+",95%,55%,"+(a*(narrow?0.20:0.30)).toFixed(3)+"),"
-        +"inset 0 0 3px hsla("+hue+",95%,70%,"+(a*0.5).toFixed(3)+")";
+        "inset 0 0 "+blur+"px hsla("+hue+",95%,55%,"+(a*(narrow?0.12:0.18)).toFixed(3)+"),"
+        +"inset 0 0 3px hsla("+hue+",95%,70%,"+(a*0.30).toFixed(3)+")";
       root.setProperty("--beat", beat.toFixed(3));
       root.setProperty("--songhue", hue);
       root.setProperty("--ga", Math.min(1, 0.09 + beat*0.8).toFixed(3));
