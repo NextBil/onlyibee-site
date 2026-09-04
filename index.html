@@ -49,13 +49,37 @@
     border-bottom:2px solid var(--border);position:relative;z-index:20;padding:8px 8px}
   #nav{display:flex;flex:1;gap:5px;overflow-x:auto;scrollbar-width:none;min-width:0}
   #nav::-webkit-scrollbar{display:none}
-  /* console-v2 look: rounded glowing chips instead of a hard segmented bar */
-  #nav button{font-family:var(--px);font-size:9px;color:var(--dim);background:#0d0d0d;border:1px solid var(--border);
-    border-radius:11px;padding:11px 13px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
+  /* console-v2 look: rounded chips, each carrying a spinning voxel icon + tiny label */
+  #nav button{display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-family:var(--px);font-size:7px;color:var(--dim);background:#0d0d0d;border:1px solid var(--border);
+    border-radius:13px;padding:6px 10px 5px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
     transition:color .15s,background .15s,border-color .15s,box-shadow .15s}
+  #nav button .nvxwrap{width:26px;height:26px;perspective:150px}
+  #nav .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;animation:navspin 5.5s linear infinite}
+  #nav .nvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+  @keyframes navspin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
+  #nav button:hover .nvx,#nav button.on .nvx{animation-duration:2.4s}
+  #nav .nvlab{font-size:7px;letter-spacing:.5px}
   #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
   #nav button.on{color:#07120a;background:var(--acid);border-color:var(--acid);
     box-shadow:0 0 16px rgba(182,255,0,.4)}
+  /* NETWORK is a compact blinking chip (a live-signal dot + small label), pinned
+     in the bar next to the account pill — cooler and saves space, like the
+     console-v2 status bar. Self-contained styling (it lives outside #nav). */
+  button[data-nav="NETWORK"]{display:flex;flex-direction:row;align-items:center;gap:6px;flex:none;align-self:center;
+    padding:9px 11px;border:1px solid #3a2020;border-radius:11px;background:#0d0808;cursor:pointer;
+    font-family:var(--px);font-size:7px;letter-spacing:1px;color:#c98a8a;white-space:nowrap}
+  button[data-nav="NETWORK"] .nvxwrap{display:none}
+  button[data-nav="NETWORK"]::before{content:"";width:6px;height:6px;border-radius:50%;flex:none;
+    background:var(--red);box-shadow:0 0 8px var(--red);animation:navblink 1.4s steps(1) infinite}
+  button[data-nav="NETWORK"]:hover{color:#fff;border-color:var(--red)}
+  button[data-nav="NETWORK"].on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 16px rgba(255,43,43,.45)}
+  button[data-nav="NETWORK"].on::before{background:#fff;box-shadow:0 0 8px #fff}
+  @keyframes navblink{50%{opacity:.25}}
+  @media(max-width:560px){ button[data-nav="NETWORK"] .nvlab{display:none} button[data-nav="NETWORK"]{padding:9px}
+    #bar{gap:4px;padding:7px 6px} #nav{gap:4px}
+    #nav button{padding:5px 7px 4px;border-radius:11px}
+    #nav button .nvxwrap{width:22px;height:22px} #nav .nvlab{font-size:6px} }
   /* ---- account pill: pinned outside the scrolling nav — always reachable, anywhere on the site ---- */
   #acct{flex:none;border-left:1px solid var(--border)}
   #acct button{font-family:var(--px);font-size:9px;padding:13px 12px;cursor:pointer;white-space:nowrap;
@@ -78,7 +102,7 @@
   /* The list is the radio box opening upward — same hue, same family, a ground
      lifted just off the page black so you can feel you are INSIDE something
      rather than looking at a dropdown over the page. */
-  #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow-y:auto;
+  #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow-y:auto;overflow-x:hidden;
     background:linear-gradient(180deg,
       hsla(var(--rh),var(--rs),11%,.985), hsla(var(--rh),var(--rs),8%,.985));
     border:1px solid hsla(var(--rh),var(--rs),55%,.5);border-bottom:0;
@@ -164,7 +188,8 @@
      list now grows to its content and the whole radio scrolls as one surface.
      The laptop layout re-introduces per-pane scrolling on purpose (§21.3) —
      there the panes sit side by side and each one needs its own. */
-  #tlbody{max-height:none;overflow:visible}
+  #tlbody{max-height:none;overflow:visible;overflow-x:hidden}
+  #tracklist .tr{max-width:100%}
   /* minmax(0,1fr) + min-width:0: a long nowrap song name must never widen its column —
      every cover stays the exact same square (the old 1fr let columns grow with the text) */
   /* auto-fill, not a fixed 3: on a laptop the list is far wider than three
@@ -291,7 +316,14 @@
   /* ===== bottom player dressed as the console-v2 dock — compact single row,
      spinning disc, NOW PLAYING + EQ, one big round play, thin seek with a knob,
      and the TAP TO OPEN tab. Same markup + same handlers, just the look. ===== */
-  #player{padding-top:16px}
+  /* one compact row like console-v2's dock: disc + meta + transport together,
+     seek spans full width below. Shorter than the old two-row player. */
+  #player{padding-top:15px;flex-flow:row wrap;align-items:center;gap:6px 8px}
+  .pl-top{flex:1 1 0;order:1;min-width:0}
+  .pl-top #time,.pl-top .chev{display:none}          /* seek + tap tab replace them */
+  .pl-row{order:2;flex:none;margin-top:0}
+  #seek{order:3;flex:1 0 100%}
+  #bottom.listopen .pl-row{flex-basis:100%;order:4;justify-content:center;margin-top:4px}
   .tapme{position:absolute;top:-10px;left:50%;transform:translateX(-50%);z-index:3;cursor:pointer;
     font-family:var(--px);font-size:7px;letter-spacing:1px;color:#07120a;background:var(--acid);
     padding:4px 11px;border-radius:8px;box-shadow:0 0 14px rgba(182,255,0,.5);white-space:nowrap;
@@ -482,9 +514,10 @@
 
   /* the row's ⓘ — same weight as the ♥ beside it */
   #tlbody .nfo{display:inline-flex;align-items:center;justify-content:center;
-    width:20px;height:20px;margin-left:6px;border-radius:50%;flex:none;
-    border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:8px;cursor:pointer}
-  #tlbody .nfo:hover{color:var(--acid);border-color:var(--acid)}
+    width:22px;height:22px;margin-left:6px;border-radius:50%;flex:none;
+    border:1px solid var(--cyan);color:var(--cyan);font-family:var(--px);font-size:8px;cursor:pointer;
+    background:rgba(38,224,255,.1);box-shadow:0 0 8px rgba(38,224,255,.28)}
+  #tlbody .nfo:hover{color:#00121a;border-color:var(--cyan);background:var(--cyan);box-shadow:0 0 12px rgba(38,224,255,.6)}
 
   /* ---- WIDE SCREENS: the radio becomes two columns ----
      A laptop has room to show the record's story beside the list, so the info
@@ -759,7 +792,23 @@
   var navEl=document.getElementById('nav');
   /* which nav label clears which notification dot when opened */
   var NAV_TGT={SHOP:'shop',TV:'tv'};
-  NAV.forEach(function(it){var b=document.createElement('button');b.textContent=it.n;
+  /* the top nav is the spinning voxel icons — same look as the console menu */
+  var NAVICO={
+    CONSOLE:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><ellipse cx='8' cy='8' rx='7' ry='2.3' fill='none' stroke='#26e0ff' stroke-width='.7' transform='rotate(-18 8 8)'/><circle cx='8' cy='8' r='4' fill='#161616' stroke='#b6ff00' stroke-width='.7'/><circle cx='6.5' cy='6.7' r='.9' fill='#b6ff00'/><circle cx='9.4' cy='9' r='.6' fill='#ff2bd6'/></svg>",
+    ROOMS:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M5 5 H11 C13 5 13.4 6.2 13.9 8 L14.7 11.4 C15 13.1 13.3 13.7 12.2 12.5 L10.3 10.4 H5.7 L3.8 12.5 C2.7 13.7 1 13.1 1.3 11.4 L2.1 8 C2.6 6.2 3 5 5 5 Z' fill='#161616' stroke='#26e0ff' stroke-width='.6'/><rect x='3.9' y='7.35' width='2.5' height='.8' fill='#26e0ff'/><rect x='4.75' y='6.5' width='.8' height='2.5' fill='#26e0ff'/><circle cx='11' cy='7.9' r='.55' fill='#b6ff00'/></svg>",
+    SHOP:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2 3 L5.2 1 L6.4 2.2 H9.6 L10.8 1 L14 3 L12.4 6.2 L11 5.2 V15 H5 V5.2 L3.6 6.2 Z' fill='#ff2bd6' stroke='#3a0030' stroke-width='.5'/><rect x='6.6' y='7' width='2.8' height='2.8' fill='#161616'/></svg>",
+    TV:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4.4 3.1 7.2 5.4 8.8 5.4 11.6 3.1' stroke='#ff2b2b' stroke-width='.9' fill='none'/><rect x='1.5' y='5' width='13' height='9' rx='1.2' fill='#161616' stroke='#ff2b2b' stroke-width='.7'/><rect x='2.7' y='6.2' width='8.6' height='6.6' fill='#26e0ff' opacity='.85'/></svg>",
+    ICS:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2 12 L3 5 L6 8 L8 3 L10 8 L13 5 L14 12 Z' fill='#161616' stroke='#ffd60a' stroke-width='.7'/><rect x='2.4' y='11.6' width='11.2' height='2.2' fill='#ffd60a'/></svg>",
+    NETWORK:"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='9' width='2.4' height='5' fill='#ff2b2b'/><rect x='5.4' y='6.5' width='2.4' height='7.5' fill='#ff2b2b'/><rect x='8.8' y='4' width='2.4' height='10' fill='#b6ff00'/><rect x='12.2' y='1.6' width='2.4' height='12.4' fill='#b6ff00'/></svg>"
+  };
+  function navVox(svg){ var w=document.createElement('span'); w.className='nvx';
+    var uri="data:image/svg+xml,"+encodeURIComponent(svg), z=[-3.2,-1.9,-.6,.6,1.9,3.2];
+    z.forEach(function(t,i){ var im=new Image(); im.src=uri; im.alt="";
+      im.style.transform='translateZ('+t+'px)'; if(i<5) im.style.filter='brightness(.42)'; w.appendChild(im); }); return w; }
+  NAV.forEach(function(it){var b=document.createElement('button');
+    var ic=document.createElement('span'); ic.className='nvxwrap'; ic.appendChild(navVox(NAVICO[it.n]||NAVICO.CONSOLE));
+    var lb=document.createElement('span'); lb.className='nvlab'; lb.textContent=it.n;
+    b.appendChild(ic); b.appendChild(lb);
     b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
     b.onclick=function(){ var tg=NAV_TGT[it.n];
       if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('navigation',{destination:it.u});
@@ -770,14 +819,17 @@
          "another page opened" and is what made NETWORK → CONSOLE feel wrong. */
       navigate(it.u,{noanim:true}); };
     navEl.appendChild(b);});
+  /* pin the NETWORK chip in the bar (out of the scrolling nav) so it's always
+     visible next to the account pill */
+  (function(){ var netB=navEl.querySelector('[data-nav="NETWORK"]'), acctEl=document.getElementById('acct');
+    if(netB&&acctEl&&acctEl.parentNode){ acctEl.parentNode.insertBefore(netB, acctEl); } })();
   /* A quiet proof of life on the permanent bar. The full community readout lives
      in NETWORK so the console screen stays uncluttered. */
   (function(){
-    var netBtn=navEl.querySelector('[data-nav="NETWORK"]'), S=window.IBEE_STATS_CLIENT;
+    var netBtn=document.querySelector('[data-nav="NETWORK"]'), S=window.IBEE_STATS_CLIENT;
     if(!netBtn||!S||!S.fetch)return;
     function networkPulse(){ S.fetch().then(function(d){
       if(!d||d.population==null)return;
-      netBtn.textContent='NETWORK · '+d.population;
       netBtn.title=d.population+' VISITORS IN THE LAST 30 DAYS — OPEN NETWORK DATA';
     }).catch(function(){}); }
     networkPulse(); setInterval(networkPulse,60000);
@@ -1429,6 +1481,11 @@
     e.preventDefault(); e.stopPropagation();
     var r=R(), i=+n.getAttribute('data-nfo');
     if(r&&r.adopt) { try{ r.adopt(i); }catch(err){} }
+    var slug=(r&&r.song)?((r.song(i)||{}).f||''):'';
+    /* the info button opens the ONE music page — the universe song page in
+       console-v2 (listening infos + the record's soul + karaoke). */
+    try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openSongPage&&slug){ setTL(false); fw.openSongPage(slug); return; } }catch(err){}
+    if(slug){ setTL(false); navigate('console-v2.html#song='+encodeURIComponent(slug)); return; }
     openSongInfo();
   },true);
   document.getElementById('songinfoclose').onclick=closeSongInfo;songinfo.onclick=function(e){if(e.target===songinfo)closeSongInfo();};

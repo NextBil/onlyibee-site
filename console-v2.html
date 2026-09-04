@@ -41,19 +41,23 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 /* phones: shorter tiles + tighter grid so more of the page shows on landing.
    `.grid .box` beats the base `.box` rule regardless of source order. */
 @media(max-width:560px){
-  .grid{gap:10px;padding:10px 12px 120px}
-  .grid .box{aspect-ratio:1/0.78}
-  .grid .box.wide{aspect-ratio:auto;min-height:140px}
+  .grid{gap:10px;padding:10px 12px 116px}
+  .grid .box.wide{aspect-ratio:auto;min-height:150px}
 }
 
 /* a box is mostly a big preview; text hides until you tap it */
-.box{--ac:var(--acid);position:relative;border:2px solid var(--border);background:#0a0a0a;overflow:hidden;
-  border-radius:22px;
-  cursor:pointer;aspect-ratio:1/1;transition:transform .16s cubic-bezier(.2,.8,.2,1),border-color .16s,box-shadow .16s}
-.box::before{content:"";position:absolute;top:0;left:14px;right:14px;height:3px;border-radius:0 0 3px 3px;background:var(--ac);opacity:.85;z-index:4}
-.box:hover,.box.sel{transform:translateY(-4px) scale(1.012);border-color:var(--ac);
-  box-shadow:0 12px 34px rgba(0,0,0,.55),0 0 26px color-mix(in srgb,var(--ac) 32%,transparent);outline:none}
-.box.wide{grid-column:1 / -1;aspect-ratio:auto;min-height:210px;border-radius:26px}
+/* squares by default (only TV is a rectangle). No colour strip — a soft resting
+   glow in the box's colour, and the border LIGHTS UP when you tap it. */
+.box{--ac:var(--acid);position:relative;border:2px solid #1c1c1c;background:#0a0a0a;overflow:hidden;
+  border-radius:20px;cursor:pointer;aspect-ratio:1/1;
+  box-shadow:0 5px 18px rgba(0,0,0,.45),0 0 15px color-mix(in srgb,var(--ac) 12%,transparent);
+  transition:transform .16s cubic-bezier(.2,.8,.2,1),border-color .18s,box-shadow .18s}
+.box:hover{transform:translateY(-3px) scale(1.01);border-color:color-mix(in srgb,var(--ac) 40%,#1c1c1c);
+  box-shadow:0 12px 30px rgba(0,0,0,.55),0 0 22px color-mix(in srgb,var(--ac) 24%,transparent)}
+.box.sel{transform:translateY(-4px) scale(1.012);border-color:var(--ac);
+  box-shadow:0 14px 36px rgba(0,0,0,.6),0 0 36px color-mix(in srgb,var(--ac) 60%,transparent),
+             inset 0 0 0 1px color-mix(in srgb,var(--ac) 40%,transparent);outline:none}
+.box.wide{grid-column:1 / -1;aspect-ratio:auto;min-height:200px;border-radius:24px}
 
 .peek{position:absolute;inset:0;background:#050505 center/cover no-repeat;background-image:var(--img)}
 .peek::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,transparent 30%,rgba(0,0,0,.2) 55%,rgba(0,0,0,.86) 100%)}
@@ -66,9 +70,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 /* the rotating voxel icon — same technique as the site menu */
 /* the rotating icon sits in the TOP-RIGHT corner on its own little chip, so the
    thumbnail never swallows it */
-.ico{position:absolute;top:9px;right:9px;left:auto;width:40px;height:40px;z-index:4;perspective:230px;
-  padding:5px;border-radius:12px;background:rgba(6,6,9,.5);border:1px solid rgba(255,255,255,.14);
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);box-shadow:0 3px 12px rgba(0,0,0,.55)}
+.ico{position:absolute;top:9px;right:9px;left:auto;width:42px;height:42px;z-index:4;perspective:230px;
+  padding:6px;border-radius:13px;background:rgba(3,3,5,.82);border:1px solid color-mix(in srgb,var(--ac) 30%,rgba(255,255,255,.12));
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  box-shadow:0 4px 14px rgba(0,0,0,.7),0 0 12px color-mix(in srgb,var(--ac) 22%,transparent),inset 0 0 0 1px rgba(0,0,0,.4)}
 .box.wide .ico{width:52px;height:52px;top:12px;right:12px}
 .o3{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;animation:sp 5.5s linear infinite}
 .o3 img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
@@ -95,6 +100,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 
 .box.music{--ac:var(--acid)}.box.rooms{--ac:var(--cyan)}.box.shop{--ac:var(--pink)}
 .box.ics{--ac:var(--gold)}.box.tv{--ac:var(--red)}.box.you{--ac:#5ad17a}
+/* YOU = a small, discrete profile strip, not a big tile */
+.box.you.slim{aspect-ratio:auto!important;min-height:0!important;height:60px;border-radius:16px}
+.box.you.slim .peek{background-size:auto 74%;background-position:16px center}
+.box.you.slim .peek::after{background:linear-gradient(90deg,rgba(0,0,0,.35),transparent 40%)}
+.box.you.slim .ico{width:32px;height:32px;top:50%;right:14px;transform:translateY(-50%);padding:4px}
+.box.you.slim .nm{bottom:auto;top:50%;left:72px;transform:translateY(-50%);font-size:11px}
+.box.you.slim .cnt{bottom:auto;top:50%;right:56px;transform:translateY(-50%);font-size:7px;background:none}
 
 /* radio dock */
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:60;background:linear-gradient(180deg,#0c0c0c,#070707);
@@ -187,10 +199,11 @@ body:not(.booting) .pressplay{opacity:0}
 #udet .lyr{margin-top:20px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px}
 .lyrh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
 /* synced karaoke lyrics — active line lit, neighbours dimmed, auto-scroll */
-.lyrbox{position:relative;max-height:250px;overflow-y:auto;overscroll-behavior:contain;padding:70px 0;
+.lyrbox{position:relative;max-height:250px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:70px 0;
   -webkit-mask:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);
   mask:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent)}
 .klyr .klrow{font-family:var(--vt);font-size:20px;line-height:1.35;color:#5c5c62;padding:9px 2px;
+  white-space:normal;overflow-wrap:anywhere;word-break:break-word;
   transition:color .3s,opacity .3s,transform .3s,text-shadow .3s;transform-origin:left center}
 .klyr .klrow.past{color:#8f8f95}
 .klyr .klrow.on{color:var(--acid);font-size:25px;transform:scale(1.02);
@@ -240,6 +253,20 @@ body:not(.booting) .pressplay{opacity:0}
 .dstats .st{border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.32);padding:8px 9px}
 .dstats .st b{display:block;font-family:var(--vt);font-size:19px;color:#fff;font-weight:normal;line-height:1}
 .dstats .st span{font-family:var(--px);font-size:6px;letter-spacing:1px;color:var(--dim);display:block;margin-top:5px}
+/* the record's soul + listening blocks on the song page */
+.dbh{font-family:var(--px);font-size:8px;letter-spacing:1px;color:var(--dim);margin:20px 0 10px}
+.dsoul .sr{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.dsoul .sk{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--acid);flex:none;width:52px;padding-top:3px}
+.dsoul .sv{font-size:17px;color:#cfcfcf;line-height:1.4;overflow-wrap:anywhere}
+.dsoul .dm{font-size:17px;color:#c4c4c8;line-height:1.5;margin:10px 0;overflow-wrap:anywhere}
+.dlisten .dpl{font-family:var(--px);font-size:9px;color:var(--acid);background:rgba(16,20,8,.6);
+  border-left:2px solid var(--acid);padding:10px 12px;margin-bottom:10px}
+.dlisten .dct{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--cyan);background:rgba(8,18,22,.55);padding:6px 12px}
+.dlisten .dct .cr{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid rgba(38,224,255,.14);font-size:16px;color:#cceff7}
+.dlisten .dct .cr:first-child{border-top:0}
+.dlisten .dct .cr b{font-family:var(--px);font-size:7px;color:var(--cyan);font-weight:normal}
+.dlisten .dct .cr i{margin-left:auto;font-family:var(--px);font-size:7px;color:var(--dim);font-style:normal;white-space:nowrap}
+.dlisten .dct .ct0{font-size:15px;color:var(--dim);padding:6px 0}
 
 /* the pinned cover grows when a planet is zoomed; tap it for the album */
 #hdrc{cursor:pointer;transition:width .3s,height .3s}
@@ -319,6 +346,17 @@ body:not(.booting) .pressplay{opacity:0}
 .trlinks .sup{color:var(--gold);border:1px solid #3a3200;padding:7px 9px;border-radius:8px}
 .trlinks .sup:hover{background:var(--gold);color:#000}
 .trlinks .sep{color:#333} .trlinks .cr{margin-left:auto;color:#555}
+/* phones: stack the footer so SUPPORT fills the width instead of leaving gaps */
+@media(max-width:560px){
+  .systray{padding:16px 14px 130px}
+  .systray .tray{flex-direction:column;align-items:stretch;gap:10px}
+  .trbtn{justify-content:center}
+  .plats2{margin-left:0;justify-content:center;gap:10px}
+  .trlinks{flex-direction:column;align-items:center;gap:9px;text-align:center}
+  .trlinks .sup{width:100%;text-align:center;padding:11px}
+  .trlinks .sep{display:none}
+  .trlinks .cr{margin-left:0}
+}
 
 /* ABOUT overlay */
 .ovl{position:fixed;inset:0;z-index:80;display:none;background:var(--bg);overflow-y:auto}
@@ -426,10 +464,10 @@ html.framed .hello{padding-top:16px}
       <a class="en">ENTER ▶</a></div>
   </button>
 
-  <button class="box you" data-ico="you" style="--img:url(https://onlyibee.com/assets/profile%20avatars/mimi%20default%20profile%20avatar.png)">
+  <button class="box you wide slim" data-ico="you" style="--img:url(https://onlyibee.com/assets/profile%20avatars/mimi%20default%20profile%20avatar.png)">
     <div class="peek contain"></div>
     <span class="ico"></span>
-    <span class="nm">YOU</span><span class="cnt">◈ 340</span>
+    <span class="nm">YOU</span><span class="cnt">RANK 04 · ◈ 340</span>
     <div class="info"><div class="tg">CARD · RANK 04</div>
       <div class="ds">your card, your rank, your one room.</div>
       <a class="en">ENTER ▶</a></div>
@@ -506,6 +544,8 @@ html.framed .hello{padding-top:16px}
       <div class="dinfo" id="dinfo"></div>
       <div class="dstats" id="dstats"></div>
       <button class="dplay" id="dplay">▶ PLAY</button>
+      <div class="dsoul" id="dsoul"></div>
+      <div class="dlisten" id="dlisten"></div>
       <div class="lyr"><div class="lyrh">LYRICS · KARAOKE</div><div class="lyrbox" id="lyrbox"><div id="dlyr" class="klyr"></div></div></div>
     </div>
   </div>
@@ -895,11 +935,27 @@ html.framed .hello{padding-top:16px}
   function exitGalaxies(){ mode="galaxy"; curG=-1; perf=null; detOpen=false; aligned=false; klStop(); $("uni").classList.remove("sys"); $("udet").classList.remove("on"); setTitle(); }
   function statRow(k,v){ return '<div class="st"><b>'+v+'</b><span>'+k+'</span></div>'; }
   function dash(v){ return (v==null||v==="")?"—":v; }
-  function openDet(s){ var g=GAL[s.g];
+  function soulRow(k,v){ return '<div class="sr"><span class="sk">'+k+'</span><span class="sv">'+esc(v)+'</span></div>'; }
+  function metaFor(slug){ var M=window.IBEE_META||{}; return M[slug]||M[(slug||"").replace(/\.mp3$/,"")]||{}; }
+  function openDet(s){ var g=GAL[s.g], m=metaFor(s.slug);
     $("dti").textContent=s.n; $("dar").textContent=s.a;
     $("dinfo").textContent=(g?g.name:"")+(s.mood?("  ·  "+s.mood):"")+"  ·  tap the universe to close";
-    $("dstats").innerHTML=statRow("TRACK","#"+s.no)+statRow("LENGTH",dash(s.len))+statRow("PLAYS",dash(s.pl))
-      +statRow("YEAR",dash(s.yr))+statRow("BPM",s.bpm?s.bpm:"—")+statRow("KEY",dash(s.key));
+    $("dstats").innerHTML=statRow("TRACK","#"+s.no)+statRow("LENGTH",dash(s.len))+statRow("YEAR",dash(s.yr))
+      +statRow("BPM",s.bpm?s.bpm:"—")+statRow("KEY",dash(s.key));
+    /* the record's soul (song-meta) */
+    var soul=""; if(m.vibe)soul+=soulRow("VIBE",m.vibe); if(m.meaning)soul+='<p class="dm">'+esc(m.meaning)+'</p>';
+    if(m.context)soul+=soulRow("MADE",m.context); if(m.took)soul+=soulRow("TIME",m.took);
+    $("dsoul").innerHTML=soul?('<div class="dbh">THE RECORD</div>'+soul):"";
+    /* listening — real plays + top cities, from the shell's stats client */
+    $("dlisten").innerHTML='<div class="dbh">LISTENING</div><div class="dpl" id="dpl">PLAYS // reading_</div>'
+      +'<div class="dct" id="dct"><span class="ct0">top cities — reading_</span></div>';
+    var S=(function(){try{return (window.top&&window.top.IBEE_STATS_CLIENT)||window.IBEE_STATS_CLIENT;}catch(e){return window.IBEE_STATS_CLIENT;}})();
+    if(S&&S.songCounts){ S.songCounts().then(function(rows){ var r=(rows||[]).filter(function(x){return x.song_slug===s.slug;})[0];
+      var el=$("dpl"); if(el) el.textContent='PLAYS // '+(r?Number(r.plays).toLocaleString():'0'); }).catch(function(){ var el=$("dpl"); if(el) el.textContent='PLAYS // —'; }); }
+    else { var e0=$("dpl"); if(e0) e0.textContent='PLAYS // '+dash(s.pl); }
+    if(S&&S.songCities){ S.songCities(s.slug).then(function(rows){ rows=(rows||[]).slice(0,5); var el=$("dct"); if(!el)return;
+      el.innerHTML=rows.length? rows.map(function(row,n){return '<span class="cr"><b>'+(n+1)+'</b> '+esc(row.city_name||'—')+'<i>'+Number(row.listeners||0).toLocaleString()+'</i></span>';}).join('')
+        : '<span class="ct0">cities appear as this song is played_</span>'; }).catch(function(){}); }
     renderKaraoke(s); detOpen=true; $("udet").classList.add("on"); setTitle(); klStart();
     $("dplay").onclick=function(){ playSong(s); toast("NOW PLAYING  "+s.n+"_"); }; }
   function closeDet(){ detOpen=false; $("udet").classList.remove("on"); klStop(); setTitle(); }
@@ -961,7 +1017,16 @@ html.framed .hello{padding-top:16px}
   /* the ONE universe: the player's galaxy button (in the shell) calls this so the
      site never opens a second, different universe. */
   window.openUniverse=function(){ openUni(); };
-  if(/#(universe|music|playing|nowplaying)/i.test(location.hash)){ setTimeout(openUni,60); }
+  /* the radio-list info button opens THIS song's full universe page */
+  window.openSongPage=function(slug){ if(!SONGS.length) buildLibrary();
+    var s=songBySlug(slug); if(!s){ openUni(); return; }
+    if(!uniOpen) openUni();
+    if(mode!=="system"||curG!==s.g) enterGalaxy(s.g);
+    var pl=planetBySlug(slug); if(pl){ aligned=false; perf=pl; assignOrbits(); }
+    openDet(s); };
+  var _sm=/#song=([^&]+)/i.exec(location.hash);
+  if(_sm){ setTimeout(function(){ window.openSongPage(decodeURIComponent(_sm[1])); },80); }
+  else if(/#(universe|music|playing|nowplaying)/i.test(location.hash)){ setTimeout(openUni,60); }
 
   /* ABOUT overlay + footer year */
   $("aboutBtn").onclick=function(){ $("about").classList.add("on"); var v=$("abvid"); if(v){try{v.play();}catch(e){}} };
