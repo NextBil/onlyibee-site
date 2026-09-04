@@ -491,10 +491,12 @@
   /* JS pins this exactly over the player's ► button (same size + position), so the
      one lit thing on the dark boot IS the player's play button — press it and the
      site wakes around it. Fallback position (bottom-centre) if JS can't measure. */
-  #enterplay{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  #enterplay{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translate(-50%,-50%);
     width:44px;height:44px;border-radius:50%;border:1px solid var(--acid);
     background:var(--acid);color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 30px rgba(182,255,0,.6);animation:enterpulse 1.6s ease-in-out infinite;transition:transform .12s}
+    box-shadow:0 0 30px rgba(182,255,0,.6);animation:enterpulse 1.6s ease-in-out infinite;transition:transform .12s;
+    opacity:0}                                   /* stays invisible until JS pins it over the player ► (no jump) */
+  #enterplay.ready{opacity:1;transition:opacity .25s ease,transform .12s}
   #enterplay.placed{transform:translate(-50%,-50%)}
   #enterplay span{font-size:15px;margin-left:2px}
   #enterplay:hover{transform:translateX(-50%) scale(1.08)}
@@ -1594,8 +1596,11 @@
       var r=rp.getBoundingClientRect(); if(!r.width)return;
       var d=Math.max(r.width,r.height);
       ep.style.left=(r.left+r.width/2)+'px'; ep.style.top=(r.top+r.height/2)+'px'; ep.style.bottom='auto';
-      ep.style.width=d+'px'; ep.style.height=d+'px'; ep.classList.add('placed'); };
+      ep.style.width=d+'px'; ep.style.height=d+'px'; ep.classList.add('placed');
+      ep.classList.add('ready'); };                 /* reveal only once it's in place */
     placeEnter(); setTimeout(placeEnter,120); setTimeout(placeEnter,500);
+    /* safety: if the player button never measured, show the button at its fallback spot */
+    setTimeout(function(){ if(ep) ep.classList.add('ready'); },600);
     window.addEventListener('resize',placeEnter);
     var started=false;
     var go=function(){ if(started)return; started=true;
