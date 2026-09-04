@@ -47,7 +47,10 @@
   /* ---- top bar: nav fills the width ---- */
   #bar{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#0b0b0b,#050505);
     border-bottom:2px solid var(--border);position:relative;z-index:20;padding:8px 8px}
-  #nav{display:flex;flex:1;gap:5px;overflow-x:auto;scrollbar-width:none;min-width:0}
+  /* padding + matching negative margin gives the lifted, scaled-up selected tab
+     room to grow without the scroll box clipping its top edge */
+  #nav{display:flex;flex:1;gap:5px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;min-width:0;
+    padding:7px 2px;margin:-7px 0}
   #nav::-webkit-scrollbar{display:none}
   /* console-v2 look: rounded chips, each carrying a spinning voxel icon + tiny label */
   #nav button{display:flex;flex-direction:column;align-items:center;gap:3px;
@@ -60,11 +63,18 @@
   #nav button.on .nvx{animation:navspin 3.4s linear infinite}
   #nav .nvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
   @keyframes navspin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
-  @media(hover:hover){ #nav button:hover .nvx{animation:navspin 2.4s linear infinite} }
   #nav .nvlab{font-size:7px;letter-spacing:.5px}
-  #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
+  /* hover is a MOUSE thing only — on touch it sticks after a tap and repaints */
+  @media(hover:hover) and (pointer:fine){
+    #nav button:hover .nvx{animation:navspin 2.4s linear infinite}
+    #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
+  }
+  /* the selected tab lifts out of the row like a card pulled from a deck:
+     bigger, raised, its own shadow, sitting above its neighbours */
   #nav button.on{color:#07120a;background:var(--acid);border-color:var(--acid);
-    box-shadow:0 0 16px rgba(182,255,0,.4)}
+    transform:scale(1.16) translateY(-2px);transform-origin:center bottom;position:relative;z-index:3;
+    box-shadow:0 6px 16px rgba(0,0,0,.5),0 0 18px rgba(182,255,0,.5)}
+  #nav button.on .nvlab{font-weight:700}
   /* NETWORK is a compact chip carrying its own spinning signal-bars icon, pinned
      in the bar next to the account pill — saves space. Self-contained styling. */
   button[data-nav="NETWORK"]{display:flex;flex-direction:column;align-items:center;gap:3px;flex:none;align-self:center;
@@ -146,7 +156,6 @@
     margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #tracklist .tr .pc{font-family:var(--px);font-size:7px;letter-spacing:.6px;color:#5d5d5d;margin-top:5px}
   #tracklist .tr.now .al{color:#6b8f00}
-  #tracklist .tr:hover{background:#0d0d0d;color:var(--ink)}
   #tracklist .tr.now{color:var(--acid);background:#0d1400}
   #tracklist .tr .no{font-family:var(--px);font-size:8px;color:#555;width:24px}
   #tracklist .tr.now .no{color:var(--acid)}
@@ -181,10 +190,11 @@
      and the NOW-PLAYING cover becomes a spinning vinyl disc */
   #tracklist .tr{border-radius:12px;transition:background .15s}
   /* the lift+zoom is nice with a mouse but repaints every row during momentum
-     scroll on a phone (lag) — so give it only to hover-capable devices */
-  @media(hover:hover){
+     scroll on a phone (lag), and a tap leaves a touch device stuck in :hover —
+     so give it ONLY to a real fine pointer (mouse), never touch */
+  @media(hover:hover) and (pointer:fine){
     #tracklist .tr{transition:background .15s,transform .15s,box-shadow .15s}
-    #tracklist .tr:hover{transform:translateX(3px) scale(1.012);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+    #tracklist .tr:hover{background:#0d0d0d;color:var(--ink);transform:translateX(3px) scale(1.012);box-shadow:0 6px 18px rgba(0,0,0,.45)}
   }
   #tracklist .tr .cv{transition:border-radius .35s,border-color .35s,box-shadow .35s}
   #tracklist .tr.now .cv{border-radius:50%;border:2px solid var(--acid);
@@ -227,7 +237,7 @@
   .tl-tile{cursor:pointer;perspective:640px;min-width:0}
   .tl-tile .art{position:relative;width:100%;aspect-ratio:1;background:#0c0c0c;border:1px solid #222;
     transform:rotateY(-18deg);transform-origin:center;transition:transform .35s cubic-bezier(.2,.7,.2,1);overflow:hidden}
-  .tl-tile:hover .art{transform:rotateY(0)}
+  @media(hover:hover) and (pointer:fine){ .tl-tile:hover .art{transform:rotateY(0)} }
   .tl-tile.now .art{border-color:var(--acid);box-shadow:0 0 14px rgba(182,255,0,.4)}
   .tl-tile .art img{width:100%;height:100%;object-fit:cover;display:block}
   .tl-tile .gtag{position:absolute;left:0;bottom:0;right:0;padding:5px 6px;font-family:var(--vt);font-size:12px;
