@@ -41,15 +41,19 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 
 /* a box is mostly a big preview; text hides until you tap it */
 .box{--ac:var(--acid);position:relative;border:2px solid var(--border);background:#0a0a0a;overflow:hidden;
+  border-radius:22px;
   cursor:pointer;aspect-ratio:1/1;transition:transform .16s cubic-bezier(.2,.8,.2,1),border-color .16s,box-shadow .16s}
-.box::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac);opacity:.9;z-index:4}
+.box::before{content:"";position:absolute;top:0;left:14px;right:14px;height:3px;border-radius:0 0 3px 3px;background:var(--ac);opacity:.85;z-index:4}
 .box:hover,.box.sel{transform:translateY(-4px) scale(1.012);border-color:var(--ac);
   box-shadow:0 12px 34px rgba(0,0,0,.55),0 0 26px color-mix(in srgb,var(--ac) 32%,transparent);outline:none}
-.box.wide{grid-column:1 / -1;aspect-ratio:auto;min-height:210px}
+.box.wide{grid-column:1 / -1;aspect-ratio:auto;min-height:210px;border-radius:26px}
 
 .peek{position:absolute;inset:0;background:#050505 center/cover no-repeat;background-image:var(--img)}
 .peek::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,transparent 30%,rgba(0,0,0,.2) 55%,rgba(0,0,0,.86) 100%)}
 .peek.contain{background-size:auto 74%;background-position:center 42%}
+/* shop: a little mosaic of pieces instead of one photo */
+.mosaic{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;background:#040404}
+.mosaic i{background:#0b0b0b center/cover no-repeat}
 .tvvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 
 /* the rotating voxel icon — same technique as the site menu */
@@ -153,34 +157,38 @@ body:not(.booting) .pressplay{opacity:0}
 .ucard:hover .uc::after{opacity:1}
 .ucard .un{font-family:var(--vt);font-size:16px;color:var(--ink);padding:7px 8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ucard .ua{font-family:var(--px);font-size:6px;color:var(--dim);padding:0 8px 9px;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#udet{position:absolute;left:0;right:0;bottom:0;top:auto;height:64%;z-index:76;background:#070708;
-  border-top:2px solid var(--acid);box-shadow:0 -14px 44px rgba(0,0,0,.65);
-  transform:translateY(100%);transition:transform .28s;display:flex;flex-direction:column;overflow-y:auto}
-#udet.on{transform:translateY(0)}
-#udet .dh{position:relative;height:22vh;min-height:140px;background:#000 center/cover no-repeat;flex:none}
+/* the song page is PART OF the universe: a frosted panel that only takes the
+   lower half, fully transparent up top so the zoomed planet + orbits show
+   through. no back button — tap the universe above to dismiss. */
+#udet{position:absolute;left:0;right:0;bottom:0;top:auto;max-height:52%;z-index:5;
+  padding:52px 20px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;
+  background:linear-gradient(180deg,transparent 0,rgba(6,6,9,.0) 10%,rgba(6,6,9,.34) 30%,rgba(6,6,9,.74) 58%,rgba(6,6,9,.94) 100%);
+  -webkit-backdrop-filter:blur(2px) saturate(1.1);backdrop-filter:blur(2px) saturate(1.1);
+  transform:translateY(24px);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .3s}
+#udet.on{transform:translateY(0);opacity:1;pointer-events:auto}
+#udet .db{position:relative;z-index:2}
+.dh,.dclose{display:none}
+#udet .dti{font-family:var(--px);font-size:15px;color:#fff;line-height:1.5;text-shadow:0 2px 12px #000}
+#udet .dar{font-family:var(--px);font-size:8px;color:var(--acid);margin-top:9px;letter-spacing:1px}
+#udet .dinfo{color:#b9b9bd;font-size:15px;margin-top:9px}
+.dplay{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--px);font-size:10px;color:#07120a;background:var(--acid);border:none;padding:13px 18px;cursor:pointer;box-shadow:0 0 20px rgba(182,255,0,.4)}
+.dplay:active{transform:translateY(1px)}
+#udet .lyr{margin-top:20px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px}
+.lyrh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
+#dlyr{font-size:19px;line-height:1.75;color:#dcdce0;white-space:pre-line}
 /* album cover header on the planet page (spotify vibe) */
 #unihdr{position:absolute;top:0;left:0;right:0;z-index:4;display:none;align-items:center;gap:12px;padding:12px 14px;
   background:linear-gradient(180deg,rgba(5,5,6,.94),rgba(5,5,6,.5) 65%,transparent);pointer-events:none}
 #uni.sys #unihdr{display:flex}
-#unihdr .hc{width:54px;height:54px;flex:none;background:#000 center/cover no-repeat;border:1px solid var(--border);box-shadow:0 0 16px rgba(0,0,0,.7)}
+#unihdr .hc{width:54px;height:54px;flex:none;background:#000 center/cover no-repeat;border:1px solid var(--border);border-radius:8px;box-shadow:0 0 16px rgba(0,0,0,.7)}
 #unihdr .ht{font-family:var(--px);font-size:11px;color:#fff;line-height:1.5}
 #unihdr .hs{font-family:var(--px);font-size:7px;color:var(--acid);margin-top:6px;letter-spacing:1px}
-#udet .dh::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,#070708)}
-.dclose{position:absolute;top:14px;left:14px;z-index:2;font-family:var(--px);font-size:9px;color:#fff;background:rgba(0,0,0,.6);border:1px solid var(--border);padding:9px 11px;cursor:pointer}
-#udet .db{padding:0 18px 140px;margin-top:-46px;position:relative;z-index:2}
-#udet .dti{font-family:var(--px);font-size:15px;color:#fff;line-height:1.5}
-#udet .dar{font-family:var(--px);font-size:8px;color:var(--acid);margin-top:9px;letter-spacing:1px}
-#udet .dinfo{color:var(--dim);font-size:16px;margin-top:9px}
-.dplay{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--px);font-size:10px;color:#07120a;background:var(--acid);border:none;padding:13px 18px;cursor:pointer}
-.dplay:active{transform:translateY(1px)}
-#udet .lyr{margin-top:22px;border-top:1px solid var(--border);padding-top:16px}
-.lyrh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
-#dlyr{font-size:19px;line-height:1.75;color:#cfcfcf;white-space:pre-line}
 
 /* galaxy stage inside the universe */
 #unistage{flex:1;position:relative;overflow:hidden;background:#050506}
 #unicv{position:absolute;inset:0;width:100%;height:100%;display:block}
-.uhint{position:absolute;left:0;right:0;bottom:130px;text-align:center;font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--dim);pointer-events:none}
+.uhint{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--dim);pointer-events:none;transition:opacity .25s;z-index:6}
+#uni.det .uhint{bottom:auto;top:74px;opacity:.85}
 .utoggle{font-family:var(--px);font-size:8px;color:var(--acid);background:none;border:1px solid var(--border);padding:9px 10px;cursor:pointer;flex:none}
 .utoggle:hover{border-color:var(--acid)}
 #uni.listmode #unicv,#uni.listmode .uhint{display:none}
@@ -208,7 +216,7 @@ body:not(.booting) .pressplay{opacity:0}
       <a class="en">ENTER ▶</a></div>
   </button>
 
-  <button class="box rooms" data-ico="rooms" style="--img:url(https://onlyibee.com/arcade/covers/aqua-bass.png)">
+  <button class="box rooms" data-ico="rooms" style="--img:url(https://onlyibee.com/arcade/covers/midnight-transit.png)">
     <div class="peek"></div>
     <span class="ico"></span>
     <span class="nm">ROOMS</span><span class="cnt">10 ▸</span>
@@ -217,8 +225,13 @@ body:not(.booting) .pressplay{opacity:0}
       <a class="en">ENTER ▶</a></div>
   </button>
 
-  <button class="box shop" data-ico="shop" style="--img:url(https://static.wixstatic.com/media/0fcae7_adcaa115259d490e8398a7ac610aa9da~mv2.jpg/v1/fit/w_600,h_600,q_85/file.jpg)">
-    <div class="peek"></div>
+  <button class="box shop" data-ico="shop">
+    <div class="peek"><div class="mosaic">
+      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_37851d102940464786ec570c169480c3~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
+      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_ee7534e7c94d430ab3305ae6ad4cb50c~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
+      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_761d9cf263d44e1fa1d18b6dd298bd30~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
+      <i style="background-image:url(https://static.wixstatic.com/media/0fcae7_4321ba1c23e349e9ad06e323e4145e49~mv2.png/v1/fit/w_400,h_400,q_85/file.png)"></i>
+    </div></div>
     <span class="ico"></span>
     <span class="nm">SHOP</span><span class="cnt">47 ▸</span>
     <div class="info"><div class="tg">UTOPIE · ONE OF ONE</div>
@@ -226,21 +239,12 @@ body:not(.booting) .pressplay{opacity:0}
       <a class="en">ENTER ▶</a></div>
   </button>
 
-  <button class="box ics" data-ico="ics" style="--img:url(https://onlyibee.com/assets/chess/queen.png)">
-    <div class="peek contain"></div>
+  <button class="box ics" data-ico="ics" style="--img:url(https://onlyibee.com/assets/img/ics-all-set.jpg)">
+    <div class="peek"></div>
     <span class="ico"></span>
     <span class="nm">ICS</span><span class="cnt">08 ▸</span>
     <div class="info"><div class="tg">THE CREW · PROJECT 03</div>
       <div class="ds">meet the characters. play them as chess.</div>
-      <a class="en">ENTER ▶</a></div>
-  </button>
-
-  <button class="box you" data-ico="you" style="--img:url(https://onlyibee.com/assets/profile%20avatars/mimi%20default%20profile%20avatar.png)">
-    <div class="peek contain"></div>
-    <span class="ico"></span>
-    <span class="nm">YOU</span><span class="cnt">◈ 340</span>
-    <div class="info"><div class="tg">CARD · RANK 04</div>
-      <div class="ds">your card, your rank, your one room.</div>
       <a class="en">ENTER ▶</a></div>
   </button>
 
@@ -252,6 +256,15 @@ body:not(.booting) .pressplay{opacity:0}
     <span class="nm">TV</span><span class="cnt">▶ LIVE</span>
     <div class="info"><div class="tg">VIDEOS</div>
       <div class="ds">clips, visuals and the occasional broadcast.</div>
+      <a class="en">ENTER ▶</a></div>
+  </button>
+
+  <button class="box you" data-ico="you" style="--img:url(https://onlyibee.com/assets/profile%20avatars/mimi%20default%20profile%20avatar.png)">
+    <div class="peek contain"></div>
+    <span class="ico"></span>
+    <span class="nm">YOU</span><span class="cnt">◈ 340</span>
+    <div class="info"><div class="tg">CARD · RANK 04</div>
+      <div class="ds">your card, your rank, your one room.</div>
       <a class="en">ENTER ▶</a></div>
   </button>
 
@@ -394,7 +407,7 @@ body:not(.booting) .pressplay{opacity:0}
   GAL.forEach(function(g){ g.img=new Image(); g.img._ok=false; g.img.onload=function(){this._ok=true;}; g.img.src=g.cv; });
   SONGS.forEach(function(s){ s.g=/20 ?min|20mzs/i.test(s.a)?1:0; });
   var cv=$("unicv"), cx=cv.getContext("2d"), CW=0,CH=0,DPR=1;
-  var uniOpen=false, mode="galaxy", curG=-1, perf=null, gxs=[], planets=[], hoverP=null, hoverG=-1, uq="", lastT=0;
+  var uniOpen=false, mode="galaxy", curG=-1, perf=null, detOpen=false, gxs=[], planets=[], hoverP=null, hoverG=-1, uq="", lastT=0;
   var stars=[]; for(var k=0;k<90;k++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()});
   var utitle=document.querySelector(".utitle"), uhint=document.querySelector(".uhint");
   function imgCover(img,dx,dy,d){ if(!img||!img._ok)return false; var iw=img.naturalWidth,ih=img.naturalHeight,s=Math.max(d/iw,d/ih),sw=d/s,sh=d/s; cx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,dx,dy,d,d); return true; }
@@ -443,10 +456,10 @@ body:not(.booting) .pressplay{opacity:0}
     others.forEach(function(p,i){ var t=others.length>1?i/(others.length-1):0; p.orbR=70+t*(maxR-70); p.orbA=Math.atan2(p.y-perf.y,p.x-perf.x); }); }
   function stepPlanet(pl,dt,beat){ var pf=perf, dtms=dt*1000, step=Math.min(3,dtms/16), W=CW,H=CH;
     pl.phase+=dtms*0.002; pl.drift+=dtms*0.0009; pl.spin+=0.02+beat*(pf===pl?0.14:0.05);
-    pl.perfScale+=((pf===pl?1.5:1)-pl.perfScale)*Math.min(1,0.05*step);
-    if(pf===pl){ var cx0=W*0.5,cy0=H*0.5;
-      pl.x+=(cx0-pl.x)*Math.min(1,0.05*step)+Math.sin(pl.drift*0.7)*0.35*step;
-      pl.y+=(cy0-pl.y)*Math.min(1,0.05*step)+Math.cos(pl.drift*0.6)*0.35*step; return; }
+    pl.perfScale+=((pf===pl?(detOpen?2.3:1.5):1)-pl.perfScale)*Math.min(1,0.05*step);
+    if(pf===pl){ var cx0=W*0.5,cy0=detOpen?H*0.30:H*0.5, ease=Math.min(1,(detOpen?0.07:0.05)*step);
+      pl.x+=(cx0-pl.x)*ease+Math.sin(pl.drift*0.7)*0.35*step;
+      pl.y+=(cy0-pl.y)*ease+Math.cos(pl.drift*0.6)*0.35*step; return; }
     if(pf){ pl.orbA+=pl.orbDir*pl.orbSpeed*step*(1+beat*1.6); var rr=pl.orbR*(1+beat*0.12);
       var tx=pf.x+Math.cos(pl.orbA)*rr, ty=pf.y+Math.sin(pl.orbA)*rr;
       pl.x+=(tx-pl.x)*Math.min(1,0.09*step); pl.y+=(ty-pl.y)*Math.min(1,0.09*step);
@@ -492,10 +505,12 @@ body:not(.booting) .pressplay{opacity:0}
     if(mode==="galaxy") drawGalaxies(beat); else drawSystem(dt,beat); }
   function galaxyAt(mx,my){ for(var i=0;i<gxs.length;i++){ if(Math.hypot(mx-gxs[i].x,my-gxs[i].y)<gxs[i].r*1.05) return i; } return -1; }
   function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.7*best.perfScale+16))?best:null; }
+  function focusPlanet(pl){ perf=pl; assignOrbits(); $("ti").textContent=pl.s.n; $("disc").style.backgroundImage="url("+pl.s.c+")"; setPlay(true); openDet(pl.s); }
   cv.addEventListener("click",function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
     if(mode==="galaxy"){ var gi=galaxyAt(mx,my); if(gi>=0) enterGalaxy(gi); return; }
     var pl=planetAt(mx,my);
-    if(pl){ perf=pl; assignOrbits(); $("ti").textContent=pl.s.n; $("disc").style.backgroundImage="url("+pl.s.c+")"; setPlay(true); openDet(pl.s); }
+    if(detOpen){ if(pl&&pl!==perf) focusPlanet(pl); else closeDet(); return; }
+    if(pl){ focusPlanet(pl); }
     else if(perf){ assignOrbits(); toast("ALIGNED_"); } });
   cv.addEventListener("mousemove",function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
     if(mode==="galaxy"){ hoverG=galaxyAt(mx,my); cv.style.cursor=hoverG>=0?"pointer":"default"; }
@@ -503,24 +518,27 @@ body:not(.booting) .pressplay{opacity:0}
   window.addEventListener("resize",function(){ if(uniOpen) sizeCv(); });
 
   function setTitle(){ if(utitle) utitle.textContent = mode==="system"?GAL[curG].name:"THE UNIVERSE";
-    if(uhint) uhint.textContent = mode==="system"?"tap a record to play  ·  tap the void to align  ·  ◀ galaxies":"a galaxy per record · tap one to enter";
+    if(uhint) uhint.textContent = mode!=="system" ? "a galaxy per record · tap one to enter"
+      : detOpen ? "tap the universe to close  ·  tap another record to switch"
+      : "tap a record to zoom in  ·  tap the void to align  ·  ◀ galaxies";
+    $("uni").classList.toggle("det",detOpen);
     $("uback").textContent = mode==="system"?"◀ GALAXIES":"◀"; }
-  function enterGalaxy(i){ mode="system"; curG=i; perf=null;
+  function enterGalaxy(i){ mode="system"; curG=i; perf=null; detOpen=false; $("udet").classList.remove("on");
     var list=SONGS.filter(function(s){return s.g===i;});
     planets=list.map(function(s){return makePlanet(s,list.length);});
     $("uni").classList.add("sys"); $("hdrc").style.backgroundImage="url("+GAL[i].cv+")"; $("hdrt").textContent=GAL[i].name;
     setTitle(); }
-  function exitGalaxies(){ mode="galaxy"; curG=-1; perf=null; $("uni").classList.remove("sys"); $("udet").classList.remove("on"); setTitle(); }
+  function exitGalaxies(){ mode="galaxy"; curG=-1; perf=null; detOpen=false; $("uni").classList.remove("sys"); $("udet").classList.remove("on"); setTitle(); }
   function openDet(s){
-    $("dhero").style.backgroundImage="url("+s.c+")"; $("dti").textContent=s.n; $("dar").textContent=s.a;
-    $("dinfo").textContent=s.len+"  ·  "+s.pl+" plays  ·  the planets keep orbiting behind_";
-    $("dlyr").textContent=LY; $("udet").classList.add("on");
+    $("dti").textContent=s.n; $("dar").textContent=s.a;
+    $("dinfo").textContent=s.len+"  ·  "+s.pl+" plays  ·  tap the universe to close";
+    $("dlyr").textContent=LY; detOpen=true; $("udet").classList.add("on"); setTitle();
     $("dplay").onclick=function(){ $("ti").textContent=s.n; $("disc").style.backgroundImage="url("+s.c+")"; setPlay(true); toast("NOW PLAYING  "+s.n+"_"); }; }
+  function closeDet(){ detOpen=false; $("udet").classList.remove("on"); setTitle(); }
   function openUni(){ $("uni").classList.add("on"); $("uni").classList.remove("listmode","sys"); uniOpen=true; mode="galaxy"; curG=-1; perf=null;
     buildGx(); setTitle(); renderUni(uq); lastT=0; setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
-  function closeUni(){ uniOpen=false; $("udet").classList.remove("on"); $("uni").classList.remove("on"); }
-  $("uback").onclick=function(){ if(mode==="system") exitGalaxies(); else closeUni(); };
-  $("dclose").onclick=function(){ $("udet").classList.remove("on"); };
+  function closeUni(){ uniOpen=false; detOpen=false; $("udet").classList.remove("on"); $("uni").classList.remove("on","det"); }
+  $("uback").onclick=function(){ if(detOpen) closeDet(); else if(mode==="system") exitGalaxies(); else closeUni(); };
   $("usq").oninput=function(){ uq=this.value.toLowerCase(); renderUni(uq); };
   $("utoggle").onclick=function(){ var list=$("uni").classList.toggle("listmode");
     this.textContent=list?"🪐 GALAXY":"▦ LIST"; if(!list) setTimeout(sizeCv,20); else renderUni(uq); };
