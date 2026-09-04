@@ -841,7 +841,11 @@ html.framed .hello{padding-top:16px}
   function frame(t){ if(!uniOpen)return; requestAnimationFrame(frame);
     var dt=Math.min(0.05,((t-lastT)/1000)||0.016); lastT=t; var beat=curBeat;
     if(!CW){ sizeCv(); } drawStars(beat);
-    if(mode==="system" && !detOpen && !aligned) syncPerformer();   /* follow the radio */
+    if(mode==="system" && !detOpen && !aligned){        /* follow the radio */
+      var Rp=RADIO();
+      if(Rp && !Rp.playing()){ perf=null; lastSyncSlug=null; }   /* stopped -> planets go free */
+      else syncPerformer();
+    }
     if(mode==="galaxy") drawGalaxies(beat); else drawSystem(dt,beat); }
   function galaxyAt(mx,my){ for(var i=0;i<gxs.length;i++){ if(Math.hypot(mx-gxs[i].x,my-gxs[i].y)<gxs[i].r*1.05) return i; } return -1; }
   function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.7*best.perfScale+16))?best:null; }
@@ -944,6 +948,10 @@ html.framed .hello{padding-top:16px}
   $("pprev").onclick=function(){ var R=RADIO(); if(R){R.control.prev(); setTimeout(function(){ var s=radioSong(); if(s){curSong=s; if(s.c)$("pdisc").style.backgroundImage="url("+s.c+")"; $("pti").textContent=s.n; $("par").textContent=s.a; markPlayer();} },80);} $("pbig").textContent="❚❚"; };
   $("pnext").onclick=function(){ var R=RADIO(); if(R){R.control.next(); setTimeout(function(){ var s=radioSong(); if(s){curSong=s; if(s.c)$("pdisc").style.backgroundImage="url("+s.c+")"; $("pti").textContent=s.n; $("par").textContent=s.a; markPlayer();} },80);} $("pbig").textContent="❚❚"; };
   window._openPlayer=openPlayer;
+  /* the ONE universe: the player's galaxy button (in the shell) calls this so the
+     site never opens a second, different universe. */
+  window.openUniverse=function(){ openUni(); };
+  if(/#(universe|music|playing|nowplaying)/i.test(location.hash)){ setTimeout(openUni,60); }
 
   /* ABOUT overlay + footer year */
   $("aboutBtn").onclick=function(){ $("about").classList.add("on"); var v=$("abvid"); if(v){try{v.play();}catch(e){}} };

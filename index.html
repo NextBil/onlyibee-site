@@ -932,11 +932,12 @@
   /* spinning shortcuts */
   document.getElementById('buni').onclick=function(){
     if(window.IBEE_BADGES&&window.IBEE_BADGES.markSeenTarget) window.IBEE_BADGES.markSeenTarget('music'); /* clear the new-music dot */
-    /* Both of these open something FULL SIZE over the page, so the track list has
-       to get out of the way — left open it sat behind them, and closing the
-       overlay revealed a radio the visitor never chose to leave open. */
     setTL(false);
-    navigate('console.html#playing');
+    /* ONE universe: if the front page (console-v2) is in the frame, open ITS
+       universe directly so the site never shows a second, different one; else
+       load console-v2 and open the universe there. */
+    try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openUniverse){ fw.openUniverse(); return; } }catch(e){}
+    navigate('console-v2.html#universe');
   };
 
   /* ================= LYRICS OVERLAY =================
