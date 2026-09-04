@@ -62,14 +62,16 @@
 
   /* ---- top bar: ONE nav, styled as the floating console pill (detached rounded
      bar, translucent + blur, soft shadow) — the design used across the site ---- */
-  #bar{display:flex;align-items:center;gap:6px;margin:calc(8px + env(safe-area-inset-top)) 8px 0;
-    padding:6px 8px;background:rgba(9,9,9,.82);border:1px solid var(--border);border-radius:18px;
-    box-shadow:0 8px 30px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.35);
-    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);position:relative;z-index:20}
-  /* padding + matching negative margin gives the lifted, scaled-up selected tab
-     room to grow without the scroll box clipping its top edge */
-  #nav{display:flex;flex:1;gap:5px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;min-width:0;
-    padding:7px 2px;margin:-7px 0}
+  #bar{align-self:center;max-width:calc(100vw - 16px);display:flex;align-items:center;gap:4px;
+    margin:calc(8px + env(safe-area-inset-top)) auto 0;
+    padding:5px 7px;background:rgba(9,9,9,.85);border:1px solid var(--border);border-radius:16px;
+    box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.35);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);position:relative;z-index:20;
+    transition:transform .3s ease,opacity .3s ease}
+  /* tucks away on scroll-down, comes back on scroll-up */
+  #bar.hide{transform:translateY(calc(-100% - 24px));opacity:0;pointer-events:none}
+  /* content-width so the pill stays a cute, compact size (not full width) */
+  #nav{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;min-width:0}
   #nav::-webkit-scrollbar{display:none}
   /* pill look: items are transparent and sit INSIDE the one pill (no individual
      chip boxes), each a spinning voxel icon + tiny label, with a soft glow behind
@@ -90,17 +92,17 @@
   #nav button.on .nvx{animation:navspin 3.4s linear infinite}
   #nav .nvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
   @keyframes navspin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
-  #nav .nvlab{font-size:7px;letter-spacing:.5px}
+  /* icon-only = a compact, cute pill (labels made it too wide). Tooltips + the
+     lit page keep it clear which is which. */
+  #nav .nvlab,#acct .nvlab{display:none}
   /* hover is a MOUSE thing only — on touch it sticks after a tap and repaints */
   @media(hover:hover) and (pointer:fine){
     #nav button:hover .nvx{animation:navspin 2.4s linear infinite}
     #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
   }
-  /* selected tab: lifts like a card (kept), but a soft pill highlight + icon glow
-     rather than a solid block — the label lights acid, the icon spins */
-  #nav button.on{color:var(--acid);background:rgba(182,255,0,.08);border-color:rgba(182,255,0,.28);
-    transform:scale(1.14) translateY(-2px);transform-origin:center bottom;position:relative;z-index:3;
-    box-shadow:0 6px 16px rgba(0,0,0,.45)}
+  /* selected tab: a soft pill highlight + brighter icon glow + acid label and a
+     spinning icon — NO scale-up (that poked above the pill and looked cut off) */
+  #nav button.on{color:var(--acid);background:rgba(182,255,0,.09);border-color:rgba(182,255,0,.30)}
   #nav button.on .nvlab{font-weight:700;color:var(--acid)}
   /* NETWORK is a compact chip carrying its own spinning signal-bars icon, pinned
      in the bar next to the account pill — saves space. Self-contained styling. */
@@ -155,17 +157,15 @@
   /* The list is the radio box opening upward — same hue, same family, a ground
      lifted just off the page black so you can feel you are INSIDE something
      rather than looking at a dropdown over the page. */
+  /* SCROLL: kept deliberately plain, exactly like the old smooth version.
+     The regression was here: transform:translateZ(0) + -webkit-overflow-scrolling:
+     touch on the SAME scroller is a known iOS combo that breaks momentum, and the
+     hue gradient + big blurred shadow re-rastered the layer. Flat opaque bg, no
+     transform, no forced layer, no blur, no transition = smooth native scroll. */
   #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow-y:auto;overflow-x:hidden;
-    -webkit-overflow-scrolling:touch;overscroll-behavior:contain;transform:translateZ(0);
-    /* OPAQUE background: a translucent scroller forces iOS to re-blend the page
-       behind it on every scroll frame — a real cause of the jerky radio scroll.
-       Fully opaque = the list scrolls as its own layer, nothing to re-composite. */
-    background:linear-gradient(180deg,
-      hsl(var(--rh,220),var(--rs,8%),9%), hsl(var(--rh,220),var(--rs,8%),6%));
-    border:1px solid hsla(var(--rh),var(--rs),55%,.5);border-bottom:0;
-    box-shadow:0 -14px 40px hsla(var(--rh),var(--rs),40%,.16),
-               inset 0 1px 0 hsla(var(--rh),var(--rs),65%,.18);
-    display:none;transition:background .6s ease,border-color .6s ease}
+    overscroll-behavior:contain;
+    background:#080809;border:1px solid hsla(var(--rh),var(--rs),55%,.5);border-bottom:0;
+    box-shadow:inset 0 1px 0 hsla(var(--rh),var(--rs),65%,.18);display:none}
   body.radioon #tracklist{border-color:hsla(var(--rh),var(--rs),58%,.9)}
   #tracklist.open{display:block}
   #tracklist .th{font-family:var(--px);font-size:9px;color:hsla(var(--rh),var(--rs),72%,1);
@@ -950,10 +950,8 @@
   function renderAcct(){
     var on=memberSession(); if(on===acctOn) return; acctOn=on;
     acctEl.innerHTML = '<button class="'+(on?'me':'login')+'" id="acctbtn" title="'+(on?'Profile':'Join / log in')+'" aria-label="'+(on?'Profile':'Join')+'">'
-      +'<span class="acctcash" title="Your cashews — listen &amp; play to earn discounts"></span>'
       +'<span class="acctprofile"><span class="dot"></span><span class="nvxwrap acctico"></span><span class="nvlab">'+(on?'PROFILE':'JOIN')+'</span></span></button>';
     try{ document.getElementById('acctbtn').querySelector('.acctico').appendChild(navVox(NAVICO.PROFILE)); }catch(e){}
-    try{ fillCash(); }catch(e){}   /* seed the cashew half so it doesn't blank on rebuild */
     /* profile === room now (one concept, 2026-07-13): the pill opens the member's room/profile */
     document.getElementById('acctbtn').onclick=function(){
       if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('account_open',{destination:on?'room/':'member/'});
@@ -970,18 +968,8 @@
   window.addEventListener('storage',renderAcct);
   setInterval(renderAcct,3000);
 
-  /* live cashew counter, now inside the profile pill — icon + number, no text;
-     ticks while music plays and freezes when it stops (reads IBEE_PERKS, the MINE
-     currency). fillCash() is hoisted so renderAcct() can seed it on rebuild. */
-  function fillCash(){
-    var btn=document.getElementById('acctbtn'); if(!btn) return;
-    var cash=btn.querySelector('.acctcash'); if(!cash) return;
-    var P=window.IBEE_PERKS; if(!P){ btn.classList.remove('hascash'); return; }
-    cash.innerHTML=P.COIN+'<b style="font-weight:400">'+P.points()+'</b>';
-    btn.classList.add('hascash');
-    btn.classList.toggle('cashlive', !!(P.playing&&P.playing()));
-  }
-  fillCash(); setInterval(fillCash, 800);
+  /* (cashew counter removed from the nav — it wasn't useful there; the balance
+     still lives on the profile/room page.) */
 
   /* ---- navigation + a real "back" ------------------------------------------
      Frame navigations DO add browser history entries, but every page used to
@@ -1055,6 +1043,18 @@
        opening SHOP from its cartridge looked like a different place than pressing
        SHOP in the header. Re-sync on the frame's own hash changes. */
     try{ frame.contentWindow.addEventListener('hashchange',sync); }catch(e){}
+    /* Hide the nav pill on scroll-down, bring it back on scroll-up. Content
+       scrolls INSIDE the frame, so listen there (re-bound on every frame load).
+       The radio list (shell-side) is a separate scroll and never hides the nav. */
+    try{
+      var fw=frame.contentWindow, bar=document.getElementById('bar'), last=0;
+      fw.addEventListener('scroll',function(){
+        var y=fw.pageYOffset||(fw.document&&fw.document.documentElement.scrollTop)||0;
+        if(y>80 && y>last+5) bar.classList.add('hide');
+        else if(y<last-5 || y<40) bar.classList.remove('hide');
+        last=y;
+      },{passive:true});
+    }catch(e){}
     /* Framed rooms do not bubble clicks to the shell. Record only the kind of
        control and its destination. The one approved query exception is a public
        product ID, so the owner can see which products get opened; pass codes and
