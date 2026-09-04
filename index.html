@@ -56,7 +56,9 @@
   #nav button{display:flex;flex-direction:column;align-items:center;gap:3px;
     font-family:var(--px);font-size:7px;color:var(--dim);background:#0d0d0d;border:1px solid var(--border);
     border-radius:13px;padding:6px 10px 5px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
-    transition:color .15s,background .15s,border-color .15s,box-shadow .15s}
+    /* animate ONLY transform (compositor) so the card-lift stays smooth even while
+       the page it opens is doing heavy work; colour/shadow snap without a repaint loop */
+    transition:transform .2s cubic-bezier(.2,.9,.25,1.3),color .12s,background .12s,border-color .12s}
   #nav button .nvxwrap{width:26px;height:26px;perspective:150px}
   #nav .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(8deg)}
   /* only the SELECTED tab's icon spins — the rest stay still (lighter on CPU) */
@@ -143,8 +145,10 @@
     display:flex;justify-content:space-between}
   #tracklist .th .x{color:var(--dim);cursor:pointer}
   #tracklist .tr{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;
-    color:var(--dim);font-size:19px;border-bottom:1px solid #141414;
-    content-visibility:auto;contain-intrinsic-size:auto 56px}   /* skip painting off-screen rows -> smooth scroll */
+    color:var(--dim);font-size:19px;border-bottom:1px solid #141414}
+  /* NOTE: no content-visibility here — with variable row heights its fixed size
+     estimate made the scrollbar jump as real heights landed (the "jerk"). ~65
+     light thumbnail rows scroll smoothly natively. */
   /* album art: the record's picture (assets/covers/<song-name>.jpg|png) over a
      hue-colored vinyl placeholder — no picture, no broken icon, just the vinyl */
   #tracklist .tr .cv{width:36px;height:36px;flex:none;border-radius:4px;overflow:hidden;
@@ -865,6 +869,10 @@
     b.appendChild(ic); b.appendChild(lb);
     b.setAttribute('data-nav',it.n);            /* badges.js pins the red dot to SHOP / TV by this */
     b.onclick=function(){ var tg=NAV_TGT[it.n];
+      /* light the tapped tab IMMEDIATELY so the card lifts the instant you touch
+         it — sync() reconciles after the page loads, but MUSIC opens the universe
+         in place (no navigation) so without this its pill would never light. */
+      document.querySelectorAll('#nav button').forEach(function(x){ x.classList.toggle('on', x===b); });
       /* MUSIC opens the ONE universe; if the front page is already framed, open
          it in place instead of reloading it */
       if(it.n==='MUSIC'){ try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openUniverse){ fw.openUniverse(); return; } }catch(e){} }
