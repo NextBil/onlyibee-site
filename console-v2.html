@@ -237,6 +237,9 @@ body:not(.booting) .pressplay{opacity:0}
 .utoggle:hover{border-color:var(--acid)}
 #uni.listmode #unicv,#uni.listmode .uhint{display:none}
 #uni:not(.listmode) #ugrid{display:none}
+/* while typing in the search, results from the whole library overlay the universe */
+#uni.searching #ugrid{display:grid!important;background:rgba(5,5,8,.95);z-index:5}
+#uni.searching .uhint{display:none}
 
 /* ---- network chip + thin strip ---- */
 .chip.net{color:var(--red);text-decoration:none}
@@ -753,13 +756,17 @@ html.framed .hello{padding-top:16px}
     ib:{sub:"SINGLES",yr:"",blurb:"Only Ibee — singles and one-offs across the catalogue."}
   };
   var SONGS=[];   /* built from the real radio in buildLibrary() */
-  function card(s,i){ return '<div class="ucard" data-i="'+i+'"><div class="uc" style="background-image:url('+s.c+')"></div>'
-    +'<div class="un">'+s.n+'</div><div class="ua">'+s.a+'</div></div>'; }
+  function card(s){ return '<div class="ucard" data-slug="'+esc(s.slug)+'"><div class="uc" style="background-image:url('+s.c+')"></div>'
+    +'<div class="un">'+esc(s.n)+'</div><div class="ua">'+esc(s.a)+'</div></div>'; }
   function renderUni(q){ q=(q||"").toLowerCase();
-    var list=SONGS.map(function(s,i){return {s:s,i:i};}).filter(function(o){ return !q || (o.s.n+" "+o.s.a).toLowerCase().indexOf(q)>-1; });
-    $("ugrid").innerHTML = list.length ? list.map(function(o){return card(o.s,o.i);}).join("")
+    /* searches the WHOLE library (every album), not just the open galaxy */
+    var list=SONGS.filter(function(s){ return !q || (s.n+" "+s.a).toLowerCase().indexOf(q)>-1; });
+    $("ugrid").innerHTML = list.length ? list.map(function(s){return card(s);}).join("")
       : '<div style="grid-column:1/-1;color:var(--dim);font-family:var(--px);font-size:9px;padding:40px 0;text-align:center">nothing here_</div>';
-    [].forEach.call($("ugrid").querySelectorAll(".ucard"),function(el){ el.onclick=function(){ openDet(SONGS[+el.getAttribute("data-i")]); }; });
+    [].forEach.call($("ugrid").querySelectorAll(".ucard"),function(el){ el.onclick=function(){
+      var slug=el.getAttribute("data-slug");
+      $("uni").classList.remove("searching"); $("usq").value=""; uq="";
+      window.openSongPage(slug); }; });
   }
 
   /* ===== THE UNIVERSE — the real galaxy-engine model + physics, kept:
@@ -857,7 +864,7 @@ html.framed .hello{padding-top:16px}
       p.cellW=colW-8; p.gcap=Math.min(colW*0.30,rowH*0.32); });   /* cap size so title fits under it */
     setTitle(); }
   function stepPlanet(pl,dt,beat){ var pf=perf, dtms=dt*1000, step=Math.min(3,dtms/16), W=CW,H=CH;
-    pl.phase+=dtms*0.002; pl.drift+=dtms*0.0009; pl.spin+=0.02+beat*(pf===pl?0.14:0.05);
+    pl.phase+=dtms*0.0013; pl.drift+=dtms*0.0006; pl.spin+=0.02+beat*(pf===pl?0.14:0.05);
     pl.perfScale+=((pf===pl?(detOpen?2.3:1.5):1)-pl.perfScale)*Math.min(1,0.05*step);
     if(aligned){ var ge=Math.min(1,0.14*step);
       pl.x+=((pl.gx||W*0.5)-pl.x)*ge + Math.sin(pl.phase*0.5)*0.15*step;
@@ -870,14 +877,15 @@ html.framed .hello{padding-top:16px}
       pl.x+=(tx-pl.x)*Math.min(1,0.09*step); pl.y+=(ty-pl.y)*Math.min(1,0.09*step);
       pl.x=Math.max(26,Math.min(W-26,pl.x)); pl.y=Math.max(80,Math.min(H-30,pl.y)); return; }
     var t2=pl.drift, wAng=Math.sin(t2*0.5)+0.5*Math.sin(t2*1.27+1.7)+0.28*Math.sin(t2*0.21+4);
-    pl.heading+=wAng*0.012*step;
-    var thrust=Math.pow(Math.max(0,Math.sin(pl.phase)),3)*0.5*pl.driftMult;
+    pl.heading+=wAng*0.008*step;
+    /* gentle, alive drift — slow float rather than darting around */
+    var thrust=Math.pow(Math.max(0,Math.sin(pl.phase)),3)*0.22*pl.driftMult;
     pl.vx+=Math.cos(pl.heading)*thrust*step; pl.vy+=Math.sin(pl.heading)*thrust*step;
     var m=70,pad=28,ceil=80,floor=H-30;
-    if(pl.x<pad+m)pl.vx+=(pad+m-pl.x)/m*0.06*step; if(pl.x>W-pad-m)pl.vx-=(pl.x-(W-pad-m))/m*0.06*step;
-    if(pl.y<ceil+m)pl.vy+=(ceil+m-pl.y)/m*0.06*step; if(pl.y>floor-m)pl.vy-=(pl.y-(floor-m))/m*0.06*step;
-    var drag=Math.pow(0.93,step); pl.vx*=drag;pl.vy*=drag;
-    var sp=Math.hypot(pl.vx,pl.vy); if(sp>1.4){pl.vx*=1.4/sp;pl.vy*=1.4/sp;}
+    if(pl.x<pad+m)pl.vx+=(pad+m-pl.x)/m*0.045*step; if(pl.x>W-pad-m)pl.vx-=(pl.x-(W-pad-m))/m*0.045*step;
+    if(pl.y<ceil+m)pl.vy+=(ceil+m-pl.y)/m*0.045*step; if(pl.y>floor-m)pl.vy-=(pl.y-(floor-m))/m*0.045*step;
+    var drag=Math.pow(0.94,step); pl.vx*=drag;pl.vy*=drag;
+    var sp=Math.hypot(pl.vx,pl.vy); if(sp>0.6){pl.vx*=0.6/sp;pl.vy*=0.6/sp;}
     pl.x+=pl.vx*step;pl.y+=pl.vy*step;
     if(pl.x<pad){pl.x=pad;pl.vx*=0.4} if(pl.x>W-pad){pl.x=W-pad;pl.vx*=0.4}
     if(pl.y<ceil){pl.y=ceil;pl.vy*=0.4} if(pl.y>floor){pl.y=floor;pl.vy*=0.4}
@@ -925,11 +933,7 @@ html.framed .hello{padding-top:16px}
   function frame(t){ if(!uniOpen)return; requestAnimationFrame(frame);
     var dt=Math.min(0.05,((t-lastT)/1000)||0.016); lastT=t; var beat=curBeat;
     if(!CW){ sizeCv(); } drawStars(beat);
-    if(mode==="system" && !detOpen && !aligned){        /* follow the radio */
-      var Rp=RADIO();
-      if(Rp && !Rp.playing()){ perf=null; lastSyncSlug=null; }   /* stopped -> planets go free */
-      else syncPerformer();
-    }
+    if(mode==="system" && !detOpen && !aligned) syncPerformer();  /* follow the radio (free if this galaxy isn't the one playing) */
     if(mode==="galaxy") drawGalaxies(beat); else drawSystem(dt,beat); }
   function galaxyAt(mx,my){ for(var i=0;i<gxs.length;i++){ if(Math.hypot(mx-gxs[i].x,my-gxs[i].y)<gxs[i].r*1.05) return i; } return -1; }
   function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.7*best.perfScale+16))?best:null; }
@@ -958,9 +962,12 @@ html.framed .hello{padding-top:16px}
   function planetBySlug(slug){ for(var i=0;i<planets.length;i++){ if(planets[i].s.slug===slug) return planets[i]; } return null; }
   var lastSyncSlug=null;
   function syncPerformer(force){ if(mode!=="system") return; var R=RADIO(); if(!R) return;
-    var slug=R.slug(); if(!slug){ return; }
+    if(detOpen) return;                    /* a song page is open — leave its planet */
+    var slug=R.playing()?R.slug():null;
     if(!force && slug===lastSyncSlug) return; lastSyncSlug=slug;
-    var pl=planetBySlug(slug); if(pl && pl!==perf){ aligned=false; perf=pl; assignOrbits(); } }
+    var pl=slug?planetBySlug(slug):null;
+    if(pl){ if(pl!==perf){ aligned=false; perf=pl; assignOrbits(); } }   /* this galaxy's song is playing -> it performs */
+    else if(perf){ perf=null; }            /* nothing from THIS galaxy is playing -> planets go free */ }
   function enterGalaxy(i){ mode="system"; curG=i; perf=null; detOpen=false; aligned=false; lastSyncSlug=null; $("udet").classList.remove("on");
     var list=SONGS.filter(function(s){return s.g===i;});
     planets=list.map(function(s){return makePlanet(s,list.length);});
@@ -1005,18 +1012,17 @@ html.framed .hello{padding-top:16px}
     $("ualbum").classList.add("on"); }
   function closeAlbum(){ $("ualbum").classList.remove("on"); }
   function openUni(){ if(!SONGS.length) buildLibrary();
-    $("uni").classList.add("on"); $("uni").classList.remove("listmode","sys"); uniOpen=true; lastT=0;
-    buildGx();
-    var cur=radioSong();
-    if(cur){ enterGalaxy(cur.g); }                 /* jump into the playing track's galaxy, centred */
-    else { mode="galaxy"; curG=-1; perf=null; setTitle(); }
-    renderUni(uq); setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
+    $("uni").classList.add("on"); $("uni").classList.remove("listmode","sys","searching"); uniOpen=true; lastT=0;
+    /* land on the album / galaxy picker — the choice of worlds */
+    mode="galaxy"; curG=-1; perf=null; buildGx(); setTitle(); renderUni(uq);
+    setTimeout(function(){ sizeCv(); requestAnimationFrame(frame); },30); }
   function closeUni(){ uniOpen=false; detOpen=false; klStop(); $("udet").classList.remove("on"); $("uni").classList.remove("on","det"); }
   $("uback").onclick=function(){ if(detOpen) closeDet(); else if(mode==="system") exitGalaxies(); else closeUni(); };
   $("dx").onclick=function(e){ e.stopPropagation(); closeDet(); };
   $("hdrc").onclick=function(){ if(curG>=0) openAlbum(curG); };
   $("albclose").onclick=closeAlbum; $("ualbum").onclick=function(e){ if(e.target===this) closeAlbum(); };
-  $("usq").oninput=function(){ uq=this.value.toLowerCase(); renderUni(uq); };
+  $("usq").oninput=function(){ uq=this.value.toLowerCase(); renderUni(uq);
+    $("uni").classList.toggle("searching", !!uq); };   /* typing surfaces all-album results over the universe */
   $("utoggle").onclick=function(){ var list=$("uni").classList.toggle("listmode");
     this.textContent=list?"🪐 GALAXY":"▦ LIST"; if(!list) setTimeout(sizeCv,20); else renderUni(uq); };
 

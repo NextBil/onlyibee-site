@@ -117,7 +117,8 @@
     display:flex;justify-content:space-between}
   #tracklist .th .x{color:var(--dim);cursor:pointer}
   #tracklist .tr{display:flex;align-items:center;gap:12px;padding:9px 14px;cursor:pointer;
-    color:var(--dim);font-size:19px;border-bottom:1px solid #141414}
+    color:var(--dim);font-size:19px;border-bottom:1px solid #141414;
+    content-visibility:auto;contain-intrinsic-size:auto 56px}   /* skip painting off-screen rows -> smooth scroll */
   /* album art: the record's picture (assets/covers/<song-name>.jpg|png) over a
      hue-colored vinyl placeholder — no picture, no broken icon, just the vinyl */
   #tracklist .tr .cv{width:36px;height:36px;flex:none;border-radius:4px;overflow:hidden;
