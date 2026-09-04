@@ -77,19 +77,24 @@
     #bar{gap:4px;padding:7px 6px} #nav{gap:4px}
     #nav button{padding:5px 7px 4px;border-radius:11px}
     #nav button .nvxwrap{width:22px;height:22px} #nav .nvlab{font-size:6px} }
-  /* ---- cashew counter: purple icon + live number, no text, by the profile ---- */
-  #cashewchip{flex:none;align-self:center;display:none;align-items:center;gap:5px;
-    font-family:var(--px);font-size:9px;color:#c79bff;border:1px solid #2e2148;border-radius:12px;
-    padding:8px 10px;background:#0d0a12;box-shadow:0 0 12px rgba(176,107,255,.16);white-space:nowrap}
-  #cashewchip.on{display:inline-flex}
-  #cashewchip .cashew{width:16px;height:16px}
-  #cashewchip.live{animation:cashewpulse 1s steps(1) infinite}
-  @keyframes cashewpulse{50%{border-color:#b06bff}}
-  /* ---- account pill: a rotating profile icon, matching the nav chips ---- */
+  /* ---- account pill: ONE box holding the live cashew count AND the profile
+     icon — cashews on the left, a purple divider, the rotating profile on the
+     right. The cashew number ticks live (no text) and the pill pulses while
+     music plays. ---- */
   #acct{flex:none;align-self:center}
   #acct button{position:relative;font-family:var(--px);font-size:7px;letter-spacing:.5px;cursor:pointer;white-space:nowrap;
-    display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px 5px;border-radius:13px;
+    display:flex;flex-direction:row;align-items:center;gap:8px;padding:6px 11px 5px;border-radius:14px;
     border:1px solid var(--border);background:#0d0d0d;color:var(--dim)}
+  /* the cashew half */
+  #acct .acctcash{display:none;align-items:center;gap:5px;font-size:9px;color:#c79bff;
+    padding-right:8px;border-right:1px solid #2e2148}
+  #acct button.hascash .acctcash{display:inline-flex}
+  #acct .acctcash .cashew{width:16px;height:16px}
+  #acct button.cashlive{border-color:#3a2a58;box-shadow:0 0 12px rgba(176,107,255,.22)}
+  #acct button.cashlive .acctcash{animation:cashewpulse 1s steps(1) infinite}
+  @keyframes cashewpulse{50%{opacity:.5}}
+  /* the profile half (icon over label, as before) */
+  #acct .acctprofile{display:flex;flex-direction:column;align-items:center;gap:3px}
   #acct .nvxwrap{width:26px;height:26px;perspective:150px}
   #acct .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(8deg)}
   #acct .nvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
@@ -97,9 +102,10 @@
   #bar #acct button.login{color:var(--gold);border-color:#3a3200}
   #acct button.me{color:#5ad17a}
   #acct .dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:transparent}
-  @media(max-width:560px){ #acct .nvlab{display:none} #acct button{padding:6px 7px} }
+  @media(max-width:560px){ #acct .nvlab{display:none} #acct button{padding:6px 8px;gap:6px} #acct .acctcash{padding-right:6px;gap:4px} }
   #acct .dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 6px var(--acid);flex:none}
   #acct svg{width:11px;height:11px;flex:none}
+  #acct .acctcash .cashew{width:16px;height:16px}
 
   /* ---- content ---- */
   #stage{position:relative;flex:1;overflow:hidden}
@@ -183,6 +189,11 @@
   #tracklist .tr .cv{transition:border-radius .35s,border-color .35s,box-shadow .35s}
   #tracklist .tr.now .cv{border-radius:50%;border:2px solid var(--acid);
     box-shadow:0 0 0 2px #0a0a0a,0 0 12px rgba(182,255,0,.4);animation:pcvspin 3.6s linear infinite}
+  /* while the finger is actually dragging the list, hand the whole surface to the
+     compositor: kill row transitions and the now-playing spin so nothing repaints
+     mid-scroll. Everything resumes the instant the scroll settles. */
+  #tracklist.scrolling .tr{transition:none}
+  #tracklist.scrolling .tr .cv,#tracklist.scrolling .tr.now .cv{animation:none;transition:none}
   #tracklist .tr.now .cv::after{content:"";position:absolute;inset:41% 41%;border-radius:50%;
     background:#0a0a0a;border:1px solid #2a2a2a;z-index:2}
   .tl-tile .fv{position:absolute;right:5px;bottom:24px;z-index:3;font-size:16px;line-height:1;
@@ -519,7 +530,8 @@
 
   /* ---- ALBUM SHELF at the top of the radio list ---- */
   #tlalbums{display:flex;gap:9px;overflow-x:auto;overflow-y:hidden;padding:9px 14px 10px;
-    border-bottom:1px solid hsla(var(--rh),var(--rs),55%,.28);scrollbar-width:none}
+    border-bottom:1px solid hsla(var(--rh),var(--rs),55%,.28);scrollbar-width:none;
+    touch-action:pan-x}   /* let a vertical drag pass through to the list's scroll */
   #tlalbums::-webkit-scrollbar{display:none}
   #tlalbums:empty{display:none}
   /* 68px: still clearly bigger than the 34px covers in the rows below, but the
@@ -672,7 +684,7 @@
   <p><a href="console.html">Enter the console</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE clothing</a></p>
 </div>
 <div id="app">
-  <div id="bar"><div id="nav"></div><span id="cashewchip" title="Your cashews — listen &amp; play to earn discounts" aria-label="Cashews"></span><div id="acct"></div></div>
+  <div id="bar"><div id="nav"></div><div id="acct"></div></div>
 
   <div id="stage">
     <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>
@@ -883,8 +895,10 @@
   function renderAcct(){
     var on=memberSession(); if(on===acctOn) return; acctOn=on;
     acctEl.innerHTML = '<button class="'+(on?'me':'login')+'" id="acctbtn" title="'+(on?'Profile':'Join / log in')+'" aria-label="'+(on?'Profile':'Join')+'">'
-      +'<span class="dot"></span><span class="nvxwrap acctico"></span><span class="nvlab">'+(on?'PROFILE':'JOIN')+'</span></button>';
+      +'<span class="acctcash" title="Your cashews — listen &amp; play to earn discounts"></span>'
+      +'<span class="acctprofile"><span class="dot"></span><span class="nvxwrap acctico"></span><span class="nvlab">'+(on?'PROFILE':'JOIN')+'</span></span></button>';
     try{ document.getElementById('acctbtn').querySelector('.acctico').appendChild(navVox(NAVICO.PROFILE)); }catch(e){}
+    try{ fillCash(); }catch(e){}   /* seed the cashew half so it doesn't blank on rebuild */
     /* profile === room now (one concept, 2026-07-13): the pill opens the member's room/profile */
     document.getElementById('acctbtn').onclick=function(){
       if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.event('account_open',{destination:on?'room/':'member/'});
@@ -901,17 +915,18 @@
   window.addEventListener('storage',renderAcct);
   setInterval(renderAcct,3000);
 
-  /* live cashew counter in the header — icon + number, no text; ticks while music
-     plays and stops when it stops (reads the MINE currency, IBEE_PERKS). */
-  (function(){
-    var chip=document.getElementById('cashewchip'); if(!chip) return;
-    function tick(){ var P=window.IBEE_PERKS; if(!P) return;
-      chip.classList.add('on');
-      chip.innerHTML=P.COIN+'<b style="font-weight:400">'+P.points()+'</b>';
-      chip.classList.toggle('live', !!(P.playing&&P.playing()));
-    }
-    tick(); setInterval(tick, 800);
-  })();
+  /* live cashew counter, now inside the profile pill — icon + number, no text;
+     ticks while music plays and freezes when it stops (reads IBEE_PERKS, the MINE
+     currency). fillCash() is hoisted so renderAcct() can seed it on rebuild. */
+  function fillCash(){
+    var btn=document.getElementById('acctbtn'); if(!btn) return;
+    var cash=btn.querySelector('.acctcash'); if(!cash) return;
+    var P=window.IBEE_PERKS; if(!P){ btn.classList.remove('hascash'); return; }
+    cash.innerHTML=P.COIN+'<b style="font-weight:400">'+P.points()+'</b>';
+    btn.classList.add('hascash');
+    btn.classList.toggle('cashlive', !!(P.playing&&P.playing()));
+  }
+  fillCash(); setInterval(fillCash, 800);
 
   /* ---- navigation + a real "back" ------------------------------------------
      Frame navigations DO add browser history entries, but every page used to
@@ -1582,9 +1597,18 @@
     try{var c=r.audio.currentTime||0,d=r.audio.duration||0;
       fill.style.width=(d?c/d*100:0)+'%'; timeEl.textContent=fmt(c)+' / '+fmt(d);}catch(e){}
     updateRoomband();
-    if(tl.classList.contains('open'))markNow();
+    if(tl.classList.contains('open')&&!tl.classList.contains('scrolling'))markNow();
     if(lyrOpen){ lyrRefresh(); lyrSync(); }
   },350);
+  /* momentum scrolling on phones stays smooth only if nothing writes to the list
+     mid-drag: flag the list 'scrolling' while the finger moves, clear it 180ms
+     after it settles (then markNow() catches the row back up). */
+  var tlScrollT=0;
+  tl.addEventListener('scroll',function(){
+    if(!tl.classList.contains('scrolling'))tl.classList.add('scrolling');
+    clearTimeout(tlScrollT);
+    tlScrollT=setTimeout(function(){ tl.classList.remove('scrolling'); if(tl.classList.contains('open'))markNow(); },180);
+  },{passive:true});
   /* karaoke needs frame-accurate timing: while the overlay is open, sync every
      animation frame (the sweep + line flips land the instant their time hits) */
   (function lyrTick(){ requestAnimationFrame(lyrTick); if(lyrOpen) lyrSync(); })();
