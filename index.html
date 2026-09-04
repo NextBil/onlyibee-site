@@ -45,13 +45,17 @@
   #app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1}
 
   /* ---- top bar: nav fills the width ---- */
-  #bar{display:flex;background:#000;border-bottom:2px solid var(--border);position:relative;z-index:20}
-  #nav{display:flex;flex:1;overflow-x:auto;scrollbar-width:none;min-width:0}
+  #bar{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#0b0b0b,#050505);
+    border-bottom:2px solid var(--border);position:relative;z-index:20;padding:8px 8px}
+  #nav{display:flex;flex:1;gap:5px;overflow-x:auto;scrollbar-width:none;min-width:0}
   #nav::-webkit-scrollbar{display:none}
-  #nav button{font-family:var(--px);font-size:9px;color:var(--dim);background:transparent;border:0;
-    border-right:1px solid #161616;padding:13px 11px;cursor:pointer;white-space:nowrap;flex:1 0 auto}
-  #nav button:hover{color:var(--ink)}
-  #nav button.on{color:#000;background:var(--acid)}
+  /* console-v2 look: rounded glowing chips instead of a hard segmented bar */
+  #nav button{font-family:var(--px);font-size:9px;color:var(--dim);background:#0d0d0d;border:1px solid var(--border);
+    border-radius:11px;padding:11px 13px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
+    transition:color .15s,background .15s,border-color .15s,box-shadow .15s}
+  #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
+  #nav button.on{color:#07120a;background:var(--acid);border-color:var(--acid);
+    box-shadow:0 0 16px rgba(182,255,0,.4)}
   /* ---- account pill: pinned outside the scrolling nav — always reachable, anywhere on the site ---- */
   #acct{flex:none;border-left:1px solid var(--border)}
   #acct button{font-family:var(--px);font-size:9px;padding:13px 12px;cursor:pointer;white-space:nowrap;
@@ -244,10 +248,18 @@
     letter-spacing:.5px}
   @media(max-width:520px){ .pl-top .hint{display:none} }
   /* the now-playing album cover: real art over a hue-vinyl placeholder (never a broken icon) */
-  #pcover{width:38px;height:38px;flex:none;border-radius:5px;overflow:hidden;border:1px solid var(--border);
-    position:relative;background:radial-gradient(circle,#333 0 20%,#070707 22% 28%,#141414 30% 100%);cursor:pointer}
+  /* now-playing cover = a spinning vinyl disc, like the music-universe mini player.
+     Circular, real art clipped into it, a punched centre hole; spins while a record
+     plays (pure CSS transform — no JS, no lag). */
+  #pcover{width:42px;height:42px;flex:none;border-radius:50%;overflow:hidden;border:2px solid #2a2a2a;
+    position:relative;background:radial-gradient(circle,#333 0 20%,#070707 22% 28%,#141414 30% 100%);cursor:pointer;
+    box-shadow:0 0 0 3px #0a0a0a,0 0 14px hsla(var(--rh),var(--rs),55%,.25)}
   #pcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
-  #pcover:hover{border-color:hsla(var(--rh),var(--rs),60%,.9);box-shadow:0 0 12px hsla(var(--rh),var(--rs),55%,.4)}
+  #pcover::after{content:"";position:absolute;inset:41% 41%;border-radius:50%;background:#0a0a0a;
+    border:1px solid #2a2a2a;z-index:2}
+  #pcover:hover{border-color:hsla(var(--rh),var(--rs),60%,.9);box-shadow:0 0 0 3px #0a0a0a,0 0 16px hsla(var(--rh),var(--rs),55%,.5)}
+  body.radioon #pcover{animation:pcvspin 3.6s linear infinite}
+  @keyframes pcvspin{to{transform:rotate(360deg)}}
   #songinfo{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72)}
   #songinfo.on{display:flex}#songinfocard{position:relative;width:min(320px,88vw);max-height:74dvh;overflow:auto;background:#0a0a0a;border:2px solid var(--border);padding:14px;box-shadow:0 18px 55px rgba(0,0,0,.78)}
   #songinfoclose{position:absolute;right:9px;top:9px;background:#111;border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:9px;padding:6px 8px;cursor:pointer}#songinfoclose:hover{color:var(--red);border-color:var(--red)}
@@ -273,6 +285,14 @@
   .pl-row button.main{background:var(--acid);color:#000;border-color:var(--acid)}
   .pl-row button.tgl svg{width:19px;height:19px}
   .pl-row button.tgl.on{background:var(--acid);color:#000;border-color:var(--acid)}
+  /* console-v2 look: the collapsed bar stays clean — just the transport. The extra
+     controls (lyrics · shuffle · share · universe) fold in when the radio LIST is
+     open. Core prev/play/next are always there. */
+  #blyr,#rshuf,#bshare,#buni{transition:opacity .2s,width .2s,margin .2s}
+  #bottom:not(.listopen) #blyr,
+  #bottom:not(.listopen) #rshuf,
+  #bottom:not(.listopen) #bshare,
+  #bottom:not(.listopen) #buni{display:none}
   /* the cool rotating icons */
   .ricon{perspective:120px}
   .ricon svg{width:24px;height:24px}
@@ -351,13 +371,30 @@
   #lyr .songbox button.now{color:#000;background:var(--acid);border-color:var(--acid)}
 
   /* ---- PRESS START intro (just enters — no music autostart) ---- */
-  #enter{position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:26px;cursor:pointer;text-align:center;padding:24px;font-family:var(--px)}
+  #enter{position:fixed;inset:0;z-index:99999;background:radial-gradient(120% 90% at 50% 40%,#0b0c0e,#000 72%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;cursor:pointer;
+    text-align:center;padding:24px 24px 150px;font-family:var(--px)}
+  /* ONLYIBEE brand — kept exactly as the original boot */
   #enter .g{color:var(--acid);font-size:clamp(24px,8vw,48px);letter-spacing:2px;text-shadow:0 0 22px rgba(182,255,0,.55)}
   #enter .g .r{color:var(--red)}
-  #enter .t{color:var(--dim);font-size:11px;line-height:1.8}
-  #enter .s{color:var(--ink);font-size:13px;animation:bk 1.1s steps(1) infinite}
-  @keyframes bk{50%{opacity:0}}
+  #enter .s{color:var(--dim);font-size:11px;letter-spacing:1px;animation:bk 1.4s steps(1) infinite}
+  @keyframes bk{50%{opacity:.3}}
+  /* the one lit thing: the radio player's PLAY button, pinned at the bottom where
+     the player lives — press it to start the music and the site */
+  /* JS pins this exactly over the player's ► button (same size + position), so the
+     one lit thing on the dark boot IS the player's play button — press it and the
+     site wakes around it. Fallback position (bottom-centre) if JS can't measure. */
+  #enterplay{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translateX(-50%);
+    width:44px;height:44px;border-radius:50%;border:1px solid var(--acid);
+    background:var(--acid);color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 30px rgba(182,255,0,.6);animation:enterpulse 1.6s ease-in-out infinite;transition:transform .12s}
+  #enterplay.placed{transform:translate(-50%,-50%)}
+  #enterplay span{font-size:15px;margin-left:2px}
+  #enterplay:hover{transform:translateX(-50%) scale(1.08)}
+  #enterplay.placed:hover{transform:translate(-50%,-50%) scale(1.08)}
+  #enterplay:active{transform:translateX(-50%) scale(.95)}
+  #enterplay.placed:active{transform:translate(-50%,-50%) scale(.95)}
+  @keyframes enterpulse{0%,100%{box-shadow:0 0 22px rgba(182,255,0,.5)}50%{box-shadow:0 0 46px rgba(182,255,0,.85)}}
 
 
   /* ---- ALBUM SHELF at the top of the radio list ---- */
@@ -613,11 +650,11 @@
   <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocopy"></div><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div></section></div>
 </div>
 
-<!-- PRESS START intro overlay -->
+<!-- PRESS START intro: dark, only the play button lit — it starts the music AND the site -->
 <div id="enter">
   <div class="g">ONLY<span class="r">IBEE</span></div>
-  <div class="t">console for art &amp; discovery_</div>
-  <div class="s">▶ PRESS START</div>
+  <button id="enterplay" aria-label="Press play to start"><span>▶</span></button>
+  <div class="s">press play_</div>
 </div>
 
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
@@ -1404,10 +1441,23 @@
     })();
   })();
 
-  /* ---- PRESS START intro: just dismiss, do NOT start music ---- */
+  /* ---- PRESS START intro: the play button starts the music AND enters the site.
+     This is the one deliberate autostart — a real tap/keypress, so browsers allow it. ---- */
   var enter=document.getElementById('enter');
   if(enter){
-    var go=function(){enter.style.display='none';window.removeEventListener('keydown',kk);};
+    /* pin the boot play button exactly over the real player ► button */
+    var ep=document.getElementById('enterplay');
+    var placeEnter=function(){ var rp=document.getElementById('rplay'); if(!rp||!ep)return;
+      var r=rp.getBoundingClientRect(); if(!r.width)return;
+      var d=Math.max(r.width,r.height);
+      ep.style.left=(r.left+r.width/2)+'px'; ep.style.top=(r.top+r.height/2)+'px'; ep.style.bottom='auto';
+      ep.style.width=d+'px'; ep.style.height=d+'px'; ep.classList.add('placed'); };
+    placeEnter(); setTimeout(placeEnter,120); setTimeout(placeEnter,500);
+    window.addEventListener('resize',placeEnter);
+    var started=false;
+    var go=function(){ if(started)return; started=true;
+      try{ if(window.IBEERADIO&&window.IBEERADIO.control) window.IBEERADIO.control.play(); }catch(e){}
+      enter.style.display='none'; window.removeEventListener('keydown',kk); };
     var kk=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();}};
     enter.addEventListener('click',go);
     window.addEventListener('keydown',kk);

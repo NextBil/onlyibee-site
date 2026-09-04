@@ -361,7 +361,6 @@ html.framed .hello{padding-top:16px}
   <span class="nm"><b>96</b> MEMBERS</span><span class="nm"><b>11.7k</b> PLAYS</span>
   <span class="ng">OPEN ↗</span>
 </a>
-<div class="hello"><h1>GOOD EVENING_</h1></div>
 
 <main class="grid" id="grid">
 
@@ -851,7 +850,7 @@ html.framed .hello{padding-top:16px}
     var pl=planetAt(mx,my);
     if(detOpen){ if(pl&&pl!==perf) focusPlanet(pl); else closeDet(); return; }
     if(pl){ focusPlanet(pl); }
-    else { alignGrid(); toast("ALIGNED_"); } });
+    else { if(aligned){ aligned=false; toast("FREE_"); setTitle(); } else { alignGrid(); toast("ALIGNED_"); } } });
   cv.addEventListener("mousemove",function(e){ var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
     if(mode==="galaxy"){ hoverG=galaxyAt(mx,my); cv.style.cursor=hoverG>=0?"pointer":"default"; }
     else { hoverP=planetAt(mx,my); cv.style.cursor=hoverP?"pointer":"default"; } });
@@ -860,7 +859,7 @@ html.framed .hello{padding-top:16px}
   function setTitle(){ if(utitle) utitle.textContent = mode==="system"?GAL[curG].name:"THE UNIVERSE";
     if(uhint) uhint.textContent = mode!=="system" ? "a galaxy per record · tap one to enter"
       : detOpen ? "tap the universe to close  ·  tap another record to switch"
-      : aligned ? "aligned_  ·  tap a record to zoom in  ·  ◀ galaxies"
+      : aligned ? "aligned_  ·  tap the void to free  ·  tap a record to zoom in"
       : "tap a record to zoom in  ·  tap the void to align  ·  ◀ galaxies";
     $("uni").classList.toggle("det",detOpen);
     $("uback").textContent = mode==="system"?"◀ GALAXIES":"◀"; }
@@ -955,6 +954,28 @@ html.framed .hello{padding-top:16px}
       setTimeout(function(){ t.style.backgroundImage="url("+url(b)+")"; t.style.opacity="1"; },420);
     }, 2600);
   })();
+
+  /* MUSIC + ROOMS previews cycle through their projects every few seconds */
+  function rotatePeek(sel, urls, every, offset){ var box=document.querySelector(sel); if(!box) return;
+    var peek=box.querySelector('.peek'); if(!peek) return;
+    urls.forEach(function(u){ var im=new Image(); im.src=u; });   // warm cache
+    peek.style.transition="opacity .5s"; var i=0;
+    setInterval(function(){ if(document.body.classList.contains("booting")) return;
+      i=(i+1)%urls.length; peek.style.opacity=".25";
+      setTimeout(function(){ peek.style.backgroundImage="url("+urls[i]+")"; peek.style.opacity="1"; },500);
+    }, every);
+  }
+  rotatePeek('.box.music', [
+    "https://onlyibee.com/assets/img/nouveaux-punk.jpg",
+    "https://onlyibee.com/assets/img/20mzs-album.jpg",
+    "https://onlyibee.com/assets/img/np-cover.jpg"
+  ], 3400);
+  rotatePeek('.box.rooms', [
+    "https://onlyibee.com/arcade/covers/midnight-transit.png",
+    "https://onlyibee.com/arcade/covers/terrarium.png",
+    "https://onlyibee.com/arcade/covers/aqua-bass.png",
+    "https://onlyibee.com/arcade/covers/lofi-bedroom.png"
+  ], 3800);
 })();
 </script>
 </body>
