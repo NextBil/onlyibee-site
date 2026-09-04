@@ -350,6 +350,29 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
     var ld={"@context":"https://schema.org","@type":"Product","name":p.n,
       "brand":{"@type":"Brand","name":"ONLY IBEE"},"sku":p.id,"description":desc,"url":purl};
     if(absImgs.length) ld.image=absImgs;
+    /* ---- mine the details that are already in the product's own name + desc:
+       colour, material, size, and which ICS character it carries. Google reads
+       these Product fields for Shopping and Images (e.g. "white tshirt", "cotton",
+       "cute African character"). Everything below is only added when actually found. */
+    var hay=((p.n||"")+" "+(p.desc||"")).toLowerCase();
+    var COLORS=["white","black","grey","gray","pink","red","blue","green","orange","yellow","purple","brown","beige","cream","navy","gold","silver"];
+    var found=COLORS.filter(function(c){ return new RegExp("\\b"+c+"\\b").test(hay); });
+    if(found.length) ld.color=found.join(", ").replace(/gray/g,"grey");
+    var MATS=[["cotton","Cotton"],["denim","Denim"],["wool","Wool"],["leather","Leather"],["fleece","Fleece"],["polyester","Polyester"],["nylon","Nylon"],["linen","Linen"]];
+    var mat=MATS.filter(function(m){ return hay.indexOf(m[0])>=0; }).map(function(m){return m[1];});
+    if(mat.length) ld.material=mat.join(", ");
+    var sz=(p.desc||"").match(/\bsize\s*(XXL|XXS|XL|XS|[SML])\b/i)||(p.desc||"").match(/\b(XXL|XXS|XL|XS|[SML])\b/);
+    if(sz) ld.size=sz[1].toUpperCase();
+    /* garment type + ICS character, from the name/desc */
+    var TYPES=[["t-shirt","T-Shirt"],["tshirt","T-Shirt"],["tee","T-Shirt"],["long sleeve","Long Sleeve"],["hoodie","Hoodie"],["sweater","Sweater"],["jacket","Jacket"],["cap","Cap"],["shirt","Shirt"]];
+    var gt=TYPES.filter(function(t){ return hay.indexOf(t[0])>=0; })[0];
+    if(gt) ld.category="Clothing / "+gt[1];
+    var CHARS={beebee:"Beebee",mimi:"Mimi",goli:"Goli",nannan:"Nannan",swordy:"Swordy",sworda:"Sworda",abla:"Abla",queen:"Abla"};
+    var ck=Object.keys(CHARS).filter(function(c){ return hay.indexOf(c)>=0; })[0];
+    var props=[];
+    if(ck) props.push({"@type":"PropertyValue","name":"ICS character","value":CHARS[ck]+" (a cute African character from Ibee's Chess Set, Baoulé-inspired, Ivory Coast)"});
+    props.push({"@type":"PropertyValue","name":"Made","value":"Hand-made, one of one"});
+    ld.additionalProperty=props;
     if(p.price!=null) ld.offers={"@type":"Offer","priceCurrency":cur,"price":String(p.price),
       "availability":out?"https://schema.org/SoldOut":"https://schema.org/InStock",
       "itemCondition":"https://schema.org/NewCondition","url":purl};

@@ -480,12 +480,15 @@ html.framed .hello{padding-top:16px}
       <a class="en">ENTER ▶</a></div>
   </button>
 
-  <button class="box ics" data-ico="ics" style="--img:url(https://onlyibee.com/assets/img/ics-all-set.jpg)">
-    <div class="peek"></div>
+  <button class="box ics" data-ico="ics">
+    <video class="tvvid" muted loop playsinline autoplay preload="auto"
+      poster="https://onlyibee.com/assets/ics-banner-poster.jpg"
+      src="https://onlyibee.com/assets/ics-banner.mp4"></video>
+    <div class="peek" style="background:none"></div>
     <span class="ico"></span>
     <span class="nm">ICS</span><span class="cnt">08 ▸</span>
     <div class="info"><div class="tg">THE CREW · PROJECT 03</div>
-      <div class="ds">meet the characters. play them as chess.</div>
+      <div class="ds">meet the characters.</div>
       <a class="en">ENTER ▶</a></div>
   </button>
 
@@ -640,7 +643,7 @@ html.framed .hello{padding-top:16px}
      we hide our own copies and let its skeleton wrap us — the radio logic is the
      shell's, untouched. Standalone, we show our own chrome. */
   if(framed()) document.documentElement.classList.add("framed");
-  var DEST={rooms:"arcade/",shop:"console.html#shop",ics:"chess/",tv:"tv/",you:"member/"};
+  var DEST={rooms:"arcade/",shop:"console.html#shop",ics:"console.html#ics",tv:"tv/",you:"member/"};
   function navTo(rel){ rel=rel.replace(/^\//,"");
     try{ if(framed()&&window.top.IBEE_SHELL&&window.top.IBEE_SHELL.navigate){ window.top.IBEE_SHELL.navigate(rel); return; } }catch(e){}
     location.href="/"+rel; }
