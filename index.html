@@ -60,22 +60,31 @@
 
   #app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1}
 
-  /* ---- top bar: nav fills the width ---- */
-  #bar{display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,#0b0b0b,#050505);
-    border-bottom:2px solid var(--border);position:relative;z-index:20;padding:8px 8px}
+  /* ---- top bar: ONE nav, styled as the floating console pill (detached rounded
+     bar, translucent + blur, soft shadow) — the design used across the site ---- */
+  #bar{display:flex;align-items:center;gap:6px;margin:calc(8px + env(safe-area-inset-top)) 8px 0;
+    padding:6px 8px;background:rgba(9,9,9,.82);border:1px solid var(--border);border-radius:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.35);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);position:relative;z-index:20}
   /* padding + matching negative margin gives the lifted, scaled-up selected tab
      room to grow without the scroll box clipping its top edge */
   #nav{display:flex;flex:1;gap:5px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;min-width:0;
     padding:7px 2px;margin:-7px 0}
   #nav::-webkit-scrollbar{display:none}
-  /* console-v2 look: rounded chips, each carrying a spinning voxel icon + tiny label */
-  #nav button{display:flex;flex-direction:column;align-items:center;gap:3px;
-    font-family:var(--px);font-size:7px;color:var(--dim);background:#0d0d0d;border:1px solid var(--border);
-    border-radius:13px;padding:6px 10px 5px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
+  /* pill look: items are transparent and sit INSIDE the one pill (no individual
+     chip boxes), each a spinning voxel icon + tiny label, with a soft glow behind
+     the icon — the console-nav design, now the single site nav */
+  #nav button{display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-family:var(--px);font-size:7px;color:var(--dim);background:transparent;border:1px solid transparent;
+    border-radius:12px;padding:6px 9px 5px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
     /* animate ONLY transform (compositor) so the card-lift stays smooth even while
        the page it opens is doing heavy work; colour/shadow snap without a repaint loop */
     transition:transform .2s cubic-bezier(.2,.9,.25,1.3),color .12s,background .12s,border-color .12s}
-  #nav button .nvxwrap{width:26px;height:26px;perspective:150px}
+  #nav button .nvxwrap{position:relative;width:26px;height:26px;perspective:150px}
+  /* the soft radial glow behind each icon (brightens on the selected one) */
+  #nav button .nvxwrap::before{content:'';position:absolute;inset:-30% -20% -6%;z-index:-1;border-radius:50%;
+    background:radial-gradient(circle at 50% 45%,rgba(182,255,0,.45),transparent 68%);opacity:.28;transition:opacity .16s}
+  #nav button.on .nvxwrap::before{opacity:.9}
   #nav .nvx{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(8deg)}
   /* only the SELECTED tab's icon spins — the rest stay still (lighter on CPU) */
   #nav button.on .nvx{animation:navspin 3.4s linear infinite}
@@ -87,12 +96,12 @@
     #nav button:hover .nvx{animation:navspin 2.4s linear infinite}
     #nav button:hover{color:var(--ink);border-color:#3a3a3a;background:#111}
   }
-  /* the selected tab lifts out of the row like a card pulled from a deck:
-     bigger, raised, its own shadow, sitting above its neighbours */
-  #nav button.on{color:#07120a;background:var(--acid);border-color:var(--acid);
-    transform:scale(1.16) translateY(-2px);transform-origin:center bottom;position:relative;z-index:3;
-    box-shadow:0 6px 16px rgba(0,0,0,.5),0 0 18px rgba(182,255,0,.5)}
-  #nav button.on .nvlab{font-weight:700}
+  /* selected tab: lifts like a card (kept), but a soft pill highlight + icon glow
+     rather than a solid block — the label lights acid, the icon spins */
+  #nav button.on{color:var(--acid);background:rgba(182,255,0,.08);border-color:rgba(182,255,0,.28);
+    transform:scale(1.14) translateY(-2px);transform-origin:center bottom;position:relative;z-index:3;
+    box-shadow:0 6px 16px rgba(0,0,0,.45)}
+  #nav button.on .nvlab{font-weight:700;color:var(--acid)}
   /* NETWORK is a compact chip carrying its own spinning signal-bars icon, pinned
      in the bar next to the account pill — saves space. Self-contained styling. */
   button[data-nav="NETWORK"]{display:flex;flex-direction:column;align-items:center;gap:3px;flex:none;align-self:center;
