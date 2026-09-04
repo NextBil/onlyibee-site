@@ -824,6 +824,13 @@
       beat *= 0.9; level *= 0.92;
     }
     var hue = cur >= 0 ? SONGS[cur].hue : 75;
+    /* THE RADIO LIST IS THE MAIN FEATURE — while it is being scrolled on a phone,
+       skip the neon-frame repaint entirely. Rewriting a blurred, viewport-sized
+       box-shadow every frame saturates the phone's frame budget and makes the
+       composited scroll stutter. The glow just holds still for the ~180ms of the
+       drag, then resumes. (Flag set by the shell's tracklist scroll handler.)
+       The next frame is already scheduled at the top of loop(), so just return. */
+    if(window.__IBEE_SCROLLING){ return; }
     /* overall brightness of the neon frame — kept low enough to read the page
        under it for a long session rather than for a first impression */
     var a = Math.min(1, 0.02 + beat*0.11 + level*0.04);

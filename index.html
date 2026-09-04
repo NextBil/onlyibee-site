@@ -1611,6 +1611,12 @@
   function fmt(s){if(!isFinite(s))return'--:--';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
   setInterval(function(){
     var r=R();if(!r)return;
+    /* THE RADIO IS THE MAIN FEATURE — its list must scroll glass-smooth on phones.
+       This tick reads getComputedStyle (a forced synchronous layout) and writes
+       styles; run mid-scroll it stalls the scroll frame and reads as jerky. While
+       a finger is actively dragging the list, skip the whole tick — the player
+       display just pauses for the ~180ms of active scroll, then resumes. */
+    if(tl.classList.contains('scrolling')) return;
     if(builtCount!==r.count)renderTracks(); /* extra records arrived — rebuild the browser */
     var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
     var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s);
@@ -1649,8 +1655,9 @@
   var tlScrollT=0;
   tl.addEventListener('scroll',function(){
     if(!tl.classList.contains('scrolling'))tl.classList.add('scrolling');
+    window.__IBEE_SCROLLING=true;   /* player.js reads this to pause its per-frame neon-glow repaint */
     clearTimeout(tlScrollT);
-    tlScrollT=setTimeout(function(){ tl.classList.remove('scrolling'); if(tl.classList.contains('open'))markNow(); },180);
+    tlScrollT=setTimeout(function(){ tl.classList.remove('scrolling'); window.__IBEE_SCROLLING=false; if(tl.classList.contains('open'))markNow(); },180);
   },{passive:true});
   /* karaoke needs frame-accurate timing: while the overlay is open, sync every
      animation frame (the sweep + line flips land the instant their time hits) */
