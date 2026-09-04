@@ -284,7 +284,7 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   }
 
   if(!p){ $("notfound").style.display=""; return; }
-  document.title=p.n+" — ONLY IBEE";
+  document.title=p.n+" | ONLY IBEE";
   $("pwrap").style.display="flex";
 
   /* gallery */
@@ -292,14 +292,14 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var big=$("bigimg");
   function show(i){
     if(!imgs.length){ big.style.display="none"; return; }
-    big.src=imgs[i]; big.alt=p.n;
+    big.src=imgs[i]; big.alt="ONLY IBEE "+p.n;
     Array.prototype.forEach.call($("thumbs").children,function(t,k){ t.classList.toggle("on",k===i); });
   }
   /* derived from the data, not hardcoded: a local /assets/tees/ file is one of
      the keyed-out cutouts, so it wants the white stage. Remote Wix photos still
      carry their own white backdrop and stay on the dark panel. */
   if(imgs.length && /^\/assets\/tees\//.test(imgs[0])) document.querySelector(".gal").classList.add("oncanvas");
-  $("thumbs").innerHTML=imgs.map(function(u,i){ return '<img src="'+e2(u)+'" alt="" data-i="'+i+'" loading="lazy">'; }).join('');
+  $("thumbs").innerHTML=imgs.map(function(u,i){ return '<img src="'+e2(u)+'" alt="ONLY IBEE '+e2(p.n)+' photo '+(i+1)+'" data-i="'+i+'" loading="lazy">'; }).join('');
   Array.prototype.forEach.call($("thumbs").children,function(t){ t.onclick=function(){ show(+t.getAttribute("data-i")); }; });
   show(0);
   if(imgs.length<2) $("thumbs").style.display="none";
@@ -326,6 +326,37 @@ footer{padding:14px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   $("pchips").innerHTML=madeChip+'<span class="chip a">1 OF 1</span>'
     +(out?'<span class="chip r">ARCHIVE — SOLD</span>':'<span class="chip">LAST ONE</span>');
   $("pdesc").textContent=p.desc||"made once, by hand, then never again_";
+
+  /* ---- SEO: per-product meta + Product structured data, so each piece can
+     surface in Google Images and Shopping under the ONLY IBEE brand. Google
+     renders this JS, so the tags below are read on crawl. ---- */
+  (function(){ try{
+    var origin=location.origin||"https://onlyibee.com";
+    function abs(u){ return /^https?:/i.test(u)?u:(origin+(u.charAt(0)==="/"?"":"/")+u); }
+    var absImgs=imgs.map(abs);
+    var desc=(p.desc||("ONLY IBEE "+p.n+", a one-of-one piece, made once by hand.")).replace(/_+$/,"");
+    var purl=origin+"/product-page/?id="+encodeURIComponent(p.id);
+    function setMeta(kind,key,val){ var sel='meta['+kind+'="'+key+'"]', m=document.head.querySelector(sel);
+      if(!m){ m=document.createElement("meta"); m.setAttribute(kind,key); document.head.appendChild(m); }
+      m.setAttribute("content",val); }
+    setMeta("name","description",desc);
+    setMeta("property","og:type","product");
+    setMeta("property","og:title",p.n+" | ONLY IBEE");
+    setMeta("property","og:description",desc);
+    setMeta("property","og:url",purl);
+    if(absImgs[0]){ setMeta("property","og:image",absImgs[0]); setMeta("name","twitter:image",absImgs[0]); }
+    setMeta("name","twitter:card","summary_large_image");
+    var cur=(p.cur==="$")?"USD":(p.cur==="£")?"GBP":((D.pay_config&&D.pay_config.currency)||"EUR");
+    var ld={"@context":"https://schema.org","@type":"Product","name":p.n,
+      "brand":{"@type":"Brand","name":"ONLY IBEE"},"sku":p.id,"description":desc,"url":purl};
+    if(absImgs.length) ld.image=absImgs;
+    if(p.price!=null) ld.offers={"@type":"Offer","priceCurrency":cur,"price":String(p.price),
+      "availability":out?"https://schema.org/SoldOut":"https://schema.org/InStock",
+      "itemCondition":"https://schema.org/NewCondition","url":purl};
+    var s=document.getElementById("prodld");
+    if(!s){ s=document.createElement("script"); s.type="application/ld+json"; s.id="prodld"; document.head.appendChild(s); }
+    s.textContent=JSON.stringify(ld);
+  }catch(e){} })();
 
   /* ---- pieces with no photograph draw themselves. The 1-of-1 tees are made to
      order, so there is no product shot to take — assets/tee-art.js renders the
