@@ -148,8 +148,11 @@
      rather than looking at a dropdown over the page. */
   #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;overscroll-behavior:contain;transform:translateZ(0);
+    /* OPAQUE background: a translucent scroller forces iOS to re-blend the page
+       behind it on every scroll frame — a real cause of the jerky radio scroll.
+       Fully opaque = the list scrolls as its own layer, nothing to re-composite. */
     background:linear-gradient(180deg,
-      hsla(var(--rh),var(--rs),11%,.985), hsla(var(--rh),var(--rs),8%,.985));
+      hsl(var(--rh,220),var(--rs,8%),9%), hsl(var(--rh,220),var(--rs,8%),6%));
     border:1px solid hsla(var(--rh),var(--rs),55%,.5);border-bottom:0;
     box-shadow:0 -14px 40px hsla(var(--rh),var(--rs),40%,.16),
                inset 0 1px 0 hsla(var(--rh),var(--rs),65%,.18);
