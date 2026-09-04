@@ -338,6 +338,13 @@ body:not(.booting) .pressplay{opacity:0}
 /* the real radio engine draws its own chip/panel — we drive our own dock, so
    hide its chrome but KEEP #nf (the neon reactive frame glow). */
 #radiochip,#radiopanel,#rp-info{display:none!important}
+/* FRAMED BY THE SHELL: it already draws the top nav + the persistent radio, so
+   hide our own copies and boot banner — the shell's PRESS START is the one boot,
+   the shell's radio is the one radio. Only the front-page DESIGN is ours. */
+html.framed .top,html.framed .netbar,html.framed .dock,html.framed .pressplay{display:none!important}
+html.framed .grid{padding-bottom:28px}
+html.framed .systray{padding-bottom:28px}
+html.framed .hello{padding-top:16px}
 </style>
 </head>
 <body>
@@ -469,7 +476,7 @@ body:not(.booting) .pressplay{opacity:0}
   </div>
 </div>
 
-<div class="pressplay">▶  PRESS PLAY TO WAKE THE CONSOLE</div>
+<div class="pressplay" aria-hidden="true"></div>
 <div id="uni">
   <div class="uhead">
     <button class="uback" id="uback">◀</button>
@@ -550,6 +557,10 @@ body:not(.booting) .pressplay{opacity:0}
      so we drive the one radio that never stops; standalone it owns its own. */
   function RADIO(){ try{ return (window.top&&window.top.IBEERADIO)||window.IBEERADIO||null; }catch(e){ return window.IBEERADIO||null; } }
   function framed(){ try{ return window.top!==window.self; }catch(e){ return false; } }
+  /* inside the shell frame the shell owns the top nav + the persistent radio, so
+     we hide our own copies and let its skeleton wrap us — the radio logic is the
+     shell's, untouched. Standalone, we show our own chrome. */
+  if(framed()) document.documentElement.classList.add("framed");
   var DEST={rooms:"arcade/",shop:"shop/",ics:"chess/",tv:"tv/",you:"member/"};
   function navTo(rel){ rel=rel.replace(/^\//,"");
     try{ if(framed()&&window.top.IBEE_SHELL&&window.top.IBEE_SHELL.navigate){ window.top.IBEE_SHELL.navigate(rel); return; } }catch(e){}
@@ -616,7 +627,9 @@ body:not(.booting) .pressplay{opacity:0}
   document.querySelector('.tapme').onclick=function(e){e.stopPropagation(); openPlayer();};
   $("bar").onclick=function(ev){ var R=RADIO(); if(!R||!R.audio||!R.audio.duration)return; var r=this.getBoundingClientRect();
     R.audio.currentTime=Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width))*R.audio.duration; syncDock(); };
-  document.body.classList.add("booting");
+  /* standalone shows our own dark PRESS-START; framed, the shell's PRESS START is
+     the one boot, so we start already awake. */
+  if(!framed()) document.body.classList.add("booting");
   setInterval(syncDock, 350);
 
   /* things move to the music — the REAL per-song groove drives --beat */
