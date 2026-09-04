@@ -61,7 +61,9 @@ body.playing .box{border-color:hsla(var(--songhue,110),85%,58%,.5);
 .box.sel{transform:translateY(-4px) scale(1.012);border-color:hsl(var(--songhue,110),90%,60%);
   box-shadow:0 14px 36px rgba(0,0,0,.6),0 0 36px hsla(var(--songhue,110),90%,60%,.55),
              inset 0 0 0 1px hsla(var(--songhue,110),90%,60%,.4);outline:none}
-.box.wide{grid-column:1 / -1;aspect-ratio:auto;min-height:200px;border-radius:24px}
+/* TV spans 2 columns: on laptop it sits to the right of ICS (fills the row);
+   on the 2-col phone layout, span 2 = full width. */
+.box.wide{grid-column:span 2;aspect-ratio:auto;min-height:200px;border-radius:24px}
 
 .peek{position:absolute;inset:0;background:#050505 center/cover no-repeat;background-image:var(--img)}
 .peek::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,transparent 30%,rgba(0,0,0,.2) 55%,rgba(0,0,0,.86) 100%)}
@@ -471,14 +473,6 @@ html.framed .hello{padding-top:16px}
       <a class="en">ENTER ▶</a></div>
   </button>
 
-  <button class="box you wide slim" data-ico="you" style="--img:url(https://onlyibee.com/assets/profile%20avatars/mimi%20default%20profile%20avatar.png)">
-    <div class="peek contain"></div>
-    <span class="ico"></span>
-    <span class="nm">YOU</span><span class="cnt">RANK 04 · ◈ 340</span>
-    <div class="info"><div class="tg">CARD · RANK 04</div>
-      <div class="ds">your card, your rank, your one room.</div>
-      <a class="en">ENTER ▶</a></div>
-  </button>
 
 </main>
 
