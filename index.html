@@ -62,14 +62,16 @@
 
   /* ---- top bar: ONE nav, styled as the floating console pill (detached rounded
      bar, translucent + blur, soft shadow) — the design used across the site ---- */
-  #bar{align-self:center;max-width:calc(100vw - 16px);display:flex;align-items:center;gap:4px;
-    margin:calc(8px + env(safe-area-inset-top)) auto 0;
-    padding:5px 7px;background:rgba(9,9,9,.85);border:1px solid var(--border);border-radius:16px;
+  /* JUST the pill — floats over the content (nothing behind it), so the page
+     scrolls UNDER it and there is no empty header left when it hides */
+  #bar{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+    max-width:calc(100vw - 16px);display:flex;align-items:center;gap:4px;
+    padding:5px 7px;background:rgba(9,9,9,.72);border:1px solid var(--border);border-radius:16px;
     box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.35);
-    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);position:relative;z-index:20;
+    -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);z-index:40;
     transition:transform .3s ease,opacity .3s ease}
-  /* tucks away on scroll-down, comes back on scroll-up */
-  #bar.hide{transform:translateY(calc(-100% - 24px));opacity:0;pointer-events:none}
+  /* tucks away on scroll-down, comes back on scroll-up (keeps the centering) */
+  #bar.hide{transform:translateX(-50%) translateY(calc(-100% - 24px));opacity:0;pointer-events:none}
   /* content-width so the pill stays a cute, compact size (not full width) */
   #nav{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;min-width:0}
   #nav::-webkit-scrollbar{display:none}
@@ -162,12 +164,16 @@
      touch on the SAME scroller is a known iOS combo that breaks momentum, and the
      hue gradient + big blurred shadow re-rastered the layer. Flat opaque bg, no
      transform, no forced layer, no blur, no transition = smooth native scroll. */
-  #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow-y:auto;overflow-x:hidden;
-    overscroll-behavior:contain;
+  #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow:hidden;
     background:#080809;border:1px solid hsla(var(--rh),var(--rs),55%,.5);border-bottom:0;
     box-shadow:inset 0 1px 0 hsla(var(--rh),var(--rs),65%,.18);display:none}
+  /* the header/search/shelf stay put; only the LIST scrolls — this is how the old
+     (smooth) version worked. Scrolling a clean inner list beats scrolling the whole
+     panel (search + horizontal album shelf + rows) as one heavy surface. */
+  #tracklist .th,#tltools,#tlalbums{flex:none}
+  #tlleft{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
   body.radioon #tracklist{border-color:hsla(var(--rh),var(--rs),58%,.9)}
-  #tracklist.open{display:block}
+  #tracklist.open{display:flex;flex-direction:column}
   #tracklist .th{font-family:var(--px);font-size:9px;color:hsla(var(--rh),var(--rs),72%,1);
     padding:12px 14px;border-bottom:1px solid hsla(var(--rh),var(--rs),55%,.28);
     display:flex;justify-content:space-between}
@@ -1664,8 +1670,8 @@
   /* momentum scrolling on phones stays smooth only if nothing writes to the list
      mid-drag: flag the list 'scrolling' while the finger moves, clear it 180ms
      after it settles (then markNow() catches the row back up). */
-  var tlScrollT=0;
-  tl.addEventListener('scroll',function(){
+  var tlScrollT=0, tlleftEl=document.getElementById('tlleft');
+  if(tlleftEl) tlleftEl.addEventListener('scroll',function(){
     if(!tl.classList.contains('scrolling'))tl.classList.add('scrolling');
     window.__IBEE_SCROLLING=true;   /* player.js reads this to pause its per-frame neon-glow repaint */
     clearTimeout(tlScrollT);
