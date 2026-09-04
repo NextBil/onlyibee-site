@@ -38,6 +38,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 .grid{flex:1;display:grid;gap:12px;padding:12px 16px 150px;z-index:5;max-width:1080px;margin:0 auto;width:100%;
   grid-template-columns:repeat(2,1fr);align-content:start}
 @media(min-width:760px){.grid{grid-template-columns:repeat(3,1fr)}}
+/* phones: shorter tiles + tighter grid so more of the page shows on landing.
+   `.grid .box` beats the base `.box` rule regardless of source order. */
+@media(max-width:560px){
+  .grid{gap:10px;padding:10px 12px 120px}
+  .grid .box{aspect-ratio:1/0.78}
+  .grid .box.wide{aspect-ratio:auto;min-height:140px}
+}
 
 /* a box is mostly a big preview; text hides until you tap it */
 .box{--ac:var(--acid);position:relative;border:2px solid var(--border);background:#0a0a0a;overflow:hidden;
@@ -57,8 +64,12 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
 .tvvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 
 /* the rotating voxel icon — same technique as the site menu */
-.ico{position:absolute;top:11px;left:11px;width:46px;height:46px;z-index:3;perspective:230px}
-.box.wide .ico{width:64px;height:64px;top:14px;left:14px}
+/* the rotating icon sits in the TOP-RIGHT corner on its own little chip, so the
+   thumbnail never swallows it */
+.ico{position:absolute;top:9px;right:9px;left:auto;width:40px;height:40px;z-index:4;perspective:230px;
+  padding:5px;border-radius:12px;background:rgba(6,6,9,.5);border:1px solid rgba(255,255,255,.14);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);box-shadow:0 3px 12px rgba(0,0,0,.55)}
+.box.wide .ico{width:52px;height:52px;top:12px;right:12px}
 .o3{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;animation:sp 5.5s linear infinite}
 .o3 img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 @keyframes sp{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
@@ -215,11 +226,10 @@ body:not(.booting) .pressplay{opacity:0}
 
 /* rotating icons stand out from the thumbnail: glow halo + lift */
 .box .ico{filter:drop-shadow(0 3px 8px rgba(0,0,0,.7))}
-.box .ico::before{content:"";position:absolute;inset:-30% -30% -10% -30%;z-index:-1;border-radius:50%;
-  background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--ac) 55%,transparent),transparent 68%);
-  opacity:.5;transition:opacity .16s}
+.box .ico::before{content:"";position:absolute;inset:-45%;z-index:-1;border-radius:16px;
+  background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--ac) 50%,transparent),transparent 70%);
+  opacity:.45;transition:opacity .16s}
 .box:hover .ico::before,.box.sel .ico::before{opacity:.9}
-.box.music .ico,.box.rooms .ico,.box.shop .ico,.box.ics .ico{top:9px;left:9px}
 .box.music .ico{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--acid) 60%,transparent))}
 .box.rooms .ico{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--cyan) 60%,transparent))}
 .box.shop  .ico{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--pink) 60%,transparent))}

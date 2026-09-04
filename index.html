@@ -316,6 +316,21 @@
   #fill{position:relative}
   #fill::after{content:"";position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:9px;height:9px;
     border-radius:50%;background:#fff;box-shadow:0 0 6px hsla(var(--rh),var(--rs),60%,.8)}
+  /* phones: keep the dock compact so it doesn't eat the screen */
+  @media(max-width:560px){
+    #player{padding:14px 10px 8px}
+    #pcover{width:42px!important;height:42px!important}
+    #nowbtn #rt{font-size:18px}
+    #nowbtn .lab{font-size:6px}
+    #nowbtn{gap:3px}
+    .pl-top{gap:9px;padding:1px 2px 4px!important}
+    #time{font-size:7px}
+    .pl-row{gap:7px;margin-top:1px}
+    .pl-row button{min-width:30px;height:30px;font-size:15px}
+    .pl-row button.main{width:44px;height:44px;font-size:15px}
+    #seek{height:3px}
+    .tapme{font-size:6px;padding:3px 9px;top:-8px}
+  }
   #nowbtn .bd{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;
     box-shadow:0 0 8px var(--red);transform:scale(var(--b,.5));transition:transform .07s}
   #time{font-family:var(--px);font-size:8px;color:hsla(var(--rh),var(--rs),72%,.85);flex:none}
