@@ -649,7 +649,7 @@
 
   /* ---- section nav (fills the bar) ---- */
   var NAV=[
-    {n:'CONSOLE', u:'console.html#menu'},
+    {n:'CONSOLE', u:'console-v2.html'},
     {n:'ROOMS',   u:'arcade/'},
     {n:'SHOP',    u:'console.html#shop'},
     {n:'TV',      u:'tv/'},
@@ -745,7 +745,7 @@
 
   function canBack(){ return trail.length>1; }
   function back(){
-    if(!canBack()){ navigate('console.html#menu',{noanim:true}); return; }
+    if(!canBack()){ navigate('console-v2.html',{noanim:true}); return; }
     goingBack=true; markNoAnim(); history.back();
   }
   /* NOTE: the parent's popstate does NOT fire when history.back() moves an
@@ -755,7 +755,7 @@
   /* the API pages talk to (same-origin, so a plain property is enough) */
   window.IBEE_SHELL={
     navigate:function(u){ navigate(u); },
-    home:function(){ navigate('console.html#menu',{noanim:true}); },
+    home:function(){ navigate('console-v2.html',{noanim:true}); },
     back:back,
     canBack:canBack
   };
@@ -766,8 +766,8 @@
   try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
 
   /* first page: ?p= (deep-link/NFC) or the console */
-  var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
-  if(/^(https?:)?\/\//i.test(p)) p='console.html#menu';
+  var p=new URLSearchParams(location.search).get('p')||'console-v2.html';
+  if(/^(https?:)?\/\//i.test(p)) p='console-v2.html';
   /* ?p=blank and friends: iOS Safari reloads a tab it has evicted for memory,
      and it restores the URL we last wrote. If that URL said p=blank the shell
      booted its frame at /blank -> 404, which is how a listener ended up on a
@@ -776,7 +776,7 @@
      (The matching guard in sync() below is what stops p=blank being written in
      the first place; this one rescues URLs already in someone's history.) */
   if(!/^[a-z0-9][a-z0-9\-_./]*(\.html)?(\?[^#]*)?(#.*)?$/i.test(p) ||
-     /^blank\b/i.test(p) || /^about:/i.test(p)) p='console.html#menu';
+     /^blank\b/i.test(p) || /^about:/i.test(p)) p='console-v2.html';
   /* profile === room (one page): old member/profile links land straight on room/ */
   p=p.replace(/^\/?member\/profile\/?(index\.html)?/i,'room/');
   frame.src=p;
