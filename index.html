@@ -135,6 +135,15 @@
   #tracklist .tr .fv{flex:none;font-size:17px;line-height:1;color:#3a3a3a;cursor:pointer;padding:3px 5px}
   #tracklist .tr .fv:hover{color:#ff2b6b}
   #tracklist .tr .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.6)}
+  /* radio list = mini-Spotify with the dock's motion: rows lift + zoom on hover,
+     and the NOW-PLAYING cover becomes a spinning vinyl disc */
+  #tracklist .tr{border-radius:12px;transition:background .15s,transform .15s,box-shadow .15s}
+  #tracklist .tr:hover{transform:translateX(3px) scale(1.012);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+  #tracklist .tr .cv{transition:border-radius .35s,border-color .35s,box-shadow .35s}
+  #tracklist .tr.now .cv{border-radius:50%;border:2px solid var(--acid);
+    box-shadow:0 0 0 2px #0a0a0a,0 0 12px rgba(182,255,0,.4);animation:pcvspin 3.6s linear infinite}
+  #tracklist .tr.now .cv::after{content:"";position:absolute;inset:41% 41%;border-radius:50%;
+    background:#0a0a0a;border:1px solid #2a2a2a;z-index:2}
   .tl-tile .fv{position:absolute;right:5px;bottom:24px;z-index:3;font-size:16px;line-height:1;
     color:rgba(255,255,255,.45);cursor:pointer;text-shadow:0 1px 4px #000;padding:3px}
   .tl-tile .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.8)}
@@ -279,6 +288,34 @@
   .peq i:nth-child(2){animation-delay:.15s}.peq i:nth-child(3){animation-delay:.3s}
   .peq i:nth-child(4){animation-delay:.08s}.peq i:nth-child(5){animation-delay:.22s}
   @keyframes peqb{0%,100%{height:25%}50%{height:100%}}
+  /* ===== bottom player dressed as the console-v2 dock — compact single row,
+     spinning disc, NOW PLAYING + EQ, one big round play, thin seek with a knob,
+     and the TAP TO OPEN tab. Same markup + same handlers, just the look. ===== */
+  #player{padding-top:16px}
+  .tapme{position:absolute;top:-10px;left:50%;transform:translateX(-50%);z-index:3;cursor:pointer;
+    font-family:var(--px);font-size:7px;letter-spacing:1px;color:#07120a;background:var(--acid);
+    padding:4px 11px;border-radius:8px;box-shadow:0 0 14px rgba(182,255,0,.5);white-space:nowrap;
+    animation:tapmeb 1.8s ease-in-out infinite}
+  @keyframes tapmeb{0%,100%{box-shadow:0 0 10px rgba(182,255,0,.4)}50%{box-shadow:0 0 20px rgba(182,255,0,.7)}}
+  .pl-top{border:0!important;background:transparent!important;box-shadow:none!important;padding:2px 2px 5px!important;gap:12px}
+  .pl-top:hover{background:transparent!important;box-shadow:none!important;border:0!important}
+  #pcover{width:52px!important;height:52px!important}
+  #nowbtn{flex-direction:column;align-items:flex-start;gap:4px;justify-content:center}
+  #nowbtn .lab{display:flex;align-items:center;gap:6px;font-family:var(--px);font-size:7px;letter-spacing:1px;
+    color:hsla(var(--rh),var(--rs),70%,.95)}
+  #nowbtn #rt{font-family:var(--vt);font-size:21px;line-height:1;color:#fff;letter-spacing:.5px}
+  #time{align-self:center;flex:none}
+  .pl-top .chev{align-self:center}
+  .pl-row{gap:10px}
+  .pl-row button{background:transparent;border:0;width:auto;min-width:36px;height:36px;color:var(--dim);font-size:17px}
+  .pl-row button:hover{background:transparent;border:0;color:#fff}
+  .pl-row button.main{width:54px;height:54px;border-radius:50%;background:var(--acid)!important;color:#07120a!important;
+    border:0;font-size:18px;box-shadow:0 0 18px rgba(182,255,0,.5)}
+  .pl-row button.main:hover{background:var(--acid)!important;color:#07120a!important;filter:brightness(1.05)}
+  #seek{height:4px;border:0;background:hsla(var(--rh),var(--rs),22%,.6);padding:0;border-radius:2px;position:relative}
+  #fill{position:relative}
+  #fill::after{content:"";position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:9px;height:9px;
+    border-radius:50%;background:#fff;box-shadow:0 0 6px hsla(var(--rh),var(--rs),60%,.8)}
   #nowbtn .bd{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;
     box-shadow:0 0 8px var(--red);transform:scale(var(--b,.5));transition:transform .07s}
   #time{font-family:var(--px);font-size:8px;color:hsla(var(--rh),var(--rs),72%,.85);flex:none}
@@ -616,11 +653,12 @@
       <aside id="tlside" aria-label="Now playing details"></aside>
     </div>
     <div id="player">
+      <span class="tapme" id="tapme">TAP TO OPEN THE PLAYER</span>
       <div class="pl-top">
         <span id="pcover"><img alt="" id="pcoverimg"></span>
-        <button id="nowbtn" title="open the radio"><span class="bd"></span><span id="rt">RADIO</span><span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
+        <button id="nowbtn" title="open the radio"><span class="lab"><span class="bd"></span>NOW PLAYING</span><span id="rt">RADIO</span><span class="peq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></button>
         <span id="time">0:00 / --:--</span>
-        <span class="hint">ALL SONGS</span><span class="chev">▲</span>
+        <span class="chev">▲</span>
       </div>
       <div id="seek"><div id="fill"></div></div>
       <div class="pl-row">
@@ -1289,6 +1327,8 @@
   document.querySelector('.pl-top').addEventListener('click',function(e){
     toggleTL();
   });
+  var tapme=document.getElementById('tapme');
+  if(tapme) tapme.addEventListener('click',function(e){ e.stopPropagation(); toggleTL(); });
   /* click anywhere outside the track list closes it (music keeps playing) */
   document.addEventListener('pointerdown',function(e){
     if(!tl.classList.contains('open'))return;
