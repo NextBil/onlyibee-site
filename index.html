@@ -77,6 +77,14 @@
     #bar{gap:4px;padding:7px 6px} #nav{gap:4px}
     #nav button{padding:5px 7px 4px;border-radius:11px}
     #nav button .nvxwrap{width:22px;height:22px} #nav .nvlab{font-size:6px} }
+  /* ---- cashew counter: purple icon + live number, no text, by the profile ---- */
+  #cashewchip{flex:none;align-self:center;display:none;align-items:center;gap:5px;
+    font-family:var(--px);font-size:9px;color:#c79bff;border:1px solid #2e2148;border-radius:12px;
+    padding:8px 10px;background:#0d0a12;box-shadow:0 0 12px rgba(176,107,255,.16);white-space:nowrap}
+  #cashewchip.on{display:inline-flex}
+  #cashewchip .cashew{width:16px;height:16px}
+  #cashewchip.live{animation:cashewpulse 1s steps(1) infinite}
+  @keyframes cashewpulse{50%{border-color:#b06bff}}
   /* ---- account pill: a rotating profile icon, matching the nav chips ---- */
   #acct{flex:none;align-self:center}
   #acct button{position:relative;font-family:var(--px);font-size:7px;letter-spacing:.5px;cursor:pointer;white-space:nowrap;
@@ -664,7 +672,7 @@
   <p><a href="console.html">Enter the console</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE clothing</a></p>
 </div>
 <div id="app">
-  <div id="bar"><div id="nav"></div><div id="acct"></div></div>
+  <div id="bar"><div id="nav"></div><span id="cashewchip" title="Your cashews — listen &amp; play to earn discounts" aria-label="Cashews"></span><div id="acct"></div></div>
 
   <div id="stage">
     <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>
@@ -892,6 +900,18 @@
   renderAcct();
   window.addEventListener('storage',renderAcct);
   setInterval(renderAcct,3000);
+
+  /* live cashew counter in the header — icon + number, no text; ticks while music
+     plays and stops when it stops (reads the MINE currency, IBEE_PERKS). */
+  (function(){
+    var chip=document.getElementById('cashewchip'); if(!chip) return;
+    function tick(){ var P=window.IBEE_PERKS; if(!P) return;
+      chip.classList.add('on');
+      chip.innerHTML=P.COIN+'<b style="font-weight:400">'+P.points()+'</b>';
+      chip.classList.toggle('live', !!(P.playing&&P.playing()));
+    }
+    tick(); setInterval(tick, 800);
+  })();
 
   /* ---- navigation + a real "back" ------------------------------------------
      Frame navigations DO add browser history entries, but every page used to

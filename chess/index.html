@@ -206,13 +206,8 @@ footer{margin-top:20px;color:var(--dim);font-size:16px;text-align:center;padding
       <div class="status" id="status"></div>
     </div>
     <div class="card">
-      <div class="lbl">MODE</div>
-      <div class="row">
-        <button class="on" id="m2" onclick="setMode('pvp')">2P</button>
-        <button id="mai" onclick="setMode('ai')">VS CPU</button>
-      </div>
-      <div class="lbl" id="lvlbl" style="margin-top:12px;display:none">CPU LEVEL</div>
-      <div class="row" id="lvrow" style="display:none">
+      <div class="lbl" id="lvlbl">CPU LEVEL</div>
+      <div class="row" id="lvrow">
         <button id="lv1" onclick="setLevel(1)">LV1</button>
         <button class="on" id="lv2" onclick="setLevel(2)">LV2</button>
         <button id="lv3" onclick="setLevel(3)">LV3</button>
@@ -259,7 +254,7 @@ const ART={
 const NAMES={K:'King',Q:'Queen',B:'Bishop',N:'Knight',R:'Tower',P:'Pon'};
 
 // ---------- state ----------
-let board, turn, history, castling, enpassant, flipped=false, mode='pvp';
+let board, turn, history, castling, enpassant, flipped=false, mode='ai';
 let selected=null, legalForSel=[], gameOver=false, lastMove=null, pendingPromo=null;
 
 function initState(){
@@ -580,14 +575,7 @@ function aiMove(){
 }
 
 // ---------- controls ----------
-function setMode(m){
-  mode=m;
-  document.getElementById('m2').classList.toggle('on',m==='pvp');
-  document.getElementById('mai').classList.toggle('on',m==='ai');
-  document.getElementById('lvlbl').style.display=m==='ai'?'block':'none';
-  document.getElementById('lvrow').style.display=m==='ai'?'flex':'none';
-  newGame();
-}
+function setMode(m){ mode='ai'; newGame(); }
 function newGame(){initState();document.getElementById('status').textContent='';render();}
 function flipBoard(){flipped=!flipped;render();}
 function undo(){
