@@ -3,6 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<!-- The old console MENU is replaced by the new console (console-v2). Any time this
+     page would land on its old menu (no hash, or #menu) — on load OR via its own
+     internal navigation — bounce to the new console instead. The section deep-links
+     (#shop / #ics / #utopie / #lazone …) still work here. -->
+<script>
+(function(){
+  function toNew(){ var h=(location.hash||'').replace(/^#/,'').toLowerCase();
+    if(h!==''&&h!=='menu') return false;
+    try{ if(window.top!==window.self && window.top.IBEE_SHELL && window.top.IBEE_SHELL.home){ window.top.IBEE_SHELL.home(); return true; } }catch(e){}
+    location.replace('/'); return true;
+  }
+  if(toNew()) return;
+  window.addEventListener('hashchange', toNew);
+})();
+</script>
 <title>ONLY IBEE — a creative dude</title>
 <meta name="description" content="Only Ibee is a creative dude born in Ivory Coast and raised in Paris. Music, art, and unexpected creations — human-made work filled with intention and philosophy, connecting Paris, Toronto, and beyond. An engine for art and discovery.">
 <!-- ===== favicon (bishop 1) ===== -->
