@@ -76,12 +76,19 @@
   /* DESKTOP: with room to spare, the pill becomes a vertical rail on the LEFT and
      the content sits beside it (nav on top only when the window is narrow). */
   @media(min-width:1000px){
-    #bar{position:fixed;left:14px;top:14px;bottom:14px;flex-direction:column;justify-content:flex-start;
-      align-self:auto;margin:0;max-width:none;width:auto;gap:6px;border-radius:22px;padding:9px 6px;overflow-y:auto}
+    /* a compact rail, VERTICALLY CENTERED on the left — icons + profile grouped
+       tightly together (not stretched top-to-bottom), and a bit bigger */
+    #bar{position:fixed;left:16px;top:50%;transform:translateY(-50%);bottom:auto;
+      flex-direction:column;justify-content:center;align-items:center;
+      align-self:auto;margin:0;max-width:none;width:auto;gap:6px;border-radius:28px;padding:12px 9px}
     #bar::-webkit-scrollbar{display:none}
-    #nav{flex-direction:column;gap:4px;overflow-x:visible}
-    #acct{margin-top:auto}          /* profile sits at the bottom of the rail */
-    #stage,#bottom{margin-left:80px}                     /* clear the rail */
+    #nav{flex-direction:column;gap:5px;overflow-x:visible}
+    #nav button{padding:8px 10px}
+    #nav button .nvxwrap{width:35px;height:35px}
+    #acct{margin-top:5px}                 /* profile sits right under the icons */
+    #acct button{padding:8px 10px}
+    #acct .nvxwrap{width:35px;height:35px}
+    #stage,#bottom{margin-left:92px}      /* clear the rail */
   }
   /* content-width so the pill stays a cute, compact size (not full width) */
   #nav{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;min-width:0}

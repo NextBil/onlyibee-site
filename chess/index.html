@@ -24,9 +24,10 @@
   --px:'Press Start 2P',monospace;--vt:'VT323',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{overflow-x:hidden}
 body{
   font-family:var(--vt);background:var(--bg);color:var(--ink);
-  min-height:100dvh;padding-bottom:30px;
+  min-height:100dvh;padding-bottom:30px;overflow-x:hidden;max-width:100%;
   display:flex;flex-direction:column;align-items:center;
 }
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
@@ -54,7 +55,8 @@ header .t{color:var(--dim);font-size:8px}
 #board{
   position:relative;
   display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
-  width:min(88vw,520px);height:min(88vw,520px);
+  /* leave room for the board-wrap + layout paddings so nothing overflows sideways */
+  width:min(84vw,520px);height:min(84vw,520px);
   border:3px solid var(--acid);box-shadow:0 0 24px rgba(182,255,0,.25);
 }
 /* ---- music reactivity: the board breathes with the site radio. --mb (beat 0..1)
