@@ -1737,7 +1737,19 @@
     window.addEventListener('resize',placeEnter);
     var started=false;
     var go=function(){ if(started)return; started=true;
-      try{ if(window.IBEERADIO&&window.IBEERADIO.control) window.IBEERADIO.control.play(); }catch(e){}
+      try{ var R=window.IBEERADIO;
+        if(R&&R.control){
+          /* START ON A RANDOM RECORD so it isn't always the same first song for
+             every visitor — unless a shared ?s= link asked for a specific one. */
+          var deep=/[?&]s=/.test(location.search), n=R.count||0;
+          if(deep || n<1){ R.control.play(R.current&&R.current()>=0?null:0); }
+          else {
+            var i=Math.floor(Math.random()*n), tries=0;
+            while(tries<15 && R.song && R.song(i) && R.song(i).locked){ i=Math.floor(Math.random()*n); tries++; }
+            R.control.play(i);
+          }
+        }
+      }catch(e){}
       enter.style.display='none'; window.removeEventListener('keydown',kk); };
     var kk=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();}};
     enter.addEventListener('click',go);
