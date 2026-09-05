@@ -404,6 +404,9 @@ body:not(.booting) .pressplay{opacity:0}
 .abreel{position:relative;margin-top:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .abreel video{width:100%;display:block;filter:brightness(.6)}
 .abreel p{position:absolute;inset:auto 0 0 0;padding:14px;font-size:16px;color:#eee;background:linear-gradient(180deg,transparent,rgba(0,0,0,.8))}
+.abquote{position:relative;margin-top:16px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.abquote video{width:100%;display:block;filter:brightness(.65)}
+.abquote figcaption{position:absolute;inset:auto 0 0 0;padding:14px;font-size:16px;color:#fff;background:linear-gradient(180deg,transparent,rgba(0,0,0,.85))}
 .abtitle{font-family:var(--px);font-size:14px;color:#fff;margin-top:26px}.abtitle.sm{font-size:11px;margin-top:28px}
 .abtitle .acid{color:var(--acid)}.abtitle .red{color:var(--red)}
 .abme{display:flex;align-items:center;gap:14px;margin-top:16px}
@@ -542,7 +545,11 @@ html.framed .hello{padding-top:16px}
     <figure class="abme"><img src="https://onlyibee.com/assets/img/onlyibee-avatar.jpg" alt="Only Ibee" loading="lazy">
       <figcaption>ONLY IBEE<span>paris ⟷ toronto</span></figcaption></figure>
     <p class="abp">ONLY IBEE — a creative dude. Born in Ivory Coast, grew up in Paris. Still mind-blown by just being alive and conscious — seriously, whaaat?</p>
-    <p class="abp">A versatile, curious artist who finds joy in creation and exploration. Human-made work filled with intention, connecting Paris, Toronto and beyond — for those who seek something real. This site is an engine for art and discovery. Scan a tag, enter the zone.</p>
+    <p class="abp">A versatile, curious artist who finds joy in creation and exploration. With a passion for philosophy — diving into deep thoughts and the intersection of art and philosophy, committed to preserving the meaning and value of every piece.</p>
+    <figure class="abquote"><video id="abvid2" muted loop playsinline preload="none"
+      src="https://onlyibee.com/assets/video/alive.mp4" aria-label="recording music"></video>
+      <figcaption>When I'm feeling down, recording music turns me into the happiest person alive.</figcaption></figure>
+    <p class="abp">Human-made work filled with intention, connecting Paris, Toronto and beyond — for those who seek something real. This site is an engine for art and discovery. Scan a tag, enter the zone.</p>
     <div class="abtitle sm">PROJECTS<span class="red">.DIR</span></div>
     <div class="abproj">
       <a href="console.html#utopie"><b>UTOPIE™</b><span>01 · THE UMBRELLA</span></a>
@@ -1115,9 +1122,11 @@ html.framed .hello{padding-top:16px}
   else if(/#(universe|music|playing|nowplaying)/i.test(location.hash)){ setTimeout(openUni,60); }
 
   /* ABOUT overlay + footer year */
-  $("aboutBtn").onclick=function(){ $("about").classList.add("on"); var v=$("abvid"); if(v){try{v.play();}catch(e){}} };
+  $("aboutBtn").onclick=function(){ $("about").classList.add("on");
+    ["abvid","abvid2"].forEach(function(id){ var v=$(id); if(v){try{v.play();}catch(e){}} }); };
   var netB=$("netBtn"); if(netB) netB.onclick=function(){ navTo("stats/"); };
-  $("abback").onclick=function(){ $("about").classList.remove("on"); var v=$("abvid"); if(v){try{v.pause();}catch(e){}} };
+  $("abback").onclick=function(){ $("about").classList.remove("on");
+    ["abvid","abvid2"].forEach(function(id){ var v=$(id); if(v){try{v.pause();}catch(e){}} }); };
   $("about").addEventListener("click",function(e){ if(e.target===this) $("abback").click(); });
   var yrEl=$("yr"); if(yrEl) yrEl.textContent=new Date().getFullYear();
 
