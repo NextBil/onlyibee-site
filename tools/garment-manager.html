@@ -87,8 +87,8 @@ legend{color:var(--gold);font-size:12px;letter-spacing:1px;padding:0 6px}
   <div class="hint">Copy this over <b>assets/garments-data.js</b> and deploy. It goes live in ~1 min (clock-stamped load, no version bump).</div>
 </div>
 
-<script>document.write('<script src="../assets/products-data.js?cb='+Date.now()+'"><\/script>')</script>
-<script>document.write('<script src="../assets/garments-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="../assets/products-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
+<script>document.write('<script src="../assets/garments-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script>
 (function(){
 "use strict";

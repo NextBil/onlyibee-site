@@ -944,9 +944,9 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
 
 <!-- extra records from IBEE STUDIO (new songs → galaxies + planets). Clock-stamped,
      synchronous (document.write) so the engine below sees it; missing file = no-op. -->
-<script>document.write('<script src="assets/songs-extra.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="assets/songs-extra.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <!-- the records' souls (vibes) — feeds the universe search; missing file = search still works on names -->
-<script>document.write('<script src="assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="assets/song-meta.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <!-- the store catalog (tools/shop-manager.html → assets/products-data.js) is NOT loaded here.
      It is 63KB and clock-stamped, so `?cb=` makes it permanently uncacheable — pulling it on every
      console load meant re-downloading it on every return from TV, ROOMS or a character page, over

@@ -63,16 +63,14 @@
   /* ---- top bar: ONE nav, styled as the floating console pill (detached rounded
      bar, translucent + blur, soft shadow) — the design used across the site ---- */
   /* the pill sits IN the layout (a slim rounded header), so content always
-     starts below it on every page — never hidden underneath */
+     starts below it on every page. Deliberately CHEAP to scroll past: a solid
+     background (NO backdrop-filter blur — that re-samples every scroll frame and
+     tanks mobile) and no scroll-driven resize (the collapsing header reflowed the
+     whole iframe on every hide/show, which is what made the site lag). */
   #bar{align-self:center;max-width:calc(100vw - 16px);display:flex;align-items:center;gap:4px;
     margin:calc(8px + env(safe-area-inset-top)) auto 6px;
-    padding:5px 7px;background:rgba(9,9,9,.85);border:1px solid var(--border);border-radius:16px;
-    box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.35);
-    -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);position:relative;z-index:40;
-    transition:margin-top .3s ease,opacity .25s ease}
-  /* hide by COLLAPSING the header space (negative margin pulls it up and the
-     content fills in), so scrolling down never leaves an empty black header */
-  #bar.hide{margin-top:calc(-72px - env(safe-area-inset-top));opacity:0;pointer-events:none}
+    padding:5px 7px;background:#0c0c0e;border:1px solid var(--border);border-radius:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,.45);position:relative;z-index:40}
   /* DESKTOP: with room to spare, the pill becomes a vertical rail on the LEFT and
      the content sits beside it (nav on top only when the window is narrow). */
   @media(min-width:1000px){
@@ -81,7 +79,6 @@
     #bar::-webkit-scrollbar{display:none}
     #nav{flex-direction:column;gap:4px;overflow-x:visible}
     #acct{margin-top:auto}          /* profile sits at the bottom of the rail */
-    #bar.hide{margin:0;opacity:1;pointer-events:auto}   /* the rail stays put on desktop */
     #stage,#bottom{margin-left:80px}                     /* clear the rail */
   }
   /* content-width so the pill stays a cute, compact size (not full width) */
@@ -870,11 +867,11 @@
 <script src="assets/analytics.js?v=2"></script>
 <!-- data layers, clock-stamped so a freshly-pushed file goes live at once (no ?v bumping).
      document.write keeps them synchronous + in order (shell logic below reads these globals). -->
-<script>document.write('<script src="assets/lyrics-data.js?cb='+Date.now()+'"><\/script>')</script>
-<script>document.write('<script src="assets/lyrics-timed.js?cb='+Date.now()+'"><\/script>')</script>
-<script>document.write('<script src="assets/song-meta.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="assets/lyrics-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
+<script>document.write('<script src="assets/lyrics-timed.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
+<script>document.write('<script src="assets/song-meta.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
-<script>document.write('<script src="assets/news-data.js?cb='+Date.now()+'"><\/script>')</script>
+<script>document.write('<script src="assets/news-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
 <script src="assets/badges.js?v=13"></script>
 <!-- the unlock ladder: earn the rhythm games by playing (grants via grant_game, see member/unlocks.sql) -->
@@ -1061,18 +1058,9 @@
        opening SHOP from its cartridge looked like a different place than pressing
        SHOP in the header. Re-sync on the frame's own hash changes. */
     try{ frame.contentWindow.addEventListener('hashchange',sync); }catch(e){}
-    /* Hide the nav pill on scroll-down, bring it back on scroll-up. Content
-       scrolls INSIDE the frame, so listen there (re-bound on every frame load).
-       The radio list (shell-side) is a separate scroll and never hides the nav. */
-    try{
-      var fw=frame.contentWindow, bar=document.getElementById('bar'), appEl=document.getElementById('app'), last=0;
-      fw.addEventListener('scroll',function(){
-        var y=fw.pageYOffset||(fw.document&&fw.document.documentElement.scrollTop)||0;
-        if(y>80 && y>last+5) bar.classList.add('hide');
-        else if(y<last-5 || y<40) bar.classList.remove('hide');
-        last=y;
-      },{passive:true});
-    }catch(e){}
+    /* (No scroll-driven nav hide anymore — it reflowed the whole framed page on
+       every hide/show and made scrolling lag. The nav is a slim always-on header
+       instead, which costs nothing to scroll past.) */
     /* Framed rooms do not bubble clicks to the shell. Record only the kind of
        control and its destination. The one approved query exception is a public
        product ID, so the owner can see which products get opened; pass codes and
