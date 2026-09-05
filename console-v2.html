@@ -44,7 +44,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
   .grid{gap:9px;padding:8px 12px 112px}
   /* a touch shorter than square so the whole menu fits the screen on landing */
   .grid .box{aspect-ratio:1/0.82}
-  .grid .box.wide{aspect-ratio:auto;min-height:124px}
+  /* TV is a video — give it more height on phones so the clip is less cropped */
+  .grid .box.wide{aspect-ratio:auto;min-height:188px}
 }
 
 /* a box is mostly a big preview; text hides until you tap it */
@@ -248,15 +249,15 @@ body:not(.booting) .pressplay{opacity:0}
 #uni:not(.listmode) #ugrid{display:none}
 /* while typing in the search, results from the whole library overlay the universe */
 /* SEARCH RESULTS = a clean vertical list with square covers (not the card grid) */
-#uni.searching #ugrid{display:block!important;background:rgba(5,5,8,.96);z-index:5;padding:12px 12px 140px}
-#uni.searching .uhint{display:none}
-#uni.searching .ucard{display:grid;grid-template-columns:56px 1fr;column-gap:12px;align-items:center;
+#uni.searching #ugrid,#uni.listmode #ugrid{display:block!important;background:rgba(5,5,8,.96);z-index:5;padding:12px 12px 140px}
+#uni.searching .uhint,#uni.listmode .uhint{display:none}
+#uni.searching .ucard,#uni.listmode .ucard{display:grid;grid-template-columns:56px 1fr;column-gap:12px;align-items:center;
   border:1px solid var(--border);border-radius:12px;background:#0c0c0c;padding:8px 10px;margin:0 0 8px;overflow:hidden}
-#uni.searching .ucard:hover{border-color:var(--acid)}
-#uni.searching .ucard .uc{grid-row:1/3;width:56px;height:56px;aspect-ratio:auto;border-radius:8px;background-size:cover}
-#uni.searching .ucard .uc::after{display:none}
-#uni.searching .ucard .un{grid-column:2;align-self:end;padding:0;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#uni.searching .ucard .ua{grid-column:2;align-self:start;padding:2px 0 0;font-size:7px}
+#uni.searching .ucard:hover,#uni.listmode .ucard:hover{border-color:var(--acid)}
+#uni.searching .ucard .uc,#uni.listmode .ucard .uc{grid-row:1/3;width:56px;height:56px;aspect-ratio:auto;border-radius:8px;background-size:cover}
+#uni.searching .ucard .uc::after,#uni.listmode .ucard .uc::after{display:none}
+#uni.searching .ucard .un,#uni.listmode .ucard .un{grid-column:2;align-self:end;padding:0;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#uni.searching .ucard .ua,#uni.listmode .ucard .ua{grid-column:2;align-self:start;padding:2px 0 0;font-size:7px}
 
 /* ---- network chip + thin strip ---- */
 .chip.net{color:var(--red);text-decoration:none}
@@ -468,6 +469,18 @@ html.framed .hello{padding-top:16px}
       <a class="en">ENTER ▶</a></div>
   </button>
 
+  <button class="box ics" data-ico="ics">
+    <video class="tvvid" muted loop playsinline autoplay preload="auto"
+      poster="https://onlyibee.com/assets/ics-banner-poster.jpg"
+      src="https://onlyibee.com/assets/ics-banner.mp4"></video>
+    <div class="peek" style="background:none"></div>
+    <span class="ico"></span>
+    <span class="nm">ICS</span><span class="cnt">08 ▸</span>
+    <div class="info"><div class="tg">THE CREW · PROJECT 03</div>
+      <div class="ds">meet the characters.</div>
+      <a class="en">ENTER ▶</a></div>
+  </button>
+
   <button class="box rooms" data-ico="rooms">
     <div class="peek"><div class="mosaic">
       <i style="background-image:url(https://onlyibee.com/arcade/covers/midnight-transit.png)"></i>
@@ -479,18 +492,6 @@ html.framed .hello{padding-top:16px}
     <span class="nm">ROOMS</span><span class="cnt">10 ▸</span>
     <div class="info"><div class="tg">VISUALIZERS</div>
       <div class="ds">creative, playable ways to hear the music.</div>
-      <a class="en">ENTER ▶</a></div>
-  </button>
-
-  <button class="box ics" data-ico="ics">
-    <video class="tvvid" muted loop playsinline autoplay preload="auto"
-      poster="https://onlyibee.com/assets/ics-banner-poster.jpg"
-      src="https://onlyibee.com/assets/ics-banner.mp4"></video>
-    <div class="peek" style="background:none"></div>
-    <span class="ico"></span>
-    <span class="nm">ICS</span><span class="cnt">08 ▸</span>
-    <div class="info"><div class="tg">THE CREW · PROJECT 03</div>
-      <div class="ds">meet the characters.</div>
       <a class="en">ENTER ▶</a></div>
   </button>
 
@@ -544,9 +545,9 @@ html.framed .hello{padding-top:16px}
     <p class="abp">A versatile, curious artist who finds joy in creation and exploration. Human-made work filled with intention, connecting Paris, Toronto and beyond — for those who seek something real. This site is an engine for art and discovery. Scan a tag, enter the zone.</p>
     <div class="abtitle sm">PROJECTS<span class="red">.DIR</span></div>
     <div class="abproj">
-      <a href="https://onlyibee.com/#utopie" target="_blank" rel="noopener"><b>UTOPIE™</b><span>01 · THE UMBRELLA</span></a>
-      <a href="https://onlyibee.com/#ics" target="_blank" rel="noopener"><b>ICS</b><span>02 · CHESS SET</span></a>
-      <a href="https://onlyibee.com/#lazone" target="_blank" rel="noopener"><b>LA ZONE</b><span>03 · THE MUSEUM</span></a>
+      <a href="console.html#utopie"><b>UTOPIE™</b><span>01 · THE UMBRELLA</span></a>
+      <a href="console.html#ics"><b>ICS</b><span>02 · CHESS SET</span></a>
+      <a href="console.html#lazone"><b>LA ZONE</b><span>03 · THE MUSEUM</span></a>
     </div>
     <div class="abtitle sm">CONTACT<span class="acid">.SYS</span></div>
     <ul class="ablinks">
@@ -826,7 +827,7 @@ html.framed .hello{padding-top:16px}
   var libPoll=setInterval(function(){ refreshLibrary(); if(libCount>1) { /* keep polling a bit for late extras */ } }, 1200);
   setTimeout(function(){ clearInterval(libPoll); }, 15000);
   var cv=$("unicv"), cx=cv.getContext("2d"), CW=0,CH=0,DPR=1;
-  var uniOpen=false, mode="galaxy", curG=-1, perf=null, detOpen=false, aligned=false, gxs=[], planets=[], hoverP=null, hoverG=-1, uq="", lastT=0;
+  var uniOpen=false, mode="galaxy", curG=-1, perf=null, detOpen=false, aligned=false, gxs=[], planets=[], hoverP=null, hoverG=-1, uq="", lastT=0, curDetSlug=null;
   var stars=[]; for(var k=0;k<90;k++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()});
   var utitle=document.querySelector(".utitle"), uhint=document.querySelector(".uhint");
   function imgCover(img,dx,dy,d){ if(!img||!img._ok)return false; var iw=img.naturalWidth,ih=img.naturalHeight,s=Math.max(d/iw,d/ih),sw=d/s,sh=d/s; cx.drawImage(img,(iw-sw)/2,(ih-sh)/2,sw,sh,dx,dy,d,d); return true; }
@@ -837,7 +838,10 @@ html.framed .hello{padding-top:16px}
   function sizeCv(){ var r=$("unistage").getBoundingClientRect(); if(!r.width)return;
     CW=r.width;CH=r.height;DPR=Math.min(2,window.devicePixelRatio||1);
     cv.width=CW*DPR;cv.height=CH*DPR;cx.setTransform(DPR,0,0,DPR,0,0);
-    var R=Math.min(CW,CH)*0.19, n=gxs.length||1, sp=Math.min(CH*0.42,CH/(n+0.25)), y0=CH*0.5-(n-1)*sp/2;
+    /* tighter spacing + shift up: each galaxy's name label hangs below it, so
+       centering on the galaxy CENTRES left the whole cluster (galaxies+labels)
+       sitting low. Pull it up so the block reads centered on the page. */
+    var R=Math.min(CW,CH)*0.19, n=gxs.length||1, sp=Math.min(CH*0.30,R*2.7), y0=CH*0.5-(n-1)*sp/2-R*0.35;
     gxs.forEach(function(gd,i){ gd.x=CW*0.5; gd.y=y0+i*sp; gd.r=R; }); }
   function drawStars(beat){ cx.fillStyle="#050506";cx.fillRect(0,0,CW,CH);
     stars.forEach(function(st){ st.y+=0.0003+st.z*0.0006; if(st.y>1)st.y=0;
@@ -962,7 +966,19 @@ html.framed .hello{padding-top:16px}
     var dt=Math.min(0.05,((t-lastT)/1000)||0.016); lastT=t; var beat=curBeat;
     if(!CW){ sizeCv(); } drawStars(beat);
     if(mode==="system" && !detOpen && !aligned) syncPerformer();  /* follow the radio (free if this galaxy isn't the one playing) */
+    if(detOpen) followDetail();   /* an open song page follows whatever the radio plays */
     if(mode==="galaxy") drawGalaxies(beat); else drawSystem(dt,beat); }
+  /* When a song page is open and the radio moves to a DIFFERENT song, swap the page
+     to that song (switching galaxy if needed) so the page always matches what plays. */
+  function followDetail(){ var R=RADIO(); if(!R||!R.playing||!R.playing()) return;
+    var slug=R.slug&&R.slug(); if(!slug||slug===curDetSlug) return;
+    var s=null; for(var i=0;i<SONGS.length;i++){ if(SONGS[i].slug===slug){ s=SONGS[i]; break; } }
+    if(!s) return;
+    if(s.g!==curG){ enterGalaxy(s.g); }        /* the new song lives in another galaxy — go there */
+    var pl=planetBySlug(slug); if(pl){ perf=pl; aligned=false; assignOrbits(); focusDetPlanet(pl); }
+    openDet(s); }
+  /* like focusPlanet but WITHOUT re-playing (the radio is already on this song) */
+  function focusDetPlanet(pl){ aligned=false; perf=pl; assignOrbits(); }
   function galaxyAt(mx,my){ for(var i=0;i<gxs.length;i++){ if(Math.hypot(mx-gxs[i].x,my-gxs[i].y)<gxs[i].r*1.05) return i; } return -1; }
   function planetAt(mx,my){ var best=null,bd=1e9; planets.forEach(function(pl){var d=Math.hypot(pl.x-mx,pl.y-my); if(d<bd){bd=d;best=pl;}}); return (best&&bd<(best.bell*0.7*best.perfScale+16))?best:null; }
   function focusPlanet(pl){ aligned=false; perf=pl; assignOrbits(); playSong(pl.s); openDet(pl.s); }
@@ -1025,9 +1041,9 @@ html.framed .hello{padding-top:16px}
     if(S&&S.songCities){ S.songCities(s.slug).then(function(rows){ rows=(rows||[]).slice(0,5); var el=$("dct"); if(!el)return;
       el.innerHTML=rows.length? rows.map(function(row,n){return '<span class="cr"><b>'+(n+1)+'</b> '+esc(row.city_name||'—')+'<i>'+Number(row.listeners||0).toLocaleString()+'</i></span>';}).join('')
         : '<span class="ct0">cities appear as this song is played_</span>'; }).catch(function(){}); }
-    renderKaraoke(s); detOpen=true; $("udet").classList.add("on"); setTitle(); klStart();
+    renderKaraoke(s); detOpen=true; curDetSlug=s.slug; $("udet").classList.add("on"); setTitle(); klStart();
     $("dplay").onclick=function(){ playSong(s); toast("NOW PLAYING  "+s.n+"_"); }; }
-  function closeDet(){ detOpen=false; $("udet").classList.remove("on"); klStop(); setTitle(); }
+  function closeDet(){ detOpen=false; curDetSlug=null; $("udet").classList.remove("on"); klStop(); setTitle(); }
   /* big album view — opens when you tap the cover pinned at the top */
   function openAlbum(i){ var g=GAL[i], list=SONGS.filter(function(s){return s.g===i;});
     $("albcv").style.backgroundImage="url("+g.cv+")"; $("albt").textContent=g.name;

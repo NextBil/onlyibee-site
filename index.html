@@ -67,10 +67,12 @@
      background (NO backdrop-filter blur — that re-samples every scroll frame and
      tanks mobile) and no scroll-driven resize (the collapsing header reflowed the
      whole iframe on every hide/show, which is what made the site lag). */
-  #bar{align-self:center;max-width:calc(100vw - 16px);display:flex;align-items:center;gap:4px;
-    margin:calc(8px + env(safe-area-inset-top)) auto 6px;
-    padding:5px 7px;background:#0c0c0e;border:1px solid var(--border);border-radius:16px;
-    box-shadow:0 6px 18px rgba(0,0,0,.45);position:relative;z-index:40}
+  #bar{align-self:center;max-width:calc(100vw - 14px);display:flex;align-items:center;gap:5px;
+    margin:calc(9px + env(safe-area-inset-top)) auto 7px;
+    padding:7px 12px;background:#0c0c0e;border:1.5px solid var(--border);border-radius:26px;
+    box-shadow:0 6px 18px rgba(0,0,0,.45);position:relative;z-index:40;transition:border-color .45s ease}
+  /* the pill's border takes on the PLAYING song's colour; neutral when silent */
+  body.radioon #bar{border-color:hsla(var(--rh),var(--rs),60%,.9)}
   /* DESKTOP: with room to spare, the pill becomes a vertical rail on the LEFT and
      the content sits beside it (nav on top only when the window is narrow). */
   @media(min-width:1000px){
@@ -89,11 +91,11 @@
      the icon — the console-nav design, now the single site nav */
   #nav button{display:flex;flex-direction:column;align-items:center;gap:4px;
     font-family:var(--px);font-size:7px;color:var(--dim);background:transparent;border:1px solid transparent;
-    border-radius:12px;padding:6px 9px 5px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
+    border-radius:14px;padding:7px 11px 6px;cursor:pointer;white-space:nowrap;flex:0 0 auto;
     /* animate ONLY transform (compositor) so the card-lift stays smooth even while
        the page it opens is doing heavy work; colour/shadow snap without a repaint loop */
     transition:transform .2s cubic-bezier(.2,.9,.25,1.3),color .12s,background .12s,border-color .12s}
-  #nav button .nvxwrap{position:relative;width:26px;height:26px;perspective:150px}
+  #nav button .nvxwrap{position:relative;width:31px;height:31px;perspective:150px}
   /* the soft radial glow behind each icon (brightens on the selected one) */
   #nav button .nvxwrap::before{content:'';position:absolute;inset:-30% -20% -6%;z-index:-1;border-radius:50%;
     background:radial-gradient(circle at 50% 45%,rgba(182,255,0,.45),transparent 68%);opacity:.28;transition:opacity .16s}
@@ -175,6 +177,7 @@
      transform, no forced layer, no blur, no transition = smooth native scroll. */
   #tracklist{position:absolute;left:0;right:0;bottom:100%;max-height:52vh;overflow:hidden;
     background:#080809;border:1px solid hsla(var(--rh),var(--rs),55%,.5);border-bottom:0;
+    border-radius:18px 18px 0 0;
     box-shadow:inset 0 1px 0 hsla(var(--rh),var(--rs),65%,.18);display:none}
   /* the header/search/shelf stay put; only the LIST scrolls — this is how the old
      (smooth) version worked. Scrolling a clean inner list beats scrolling the whole
@@ -318,6 +321,7 @@
     background:linear-gradient(180deg,
       hsla(var(--rh),var(--rs),14%,1), hsla(var(--rh),var(--rs),9%,1) 60%, #08090b);
     border-top:2px solid hsla(var(--rh),var(--rs),52%,.55);
+    border-radius:22px 22px 0 0;
     padding:8px 12px 10px;position:relative;
     display:flex;flex-direction:column;gap:7px;
     box-shadow:0 -6px 22px hsla(var(--rh),var(--rs),50%,.10),
@@ -891,10 +895,9 @@
   var NAV=[
     {n:'HOME',    u:'console-v2.html'},
     {n:'MUSIC',   u:'console-v2.html#universe'},
-    {n:'ROOMS',   u:'arcade/'},
     {n:'SHOP',    u:'console.html#shop'},
-    {n:'TV',      u:'tv/'},
-    {n:'ICS',     u:'console.html#ics'}
+    {n:'ROOMS',   u:'arcade/'},
+    {n:'TV',      u:'tv/'}
   ];
   /* (lyrics left the nav — the spinning book in the player opens the overlay) */
   var navEl=document.getElementById('nav');
