@@ -62,16 +62,28 @@
 
   /* ---- top bar: ONE nav, styled as the floating console pill (detached rounded
      bar, translucent + blur, soft shadow) — the design used across the site ---- */
-  /* JUST the pill — floats over the content (nothing behind it), so the page
-     scrolls UNDER it and there is no empty header left when it hides */
-  #bar{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
-    max-width:calc(100vw - 16px);display:flex;align-items:center;gap:4px;
-    padding:5px 7px;background:rgba(9,9,9,.72);border:1px solid var(--border);border-radius:16px;
+  /* the pill sits IN the layout (a slim rounded header), so content always
+     starts below it on every page — never hidden underneath */
+  #bar{align-self:center;max-width:calc(100vw - 16px);display:flex;align-items:center;gap:4px;
+    margin:calc(8px + env(safe-area-inset-top)) auto 6px;
+    padding:5px 7px;background:rgba(9,9,9,.85);border:1px solid var(--border);border-radius:16px;
     box-shadow:0 8px 26px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.35);
-    -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);z-index:40;
-    transition:transform .3s ease,opacity .3s ease}
-  /* tucks away on scroll-down, comes back on scroll-up (keeps the centering) */
-  #bar.hide{transform:translateX(-50%) translateY(calc(-100% - 24px));opacity:0;pointer-events:none}
+    -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);position:relative;z-index:40;
+    transition:margin-top .3s ease,opacity .25s ease}
+  /* hide by COLLAPSING the header space (negative margin pulls it up and the
+     content fills in), so scrolling down never leaves an empty black header */
+  #bar.hide{margin-top:calc(-72px - env(safe-area-inset-top));opacity:0;pointer-events:none}
+  /* DESKTOP: with room to spare, the pill becomes a vertical rail on the LEFT and
+     the content sits beside it (nav on top only when the window is narrow). */
+  @media(min-width:1000px){
+    #bar{position:fixed;left:14px;top:14px;bottom:14px;flex-direction:column;justify-content:flex-start;
+      align-self:auto;margin:0;max-width:none;width:auto;gap:6px;border-radius:22px;padding:9px 6px;overflow-y:auto}
+    #bar::-webkit-scrollbar{display:none}
+    #nav{flex-direction:column;gap:4px;overflow-x:visible}
+    #acct{margin-top:auto}          /* profile sits at the bottom of the rail */
+    #bar.hide{margin:0;opacity:1;pointer-events:auto}   /* the rail stays put on desktop */
+    #stage,#bottom{margin-left:80px}                     /* clear the rail */
+  }
   /* content-width so the pill stays a cute, compact size (not full width) */
   #nav{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;min-width:0}
   #nav::-webkit-scrollbar{display:none}
@@ -1053,7 +1065,7 @@
        scrolls INSIDE the frame, so listen there (re-bound on every frame load).
        The radio list (shell-side) is a separate scroll and never hides the nav. */
     try{
-      var fw=frame.contentWindow, bar=document.getElementById('bar'), last=0;
+      var fw=frame.contentWindow, bar=document.getElementById('bar'), appEl=document.getElementById('app'), last=0;
       fw.addEventListener('scroll',function(){
         var y=fw.pageYOffset||(fw.document&&fw.document.documentElement.scrollTop)||0;
         if(y>80 && y>last+5) bar.classList.add('hide');
