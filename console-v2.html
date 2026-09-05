@@ -407,6 +407,8 @@ body:not(.booting) .pressplay{opacity:0}
 .abquote{position:relative;margin-top:16px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
 .abquote video{width:100%;display:block;filter:brightness(.65)}
 .abquote figcaption{position:absolute;inset:auto 0 0 0;padding:14px;font-size:16px;color:#fff;background:linear-gradient(180deg,transparent,rgba(0,0,0,.85))}
+.abfilm{margin-top:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.abfilm video{width:100%;display:block}
 .abtitle{font-family:var(--px);font-size:14px;color:#fff;margin-top:26px}.abtitle.sm{font-size:11px;margin-top:28px}
 .abtitle .acid{color:var(--acid)}.abtitle .red{color:var(--red)}
 .abme{display:flex;align-items:center;gap:14px;margin-top:16px}
@@ -556,6 +558,14 @@ html.framed .hello{padding-top:16px}
       <a href="console.html#ics"><b>ICS</b><span>02 · CHESS SET</span></a>
       <a href="console.html#lazone"><b>LA ZONE</b><span>03 · THE MUSEUM</span></a>
     </div>
+    <div class="abtitle sm">VIDEOS<span class="red">.DIR</span></div>
+    <figure class="abfilm"><video id="abvid3" muted loop playsinline preload="none"
+      src="https://onlyibee.com/assets/video/shortfilm.mp4" aria-label="short film"></video></figure>
+    <ul class="ablinks">
+      <li><a href="https://www.youtube.com/watch?v=7F42hEzB44M" target="_blank" rel="noopener">TOUJOURS / JE NE REGRETTE RIEN →</a></li>
+      <li><a href="https://www.youtube.com/watch?v=hMkh-wA1kvo" target="_blank" rel="noopener">FUYEZ! (COURT MÉTRAGE) →</a></li>
+      <li><a href="https://www.youtube.com/watch?v=T1e6cesSEpg" target="_blank" rel="noopener">DANS LA STREET →</a></li>
+    </ul>
     <div class="abtitle sm">CONTACT<span class="acid">.SYS</span></div>
     <ul class="ablinks">
       <li><a href="mailto:contact@onlyibee.com">EMAIL → CONTACT@ONLYIBEE.COM</a></li>
@@ -1123,10 +1133,10 @@ html.framed .hello{padding-top:16px}
 
   /* ABOUT overlay + footer year */
   $("aboutBtn").onclick=function(){ $("about").classList.add("on");
-    ["abvid","abvid2"].forEach(function(id){ var v=$(id); if(v){try{v.play();}catch(e){}} }); };
+    ["abvid","abvid2","abvid3"].forEach(function(id){ var v=$(id); if(v){try{v.play();}catch(e){}} }); };
   var netB=$("netBtn"); if(netB) netB.onclick=function(){ navTo("stats/"); };
   $("abback").onclick=function(){ $("about").classList.remove("on");
-    ["abvid","abvid2"].forEach(function(id){ var v=$(id); if(v){try{v.pause();}catch(e){}} }); };
+    ["abvid","abvid2","abvid3"].forEach(function(id){ var v=$(id); if(v){try{v.pause();}catch(e){}} }); };
   $("about").addEventListener("click",function(e){ if(e.target===this) $("abback").click(); });
   var yrEl=$("yr"); if(yrEl) yrEl.textContent=new Date().getFullYear();
 
