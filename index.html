@@ -88,7 +88,11 @@
     #acct{margin-top:5px}                 /* profile sits right under the icons */
     #acct button{padding:8px 10px}
     #acct .nvxwrap{width:35px;height:35px}
-    #stage,#bottom{margin-left:92px}      /* clear the rail */
+    /* content + player span the FULL width so they CENTRE on the whole screen
+       (each centres its own inner content with max-width + auto margins); the
+       vertical rail floats in the empty left margin rather than pushing
+       everything to the right. */
+    #stage,#bottom{margin-left:0}
   }
   /* content-width so the pill stays a cute, compact size (not full width) */
   #nav{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;min-width:0}
