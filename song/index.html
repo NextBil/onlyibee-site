@@ -145,6 +145,9 @@
   .credit{display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
     background:#0b0b0d;border:1px solid var(--border);padding:12px 13px;color:var(--ink);font-family:var(--vt)}
   .credit:hover{border-color:hsl(var(--h),var(--s),58%)}
+  .credit .av,#cav{position:relative;overflow:hidden}
+  .credit .av img,#cav img{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;border-radius:50%}
   .credit .av{width:40px;height:40px;flex:none;border-radius:50%;
     background:radial-gradient(circle at 35% 30%,hsl(var(--h),var(--s),62%),#15151a 70%);
     display:flex;align-items:center;justify-content:center;
@@ -175,29 +178,46 @@
   .tail{margin-top:34px;text-align:center;font-size:17px;color:var(--dim);line-height:1.6}
   .tail a{text-decoration:none;border-bottom:1px dashed currentColor}
 
-  /* ---- the credit window: a small panel ON the page, not a new tab ----
-     It cannot contain instagram.com itself — Instagram answers every request
-     with `x-frame-options: DENY`, so an <iframe> of a profile renders as a
-     blank box, styled or not. What it can do is keep you here: the card, the
-     handle and one deliberate way out, with the record still playing behind
-     it. Closing costs a tap, Escape, or the backdrop. */
+  /* ---- the credit window: their actual Instagram, ON this page ----
+     The bare profile URL cannot be framed — instagram.com/<user>/ answers with
+     `x-frame-options: DENY`. But instagram.com/<user>/embed/ is Instagram's own
+     profile-embed endpoint and sends no such header, so it frames fine and
+     renders the real thing: avatar, bio, follower and post counts, and the
+     post grid. That is what is in the box.
+     It is NOT a navigation, on purpose — the record is playing in the shell and
+     leaving this page would stop it. Closing costs a tap, Escape, or the
+     backdrop. The iframe src is only set when the window opens and cleared when
+     it shuts, so Instagram is never contacted for someone who never asked. */
   #cmodal{position:fixed;inset:0;z-index:9600;display:none;align-items:center;justify-content:center;
     padding:18px;background:rgba(0,0,0,.72)}
   #cmodal.on{display:flex}
-  #cbox{position:relative;width:100%;max-width:360px;background:#0b0b0d;
+  #cbox{position:relative;width:100%;max-width:400px;background:#0b0b0d;
     border:1px solid hsl(var(--h),var(--s),55%);
     box-shadow:0 20px 60px rgba(0,0,0,.75),0 0 40px hsla(var(--h),var(--s),55%,.22);
-    padding:26px 22px 20px;text-align:center}
-  #cclose{position:absolute;top:8px;right:9px;width:30px;height:30px;cursor:pointer;
-    background:transparent;border:0;color:var(--dim);font-size:17px;line-height:1}
+    padding:20px 16px 16px;text-align:center;
+    max-height:calc(100vh - 36px);overflow-y:auto}
+  /* the embed is a white Instagram card — give it a frame so it does not look
+     like a hole punched in the page */
+  #cframewrap{position:relative;margin:14px 0 12px;border:1px solid var(--border);
+    background:#fff;min-height:200px}
+  /* Sized against the VIEWPORT, not a fixed 460px: at a fixed height the box
+     grew taller than the window, #cbox started scrolling, and the close button
+     — absolutely positioned inside it — scrolled out of reach. Now the whole
+     window fits and the X is always there. */
+  #cframe{display:block;width:100%;height:min(460px,48vh);min-height:260px;border:0}
+  #cload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:#0d0d10;color:var(--dim);font-family:var(--px);font-size:7.5px;letter-spacing:1px}
+  #cframewrap.ready #cload{display:none}
+  #cclose{position:sticky;top:0;float:right;width:32px;height:32px;cursor:pointer;
+    background:#0b0b0d;border:0;color:var(--dim);font-size:17px;line-height:1;z-index:2}
   #cclose:hover{color:var(--red)}
-  #cav{width:78px;height:78px;border-radius:50%;margin:0 auto 14px;
+  #cav{width:58px;height:58px;border-radius:50%;margin:0 auto 11px;
     background:radial-gradient(circle at 35% 30%,hsl(var(--h),var(--s),62%),#15151a 72%);
     display:flex;align-items:center;justify-content:center;
-    font-family:var(--px);font-size:22px;color:#07120a}
+    font-family:var(--px);font-size:17px;color:#07120a}
   #cname{font-family:var(--px);font-size:12px;letter-spacing:1px;margin-bottom:9px;line-height:1.5}
   #crole{font-size:17px;color:var(--dim);margin-bottom:3px}
-  #chandle{font-size:18px;color:hsl(var(--h),var(--s),66%);margin-bottom:18px}
+  #chandle{font-size:18px;color:hsl(var(--h),var(--s),66%)}
   #cgo{display:block;text-decoration:none;font-family:var(--px);font-size:9px;letter-spacing:1px;
     padding:14px 12px;background:var(--acid);color:#07120a;border:1px solid var(--acid)}
   #cgo:hover{background:#c9ff33}
@@ -273,8 +293,13 @@
     <div id="cname"></div>
     <div id="crole"></div>
     <div id="chandle"></div>
-    <a id="cgo" target="_blank" rel="noopener noreferrer">OPEN INSTAGRAM &#8599;</a>
-    <div id="cnote">OPENS IN A NEW TAB &middot; THE RECORD KEEPS PLAYING</div>
+    <div id="cframewrap"><div id="cload">LOADING PROFILE_</div>
+      <iframe id="cframe" title="Instagram profile" loading="lazy" scrolling="no"
+              referrerpolicy="origin-when-cross-origin"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+    </div>
+    <a id="cgo" target="_blank" rel="noopener noreferrer">OPEN FULL PROFILE &#8599;</a>
+    <div id="cnote">THE RECORD KEEPS PLAYING</div>
   </div>
 </div>
 <div id="toast"></div>
@@ -367,13 +392,17 @@ function draw(force){
     currentCredits=cr;
     $('feat').innerHTML=cr.map(function(p,ci){
       var initial=(p.n||'?').trim().charAt(0).toUpperCase();
+      /* their photo over the initial; onerror drops the <img> so a missing or
+         mistyped file falls back to the letter instead of a broken icon */
+      var pic=p.img?('<img src="'+esc(p.img)+'" alt="" loading="lazy"'
+        +' onerror="this.remove()">'):'';
       var handle=p.ig?('@'+String(p.ig).replace(/\/+$/,'').split('/').pop()):'';
       var line=[p.role,handle].filter(Boolean).join('  \u00b7  ');
       /* a credit with no link is still a credit — render it as a plain row
          rather than a button that goes nowhere */
       var tag='button';
       return '<'+tag+' class="credit" type="button" data-credit="'+ci+'">'
-        +'<span class="av">'+esc(initial)+'</span>'
+        +'<span class="av">'+esc(initial)+pic+'</span>'
         +'<span class="who"><span class="nm">'+esc(p.n||'')+'</span>'
         +(line?'<span class="rl">'+esc(line)+'</span>':'')+'</span>'
         +'<span class="go">OPEN &#8599;</span>'
@@ -457,7 +486,13 @@ function toast(t){ var e=$('toast'); e.textContent=t; e.classList.add('on');
 var cmodal=$('cmodal'), lastFocus=null;
 function openCredit(p){
   lastFocus=document.activeElement;
-  $('cav').textContent=(p.n||'?').trim().charAt(0).toUpperCase();
+  var cav=$('cav');
+  cav.textContent=(p.n||'?').trim().charAt(0).toUpperCase();
+  if(p.img){
+    var im=document.createElement('img');
+    im.alt=''; im.onerror=function(){ im.remove(); }; im.src=p.img;
+    cav.appendChild(im);
+  }
   $('cname').textContent=p.n||'';
   $('crole').textContent=p.role||'';
   var handle=p.ig?('@'+String(p.ig).replace(/\/+$/,'').split('/').pop()):'';
@@ -465,11 +500,30 @@ function openCredit(p){
   var go=$('cgo');
   if(p.ig){ go.href=p.ig; go.style.display=''; } else go.style.display='none';
   $('cnote').style.display=p.ig?'':'none';
+
+  /* The embed: instagram.com/<user>/embed/ — Instagram's own endpoint, the one
+     that is actually framable. Derived from the profile URL so credits.js only
+     ever has to carry the normal link someone would paste. */
+  var wrap=$('cframewrap'), fr=$('cframe');
+  wrap.classList.remove('ready');
+  var handleOnly=p.ig?String(p.ig).replace(/[?#].*$/,'').replace(/\/+$/,'').split('/').pop():'';
+  if(handleOnly){
+    wrap.style.display='';
+    fr.onload=function(){ wrap.classList.add('ready'); };
+    fr.src='https://www.instagram.com/'+encodeURIComponent(handleOnly)+'/embed/';
+  }else{
+    wrap.style.display='none';
+    fr.removeAttribute('src');
+  }
+
   cmodal.classList.add('on');
   try{ $('cclose').focus(); }catch(e){}
 }
 function closeCredit(){
   cmodal.classList.remove('on');
+  /* drop the src: a hidden iframe keeps the embed alive (and its requests
+     going) for the rest of the visit otherwise */
+  var fr=$('cframe'); fr.removeAttribute('src'); $('cframewrap').classList.remove('ready');
   try{ if(lastFocus&&lastFocus.focus) lastFocus.focus(); }catch(e){}
 }
 $('cclose').onclick=closeCredit;
