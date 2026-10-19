@@ -532,8 +532,15 @@
     b.textContent = on ? "♥" : "♡";
     b.classList.toggle("on", on);
   }
-  /* a song's shareable address: the site root adopts ?s=<slug> and plays it */
-  function songLink(s){ return ROOT + "?s=" + encodeURIComponent(s.f.replace(/\.mp3$/i,"")); }
+  /* A song's shareable address.
+     It points at /s/<slug>/, a tiny generated page (tools/make-share-pages.py)
+     that exists for ONE reason: link previews. The crawlers behind iMessage,
+     WhatsApp, Instagram and Discord do not run JavaScript — they read the raw
+     <meta og:*> and leave — so /?s=<slug> could only ever preview as one
+     generic card for every record. /s/<slug>/ carries that record's own cover
+     and title, then redirects a human to /?s=<slug>, which is still the real
+     destination and still works for every link already out in the wild. */
+  function songLink(s){ return ROOT + "s/" + encodeURIComponent(s.f.replace(/\.mp3$/i,"")) + "/"; }
   function shareSong(s, btn){
     var url = songLink(s);
     try{ if(navigator.clipboard) navigator.clipboard.writeText(url); }catch(e){}

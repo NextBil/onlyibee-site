@@ -140,6 +140,23 @@
   #lyr div{padding:1px 0}
   #lyr div.hot{color:hsl(var(--h),var(--s),68%)}
 
+  /* ---- featuring ---- */
+  #feat{display:flex;flex-direction:column;gap:9px}
+  .credit{display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
+    background:#0b0b0d;border:1px solid var(--border);padding:12px 13px;color:var(--ink);font-family:var(--vt)}
+  .credit:hover{border-color:hsl(var(--h),var(--s),58%)}
+  .credit .av{width:40px;height:40px;flex:none;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,hsl(var(--h),var(--s),62%),#15151a 70%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--px);font-size:11px;color:#07120a}
+  .credit .who{flex:1;min-width:0}
+  .credit .nm{font-family:var(--px);font-size:9px;letter-spacing:.5px;display:block;margin-bottom:5px}
+  .credit .rl{font-size:16px;color:var(--dim);display:block;line-height:1.3}
+  .credit .go{flex:none;font-family:var(--px);font-size:7px;letter-spacing:1px;
+    color:hsl(var(--h),var(--s),66%);border:1px solid currentColor;padding:7px 9px;white-space:nowrap}
+  .credit:hover .go{background:hsl(var(--h),var(--s),58%);color:#07120a;border-color:transparent}
+  .credit .nocta{flex:none;font-family:var(--px);font-size:7px;color:#444}
+
   .cityrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #1b1b1e;
     font-size:17px}
   .cityrow:last-child{border-bottom:0}
@@ -157,6 +174,34 @@
 
   .tail{margin-top:34px;text-align:center;font-size:17px;color:var(--dim);line-height:1.6}
   .tail a{text-decoration:none;border-bottom:1px dashed currentColor}
+
+  /* ---- the credit window: a small panel ON the page, not a new tab ----
+     It cannot contain instagram.com itself — Instagram answers every request
+     with `x-frame-options: DENY`, so an <iframe> of a profile renders as a
+     blank box, styled or not. What it can do is keep you here: the card, the
+     handle and one deliberate way out, with the record still playing behind
+     it. Closing costs a tap, Escape, or the backdrop. */
+  #cmodal{position:fixed;inset:0;z-index:9600;display:none;align-items:center;justify-content:center;
+    padding:18px;background:rgba(0,0,0,.72)}
+  #cmodal.on{display:flex}
+  #cbox{position:relative;width:100%;max-width:360px;background:#0b0b0d;
+    border:1px solid hsl(var(--h),var(--s),55%);
+    box-shadow:0 20px 60px rgba(0,0,0,.75),0 0 40px hsla(var(--h),var(--s),55%,.22);
+    padding:26px 22px 20px;text-align:center}
+  #cclose{position:absolute;top:8px;right:9px;width:30px;height:30px;cursor:pointer;
+    background:transparent;border:0;color:var(--dim);font-size:17px;line-height:1}
+  #cclose:hover{color:var(--red)}
+  #cav{width:78px;height:78px;border-radius:50%;margin:0 auto 14px;
+    background:radial-gradient(circle at 35% 30%,hsl(var(--h),var(--s),62%),#15151a 72%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--px);font-size:22px;color:#07120a}
+  #cname{font-family:var(--px);font-size:12px;letter-spacing:1px;margin-bottom:9px;line-height:1.5}
+  #crole{font-size:17px;color:var(--dim);margin-bottom:3px}
+  #chandle{font-size:18px;color:hsl(var(--h),var(--s),66%);margin-bottom:18px}
+  #cgo{display:block;text-decoration:none;font-family:var(--px);font-size:9px;letter-spacing:1px;
+    padding:14px 12px;background:var(--acid);color:#07120a;border:1px solid var(--acid)}
+  #cgo:hover{background:#c9ff33}
+  #cnote{font-family:var(--px);font-size:6.5px;color:#555;margin-top:11px;line-height:1.8}
 
   #toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:9500;
     font-family:var(--px);font-size:8px;color:#07120a;background:var(--acid);padding:10px 14px;
@@ -195,6 +240,11 @@
     <div class="panel" id="soul"><p class="empty">reading_</p></div>
   </section>
 
+  <section id="featsec" hidden>
+    <h2>// FEATURING_</h2>
+    <div id="feat"></div>
+  </section>
+
   <section id="lyrsec" hidden>
     <h2>// WORDS_</h2>
     <div class="panel"><div id="lyr"></div></div>
@@ -216,12 +266,24 @@
     <a href="/">open the whole thing_</a>
   </div>
 </main>
+<div id="cmodal" role="dialog" aria-modal="true" aria-labelledby="cname">
+  <div id="cbox">
+    <button id="cclose" type="button" title="close" aria-label="close">&#10005;</button>
+    <div id="cav"></div>
+    <div id="cname"></div>
+    <div id="crole"></div>
+    <div id="chandle"></div>
+    <a id="cgo" target="_blank" rel="noopener noreferrer">OPEN INSTAGRAM &#8599;</a>
+    <div id="cnote">OPENS IN A NEW TAB &middot; THE RECORD KEEPS PLAYING</div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <script defer src="/assets/console-nav.js"></script>
-<script src="/assets/player.js?v=29"></script>
+<script src="/assets/player.js?v=30"></script>
 <script>document.write('<script src="/assets/song-meta.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script>document.write('<script src="/assets/lyrics-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
+<script src="/assets/credits.js?v=1"></script>
 <script src="/assets/stats-client.js?v=8"></script>
 <script src="/assets/pulse.js?v=3"></script>
 <script>
@@ -239,6 +301,7 @@ function fmt(s){ if(!isFinite(s)||s<0) return '--:--';
   var m=Math.floor(s/60),x=Math.floor(s%60); return m+':'+(x<10?'0':'')+x; }
 
 var slugWanted = (new URLSearchParams(location.search).get('s')||'').trim();
+var currentCredits=[];
 var drawnSlug = null, triedAutoplay = false, statsReq = 0;
 
 /* ---------- resolve the slug to a radio index ----------
@@ -296,6 +359,27 @@ function draw(force){
   if(m.context) soul+='<p><b>MADE //</b>'+esc(m.context)+'</p>';
   if(m.took)    soul+='<p><b>TIME //</b>'+esc(m.took)+'</p>';
   $('soul').innerHTML = soul || '<p class="empty">no notes written for this one yet — press play and make your own_</p>';
+
+  /* who else is on it — assets/credits.js, hand-kept, see the note in there */
+  var C=D('IBEE_CREDITS')||{}, cr=C[s.f]||[];
+  if(cr.length){
+    $('featsec').hidden=false;
+    currentCredits=cr;
+    $('feat').innerHTML=cr.map(function(p,ci){
+      var initial=(p.n||'?').trim().charAt(0).toUpperCase();
+      var handle=p.ig?('@'+String(p.ig).replace(/\/+$/,'').split('/').pop()):'';
+      var line=[p.role,handle].filter(Boolean).join('  \u00b7  ');
+      /* a credit with no link is still a credit — render it as a plain row
+         rather than a button that goes nowhere */
+      var tag='button';
+      return '<'+tag+' class="credit" type="button" data-credit="'+ci+'">'
+        +'<span class="av">'+esc(initial)+'</span>'
+        +'<span class="who"><span class="nm">'+esc(p.n||'')+'</span>'
+        +(line?'<span class="rl">'+esc(line)+'</span>':'')+'</span>'
+        +'<span class="go">OPEN &#8599;</span>'
+        +'</'+tag+'>';
+    }).join('');
+  }else{ currentCredits=[]; $('featsec').hidden=true; $('feat').innerHTML=''; }
 
   /* words */
   var L=D('IBEE_LYRICS')||{}, lines=L[s.f];
@@ -364,9 +448,48 @@ $('seekwrap').onclick=function(ev){
 function toast(t){ var e=$('toast'); e.textContent=t; e.classList.add('on');
   setTimeout(function(){ e.classList.remove('on'); },1700); }
 
+/* ---- a credit opens in a window ON this page ----
+   Deliberately NOT an iframe of instagram.com: Instagram answers with
+   `x-frame-options: DENY`, so an embedded profile is a blank box however it is
+   styled. And deliberately not a navigation: the record is playing in the
+   shell, and leaving this page would stop it. So the card opens here, closable
+   three ways, and going to Instagram is one explicit tap into a new tab. */
+var cmodal=$('cmodal'), lastFocus=null;
+function openCredit(p){
+  lastFocus=document.activeElement;
+  $('cav').textContent=(p.n||'?').trim().charAt(0).toUpperCase();
+  $('cname').textContent=p.n||'';
+  $('crole').textContent=p.role||'';
+  var handle=p.ig?('@'+String(p.ig).replace(/\/+$/,'').split('/').pop()):'';
+  $('chandle').textContent=handle;
+  var go=$('cgo');
+  if(p.ig){ go.href=p.ig; go.style.display=''; } else go.style.display='none';
+  $('cnote').style.display=p.ig?'':'none';
+  cmodal.classList.add('on');
+  try{ $('cclose').focus(); }catch(e){}
+}
+function closeCredit(){
+  cmodal.classList.remove('on');
+  try{ if(lastFocus&&lastFocus.focus) lastFocus.focus(); }catch(e){}
+}
+$('cclose').onclick=closeCredit;
+cmodal.addEventListener('click',function(ev){ if(ev.target===cmodal) closeCredit(); });
+document.addEventListener('keydown',function(ev){
+  if(ev.key==='Escape'&&cmodal.classList.contains('on')) closeCredit();
+});
+document.addEventListener('click',function(ev){
+  var b=ev.target.closest&&ev.target.closest('[data-credit]');
+  if(!b) return;
+  ev.preventDefault();
+  var i=+b.getAttribute('data-credit'), list=currentCredits||[];
+  if(list[i]) openCredit(list[i]);
+});
+
 $('sharebtn').onclick=function(){
   var r=R(), s=r&&r.song?r.song():null; if(!s) return;
-  var url=location.origin+'/?s='+encodeURIComponent(s.f.replace(/\.mp3$/i,''));
+  /* /s/<slug>/ so the link previews with this record's cover — see songLink()
+     in player.js and tools/make-share-pages.py */
+  var url=location.origin+'/s/'+encodeURIComponent(s.f.replace(/\.mp3$/i,''))+'/';
   if(navigator.share){ navigator.share({title:s.n+' — ONLY IBEE',url:url}).catch(function(){}); return; }
   if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast('LINK COPIED_'); })
     .catch(function(){ toast(url); }); }
