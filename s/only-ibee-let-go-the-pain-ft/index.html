@@ -7,7 +7,13 @@
      A crawler reads the tags below and stops; a person is redirected to the
      real page by the script at the bottom. -->
 <title>ONLY IBEE - LET GO THE PAIN FT — ONLY IBEE</title>
-<link rel="canonical" href="https://onlyibee.com/?s=only-ibee-let-go-the-pain-ft">
+<!-- Self-canonical ON PURPOSE. It used to point at /?s=only-ibee-let-go-the-pain-ft, and several
+     scrapers (Facebook and WhatsApp among them) follow rel=canonical and read
+     THAT page's tags instead — which are the generic site ones, so a correctly
+     shared link still previewed as the plain homepage card. noindex keeps these
+     63 redirect stubs out of search while leaving them scrapable. -->
+<link rel="canonical" href="https://onlyibee.com/s/only-ibee-let-go-the-pain-ft/">
+<meta name="robots" content="noindex, follow">
 <meta name="description" content="A record from ONLY IBEE. Press play, read what it means, and see where it is being heard.">
 <meta property="og:type" content="music.song">
 <meta property="og:site_name" content="ONLY IBEE">

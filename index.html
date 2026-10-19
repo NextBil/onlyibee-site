@@ -1125,7 +1125,19 @@
       else if(lastPage===null || page!==lastPage) trail.push(rel);
       else trail[trail.length-1]=rel;      /* same page, newer hash */
       lastRel=rel;
-      history.replaceState(null,'','?p='+encodeURIComponent(rel));
+      /* THE ADDRESS BAR HAS TO BE SHAREABLE.
+         Everything else is written as ?p=<page>, which is right — it is how a
+         reload gets back to the same screen. But on a record's page that gave
+         ?p=song%2F%3Fs%3D<slug>, and copying the address bar (the thing people
+         actually do) produced a link whose og tags are the generic site card:
+         no song title, no cover. So a record shows its real share address
+         instead, /s/<slug>/, the same URL the SHARE button builds. Reloading it
+         still lands here — the stub redirects to /?s=<slug>, which this shell
+         opens on the song page. */
+      var shareRel=null, sm=/^song\/\?s=([^&#]+)/.exec(rel);
+      if(sm) shareRel='s/'+sm[1]+'/';
+      history.replaceState(null,'', shareRel ? '/'+shareRel
+                                             : '?p='+encodeURIComponent(rel));
       /* the trail is now accurate — let the page re-decide its back button */
       try{ if(frame.contentWindow.IBEE_NAV) frame.contentWindow.IBEE_NAV.refresh(); }catch(e){}
       if(frame.contentDocument&&frame.contentDocument.title) document.title=frame.contentDocument.title;

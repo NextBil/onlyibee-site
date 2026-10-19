@@ -93,7 +93,13 @@ PAGE = """<!DOCTYPE html>
      A crawler reads the tags below and stops; a person is redirected to the
      real page by the script at the bottom. -->
 <title>{title}</title>
-<link rel="canonical" href="{site}/?s={slug}">
+<!-- Self-canonical ON PURPOSE. It used to point at /?s={slug}, and several
+     scrapers (Facebook and WhatsApp among them) follow rel=canonical and read
+     THAT page's tags instead — which are the generic site ones, so a correctly
+     shared link still previewed as the plain homepage card. noindex keeps these
+     63 redirect stubs out of search while leaving them scrapable. -->
+<link rel="canonical" href="{site}/s/{slug}/">
+<meta name="robots" content="noindex, follow">
 <meta name="description" content="{desc}">
 <meta property="og:type" content="music.song">
 <meta property="og:site_name" content="ONLY IBEE">
