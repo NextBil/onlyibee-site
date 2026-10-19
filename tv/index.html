@@ -40,6 +40,14 @@
     box-shadow:inset 0 0 40px rgba(0,0,0,.9),0 0 26px rgba(182,255,0,.07)}
   #screen{position:relative;width:100%;aspect-ratio:16/9;background:#000}
   #yt{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  /* the local channel shares the tube with the embed; only one is ever shown */
+  #tvv{position:absolute;inset:0;width:100%;height:100%;display:none;object-fit:cover;background:#000}
+  #tvv.on{display:block}
+  #unmute{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:7;cursor:pointer;
+    font-family:var(--px);font-size:8px;letter-spacing:1.5px;color:#0a0a0a;background:var(--acid);
+    border:0;padding:9px 14px;box-shadow:0 0 18px rgba(182,255,0,.45)}
+  #unmute:hover{background:#c9ff33}
+  #unmute[hidden]{display:none}
   #static{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:3}
   #static.off{display:none}
   /* CRT face over the tube */
@@ -113,7 +121,6 @@
   #screenwrap:fullscreen #screen{width:100%;height:100%;max-width:none;border:0}
   #screenwrap:fullscreen #tvfs{right:16px;top:16px}
 </style>
-<script defer src="/assets/console-nav.js"></script>
 </head>
 <body>
 <header>
@@ -127,8 +134,13 @@
       <button id="tvfs" title="fullscreen">⛶</button>
       <div id="screen">
         <iframe id="yt" title="IBEE TV" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+        <!-- CH 01 is ours, not YouTube: a self-hosted clip that plays the moment
+             the set switches on. Muted, because that is the only autoplay a
+             browser allows — #unmute turns the sound on. -->
+        <video id="tvv" loop muted playsinline preload="auto"></video>
         <canvas id="static"></canvas>
         <div id="hint"><button id="pressbtn" type="button">PRESS</button><span class="ph">a random transmission_</span></div>
+        <button id="unmute" type="button" hidden>&#128266; TAP FOR SOUND</button>
         <span id="osd">CH 01</span>
       </div>
     </div>
@@ -157,6 +169,9 @@
    (youtube.com/playlist?list=PLeMZDG5P8Kko). Add a video to the playlist,
    then add its line here (same order). ===== */
 var CHANNELS=[
+  /* A channel is either a YouTube {id} or a self-hosted {src}. This one is the
+     set's default transmission — it starts on load so the tube is never dead. */
+  {src:"/assets/video/np2-teaser.mp4", t:"NOUVEAUX PUNK 2 \u2014 TEASER"},
   {id:"-M646sfdyiw", t:"ALL I SEE"},
   {id:"rA6zb4bp-sE", t:"PIQUÉ"},
   {id:"FW8eWeDuHBk", t:"DEUSPI"},
@@ -175,8 +190,14 @@ var CHANNELS=[
 
 var yt=document.getElementById("yt"), st=document.getElementById("static"),
     osd=document.getElementById("osd"), hint=document.getElementById("hint"),
-    chN=document.getElementById("chN"), chans=document.getElementById("chans");
+    chN=document.getElementById("chN"), chans=document.getElementById("chans"),
+    tvv=document.getElementById("tvv"), unmute=document.getElementById("unmute");
 var cur=-1, staticT=null, noiseOn=true;
+/* Sound stays off until the viewer asks for it, and then stays on for the rest
+   of the visit. It is also what decides whether the TV takes the radio over:
+   a silent clip and the radio can share the room, a loud one cannot. */
+var tvSound=false;
+function isLocal(c){ return !!(c && c.src); }
 
 /* ---- static noise (the tube between channels) ---- */
 var sctx=st.getContext("2d");
@@ -210,7 +231,10 @@ function fmtViews(n){
 }
 function loadViews(){
   if(!YT_KEY) return;                                  /* no key -> stay quiet */
-  var ids=CHANNELS.map(function(c){return c.id;});
+  /* local channels have no YouTube id — asking about them returns nothing and
+     an empty id in the list would break the comma-joined query */
+  var ids=CHANNELS.map(function(c){return c.id;}).filter(Boolean);
+  if(!ids.length) return;
   /* the API takes up to 50 ids per call — one request covers the whole grid */
   for(var i=0;i<ids.length;i+=50){
     (function(batch){
@@ -232,7 +256,7 @@ function loadViews(){
 CHANNELS.forEach(function(c,i){
   var d=document.createElement("div");d.className="ch";
   d.innerHTML='<span class="no">'+String(i+1).padStart(2,"0")+'</span><span class="tt">'+c.t+'</span>'
-    +'<span class="vw" data-vw="'+c.id+'">'+(c.views?fmtViews(c.views):'')+'</span>';
+    +'<span class="vw" data-vw="'+(c.id||"")+'">'+(c.views?fmtViews(c.views):(isLocal(c)?'OURS':''))+'</span>';
   d.onclick=function(){tune(i);};
   chans.appendChild(d);
 });
@@ -253,28 +277,62 @@ function markList(){
 loadViews();
 
 /* ---- tune: static burst → swap the feed ---- */
-function tune(i){
-  cur=((i%CHANNELS.length)+CHANNELS.length)%CHANNELS.length;
-  var c=CHANNELS[cur];
-  /* one soundtrack at a time: the TV takes over from the radio */
+function hushRadio(){
   try{var r=window.IBEERADIO||(window.top&&window.top.IBEERADIO);
     if(r&&r.playing&&r.playing())r.control.pause();}catch(e){}
+}
+function tune(i,opts){
+  opts=opts||{};
+  cur=((i%CHANNELS.length)+CHANNELS.length)%CHANNELS.length;
+  var c=CHANNELS[cur], local=isLocal(c);
+  /* One soundtrack at a time: the TV takes over from the radio. A MUTED local
+     channel is the exception — on load it must not reach over and stop someone's
+     music, so it only claims the room once the sound is actually on. */
+  if(!local || tvSound) hushRadio();
   hint.style.display="none";
   noiseOn=true; st.classList.remove("off");
   osd.textContent="CH "+String(cur+1).padStart(2,"0"); osd.classList.add("on");
   chN.textContent=String(cur+1).padStart(2,"0");
   markList();
   clearTimeout(staticT);
-  yt.src="https://www.youtube-nocookie.com/embed/"+c.id+"?autoplay=1&playsinline=1&rel=0&color=white&enablejsapi=1";
+
+  if(local){
+    /* kill the embed outright — a blanked-but-loaded YouTube player keeps its
+       audio going behind our clip */
+    if(yt.src) yt.removeAttribute("src");
+    if(tvv.getAttribute("src")!==c.src) tvv.src=c.src;
+    tvv.muted=!tvSound;
+    tvv.classList.add("on");
+    var p=tvv.play();
+    if(p&&p.catch) p.catch(function(){
+      /* autoplay refused even muted (rare, and some lock-down settings): fall
+         back to the invitation rather than a dead tube */
+      noiseOn=true; st.classList.remove("off"); hint.style.display="";
+    });
+    unmute.hidden = tvSound;
+  }else{
+    tvv.classList.remove("on");
+    try{ tvv.pause(); }catch(e){}
+    unmute.hidden=true;
+    yt.src="https://www.youtube-nocookie.com/embed/"+c.id+"?autoplay=1&playsinline=1&rel=0&color=white&enablejsapi=1";
+  }
+
   staticT=setTimeout(function(){
     noiseOn=false; st.classList.add("off");
     setTimeout(function(){osd.classList.remove("on");},1400);
   },650);
 }
+unmute.onclick=function(){
+  tvSound=true; tvv.muted=false; unmute.hidden=true;
+  hushRadio();                      /* now it has a voice, it gets the room */
+  try{ tvv.play(); }catch(e){}
+};
+/* switch the set on: CH 01, our own transmission, silent until asked */
+tune(0);
 /* belt-and-suspenders autoplay: once the player loads, order it to play
    (some browsers ignore the autoplay param inside nested frames) */
 yt.addEventListener("load",function(){
-  if(cur<0)return;
+  if(cur<0 || isLocal(CHANNELS[cur]))return;
   var kick=function(){try{yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*");}catch(e){}};
   /* One or two nudges is not enough: the player has to finish booting before it
      accepts commands, and how long that takes varies with the connection. Keep
@@ -291,7 +349,8 @@ yt.addEventListener("load",function(){
   document.addEventListener("fullscreenchange",function(){
     btn.textContent = document.fullscreenElement ? "✕" : "⛶";
     /* nudge playback in case the transition paused it — never reload the src */
-    try{ yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*"); }catch(e){}
+    if(isLocal(CHANNELS[cur])){ try{ tvv.play(); }catch(e){} }
+    else { try{ yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*"); }catch(e){} }
   });
 })();
 document.getElementById("chup").onclick=function(){tune(cur+1);};
