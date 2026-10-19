@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>A RECORD — ONLY IBEE</title>
+<meta name="description" content="A record from ONLY IBEE — press play, read what it means, see where it is being heard.">
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<meta name="theme-color" content="#070707">
+<meta property="og:type" content="music.song">
+<meta property="og:site_name" content="ONLY IBEE">
+<meta property="og:title" content="Someone sent you a record — ONLY IBEE">
+<meta property="og:description" content="Press play. The story behind it, its tempo, and where in the world it is being heard.">
+<meta property="og:image" content="https://onlyibee.com/assets/img/og-default.png">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<!--
+  THE SHARED-RECORD LANDING PAGE.
+
+  Every SHARE button on the site builds <site>/?s=<slug> (player.js → songLink).
+  That link used to drop a stranger on the main menu with the song quietly
+  playing underneath — the record was adopted, but nothing on screen was about
+  it. This is the page that link deserves: one record, its cover, its story, its
+  tempo, its lyrics and where it is being heard.
+
+  WHERE THE SLUG COMES FROM, in order:
+    1. ?s= on this page's own URL (how the shell opens it)
+    2. whatever the radio is currently on (so the page is never empty)
+  After that it FOLLOWS THE RADIO: skip to another track from the bottom player
+  and this page re-draws for the new record rather than lying about it.
+
+  IT OWNS NO AUDIO. There is exactly one <audio> on this site, inside
+  player.js, and it lives in the shell so music survives navigation. This page
+  only ever asks window.IBEERADIO to do things. Giving it its own player would
+  mean two songs at once the moment someone touched the bottom bar.
+
+  AUTOPLAY: browsers refuse to start audio before a real interaction, and the
+  shell deliberately clears its "was playing" flag on boot (see §3 of the
+  README — "No autoplay" is a guarantee, not an oversight). So the page cues
+  the record and makes PLAY the biggest thing on screen. It does attempt a
+  silent play() first; where the browser allows it the song is already running,
+  and where it does not, nothing breaks and the button is waiting.
+-->
+<style>
+  :root{
+    --bg:#070707;--ink:#e8e8e8;--dim:#7a7a7a;--acid:#b6ff00;--red:#ff2b2b;
+    --cyan:#26e0ff;--border:#2a2a2a;--px:'Press Start 2P',monospace;--vt:'VT323',monospace;
+    /* the record's own colour — set from its hue the moment we know it */
+    --h:75;--s:88%;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px}
+  body{overflow-x:hidden}
+  /* the CRT face the rest of the site wears */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px)}
+  a{color:var(--cyan)}
+
+  /* ---- the record's light. One fixed layer, hue from the song, breathing on
+     --pulse (assets/pulse.js). Fixed + pointer-events:none so it can never eat
+     a tap and never moves layout. ---- */
+  #glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(60% 45% at 50% 0%,
+      hsla(var(--h),var(--s),55%,calc(.10 + var(--pulse,0)*.22)),transparent 70%)}
+
+  main{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:18px 16px 90px}
+
+  .from{font-family:var(--px);font-size:8px;letter-spacing:1.5px;color:var(--dim);
+    text-align:center;margin:6px 0 18px;line-height:1.9}
+  .from b{color:var(--acid);font-weight:normal;white-space:nowrap}
+  /* on a phone the one-line version breaks after the slashes and strands them;
+     hide the separator and let it stack into two clean lines instead */
+  .from .sep{display:inline}
+  @media(max-width:520px){ .from .sep{display:block;font-size:0;height:4px} }
+
+  /* ---- hero: cover + title ---- */
+  .hero{display:grid;grid-template-columns:1fr;gap:20px;align-items:center}
+  @media(min-width:720px){ .hero{grid-template-columns:300px 1fr;gap:28px} }
+
+  #artwrap{position:relative;aspect-ratio:1;max-width:300px;margin:0 auto;width:100%}
+  #art{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:2;
+    border:2px solid hsla(var(--h),var(--s),55%,.55);background:#0c0c0e}
+  /* the vinyl behind the sleeve, in the record's colour — shows through while
+     the cover loads and peeks out around it after */
+  #artwrap::before{content:"";position:absolute;inset:-10px;z-index:1;
+    background:radial-gradient(circle,hsla(var(--h),var(--s),55%,.5) 0 12%,transparent 60%);
+    filter:blur(calc(8px + var(--pulse,0)*22px));opacity:calc(.55 + var(--pulse,0)*.45)}
+
+  .meta{min-width:0;text-align:center}
+  @media(min-width:720px){ .meta{text-align:left} }
+  .artist{font-family:var(--px);font-size:9px;letter-spacing:2px;color:hsla(var(--h),var(--s),70%,1);margin-bottom:10px}
+  h1{font-family:var(--px);font-size:clamp(14px,4.4vw,24px);line-height:1.5;letter-spacing:.5px;
+    word-break:break-word;margin-bottom:10px}
+  .album{font-size:19px;color:var(--dim)}
+  .album b{color:var(--ink);font-weight:normal}
+
+  /* ---- transport ---- */
+  .transport{display:flex;align-items:center;gap:14px;margin:20px 0 6px;justify-content:center}
+  @media(min-width:720px){ .transport{justify-content:flex-start} }
+  #play{width:74px;height:74px;flex:none;border-radius:50%;border:0;cursor:pointer;
+    background:hsl(var(--h),var(--s),58%);color:#07120a;font-size:30px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 calc(18px + var(--pulse,0)*34px) hsla(var(--h),var(--s),58%,.6);
+    transition:transform .14s}
+  #play:active{transform:scale(.94)}
+  #play.pulse{animation:pb 1.9s ease-in-out infinite}
+  @keyframes pb{0%,100%{box-shadow:0 0 16px hsla(var(--h),var(--s),58%,.45)}
+    50%{box-shadow:0 0 38px hsla(var(--h),var(--s),58%,.85)}}
+  .tbtn{width:46px;height:46px;flex:none;background:#0d0d0f;color:var(--ink);cursor:pointer;
+    border:1px solid var(--border);font-size:17px}
+  .tbtn:hover{border-color:hsl(var(--h),var(--s),58%);color:hsl(var(--h),var(--s),62%)}
+
+  #seekwrap{margin:14px 0 4px;cursor:pointer;padding:7px 0}
+  #seek{height:5px;background:#17171a;position:relative;overflow:hidden}
+  #fill{position:absolute;inset:0 100% 0 0;background:hsl(var(--h),var(--s),58%);
+    box-shadow:0 0 10px hsla(var(--h),var(--s),58%,.7)}
+  #times{display:flex;justify-content:space-between;font-family:var(--px);font-size:7px;color:var(--dim);margin-top:7px}
+
+  /* ---- chips ---- */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 0;justify-content:center}
+  @media(min-width:720px){ .chips{justify-content:flex-start} }
+  .chip{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--dim);
+    border:1px solid var(--border);background:#0b0b0d;padding:8px 10px;white-space:nowrap}
+  .chip b{color:hsl(var(--h),var(--s),65%);font-weight:normal}
+
+  /* ---- sections ---- */
+  section{margin-top:34px}
+  h2{font-family:var(--px);font-size:10px;color:var(--acid);letter-spacing:1px;margin-bottom:12px}
+  .panel{border:1px solid var(--border);background:rgba(11,11,13,.75);padding:16px 16px 14px}
+  .panel p{margin-bottom:11px;line-height:1.45}
+  .panel p:last-child{margin-bottom:0}
+  .panel b{font-family:var(--px);font-size:8px;letter-spacing:1px;color:hsl(var(--h),var(--s),66%);
+    font-weight:normal;margin-right:6px}
+  .empty{color:#4a4a4a}
+
+  /* lyrics: a window, not a wall — long records should not push everything else
+     off the page, so it scrolls inside a fixed height */
+  #lyr{max-height:300px;overflow-y:auto;line-height:1.55;overscroll-behavior:contain}
+  #lyr div{padding:1px 0}
+  #lyr div.hot{color:hsl(var(--h),var(--s),68%)}
+
+  .cityrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #1b1b1e;
+    font-size:17px}
+  .cityrow:last-child{border-bottom:0}
+  .cityrow span:last-child{font-family:var(--px);font-size:7px;color:var(--dim);flex:none;align-self:center}
+
+  /* ---- actions ---- */
+  .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
+  .act{flex:1 1 190px;text-align:center;text-decoration:none;cursor:pointer;
+    font-family:var(--px);font-size:8.5px;letter-spacing:1px;padding:15px 12px;
+    border:1px solid var(--border);background:#0b0b0d;color:var(--ink)}
+  .act:hover{border-color:var(--acid);color:var(--acid)}
+  .act.primary{background:var(--acid);border-color:var(--acid);color:#07120a}
+  .act.primary:hover{background:#c9ff33;color:#07120a}
+  .act.room{border-color:hsl(var(--h),var(--s),55%);color:hsl(var(--h),var(--s),65%)}
+
+  .tail{margin-top:34px;text-align:center;font-size:17px;color:var(--dim);line-height:1.6}
+  .tail a{text-decoration:none;border-bottom:1px dashed currentColor}
+
+  #toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:9500;
+    font-family:var(--px);font-size:8px;color:#07120a;background:var(--acid);padding:10px 14px;
+    opacity:0;transition:opacity .25s;pointer-events:none}
+  #toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="glow" aria-hidden="true"></div>
+<main>
+  <div class="from">SOMEONE SENT YOU A RECORD<span class="sep">&nbsp;//&nbsp;</span><b>ONLYIBEE.COM</b></div>
+
+  <div class="hero">
+    <div id="artwrap"><img id="art" alt="" width="300" height="300"></div>
+    <div class="meta">
+      <div class="artist">ONLY IBEE</div>
+      <h1 id="title">READING THE RECORD_</h1>
+      <div class="album">from <b id="album">—</b></div>
+
+      <div class="transport">
+        <button class="tbtn" id="prev" title="previous record">&#9664;&#9664;</button>
+        <button id="play" title="play">&#9654;</button>
+        <button class="tbtn" id="next" title="next record">&#9654;&#9654;</button>
+      </div>
+
+      <div id="seekwrap"><div id="seek"><div id="fill"></div></div>
+        <div id="times"><span id="tcur">0:00</span><span id="tdur">--:--</span></div>
+      </div>
+
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>// THE RECORD_</h2>
+    <div class="panel" id="soul"><p class="empty">reading_</p></div>
+  </section>
+
+  <section id="lyrsec" hidden>
+    <h2>// WORDS_</h2>
+    <div class="panel"><div id="lyr"></div></div>
+  </section>
+
+  <section>
+    <h2>// WHERE IT IS BEING HEARD_</h2>
+    <div class="panel" id="cities"><p class="empty">reading locations_</p></div>
+  </section>
+
+  <div class="acts">
+    <a class="act primary" href="/" id="radiobtn">&#9654; OPEN THE RADIO</a>
+    <a class="act room" id="roombtn" hidden>&#9654; GO TO THE ROOM</a>
+    <button class="act" id="sharebtn" type="button">&#10548; SHARE THIS RECORD</button>
+  </div>
+
+  <div class="tail">
+    every record here has a room, a groove and a story.<br>
+    <a href="/">open the whole thing_</a>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script defer src="/assets/console-nav.js"></script>
+<script src="/assets/player.js?v=29"></script>
+<script>document.write('<script src="/assets/song-meta.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
+<script>document.write('<script src="/assets/lyrics-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
+<script src="/assets/stats-client.js?v=8"></script>
+<script src="/assets/pulse.js?v=3"></script>
+<script>
+(function(){
+"use strict";
+/* The radio is the shell's, not ours. Inside the frame player.js aliases
+   window.IBEERADIO to the top one; standalone it builds its own. Either way
+   this is the only handle we use. */
+function R(){ try{ return window.IBEERADIO || (window.top && window.top.IBEERADIO) || null; }catch(e){ return null; } }
+function D(n){ try{ return window[n] || (window.top && window.top[n]) || null; }catch(e){ return null; } }
+var $=function(id){ return document.getElementById(id); };
+function esc(x){ return String(x==null?'':x).replace(/[&<>"]/g,function(m){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]; }); }
+function fmt(s){ if(!isFinite(s)||s<0) return '--:--';
+  var m=Math.floor(s/60),x=Math.floor(s%60); return m+':'+(x<10?'0':'')+x; }
+
+var slugWanted = (new URLSearchParams(location.search).get('s')||'').trim();
+var drawnSlug = null, triedAutoplay = false, statsReq = 0;
+
+/* ---------- resolve the slug to a radio index ----------
+   Share links carry the filename without .mp3; the radio keys on the filename
+   WITH it. Try both, and try again later: records pressed in IBEE STUDIO arrive
+   with songs-extra.js, which loads after this script runs. */
+function indexFor(slug){
+  var r=R(); if(!r||!slug) return -1;
+  var i=r.indexBySlug(slug); if(i>=0) return i;
+  i=r.indexBySlug(slug+'.mp3'); if(i>=0) return i;
+  i=r.indexBySlug(slug.replace(/\.mp3$/i,'')); return i;
+}
+
+/* ---------- paint ---------- */
+function draw(force){
+  var r=R(); if(!r) return;
+  var i=r.current?r.current():-1;
+  /* the page is about ONE record, but if the listener skips on from the bottom
+     player it must follow rather than keep describing the old one */
+  if(i<0) return;
+  var s=r.song(i); if(!s) return;
+  if(!force && s.f===drawnSlug) return;
+  drawnSlug=s.f;
+
+  var alb=(r.album?r.album(i):null)||{};
+  var hue=(s.hue!=null?s.hue:(alb.hue!=null?alb.hue:75));
+  document.documentElement.style.setProperty('--h',String(hue));
+
+  $('title').textContent=s.n||'—';
+  var t=(s.n||'A RECORD')+' \u2014 ONLY IBEE';
+  document.title=t;
+  /* The shell mirrors the frame's <title> in sync(), which runs on frame load —
+     before this page has resolved which record it is about. Without this the
+     tab (and anything that reads it) keeps the placeholder. */
+  try{ if(window.top!==window.self) window.top.document.title=t; }catch(e){}
+  $('album').textContent=alb.name||'ONLY IBEE';
+
+  var cov=s.cover||alb.cover||'';
+  var art=$('art');
+  if(cov){ art.onerror=function(){ art.onerror=null; art.style.display='none'; };
+           art.style.display='block'; art.src=cov; }
+  else art.style.display='none';
+
+  /* chips: only facts we actually have — never a placeholder number */
+  var B=D('IBEE_BEAT')||{}, g=B[s.f], chips=[];
+  if(g&&g.bpm) chips.push('<span class="chip">BPM <b>'+Math.round(g.bpm)+'</b></span>');
+  if(alb.room) chips.push('<span class="chip">HAS A ROOM <b>&#9654;</b></span>');
+  chips.push('<span class="chip" id="playschip">PLAYS <b>&#8230;</b></span>');
+  $('chips').innerHTML=chips.join('');
+
+  /* the story */
+  var M=D('IBEE_META')||{}, m=M[s.f]||{}, soul='';
+  if(m.vibe)    soul+='<p><b>VIBE //</b>'+esc(m.vibe)+'</p>';
+  if(m.meaning) soul+='<p>'+esc(m.meaning)+'</p>';
+  if(m.context) soul+='<p><b>MADE //</b>'+esc(m.context)+'</p>';
+  if(m.took)    soul+='<p><b>TIME //</b>'+esc(m.took)+'</p>';
+  $('soul').innerHTML = soul || '<p class="empty">no notes written for this one yet — press play and make your own_</p>';
+
+  /* words */
+  var L=D('IBEE_LYRICS')||{}, lines=L[s.f];
+  if(lines&&lines.length){
+    $('lyrsec').hidden=false;
+    $('lyr').innerHTML=lines.map(function(l){ return '<div>'+esc(l)+'</div>'; }).join('');
+  }else{ $('lyrsec').hidden=true; $('lyr').innerHTML=''; }
+
+  /* the room, if this album has one */
+  var rb=$('roombtn');
+  if(alb.room){ rb.hidden=false; rb.setAttribute('href',alb.room); }
+  else rb.hidden=true;
+
+  loadStats(s.f);
+  paintTransport();
+}
+
+/* ---------- plays + cities (real numbers or an honest blank) ---------- */
+function loadStats(slug){
+  var S=window.IBEE_STATS_CLIENT, req=++statsReq, cities=$('cities');
+  if(!S){ cities.innerHTML='<p class="empty">locations unavailable_</p>'; return; }
+  cities.innerHTML='<p class="empty">reading locations_</p>';
+  if(S.songCounts) S.songCounts().then(function(rows){
+    if(req!==statsReq) return;
+    var row=(rows||[]).filter(function(x){ return x.song_slug===slug; })[0];
+    var c=$('playschip'); if(c) c.innerHTML='PLAYS <b>'+(row?Number(row.plays).toLocaleString():'0')+'</b>';
+  }).catch(function(){ var c=$('playschip'); if(c) c.remove(); });
+  if(S.songCities) S.songCities(slug).then(function(rows){
+    if(req!==statsReq) return;
+    rows=(rows||[]).slice(0,5);
+    cities.innerHTML = rows.length
+      ? rows.map(function(x,n){ return '<div class="cityrow"><span>0'+(n+1)+' &middot; '+esc(x.city_name||'UNKNOWN')
+          +'</span><span>'+Number(x.listeners||0).toLocaleString()+' LISTENERS</span></div>'; }).join('')
+      : '<p class="empty">nobody has been counted on this one yet — you could be the first_</p>';
+  }).catch(function(){ if(req===statsReq) cities.innerHTML='<p class="empty">locations unavailable_</p>'; });
+}
+
+/* ---------- transport ---------- */
+function paintTransport(){
+  var r=R(); if(!r) return;
+  var on=r.playing();
+  var p=$('play');
+  p.innerHTML = on ? '&#10074;&#10074;' : '&#9654;';
+  p.title = on ? 'pause' : 'play';
+  p.classList.toggle('pulse', !on);
+}
+$('play').onclick=function(){
+  var r=R(); if(!r) return;
+  if(r.playing()) r.control.pause();
+  else{
+    var i=r.current();
+    if(i<0){ var j=indexFor(slugWanted); if(j>=0) i=j; }
+    r.control.play(i<0?0:i);
+  }
+  paintTransport();
+};
+$('next').onclick=function(){ var r=R(); if(r) r.control.next(); };
+$('prev').onclick=function(){ var r=R(); if(r) r.control.prev(); };
+
+$('seekwrap').onclick=function(ev){
+  var r=R(); if(!r||!r.audio||!isFinite(r.audio.duration)) return;
+  var b=$('seek').getBoundingClientRect();
+  r.audio.currentTime=Math.max(0,Math.min(1,(ev.clientX-b.left)/b.width))*r.audio.duration;
+};
+
+function toast(t){ var e=$('toast'); e.textContent=t; e.classList.add('on');
+  setTimeout(function(){ e.classList.remove('on'); },1700); }
+
+$('sharebtn').onclick=function(){
+  var r=R(), s=r&&r.song?r.song():null; if(!s) return;
+  var url=location.origin+'/?s='+encodeURIComponent(s.f.replace(/\.mp3$/i,''));
+  if(navigator.share){ navigator.share({title:s.n+' — ONLY IBEE',url:url}).catch(function(){}); return; }
+  if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast('LINK COPIED_'); })
+    .catch(function(){ toast(url); }); }
+  else toast(url);
+};
+/* OPEN THE RADIO must not reload the shell out from under the music */
+$('radiobtn').onclick=function(ev){
+  try{ if(window.top!==window.self && window.top.IBEE_SHELL){ ev.preventDefault(); window.top.IBEE_SHELL.home(); } }catch(e){}
+};
+
+/* ---------- boot ----------
+   songs-extra.js (the studio-pressed records) loads asynchronously, so a shared
+   link to one of those cannot resolve on the first tick. Keep trying briefly,
+   then settle for whatever the radio is on. */
+var tries=0;
+(function cue(){
+  var r=R();
+  if(r){
+    if(slugWanted){
+      var i=indexFor(slugWanted);
+      if(i>=0){
+        if(r.current()!==i) r.adopt(i);
+        draw(true);
+        if(!triedAutoplay){
+          triedAutoplay=true;
+          /* Ask once, quietly. Browsers refuse audio without a prior gesture and
+             that is fine — the PLAY button is already the loudest thing here.
+             Never surface the rejection. */
+          try{ var pr=r.audio&&r.audio.play&&r.control.play(i); }catch(e){}
+          setTimeout(paintTransport,300);
+        }
+        return;
+      }
+    }else if(r.current()>=0){ draw(true); return; }
+  }
+  if(++tries<40) setTimeout(cue,150);
+  else if(r&&r.current()>=0) draw(true);
+  else $('title').textContent='RECORD NOT FOUND_';
+})();
+
+/* follow the radio: the record on screen is always the record in the speakers */
+setInterval(function(){
+  var r=R(); if(!r) return;
+  draw(false);
+  paintTransport();
+  var a=r.audio;
+  if(a&&isFinite(a.duration)){
+    $('fill').style.right=(100-(a.currentTime/a.duration*100))+'%';
+    $('tcur').textContent=fmt(a.currentTime);
+    $('tdur').textContent=fmt(a.duration);
+  }
+},350);
+})();
+</script>
+</body>
+</html>

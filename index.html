@@ -1056,7 +1056,14 @@
   try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
 
   /* first page: ?p= (deep-link/NFC) or the console */
-  var p=new URLSearchParams(location.search).get('p')||'console.html#menu';
+  var _q=new URLSearchParams(location.search);
+  /* A SHARED RECORD (<site>/?s=<slug>, built by every SHARE button) used to land
+     on the main menu with the song playing quietly underneath — the record was
+     adopted, but nothing on screen was about it. Open the record's own page
+     instead. ?p= still wins, so an explicit deep link is never overridden, and
+     player.js reads ?s= off this same URL to adopt the track as before. */
+  var _s=(_q.get('s')||'').trim();
+  var p=_q.get('p')|| (_s ? 'song/?s='+encodeURIComponent(_s) : 'console.html#menu');
   if(/^(https?:)?\/\//i.test(p)) p='console.html#menu';
   /* ?p=blank and friends: iOS Safari reloads a tab it has evicted for memory,
      and it restores the URL we last wrote. If that URL said p=blank the shell
@@ -1730,8 +1737,13 @@
   /* Deep-link arrival (a shared link / search result opened /?p=<page>): the
      visitor already chose a page, so skip the PRESS START boot and drop them
      straight onto it inside the shell. Radio stays paused until they tap play. */
-  try{ var _pp=new URLSearchParams(location.search).get('p');
-    if(enter && _pp && !/^console\.html/i.test(_pp)){ enter.style.display='none'; enter=null; } }catch(e){}
+  try{ var _qq=new URLSearchParams(location.search), _pp=_qq.get('p');
+    /* ?s= is a SHARED RECORD. Someone tapped a friend's link to one song — the
+       choice is already made, so the boot screen is a door in front of a door.
+       Treated exactly like a ?p= deep link: straight onto the record's page.
+       (Checked before _pp, because a share link carries no ?p= at all.) */
+    if(enter && _qq.get('s')){ enter.style.display='none'; enter=null; }
+    else if(enter && _pp && !/^console\.html/i.test(_pp)){ enter.style.display='none'; enter=null; } }catch(e){}
   if(enter){
     /* pin the boot play button exactly over the real player ► button */
     var ep=document.getElementById('enterplay');
