@@ -423,6 +423,7 @@
   .pl-row{order:2;flex:none;margin-top:0}
   #seek{order:3;flex:1 0 100%}
   #bottom.listopen .pl-row{flex-basis:100%;order:4;justify-content:center;margin-top:4px}
+  #ptime{display:none}
   .tapme{position:absolute;top:-10px;left:50%;transform:translateX(-50%);z-index:3;cursor:pointer;
     font-family:var(--px);font-size:7px;letter-spacing:1px;color:#07120a;background:var(--acid);
     padding:4px 11px;border-radius:8px;box-shadow:0 0 14px rgba(182,255,0,.5);white-space:nowrap;
@@ -483,6 +484,39 @@
     #seek{flex:1 1 100%;max-width:920px;margin:2px auto 0}
     #bottom.listopen .pl-row{max-width:920px;margin:4px auto 0}
   }
+
+  /* ===== LAPTOP: the dock is ONE ROW =====
+     Open on a laptop the player was a phone layout stretched across 1440px —
+     #seek takes flex-basis:100%, and `listopen` pushed .pl-row onto a full-width
+     row of its own, so meta / seek / transport stacked into THREE rows and the
+     dock stood 167px tall. That height came straight out of the radio above it,
+     which is why the album rail was cut off and had to be scrolled.
+     Here they sit side by side instead: cover + title, transport, then the seek
+     taking the slack, with the time readout back (there is room for it now).
+     ~76px instead of 167 — and the 90px goes to the list, below. */
+  @media(min-width:900px){
+    #player,#bottom.listopen #player{
+      flex-wrap:nowrap;align-items:center;justify-content:flex-start;
+      column-gap:22px;padding:11px 20px 13px}
+    .pl-top{order:1;flex:0 1 300px;min-width:0}
+    /* flex-basis/order/margin are all overriding the stacked-row rules above */
+    .pl-row,#bottom.listopen .pl-row{
+      order:2;flex:none;flex-basis:auto;max-width:none;margin:0;justify-content:center}
+    #seek,#bottom.listopen #seek{
+      order:3;flex:1 1 auto;width:auto;max-width:none;margin:0}
+    /* the clock earns its place back on one row */
+    .pl-top #time{display:none}
+    #ptime{order:4;flex:none;display:block;font-family:var(--px);font-size:8px;
+      color:hsla(var(--rh),var(--rs),72%,.85);white-space:nowrap;min-width:84px;text-align:right}
+    /* a touch smaller so the row lands near 76px */
+    #pcover{width:48px!important;height:48px!important}
+    .pl-row button.main{width:46px;height:46px;font-size:16px}
+    .pl-row button{min-width:32px;height:32px;font-size:15px}
+    .pl-row{gap:8px}
+  }
+
+
+
   #nowbtn .bd{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none;
     box-shadow:0 0 8px var(--red);transform:scale(var(--b,.5));transition:transform .07s}
   #time{font-family:var(--px);font-size:8px;color:hsla(var(--rh),var(--rs),72%,.85);flex:none}
@@ -663,7 +697,11 @@
        always had, which is tuned to leave the page visible behind the radio */
     /* 72vh swallowed the whole laptop screen. Half the viewport still gives room
        to browse while leaving the page you were on visible behind it. */
-    #tracklist{max-height:min(50vh,430px);overflow:hidden}
+    /* The dock went 167px -> ~76px, so the list takes that 90px back: the radio
+       plus the dock still occupy the same slice of the screen as before (so the
+       page behind stays as visible as it was), but the panes inside get a third
+       more height and the album rail stops being cut off. */
+    #tracklist{max-height:min(58vh,520px);overflow:hidden}
     /* `auto auto 1fr` + overflow:hidden is what makes each pane scroll ITSELF.
        Without a sized row the panes grow to fit their content and the OUTER box
        scrolls instead — the info panel measured 4085px tall and dragged the
@@ -679,7 +717,7 @@
        the track list is what the radio is FOR, so it takes the growth. */
     /* Symmetric side columns — equal weight left and right, which also centres
        the track list between them without any centring rule of its own. */
-    #tracklist.open{display:grid;grid-template-columns:392px 1fr 348px;align-content:start}
+    #tracklist.open{display:grid;grid-template-columns:300px 1fr 348px;align-content:start}
     /* The title bar, search and album shelf run the FULL width across the top —
        they belong to the whole radio, not to the tracks. Both panes then begin
        on the row underneath, so their top edges line up. Spanning the panel from
@@ -695,12 +733,14 @@
        under the search, and each scrolls on its own. */
     /* two covers per row: at 300px a single column would blow each cover up to
        full width, which is bigger than the artwork deserves next to the list */
-    #tlalbums{grid-column:1;display:grid;grid-template-columns:repeat(2,1fr);
+    /* THREE per row in a narrower rail. Two big covers in a 392px column meant
+       five records needed 574px of height in a 342px pane — the rail was always
+       cut. At three-up the same five fit in two rows with room to spare, and the
+       92px the rail gives up goes to the track list beside it. */
+    #tlalbums{grid-column:1;display:grid;grid-template-columns:repeat(3,1fr);
       align-content:start;overflow-x:hidden;overflow-y:auto;
       min-height:0;border-right:1px solid hsla(var(--rh),var(--rs),55%,.28);border-bottom:0;
-      /* breathing room on the outer edge — the covers sat flush against the
-         screen edge, which reads as clipped rather than as a column */
-      padding:14px 14px 14px 44px;gap:12px}
+      padding:14px 14px 14px 22px;gap:11px 9px}
     /* align-items:start — grid items stretch to the row height by default, which
        dragged each cover into a tall rectangle (161x246) no matter what the
        aspect-ratio said. */
@@ -738,6 +778,22 @@
     #tlside #songinfocard{width:auto;max-height:none;border:0;padding:0;box-shadow:none;background:transparent}
     #tlside #songinfoclose{display:none}
   }
+
+  /* ===== NARROW LAPTOPS (900-1199px) =====
+     The side columns are fixed, so on a small laptop they eat the middle: at
+     940px the track list came out 290px — narrower than both the rail beside it
+     and the panel next to that, which is backwards, since the list is what the
+     radio is FOR. Pull both sides in so the list is the widest pane again, drop
+     the clock (the seek was down to 118px and needs the room more), and give the
+     rail two columns since three would shrink the covers past recognising. */
+  @media(min-width:900px) and (max-width:1199px){
+    #tracklist.open{grid-template-columns:240px 1fr 300px}
+    #tlalbums{grid-template-columns:repeat(2,1fr);padding-left:18px}
+    #ptime{display:none}
+    .pl-top{flex:0 1 250px}
+    #player,#bottom.listopen #player{column-gap:16px;padding-left:16px;padding-right:16px}
+  }
+
 
   /* the hearts card in the shelf */
   /* the heart must sit dead centre of the square and read at cover size — the
@@ -854,6 +910,9 @@
         <span class="chev">▲</span>
       </div>
       <div id="seek"><div id="fill"></div></div>
+      <!-- laptop-only clock: on one row there is finally room for it. Hidden by
+           default; the ≥900px block shows it. -->
+      <span id="ptime" aria-hidden="true">0:00 / --:--</span>
       <div class="pl-row">
         <button id="blyr" class="ricon lyr" title="Lyrics engine">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1665,7 +1724,8 @@
 
   /* ---- keep the player reflecting the one radio's state ---- */
   var rt=document.getElementById('rt'),rplay=document.getElementById('rplay'),
-      fill=document.getElementById('fill'),timeEl=document.getElementById('time'),bd=document.querySelector('#nowbtn .bd');
+      fill=document.getElementById('fill'),timeEl=document.getElementById('time'),
+      ptimeEl=document.getElementById('ptime'),bd=document.querySelector('#nowbtn .bd');
   /* the now-playing album cover in the bar: song's own art → album cover → hue vinyl */
   var pcover=document.getElementById('pcover'),pcoverimg=document.getElementById('pcoverimg'),lastCoverI=-2;
   var songinfo=document.getElementById('songinfo'),songInfoRequest=0;
@@ -1788,7 +1848,9 @@
     rshuf.classList.toggle('on',!!(r.shuffled&&r.shuffled()));
     try{bd.style.setProperty('--b',(0.45+(pl?r.beat():0)).toFixed(2));}catch(e){}
     try{var c=r.audio.currentTime||0,d=r.audio.duration||0;
-      fill.style.width=(d?c/d*100:0)+'%'; timeEl.textContent=fmt(c)+' / '+fmt(d);}catch(e){}
+      fill.style.width=(d?c/d*100:0)+'%';
+      var ts=fmt(c)+' / '+fmt(d); timeEl.textContent=ts;
+      if(ptimeEl) ptimeEl.textContent=ts;}catch(e){}
     updateRoomband();
     if(tl.classList.contains('open')&&!tl.classList.contains('scrolling'))markNow();
     if(lyrOpen){ lyrRefresh(); lyrSync(); }
