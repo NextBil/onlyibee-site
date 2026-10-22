@@ -267,17 +267,29 @@
      CHIP IN THE ALBUM SHELF now (2026-10-22): the shelf is already a row of
      places to go, the chip costs no extra height at all, and it sits with the
      record it belongs to. The band and its pulse are gone. */
-  .alb.pagechip .ac{position:relative;border-color:var(--rtint,var(--red));
-    box-shadow:0 0 14px color-mix(in srgb,var(--rtint,#ff2b2b) 45%,transparent)}
-  .alb.pagechip .ac:after{content:"▶";position:absolute;inset:0;display:flex;align-items:center;
-    justify-content:center;font-family:var(--px);font-size:15px;color:#fff;
-    background:color-mix(in srgb,var(--rtint,#ff2b2b) 62%,transparent);text-shadow:0 2px 6px #000}
+  /* ---- the page chip is a TURNING OBJECT ----
+     ⚠ overflow must be VISIBLE and the border dropped: the stack rotates out of
+     the flat square, and `overflow:hidden` (which every other .ac wants) would
+     slice the faces off mid-turn. Rotating on Y only ever makes the slab
+     NARROWER than the box, so nothing spills sideways. */
+  .alb.pagechip .ac{position:relative;border:0;overflow:visible;background:transparent;
+    perspective:220px;
+    filter:drop-shadow(0 0 10px color-mix(in srgb,var(--rtint,#ff2b2b) 55%,transparent))}
+  .alb.pagechip .pvx{position:relative;display:block;width:100%;height:100%;
+    transform-style:preserve-3d;transform:rotateX(8deg)}
+  .alb.pagechip .pvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    backface-visibility:visible;border:1px solid color-mix(in srgb,var(--rtint,#ff2b2b) 70%,transparent)}
+  /* the ▶ sits OUTSIDE the spin — a tint over the whole cover hid the object it
+     was meant to advertise, so it is a corner badge now and stays still */
+  .alb.pagechip .pgo{position:absolute;right:-3px;bottom:-3px;z-index:2;
+    width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:8px;color:#07120a;background:var(--rtint,var(--red));
+    box-shadow:0 1px 5px rgba(0,0,0,.7)}
   .alb.pagechip .an{color:var(--rtint,var(--red))}
   @media(prefers-reduced-motion:no-preference){
-    .alb.pagechip .ac{animation:roompulse 1.9s ease-in-out infinite}
+    .alb.pagechip .pvx{animation:pgspin 4.6s linear infinite}
   }
-  @keyframes roompulse{0%,100%{box-shadow:0 0 8px color-mix(in srgb,var(--rtint,#ff2b2b) 35%,transparent)}
-    50%{box-shadow:0 0 20px color-mix(in srgb,var(--rtint,#ff2b2b) 80%,transparent)}}
+  @keyframes pgspin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
 
   /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
   /* ONE scroll on phones. #tracklist already scrolls; giving the song list its
@@ -747,6 +759,9 @@
     #tlalbums{align-items:start}
     #tlalbums .alb{width:100%}
     #tlalbums .alb .ac{width:100%;height:auto;aspect-ratio:1/1;overflow:hidden;display:block}
+    /* the rule above is ID-specific, so the turning chip has to out-specify it
+       or the laptop clips the spin back into a flat square */
+    #tlalbums .alb.pagechip .ac{overflow:visible;border:0;background:transparent;perspective:260px}
     #tlalbums .alb .ac img{width:100%;height:100%;object-fit:cover;display:block}
     #tlalbums .alb .an{white-space:normal;font-size:6.5px;line-height:1.45}
     #tlleft{grid-column:2;display:flex;flex-direction:column;min-height:0}
@@ -1483,10 +1498,22 @@
     var r=R(); if(!r) return '';
     var i=r.current?r.current():-1, alb=(i>=0&&r.album)?r.album(i):null;
     var room=alb&&alb.room; if(!room) return '';
-    var cov=alb.cover?('<img src="'+esc(sized(alb.cover,'mid'))+'" alt="" loading="lazy" decoding="async" data-alt="'+esc(alb.cover)+'">'):'';
+    /* the cover as a SPINNING OBJECT — the site's fake-voxel trick (same six
+       translateZ copies and darkened back faces as the nav icons, see navVox).
+       A flat thumbnail read as just another album; a turning slab reads as a
+       door. */
+    var cov='';
+    if(alb.cover){
+      var src=esc(sized(alb.cover,'mid')), raw=esc(alb.cover);
+      [-3.2,-1.9,-0.6,0.6,1.9,3.2].forEach(function(t,i){
+        cov+='<img src="'+src+'" alt="" loading="lazy" decoding="async" data-alt="'+raw+'"'
+          +' style="transform:translateZ('+t+'px)'+(i<5?';filter:brightness(.42)':'')+'">';
+      });
+      cov='<span class="pvx">'+cov+'</span>';
+    }
     return '<button class="alb pagechip" data-page="'+esc(room)+'" style="--rtint:'+esc(alb.tint||'#ff2b2b')+'"'
       +' title="Go to the '+esc(alb.name)+' page">'
-      +'<span class="ac">'+cov+'</span>'
+      +'<span class="ac">'+cov+'<span class="pgo">&#9654;</span></span>'
       +'<span class="an">GO TO THE PAGE</span></button>';
   }
 
