@@ -45,7 +45,7 @@
           <tr><td class="k">Email address and password</td><td>Only if you create an account</td><td>To run your account. Performance of a contract. The password is handled and hashed by Supabase Auth — we never see it.</td></tr>
           <tr><td class="k">Nickname, room layout, favourites, badges, listening counts</td><td>While you use your account</td><td>So your profile and room follow you between devices instead of dying with one browser. Performance of a contract.</td></tr>
           <tr><td class="k">Name, email, postal address, order note</td><td>Only if you order something</td><td>To take the order and post the item. Performance of a contract, and a legal duty to keep sales records.</td></tr>
-          <tr><td class="k">A random visitor ID, the page you're on, timestamps</td><td>Every visit</td><td>To count how many people come and which songs get played. Legitimate interest in knowing whether the work reaches anyone.</td></tr>
+          <tr><td class="k">A temporary random session ID, page, timestamps, anonymous interaction totals and public product IDs clicked</td><td>Every visit</td><td>To understand which rooms and products work, approximate active time, and where visitors leave. Legitimate interest in improving the site. It is not linked to an account or used across other websites.</td></tr>
           <tr><td class="k">Approximate country and city</td><td>Every visit</td><td>Same. Worked out from your browser's own timezone setting — <span class="good">no location lookup, and your IP is not sent anywhere to get it</span>.</td></tr>
           <tr><td class="k">A one-way hash of your IP</td><td>Every visit</td><td>Only to spot bot floods. It is a SHA-256 hash — it cannot be turned back into your IP, and <span class="good">the IP itself is never written down</span>.</td></tr>
         </tbody>
@@ -58,7 +58,7 @@
       <ul>
         <li><strong>Account and profile data</strong> — until you delete your account, then it goes immediately.</li>
         <li><strong>Orders</strong> — kept while the order is live, then retained as accounting records for the period French law requires (10 years).</li>
-        <li><strong>Visit records</strong> — deleted automatically after 14 months.</li>
+        <li><strong>Visit and anonymous activity records</strong> — deleted automatically after 14 months.</li>
         <li><strong>Song plays</strong> — deleted automatically after 14 months.</li>
       </ul>
     </section>

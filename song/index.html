@@ -277,7 +277,7 @@
 
   <div class="acts">
     <a class="act primary" href="/" id="radiobtn">&#9654; OPEN THE RADIO</a>
-    <a class="act room" id="roombtn" hidden>&#9654; GO TO THE ROOM</a>
+    <a class="act room" id="roombtn" hidden>&#9654; GO TO THE PAGE</a>
     <button class="act" id="sharebtn" type="button">&#10548; SHARE THIS RECORD</button>
   </div>
 
@@ -305,7 +305,7 @@
 <div id="toast"></div>
 
 <script defer src="/assets/console-nav.js"></script>
-<script src="/assets/player.js?v=30"></script>
+<script src="/assets/player.js?v=31"></script>
 <script>document.write('<script src="/assets/song-meta.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script>document.write('<script src="/assets/lyrics-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script src="/assets/credits.js?v=1"></script>
@@ -337,7 +337,8 @@ function indexFor(slug){
   var r=R(); if(!r||!slug) return -1;
   var i=r.indexBySlug(slug); if(i>=0) return i;
   i=r.indexBySlug(slug+'.mp3'); if(i>=0) return i;
-  i=r.indexBySlug(slug.replace(/\.mp3$/i,'')); return i;
+  i=r.indexBySlug(slug+'.m4a'); if(i>=0) return i;   /* AAC tracks (NP2 replacements) */
+  i=r.indexBySlug(slug.replace(/\.(?:mp3|m4a)$/i,'')); return i;
 }
 
 /* ---------- paint ---------- */
@@ -543,7 +544,7 @@ $('sharebtn').onclick=function(){
   var r=R(), s=r&&r.song?r.song():null; if(!s) return;
   /* /s/<slug>/ so the link previews with this record's cover — see songLink()
      in player.js and tools/make-share-pages.py */
-  var url=location.origin+'/s/'+encodeURIComponent(s.f.replace(/\.mp3$/i,''))+'/';
+  var url=location.origin+'/s/'+encodeURIComponent(s.f.replace(/\.(?:mp3|m4a)$/i,''))+'/';
   if(navigator.share){ navigator.share({title:s.n+' — ONLY IBEE',url:url}).catch(function(){}); return; }
   if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ toast('LINK COPIED_'); })
     .catch(function(){ toast(url); }); }

@@ -23,7 +23,23 @@
   var LAUNCHED = false;
   if(LAUNCHED) return;                            // no cover — the page is public
 
-  var OWNER  = "droguepuissance4@gmail.com";
+  /* The owner is matched by a SHA-256 of their address, not the address itself.
+     These files ship to every visitor, and the security audit found the same
+     mistake in player.js (a friend's email served on every page) — the whole
+     point of a private gate is defeated if the gate announces who it is for.
+     New owner: python3 -c "import hashlib;print(hashlib.sha256(b'their@email').hexdigest())" */
+  var OWNER_SHA = "ef497961f5e4932102172edae2ba5edbf8eb2db2cc8e99c8a73790d341034b69";
+  function sha256hex(t){
+    try{ if(!(window.crypto&&crypto.subtle)) return Promise.resolve("");
+      return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){
+        return Array.prototype.map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+      }).catch(function(){return "";});
+    }catch(e){ return Promise.resolve(""); }
+  }
+  function isOwnerEmail(em){
+    if(!em) return Promise.resolve(false);
+    return sha256hex(String(em).trim().toLowerCase()).then(function(h){ return h===OWNER_SHA; });
+  }
   var SB_URL = "https://hloxwicoeahczifshyoe.supabase.co";
   var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
 
@@ -39,7 +55,10 @@
     +"<div style=\"font-family:'Press Start 2P',monospace;font-size:clamp(13px,5vw,18px);color:#ff2bd6;letter-spacing:3px;text-shadow:0 0 18px rgba(255,43,214,.45)\">NOUVEAUX PUNK 2</div>"
     +"<div style=\"font-family:'Press Start 2P',monospace;font-size:11px;color:#b6ff00;letter-spacing:3px\">COMING SOON</div>"
     +"<div style=\"font-family:'VT323',monospace;font-size:21px;color:#9a9a9a;max-width:340px;line-height:1.4\">this one isn’t open yet_<br>it’s being tuned. it’s coming.</div>"
-    +"<a href=\"/console.html#menu\" style=\"font-family:'Press Start 2P',monospace;font-size:10px;padding:14px 16px;text-decoration:none;border:1px solid #2a2a2a;color:#7a7a7a;margin-top:4px\">◀ BACK TO ONLYIBEE</a>"
+    +"<div style=\"display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:4px\">"
+      +"<a id=\"pgsign\" href=\"/member/?login=1\" style=\"font-family:'Press Start 2P',monospace;font-size:10px;padding:14px 16px;text-decoration:none;border:1px solid #b6ff00;background:#b6ff00;color:#000\">▶ SIGN IN</a>"
+      +"<a href=\"/console.html#menu\" style=\"font-family:'Press Start 2P',monospace;font-size:10px;padding:14px 16px;text-decoration:none;border:1px solid #2a2a2a;color:#7a7a7a\">◀ BACK TO ONLYIBEE</a>"
+    +"</div>"
     +"<div id=\"pgw\" style=\"font-family:'VT323',monospace;font-size:14px;color:#3a3a3a;margin-top:6px;letter-spacing:1px\">checking access_</div>";
   function mount(){ (document.body||document.documentElement).appendChild(ov); }
   mount();
@@ -61,8 +80,11 @@
       var sb=window.supabase.createClient(SB_URL,SB_KEY);
       sb.auth.getSession().then(function(res){
         var em=res&&res.data&&res.data.session&&res.data.session.user&&res.data.session.user.email;
-        if(em && String(em).toLowerCase()===OWNER.toLowerCase()){ reveal(); }
-        else { note(em?"":"sign in to preview_"); }
+        /* come back HERE after signing in, instead of dumping you on the member page */
+        try{ var a=document.getElementById("pgsign");
+          if(a) a.href="/member/?login=1&next="+encodeURIComponent(location.pathname+location.search); }catch(e){}
+        if(!em){ note("sign in to preview_"); return; }
+        isOwnerEmail(em).then(function(ok){ if(ok) reveal(); else note("this one isn't yours yet_"); });
       }).catch(function(){ note(""); });
     }catch(e){ note(""); }
   });

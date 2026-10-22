@@ -438,11 +438,15 @@
       signedIn=true;
       /* PRIVATE: THE FALL x NP2 is owner-only until launch — flip it from a
          non-clickable SOON tile to a live room just for the owner account. */
+      /* hashed, never the address itself — these files ship to every visitor */
+      function _sha(t){ try{ if(!(window.crypto&&crypto.subtle)) return Promise.resolve("");
+        return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){
+          return Array.prototype.map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+        }).catch(function(){return "";}); }catch(e){ return Promise.resolve(""); } }
       var _em=sess.user&&sess.user.email;
-      if(_em && String(_em).toLowerCase()==="droguepuissance4@gmail.com"){
-        GAMES.forEach(function(g){ if(g.private) g.status="live"; });
-        render();
-      }
+      if(_em) _sha(String(_em).trim().toLowerCase()).then(function(h){
+        if(h==="ef497961f5e4932102172edae2ba5edbf8eb2db2cc8e99c8a73790d341034b69"){ GAMES.forEach(function(g){ if(g.private) g.status="live"; }); render(); }
+      });
       /* which room did they pick? (env) — only that one is theirs */
       sb.rpc("my_profile").then(function(p){
         var prof=p&&p.data; pickedRoom=(prof&&prof.room&&prof.room.env)||pickedRoom;
@@ -462,7 +466,7 @@
   });
 })();
 </script>
-<script src="../assets/player.js?v=30"></script>
+<script src="../assets/player.js?v=31"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 <script src="../assets/nav.js?v=1"></script>
 <script src="/assets/pulse.js?v=3"></script>

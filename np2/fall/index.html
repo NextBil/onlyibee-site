@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- PRIVATE until launch — only droguepuissance4@gmail.com sees the page; remove this line to open it -->
+<!-- PRIVATE until launch — gated by assets/privategate.js (owner only). Remove that script tag to open it. -->
 <script src="../../assets/privategate.js?v=1"></script>
 <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
@@ -300,7 +300,7 @@ header span{color:var(--dim);font-size:7px}
   <div class="hint" style="margin-top:12px">the level is the song —<br>it needs the record running_</div>
 </div></div>
 
-<script>document.write('<script src="../../assets/player.js?v=30"><\/script>')</script>
+<script>document.write('<script src="../../assets/player.js?v=31"><\/script>')</script>
 <script src="../../assets/np2-perks.js?v=3"></script>
 <script>
 (function(){
@@ -316,13 +316,13 @@ var NP2=[
   ["np2-01-all-i-need.mp3","All I Need"],      ["np2-02-okay.mp3","Okay"],
   ["np2-03-money-upp.mp3","Money Upp"],        ["np2-04-drop-it.mp3","Drop It"],
   ["np2-05-pikatchuu.mp3","Pikatchuu"],        ["np2-06-write-a-song.mp3","Write a Song"],
-  ["np2-07-u-mine.mp3","U Mine"],              ["np2-08-let-go.mp3","Let Go"],
+  ["np2-07-u-mine.mp3","U Mine"],              ["np2-08-still-young.m4a","Still Young"],
   ["np2-09-between-the-lines.mp3","Between the Lines"], ["np2-10-satisfied.mp3","Satisfied"],
-  ["np2-11-rockstar.mp3","Rockstar"],          ["np2-12-i-feel-alive.mp3","I Feel Alive"],
+  ["np2-11-rockstar.m4a","Rockstar"],          ["np2-12-i-feel-alive.mp3","I Feel Alive"],
   ["np2-13-mama-is-a-preacher.mp3","Mama Is a Preacher"], ["np2-14-pas-de-soucis.mp3","Pas de soucis"],
   ["np2-15-spoof.mp3","Spoof"],                ["np2-16-benda.mp3","Benda"],
   ["np2-17-buss-in-it-pitch.mp3","Buss In It"],["np2-18-cigarette.mp3","Cigarette"],
-  ["np2-19-da-shit.mp3","Da Shit"],            ["np2-20-damn.mp3","Damn"],
+  ["np2-19-to-the-next-shawty.m4a","To the Next Shawty"],            ["np2-20-damn.mp3","Damn"],
   ["np2-21-deranger.mp3","Déranger"],          ["np2-22-epic-film.mp3","Epic Film"],
   ["np2-23-illegal2.mp3","Illegal 2"],         ["np2-24-like-jimi-hendrix.mp3","Like Jimi Hendrix"],
   ["np2-25-lonely3.mp3","Lonely 3"],           ["np2-26-no-name.mp3","No Name"]
@@ -787,7 +787,8 @@ function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+":"+String
 /* One account walks in with the whole pit open — the owner needs to be able to
    check level 23 without playing 22 first. Read off the Supabase session, so it
    is the signed-in identity that unlocks, not a flag anyone can set. */
-var TESTERS=["droguepuissance4@gmail.com"];
+/* hashed — this file is public, so it must not publish who the testers are */
+var TESTERS=["ef497961f5e4932102172edae2ba5edbf8eb2db2cc8e99c8a73790d341034b69"];
 var allOpen=false;
 function checkTester(){
   loadSB(function(){
@@ -796,10 +797,19 @@ function checkTester(){
       sb=sb||window.supabase.createClient(SB_URL,SB_KEY);
       sb.auth.getSession().then(function(r){
         var em=r&&r.data&&r.data.session&&r.data.session.user&&r.data.session.user.email;
-        if(em && TESTERS.indexOf(String(em).toLowerCase())>=0){
-          allOpen=true; paintGrid();
-          flashMsg("TEST ACCOUNT — THE WHOLE PIT IS OPEN");
-        }
+        if(!em) return;
+        /* TESTERS holds hashes now, so the session address has to be hashed
+           before it is compared — a plain compare would silently never match. */
+        (function(t){ try{
+          if(!(window.crypto&&crypto.subtle)) return;
+          crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){
+            var h=Array.prototype.map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+            if(TESTERS.indexOf(h)>=0){
+              allOpen=true; paintGrid();
+              flashMsg("TEST ACCOUNT — THE WHOLE PIT IS OPEN");
+            }
+          }).catch(function(){});
+        }catch(e){} })(String(em).trim().toLowerCase());
       }).catch(function(){});
     }catch(e){}
   });

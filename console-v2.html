@@ -648,7 +648,7 @@ html.framed .hello{padding-top:16px}
      player.js self-bridges to window.top.IBEERADIO when the shell frames us, so the
      one radio keeps playing across pages; standalone it owns its own audio. -->
 <script src="/assets/owner.js"></script>
-<script src="/assets/player.js?v=29"></script>
+<script src="/assets/player.js?v=31"></script>
 <script>document.write('<script src="/assets/lyrics-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script>document.write('<script src="/assets/lyrics-timed.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script>document.write('<script src="/assets/song-meta.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
@@ -768,8 +768,8 @@ html.framed .hello{padding-top:16px}
       "just give me a year, watch me gettin closer to the check","you wish I was lying."]
   };
   /* the REAL lyrics: timed (karaoke) when we have them, plain otherwise */
-  function slugKey(map,slug){ if(!map)return null; if(map[slug])return map[slug]; var alt=(slug||"").replace(/\.mp3$/,"");
-    for(var k in map){ if(k.replace(/\.mp3$/,"")===alt) return map[k]; } return null; }
+  function slugKey(map,slug){ if(!map)return null; if(map[slug])return map[slug]; var alt=(slug||"").replace(/\.(?:mp3|m4a)$/,"");
+    for(var k in map){ if(k.replace(/\.(?:mp3|m4a)$/,"")===alt) return map[k]; } return null; }
   function linesFor(s){ var slug=s.slug||"";
     var T=slugKey(window.IBEE_LYRICS_TIMED,slug); if(T&&T.length) return T.map(function(o){return o.w;});
     var P=slugKey(window.IBEE_LYRICS,slug); if(P&&P.length) return P.slice();
@@ -829,7 +829,7 @@ html.framed .hello{padding-top:16px}
         byAlbum[alId]={id:alId,name:al.name||alId.toUpperCase(),hue:(hueFromTint(al.tint)!=null?hueFromTint(al.tint):(so.hue!=null?so.hue:110)),
           sub:(mt.sub||al.tag||"ONLY IBEE"),cv:al.cover||"",yr:(mt.yr||""),label:"ONLY IBEE",blurb:(mt.blurb||("— "+(al.name||alId)+" —")),room:al.room||"",songs:[]};
         order.push(alId); }
-      var g=byAlbum[alId]; var slug=so.f||""; var bd=B[slug]||B[slug.replace(/\.mp3$/,"")]||{}; var md=MET[slug]||MET[slug.replace(/\.mp3$/,"")]||{};
+      var g=byAlbum[alId]; var slug=so.f||""; var bd=B[slug]||B[slug.replace(/\.(?:mp3|m4a)$/,"")]||{}; var md=MET[slug]||MET[slug.replace(/\.(?:mp3|m4a)$/,"")]||{};
       var song={n:so.n||slug,a:g.name,c:g.cv,slug:slug,idx:i,al:alId,len:(so.len||md.len||""),pl:"",no:g.songs.length+1,yr:g.yr,
         bpm:(bd.bpm||0),key:(md.key||""),mood:(md.mood||md.vibe||g.sub.toLowerCase())};
       g.songs.push(song); SONGS.push(song); }
@@ -896,7 +896,7 @@ html.framed .hello{padding-top:16px}
   }
   /* old galaxy-engine feature restored: a record GROWS with how many times you've
      played it (from ibee_sav.plays), up to +60% at 10 plays */
-  function playsOf(slug){ try{ var s=JSON.parse(localStorage.getItem("ibee_sav")||"{}"); var p=s&&s.plays&&(s.plays[slug]||s.plays[(slug||"").replace(/\.mp3$/,"")]); return p>0?p:0; }catch(e){ return 0; } }
+  function playsOf(slug){ try{ var s=JSON.parse(localStorage.getItem("ibee_sav")||"{}"); var p=s&&s.plays&&(s.plays[slug]||s.plays[(slug||"").replace(/\.(?:mp3|m4a)$/,"")]); return p>0?p:0; }catch(e){ return 0; } }
   function makePlanet(s,n){ var sz=n>12?13:n>8?17:22, W=CW||360, H=CH||620;
     var grow=1+Math.min(10,playsOf(s.slug))*0.06;      /* 1.0 .. 1.6 */
     return {s:s,x:40+Math.random()*(W-80),y:110+Math.random()*Math.max(120,(H-260)),vx:0,vy:0,
@@ -1041,7 +1041,7 @@ html.framed .hello{padding-top:16px}
   function statRow(k,v){ return '<div class="st"><b>'+v+'</b><span>'+k+'</span></div>'; }
   function dash(v){ return (v==null||v==="")?"—":v; }
   function soulRow(k,v){ return '<div class="sr"><span class="sk">'+k+'</span><span class="sv">'+esc(v)+'</span></div>'; }
-  function metaFor(slug){ var M=window.IBEE_META||{}; return M[slug]||M[(slug||"").replace(/\.mp3$/,"")]||{}; }
+  function metaFor(slug){ var M=window.IBEE_META||{}; return M[slug]||M[(slug||"").replace(/\.(?:mp3|m4a)$/,"")]||{}; }
   function openDet(s){ var g=GAL[s.g], m=metaFor(s.slug);
     $("dti").textContent=s.n; $("dar").textContent=s.a;
     $("dinfo").textContent=(g?g.name:"")+(s.mood?("  ·  "+s.mood):"")+"  ·  tap the universe to close";

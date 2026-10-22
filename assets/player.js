@@ -540,7 +540,7 @@
      generic card for every record. /s/<slug>/ carries that record's own cover
      and title, then redirects a human to /?s=<slug>, which is still the real
      destination and still works for every link already out in the wild. */
-  function songLink(s){ return ROOT + "s/" + encodeURIComponent(s.f.replace(/\.mp3$/i,"")) + "/"; }
+  function songLink(s){ return ROOT + "s/" + encodeURIComponent(s.f.replace(/\.(?:mp3|m4a)$/i,"")) + "/"; }
   function shareSong(s, btn){
     var url = songLink(s);
     try{ if(navigator.clipboard) navigator.clipboard.writeText(url); }catch(e){}
@@ -551,7 +551,7 @@
   function paintRoomBtn(al){
     var box = $("rp-room");
     if(al && al.room){
-      box.innerHTML = '<a href="'+al.room+'">▶ GO TO THE ROOM</a>';
+      box.innerHTML = '<a href="'+al.room+'">▶ GO TO THE PAGE</a>';
       box.style.setProperty("--roomtint", al.tint || "#ff2b2b");
       box.classList.add("show");
     } else {
@@ -945,7 +945,7 @@
     if(!DEEP) return;
     for(var i=0;i<SONGS.length;i++){
       var f = (SONGS[i].f||"").toLowerCase();
-      if(f !== DEEP && f.replace(/\.mp3$/,"") !== DEEP) continue;
+      if(f !== DEEP && f.replace(/\.(?:mp3|m4a)$/,"") !== DEEP) continue;
       DEEP = null;
       if(SONGS[i].locked) return;                    // a locked record never leaks
       play(i, 0);                                    // shared links beat the saved state

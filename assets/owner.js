@@ -16,7 +16,23 @@
 (function(){
   "use strict";
   if(window.IBEE_OWNER_READY) return;                 // already loaded once
-  var OWNER  = "droguepuissance4@gmail.com";
+  /* The owner is matched by a SHA-256 of their address, not the address itself.
+     These files ship to every visitor, and the security audit found the same
+     mistake in player.js (a friend's email served on every page) — the whole
+     point of a private gate is defeated if the gate announces who it is for.
+     New owner: python3 -c "import hashlib;print(hashlib.sha256(b'their@email').hexdigest())" */
+  var OWNER_SHA = "ef497961f5e4932102172edae2ba5edbf8eb2db2cc8e99c8a73790d341034b69";
+  function sha256hex(t){
+    try{ if(!(window.crypto&&crypto.subtle)) return Promise.resolve("");
+      return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){
+        return Array.prototype.map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+      }).catch(function(){return "";});
+    }catch(e){ return Promise.resolve(""); }
+  }
+  function isOwnerEmail(em){
+    if(!em) return Promise.resolve(false);
+    return sha256hex(String(em).trim().toLowerCase()).then(function(h){ return h===OWNER_SHA; });
+  }
   var SB_URL = "https://hloxwicoeahczifshyoe.supabase.co";
   var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhsb3h3aWNvZWFoY3ppZnNoeW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MjM1MzMsImV4cCI6MjA5OTI5OTUzM30.IK7f4tU6Bb6O9oW5fwfO2Tv3dEZhh3IAj5y_91nier8";
 
@@ -68,7 +84,8 @@
       var sb=window.supabase.createClient(SB_URL,SB_KEY);
       sb.auth.getSession().then(function(res){
         var em=res&&res.data&&res.data.session&&res.data.session.user&&res.data.session.user.email;
-        settle(!!em && String(em).toLowerCase()===OWNER.toLowerCase());
+        if(!em){ settle(false); return; }
+        isOwnerEmail(em).then(settle).catch(function(){ settle(false); });
       }).catch(function(){ settle(false); });
     }catch(e){ settle(false); }
   });

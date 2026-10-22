@@ -178,6 +178,65 @@
 
   /* ================= ENGINE (music universe) ================= */
   #music{max-width:none}
+  /* ===== THE RECORD'S PAGE — the original console-v2 design, restored =====
+     A gradient sheet rather than a panel: it fades up out of the universe so the
+     canvas keeps reading as one surface, with a blur behind the text. Everything
+     here (sizes, the 3-up stat grid, the acid/cyan left-borders, the karaoke
+     mask) is the design that was lost when console.html became home again. */
+  #udet{position:absolute;left:0;right:0;bottom:0;top:auto;max-height:52%;z-index:40;
+    padding:52px 20px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;
+    background:linear-gradient(180deg,transparent 0,rgba(6,6,9,0) 10%,rgba(6,6,9,.34) 30%,rgba(6,6,9,.74) 58%,rgba(6,6,9,.94) 100%);
+    -webkit-backdrop-filter:blur(2px) saturate(1.1);backdrop-filter:blur(2px) saturate(1.1);
+    transform:translateY(24px);opacity:0;pointer-events:none;
+    transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .3s}
+  #udet.on{transform:translateY(0);opacity:1;pointer-events:auto}
+  #udet .db{position:relative;z-index:2}
+  /* window-style close on the song page */
+  #udet .dx{position:absolute;top:12px;right:12px;z-index:6;width:34px;height:34px;border-radius:10px;
+    background:rgba(6,6,9,.72);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:14px;cursor:pointer;
+    -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);box-shadow:0 3px 12px rgba(0,0,0,.55)}
+  #udet .dx:hover{border-color:var(--acid);color:var(--acid)}
+  #udet .dti{font-family:var(--px);font-size:15px;color:#fff;line-height:1.5;text-shadow:0 2px 12px #000;
+    padding-right:40px;overflow-wrap:anywhere}
+  #udet .dar{font-family:var(--px);font-size:8px;color:var(--acid);margin-top:9px;letter-spacing:1px}
+  #udet .dinfo{color:#b9b9bd;font-size:15px;margin-top:9px}
+  #udet .dstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  #udet .dstats .st{border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.32);padding:8px 9px}
+  #udet .dstats .st b{display:block;font-family:var(--vt);font-size:19px;color:#fff;font-weight:normal;line-height:1}
+  #udet .dstats .st span{font-family:var(--px);font-size:6px;letter-spacing:1px;color:var(--dim);display:block;margin-top:5px}
+  #udet .dplay{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-family:var(--px);font-size:10px;
+    color:#07120a;background:var(--acid);border:none;padding:13px 18px;cursor:pointer;box-shadow:0 0 20px rgba(182,255,0,.4)}
+  #udet .dplay:active{transform:translateY(1px)}
+  /* the record's soul + listening blocks */
+  #udet .dbh{font-family:var(--px);font-size:8px;letter-spacing:1px;color:var(--dim);margin:20px 0 10px}
+  #udet .dsoul .sr{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+  #udet .dsoul .sk{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--acid);flex:none;width:52px;padding-top:3px}
+  #udet .dsoul .sv{font-size:17px;color:#cfcfcf;line-height:1.4;overflow-wrap:anywhere}
+  #udet .dsoul .dm{font-size:17px;color:#c4c4c8;line-height:1.5;margin:10px 0;overflow-wrap:anywhere}
+  #udet .dlisten .dpl{font-family:var(--px);font-size:9px;color:var(--acid);background:rgba(16,20,8,.6);
+    border-left:2px solid var(--acid);padding:10px 12px;margin-bottom:10px}
+  #udet .dlisten .dct{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--cyan);
+    background:rgba(8,18,22,.55);padding:6px 12px}
+  #udet .dlisten .dct .cr{display:flex;align-items:center;gap:8px;padding:6px 0;
+    border-top:1px solid rgba(38,224,255,.14);font-size:16px;color:#cceff7}
+  #udet .dlisten .dct .cr:first-child{border-top:0}
+  #udet .dlisten .dct .cr b{font-family:var(--px);font-size:7px;color:var(--cyan);font-weight:normal}
+  #udet .dlisten .dct .cr i{margin-left:auto;font-family:var(--px);font-size:7px;color:var(--dim);font-style:normal;white-space:nowrap}
+  #udet .dlisten .dct .ct0{font-size:15px;color:var(--dim);padding:6px 0}
+  /* synced karaoke — active line lit, neighbours dimmed, auto-scroll, masked edges */
+  #udet .lyr{margin-top:20px;border-top:1px solid rgba(255,255,255,.12);padding-top:16px}
+  #udet .lyrh{font-family:var(--px);font-size:8px;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
+  #udet .lyrbox{position:relative;max-height:250px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:70px 0;
+    -webkit-mask:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);
+    mask:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent)}
+  #udet .klyr .klrow{font-family:var(--vt);font-size:20px;line-height:1.35;color:#5c5c62;padding:9px 2px;
+    white-space:normal;overflow-wrap:anywhere;word-break:break-word;
+    transition:color .3s,opacity .3s,transform .3s,text-shadow .3s;transform-origin:left center}
+  #udet .klyr .klrow.past{color:#8f8f95}
+  #udet .klyr .klrow.on{color:var(--acid);font-size:25px;transform:scale(1.02);
+    text-shadow:0 0 16px rgba(182,255,0,.55)}
+  #udet .klyr .klrow.soon{color:#7a7a80}
+
   #engroot{
     position:relative;width:100%;
     height:calc(100dvh - 235px);min-height:430px;
@@ -249,6 +308,16 @@
     display:flex;justify-content:space-between;padding:12px 14px 24px;
     background:linear-gradient(180deg,var(--bg) 55%,rgba(7,7,7,.85) 78%,transparent);
   }
+  .eng-hud{align-items:flex-start;gap:12px}
+  /* the album cover on the planet page */
+  .eng-hud .hc{width:54px;height:54px;flex:none;background:#000 center/cover no-repeat;
+    border:1px solid var(--border);border-radius:8px;box-shadow:0 0 16px rgba(0,0,0,.7);
+    transition:width .3s,height .3s,box-shadow .3s}
+  .eng-hud .hc[hidden]{display:none}
+  .eng-hud .l{flex:1;min-width:0}
+  /* …and it swells with an acid ring while a record's page is open */
+  #engroot.detopen .eng-hud .hc{width:82px;height:82px;
+    box-shadow:0 0 26px rgba(0,0,0,.8),0 0 0 1px var(--acid)}
   .eng-hud .l .t{font-family:var(--px);font-size:11px;color:var(--acid);text-shadow:0 0 10px rgba(182,255,0,.4)}
   .eng-hud .l .s{color:var(--dim);font-size:17px;margin-top:5px}
   .eng-hud .r{font-family:var(--px);font-size:8px;color:var(--dim);text-align:right;line-height:2}
@@ -699,7 +768,30 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
           <button class="egclose" id="egclose" data-go="menu">✕ CLOSE — BACK TO MENU</button>
         </div>
         <canvas id="engcanvas"></canvas>
+        <!-- THE RECORD'S PAGE — restored from console-v2 (2026-10-22).
+             This is the ORIGINAL design, not a rebuild: a gradient sheet that
+             fades up out of the universe (no hard panel edge), a 3-up stat grid,
+             the record's soul, real listening numbers, and synced karaoke. The
+             planet zooms behind it. -->
+        <div id="udet">
+          <button class="dx" id="dx" aria-label="Close">&#10005;</button>
+          <div class="db">
+            <div class="dti" id="dti"></div>
+            <div class="dar" id="dar"></div>
+            <div class="dinfo" id="dinfo"></div>
+            <div class="dstats" id="dstats"></div>
+            <button class="dplay" id="dplay">&#9654; PLAY</button>
+            <div class="dsoul" id="dsoul"></div>
+            <div class="dlisten" id="dlisten"></div>
+            <div class="lyr"><div class="lyrh">LYRICS &middot; KARAOKE</div>
+              <div class="lyrbox" id="lyrbox"><div id="dlyr" class="klyr"></div></div></div>
+          </div>
+        </div>
         <div class="eng-hud">
+          <!-- the record's cover, pinned while you are inside a galaxy. It grows
+               and takes an acid ring when a song's page opens — the "spotify
+               vibe" header the old console had (#unihdr there). -->
+          <div class="hc" id="engcover" hidden></div>
           <div class="l">
             <div class="t" id="engtitle">THE UNIVERSE</div>
             <div class="s" id="engsub">tap a galaxy to enter_</div>
@@ -1369,7 +1461,8 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         if(!ga||!ga.id)return;
         if(ga.id==="np2"&&!window.IBEE_SHOW_NP2)return;   // NP2 private until owner
         for(var gi=0;gi<GALX.length;gi++)if(GALX[gi].id===ga.id)return;
-        GALX.push({id:ga.id,name:ga.name||ga.id.toUpperCase(),sub:ga.sub||"NEW TRANSMISSION",hue:(ga.hue!=null?ga.hue:190)});
+        GALX.push({id:ga.id,name:ga.name||ga.id.toUpperCase(),sub:ga.sub||"NEW TRANSMISSION",
+          hue:(ga.hue!=null?ga.hue:190),cover:ga.cover||undefined});
       });
       (XSE.songs||[]).forEach(function(e){
         if(!e||!e.f)return;
@@ -1405,6 +1498,8 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     var gridScrollY=0,gridMaxScroll=0;   // grid mode scrolls vertically so rows can breathe
     var galScrollY=0,galMaxScroll=0;     // the galaxy picker scrolls too (comfortable sizes on phones)
     var forceGhost=false,zoomStart=0; // forceGhost: pin the radio song as performer on arrival · zoomStart: galaxy open animation
+    var detPl=null;                   // the planet whose page is open (null = closed)
+    var detCardH=0;                   // how much of the canvas the open page covers
     function slugOf(t){return (t.file||"").split("/").pop();} /* locked planets have no file — never match */
     var stars=null,galaxyGeo=null;
     var audioLevel=0,audioBeat=0,emaLow=0;
@@ -1587,6 +1682,8 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       };
     }
     function enterGalaxy(g){
+      closeDet();
+      paintCover(g);
       curG=g;view="system";
       forceGhost=false;                 // normal entry: no pinned performer
       zoomStart=performance.now();      // trigger the zoom-in animation
@@ -1606,6 +1703,8 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       }
     }
     function exitToGalaxies(){
+      closeDet();
+      paintCover(null);
       view="galaxy";curG=null;galScrollY=0;
       engTitle.textContent="THE UNIVERSE";
       engSub.textContent="tap a galaxy to enter_";
@@ -1724,11 +1823,22 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     }
     function stepPlanet(pl,dt,bounds,idx,total){
       var pf=playing||ghost;
+      /* THE FOCUS is the record whose page is open, falling back to whatever is
+         performing. Keying the zoom off the performer alone meant that opening a
+         page for a track the radio had not switched to yet left the planet small
+         and off-centre — you were reading about one record while another sat in
+         the middle. The page always wins while it is open. */
+      var fc=detPl||pf;
       var step=Math.min(3,dt/16);
       pl.phase+=dt*0.002;
       pl.drift+=dt*0.0009;
       pl.spin+=0.015+audioBeat*(pf===pl?0.14:0.05);
-      pl.perfScale+=((pf===pl?1.45:1)-pl.perfScale)*Math.min(1,0.05*step);
+      /* ZOOM ON THE PLANET: while its page is open the performer swells and the
+         easing doubles, so the record you tapped visibly comes at you instead of
+         drifting. 1.45 is the normal performing size. */
+      /* the original numbers: 2.3 while its page is open, 1.45 performing */
+      var want=(fc===pl)?(detPl===pl?2.3:1.45):1;
+      pl.perfScale+=(want-pl.perfScale)*Math.min(1,0.05*step);
       if(pl.dragging)return;
 
       // GRID MODE — records line up like files in a folder
@@ -1741,18 +1851,23 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       }
 
       // performer floats to center
-      if(pf===pl){
-        var cx=bounds.w*0.5,cy=bounds.h*0.44;
-        pl.x+=(cx-pl.x)*Math.min(1,0.05*step)+Math.sin(pl.drift*0.7)*0.35*step;
-        pl.y+=(cy-pl.y)*Math.min(1,0.05*step)+Math.cos(pl.drift*0.6)*0.35*step;
+      if(fc===pl){
+        /* The original mark: the card is max-height 52%, so H*0.30 sits the
+           record in the middle of the stage you can still see, and it keeps its
+           slow drift — it breathes there rather than being pinned. */
+        var open=(detPl===pl);
+        var cx=bounds.w*0.5, cy=open?bounds.h*0.30:bounds.h*0.44;
+        var ez=Math.min(1,(open?0.07:0.05)*step);
+        pl.x+=(cx-pl.x)*ez+Math.sin(pl.drift*0.7)*0.35*step;
+        pl.y+=(cy-pl.y)*ez+Math.cos(pl.drift*0.6)*0.35*step;
         return;
       }
       // others orbit the performer (only if it's in this galaxy)
-      if(pf&&curG&&pf.t.g===curG.id){
+      if(fc&&curG&&fc.t.g===curG.id){
         pl.orbA+=pl.orbDir*pl.orbSpeed*step*(1+audioBeat*1.6);
         var rr=pl.orbR*(1+audioBeat*0.12);
-        var tx=pf.x+Math.cos(pl.orbA)*rr;
-        var ty=pf.y+Math.sin(pl.orbA)*rr;
+        var tx=fc.x+Math.cos(pl.orbA)*rr;
+        var ty=fc.y+Math.sin(pl.orbA)*rr;
         pl.x+=(tx-pl.x)*Math.min(1,0.09*step);
         pl.y+=(ty-pl.y)*Math.min(1,0.09*step);
         pl.x=Math.max(26,Math.min(bounds.w-26,pl.x));
@@ -2008,6 +2123,136 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       blip(320,.04);
     });
     function fmt(s){if(!isFinite(s))return"--:--";var m=Math.floor(s/60),ss=Math.floor(s%60);return m+":"+(ss<10?"0":"")+ss;}
+    /* ===== THE RECORD'S PAGE — behaviour restored from console-v2 =====
+       Same fields, same helpers (statRow/soulRow/dash), same karaoke loop. The
+       only thing rewritten is where the data comes from: v2 read its own SONGS
+       array, this reads console.html's TRACKS/GALX, song-meta and beat-data. */
+    var detCardH=0, klTimer=null, klLines=[], klTimed=null, klIdx=0, curDetSlug=null;
+
+    function statRow(k,v){ return '<div class="st"><b>'+v+'</b><span>'+k+'</span></div>'; }
+    function dash(v){ return (v==null||v==="")?"—":v; }
+    function esc2(x){ return String(x==null?"":x).replace(/[&<>"]/g,function(m){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]; }); }
+    function soulRow(k,v){ return '<div class="sr"><span class="sk">'+k+'</span><span class="sv">'+esc2(v)+'</span></div>'; }
+    function fmtLen(sec){ sec=Math.round(sec||0); if(!sec)return "—";
+      return Math.floor(sec/60)+":"+("0"+(sec%60)).slice(-2); }
+    /* the shell owns the lyric + meta stores; inside the frame they live on top */
+    function TOPWIN(){ try{ return window.top||window; }catch(e){ return window; } }
+    function store(name){ try{ return window[name]||TOPWIN()[name]||{}; }catch(e){ return window[name]||{}; } }
+    function slugKey(map,slug){ if(!map)return null; if(map[slug])return map[slug];
+      var alt=(slug||"").replace(/\.(?:mp3|m4a)$/,"");
+      for(var k in map){ if(k.replace(/\.(?:mp3|m4a)$/,"")===alt) return map[k]; } return null; }
+    function metaOf(tr){ return slugKey(store("IBEE_META"),slugOf(tr))||{}; }
+    function bpmOf(tr){ var e=slugKey(store("IBEE_BEAT"),slugOf(tr)); return (e&&e.bpm)||0; }
+    /* curated album copy the engine doesn't carry (genre/year) — same table as v2 */
+    var ALBUM_META={ np:{sub:"ROCK · RNB · BLUES",yr:"2024"}, np2:{sub:"THE SEQUEL",yr:"2025"},
+      mzs:{sub:"ONE TAKE",yr:"2025"}, ib:{sub:"SINGLES",yr:""} };
+
+    function linesFor(tr){
+      var t=slugKey(store("IBEE_LYRICS_TIMED"),slugOf(tr));
+      if(t&&t.length) return t.map(function(l){ return l.w||""; });
+      var p=slugKey(store("IBEE_LYRICS"),slugOf(tr));
+      return (p&&p.length)?p:[];
+    }
+    function renderKaraoke(tr){
+      klTimed=slugKey(store("IBEE_LYRICS_TIMED"),slugOf(tr))||null;
+      klLines=linesFor(tr); klIdx=0;
+      var box=document.getElementById("dlyr");
+      if(!klLines.length){ box.innerHTML='<div class="klrow soon">no words pressed for this one yet_</div>'; return; }
+      box.innerHTML=klLines.map(function(l){ return '<div class="klrow soon">'+esc2(l)+'</div>'; }).join("");
+      klPaint();
+    }
+    function klPaint(){ var rows=document.getElementById("dlyr").children, box=document.getElementById("lyrbox");
+      for(var i=0;i<rows.length;i++){ rows[i].className='klrow '+(i<klIdx?'past':i===klIdx?'on':'soon'); }
+      var cur=rows[klIdx]; if(cur&&box){ box.scrollTop=cur.offsetTop-box.clientHeight/2+cur.offsetHeight/2; } }
+    function klStart(){ klStop(); klTimer=setInterval(function(){ if(!detPl)return;
+      var R=window.IBEERADIO;
+      if(klTimed && R && R.audio){ var tt=R.audio.currentTime||0, ni=0;
+        for(var i=0;i<klTimed.length;i++){ if(klTimed[i].t<=tt) ni=i; else break; }
+        if(ni!==klIdx){ klIdx=ni; klPaint(); } return; }
+      if(!klLines.length) return;
+      klIdx=(klIdx+1)%klLines.length; klPaint(); }, 400); }
+    function klStop(){ if(klTimer){ clearInterval(klTimer); klTimer=null; } }
+
+    /* THE RECORD'S COVER. GALX only carries a cover for studio-founded albums,
+       so for the built-ins we ask the radio (its ALBUMS map has the real art) and
+       fall back to any track in the galaxy that carries its own picture. */
+    function galCover(g){
+      if(!g) return "";
+      if(g.cover) return g.cover;
+      try{
+        var R=window.IBEERADIO;
+        if(R&&R.indexBySlug&&R.album){
+          for(var i=0;i<TRACKS.length;i++){
+            if(TRACKS[i].g!==g.id||!TRACKS[i].file) continue;
+            var ri=R.indexBySlug(slugOf(TRACKS[i]));
+            if(ri>=0){ var al=R.album(ri); if(al&&al.cover) return al.cover; }
+          }
+        }
+      }catch(e){}
+      for(var j=0;j<TRACKS.length;j++) if(TRACKS[j].g===g.id&&TRACKS[j].cover) return TRACKS[j].cover;
+      return "";
+    }
+    function paintCover(g){
+      var el=document.getElementById("engcover"); if(!el) return;
+      var c=g?galCover(g):"";
+      if(c){ el.style.backgroundImage="url("+JSON.stringify(c).slice(1,-1)+")"; el.hidden=false; }
+      else { el.style.backgroundImage=""; el.hidden=true; }
+    }
+
+    function openDet(pl){
+      if(!pl||!pl.t||pl.t.locked) return;
+      var tr=pl.t, g=null, no=0, seen=0;
+      for(var i=0;i<GALX.length;i++) if(GALX[i].id===tr.g){ g=GALX[i]; break; }
+      for(var j=0;j<TRACKS.length;j++){ if(TRACKS[j].g===tr.g){ seen++; if(TRACKS[j]===tr){ no=seen; break; } } }
+      var am=ALBUM_META[tr.g]||{}, m=metaOf(tr), bpm=bpmOf(tr);
+      document.getElementById("dti").textContent=tr.name||"—";
+      document.getElementById("dar").textContent="ONLY IBEE";
+      document.getElementById("dinfo").textContent=(g?g.name:"")+(m.vibe?("  ·  "+m.vibe):"")+"  ·  tap the universe to close";
+      document.getElementById("dstats").innerHTML=
+        statRow("TRACK","#"+(no||"—"))+statRow("LENGTH",fmtLen(tr.len))+statRow("YEAR",dash(am.yr))
+        +statRow("BPM",bpm?bpm:"—")+statRow("PLAYS",playsOf(tr))+statRow("GROWTH",Math.min(playsOf(tr),MAX_PLAYS)+"/"+MAX_PLAYS);
+      /* the record's soul (song-meta) */
+      var soul="";
+      if(m.vibe)    soul+=soulRow("VIBE",m.vibe);
+      if(m.meaning) soul+='<p class="dm">'+esc2(m.meaning)+'</p>';
+      if(m.context) soul+=soulRow("MADE",m.context);
+      if(m.took)    soul+=soulRow("TIME",m.took);
+      document.getElementById("dsoul").innerHTML=soul?('<div class="dbh">THE RECORD</div>'+soul):"";
+      /* listening — real plays + top cities, from the shell's stats client */
+      document.getElementById("dlisten").innerHTML='<div class="dbh">LISTENING</div>'
+        +'<div class="dpl" id="dpl">PLAYS // reading_</div>'
+        +'<div class="dct" id="dct"><span class="ct0">top cities — reading_</span></div>';
+      var S=(function(){try{return (window.top&&window.top.IBEE_STATS_CLIENT)||window.IBEE_STATS_CLIENT;}catch(e){return window.IBEE_STATS_CLIENT;}})();
+      var slug=slugOf(tr);
+      if(S&&S.songCounts){ S.songCounts().then(function(rows){
+        var r=(rows||[]).filter(function(x){return x.song_slug===slug;})[0];
+        var el=document.getElementById("dpl"); if(el) el.textContent='PLAYS // '+(r?Number(r.plays).toLocaleString():'0');
+      }).catch(function(){ var el=document.getElementById("dpl"); if(el) el.textContent='PLAYS // —'; }); }
+      else { var e0=document.getElementById("dpl"); if(e0) e0.textContent='PLAYS // '+playsOf(tr); }
+      if(S&&S.songCities){ S.songCities(slug).then(function(rows){ rows=(rows||[]).slice(0,5);
+        var el=document.getElementById("dct"); if(!el)return;
+        el.innerHTML=rows.length? rows.map(function(row,n){
+          return '<span class="cr"><b>'+(n+1)+'</b> '+esc2(row.city_name||'—')+'<i>'+Number(row.listeners||0).toLocaleString()+'</i></span>';
+        }).join('') : '<span class="ct0">cities appear as this song is played_</span>'; }).catch(function(){}); }
+      renderKaraoke(tr);
+      detPl=pl; curDetSlug=slug;
+      try{ assignOrbits(pl); }catch(e){}
+      var card=document.getElementById("udet");
+      card.classList.add("on");
+      try{ detCardH=card.getBoundingClientRect().height||0; }catch(e){ detCardH=0; }
+      root.classList.add("detopen");
+      klStart();
+      document.getElementById("dplay").onclick=function(e){ e.stopPropagation(); playTrack(pl); };
+    }
+    function closeDet(){
+      if(!detPl) return;
+      detPl=null; detCardH=0; curDetSlug=null; klStop();
+      document.getElementById("udet").classList.remove("on");
+      root.classList.remove("detopen");
+    }
+    document.getElementById("dx").onclick=function(e){ e.stopPropagation(); closeDet(); };
+
     function playTrack(pl){
       /* ===== ONE SOURCE =====
          If this planet is a radio song, don't spin up a second player — command the
@@ -2171,13 +2416,18 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
           var hit=pickPlanet(p.x,p.y);
           if(hit){
             if(hit.t.locked){toast("SIGNAL ENCRYPTED — not yet transmitted_",true);blip(120,.08);}
-            else if(playing===hit||ghost===hit){stopTrack();}   // tap the performer (radio or local) to stop
-            else{playTrack(hit);}
+            else if(detPl===hit){ stopTrack(); closeDet(); }   // tapping the open record again stops it
+            else { playTrack(hit); openDet(hit); }             // play AND open the record's page
           }else{
-            // tap the void → snap to grid / back to free motion
-            gridMode=!gridMode; gridScrollY=0;
-            toast(gridMode?"⊞ ALIGNED TO GRID · drag to scroll_":"✦ FREE MOTION_");
-            blip(gridMode?520:300,.05);
+            /* the void closes an open record first — it is the big, obvious
+               target, and grid-toggling out from under a page you were reading
+               was the jarring part. Only once nothing is open does it grid. */
+            if(detPl){ closeDet(); }
+            else{
+              gridMode=!gridMode; gridScrollY=0;
+              toast(gridMode?"⊞ ALIGNED TO GRID · drag to scroll_":"✦ FREE MOTION_");
+              blip(gridMode?520:300,.05);
+            }
           }
         }
       }
@@ -2347,7 +2597,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
   });
 })();
 </script>
-<script src="assets/player.js?v=30"></script>
+<script src="assets/player.js?v=31"></script>
 <script src="/assets/process.js?v=2"></script>
 <div id="icslbx"><img alt=""></div>
 <script>

@@ -261,13 +261,23 @@
   .tl-tile .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.8)}
   #tlempty{padding:22px 14px;text-align:center;color:#555;font-family:var(--px);font-size:8px;line-height:2;display:none}
 
-  /* ---- GO TO THE ROOM: persistent pulsing button for the current special album ---- */
-  #roomband{display:none;padding:8px 14px;border-bottom:1px solid var(--border)}
-  #roomband.show{display:block}
-  #roomband button{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
-    font-family:var(--px);font-size:9px;padding:11px 10px;color:#000;background:var(--rtint,var(--red));
-    border:1px solid var(--rtint,var(--red));letter-spacing:1px;cursor:pointer;animation:roompulse 1.9s ease-in-out infinite}
-  @keyframes roompulse{0%,100%{box-shadow:0 0 6px rgba(255,80,40,.35)}50%{box-shadow:0 0 18px rgba(255,80,40,.75)}}
+  /* ---- GO TO THE PAGE ----
+     It had its own full-width band between the shelf and the songs, which cost
+     the list a whole row for a button that is only relevant sometimes. It is a
+     CHIP IN THE ALBUM SHELF now (2026-10-22): the shelf is already a row of
+     places to go, the chip costs no extra height at all, and it sits with the
+     record it belongs to. The band and its pulse are gone. */
+  .alb.pagechip .ac{position:relative;border-color:var(--rtint,var(--red));
+    box-shadow:0 0 14px color-mix(in srgb,var(--rtint,#ff2b2b) 45%,transparent)}
+  .alb.pagechip .ac:after{content:"▶";position:absolute;inset:0;display:flex;align-items:center;
+    justify-content:center;font-family:var(--px);font-size:15px;color:#fff;
+    background:color-mix(in srgb,var(--rtint,#ff2b2b) 62%,transparent);text-shadow:0 2px 6px #000}
+  .alb.pagechip .an{color:var(--rtint,var(--red))}
+  @media(prefers-reduced-motion:no-preference){
+    .alb.pagechip .ac{animation:roompulse 1.9s ease-in-out infinite}
+  }
+  @keyframes roompulse{0%,100%{box-shadow:0 0 8px color-mix(in srgb,var(--rtint,#ff2b2b) 35%,transparent)}
+    50%{box-shadow:0 0 20px color-mix(in srgb,var(--rtint,#ff2b2b) 80%,transparent)}}
 
   /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
   /* ONE scroll on phones. #tracklist already scrolls; giving the song list its
@@ -603,7 +613,7 @@
 
 
   /* ---- ALBUM SHELF at the top of the radio list ---- */
-  #tlalbums{display:flex;gap:9px;overflow-x:auto;overflow-y:hidden;padding:9px 14px 10px;
+  #tlalbums{display:flex;align-items:flex-start;gap:7px;overflow-x:auto;overflow-y:hidden;padding:6px 14px 7px;
     border-bottom:1px solid hsla(var(--rh),var(--rs),55%,.28);scrollbar-width:none;
     touch-action:pan-x}   /* let a vertical drag pass through to the list's scroll */
   #tlalbums::-webkit-scrollbar{display:none}
@@ -612,18 +622,27 @@
      shelf no longer eats half the list. The label sits under the art and is
      capped to one line — a wrapping album name used to make the whole strip
      twice as tall as the covers it was labelling. */
-  .alb{flex:none;width:68px;cursor:pointer;text-align:left;background:none;border:0;padding:0}
-  .alb .ac{width:68px;height:68px;border:1px solid hsla(var(--rh),var(--rs),55%,.42);
+  /* 48px (was 68px, 2026-10-22): the shelf is a way IN to a record, not the
+     point of the screen — the song list is. Shrinking the covers and the two
+     labels under them gives the list back roughly a row and a half on a phone. */
+  .alb{flex:none;width:48px;cursor:pointer;text-align:left;background:none;border:0;padding:0}
+  /* display:block is load-bearing — .ac is a <span>, and width/height are simply
+     IGNORED on an inline box. Without it the cover sized itself to the image
+     (122px on a phone) and no amount of editing these numbers did anything,
+     which is why the shelf stayed enormous. */
+  .alb .ac{display:block;width:48px;height:48px;border:1px solid hsla(var(--rh),var(--rs),55%,.42);
     background:#000;overflow:hidden;position:relative;transition:border-color .15s,box-shadow .15s}
   .alb .ac img{width:100%;height:100%;object-fit:cover;display:block}
   .alb:hover .ac{border-color:hsla(var(--rh),var(--rs),62%,.95);
     box-shadow:0 0 16px hsla(var(--rh),var(--rs),55%,.3)}
   .alb.on .ac{border-color:hsla(var(--rh),var(--rs),65%,1);
     box-shadow:0 0 18px hsla(var(--rh),var(--rs),58%,.45)}
-  .alb .an{display:block;margin-top:5px;font-family:var(--px);font-size:6px;line-height:1.4;
+  .alb .an{display:block;margin-top:4px;font-family:var(--px);font-size:5px;line-height:1.35;
     color:hsla(var(--rh),var(--rs),74%,.95);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .alb .aq{display:block;font-family:var(--px);font-size:5.5px;color:var(--dim);margin-top:2px}
+  /* the track count is the first thing to go when space is tight — the cover and
+     the name already identify the record. */
+  .alb .aq{display:none}
 
   /* the row's ⓘ — same weight as the ♥ beside it */
   #tlbody .nfo{display:inline-flex;align-items:center;justify-content:center;
@@ -723,11 +742,15 @@
   /* the hearts card in the shelf */
   /* the heart must sit dead centre of the square and read at cover size — the
      glyph's own line-box was offsetting it and 26px was lost on a 161px tile */
-  .alb.liked .ac{display:flex!important;align-items:center;justify-content:center;
+  .alb.liked .ac,.alb.allrec .ac{display:flex!important;align-items:center;justify-content:center;
     background:linear-gradient(135deg,#2a0a1a,#160610);line-height:0}
+  .alb.allrec .ac{background:linear-gradient(135deg,#0d1a0a,#060f06)}
   .alb.liked .lkh{display:block;font-size:54%;line-height:1;color:#ff2b6b;
     text-shadow:0 0 18px rgba(255,43,107,.85)}
-  #tlalbums .alb.liked .lkh{font-size:74px}
+  .alb.allrec .lkh{display:block;font-size:54%;line-height:1;color:var(--acid);
+    text-shadow:0 0 18px rgba(182,255,0,.7)}
+  /* follows the 48px shelf cover (was 74px for the old 68px square) */
+  #tlalbums .alb.liked .lkh,#tlalbums .alb.allrec .lkh{font-size:50px}
   .alb.liked.on .ac{border-color:#ff2b6b;box-shadow:0 0 18px rgba(255,43,107,.5)}
   .alb.liked .an{color:#ff8fb4}
 
@@ -816,7 +839,7 @@
            one filters the list to that album — it is a shortcut, not a new screen. -->
       <div id="tlalbums"></div>
       <div id="tlleft">
-        <div id="roomband"><button id="roombtn">▶ GO TO THE ROOM</button></div>
+
         <div id="tlbody"></div>
         <div id="tlempty">NO SIGNALS_<br>TRY ANOTHER WORD</div>
       </div>
@@ -877,7 +900,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=30"></script>
+<script src="assets/player.js?v=31"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- anonymous site analytics: page activity, exits and meaningful interactions -->
@@ -1276,7 +1299,7 @@
       if(r.audio&&r.audio.duration)r.audio.currentTime=Math.max(0,Math.min(1,fr))*r.audio.duration;}catch(x){}});
 
   /* ================= THE RADIO BROWSER (grid default + list + search) =================
-     Renders into the STATIC scaffolding (#tltools search, #roomband, #tlbody, #tlempty) —
+     Renders into the STATIC scaffolding (#tltools search, #tlbody, #tlempty) —
      it no longer overwrites #tracklist, so the header/tools/room-band stay put. GRID is the
      default view (Spotify-style covers with a 3D sideways tilt that straightens on hover),
      LIST is the second choice. Album name / cover / room all come from the radio bridge's
@@ -1285,10 +1308,16 @@
       tlbody=document.getElementById('tlbody'),
       tlempty=document.getElementById('tlempty'),
       tlsearch=document.getElementById('tlsearch'),
-      tlview=document.getElementById('tlview'),
-      roomband=document.getElementById('roomband'),
-      roombtn=document.getElementById('roombtn');
+      tlview=document.getElementById('tlview');
   var viewMode='list', query='', builtCount=-1;   /* LIST is the default view (2026-07-13) */
+  /* ALBUM SELECTION IS NOT THE SEARCH BOX (2026-10-22). Tapping a record used to
+     write its name into `query`, so the shelf filtered by SUBSTRING: picking
+     NOUVEAUX PUNK also listed NOUVEAUX PUNK 2, and any song whose TITLE contained
+     the album name leaked in — "it shows me the list of another album". It was
+     also a toggle, so a second tap on the same record silently emptied the filter
+     and threw you back to the whole catalogue. Now the album is an EXACT match
+     held separately, and tapping the record that is already open does nothing. */
+  var albumSel='';
   var favOnly=false;                              /* ♥ filter: only the saved songs */
   /* favourites — same device-local store as the standalone radio (ibee_favs = {slug:1}) */
   function favs(){ try{ return JSON.parse(localStorage.getItem('ibee_favs')||'{}')||{}; }catch(e){ return {}; } }
@@ -1300,6 +1329,12 @@
   function e3(s){return String(s==null?'':s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
   function matchQ(name,alb){ if(!query)return true; var q=query.toLowerCase();
     return (name||'').toLowerCase().indexOf(q)>=0 || (alb||'').toLowerCase().indexOf(q)>=0; }
+  /* one gate for the shelf: the chosen record (exact, so "NOUVEAUX PUNK" can
+     never pull in "NOUVEAUX PUNK 2") and then the typed words. */
+  function passF(name,alb){
+    if(albumSel && String(alb||'').toLowerCase()!==albumSel.toLowerCase()) return false;
+    return matchQ(name,alb);
+  }
   function vinyl(hue){ return 'radial-gradient(circle,hsl('+(hue||75)+',85%,55%) 0 20%,#070707 22% 28%,#161616 30% 100%)'; }
   /* cover art: song's own picture → its ALBUM cover → legacy assets/covers/<name>.jpg|png → vinyl */
   /* ---- COVER SIZE: never hand a phone a 1400px cover for a 34px row --------
@@ -1366,37 +1401,79 @@
       +'<span class="ac"><span class="lkh">&#9829;</span></span>'
       +'<span class="an">LIKED SONGS</span>'
       +'<span class="aq">'+favN+(favN===1?' SONG':' SONGS')+'</span></button>';
-    host.innerHTML=favCard+out.map(function(a){
-      var on = query && a.name.toLowerCase()===query.toLowerCase();
+    /* the way back to everything. Tapping an open record is a no-op now, so the
+       shelf needs its own exit or you would be stuck inside one album. */
+    var allOn = !albumSel && !favOnly;
+    var allCard='<button class="alb allrec'+(allOn?' on':'')+'" data-all="1" title="All records">'
+      +'<span class="ac"><span class="lkh">&#9673;</span></span>'
+      +'<span class="an">ALL RECORDS</span>'
+      +'<span class="aq">'+r.count+' TRACKS</span></button>';
+    host.innerHTML=pageChip()+allCard+favCard+out.map(function(a){
+      var on = albumSel && a.name.toLowerCase()===albumSel.toLowerCase();
       return '<button class="alb'+(on?' on':'')+'" data-alb="'+esc(a.name)+'" title="'+esc(a.name)+'">'
         +'<span class="ac">'+(a.cover?'<img src="'+esc(sized(a.cover,'mid'))+'" alt="" loading="lazy" decoding="async" data-alt="'+esc(a.cover)+'">':'')+'</span>'
         +'<span class="an">'+esc(a.name)+'</span>'
         +'<span class="aq">'+a.ref.n+' TRACKS</span></button>';
     }).join('');
   }
+  /* THE PAGE CHIP — the record on air has a page of its own (NOUVEAUX PUNK,
+     20 MIN ZA SESSION, any studio album with a room). It leads the shelf so it
+     is reachable without scrolling, and disappears the moment the song changes
+     to one whose album has no page. */
+  function pageChip(){
+    var r=R(); if(!r) return '';
+    var i=r.current?r.current():-1, alb=(i>=0&&r.album)?r.album(i):null;
+    var room=alb&&alb.room; if(!room) return '';
+    var cov=alb.cover?('<img src="'+esc(sized(alb.cover,'mid'))+'" alt="" loading="lazy" decoding="async" data-alt="'+esc(alb.cover)+'">'):'';
+    return '<button class="alb pagechip" data-page="'+esc(room)+'" style="--rtint:'+esc(alb.tint||'#ff2b2b')+'"'
+      +' title="Go to the '+esc(alb.name)+' page">'
+      +'<span class="ac">'+cov+'</span>'
+      +'<span class="an">GO TO THE PAGE</span></button>';
+  }
+
   document.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('.alb'); if(!b) return;
+    if(b.hasAttribute('data-page')){          /* the record's own page */
+      var u=b.getAttribute('data-page'); if(u){ navigate(u); setTL(false); } return;
+    }
+    if(b.hasAttribute('data-all')){            /* back to the whole catalogue */
+      if(!albumSel && !favOnly && !query) return;   /* already there — change nothing */
+      albumSel=''; favOnly=false; query=''; _setQ('');
+      renderTracks(); markNow(); renderAlbums(); return;
+    }
     if(b.hasAttribute('data-liked')){          /* the hearts filter, not an album */
       favOnly=!favOnly;
-      query=''; _setQ(''); renderTracks(); markNow(); renderAlbums(); return;
+      albumSel=''; query=''; _setQ(''); renderTracks(); markNow(); renderAlbums(); return;
     }
+    var name=b.getAttribute('data-alb')||'';
+    /* TAPPING THE RECORD THAT IS ALREADY OPEN DOES NOTHING. It used to toggle the
+       filter off, which read as "the list jumped to another album". Leave by the
+       ALL RECORDS card instead. */
+    if(albumSel && albumSel.toLowerCase()===name.toLowerCase()) return;
     /* leaving LIKED SONGS: without this the hearts filter stayed on and the
        album's tracks were filtered away to nothing — the list looked stuck. */
     favOnly=false;
-    var name=b.getAttribute('data-alb');
-    /* tapping the album that is already filtering clears it — a toggle, so the
-       shelf can never trap you in one record with no way back to everything */
-    query = (query&&query.toLowerCase()===name.toLowerCase()) ? '' : name;
-    _setQ(query); renderTracks(); markNow(); renderAlbums();
+    albumSel=name;
+    query=''; _setQ('');                       /* the search box is no longer the filter */
+    renderTracks(); markNow(); renderAlbums();
   });
 
   function renderTracks(){
     var r=R();if(!r)return;
     tlbody.className = viewMode==='grid'?'grid':'';
     var html='',shown=0,i,cur=r.current?r.current():-1;
+    /* TRACK NUMBERS ARE PER ALBUM (2026-10-22). They used to be the song's index
+       in the whole radio, so NOUVEAUX PUNK 2 opened at 34 and a record never
+       showed its own running order. Count each album separately, once, before
+       the rows are built — the number then stays the same whatever is filtered. */
+    var albNo={}, albSeen={};
+    for(i=0;i<r.count;i++){
+      var a0=r.album?r.album(i):null, k0=(a0&&a0.name)||'ONLY IBEE';
+      albSeen[k0]=(albSeen[k0]||0)+1; albNo[i]=albSeen[k0];
+    }
     for(i=0;i<r.count;i++){
       var s=r.song(i)||{}, alb=r.album?r.album(i):null, aln=(alb&&alb.name)||'ONLY IBEE';
-      if(!matchQ(s.n,aln))continue;
+      if(!passF(s.n,aln))continue;
       if(favOnly&&!isFav(s.f))continue;
       shown++;
       var img0=imgTag(coverCands(s,alb,viewMode==='grid'?'mid':'thumb')), room=alb&&alb.room, tint=(alb&&alb.tint)||'#ff2b2b';
@@ -1416,7 +1493,7 @@
           +'<div class="nm">'+e3(s.n||'—')+playsLabel(s.f)+'</div></div>';
       } else {
         html+='<div class="tr'+(i===cur?' now':'')+(s.locked?' locked':'')+'" data-i="'+i+'"'+(room?' style="--rt:'+tint+'"':'')+'>'
-          +'<span class="no">'+(i<9?'0':'')+(i+1)+'</span>'
+          +'<span class="no">'+(albNo[i]<10?'0':'')+albNo[i]+'</span>'
           +'<span class="cv" style="background:'+vinyl(s.hue)+'">'+img0+'</span>'
           +'<span class="ti"><span class="tn">'+e3(s.n||'—')+'</span><span class="al">'+e3(aln)+'</span>'+playsLabel(s.f)+'</span>'
           +fv
@@ -1426,7 +1503,7 @@
     }
     /* room-only album cards (e.g. NOUVEAUX PUNK — the full experience) */
     (r.rooms?r.rooms():[]).forEach(function(rm){
-      if(!matchQ(rm.name,rm.name))return;
+      if(!passF(rm.name,rm.name))return;
       if(favOnly)return;
       shown++;
       var tint=rm.tint||'#ff2b2b';
@@ -1503,20 +1580,29 @@
   /* GO TO THE ROOM — shows for whichever special album is on air (NOUVEAUX PUNK, 20 MIN ZA
      SESSION, any studio album with a room). Navigates in-frame so the radio keeps playing. */
   var lastRoomKey='';
+  /* Runs on the 350ms heartbeat, so it must NOT re-render the shelf — that would
+     reset its horizontal scroll under your thumb. It swaps the one chip instead,
+     and only when the on-air album actually changed. */
   function updateRoomband(){
-    var r=R();if(!r){roomband.classList.remove('show');return;}
+    var r=R(); if(!r) return;
     var i=r.current?r.current():-1, alb=(i>=0&&r.album)?r.album(i):null;
     var room=alb&&alb.room, key=room?(alb.name+'|'+room):'';
-    if(key===lastRoomKey)return; lastRoomKey=key;
-    if(room){ roombtn.textContent='▶ GO TO THE ROOM';
-      roomband.style.setProperty('--rtint',alb.tint||'#ff2b2b');
-      roomband.dataset.room=room; roomband.classList.add('show'); }
-    else roomband.classList.remove('show');
+    if(key===lastRoomKey) return; lastRoomKey=key;
+    var host=document.getElementById('tlalbums'); if(!host) return;
+    var cur=host.querySelector('.pagechip');
+    var html=pageChip();
+    if(cur&&!html){ cur.remove(); return; }
+    if(!html) return;
+    var tmp=document.createElement('div'); tmp.innerHTML=html;
+    var chip=tmp.firstChild;
+    if(cur) host.replaceChild(chip,cur); else host.insertBefore(chip,host.firstChild);
   }
-  roombtn.onclick=function(){ var u=roomband.dataset.room; if(u){ navigate(u); setTL(false); } };
   var tlclear=document.getElementById('tlclear'), tlwrap=document.getElementById('tlsearchwrap');
   function searchChanged(){
     query=tlsearch.value.trim();
+    /* typing is a catalogue-wide search, so it steps out of the open record —
+       otherwise the words are silently ANDed with an album and find nothing. */
+    if(query) albumSel='';
     tlwrap.classList.toggle('has', tlsearch.value.length>0);
     renderTracks(); markNow(); renderAlbums();
   }
@@ -1531,7 +1617,7 @@
      Copies to the clipboard and offers the native share sheet where there is one. */
   document.getElementById('bshare').onclick=function(){
     var r=R(); if(!r)return; var s=r.song&&r.song(); if(!s||!s.f)return;
-    var url=location.origin+location.pathname.replace(/[^/]*$/,'')+'?s='+encodeURIComponent(s.f.replace(/\.mp3$/i,''));
+    var url=location.origin+location.pathname.replace(/[^/]*$/,'')+'?s='+encodeURIComponent(s.f.replace(/\.(?:mp3|m4a)$/i,''));
     try{ if(navigator.clipboard)navigator.clipboard.writeText(url); }catch(e){}
     if(navigator.share){ navigator.share({title:s.n+' — ONLY IBEE',url:url}).catch(function(){}); }
     var b=this,keep=b.innerHTML; b.innerHTML='✓'; b.style.color='#b6ff00';
@@ -1630,7 +1716,8 @@
     var r=R(),i=r&&r.current?r.current():-1,alb=r&&r.album?r.album(i):null;if(!alb)return;
     closeSongInfo();
     if(alb.room){navigate(alb.room);return;}
-    query=alb.name||'';tlsearch.value=query;openTL();renderTracks();markNow();
+    albumSel=alb.name||''; query=''; _setQ('');
+    openTL();renderTracks();markNow();renderAlbums();
   };
   /* One binding, one fire. The old pair (onclick + capturing pointerup) ran
      twice for every single tap. */

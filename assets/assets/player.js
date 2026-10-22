@@ -34,10 +34,16 @@
      an extra <script> tag; everything degrades gracefully if it's missing. */
   try{
     var bsc = document.createElement("script");
-    /* clock-stamped so a freshly-pushed beat-data.js is fetched immediately —
-       no manual ?v bumping. Loaded once per page (the shell persists), so this
-       is cheap. Old ?v=N versioning retired; IBEE STUDIO just replaces the file. */
-    bsc.src = BASE + "beat-data.js?cb=" + Date.now();
+    /* Stamped per BROWSING SESSION, not per load. A fresh stamp still picks up a
+       newly pushed beat-data.js the next time the site is opened, so IBEE STUDIO
+       still just replaces the file — but Date.now() meant this 300KB file could
+       never be cached, and iOS re-downloads it every time it reloads a tab it
+       evicted for memory. sessionStorage survives that reload; the tab reuses
+       the copy it already has. Old ?v=N versioning stays retired. */
+    var stamp;
+    try{ stamp = sessionStorage.getItem("ibee_cb"); if(!stamp){ stamp = String(Date.now()); sessionStorage.setItem("ibee_cb", stamp); } }
+    catch(e){ stamp = String(Date.now()); }
+    bsc.src = BASE + "beat-data.js?cb=" + stamp;
     document.head.appendChild(bsc);
   }catch(e){}
   /* extra records pressed in IBEE STUDIO (assets/songs-extra.js →
@@ -50,6 +56,20 @@
     xsc.src = BASE + "songs-extra.js?cb=" + Date.now();
     xsc.onload = function(){ addExtras(); };
     document.head.appendChild(xsc);
+  }catch(e){}
+  /* owner flag: NOUVEAUX PUNK 2 is private for now — its songs are kept OUT of
+     the radio for everyone (see addExtras) and folded back in only when the
+     owner account is confirmed. owner.js resolves that once and fires the event
+     we listen for below. Remove this + the np2 guards in addExtras to go public. */
+  try{
+    var osc = document.createElement("script");
+    osc.src = BASE + "owner.js?cb=" + Date.now();
+    document.head.appendChild(osc);
+  }catch(e){}
+  try{
+    document.addEventListener("ibee-owner", function(ev){
+      if(ev && ev.detail){ window.IBEE_SHOW_NP2 = true; try{ addExtras(); }catch(e){} }
+    });
   }catch(e){}
   /* cloud save: sync favourites / badges / room progress to the signed-in ACCOUNT
      so they follow the member across devices (assets/cloudsync.js self-guards to
@@ -74,35 +94,22 @@
      `room` present ⇒ the album is a "special project" that has its own
      immersive page; those get a GO TO THE ROOM button by the player. -------- */
   var ALBUMS = {
-    rss: { name:"RARE SOUL SESSIONS", cover: ROOT+"assets/img/follow-me.jpg" },
+    /* `ib` is the unfiled fallback — every real record names its album below.
+       (RARE SOUL SESSIONS was retired 2026-08-19; the catalogue is the three
+       records now: NOUVEAUX PUNK, NOUVEAUX PUNK 2, 20 MIN ZA SESSION.) */
+    ib:  { name:"ONLY IBEE",          cover: ROOT+"assets/img/follow-me.jpg" },
     np:  { name:"NOUVEAUX PUNK",      cover: ROOT+"assets/img/nouveaux-punk.jpg",
-           room: ROOT+"nouveauxpunk/", galaxy:"np",  tint:"#ff2b2b" },
-    mzs: { name:"20 MIN ZA SESSION",  cover: ROOT+"assets/img/20mzs-album.png",
+           room: ROOT+"nouveauxpunk/", galaxy:"np",  tint:"#ff2b2b", tag:"THE EXPERIENCE" },
+    np2: { name:"NOUVEAUX PUNK 2",    cover: ROOT+"assets/img/nouveaux-punk-2.jpg",
+           room: ROOT+"np2/",          galaxy:"np2", tint:"#ff1f6f", tag:"THE SEQUEL" },
+    mzs: { name:"20 MIN ZA SESSION",  cover: ROOT+"assets/img/20mzs-album.jpg",
            room: ROOT+"20minzasession/", galaxy:"mzs", tint:"#ff7a1a" }
   };
-  function album(id){ return ALBUMS[id] || ALBUMS.rss; }
+  function album(id){ return ALBUMS[id] || ALBUMS.ib; }
 
   /* f = tidy path in assets/audio/songs/ · r = original filename at site root (fallback)
      al = album id (cover + name) · special albums also expose a ROOM. */
   var SONGS = [
-    {f:"all-i-need.mp3",    r:"all i need v1.mp3",  n:"ALL I NEED",      hue:210, al:"rss"},
-    {f:"bounceee.mp3",      r:"bounceee3.mp3",      n:"BOUNCEEE",        hue:285, al:"rss"},
-    {f:"callin-on-u.mp3",   r:"callin on u .mp3",   n:"CALLIN ON U",     hue:200, al:"rss"},
-    {f:"freestyle-sept9.mp3",r:"freestylesept9.mp3",n:"FREESTYLE SEPT9", hue:150, al:"rss"},
-    {f:"head.mp3",          r:"head .mp3",          n:"HEAD",            hue:120, al:"rss"},
-    {f:"lonely22.mp3",      r:"lonely22.mp3",       n:"LONELY22",        hue:230, al:"rss"},
-    {f:"maintenant.mp3",    r:"maintenant.mp3",     n:"MAINTENANT",      hue:40,  al:"rss"},
-    {f:"mix-100.mp3",       r:"mix 100.mp3",        n:"MIX 100",         hue:20,  al:"rss"},
-    {f:"nananannn.mp3",     r:"nananannn.mp3",      n:"NANANANNN",       hue:300, al:"rss"},
-    {f:"obsess.mp3",        r:"obsess.mp3",         n:"OBSESS",          hue:320, al:"rss"},
-    {f:"real-to-me.mp3",    r:"real to me .mp3",    n:"REAL TO ME",      hue:190, al:"rss", cover: ROOT+"assets/covers/real to me.jpg"},
-    {f:"ride-it.mp3",       r:"riddeit2.mp3",       n:"RIDE IT",         hue:265, al:"rss"},
-    {f:"right-middle.mp3",  r:"right middle.mp3",   n:"RIGHT MIDDLE",    hue:175, al:"rss"},
-    {f:"silouhette.mp3",    r:"silouhette.mp3",     n:"SILOUHETTE",      hue:250, al:"rss"},
-    {f:"strippin-down.mp3", r:"strippin down.mp3",  n:"STRIPPIN DOWN",   hue:340, al:"rss"},
-    {f:"to-our-pain.mp3",   r:"to our pain .mp3",   n:"TO OUR PAIN",     hue:0,   al:"rss"},
-    {f:"write-a-song.mp3",  r:"write a song v1.mp3",n:"WRITE A SONG",    hue:45,  al:"rss"},
-    {f:"yo-body.mp3",       r:"yo body .mp3",       n:"YO BODY",         hue:75,  al:"rss"},
     /* ---- special projects — playable on the radio AND have their own room ---- */
     {f:"20mzs.mp3",         r:"Only Ibee - 20MZS.mp3", n:"20 MIN ZA SESSION", hue:32, al:"mzs"}
   ];
@@ -110,7 +117,8 @@
      radio it shows as one album card whose action is "go to the room" (roomOnly).
      Any album with a `room` also gets a persistent GO TO THE ROOM button. */
   var ROOMS = [
-    {al:"np", roomOnly:true}
+    {al:"np", roomOnly:true},
+    {al:"np2", roomOnly:true}
   ];
   function songCover(s){ return s.cover || album(s.al).cover; }
 
@@ -298,9 +306,23 @@
       +"%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='hsl("+(hue||190)+",90%25,55%25)' stroke-width='3'/%3E"
       +"%3Ccircle cx='50' cy='50' r='7' fill='hsl("+(hue||190)+",90%25,55%25)'/%3E%3C/svg%3E";
   }
-  function coverImg(cls, src, hue){
-    return '<img class="'+cls+'" alt="" loading="lazy" src="'+src+'" '
-      +'onerror="this.onerror=null;this.src=\''+fallbackCover(hue)+'\'">';
+  /* ---- COVER SIZE ---------------------------------------------------------
+     Safari decodes an <img> at its NATURAL size and holds that bitmap for as
+     long as the element lives — the drawn size is irrelevant. The radio panel
+     lists 65 records at 34x34; pointed at the full covers that is hundreds of
+     megabytes of decoded art in one tab, which is what makes iOS announce
+     "this webpage was reloaded". assets/img/thumb (128px) and assets/img/mid
+     (384px) hold generated copies under the SAME filename, so picking a size
+     is a path rewrite — and the full-size file is the first onerror fallback,
+     so a cover with no thumb still shows. Rebuild with tools/make-thumbs.sh. */
+  function sized(u, bucket){
+    var m = String(u||"").match(/^((?:[^?#]*\/)?assets\/(?:img|covers)\/)([^\/?#]+)$/);
+    return m ? m[1]+bucket+"/"+m[2] : u;
+  }
+  function coverImg(cls, src, hue, bucket){
+    var small = sized(src, bucket||"thumb"), esc2 = function(x){ return String(x).replace(/'/g,"%27"); };
+    return '<img class="'+cls+'" alt="" loading="lazy" decoding="async" src="'+small+'" '
+      +'onerror="if(this.src.indexOf(\''+esc2(small)+'\')>-1&&\''+esc2(small)+'\'!==\''+esc2(src)+'\'){this.src=\''+esc2(src)+'\';return;}this.onerror=null;this.src=\''+fallbackCover(hue)+'\'">';
   }
 
   /* ---------- favourites: hearts saved on this device (ibee_favs = {slug:1}) ---------- */
@@ -332,7 +354,7 @@
         var padc = al.pad ? " pad" : "";
         html += '<div class="rp-tile'+(i===cur?" now":"")+(s.locked?" locked":"")+'" data-i="'+i+'"'
           + (al.room?' style="--rt:'+(al.tint||"#ff2b2b")+'"':'')+'>'
-          + '<div class="art'+padc+'">'+coverImg("", songCover(s), s.hue)
+          + '<div class="art'+padc+'">'+coverImg("", songCover(s), s.hue, "mid")
           + (i===cur?'<span class="gnow">NOW</span>':'')
           + (s.locked?LOCK_BIG:'')
           + (al.room?'<span class="roomb">ROOM</span>':'')
@@ -347,9 +369,9 @@
         if(favOnly) return;
         shown++;
         html += '<div class="rp-tile" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
-          + '<div class="art'+(al.pad?" pad":"")+'">'+coverImg("", al.cover, 110)
+          + '<div class="art'+(al.pad?" pad":"")+'">'+coverImg("", al.cover, 110, "mid")
           + '<span class="roomb">ROOM</span>'
-          + '<span class="gtag">ALBUM · THE EXPERIENCE</span></div>'
+          + '<span class="gtag">ALBUM · '+esc(al.tag||"THE EXPERIENCE")+'</span></div>'
           + '<div class="nm">'+esc(al.name)+'</div></div>';
       });
     } else {
@@ -361,7 +383,7 @@
         html += '<div class="rp-row'+(i===cur?" now":"")+(s2.locked?" locked":"")+'" data-i="'+i+'"'
           + (al2.room?' style="--rt:'+(al2.tint||"#ff2b2b")+'"':'')+'>'
           + '<span class="no">'+String(i+1).padStart(2,"0")+'</span>'
-          + coverImg("rc", songCover(s2), s2.hue)
+          + coverImg("rc", songCover(s2), s2.hue, "thumb")
           + '<span class="rt"><span class="rn">'+esc(s2.n)+'</span><span class="ra">'+esc(al2.name)+'</span></span>'
           + '<span class="fv'+(isFav(s2.f)?" on":"")+'" data-fv="'+i+'" title="favourite">♥</span>'
           + (s2.locked?LOCK_SVG:(al2.room?'<span class="rmroom">ROOM</span>':''))
@@ -374,8 +396,8 @@
         shown++;
         html += '<div class="rp-row" data-room="'+r.al+'" style="--rt:'+(al.tint||"#ff2b2b")+'">'
           + '<span class="no">EP</span>'
-          + coverImg("rc", al.cover, 110)
-          + '<span class="rt"><span class="rn">'+esc(al.name)+'</span><span class="ra">the experience · tap for the room</span></span>'
+          + coverImg("rc", al.cover, 110, "thumb")
+          + '<span class="rt"><span class="rn">'+esc(al.name)+'</span><span class="ra">'+esc((al.tag||"the experience").toLowerCase())+' · tap for the room</span></span>'
           + '<span class="rmroom">ROOM</span></div>';
       });
     }
@@ -494,9 +516,11 @@
     var s = SONGS[cur], al = album(s.al);
     $("rp-title").textContent = s.n;
     $("rp-album").innerHTML = esc(al.name) + ' <span class="browse">· tap to browse</span>';
-    var cov = $("rp-cover");
-    cov.onerror = function(){ cov.onerror=null; cov.src = fallbackCover(s.hue); };
-    cov.src = songCover(s);
+    var cov = $("rp-cover"), full = songCover(s), small = sized(full, "mid");
+    /* 52px on screen: the 384px copy is plenty, and the full file is the first
+       thing tried if that copy is missing. */
+    cov.onerror = function(){ if(cov.src.indexOf(small)>-1 && small!==full){ cov.src=full; return; } cov.onerror=null; cov.src = fallbackCover(s.hue); };
+    cov.src = small;
     cov.style.padding = al.pad ? "6px" : "0";
     cov.style.background = al.pad ? "radial-gradient(circle at 50% 40%,#241207,#0a0604)" : "#111";
     paintRoomBtn(al);
@@ -508,8 +532,15 @@
     b.textContent = on ? "♥" : "♡";
     b.classList.toggle("on", on);
   }
-  /* a song's shareable address: the site root adopts ?s=<slug> and plays it */
-  function songLink(s){ return ROOT + "?s=" + encodeURIComponent(s.f.replace(/\.mp3$/i,"")); }
+  /* A song's shareable address.
+     It points at /s/<slug>/, a tiny generated page (tools/make-share-pages.py)
+     that exists for ONE reason: link previews. The crawlers behind iMessage,
+     WhatsApp, Instagram and Discord do not run JavaScript — they read the raw
+     <meta og:*> and leave — so /?s=<slug> could only ever preview as one
+     generic card for every record. /s/<slug>/ carries that record's own cover
+     and title, then redirects a human to /?s=<slug>, which is still the real
+     destination and still works for every link already out in the wild. */
+  function songLink(s){ return ROOT + "s/" + encodeURIComponent(s.f.replace(/\.(?:mp3|m4a)$/i,"")) + "/"; }
   function shareSong(s, btn){
     var url = songLink(s);
     try{ if(navigator.clipboard) navigator.clipboard.writeText(url); }catch(e){}
@@ -520,7 +551,7 @@
   function paintRoomBtn(al){
     var box = $("rp-room");
     if(al && al.room){
-      box.innerHTML = '<a href="'+al.room+'">▶ GO TO THE ROOM</a>';
+      box.innerHTML = '<a href="'+al.room+'">▶ GO TO THE PAGE</a>';
       box.style.setProperty("--roomtint", al.tint || "#ff2b2b");
       box.classList.add("show");
     } else {
@@ -536,6 +567,11 @@
     var cands = [BASE + "audio/songs/" + s.f, ROOT + s.f, ROOT + encodeURI(s.r)];
     /* 20mzs lives in assets/audio/ (not /songs/) and at the site root */
     if(s.al === "mzs"){ cands = [BASE + "audio/" + s.f, ROOT + s.f, ROOT + encodeURI(s.r)]; }
+    /* A record whose `r` is already a PATH (the NP and NP2 albums live in their
+       own folders) knows exactly where it is — try that first instead of eating
+       two guaranteed 404s per track on the way to it. The tidy-folder guesses
+       stay behind it as the fallback for everything else. */
+    if(s.r && s.r.indexOf("/") >= 0){ cands.unshift(ROOT + encodeURI(s.r)); }
     var ci = 0;
     audio.onerror = function(){
       ci++;
@@ -795,19 +831,26 @@
       beat *= 0.9; level *= 0.92;
     }
     var hue = cur >= 0 ? SONGS[cur].hue : 75;
+    /* THE RADIO LIST IS THE MAIN FEATURE — while it is being scrolled on a phone,
+       skip the neon-frame repaint entirely. Rewriting a blurred, viewport-sized
+       box-shadow every frame saturates the phone's frame budget and makes the
+       composited scroll stutter. The glow just holds still for the ~180ms of the
+       drag, then resumes. (Flag set by the shell's tracklist scroll handler.)
+       The next frame is already scheduled at the top of loop(), so just return. */
+    if(window.__IBEE_SCROLLING){ return; }
     /* overall brightness of the neon frame — kept low enough to read the page
        under it for a long session rather than for a first impression */
-    var a = Math.min(1, 0.035 + beat*0.32 + level*0.10);
+    var a = Math.min(1, 0.02 + beat*0.11 + level*0.04);
     var root = document.documentElement.style;
     if(playing || beat > 0.02){
-      nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.65).toFixed(3)+")";
+      nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.42).toFixed(3)+")";
       /* narrow screens get a tighter radius: a blur sized for a laptop is a big
          slice of a phone's width and washes the middle of the display */
       var narrow = (window.innerWidth||9999) < 600;
-      var blur = narrow ? (5+beat*16) : (7+beat*26);
+      var blur = narrow ? (2+beat*5) : (4+beat*10);
       nf.style.boxShadow =
-        "inset 0 0 "+blur+"px hsla("+hue+",95%,55%,"+(a*(narrow?0.30:0.38)).toFixed(3)+"),"
-        +"inset 0 0 3px hsla("+hue+",95%,70%,"+(a*0.5).toFixed(3)+")";
+        "inset 0 0 "+blur+"px hsla("+hue+",95%,55%,"+(a*(narrow?0.12:0.18)).toFixed(3)+"),"
+        +"inset 0 0 3px hsla("+hue+",95%,70%,"+(a*0.30).toFixed(3)+")";
       root.setProperty("--beat", beat.toFixed(3));
       root.setProperty("--songhue", hue);
       root.setProperty("--ga", Math.min(1, 0.09 + beat*0.8).toFixed(3));
@@ -846,7 +889,7 @@
     rooms: function(){
       return ROOMS.map(function(r){
         var al = album(r.al);
-        return { id:r.al, name:al.name, cover:al.cover, room:al.room, tint:al.tint, pad:al.pad };
+        return { id:r.al, name:al.name, cover:al.cover, room:al.room, tint:al.tint, pad:al.pad, tag:al.tag };
       });
     },
     shuffled: function(){ return shuffle; },
@@ -902,7 +945,7 @@
     if(!DEEP) return;
     for(var i=0;i<SONGS.length;i++){
       var f = (SONGS[i].f||"").toLowerCase();
-      if(f !== DEEP && f.replace(/\.mp3$/,"") !== DEEP) continue;
+      if(f !== DEEP && f.replace(/\.(?:mp3|m4a)$/,"") !== DEEP) continue;
       DEEP = null;
       if(SONGS[i].locked) return;                    // a locked record never leaks
       play(i, 0);                                    // shared links beat the saved state
@@ -920,8 +963,25 @@
   /* ---------- VIP welcome: a special hello for special people ----------
      Site-wide (player.js runs on every page's top window). When a VIP's session
      appears, a brief neon overlay says their line — once per visit; logging out
-     and back in says it again. Member grants live in member/vip.sql. */
-  var VIPS = { "najwa.barton@outlook.com": "welcome babe" };
+     and back in says it again. Member grants live in member/vip.sql.
+
+     ⚠ The email used to be written here in plain text. player.js loads on EVERY page,
+     so that published a real person's address — next to a private message — to anyone
+     who opened the source. The greeting is worth keeping; publishing her address is not.
+     Keyed on a SHA-256 of the lowercased address instead: same behaviour, but the source
+     no longer discloses who it is. (Someone who ALREADY knows the address could confirm
+     it by hashing — that is fine. The point is that the page stops handing it out.)
+     To add a VIP: node/python -c "hashlib.sha256(b'their@email').hexdigest()". */
+  var VIPS = { "d82b31810bbcd05ec6803ac28c285c2410b2ce149ebbb744adfe3b40f9cf7deb": "welcome babe" };
+  function sha256hex(s){
+    try{
+      if(!(window.crypto&&crypto.subtle)) return Promise.resolve("");
+      return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(function(b){
+        return Array.prototype.map.call(new Uint8Array(b),function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+      }).catch(function(){ return ""; });
+    }catch(e){ return Promise.resolve(""); }
+  }
+  var _vipH=null, _vipFor="";        // cached hash + the address it was computed for
   function sessEmail(){
     try{
       for(var i=0;i<localStorage.length;i++){
@@ -964,14 +1024,18 @@
   }
   setInterval(function(){
     var em=sessEmail();
-    if(!em){ try{ sessionStorage.removeItem("ibee_vip_hi"); }catch(e){} return; }   // logged out → next login greets again
-    var msg=VIPS[em]; if(!msg) return;
+    if(!em){ try{ sessionStorage.removeItem("ibee_vip_hi"); }catch(e){} _vipH=null; _vipFor=""; return; }  // logged out → next login greets again
     /* the shell's PRESS START curtain sits above everything — wait until it's gone */
     var en=document.getElementById("enter");
     if(en && en.style.display!=="none" && en.offsetParent!==null) return;
+    /* hashing is async, and this ticks every 2.5s — so hash once per session and
+       reuse it, otherwise we'd fire a digest on every single tick for nothing */
+    if(_vipFor!==em){ _vipFor=em; _vipH=null; sha256hex(em).then(function(h){ if(_vipFor===em) _vipH=h; }); return; }
+    if(!_vipH) return;                                    // still hashing, or crypto unavailable
+    var msg=VIPS[_vipH]; if(!msg) return;
     try{
-      if(sessionStorage.getItem("ibee_vip_hi")===em) return;
-      sessionStorage.setItem("ibee_vip_hi",em);
+      if(sessionStorage.getItem("ibee_vip_hi")===_vipH) return;
+      sessionStorage.setItem("ibee_vip_hi",_vipH);        // the HASH, not the address
     }catch(e){ return; }
     vipGreet(msg);
   },2500);
@@ -986,12 +1050,16 @@
     try{
       /* new albums first: a studio-founded galaxy (IBEE_SONGS_EXTRA.galaxies) is
          registered as an album here too, so its songs wear the real album name /
-         tint / cover on the radio instead of falling back to RARE SOUL SESSIONS
+         tint / cover on the radio instead of falling back to the unfiled album
          (the universe already knows these galaxies; the radio didn't). Built-in
          albums are never overridden. Optional per-galaxy `cover`/`tint`/`room`. */
+      /* NP2 is private for now: its album + songs are hidden from the radio
+         until owner.js confirms the owner account (window.IBEE_SHOW_NP2). */
+      var HIDE_NP2 = !window.IBEE_SHOW_NP2;
       var GX = (window.IBEE_SONGS_EXTRA && window.IBEE_SONGS_EXTRA.galaxies) || [];
       GX.forEach(function(ga){
         if(!ga || !ga.id || ALBUMS[ga.id]) return;
+        if(HIDE_NP2 && ga.id==="np2") return;
         var a = { name: ga.name || String(ga.id).toUpperCase() };
         if(ga.cover) a.cover = ga.cover;      // else songs use own cover / hue disc
         if(ga.tint)  a.tint  = ga.tint;
@@ -1002,9 +1070,10 @@
       var added = false;
       X.forEach(function(e){
         if(!e || !e.f || !e.n) return;
+        if(HIDE_NP2 && e.g==="np2") return;                 // NP2 hidden until owner
         for(var i=0;i<SONGS.length;i++) if(SONGS[i].f === e.f) return;
         /* a studio song can name an album id (g) or bring its own cover */
-        var alId = e.g && ALBUMS[e.g] ? e.g : "rss";
+        var alId = e.g && ALBUMS[e.g] ? e.g : "ib";
         SONGS.push({ f:e.f, r:e.r || e.f, n:e.n, hue:(e.hue != null ? e.hue : 190),
           al:alId, cover:e.cover || "", locked:!!e.locked });
         added = true;
