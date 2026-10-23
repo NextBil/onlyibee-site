@@ -12,3 +12,10 @@ README.md
 # address. They stay in the working copy and get pasted into the Supabase SQL
 # editor by hand — never committed, never served.
 member/*.sql
+
+# Local-only tooling: IBEE STUDIO, the shop/garment managers, the newsroom, the
+# pass minter and the generators (share pages, beat data, thumbs). They are
+# authoring tools, not pages. Eight of them were still tracked after the audit
+# clear-out and served at onlyibee.com/tools/ — .gitignore cannot untrack what
+# is already committed, so they were git rm --cached'd as well.
+tools/
