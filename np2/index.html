@@ -433,6 +433,41 @@ body.neon #bats .bat{opacity:.75}
   filter:drop-shadow(0 0 calc(6px + var(--nb,0)*14px) rgba(255,31,111,.9))}
 @keyframes batcross{from{transform:translateX(-16vw)}to{transform:translateX(116vw)}}
 
+/* ===== CALM WHILE IT PLAYS (2026-10-25) =====
+   The room used to come fully alive the moment a record started: four big
+   radial lights DRIFTING across the viewport under an animated blur, a
+   flickering tube, bats crossing and flapping, a page-wide sheen sweeping.
+   An animated `filter: blur(52px)` on viewport-sized elements is about the
+   most expensive thing a phone can be asked to composite, and it never
+   stopped — so listening cost battery, and the page moved under you while you
+   were trying to read it.
+   The room still LIGHTS UP. It just holds still now: the glows are parked and
+   statically blurred, the tube stops stuttering, the bats stop crossing, the
+   sheen stops sweeping. The beat still reaches the frame through --nb on the
+   static shadows, which is a repaint of a shadow rather than a re-blur of a
+   layer. Nothing here changes a colour or a layout — only what MOVES. */
+body.neon .glow{
+  animation:none !important;                 /* park the lights */
+  filter:blur(46px) saturate(1.15) !important;   /* fixed radius: no re-blur per frame */
+}
+/* give each one a resting place, since the keyframes used to position them */
+body.neon .glow.g1{transform:translate(8vw,62vh)}
+body.neon .glow.g2{transform:translate(72vw,16vh)}
+body.neon .glow.g3{transform:translate(18vw,22vh)}
+body.neon .glow.g4{transform:translate(66vw,74vh)}
+body.neon #tube{animation:none !important}         /* no flicker */
+body.neon #wrapsheen{animation:none !important}    /* no sweep */
+body.neon #bats .bat,
+body.neon #bats .bat svg{animation:none !important}
+body.neon #bats{display:none}                      /* parked bats are just clutter */
+/* the marquee is the last thing moving while you read — let it rest too */
+body.neon .band #bandrow{animation-play-state:paused}
+/* the feed's Ken-Burns is a continuous transform on a full-width photograph —
+   same cost as the drifting lights, and it is directly under the text you are
+   reading. The cover's wobble is a 3D transform doing the same thing higher up. */
+body.neon #plateimg{animation:none !important;transform:scale(1.04)}
+body.neon .cover{animation:none !important}
+
 /* bottom-centred: at the top it spent its 6.5s parked on the sleeve */
 #roomtag{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:9;opacity:0;
   font-family:var(--px);font-size:9px;color:var(--pink);letter-spacing:2px;text-align:center;
