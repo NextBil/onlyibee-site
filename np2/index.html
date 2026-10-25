@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <!-- PRIVATE until launch — gated by assets/privategate.js (owner only). Remove that script tag to open it. -->
-<script src="../assets/privategate.js?v=1"></script>
+<script src="../assets/privategate.js?v=3"></script>
 <!-- ===== favicon ===== -->
 <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
@@ -146,34 +146,6 @@ body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
 .prose p{margin-bottom:14px}
 .prose .a{color:var(--acid)} .prose .r{color:var(--pink-hot)}
 
-/* ---------- track signals ---------- */
-.tr{display:flex;align-items:center;gap:14px;padding:11px 12px;border-bottom:1px solid #16292d;
-  color:var(--dim);cursor:pointer;transition:background .15s}
-.tr:hover{background:#16292d}
-.tr .no{font-family:var(--px);font-size:9px;width:30px;color:#456}
-.tr .ti{flex:none;max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  color:#cfdcdc;font-size:19px}
-/* THE ROW IS THE RECORD'S OWN SHAPE.
-   Every row used to be the same 26 bars pulsing on the same timer — decoration
-   that said nothing about the song under it. These are the bass envelope
-   pressed into THAT track (IBEE_BEAT.low, the same groove the games and the
-   neon frame read), so each row is a different silhouette and you can see the
-   drops before you have heard them.
-   Two identical layers: a dim one, and a lit one clipped to the playhead, so
-   the playing row fills in like a progress bar without touching the DOM. */
-.tr .wave{position:relative;flex:1;height:22px;min-width:0;overflow:hidden}
-.tr .bars{position:absolute;inset:0;display:flex;gap:2px;align-items:center}
-.tr .bars i{flex:1;min-width:1px;background:#23383c;border-radius:1px;
-  height:calc(3px + var(--h,0) * 17px);transition:background .2s}
-.tr .bars.hot{clip-path:inset(0 calc(100% - var(--p,0) * 100%) 0 0)}
-.tr .bars.hot i{background:#2d4a50}
-.tr.playing .bars.hot i{background:var(--pink);
-  box-shadow:0 0 6px rgba(255,31,111,.55)}
-.tr .st{font-family:var(--px);font-size:8px;color:var(--pink);flex:none;min-width:36px;text-align:right}
-.tr.playing{background:#20101a;color:var(--ink)}
-.tr.playing .no,.tr.playing .ti,.tr.playing .st{color:var(--pink-hot)}
-.tr.playing .ti{text-shadow:0 0 12px rgba(255,92,157,.6)}
-
 
 /* ---------- THE FEED — the archive console ----------
    Every archive picture is mounted as an ALTERNATIVE COVER: the real sleeve
@@ -255,6 +227,69 @@ body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,1
 .facts b{font-family:var(--px);font-size:17px;color:var(--pink-hot);font-weight:normal;
   text-shadow:0 0 12px rgba(255,92,157,.5)}
 .prose .lede{font-size:21px;color:#dceaea}
+
+/* ===== THE MANUAL =====
+   A record this long is a wall. The moods are the way in: pick the state you
+   are in and the 27 collapse to the handful that belong there. Every song
+   carries its signs, so a card says what it is FOR before you press it.
+   The groups are the artist's own — see MOODS in the script. */
+.moods{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
+.mood{display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  padding:8px 11px 8px 9px;border:1px solid #23383c;background:#0d191c;
+  font-family:var(--px);font-size:7.5px;letter-spacing:1px;color:#93a8a9;
+  transition:border-color .15s,color .15s,background .15s}
+.mood svg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mood .n{font-size:7px;color:#5d7275}
+.mood:hover{border-color:var(--pink);color:#cfdcdc}
+.mood.on{border-color:var(--pink);background:#240914;color:var(--pink-hot);
+  box-shadow:0 0 14px rgba(255,31,111,.3)}
+.mood.on .n{color:var(--pink)}
+
+/* the grid of records */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sg{position:relative;display:block;cursor:pointer;text-decoration:none;
+  border:1px solid #1d3338;background:#0b1719;overflow:hidden;
+  transition:border-color .18s,transform .18s,box-shadow .18s}
+.sg:hover{border-color:var(--pink);transform:translateY(-3px);
+  box-shadow:0 0 20px rgba(255,31,111,.3)}
+.sg .art{position:relative;aspect-ratio:1/1;overflow:hidden;background:#07100f}
+/* THE SLEEVE IS THE BACKDROP, THE GROOVE IS THE PORTRAIT.
+   All 27 share one cover, so tinting each copy a different hue was tried and
+   abandoned: mix-blend-mode barely moves a dark photograph, and the grid still
+   read as 27 identical squares. What actually differs between these records is
+   the music — so the sleeve drops back to a dim ground and the song's own bass
+   envelope is drawn across the card, big, in its own colour. Every card is a
+   different silhouette because every song is. */
+.sg .art img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.35) brightness(.3) contrast(1.1)}
+.sg .art:after{content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 90% at 50% 0,hsl(var(--hue,330) 70% 22% / .55),rgba(5,12,14,.88))}
+.sg .no{position:absolute;top:0;left:0;z-index:3;padding:5px 8px;
+  font-family:var(--px);font-size:9px;color:#fff;background:rgba(5,12,14,.78);
+  letter-spacing:1px}
+.sg .wv{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  z-index:3;height:62%;display:flex;align-items:center;gap:2px;padding:0 10px}
+.sg .wv i{flex:1;min-width:2px;border-radius:1px;
+  background:hsl(var(--hue,330) 85% 62%);
+  box-shadow:0 0 7px hsl(var(--hue,330) 90% 58% / .6);
+  height:calc(6% + var(--h,0) * 94%)}
+.sg.playing{border-color:var(--pink-hot);box-shadow:0 0 22px rgba(255,92,157,.45)}
+.sg.playing .wv i{background:var(--pink-hot);box-shadow:0 0 9px rgba(255,92,157,.8)}
+.sg .meta{padding:9px 10px 10px}
+.sg .tt{font-size:17px;color:#dceaea;line-height:1.25;overflow-wrap:anywhere}
+.sg .dur{font-family:var(--px);font-size:7px;color:var(--pink);margin-top:5px}
+/* the signs: what this one is for */
+.sg .signs{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.sg .signs svg{width:13px;height:13px;stroke:#6c8285;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+.sg.playing .signs svg{stroke:var(--pink)}
+.gridempty{font-family:var(--px);font-size:9px;color:#5d7275;padding:22px 0;text-align:center;
+  line-height:2}
+@media(max-width:480px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:9px}
+  .mood{font-size:7px;padding:7px 9px}
+}
 
 /* the drop as a FOLDER — spines peeking out of a card you open */
 .teefolder{display:flex;align-items:center;gap:16px;padding:14px;text-decoration:none;
@@ -503,9 +538,10 @@ body.neon #roomtag.gone{opacity:0}
 
   <!-- track signals -->
   <div class="sec">
-    <div class="sh">TRACK SIGNALS <span class="a">[26]</span></div>
-    <div class="ssub">the whole sequel, open — tap a row to play it_</div>
-    <div class="card" id="tracks"></div>
+    <div class="sh">THE <span class="a">MANUAL</span>_</div>
+    <div class="ssub">27 signals — pick the state you're in, the record sorts itself_</div>
+    <div class="moods" id="moods"></div>
+    <div class="grid" id="tracks"></div>
   </div>
 
   <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
@@ -576,45 +612,134 @@ body.neon #roomtag.gone{opacity:0}
     {f:"np2-23-illegal2.mp3",          t:"Illegal 2",          d:127},
     {f:"np2-24-ride-it.mp3", t:"Ride It",  d:183},
     {f:"np2-25-lonely3.mp3",           t:"Lonely 3",           d:187},
-    {f:"np2-26-killa.m4a",           t:"Killa",            d:170}
+    {f:"np2-26-killa.m4a",           t:"Killa",            d:170},
+    {f:"np2-27-lockin.m4a",          t:"Lockin",           d:169}
   ];
 
   var tr=document.getElementById("tracks"),html="";
   function fmt(s){var m=Math.floor(s/60),ss=Math.floor(s%60);return m+":"+(ss<10?"0":"")+ss;}
+  /* ===== THE MANUAL =====
+     MOODS are the artist's own groupings, by TRACK NUMBER (position in the
+     record, 1-27). Kept as plain numbers rather than slugs on purpose: the
+     tracklist has already had songs swapped under it twice, and a position
+     survives that where a filename does not.
+     Each sign is inline SVG — no assets, and they inherit colour so a card
+     and a chip can light the same icon differently. */
+  var SIGN={
+    night:'<path d="M14.5 2.5a7 7 0 1 0 7 7 5.6 5.6 0 0 1-7-7Z"/><circle cx="6" cy="5" r=".6"/><circle cx="4" cy="11" r=".6"/>',
+    hope:'<path d="M12 21c3.3 0 6-2.5 6-5.6 0-3.9-4.2-6-6-12.4-1.8 6.4-6 8.5-6 12.4C6 18.5 8.7 21 12 21Z"/><path d="M12 17.5c1.2 0 2.2-.9 2.2-2 0-1.5-1.5-2.3-2.2-4.6-.7 2.3-2.2 3.1-2.2 4.6 0 1.1 1 2 2.2 2Z"/>',
+    smoke:'<path d="M4 20h16M6 16c0-2 2.5-2 2.5-4S6 10 6 8"/><path d="M12 16c0-2 2.5-2 2.5-4S12 10 12 8"/><path d="M18 16c0-1.6 2-1.6 2-3"/>',
+    broken:'<path d="M12 20.3 4.6 13a4.7 4.7 0 0 1 6.6-6.6l.8.8"/><path d="M12 20.3 19.4 13a4.7 4.7 0 0 0-6.6-6.6l-.8.8"/><path d="m12 7.2-2 3.4 3.6 1.7L11.4 16"/>',
+    nonsense:'<path d="M12 21a9 9 0 1 1 9-9"/><path d="M21 12c0 2.4-2 3.4-3.6 2.4-1.4-.9-1-3 .7-3.4"/><path d="M8.4 8.4 12 12l4.2-1.6"/>',
+    grind:'<path d="M3 20h3v-6H3Zm5.5 0h3V9h-3Zm5.5 0h3V12h-3Zm5.5 0h3V4h-3Z"/>',
+    dance:'<circle cx="13" cy="4.3" r="1.8"/><path d="M13 6.4v4.2l3.4 2.1M13 10.6 9.6 13l1.1 4M13 10.6l1.6 4.2.3 4.4M9.6 13 7 11.3"/>',
+    sleep:'<path d="M3 15c3-.6 5-2.4 5-5a9 9 0 0 1 9 9H5a2 2 0 0 1-2-2Z"/><path d="M14 3h4l-4 5h4"/>',
+    drive:'<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3.6v6M12 14.4v6M3.6 12h6M14.4 12h6"/>',
+    sensual:'<path d="M12 4c2.4 2.8 4.6 5.2 4.6 8a4.6 4.6 0 1 1-9.2 0c0-2.8 2.2-5.2 4.6-8Z"/><path d="M9.8 12.6c.7 1.3 3.7 1.3 4.4 0"/>',
+    punk:'<path d="M5.5 7.5c0-2 1.6-3.4 3.4-3.4s3.3 1.4 3.3 3.4V16a2.6 2.6 0 0 0 5.2 0V8"/><circle cx="17.4" cy="6.4" r="1.7"/><path d="M5.5 10.6h7"/>',
+    beats:'<rect x="3.2" y="3.2" width="17.6" height="17.6" rx="1.6"/><rect x="6" y="6" width="4.6" height="4.6"/><rect x="13.4" y="6" width="4.6" height="4.6"/><rect x="6" y="13.4" width="4.6" height="4.6"/><rect x="13.4" y="13.4" width="4.6" height="4.6"/>',
+    afro:'<path d="M5 20h14l-2.4-6.6a5 5 0 0 0-9.2 0Z"/><ellipse cx="12" cy="12.6" rx="6" ry="2"/><path d="M8.4 20 7 22.6M15.6 20 17 22.6M12 7.6V4.4M9 8.4 7.6 5.8M15 8.4l1.4-2.6"/>',
+    french:'<path d="M5 3.6v17"/><path d="M5 4.4h13l-2.6 4 2.6 4H5"/>',
+    all:'<rect x="3.4" y="3.4" width="7" height="7"/><rect x="13.6" y="3.4" width="7" height="7"/><rect x="3.4" y="13.6" width="7" height="7"/><rect x="13.6" y="13.6" width="7" height="7"/>'
+  };
+  function ico(k){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(SIGN[k]||"")+'</svg>'; }
+
+  var MOODS=[
+    {k:"all",      t:"ALL THE SONGS",        n:null},
+    {k:"night",    t:"ALONE AT NIGHT",       n:[1,2,4,6,8,11,18,20,24,25]},
+    {k:"hope",     t:"A TINY HOPE LEFT",     n:[3,12,13,20,21]},
+    {k:"smoke",    t:"SMOKE AND CHILL",      n:[1,3,5,6,7,9,15,17,18,19]},
+    {k:"broken",   t:"HEART BROKEN",         n:[2,6,10,11,13,18,19,25]},
+    {k:"nonsense", t:"NOTHING MAKES SENSE",  n:[1,3,9,12,14,15,17,18,20]},
+    {k:"grind",    t:"GRINDING IS ALL",      n:[1,3,5,8,9,13,14,15,17,21,23,26]},
+    {k:"dance",    t:"TO DANCE",             n:[8,11,14,16,21,23,26,27]},
+    {k:"sleep",    t:"TO SLEEP",             n:[1,17,18,22,24,25]},
+    {k:"drive",    t:"TO DRIVE",             n:[1,19]},
+    {k:"sensual",  t:"SAD AND SENSUAL",      n:[1,4,7,25]},
+    {k:"punk",     t:"PUNK OF PUNK",         n:[2,3,4,7,10,13,22]},
+    {k:"beats",    t:"BEATS BY ONLY IBEE",   n:[4,8,9,12,14,16,20,22,23,24,26]},
+    {k:"afro",     t:"AFRO GROOVE",          n:[8,16,23,26,27]},
+    {k:"french",   t:"FRENCH",               n:[14,15,21]}
+  ];
+  /* song index (0-based) -> the signs it carries, built once */
+  var SIGNS=NP2.map(function(){ return []; });
+  MOODS.forEach(function(m){
+    if(!m.n) return;
+    m.n.forEach(function(no){ var i=no-1; if(SIGNS[i] && SIGNS[i].indexOf(m.k)<0) SIGNS[i].push(m.k); });
+  });
+
   /* WAVE: downsample the song's own bass envelope to N bars. Falls back to a
      flat-ish shape only if a record has no pressed groove yet, so a missing
-     entry degrades to a plain row instead of an empty one. */
-  var WAVEN=44;
+     entry degrades to a plain card instead of an empty one. */
+  var WAVEN=26;
   function waveBars(slug){
     var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT)||null;
     var g=B&&(B[slug]||B[String(slug).replace(/\.(?:mp3|m4a)$/,"")]);
-    var out=[],k,v;
+    var out=[],k;
     if(g&&g.low&&g.low.length){
       var L=g.low, step=L.length/WAVEN;
       for(k=0;k<WAVEN;k++){
-        /* peak of the window, not the mean — a mean flattens every song into
-           the same soft hill and loses the drops */
-        var a=Math.floor(k*step), b=Math.min(L.length,Math.floor((k+1)*step)), m=0;
-        for(var j=a;j<b;j++){ var x=parseInt(L.charAt(j),36)/35; if(x>m) m=x; }
-        out.push(m);
+        /* MEAN of the window, not its peak. 26 bars over a three-minute song
+           is a ~7-second window, and any 7 seconds of this record contains a
+           peak — taking the max made every bar full height and every card a
+           solid block. The mean is what varies across a song at this scale. */
+        var a=Math.floor(k*step), b=Math.min(L.length,Math.floor((k+1)*step)), sum=0,n2=0;
+        for(var j=a;j<b;j++){ sum+=parseInt(L.charAt(j),36)/35; n2++; }
+        out.push(n2?sum/n2:0);
       }
-    } else {
-      for(k=0;k<WAVEN;k++) out.push(0.22+0.10*Math.sin(k*0.7));
-    }
+    } else { for(k=0;k<WAVEN;k++) out.push(0.22+0.10*Math.sin(k*0.7)); }
+    /* STRETCH EACH SONG OVER ITS OWN RANGE. Peak-picking leaves most bars near
+       the top, so every card came out a solid block and the silhouette — the
+       whole point — was lost. Normalising to the song's own quiet and loud,
+       then bending the curve, puts the drops back above the verses. */
+    var lo=Math.min.apply(null,out), hi=Math.max.apply(null,out), rng=(hi-lo)||1;
+    for(k=0;k<WAVEN;k++) out[k]=Math.pow((out[k]-lo)/rng, 1.5);
     var bars="";
     for(k=0;k<WAVEN;k++) bars+='<i style="--h:'+out[k].toFixed(3)+'"></i>';
     return bars;
   }
-  NP2.forEach(function(s,i){
-    var bars=waveBars(s.f);
-    html+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
-      +'<span class="ti">'+s.t+'</span>'
-      +'<span class="wave"><span class="bars">'+bars+'</span>'
-      +'<span class="bars hot">'+bars+'</span></span>'
-      +'<span class="st">'+fmt(s.d)+'</span></div>';
-  });
-  tr.innerHTML=html;
 
+  var COVER="../assets/img/nouveaux-punk-2.jpg";
+  var moodSel="all";
+  function cardFor(s,i){
+    /* THE GOLDEN ANGLE. A fixed step of 13° kept every neighbour inside the
+       same pink, so a row of cards read as four copies of the sleeve. 137.5°
+       is the angle that never repeats or clusters — adjacent cards land on
+       opposite sides of the wheel, and the 27th is still distinct from the
+       1st. Anchored at the album's own pink so the set stays NP2. */
+    var hue=Math.round((330+i*137.5)%360);
+    return '<a class="sg" data-i="'+i+'" href="#" style="--hue:'+hue+'">'
+      +'<span class="art"><img src="'+COVER+'" alt="" loading="lazy" decoding="async">'
+        +'<span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
+        +'<span class="wv">'+waveBars(s.f)+'</span></span>'
+      +'<span class="meta"><span class="tt">'+s.t+'</span>'
+        +'<span class="dur">'+fmt(s.d)+'</span>'
+        +'<span class="signs">'+SIGNS[i].map(ico).join("")+'</span></span></a>';
+  }
+  function paintGrid(){
+    var m=null,x;
+    for(x=0;x<MOODS.length;x++) if(MOODS[x].k===moodSel) m=MOODS[x];
+    var html="",shown=0;
+    NP2.forEach(function(s,i){
+      if(m && m.n && m.n.indexOf(i+1)<0) return;
+      shown++; html+=cardFor(s,i);
+    });
+    tr.innerHTML = shown? html
+      : '<div class="gridempty">NO SIGNALS IN THIS STATE_</div>';
+    rowState();
+  }
+  function paintMoods(){
+    document.getElementById("moods").innerHTML=MOODS.map(function(m){
+      var n=m.n?m.n.length:NP2.length;
+      return '<button class="mood'+(m.k===moodSel?" on":"")+'" data-m="'+m.k+'">'
+        +ico(m.k)+'<span>'+m.t+'</span><span class="n">'+n+'</span></button>';
+    }).join("");
+  }
+  document.getElementById("moods").addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest(".mood"); if(!b) return;
+    moodSel=b.getAttribute("data-m"); paintMoods(); paintGrid();
+  });
+  paintMoods();
   /* ---------- the surprises: the 26 T-SHIRTS ----------
      The drop is the shop's own "np2-26" folder — one shirt per track on the
      record, which is why the count matches the tracklist above it. Reading
@@ -851,29 +976,18 @@ body.neon #roomtag.gone{opacity:0}
   var cur=-1;
   function RADIO(){ try{ return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null; }catch(e){ return null; } }
   function idxOf(slug){ if(!slug)return -1; for(var i=0;i<NP2.length;i++) if(NP2[i].f===slug) return i; return -1; }
+  /* The grid is FILTERED, so a card's position is not its track number —
+     everything keys off data-i. (The list this replaced could assume
+     child index === track, which is exactly the bug a filter introduces.) */
   function rowState(){
     var r=RADIO(),playing=false; try{ playing=!!(r&&r.playing()); }catch(e){}
-    Array.prototype.forEach.call(tr.children,function(row,i){
-      var on=(i===cur&&playing);
-      row.classList.toggle("playing",on);
-      row.querySelector(".st").textContent = on?"❚❚":(i===cur?"▶":fmt(NP2[i].d));
-      if(i!==cur) row.style.setProperty("--p",0);
+    Array.prototype.forEach.call(tr.querySelectorAll(".sg"),function(card){
+      var i=+card.getAttribute("data-i");
+      card.classList.toggle("playing", i===cur && playing);
+      var d=card.querySelector(".dur");
+      if(d) d.textContent = (i===cur&&playing)?"❚❚ PLAYING":(i===cur?"▶ PAUSED":fmt(NP2[i].d));
     });
   }
-  /* the lit half of the waveform IS the playhead. One CSS variable per frame
-     on one row — the bars never re-render. */
-  (function wavePlayhead(){
-    function tick(){
-      var r=RADIO();
-      if(r&&cur>=0&&tr.children[cur]){
-        var d=0,c=0;
-        try{ c=r.audio.currentTime||0; d=r.audio.duration||NP2[cur].d||0; }catch(e){}
-        tr.children[cur].style.setProperty("--p", d? Math.max(0,Math.min(1,c/d)) : 0);
-      }
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  })();
   /* play/pause NP2 track i through the radio; poll until the radio AND the extra
      records have loaded (both arrive async on a standalone visit). */
   function play(i,tries){
@@ -885,9 +999,13 @@ body.neon #roomtag.gone{opacity:0}
     else r.control.play(ri);
     cur=i; rowState();
   }
-  Array.prototype.slice.call(tr.querySelectorAll(".tr")).forEach(function(row){
-    row.addEventListener("click",function(){ play(+row.getAttribute("data-i")); });
+  /* delegated: the grid is rebuilt on every filter change, so per-card
+     listeners would be re-bound (and leak) each time */
+  tr.addEventListener("click",function(e){
+    var c=e.target.closest&&e.target.closest(".sg"); if(!c) return;
+    e.preventDefault(); play(+c.getAttribute("data-i"));
   });
+  paintGrid();
 
   /* ---- badge: 7 distinct NP2 tracks earns NEON PUNK. A track counts once
      you've actually felt ~15s of it. Own localStorage key so badges.js can read

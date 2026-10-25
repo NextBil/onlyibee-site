@@ -123,7 +123,29 @@
   /* The key is checked BEFORE Supabase: a previewer has no account, and making
      them wait on an auth round-trip (or fail with it) would be the whole point
      of the link missed. */
-  hasPreview().then(function(ok){ if(ok){ reveal(); return; } startAuthCheck(); });
+  hasPreview().then(function(ok){ if(ok){ openProject(); reveal(); return; } startAuthCheck(); });
+
+  /* A preview link has to open the PROJECT, not just this page. NP2 is hidden
+     from the radio, the universe, the shop and the ROOMS tile until owner.js
+     says otherwise — so a previewer could read the page but not play a note of
+     it. Raising the same flag and firing the same event owner.js fires puts the
+     record on the radio for them too.
+     Scope check: every listener for this event is NP2 VISIBILITY (merge the
+     songs, show the galaxy, un-grey the FALL tile, re-render the shop). Nothing
+     account-shaped rides on it — inventory, VIP and the tables are all decided
+     server-side by RLS, which a key in a URL cannot touch.
+     The radio lives in the shell, so the top document has to hear it as well. */
+  function openProject(){
+    try{
+      window.IBEE_SHOW_NP2 = true;
+      document.dispatchEvent(new CustomEvent("ibee-owner",{detail:true}));
+      var t=window.top;
+      if(t && t!==window){
+        t.IBEE_SHOW_NP2 = true;
+        t.document.dispatchEvent(new t.CustomEvent("ibee-owner",{detail:true}));
+      }
+    }catch(e){}
+  }
 
   function startAuthCheck(){
   loadSB(function(){

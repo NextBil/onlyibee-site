@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <!-- PRIVATE until launch — gated by assets/privategate.js (owner only). Remove that script tag to open it. -->
-<script src="../../assets/privategate.js?v=1"></script>
+<script src="../../assets/privategate.js?v=3"></script>
 <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <meta name="theme-color" content="#05080a">
@@ -257,9 +257,10 @@ header span{color:var(--dim);font-size:7px}
   <div class="tsub">— 26 SONGS · ONE PIT —</div>
   <div class="blurb">
     You fell in. There is a way out and it is a long way down.<br><br>
-    <b>Hold anywhere</b> and you move — the beat throws light and you sink away from
-    what is coming down after you. <b>Let go</b> and the writing surfaces, but the
-    collapse keeps falling and it is falling faster than you are.
+    <b>Play the drums.</b> Two pads, one under each thumb — hit them <b>on the beat</b>
+    and you keep sinking away from what is coming down after you. Drop the
+    pattern and you slow, but the collapse does not: it keeps falling, and it
+    is falling faster than you are.
   </div>
   <div id="perkwrap"><div id="perk">— fall to earn —</div></div>
   <div id="charsel"></div>
@@ -302,6 +303,11 @@ header span{color:var(--dim);font-size:7px}
 
 <script>document.write('<script src="../../assets/player.js?v=31"><\/script>')</script>
 <script src="../../assets/np2-perks.js?v=3"></script>
+<!-- the hand-played drum patterns, if any exist yet. Clock-stamped like the
+     other data files (README §4) so a new export from IBEE STUDIO goes live
+     within the minute with no version bump. Absent or empty = every record
+     falls back to its pressed groove. -->
+<script>document.write('<script src="../../assets/chart-data.js?cb='+Date.now()+'"><\/script>')</script>
 <script>
 (function(){
 "use strict";
@@ -325,7 +331,8 @@ var NP2=[
   ["np2-19-to-the-next-shawty.m4a","To the Next Shawty"],            ["np2-20-damn.mp3","Damn"],
   ["np2-21-deranger.mp3","Déranger"],          ["np2-22-epic-film.mp3","Epic Film"],
   ["np2-23-illegal2.mp3","Illegal 2"],         ["np2-24-ride-it.mp3","Ride It"],
-  ["np2-25-lonely3.mp3","Lonely 3"],           ["np2-26-killa.m4a","Killa"]
+  ["np2-25-lonely3.mp3","Lonely 3"],           ["np2-26-killa.m4a","Killa"],
+  ["np2-27-lockin.m4a","Lockin"]
 ];
 
 /* THE PIT IS A ROUTE, NOT A DIFFICULTY CURVE.
@@ -721,9 +728,63 @@ function build(slug, idx){
   }
 
   return {n:n, dur:dur, steps:steps, mid:mid, half:half, lo:sLo, lv:sLv, im:im,
+          beats:beatsFor(slug, im, n),
           secs:secs, zone:Z, depth:dur*SCROLL, gates:gates, cps:cps, seed:seed,
           picks:picks, coins:coins, relics:relics, caches:caches, targets:targets, foes:foes};
 }
+/* =====================================================================
+   THE DRUM — the pads, and the beat they are asking for.
+
+   The pit used to be a HOLD: thumb down, you outrun the collapse; thumb up,
+   it eats you. That reads as a switch, and it ignored the record you were
+   falling through. Now you keep moving by PLAYING: two pads, left and right,
+   and a hit lands on the beat or it does not.
+
+   WHERE THE BEAT COMES FROM — two sources, in order:
+     1. window.IBEE_CHART["slug.mp3"] = {beats:[{t:seconds, side:-1|1}, ...]}
+        A hand-played chart. This is the hook for IBEE STUDIO: tap a song's
+        drum pattern there, export assets/chart-data.js, drop it in. Nothing
+        else has to change — the game picks it up by filename.
+     2. Otherwise the groove already pressed into the record: the peaks of
+        `imp` (onset strength, the same layer the other games spawn on).
+        Good enough to play to on every song from day one.
+
+   Sticking alternates L/R like a drummer's hands rather than landing
+   randomly, so the pattern is readable before you have heard the song.
+   ===================================================================== */
+function CHART(){ try{ return window.IBEE_CHART||(window.top&&window.top.IBEE_CHART)||null; }catch(e){ return null; } }
+
+var HIT_PERFECT=0.11, HIT_GOOD=0.20;   /* judgement windows, seconds */
+
+function beatsFor(slug, im, n){
+  /* ---- 1. a real chart, if one has been made for this record ---- */
+  var C=CHART(), hand=C&&(C[slug]||C[String(slug).replace(/\.(?:mp3|m4a)$/,"")]);
+  if(hand&&hand.beats&&hand.beats.length){
+    return hand.beats.map(function(b,i){
+      return {t:+b.t, side:(b.side===-1||b.side===1)?b.side:(i%2?1:-1), hit:0};
+    }).sort(function(a,b){ return a.t-b.t; });
+  }
+  /* ---- 2. peaks of the pressed groove ---- */
+  if(!im||!n) return [];
+  var i, peak=[];
+  /* a floor relative to the song's own loudness, so a quiet record still
+     yields a pattern and a loud one does not yield a wall of notes */
+  var srt=Array.prototype.slice.call(im).sort(function(a,b){return a-b;});
+  var thr=Math.max(0.16, srt[Math.floor(srt.length*0.86)]||0.2);
+  for(i=1;i<n-1;i++){
+    if(im[i]>=thr && im[i]>=im[i-1] && im[i]>=im[i+1]) peak.push(i/20);
+  }
+  /* MIN GAP is what makes it a drum part instead of a stream. Two onsets
+     12/20s apart are a roll no thumb can play; keep the louder one. */
+  var MINGAP=0.30, out=[];
+  for(i=0;i<peak.length;i++){
+    if(out.length && peak[i]-out[out.length-1].t < MINGAP) continue;
+    out.push({t:peak[i], side:0, hit:0});
+  }
+  for(i=0;i<out.length;i++) out[i].side = (i%2) ? 1 : -1;
+  return out;
+}
+
 function chanAt(L,t){
   var f=clamp(t/RES,0,L.steps-1.001), i=Math.floor(f), k=f-i;
   return { m:lerp(L.mid[i],L.mid[i+1],k), h:lerp(L.half[i],L.half[i+1],k) };
@@ -984,6 +1045,15 @@ function start(i){
   if(!rafOn){ rafOn=true; requestAnimationFrame(loop); }
 }
 
+function resetDrum(){
+  /* A BAR ON THE HOUSE. The pattern starts within a fraction of a second of
+     the record, and landing in the pit already behind the beat is not a
+     difficulty, it is a door slammed. This buys the first ~1.5s so you hear
+     the drum before it starts asking. */
+  groove=1.5; beatI=0; combo=0; bestCombo=0; hits=0; misses=0;
+  judgeTxt=""; judgeT=-9; padFx[0]={f:0,miss:0}; padFx[1]={f:0,miss:0};
+  if(L&&L.beats) for(var i=0;i<L.beats.length;i++) L.beats[i].hit=0;
+}
 function play(i,tries){
   tries=tries||0; var r=RADIO();
   if(!r){ if(tries<40) setTimeout(function(){ play(i,tries+1); },200); return; }
@@ -994,6 +1064,7 @@ function play(i,tries){
     if(idx!==i) return;
     var ok=false; try{ ok=r.slug()===NP2[i][0] && r.audio.readyState>0; }catch(e){}
     if(ok){ try{ if((r.audio.currentTime||0)>0.6) r.audio.currentTime=0; }catch(e){}
+      resetDrum();                 /* a fresh chart for a fresh run */
       armed=true; wake.style.display="none"; return; }
     if(k<50) setTimeout(function(){ settle(k+1); },120);
     else if(live && !armed) wake.style.display="flex";
@@ -1215,10 +1286,64 @@ document.getElementById("oready").onclick=function(){
    8. INPUT — the whole screen is the controller
    ===================================================================== */
 var tap=document.getElementById("tap");
+/* ---- the pads: state, judging, and the groove they keep alive ---- */
+var groove=0;          /* seconds of sustain left — this is what "holding" means now */
+var padFx=[{f:0,miss:0},{f:0,miss:0}];   /* [left,right] flash + miss shake */
+var beatI=0;           /* how far the timeline has been consumed */
+var combo=0, bestCombo=0, hits=0, misses=0;
+var judgeTxt="", judgeT=-9;
+
+function padIdx(side){ return side<0?0:1; }
+
+/* Find the nearest unplayed beat for this side inside the good window. */
+function nearestBeat(side,t){
+  var B=L&&L.beats; if(!B||!B.length) return -1;
+  var best=-1, bd=HIT_GOOD+0.001;
+  for(var i=Math.max(0,beatI-6); i<B.length; i++){
+    var d=B[i].t-t;
+    if(d> HIT_GOOD) break;
+    if(B[i].hit || B[i].side!==side) continue;
+    var ad=Math.abs(d);
+    if(ad<bd){ bd=ad; best=i; }
+  }
+  return best;
+}
+
+/* A hit buys sustain until a little past the NEXT beat, so playing in time
+   keeps the fall going and dropping the pattern lets it lapse — the same
+   "letting go" the hold version had, just earned. */
+function sustainFor(i,t){
+  var B=L.beats, nxt=(i+1<B.length)?B[i+1].t:(t+0.75);
+  return clamp((nxt-t)+0.22, 0.26, 1.25);
+}
+
+function judge(side,t){
+  var i=nearestBeat(side,t);
+  var k=padIdx(side);
+  if(i<0){                                   /* nothing there — an off-beat tap */
+    padFx[k].miss=1; combo=0; misses++;
+    judgeTxt="OFF"; judgeT=t;
+    groove=Math.max(0,groove-0.18);          /* costs you, but never kills outright */
+    return 0;
+  }
+  var B=L.beats, ad=Math.abs(B[i].t-t);
+  B[i].hit=1;
+  while(beatI<B.length && (B[beatI].hit || B[beatI].t < t-HIT_GOOD)) beatI++;
+  var perfect=ad<=HIT_PERFECT;
+  padFx[k].f=1; combo++; hits++; if(combo>bestCombo) bestCombo=combo;
+  judgeTxt=perfect?"PERFECT":"GOOD"; judgeT=t;
+  groove=Math.max(groove, sustainFor(i,t)*(perfect?1:0.82));
+  addScore(perfect?60:30);
+  if(combo && combo%10===0){ addScore(combo*5); flashMsg(combo+" IN A ROW"); }
+  return perfect?2:1;
+}
+
 function down(x){
   holding=1;
   var d=(x-W*0.5)/W;
   holdSide = Math.abs(d)<0.13 ? 0 : (d<0?-1:1);
+  /* the pads only exist while a record is actually playing and charted */
+  if(armed && L && L.beats && L.beats.length && holdSide!==0) judge(holdSide, songT());
   var now=Date.now(), gap=now-lastTapT;
   if(gap<320 && lastTapSide!==null){
     if(lastTapSide===0 && holdSide===0 && idx>=2){
@@ -1233,7 +1358,12 @@ function down(x){
     lastTapT=now; lastTapSide=holdSide;
   }
 }
-function up(){ holding=0; holdSide=0; }
+function up(){
+  /* With a chart the thumb coming up means nothing — the groove you played is
+     what is still carrying you. Without one, this is the old hold release. */
+  if(L && L.beats && L.beats.length) return;
+  holding=0; holdSide=0;
+}
 function paintScore(){
   var el=document.getElementById("hscore"); if(!el) return;
   el.textContent="SCORE "+String(pts.score||0).padStart(6,"0")+" · ✦ "+(pts.relics||0)+" ◈ "+(pts.caches||0)+(shootCombo>1?" · ×"+shootCombo:"");
@@ -1262,8 +1392,11 @@ addEventListener("mouseup",up);
 addEventListener("keydown",function(e){
   if(e.key==="Escape"&&live){ live=false; netLeave(); show(menu); return; }
   if(!live) return;
-  if(e.key==="ArrowLeft"||e.key==="a"){ holding=1; holdSide=-1; e.preventDefault(); }
-  if(e.key==="ArrowRight"||e.key==="d"){ holding=1; holdSide=1; e.preventDefault(); }
+  /* the arrows ARE the two pads — one key per hand, same as the thumbs */
+  if((e.key==="ArrowLeft"||e.key==="a") && !e.repeat){ holding=1; holdSide=-1;
+    if(armed&&L&&L.beats&&L.beats.length) judge(-1,songT()); e.preventDefault(); }
+  if((e.key==="ArrowRight"||e.key==="d") && !e.repeat){ holding=1; holdSide=1;
+    if(armed&&L&&L.beats&&L.beats.length) judge(1,songT()); e.preventDefault(); }
   if(e.key===" "){ holding=1; holdSide=0; e.preventDefault(); }
   if(e.key==="ArrowDown"){ shoot(); e.preventDefault(); }
 });
@@ -1296,6 +1429,28 @@ function step(dt,t){
   var s=clamp(Math.floor(t*20),0,L.n-1);
   var hit=L.im[s], bass=L.lo[s];
   var isVoid=(Z.id==="void");
+
+  /* ---- THE DRUM DRIVES THE FALL ----
+     `holding` used to be the thumb, straight through. It is the GROOVE now:
+     sustain earned by hitting the beat, ticking away between hits. Everything
+     downstream (the collapse, the gates, the void's inversion) is untouched —
+     it still only asks "are they pushing?", it just has to be played for now.
+     A record with no beat data falls back to the old hold, so the pit is never
+     unplayable. */
+  var charted = !!(L.beats && L.beats.length);
+  if(charted){
+    groove=Math.max(0, groove-dt);
+    /* missing a beat entirely breaks the run — the pattern has moved on */
+    var B=L.beats;
+    while(beatI<B.length && B[beatI].t < t-HIT_GOOD){
+      if(!B[beatI].hit){ combo=0; misses++; }
+      beatI++;
+    }
+    holding = groove>0 ? 1 : 0;
+    if(!holding) holdSide=0;
+  }
+  padFx[0].f=Math.max(0,padFx[0].f-dt*3.2); padFx[0].miss=Math.max(0,padFx[0].miss-dt*4);
+  padFx[1].f=Math.max(0,padFx[1].f-dt*3.2); padFx[1].miss=Math.max(0,padFx[1].miss-dt*4);
 
   /* ---- lean. Water keeps your momentum, wind leans on you. ---- */
   var want=holding?holdSide:0;
@@ -2621,6 +2776,84 @@ function draw(t){
   ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
 
   drawEventFore(t);                  /* the warning, on top of everything */
+  drawPads(t);                       /* the two drums, over the pit */
+}
+
+/* =====================================================================
+   THE PADS — one circle per hand, bottom-left and bottom-right.
+   Drawn on the canvas rather than as DOM so they are on the SAME clock as
+   the fall: the approach ring is literally the song's next beat closing in,
+   not a CSS animation hoping to stay in step.
+   ===================================================================== */
+function drawPads(t){
+  if(!L || !L.beats || !L.beats.length) return;   /* uncharted record — old hold rules */
+  var R=Math.max(34, Math.min(W,H)*0.088);
+  var pad=R*1.5, cy=H-pad-6;
+  var spots=[{x:pad+6, side:-1}, {x:W-pad-6, side:1}];
+  var col=L.zone&&L.zone.glow||"#b6ff00";
+
+  for(var k=0;k<2;k++){
+    var sp=spots[k], fx=padFx[k];
+    /* the NEXT beat for this hand, and how close it is */
+    var nxt=null;
+    for(var i=Math.max(0,beatI-4); i<L.beats.length; i++){
+      var b=L.beats[i];
+      if(b.side!==sp.side || b.hit) continue;
+      if(b.t < t-HIT_GOOD) continue;
+      nxt=b; break;
+    }
+    var lead=1.0, app=nxt? clamp(1-(nxt.t-t)/lead, 0, 1) : 0;
+    var onNow = nxt && Math.abs(nxt.t-t)<=HIT_GOOD;
+
+    ctx.save();
+    ctx.translate(sp.x + (fx.miss>0?(Math.random()-0.5)*fx.miss*7:0), cy);
+
+    /* the skin */
+    var g=ctx.createRadialGradient(0,-R*0.3,R*0.2,0,0,R);
+    g.addColorStop(0,"rgba(255,255,255,.10)"); g.addColorStop(1,"rgba(0,0,0,.42)");
+    ctx.fillStyle="rgba(10,10,14,.60)"; ctx.beginPath(); ctx.arc(0,0,R,0,6.2832); ctx.fill();
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,R,0,6.2832); ctx.fill();
+
+    /* the rim — lights as its beat arrives, red when the hand mistimed */
+    var rim = fx.miss>0 ? "#ff2b4d" : (onNow? "#ffffff" : col);
+    ctx.lineWidth=Math.max(2,R*0.07);
+    ctx.globalAlpha=0.30+app*0.55+fx.f*0.45;
+    ctx.strokeStyle=rim; ctx.beginPath(); ctx.arc(0,0,R,0,6.2832); ctx.stroke();
+
+    /* the approach ring: a circle shrinking onto the rim, meeting it on the beat */
+    if(nxt){
+      ctx.globalAlpha=0.20+app*0.75;
+      ctx.lineWidth=Math.max(1.5,R*0.05);
+      ctx.strokeStyle=onNow?"#ffffff":col;
+      ctx.beginPath(); ctx.arc(0,0,R*(1.85-0.85*app),0,6.2832); ctx.stroke();
+    }
+
+    /* the strike */
+    if(fx.f>0){
+      ctx.globalAlpha=fx.f*0.55;
+      ctx.fillStyle=rim; ctx.beginPath(); ctx.arc(0,0,R*(1+(1-fx.f)*0.45),0,6.2832); ctx.fill();
+    }
+
+    /* the groove you are riding, as a filled core */
+    var core=clamp(groove/0.9,0,1);
+    if(core>0){
+      ctx.globalAlpha=0.16+core*0.34;
+      ctx.fillStyle=col; ctx.beginPath(); ctx.arc(0,0,R*0.58*core,0,6.2832); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    ctx.restore();
+  }
+
+  /* the call on the last hit, by the pads rather than mid-screen */
+  if(t-judgeT < 0.45 && judgeTxt){
+    var a=1-(t-judgeT)/0.45;
+    ctx.globalAlpha=a;
+    ctx.fillStyle = judgeTxt==="OFF" ? "#ff2b4d" : (judgeTxt==="PERFECT"?"#ffffff":col);
+    ctx.font="700 "+Math.round(R*0.42)+"px ui-monospace,monospace";
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(judgeTxt+(combo>1&&judgeTxt!=="OFF"?"  x"+combo:""), W*0.5, cy-R*1.35);
+    ctx.globalAlpha=1;
+  }
 }
 
 /* =====================================================================
