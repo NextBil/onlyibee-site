@@ -36,6 +36,46 @@
       }).catch(function(){return "";});
     }catch(e){ return Promise.resolve(""); }
   }
+  /* ---- PREVIEW LINK ----------------------------------------------------
+     A link that opens this project for someone who is not the owner:
+         https://onlyibee.com/np2/?k=<key>
+     The KEY IS THE SECRET, not this file — only its SHA-256 is here, so
+     reading the source gets you a hash, not a way in. One key opens the whole
+     project (the room, THE FALL, the drop) because they share this gate.
+
+     Once a good key is seen it is remembered, so links INSIDE the project keep
+     working without the key trailing on every URL. What is remembered is the
+     HASH — so changing PREVIEW_SHA below revokes every link and every browser
+     that was let in by the old one, instantly and without touching anything else.
+
+     To rotate: pick a new key, put its hash here, reshare.
+       python3 -c "import hashlib;print(hashlib.sha256(b'NEW-KEY').hexdigest())"
+     To close previews entirely: set PREVIEW_SHA to "".
+     ---------------------------------------------------------------------- */
+  var PREVIEW_SHA = "3c1779b84755149385154959cf622a694536f5546701dfb1615f23c5bc0efeae";
+  var PREVIEW_LS  = "ibee_np2_preview";
+
+  function keyFromUrl(){
+    try{
+      var m=/[?&]k=([^&#]+)/.exec(location.search||"");
+      return m?decodeURIComponent(m[1]).trim().toUpperCase():"";
+    }catch(e){ return ""; }
+  }
+  function rememberedHash(){ try{ return localStorage.getItem(PREVIEW_LS)||""; }catch(e){ return ""; } }
+  function remember(h){ try{ localStorage.setItem(PREVIEW_LS,h); }catch(e){} }
+
+  /* resolves true if this visitor holds a valid preview key, now or earlier */
+  function hasPreview(){
+    if(!PREVIEW_SHA) return Promise.resolve(false);
+    if(rememberedHash()===PREVIEW_SHA) return Promise.resolve(true);
+    var k=keyFromUrl();
+    if(!k) return Promise.resolve(false);
+    return sha256hex(k).then(function(h){
+      if(h===PREVIEW_SHA){ remember(h); return true; }
+      return false;
+    });
+  }
+
   function isOwnerEmail(em){
     if(!em) return Promise.resolve(false);
     return sha256hex(String(em).trim().toLowerCase()).then(function(h){ return h===OWNER_SHA; });
@@ -60,12 +100,18 @@
       +"<a href=\"/console.html#menu\" style=\"font-family:'Press Start 2P',monospace;font-size:10px;padding:14px 16px;text-decoration:none;border:1px solid #2a2a2a;color:#7a7a7a\">◀ BACK TO ONLYIBEE</a>"
     +"</div>"
     +"<div id=\"pgw\" style=\"font-family:'VT323',monospace;font-size:14px;color:#3a3a3a;margin-top:6px;letter-spacing:1px\">checking access_</div>";
-  function mount(){ (document.body||document.documentElement).appendChild(ov); }
+  /* `revealed` is load-bearing. The re-mount below exists because the body can
+     replace documentElement's children while parsing — but it also fires AFTER
+     a fast reveal and put the cover straight back. The owner path never hit it
+     (Supabase is slower than DOMContentLoaded); a preview key resolves in
+     milliseconds and hit it every time. Once we have let someone in, nothing
+     re-covers the page. */
+  var revealed=false;
+  function mount(){ if(revealed) return; (document.body||document.documentElement).appendChild(ov); }
   mount();
-  /* body might replace documentElement's children as it parses — re-mount on ready */
-  document.addEventListener("DOMContentLoaded",function(){ if(!document.getElementById("pgate")) mount(); });
+  document.addEventListener("DOMContentLoaded",function(){ if(!revealed && !document.getElementById("pgate")) mount(); });
 
-  function reveal(){ var e=document.getElementById("pgate"); if(e&&e.parentNode) e.parentNode.removeChild(e); }
+  function reveal(){ revealed=true; var e=document.getElementById("pgate"); if(e&&e.parentNode) e.parentNode.removeChild(e); }
   function note(m){ var w=document.getElementById("pgw"); if(w) w.textContent=m||""; }
 
   function loadSB(cb){
@@ -74,6 +120,12 @@
     s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
     s.onload=cb; s.onerror=function(){cb();}; document.head.appendChild(s);
   }
+  /* The key is checked BEFORE Supabase: a previewer has no account, and making
+     them wait on an auth round-trip (or fail with it) would be the whole point
+     of the link missed. */
+  hasPreview().then(function(ok){ if(ok){ reveal(); return; } startAuthCheck(); });
+
+  function startAuthCheck(){
   loadSB(function(){
     if(!(window.supabase&&window.supabase.createClient)){ note("offline — try again in a moment_"); return; }
     try{
@@ -88,4 +140,5 @@
       }).catch(function(){ note(""); });
     }catch(e){ note(""); }
   });
+  }
 })();
