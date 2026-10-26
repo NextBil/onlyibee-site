@@ -645,8 +645,7 @@
   #linfo .irow .icard{flex:1;margin:0}
   #lyr .bottom{pointer-events:auto;background:rgba(0,0,0,.74);border-top:1px solid var(--border);
     padding:8px 10px 10px;display:flex;flex-direction:column;gap:8px}
-  #lyr .lbar{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
-  #lyr .lbar .t{font-family:var(--px);font-size:9px;color:var(--acid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38%}
+  #lyr .lbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;position:relative}
   #lyr .lbar .btns{display:flex;gap:6px;flex:none}
   #lyr .lbar button{background:#0e0e0e;border:1px solid var(--border);color:var(--ink);cursor:pointer;
     width:40px;height:34px;display:flex;align-items:center;justify-content:center;font-family:var(--px);font-size:11px}
@@ -927,7 +926,6 @@
       </div>
       <div class="bottom">
         <div class="lbar">
-          <span class="t" id="lsong">—</span>
           <div class="btns">
             <button id="lfs" title="the record's soul — meaning, context, vibe">i</button>
             <button id="lclose" title="close">✕</button>
@@ -1330,7 +1328,7 @@
      record's soul from song-meta.js + BPM from beat-data.js. */
   var LYR=window.IBEE_LYRICS||{}, LYRT=window.IBEE_LYRICS_TIMED||{}, META=window.IBEE_META||{};
   var lyr=document.getElementById('lyr'),lstream=document.getElementById('lstream'),
-      lempty=document.getElementById('lempty'),lsong=document.getElementById('lsong'),lsongbox=document.getElementById('lsongbox');
+      lempty=document.getElementById('lempty'),lsongbox=document.getElementById('lsongbox');
   var lyrOpen=false,lyrSlug=null,lyrLines=[],lyrTimes=null,lyrActive=-1,lyrBoxN=-1;
   /* manual scroll: the user owns the list while touching it; 4s idle → follow again */
   var lwords=lyr.querySelector('.words'),lyrManual=0,lyrCentered=-1;
@@ -1390,7 +1388,7 @@
       var timed=slug&&LYRT[slug];
       if(timed&&timed.length){ lyrLines=timed.map(function(l){return l.w;}); lyrTimes=timed.map(function(l){return l.t;}); }
       else { lyrLines=(slug&&LYR[slug])||[]; lyrTimes=null; }
-      var s=r.song&&r.song(); lsong.textContent=s?s.n:'—';
+      var s=r.song&&r.song();
       var ln=document.getElementById('lname'), lm=document.getElementById('lmood');
       if(ln) ln.textContent=s?s.n:'LYRICS ENGINE';
       var mv=(slug&&META[slug]&&META[slug].vibe)||'';
