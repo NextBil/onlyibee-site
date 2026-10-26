@@ -4,6 +4,38 @@
   if(window.IBEE_STATS_CLIENT) return;
   var URL="https://hloxwicoeahczifshyoe.supabase.co";
   var KEY="sb_publishable_1GXmfEAlQlq8aeF8hgE-sQ_mKprQbQY";
+
+  /* ---- IS THIS A PERSON? -------------------------------------------------
+     Only writes are gated; reading the public counters stays open to anyone.
+
+     The signals below are the ones NO human browser produces. They are kept
+     deliberately narrow, because a false positive here deletes a real listener
+     and you would never know:
+       navigator.webdriver   set by every automation driver (Puppeteer,
+                             Playwright, Selenium) and by nothing else
+       Headless in the UA    headless Chrome announces itself
+       the crawler list      Googlebot, link-preview fetchers, curl, wget,
+                             python-requests and friends
+       _phantom / Cypress    older harnesses that predate navigator.webdriver
+
+     ⚠ TIMEZONE IS NOT ON THIS LIST, on purpose. The "city" this file reports
+     is the last segment of the browser's IANA timezone, so a datacentre box on
+     US-Pacific files itself as "Los Angeles" — which is where a sudden crowd
+     of LA listeners comes from. But America/Los_Angeles is also the honest
+     clock of everyone actually in Los Angeles, so treating the zone itself as
+     a bot signal would throw away real people to tidy up a number. What is
+     filtered here is automation, not a place.                               */
+  var BOTS=/bot|crawl|spider|slurp|mediapartners|facebookexternalhit|whatsapp|telegram|discord|preview|scrape|curl|wget|python-requests|axios|node-fetch|okhttp|lighthouse|pagespeed|gtmetrix|pingdom|headless|phantom|puppeteer|playwright|semrush|ahrefs|mj12|dotbot|petalbot|bytespider|applebot|yandex|baidu|duckduck|archive\.org/i;
+  function botLike(){
+    try{
+      if(navigator.webdriver) return true;
+      var ua=navigator.userAgent||"";
+      if(!ua) return true;                      /* no UA at all is not a browser */
+      if(BOTS.test(ua)) return true;
+      if(window._phantom||window.callPhantom||window.__nightmare||window.Cypress) return true;
+    }catch(e){}
+    return false;
+  }
   var VISITOR_KEY="ibee_network_visitor",COUNTRY_KEY="ibee_network_country",CITY_KEY="ibee_network_city",lastPlay="";
   function visitor(){try{var id=localStorage.getItem(VISITOR_KEY);if(id)return id;id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():"v_"+Date.now()+"_"+Math.random().toString(36).slice(2);localStorage.setItem(VISITOR_KEY,id);return id;}catch(e){return "v_"+Math.random().toString(36).slice(2);}}
   function call(name,body){return fetch(URL+"/rest/v1/rpc/"+name,{method:"POST",headers:{"apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(body||{})}).then(function(r){if(!r.ok)throw new Error("stats endpoint unavailable");return r.status===204?null:r.text().then(function(text){return text?JSON.parse(text):null;});});}
@@ -61,9 +93,9 @@
      then again once the network geo lookup came back — because presence must never
      depend on a slow or blocked third party. place() is local and instant now, so
      one write does the whole job and the site makes half as many calls. */
-  function heartbeat(){var id=visitor(),path=location.pathname;
+  function heartbeat(){if(botLike())return Promise.resolve();var id=visitor(),path=location.pathname;
     return place().then(function(p){return call("record_site_visit",{visitor_id:id,page_path:path,country_code:p.country||"",city_name:p.city||""});});}
-  function trackPlay(song){var key=(song||"unknown")+":"+Math.floor(Date.now()/1800000);if(key===lastPlay)return Promise.resolve();lastPlay=key;return place().then(function(p){return call("record_song_play",{visitor_id:visitor(),song_slug:String(song||"unknown").slice(0,180),city_name:p.city||""});}).then(function(result){try{window.dispatchEvent(new CustomEvent("ibee:play-counted",{detail:{song:song}}));}catch(e){}return result;});}
+  function trackPlay(song){if(botLike())return Promise.resolve();var key=(song||"unknown")+":"+Math.floor(Date.now()/1800000);if(key===lastPlay)return Promise.resolve();lastPlay=key;return place().then(function(p){return call("record_song_play",{visitor_id:visitor(),song_slug:String(song||"unknown").slice(0,180),city_name:p.city||""});}).then(function(result){try{window.dispatchEvent(new CustomEvent("ibee:play-counted",{detail:{song:song}}));}catch(e){}return result;});}
   function installRadioListener(){var tries=0,timer=setInterval(function(){var radio=window.IBEERADIO;if(!radio||!radio.audio){if(++tries>30)clearInterval(timer);return;}clearInterval(timer);radio.audio.addEventListener("play",function(){var song=radio.song&&radio.song();trackPlay(song&&song.f).catch(function(){});});},500);}
   heartbeat().catch(function(){});setInterval(function(){if(document.visibilityState==="visible")heartbeat().catch(function(){});},60000);installRadioListener();
   window.IBEE_STATS_CLIENT={fetch:fetchStats,songCounts:songCounts,countries:countries,cities:cities,songCities:songCities,heartbeat:heartbeat,trackPlay:trackPlay};
