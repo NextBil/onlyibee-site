@@ -203,9 +203,7 @@
   +"font-size:17px;padding:7px 9px;outline:none}"
   +"#rp-search:focus{border-color:#b6ff00}"
   +"#rp-search::placeholder{color:#5a5a5a}"
-  +"#rp-view{font-family:'Press Start 2P',monospace;font-size:8px;padding:0 9px;height:33px;flex:none;"
   +"background:#0e0e0e;color:#7a7a7a;border:1px solid #2a2a2a;cursor:pointer}"
-  +"#rp-view:hover,#rp-view.on{border-color:#b6ff00;color:#b6ff00}"
   +"#rp-list{overflow-y:auto;max-height:min(340px,44vh)}"
   /* ----- list rows (with mini cover) ----- */
   +".rp-row{display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;color:#9a9a9a;font-size:17px;border-bottom:1px solid #161616}"
@@ -303,7 +301,6 @@
     +'<div id="rp-tools">'
     +'  <input id="rp-search" type="text" placeholder="search songs & albums_" autocomplete="off" spellcheck="false">'
     +'  <button id="rp-favtgl" title="my favourites only">♥</button>'
-    +'  <button id="rp-view" title="grid / list view">▦ GRID</button>'
     +'</div>'
     +'<div id="rp-list"></div>'
     +'<div id="rp-empty">NO SIGNALS_<br>TRY ANOTHER WORD</div>';
@@ -352,7 +349,8 @@
     try{ localStorage.setItem("ibee_favs",JSON.stringify(f)); }catch(e){} }
 
   /* ===================== LIST + GRID RENDERING ===================== */
-  var viewMode = "list";   // "list" | "grid"
+  /* the radio is a list; the grid toggle was removed on request (2026-10-26) */
+  var viewMode = "list";
   var query = "";
   var favOnly = false;     // ♥ filter: only the songs you saved
 
@@ -783,10 +781,8 @@
   /* Only the cover opens song information; the rest of this row still browses songs. */
   $("rp-cover").onclick=function(e){e.stopPropagation();openSongInfo();};
   $("rp-cover").setAttribute("role","button");$("rp-cover").setAttribute("tabindex","0");$("rp-cover").onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();openSongInfo();}};
-  /* tap the title/album area → open the browser (grid) + focus search */
+  /* tap the title/album area → open the browser + focus search */
   $("rp-nowtop").onclick = function(){
-    viewMode = "grid";
-    $("rp-view").textContent = "≡ LIST"; $("rp-view").classList.add("on");
     render();
     openPanel();
     setTimeout(function(){ try{ $("rp-search").focus(); }catch(e){} }, 60);
@@ -797,13 +793,6 @@
   $("rp-favtgl").onclick = function(){
     favOnly = !favOnly;
     this.classList.toggle("on", favOnly);
-    render();
-  };
-  /* grid / list toggle */
-  $("rp-view").onclick = function(){
-    viewMode = (viewMode === "grid") ? "list" : "grid";
-    this.textContent = viewMode === "grid" ? "≡ LIST" : "▦ GRID";
-    this.classList.toggle("on", viewMode === "grid");
     render();
   };
   /* click anywhere outside the box closes it — music keeps playing */

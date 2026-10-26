@@ -231,9 +231,6 @@
   #tlsearchwrap.has #tlclear{display:flex}
   #tlsearch:focus{border-color:var(--acid)}
   #tlsearch::placeholder{color:#555}
-  #tlview{font-family:var(--px);font-size:8px;padding:0 9px;height:31px;flex:none;background:#0e0e0e;
-    color:var(--dim);border:1px solid var(--border);cursor:pointer}
-  #tlview:hover,#tlview.on{border-color:var(--acid);color:var(--acid)}
   /* ♥ favourites filter + the hearts on every song */
   #tracklist .tr .fv{flex:none;font-size:17px;line-height:1;color:#3a3a3a;cursor:pointer;padding:3px 5px;
     width:22px;text-align:center;box-sizing:content-box}
@@ -968,7 +965,6 @@
 
       <div id="tltools">
         <span id="tlsearchwrap"><input id="tlsearch" type="text" placeholder="search songs &amp; albums_" autocomplete="off" spellcheck="false"><button id="tlclear" type="button" title="clear search" aria-label="Clear search">✕</button></span>
-        <button id="tlview" title="grid / list view">▦ GRID</button>
       </div>
       <!-- the shelf: albums as covers, straight under the search. Bigger art than
            the rows below because a cover is how people recognise a record. Tapping
@@ -1039,7 +1035,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=33"></script>
+<script src="assets/player.js?v=34"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- anonymous site analytics: page activity, exits and meaningful interactions -->
@@ -1471,9 +1467,10 @@
   var tl=document.getElementById('tracklist'),
       tlbody=document.getElementById('tlbody'),
       tlempty=document.getElementById('tlempty'),
-      tlsearch=document.getElementById('tlsearch'),
-      tlview=document.getElementById('tlview');
-  var viewMode='list', query='', builtCount=-1;   /* LIST is the default view (2026-07-13) */
+      tlsearch=document.getElementById('tlsearch');
+  /* The radio is a list. The grid/list toggle was removed on request
+     (2026-10-26); the grid branches below are kept dormant. */
+  var viewMode='list', query='', builtCount=-1;
   /* ALBUM SELECTION IS NOT THE SEARCH BOX (2026-10-22). Tapping a record used to
      write its name into `query`, so the shelf filtered by SUBSTRING: picking
      NOUVEAUX PUNK also listed NOUVEAUX PUNK 2, and any song whose TITLE contained
@@ -1755,10 +1752,6 @@
     var b=this,keep=b.innerHTML; b.innerHTML='✓'; b.style.color='#b6ff00';
     setTimeout(function(){ b.innerHTML=keep; b.style.color=''; },1400);
   };
-  tlview.onclick=function(){ viewMode=(viewMode==='grid')?'list':'grid';
-    this.textContent=viewMode==='grid'?'≡ LIST':'▦ GRID';
-    this.classList.toggle('on',viewMode==='grid'); renderTracks(); markNow(); };
-  tlview.classList.toggle('on',viewMode==='grid');
   document.getElementById('tlx').onclick=function(ev){ ev.stopPropagation(); setTL(false); };
   /* `listopen` on #bottom is what flips the chevron and lights the strip, so it
      has to follow the list in BOTH directions — set it in one place. */
