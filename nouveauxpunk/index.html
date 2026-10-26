@@ -92,25 +92,64 @@ h1{
 .prose p{margin-bottom:14px}
 .prose .a{color:var(--acid)} .prose .r{color:var(--red)}
 
-/* track signals — the album, playable (tap a row) */
-.tr{
-  display:flex;align-items:center;gap:14px;padding:11px 12px;border-bottom:1px solid #1f1010;
-  color:var(--dim);cursor:pointer;
+/* three facts, said once, instead of a sentence each (same strip as chapter two) */
+.facts{display:flex;gap:10px;margin:0 0 12px}
+.facts span{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 6px;border:1px solid #2a1414;background:#140a0a;
+  font-family:var(--px);font-size:7px;color:#8a7070;letter-spacing:1px;text-align:center}
+.facts b{font-family:var(--px);font-size:17px;color:var(--red);font-weight:normal;
+  text-shadow:0 0 12px rgba(255,43,43,.5)}
+
+/* THE RECORD AS A SHELF (same shelf as chapter two, in this room's red).
+   Rows were a column you scroll past; a wall of sleeves is one glance and half
+   the height. Every tile is the SAME cover — the record is one object — so the
+   STATE distinguishes them: everything dim and cold, and the one that is on
+   goes full colour, lifts and rings while the rest drop another stop.
+   The tiles use assets/img/thumb (128px), never the full cover: Safari decodes
+   an <img> at its NATURAL size, so 27 full sleeves in a tab is hundreds of MB
+   of bitmap on a phone. */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:10px}
+.sq{position:relative;display:block;text-decoration:none;cursor:pointer;
+  transition:transform .22s ease}
+.sqw{display:block;position:relative;aspect-ratio:1;overflow:hidden;isolation:isolate;
+  border:1px solid #2a1414;background:#0a0505;transition:border-color .2s,box-shadow .25s}
+.sqw img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(.45) brightness(.66);transition:filter .25s}
+.sqw::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:#0a1a26;opacity:0;transition:opacity .25s}
+.sq .no{position:absolute;top:5px;left:5px;z-index:3;font-family:var(--px);font-size:7px;
+  letter-spacing:1px;color:#e8e8e8;background:rgba(7,3,3,.76);padding:3px 4px;line-height:1}
+.sq .st{position:absolute;right:5px;bottom:5px;z-index:3;font-family:var(--px);font-size:7px;
+  color:var(--acid);opacity:0;transition:opacity .2s}
+.sq .ti{display:block;min-width:0;margin-top:6px;font-size:15px;line-height:1.3;color:#9a8888;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s}
+.sq .dur{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
+  color:#5a3333;line-height:1.9}
+.sq:hover .sqw img{filter:none}
+.sq:hover .sqw{border-color:#4a2222}
+.sq:hover .ti{color:#cfc5c5}
+.sq:hover .st{opacity:1}
+.sq.playing{transform:scale(1.08);z-index:4}
+.sq.playing .sqw{border-color:var(--acid);
+  box-shadow:0 0 0 1px var(--acid),0 0 24px rgba(182,255,0,.4),0 10px 26px rgba(0,0,0,.65)}
+.sq.playing .sqw img{filter:none}
+.sq.playing .sqw::after{opacity:0}
+.sq.playing .ti{color:var(--acid)}
+.sq.playing .dur{color:var(--acid)}
+.sq.playing .st{opacity:1}
+.grid.live .sq:not(.playing) .sqw img{filter:grayscale(1) brightness(.34)}
+.grid.live .sq:not(.playing) .sqw::after{opacity:.6}
+.grid.live .sq:not(.playing) .ti{color:#584848}
+.grid.live .sq:not(.playing) .dur{color:#3a2222}
+@media(max-width:560px){
+  /* minmax(0,1fr), NOT 1fr: a bare 1fr is minmax(auto,1fr) and will not shrink
+     below a track's min-content, so the longest song title widened its column
+     and pushed the page 33px past the screen. */
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .sq .ti{font-size:14px}
+  .sq .no{font-size:6px}
+  .facts b{font-size:15px}
 }
-.tr:hover{background:#150b0b}
-.tr .no{font-family:var(--px);font-size:9px;width:30px;color:#5a3333}
-.tr .ti{flex:none;max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  color:#cfc5c5;font-size:19px}
-.tr .bars{flex:1;display:flex;gap:3px;align-items:center;overflow:hidden}
-.tr .bars i{width:6px;height:5px;background:#2a1414;animation:stat 1.4s ease-in-out infinite;animation-play-state:paused}
-.tr .bars i:nth-child(3n){animation-delay:.2s}.tr .bars i:nth-child(3n+1){animation-delay:.45s}
-@keyframes stat{0%,100%{height:5px}50%{height:14px}}
-.tr .st{font-family:var(--px);font-size:8px;color:var(--red);flex:none;min-width:36px;text-align:right}
-.tr.playing{background:#101505;color:var(--ink)}
-.tr.playing .no{color:var(--acid)}
-.tr.playing .ti{color:var(--acid)}
-.tr.playing .st{color:var(--acid)}
-.tr.playing .bars i{background:#4a5500;animation-play-state:running}
 
 /* MORE: the statement is four paragraphs and three of them are for the people
    who want them. The box stays short until someone asks. */
@@ -210,10 +249,6 @@ body.storm h1{text-shadow:0 0 calc(24px + var(--npbeat,0)*34px) rgba(182,255,0,.
 body.storm h1{animation:h1flick 3.5s steps(1) infinite}
 @keyframes h1flick{0%,97%,100%{opacity:1}98%{opacity:.4}}
 /* room banner that rises when the storm hits */
-#roomtag{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:9;opacity:0;
-  font-family:var(--px);font-size:9px;color:var(--red);letter-spacing:2px;text-align:center;
-  text-shadow:0 0 14px rgba(255,43,43,.7);transition:opacity 1s ease;pointer-events:none}
-body.storm #roomtag{opacity:.9}
 
 /* ===== LISTENING NOTICE (from the original NP notice) ===== */
 .notice{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--red);
@@ -245,7 +280,6 @@ body.storm #roomtag{opacity:.9}
   <div class="lightning" id="ltng"></div>
   <div id="pills"></div>
 </div>
-<div id="roomtag">▓ THE ROOM IS OPEN ▓<br>you're inside the experience now_</div>
 <header>
   <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
   <span>NP.SYS</span>
@@ -282,6 +316,10 @@ body.storm #roomtag{opacity:.9}
   <!-- about -->
   <div class="sec">
     <div class="sh"><span class="r">//</span> WHAT IS <span class="a">NOUVEAUX PUNK</span>_</div>
+    <div class="facts">
+      <span><b>27</b>songs</span>
+      <span><b>2</b>years to create</span>
+    </div>
     <div class="card prose">
       <p>NOUVEAUX PUNK is how I turn my issues into art. The songs might sound
          unrelated, but it's one story — <span class="r">what they all have in common is that I
@@ -307,7 +345,7 @@ body.storm #roomtag{opacity:.9}
   <div class="sec">
     <div class="sh">TRACK SIGNALS <span class="a">[DECRYPTED]</span></div>
     <div class="ssub">the experience, open — 27 transmissions. tap one to play_</div>
-    <div class="card" id="tracks"></div>
+    <div class="grid" id="tracks"></div>
   </div>
 
   <!-- listening notice — how to hear it, from the original NP notice -->
@@ -389,10 +427,19 @@ body.storm #roomtag{opacity:.9}
   ];
   var tr=document.getElementById("tracks"),html="";
   function fmt(s){var m=Math.floor(s/60),ss=Math.floor(s%60);return m+":"+(ss<10?"0":"")+ss;}
+  /* THE TILE. The 26 pulsing <i> bars per row are gone — 702 animated DOM nodes
+     for one tracklist, saying nothing the cover doesn't. Thumb, not the sleeve:
+     see the CSS note on what Safari does with 27 full-size decodes. */
+  var COVER="../assets/img/thumb/nouveaux-punk.jpg";
   NP.forEach(function(s,i){
-    var bars="";for(var b=0;b<26;b++)bars+="<i></i>";
-    html+='<div class="tr" data-i="'+i+'"><span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
-      +'<span class="ti">'+s.t+'</span><span class="bars">'+bars+'</span><span class="st">'+fmt(s.d)+'</span></div>';
+    html+='<a class="sq" data-i="'+i+'" href="#">'
+      +'<span class="sqw">'
+        +'<img src="'+COVER+'" alt="" loading="lazy" decoding="async" width="128" height="128">'
+        +'<span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
+        +'<span class="st">\u25b6</span>'
+      +'</span>'
+      +'<span class="ti">'+s.t+'</span>'
+      +'<span class="dur">'+fmt(s.d)+'</span></a>';
   });
   tr.innerHTML=html;
 
@@ -409,10 +456,14 @@ body.storm #roomtag{opacity:.9}
   function npIdxOf(slug){ if(!slug)return -1; for(var i=0;i<NP.length;i++) if(NP[i].f===slug) return i; return -1; }
   function rowState(){
     var r=RADIO(),playing=false; try{ playing=!!(r&&r.playing()); }catch(e){}
+    /* ONE class on the grid dims the other 26 — twenty-seven class writes four
+       times a second is exactly what this page is trying to stop doing. */
+    tr.classList.toggle("live", playing && npCur>=0);
     Array.prototype.forEach.call(tr.children,function(row,i){
       var on=(i===npCur&&playing);
       row.classList.toggle("playing",on);
-      row.querySelector(".st").textContent = on?"❚❚":(i===npCur?"▶":fmt(NP[i].d));
+      var st=row.querySelector(".st");
+      if(st) st.textContent = on ? "\u275a\u275a" : "\u25b6";
     });
   }
   /* play (or pause/resume) NP track i through the radio; poll until the radio +
@@ -648,8 +699,9 @@ body.storm #roomtag{opacity:.9}
     if(taps===5){taps=0;toast("★ FRAGMENT FOUND_<br>↑↑↓↓←→←→ B A<br>speak it to the console_",5200);}
     else if(taps===3){toast("something is hidden in this cover_");}
   });
-  Array.prototype.slice.call(document.querySelectorAll(".tr")).forEach(function(row){
-    row.addEventListener("click",function(){ playNP(+row.getAttribute("data-i")); });
+  tr.addEventListener("click",function(e){
+    var c=e.target.closest&&e.target.closest(".sq"); if(!c) return;
+    e.preventDefault(); playNP(+c.getAttribute("data-i"));
   });
 })();
 </script>

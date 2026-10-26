@@ -284,10 +284,13 @@ body.neon .dplay{background:#3a0e20;box-shadow:0 0 12px rgba(255,31,111,.5)}
   position:relative;border:0;font:inherit;color:inherit;display:block;width:100%;
   transition:background .18s}
 .note:hover{background:#16292d}
-.note .ic{display:block;height:30px;margin-bottom:9px}
-.note .ic svg{width:30px;height:30px;stroke:#93a8a9;fill:none;stroke-width:1.5;
-  stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s}
-.note:hover .ic svg{stroke:var(--pink-hot)}
+.note .ic{display:block;height:38px;margin-bottom:9px}
+.note .ic svg{width:38px;height:38px;stroke:#c7d7d9;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;transform:rotate(-8deg);
+  filter:drop-shadow(0 0 7px rgba(255,31,111,.6));
+  transition:stroke .18s,filter .18s,transform .25s}
+.note:hover .ic svg,.note.on .ic svg{stroke:var(--pink-hot);transform:rotate(0);
+  filter:drop-shadow(0 0 9px rgba(255,31,111,.9))}
 .note .nm{display:block;font-family:var(--px);font-size:7.5px;line-height:1.75;
   letter-spacing:1px;color:#cfdcdc;min-height:26px}
 .note .pl{width:34px;height:34px;margin:10px auto 8px;border-radius:50%;
@@ -298,7 +301,6 @@ body.neon .dplay{background:#3a0e20;box-shadow:0 0 12px rgba(255,31,111,.5)}
 .note .rc{display:block;color:#5d7275;font-size:15px;line-height:1.45}
 .note.on{background:#240914}
 .note.on .nm{color:var(--pink-hot)}
-.note.on .ic svg{stroke:var(--pink)}
 .note.on .pl{background:var(--acid);color:#000;box-shadow:0 0 14px rgba(182,255,0,.6)}
 @media(max-width:640px){
   .notice{grid-template-columns:repeat(2,1fr)}
@@ -334,40 +336,86 @@ body.neon .dplay{background:#3a0e20;box-shadow:0 0 12px rgba(255,31,111,.5)}
   .chap b{font-size:9px}.chap .cs{font-size:15px}
 }
 
-/* THE LIST. A grid of 27 cards was a wall of sleeves you had to scroll past;
-   a list is scannable, and the signs still say what each one is FOR. The
-   record's own bass envelope runs across the row, which is the only thing
-   that actually differs between 27 tracks sharing one cover. */
-.list{padding:0;overflow:hidden}
-.sg{display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;
-  text-decoration:none;border-bottom:1px solid #16292d;
-  transition:background .15s}
-.sg:last-child{border-bottom:0}
-.sg:hover{background:#16292d}
-.sg .no{font-family:var(--px);font-size:9px;width:26px;flex:none;color:#456}
-.sg .tt{flex:none;width:30%;min-width:0;overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap;color:#cfdcdc;font-size:18px}
-/* the groove, in the song's own colour */
-.sg .wv{flex:1;min-width:0;display:flex;align-items:center;gap:1px;height:22px}
-.sg .wv i{flex:1;min-width:1px;border-radius:1px;
-  background:hsl(var(--hue,330) 80% 58% / .75);
-  height:calc(8% + var(--h,0) * 92%)}
-.sg .signs{display:flex;gap:4px;flex:none}
-.sg .signs svg{width:12px;height:12px;stroke:#5d7275;fill:none;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round}
-.sg .dur{font-family:var(--px);font-size:8px;color:var(--pink);flex:none;
-  min-width:34px;text-align:right}
-.sg.playing{background:#20101a}
-.sg.playing .no,.sg.playing .tt{color:var(--pink-hot)}
-.sg.playing .wv i{background:var(--pink-hot)}
-.sg.playing .signs svg{stroke:var(--pink)}
+/* THE RECORD AS A SHELF. Rows were a column you scroll past; a wall of sleeves
+   is one glance, and it is half the height. Every tile is the SAME cover — that
+   is the point, the record is one object — so STATE does all the distinguishing
+   instead of twenty-seven different pictures:
+     nothing on   → everything sits dim and cold
+     something on → that one goes to full colour, lifts and rings; the rest drop
+                    another stop into the dark and turn blue.
+   The tiles use assets/img/thumb (128px), never the full cover: Safari decodes
+   an <img> at its NATURAL size, so 27 full sleeves in one tab is hundreds of MB
+   of decoded bitmap on a phone. See the radio list for the same trap. */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:10px}
+.sq{position:relative;display:block;text-decoration:none;cursor:pointer;
+  transition:transform .22s ease}
+.sqw{display:block;position:relative;aspect-ratio:1;overflow:hidden;isolation:isolate;
+  border:1px solid #1d3338;background:#060f10;transition:border-color .2s,box-shadow .25s}
+.sqw img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(.45) brightness(.66);transition:filter .25s}
+/* the cold wash that falls over everything the record is NOT playing */
+.sqw::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:#0a2b33;opacity:0;transition:opacity .25s}
+.sq .no{position:absolute;top:5px;left:5px;z-index:3;font-family:var(--px);font-size:7px;
+  letter-spacing:1px;color:#cfdcdc;background:rgba(4,12,13,.74);padding:3px 4px;line-height:1}
+.sq .st{position:absolute;right:5px;bottom:5px;z-index:3;font-family:var(--px);font-size:7px;
+  color:var(--pink-hot);opacity:0;transition:opacity .2s}
+.sq .tt{display:block;min-width:0;margin-top:6px;font-size:15px;line-height:1.3;color:#93a8a9;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s}
+.sq .dur{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
+  color:#44585b;line-height:1.9}
+.sq:hover .sqw img{filter:none}
+.sq:hover .sqw{border-color:#2f5157}
+.sq:hover .tt{color:#cfdcdc}
+.sq:hover .st{opacity:1}
+/* the one that is on */
+.sq.playing{transform:scale(1.08);z-index:4}
+.sq.playing .sqw{border-color:var(--pink);
+  box-shadow:0 0 0 1px var(--pink),0 0 24px rgba(255,31,111,.5),0 10px 26px rgba(0,0,0,.6)}
+.sq.playing .sqw img{filter:none}
+.sq.playing .sqw::after{opacity:0}
+.sq.playing .tt{color:var(--pink-hot)}
+.sq.playing .dur{color:var(--pink)}
+.sq.playing .st{opacity:1}
+/* …and everything that is not, while something is */
+.grid.live .sq:not(.playing) .sqw img{filter:grayscale(1) brightness(.34)}
+.grid.live .sq:not(.playing) .sqw::after{opacity:.6}
+.grid.live .sq:not(.playing) .tt{color:#4a5d60}
+.grid.live .sq:not(.playing) .dur{color:#30474a}
 .gridempty{font-family:var(--px);font-size:9px;color:#5d7275;padding:22px 0;text-align:center;
-  line-height:2}
+  line-height:2;grid-column:1/-1}
 @media(max-width:560px){
-  .sg{gap:9px;padding:9px 10px}
-  .sg .tt{width:40%;font-size:16px}
-  .sg .signs{display:none}        /* the chips above already say the mood */
-  .mood{font-size:7px;padding:7px 9px}
+  /* minmax(0,1fr), NOT 1fr: a bare 1fr is minmax(auto,1fr) and will not shrink
+     below a track's min-content, so the longest song title widened its column
+     and pushed the page 33px past the screen. */
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .sq .tt{font-size:14px}
+  .sq .no{font-size:6px}
+}
+
+/* THE NOTICE OPENS. Fifteen plates is most of a screen, and it is the last
+   section on the page — it stays shut until someone wants it. */
+.opener{display:flex;align-items:center;gap:14px;width:100%;cursor:pointer;
+  padding:14px 16px;text-align:left;font:inherit;color:inherit;
+  border:2px solid var(--pink);background:linear-gradient(135deg,#1a2d31,#0b1719 62%,#240914);
+  transition:box-shadow .2s,transform .18s}
+.opener:hover{box-shadow:0 0 26px rgba(255,31,111,.42);transform:translateY(-2px)}
+.opener .oi{flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+.opener .oi svg{width:34px;height:34px;stroke:var(--pink-hot);fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;transform:rotate(-9deg);
+  filter:drop-shadow(0 0 7px rgba(255,31,111,.85));transition:transform .25s}
+.opener:hover .oi svg{transform:rotate(0)}
+.opener .ot{min-width:0;margin-right:auto}
+.opener b{display:block;font-family:var(--px);font-size:10px;color:var(--acid);
+  font-weight:normal;letter-spacing:1px;line-height:1.7}
+.opener .os{display:block;color:#93a8a9;font-size:16px;margin-top:5px;line-height:1.35}
+.opener .oc{flex:none;font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--pink-hot)}
+.notice{margin-top:12px}
+.notice[hidden]{display:none}
+@media(max-width:560px){
+  .opener{gap:11px;padding:12px}
+  .opener b{font-size:8.5px}.opener .os{font-size:14px}
+  .opener .oi{width:32px;height:32px}.opener .oi svg{width:28px;height:28px}
 }
 
 /* the drop as a FOLDER — spines peeking out of a card you open */
@@ -519,7 +567,7 @@ body.neon .batwrap svg{animation:none !important}
     <div class="facts">
       <span><b>27</b>songs</span>
       <span><b>2</b>cities</span>
-      <span><b>10.31</b>halloween</span>
+      <span><b>4</b>years to create</span>
     </div>
     <div class="card prose">
       <!-- THE SHOT. The statement says "Toronto and Paris"; the archive is
@@ -577,7 +625,7 @@ body.neon .batwrap svg{animation:none !important}
 
   <div class="sec" id="recsec">
     <div class="ssub" id="recsub">27 songs — tap any one, or press play above_</div>
-    <div class="list card" id="tracks"></div>
+    <div class="grid" id="tracks"></div>
   </div>
 
   <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
@@ -592,9 +640,17 @@ body.neon .batwrap svg{animation:none !important}
        plate of states, with this record's own signs instead of emoji. It sits
        after the surprises because it is the last word on how to hear it. -->
   <div class="sec">
-    <div class="sh">THE <span class="a">MANUAL</span>_</div>
-    <div class="ssub">tap a state to sort the record — tap ▶ to press play on it_</div>
-    <div class="notice" id="moods"></div>
+    <div class="sh">THE <span class="a">NOTICE</span>_</div>
+    <button class="opener" id="noticeopen" type="button" aria-expanded="false" aria-controls="moods">
+      <span class="oi"><svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3.2 22.2 20.6H1.8Z"/><path d="M12 9.6v5.2M12 17.8v.2"/></svg></span>
+      <span class="ot">
+        <b>HOW TO LISTEN</b>
+        <span class="os">fifteen states — tap one to sort the record, tap ▶ to press play on it_</span>
+      </span>
+      <span class="oc">OPEN ▾</span>
+    </button>
+    <div class="notice" id="moods" hidden></div>
   </div>
 
   <!-- back to where it started -->
@@ -693,22 +749,69 @@ body.neon .batwrap svg{animation:none !important}
      survives that where a filename does not.
      Each sign is inline SVG — no assets, and they inherit colour so a card
      and a chip can light the same icon differently. */
+  /* THE SIGNS. Stick figures, not symbols: a state is something a PERSON is in,
+     and a little figure says that where a pictogram of an object does not. Each
+     one is a single body in a pose plus one prop, drawn on the same 24-grid so
+     they sit at the same weight. They glow and lean in the CSS — these are the
+     plates on a notice, not icons in a toolbar. */
   var SIGN={
-    night:'<path d="M14.5 2.5a7 7 0 1 0 7 7 5.6 5.6 0 0 1-7-7Z"/><circle cx="6" cy="5" r=".6"/><circle cx="4" cy="11" r=".6"/>',
-    hope:'<path d="M12 21c3.3 0 6-2.5 6-5.6 0-3.9-4.2-6-6-12.4-1.8 6.4-6 8.5-6 12.4C6 18.5 8.7 21 12 21Z"/><path d="M12 17.5c1.2 0 2.2-.9 2.2-2 0-1.5-1.5-2.3-2.2-4.6-.7 2.3-2.2 3.1-2.2 4.6 0 1.1 1 2 2.2 2Z"/>',
-    smoke:'<path d="M4 20h16M6 16c0-2 2.5-2 2.5-4S6 10 6 8"/><path d="M12 16c0-2 2.5-2 2.5-4S12 10 12 8"/><path d="M18 16c0-1.6 2-1.6 2-3"/>',
-    broken:'<path d="M12 20.3 4.6 13a4.7 4.7 0 0 1 6.6-6.6l.8.8"/><path d="M12 20.3 19.4 13a4.7 4.7 0 0 0-6.6-6.6l-.8.8"/><path d="m12 7.2-2 3.4 3.6 1.7L11.4 16"/>',
-    nonsense:'<path d="M12 21a9 9 0 1 1 9-9"/><path d="M21 12c0 2.4-2 3.4-3.6 2.4-1.4-.9-1-3 .7-3.4"/><path d="M8.4 8.4 12 12l4.2-1.6"/>',
-    grind:'<path d="M3 20h3v-6H3Zm5.5 0h3V9h-3Zm5.5 0h3V12h-3Zm5.5 0h3V4h-3Z"/>',
-    dance:'<circle cx="13" cy="4.3" r="1.8"/><path d="M13 6.4v4.2l3.4 2.1M13 10.6 9.6 13l1.1 4M13 10.6l1.6 4.2.3 4.4M9.6 13 7 11.3"/>',
-    sleep:'<path d="M3 15c3-.6 5-2.4 5-5a9 9 0 0 1 9 9H5a2 2 0 0 1-2-2Z"/><path d="M14 3h4l-4 5h4"/>',
-    drive:'<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3.6v6M12 14.4v6M3.6 12h6M14.4 12h6"/>',
-    sensual:'<path d="M12 4c2.4 2.8 4.6 5.2 4.6 8a4.6 4.6 0 1 1-9.2 0c0-2.8 2.2-5.2 4.6-8Z"/><path d="M9.8 12.6c.7 1.3 3.7 1.3 4.4 0"/>',
-    punk:'<path d="M5.5 7.5c0-2 1.6-3.4 3.4-3.4s3.3 1.4 3.3 3.4V16a2.6 2.6 0 0 0 5.2 0V8"/><circle cx="17.4" cy="6.4" r="1.7"/><path d="M5.5 10.6h7"/>',
-    beats:'<rect x="3.2" y="3.2" width="17.6" height="17.6" rx="1.6"/><rect x="6" y="6" width="4.6" height="4.6"/><rect x="13.4" y="6" width="4.6" height="4.6"/><rect x="6" y="13.4" width="4.6" height="4.6"/><rect x="13.4" y="13.4" width="4.6" height="4.6"/>',
-    afro:'<path d="M5 20h14l-2.4-6.6a5 5 0 0 0-9.2 0Z"/><ellipse cx="12" cy="12.6" rx="6" ry="2"/><path d="M8.4 20 7 22.6M15.6 20 17 22.6M12 7.6V4.4M9 8.4 7.6 5.8M15 8.4l1.4-2.6"/>',
-    french:'<path d="M5 3.6v17"/><path d="M5 4.4h13l-2.6 4 2.6 4H5"/>',
-    all:'<rect x="3.4" y="3.4" width="7" height="7"/><rect x="13.6" y="3.4" width="7" height="7"/><rect x="3.4" y="13.6" width="7" height="7"/><rect x="13.6" y="13.6" width="7" height="7"/>'
+    /* everyone — three bodies */
+    all:'<circle cx="5" cy="6.6" r="1.5"/><path d="M5 8.1v4.2M3 9.5h4M5 12.3l-1.4 3.2M5 12.3l1.4 3.2"/>'
+       +'<circle cx="12" cy="5.6" r="1.8"/><path d="M12 7.4v5M9.6 9h4.8M12 12.4l-1.7 3.8M12 12.4l1.7 3.8"/>'
+       +'<circle cx="19" cy="6.6" r="1.5"/><path d="M19 8.1v4.2M17 9.5h4M19 12.3l-1.4 3.2M19 12.3l1.4 3.2"/>',
+    /* alone at night — one body under a moon */
+    night:'<path d="M17.8 2.4a4.2 4.2 0 1 0 4.2 4.2 4.9 4.9 0 0 1-4.2-4.2Z"/>'
+         +'<circle cx="8" cy="9.6" r="2"/><path d="M8 11.6v5.4M5.5 13.3h5M8 17l-1.9 4.2M8 17l1.9 4.2"/>',
+    /* a tiny hope left — arms up at a spark */
+    hope:'<circle cx="10" cy="11.4" r="2"/><path d="M10 13.4v4.8M10 14.4 6.6 10.8M10 14.4l3.4-3.6'
+        +'M10 18.2l-1.9 3.6M10 18.2l1.9 3.6"/><path d="M18.6 2.6v4M16.6 4.6h4M17.2 3.2l2.8 2.8M20 3.2l-2.8 2.8"/>',
+    /* smoke and chill — a body, a cigarette, two curls */
+    smoke:'<circle cx="7.4" cy="7.8" r="2"/><path d="M7.4 9.8v5.4M5 11.5h4.8M9.8 11.5h2.6'
+         +'M7.4 15.2l-1.8 4.2M7.4 15.2l1.8 4.2"/>'
+         +'<path d="M14.8 11c0-1.7 2.1-1.7 2.1-3.4S14.8 5.9 14.8 4.2"/><path d="M19.2 10.4c0-1.3 1.8-1.3 1.8-2.7"/>',
+    /* heart broken — a body and a split heart */
+    broken:'<circle cx="6.2" cy="7.4" r="1.9"/><path d="M6.2 9.3v5.3M4 10.9h4.4M6.2 14.6l-1.7 4M6.2 14.6l1.7 4"/>'
+          +'<path d="M16.6 19.4 13 15.6a2.6 2.6 0 0 1 3.6-3.7l.4.4"/>'
+          +'<path d="M16.6 19.4 20.2 15.6a2.6 2.6 0 0 0-3.6-3.7l-.4.4"/>'
+          +'<path d="m16.6 13.2-1.1 1.9 1.9.9-1.1 2.1"/>',
+    /* nothing makes sense — a head with the thread coming loose */
+    nonsense:'<circle cx="9" cy="11.4" r="2"/><path d="M9 13.4v4.8M6.5 15.1h5M9 18.2l-1.8 3.8M9 18.2l1.8 3.8"/>'
+            +'<path d="M17.4 6.2a2.3 2.3 0 1 0-2.3 2.3 3.4 3.4 0 1 1 3.4-3.4"/><circle cx="18.2" cy="10.6" r=".8"/>',
+    /* grinding is all — a body, and the stairs still ahead of it */
+    grind:'<circle cx="5.6" cy="9.6" r="2"/><path d="M5.6 11.6V17M3.2 13.3h4.8M5.6 17l-1.8 4.2M5.6 17l1.8 4.2"/>'
+         +'<path d="M11.2 21.4h3.2v-3.4h3.2v-3.4h3.2v-3.4"/>',
+    /* to dance — the one that was already a dancer */
+    dance:'<circle cx="13" cy="4.3" r="1.9"/><path d="M13 6.4v4.2l3.6 2.2M13 10.6 9.4 13l1.2 4.2'
+         +'M13 10.6l1.7 4.4.3 4.6M9.4 13 6.6 11.2"/>',
+    /* to sleep — a body lying down, and the Zs */
+    sleep:'<circle cx="6.4" cy="15.6" r="2"/><path d="M8.4 16h8.4M16.8 13.8v4.4M3 19.4h18"/>'
+         +'<path d="M14.4 3.2h4l-4 5h4"/><path d="M19.8 9.4h2.4l-2.4 3h2.4"/>',
+    /* to drive — a head behind a wheel */
+    drive:'<circle cx="12" cy="14.8" r="5.2"/><circle cx="12" cy="14.8" r="1"/>'
+         +'<path d="M12 9.6v4.2M7.6 17.4l3.6-2M16.4 17.4l-3.6-2"/>'
+         +'<circle cx="12" cy="4.2" r="1.9"/><path d="M12 6.1v1.4M10.2 7.2 7.8 11M13.8 7.2l2.4 3.8"/>',
+    /* sad and sensual — two bodies, close */
+    sensual:'<circle cx="8" cy="8.4" r="1.9"/><path d="M8 10.3v5.3M8 15.6l-1.6 4M8 15.6l1.6 4"/>'
+           +'<circle cx="16" cy="8.4" r="1.9"/><path d="M16 10.3v5.3M16 15.6l-1.6 4M16 15.6l1.6 4"/>'
+           +'<path d="M8 11.8h8"/><path d="M12 5.4 10.9 4.2a1 1 0 0 1 1.1-1.5 1 1 0 0 1 1.1 1.5Z"/>',
+    /* punk of punk — mohawk, fist up */
+    punk:'<circle cx="9.6" cy="9" r="2"/><path d="M7.9 7.3 8.5 4.4M9.6 7V3.8M11.3 7.3 10.7 4.4"/>'
+        +'<path d="M9.6 11v5.4M9.6 12.2 13.2 9M9.6 12.2 6.4 14M9.6 16.4l-1.8 4.4M9.6 16.4l1.8 4.4"/>'
+        +'<circle cx="14.4" cy="8.2" r="1.4"/>',
+    /* beats by only ibee — a body over four pads */
+    beats:'<circle cx="5.6" cy="5.4" r="1.9"/><path d="M5.6 7.3v4.4M5.6 8.6 3 11.4M5.6 8.6l3.6 3.4'
+         +'M5.6 11.7l-1.4 3.4M5.6 11.7l1.4 3.4"/>'
+         +'<rect x="12.6" y="10" width="3.8" height="3.8"/><rect x="17.4" y="10" width="3.8" height="3.8"/>'
+         +'<rect x="12.6" y="14.8" width="3.8" height="3.8"/><rect x="17.4" y="14.8" width="3.8" height="3.8"/>',
+    /* afro groove — the hair is the head, and a drum */
+    afro:'<circle cx="6.6" cy="6.6" r="2.9"/><path d="M6.6 9.5v5.3M4.2 11.2h4.8M6.6 14.8l-1.7 4M6.6 14.8l1.7 4"/>'
+        +'<ellipse cx="17.4" cy="11.6" rx="3.8" ry="1.6"/><path d="M13.6 11.6v5.8a3.8 1.6 0 0 0 7.6 0v-5.8"/>',
+    /* french — the beret and the flag */
+    french:'<circle cx="7.8" cy="8.4" r="2"/>'
+          +'<path d="M5.2 7c1.5-2.2 3.7-2.2 5.2 0 .5.7-.2 1.1-1 1.1H6.2c-.8 0-1.5-.4-1-1.1Z"/>'
+          +'<path d="M10.2 5.4V4.4"/>'
+          +'<path d="M7.8 10.4v5.4M5.4 12.1h4.8M7.8 15.8l-1.7 4M7.8 15.8l1.7 4"/>'
+          +'<path d="M16.4 20.4V5.2M16.4 6h5.2l-1.1 2.3 1.1 2.3h-5.2"/>'
   };
   function ico(k){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(SIGN[k]||"")+'</svg>'; }
 
@@ -736,49 +839,20 @@ body.neon .batwrap svg{animation:none !important}
     m.n.forEach(function(no){ var i=no-1; if(SIGNS[i] && SIGNS[i].indexOf(m.k)<0) SIGNS[i].push(m.k); });
   });
 
-  /* WAVE: downsample the song's own bass envelope to N bars. Falls back to a
-     flat-ish shape only if a record has no pressed groove yet, so a missing
-     entry degrades to a plain card instead of an empty one. */
-  var WAVEN=56;   /* a row is far wider than a card was — more detail fits */
-  function waveBars(slug){
-    var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT)||null;
-    var g=B&&(B[slug]||B[String(slug).replace(/\.(?:mp3|m4a)$/,"")]);
-    var out=[],k;
-    if(g&&g.low&&g.low.length){
-      var L=g.low, step=L.length/WAVEN;
-      for(k=0;k<WAVEN;k++){
-        /* MEAN of the window, not its peak. 26 bars over a three-minute song
-           is a ~7-second window, and any 7 seconds of this record contains a
-           peak — taking the max made every bar full height and every card a
-           solid block. The mean is what varies across a song at this scale. */
-        var a=Math.floor(k*step), b=Math.min(L.length,Math.floor((k+1)*step)), sum=0,n2=0;
-        for(var j=a;j<b;j++){ sum+=parseInt(L.charAt(j),36)/35; n2++; }
-        out.push(n2?sum/n2:0);
-      }
-    } else { for(k=0;k<WAVEN;k++) out.push(0.22+0.10*Math.sin(k*0.7)); }
-    /* STRETCH EACH SONG OVER ITS OWN RANGE. Peak-picking leaves most bars near
-       the top, so every card came out a solid block and the silhouette — the
-       whole point — was lost. Normalising to the song's own quiet and loud,
-       then bending the curve, puts the drops back above the verses. */
-    var lo=Math.min.apply(null,out), hi=Math.max.apply(null,out), rng=(hi-lo)||1;
-    for(k=0;k<WAVEN;k++) out[k]=Math.pow((out[k]-lo)/rng, 1.5);
-    var bars="";
-    for(k=0;k<WAVEN;k++) bars+='<i style="--h:'+out[k].toFixed(3)+'"></i>';
-    return bars;
-  }
+  /* THE TILE. No waveform any more: it was 56 <i> elements per song, 1,512 DOM
+     nodes for one list, and it said less than the cover does. The tiles point at
+     assets/img/thumb (128px) on purpose — see the CSS note on decoded size. */
+  var COVER="../assets/img/thumb/nouveaux-punk-2.jpg";
 
   var moodSel="all";
   function cardFor(s,i){
-    /* THE GOLDEN ANGLE round the wheel, anchored at the album's own pink: no
-       two neighbouring grooves share a colour, and the 27th is still distinct
-       from the 1st. (A fixed small step kept every neighbour inside the same
-       pink, which is how this started.) */
-    var hue=Math.round((330+i*137.5)%360);
-    return '<a class="sg" data-i="'+i+'" href="#" style="--hue:'+hue+'">'
-      +'<span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
+    return '<a class="sq" data-i="'+i+'" href="#">'
+      +'<span class="sqw">'
+        +'<img src="'+COVER+'" alt="" loading="lazy" decoding="async" width="128" height="128">'
+        +'<span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
+        +'<span class="st">\u25b6</span>'
+      +'</span>'
       +'<span class="tt">'+s.t+'</span>'
-      +'<span class="wv">'+waveBars(s.f)+'</span>'
-      +'<span class="signs">'+SIGNS[i].map(ico).join("")+'</span>'
       +'<span class="dur">'+fmt(s.d)+'</span></a>';
   }
   function paintGrid(){
@@ -1009,11 +1083,14 @@ body.neon .batwrap svg{animation:none !important}
      child index === track, which is exactly the bug a filter introduces.) */
   function rowState(){
     var r=RADIO(),playing=false; try{ playing=!!(r&&r.playing()); }catch(e){}
-    Array.prototype.forEach.call(tr.querySelectorAll(".sg"),function(card){
+    /* ONE class on the grid does the dimming of all 26 others — twenty-seven
+       separate class writes four times a second is the thing to avoid here. */
+    tr.classList.toggle("live", playing && cur>=0);
+    Array.prototype.forEach.call(tr.querySelectorAll(".sq"),function(card){
       var i=+card.getAttribute("data-i");
       card.classList.toggle("playing", i===cur && playing);
-      var d=card.querySelector(".dur");
-      if(d) d.textContent = (i===cur&&playing)?"❚❚ PLAYING":(i===cur?"▶ PAUSED":fmt(NP2[i].d));
+      var st=card.querySelector(".st");
+      if(st) st.textContent = (i===cur&&playing) ? "\u275a\u275a" : "\u25b6";
     });
   }
   /* play/pause NP2 track i through the radio; poll until the radio AND the extra
@@ -1030,7 +1107,7 @@ body.neon .batwrap svg{animation:none !important}
   /* delegated: the grid is rebuilt on every filter change, so per-card
      listeners would be re-bound (and leak) each time */
   tr.addEventListener("click",function(e){
-    var c=e.target.closest&&e.target.closest(".sg"); if(!c) return;
+    var c=e.target.closest&&e.target.closest(".sq"); if(!c) return;
     e.preventDefault(); play(+c.getAttribute("data-i"));
   });
   paintGrid();
@@ -1148,6 +1225,18 @@ body.neon .batwrap svg{animation:none !important}
   }
   setInterval(syncFromRadio,250);
   syncFromRadio();
+
+  /* ---------- the notice opens ---------- */
+  (function(){
+    var btn=document.getElementById("noticeopen"), box=document.getElementById("moods");
+    if(!btn||!box) return;
+    btn.addEventListener("click",function(){
+      var open=box.hasAttribute("hidden");
+      if(open) box.removeAttribute("hidden"); else box.setAttribute("hidden","");
+      btn.setAttribute("aria-expanded",open?"true":"false");
+      btn.querySelector(".oc").textContent = open ? "CLOSE \u25b4" : "OPEN \u25be";
+    });
+  })();
 
   /* ---------- MORE: the rest of the statement ---------- */
   (function(){
