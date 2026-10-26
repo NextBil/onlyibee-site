@@ -112,29 +112,34 @@ h1{
 .tr.playing .st{color:var(--acid)}
 .tr.playing .bars i{background:#4a5500;animation-play-state:running}
 
-/* surprises vault */
-.vault{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px}
-.slot{
-  border:2px solid var(--border);background:var(--panel);padding:20px 12px 14px;
-  text-align:center;position:relative;overflow:hidden;
+/* MORE: the statement is four paragraphs and three of them are for the people
+   who want them. The box stays short until someone asks. */
+.more{display:inline-block;margin-top:4px;cursor:pointer;background:none;
+  border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:7px;
+  letter-spacing:1px;padding:8px 11px;transition:border-color .15s,color .15s}
+.more:hover{border-color:var(--red);color:#f4f4f4}
+.prose .xtra{display:none}
+.prose.open .xtra{display:block}
+
+/* THE OTHER CHAPTER — the sleeve itself is the link, top and bottom */
+.chap{display:flex;align-items:center;gap:18px;padding:14px;text-decoration:none;
+  border:2px solid var(--red);background:linear-gradient(135deg,#1d1010,#120808 62%,#2a0b0b);
+  box-shadow:0 0 20px rgba(255,43,43,.22);transition:transform .18s,box-shadow .18s}
+.chap:hover{transform:translateY(-2px);box-shadow:0 0 32px rgba(255,43,43,.45)}
+.chap img{width:104px;height:104px;flex:none;object-fit:cover;display:block;
+  border:1px solid #3a2020}
+.chap .cmeta{min-width:0}
+.chap b{display:block;font-family:var(--px);font-size:11px;color:var(--acid);
+  font-weight:normal;letter-spacing:1px;line-height:1.7}
+.chap .cs{display:block;color:var(--dim);font-size:17px;margin-top:5px;line-height:1.35}
+.chap .cg{display:block;font-family:var(--px);font-size:7px;letter-spacing:1px;
+  color:var(--red);margin-top:9px;line-height:1.9}
+.chap.top{margin-top:30px}
+@media(max-width:560px){
+  .chap{gap:13px;padding:11px}
+  .chap img{width:82px;height:82px}
+  .chap b{font-size:9px}.chap .cs{font-size:15px}
 }
-.slot .stage{width:110px;height:110px;margin:0 auto;perspective:480px}
-.slot .sp{display:block;width:100%;height:100%;transform-style:preserve-3d;animation:gspin 5.4s linear infinite}
-.slot:nth-child(2n) .sp{animation-duration:6.8s;animation-direction:reverse}
-.slot .sp img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;
-  filter:brightness(0) drop-shadow(0 0 10px rgba(255,43,43,.3));opacity:.9}
-.slot .qm{
-  position:absolute;top:34%;left:50%;transform:translate(-50%,-50%);
-  font-family:var(--px);font-size:26px;color:var(--red);
-  text-shadow:0 0 14px rgba(255,43,43,.6);animation:blink 1.2s steps(1) infinite;
-}
-@keyframes blink{50%{opacity:.25}}
-.slot .lock{
-  position:absolute;top:10px;right:10px;font-family:var(--px);font-size:7px;
-  color:var(--red);border:1px solid var(--red);padding:4px 6px;background:rgba(0,0,0,.8);
-}
-.slot .nm{font-family:var(--px);font-size:9px;line-height:1.8;margin-top:10px;color:var(--dim)}
-.slot .ds{color:#6a5555;font-size:16px;margin-top:6px;line-height:1.5}
 
 /* actions */
 .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:46px}
@@ -246,8 +251,8 @@ body.storm #roomtag{opacity:.9}
   <span>NP.SYS</span>
 </header>
 <div class="mq"><div>
-  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ 27 SIGNALS DECRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
-  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ 27 SIGNALS DECRYPTED +++ SURPRISES LOADING +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
+  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ 27 SIGNALS DECRYPTED +++ CHAPTER TWO IS OUT +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
+  +++ NOUVEAUX PUNK — THE EXPERIENCE +++ 27 SIGNALS DECRYPTED +++ CHAPTER TWO IS OUT +++ ROCK · RNB · BLUES · EMOTIONAL · EPIC +++&nbsp;
 </div></div>
 
 <main>
@@ -263,13 +268,38 @@ body.storm #roomtag{opacity:.9}
   <div class="sub">— THE EXPERIENCE —</div>
   <div class="meta">2022 · ROCK / RNB / BLUES / EMOTIONAL / EPIC · ONLY IB</div>
 
+  <!-- the sequel, offered straight away: most people arrive here from a link
+       and have no idea there is a second one. -->
+  <a class="chap top" href="../np2/">
+    <img src="../assets/img/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2 — The Sequel">
+    <span class="cmeta">
+      <b>CHAPTER TWO</b>
+      <span class="cs">NOUVEAUX PUNK 2 — THE SEQUEL · out 31 october 2026</span>
+      <span class="cg">▶ GO TO THE SEQUEL</span>
+    </span>
+  </a>
+
   <!-- about -->
   <div class="sec">
-    <div class="sh"><span class="r">//</span> WHAT IS <span class="a">THE EXPERIENCE</span>_</div>
+    <div class="sh"><span class="r">//</span> WHAT IS <span class="a">NOUVEAUX PUNK</span>_</div>
     <div class="card prose">
-      <p>NOUVEAUX PUNK isn't just an EP — it's a story written by ONLY IB, based on the novel by NOUVEAUX PUNK. Rock that cries, RnB that fights, blues that refuses to lose. <span class="a">Emotional. Epic.</span></p>
-      <p>This page is the album's home. Piece by piece it will fill up with everything around it: the songs, the story behind every scream, the visuals, the relics — <span class="r">and things nobody expects_</span></p>
-      <p>Some of it unlocks with time. Some of it unlocks with codes. Some of it only unlocks if you were there.</p>
+      <p>NOUVEAUX PUNK is how I turn my issues into art. The songs might sound
+         unrelated, but it's one story — <span class="r">what they all have in common is that I
+         made them when I was feeling very bad. Very, very bad.</span></p>
+      <div class="xtra">
+        <p>That's when I make music without thinking about the outcome, just as a way
+           to evacuate the stress and the pain. When I listen back, it calms me down —
+           like I built <span class="a">the sound of my pain, my fears, my life</span>. The soundtrack
+           of my issues. Very personal, and still open to any human going through
+           those moments.</p>
+        <p>Technically it's a project where I allow myself to do anything: explore and
+           test my skills across genres. But the main colour is guitar —
+           <span class="a">rock, and RnB grooves</span>.</p>
+        <p>A <span class="r">Nouveaux Punk</span>, to me, is someone who needs freedom and expression
+           but still keeps order and an aesthetic perfectionism.
+           <span class="a">Between chaos and beauty.</span></p>
+      </div>
+      <button class="more" type="button" data-prose>MORE ▾</button>
     </div>
   </div>
 
@@ -280,38 +310,6 @@ body.storm #roomtag{opacity:.9}
     <div class="card" id="tracks"></div>
   </div>
 
-  <!-- surprises -->
-  <div class="sec">
-    <div class="sh">THE <span class="a">SURPRISES</span>_</div>
-    <div class="ssub">sealed containers — each one opens on its own day_</div>
-    <div class="vault">
-      <div class="slot"><span class="lock">SEALED</span>
-        <div class="stage"><span class="sp"><img src="../assets/chess/knight2.png" alt=""></span></div><span class="qm">?</span>
-        <div class="nm">THE FILM</div><div class="ds">a visual piece from the experience_</div>
-      </div>
-      <div class="slot"><span class="lock">SEALED</span>
-        <div class="stage"><span class="sp"><img src="../assets/chess/rook1.png" alt=""></span></div><span class="qm">?</span>
-        <div class="nm">DEMO TAPES</div><div class="ds">the versions nobody was meant to hear_</div>
-      </div>
-      <div class="slot"><span class="lock">SEALED</span>
-        <div class="stage"><span class="sp"><img src="../assets/chess/queen.png" alt=""></span></div><span class="qm">?</span>
-        <div class="nm">THE RELICS</div><div class="ds">nouveaux punk pieces — crop tops &amp; more, archive + drops_</div>
-      </div>
-      <div class="slot"><span class="lock">SEALED</span>
-        <div class="stage"><span class="sp"><img src="../assets/chess/bishop1.png" alt=""></span></div><span class="qm">?</span>
-        <div class="nm">THE STORY</div><div class="ds">the novel behind the album, chapter by chapter_</div>
-      </div>
-      <div class="slot"><span class="lock">SEALED</span>
-        <div class="stage"><span class="sp"><img src="../assets/chess/pon.png" alt=""></span></div><span class="qm">?</span>
-        <div class="nm">LIVE RITUAL</div><div class="ds">when and where the experience happens in real life_</div>
-      </div>
-      <div class="slot"><span class="lock">SEALED</span>
-        <div class="stage"><span class="sp"><img src="../assets/chess/king.png" alt=""></span></div><span class="qm">?</span>
-        <div class="nm">??????</div><div class="ds">not even the console knows what this one is_</div>
-      </div>
-    </div>
-  </div>
-
   <!-- listening notice — how to hear it, from the original NP notice -->
   <div class="sec">
     <div class="sh">THE <span class="a">LISTENING NOTICE</span>_</div>
@@ -319,8 +317,20 @@ body.storm #roomtag{opacity:.9}
     <div class="notice" id="notice"></div>
   </div>
 
+  <div class="sec">
+    <a class="chap" href="../np2/">
+      <img src="../assets/img/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2 — The Sequel">
+      <span class="cmeta">
+        <b>CHAPTER TWO</b>
+        <span class="cs">NOUVEAUX PUNK 2 — THE SEQUEL · out 31 october 2026</span>
+        <span class="cg">▶ GO TO THE SEQUEL</span>
+      </span>
+    </a>
+  </div>
+
   <div class="actions">
     <a class="btn" href="../?tag=NOUVEAUXPUNK">▶ ENTER THE GALAXY</a>
+    <a class="btn alt" href="../np2/">▶ CHAPTER TWO</a>
   </div>
 </main>
 
@@ -618,6 +628,16 @@ body.storm #roomtag{opacity:.9}
   }
   setInterval(syncFromRadio,250);
   syncFromRadio();
+
+  /* ---------- MORE: the rest of the statement ---------- */
+  (function(){
+    var btn=document.querySelector(".more[data-prose]"); if(!btn) return;
+    var box=btn.parentNode;
+    btn.addEventListener("click",function(){
+      var open=box.classList.toggle("open");
+      btn.textContent = open ? "LESS \u25b4" : "MORE \u25be";
+    });
+  })();
 
   /* ---------- toast + cover secret ---------- */
   var toastEl=document.getElementById("toast"),tt=null;

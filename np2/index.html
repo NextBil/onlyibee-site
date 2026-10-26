@@ -81,9 +81,8 @@ header span{color:var(--dim);font-size:8px}
   letter-spacing:1px;padding:0 26px;text-shadow:0 2px 0 rgba(0,0,0,.28);
 }
 @keyframes bandrun{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-/* the band breathes with the record once the room is lit */
-body.neon .band{box-shadow:0 0 calc(26px + var(--nb,0)*60px) rgba(255,31,111,.7),
-                           0 0 calc(70px + var(--nb,0)*120px) rgba(255,31,111,.3)}
+/* the band lifts a little once the room is lit — a static shadow, not a bloom */
+body.neon .band{box-shadow:0 0 18px rgba(255,31,111,.45)}
 
 main{max-width:980px;margin:0 auto;padding:34px 18px 90px;position:relative;z-index:2;
   animation:crtin .3s ease-out}
@@ -115,8 +114,7 @@ main{max-width:980px;margin:0 auto;padding:34px 18px 90px;position:relative;z-in
   background-size:280% 100%;animation:wrap 6.5s linear infinite;mix-blend-mode:screen;
 }
 @keyframes wrap{from{background-position:180% 0}to{background-position:-80% 0}}
-body.neon .cover img{box-shadow:0 0 calc(38px + var(--nb,0)*58px) rgba(255,31,111,.8),
-                                0 24px 60px rgba(0,0,0,.72)}
+body.neon .cover img{box-shadow:0 0 22px rgba(255,31,111,.45),0 24px 60px rgba(0,0,0,.72)}
 
 h1{
   font-family:var(--px);font-size:clamp(17px,5.2vw,32px);letter-spacing:2px;text-align:center;
@@ -124,8 +122,7 @@ h1{
   /* the sleeve's logotype: acid yellow with a hot bleed behind it */
   text-shadow:0 0 18px rgba(232,220,18,.5),0 0 42px rgba(255,31,111,.45),3px 3px 0 #200d18;
 }
-body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
-                         0 0 calc(42px + var(--nb,0)*54px) rgba(255,31,111,.6),3px 3px 0 #200d18}
+body.neon h1{text-shadow:0 0 18px rgba(232,220,18,.55),0 0 34px rgba(255,31,111,.45),3px 3px 0 #200d18}
 .sub{font-family:var(--px);font-size:clamp(9px,2.4vw,13px);color:var(--pink-hot);
   text-align:center;margin-top:12px;letter-spacing:3px}
 .meta{color:var(--dim);text-align:center;margin-top:10px;font-size:20px;letter-spacing:2px}
@@ -179,8 +176,7 @@ body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
 .shot .sgo{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
   color:#5d7275;padding:6px 8px 8px;transition:color .15s}
 .shot:hover .sgo{color:var(--pink-hot)}
-body.neon .shot{border-color:var(--pink);
-  box-shadow:0 0 calc(5px + var(--nb,0)*18px) rgba(255,31,111,.4)}
+body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)}
 
 /* THE DRAWER — the project's whole photo library, over the page */
 .lib{position:fixed;inset:0;z-index:60;background:#060f10;
@@ -250,8 +246,7 @@ body.neon .shot{border-color:var(--pink);
   transition:transform .15s,box-shadow .2s,background .2s}
 .dplay svg{width:22px;height:22px;fill:currentColor}
 .dplay:hover{transform:scale(1.06);box-shadow:0 0 20px rgba(255,31,111,.55)}
-body.neon .dplay{background:#3a0e20;
-  box-shadow:0 0 calc(7px + var(--nb,0)*24px) rgba(255,31,111,.55)}
+body.neon .dplay{background:#3a0e20;box-shadow:0 0 12px rgba(255,31,111,.5)}
 .dnow{flex:1;min-width:0}
 .dlab{display:block;font-family:var(--px);font-size:6.5px;letter-spacing:1px;
   color:var(--acid);line-height:1.9}
@@ -277,23 +272,67 @@ body.neon .dplay{background:#3a0e20;
   .dskip{padding:9px 7px;font-size:6.5px}
 }
 
-/* ===== THE MANUAL =====
-   A record this long is a wall. The moods are the way in: pick the state you
-   are in and the 27 collapse to the handful that belong there. Every song
-   carries its signs, so a card says what it is FOR before you press it.
-   The groups are the artist's own — see MOODS in the script. */
-.moods{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
-.mood{display:inline-flex;align-items:center;gap:7px;cursor:pointer;
-  padding:8px 11px 8px 9px;border:1px solid #23383c;background:#0d191c;
-  font-family:var(--px);font-size:7.5px;letter-spacing:1px;color:#93a8a9;
-  transition:border-color .15s,color .15s,background .15s}
-.mood svg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;
-  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.mood .n{font-size:7px;color:#5d7275}
-.mood:hover{border-color:var(--pink);color:#cfdcdc}
-.mood.on{border-color:var(--pink);background:#240914;color:var(--pink-hot);
-  box-shadow:0 0 14px rgba(255,31,111,.3)}
-.mood.on .n{color:var(--pink)}
+/* ===== THE MANUAL — chapter one's LISTENING NOTICE, in NP2's colours =====
+   The chips this replaces read as a toolbar, and a toolbar is something you
+   skip. The notice plate is the one piece of chapter one that people actually
+   used: a wall of states behind a hot hairline grid, each one a card you press.
+   Same structure here, with this record's own signs in place of the emoji and
+   a count where chapter one put its recommendation. */
+.notice{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--pink);
+  border:2px solid var(--pink);box-shadow:0 0 22px rgba(255,31,111,.3)}
+.note{background:#0b1719;padding:17px 11px 13px;text-align:center;cursor:pointer;
+  position:relative;border:0;font:inherit;color:inherit;display:block;width:100%;
+  transition:background .18s}
+.note:hover{background:#16292d}
+.note .ic{display:block;height:30px;margin-bottom:9px}
+.note .ic svg{width:30px;height:30px;stroke:#93a8a9;fill:none;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s}
+.note:hover .ic svg{stroke:var(--pink-hot)}
+.note .nm{display:block;font-family:var(--px);font-size:7.5px;line-height:1.75;
+  letter-spacing:1px;color:#cfdcdc;min-height:26px}
+.note .pl{width:34px;height:34px;margin:10px auto 8px;border-radius:50%;
+  background:var(--pink);display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;box-shadow:0 0 12px rgba(255,31,111,.5);
+  transition:transform .18s,background .18s}
+.note:hover .pl{transform:scale(1.12)}
+.note .rc{display:block;color:#5d7275;font-size:15px;line-height:1.45}
+.note.on{background:#240914}
+.note.on .nm{color:var(--pink-hot)}
+.note.on .ic svg{stroke:var(--pink)}
+.note.on .pl{background:var(--acid);color:#000;box-shadow:0 0 14px rgba(182,255,0,.6)}
+@media(max-width:640px){
+  .notice{grid-template-columns:repeat(2,1fr)}
+  .note{padding:14px 9px 11px}
+  .note .nm{font-size:7px}
+}
+
+/* MORE: the statement is four paragraphs now, and three of them are for the
+   people who want them. The box stays short until someone asks. */
+.more{display:inline-block;margin-top:4px;cursor:pointer;background:none;
+  border:1px solid #23383c;color:#93a8a9;font-family:var(--px);font-size:7px;
+  letter-spacing:1px;padding:8px 11px;transition:border-color .15s,color .15s}
+.more:hover{border-color:var(--pink);color:var(--pink-hot)}
+.ptxt .xtra{display:none}
+.ptxt.open .xtra{display:block}
+
+/* THE OTHER CHAPTER — the sleeve itself is the link */
+.chap{display:flex;align-items:center;gap:18px;padding:14px;text-decoration:none;
+  border:2px solid var(--pink);background:linear-gradient(135deg,#1a2d31,#0b1719 62%,#240914);
+  box-shadow:0 0 20px rgba(255,31,111,.22);transition:transform .18s,box-shadow .18s}
+.chap:hover{transform:translateY(-2px);box-shadow:0 0 32px rgba(255,31,111,.45)}
+.chap img{width:104px;height:104px;flex:none;object-fit:cover;display:block;
+  border:1px solid #2a4347}
+.chap .cmeta{min-width:0}
+.chap b{display:block;font-family:var(--px);font-size:11px;color:var(--acid);
+  font-weight:normal;letter-spacing:1px;line-height:1.7}
+.chap .cs{display:block;color:#93a8a9;font-size:17px;margin-top:5px;line-height:1.35}
+.chap .cg{display:block;font-family:var(--px);font-size:7px;letter-spacing:1px;
+  color:var(--pink-hot);margin-top:9px;line-height:1.9}
+@media(max-width:560px){
+  .chap{gap:13px;padding:11px}
+  .chap img{width:82px;height:82px}
+  .chap b{font-size:9px}.chap .cs{font-size:15px}
+}
 
 /* THE LIST. A grid of 27 cards was a wall of sleeves you had to scroll past;
    a list is scannable, and the signs still say what each one is FOR. The
@@ -412,132 +451,41 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
    as strong as it likes without ever fighting the text; #room sits in front
    (z-index 8) and carries only the thin light trails and the bats, held at a
    low opacity so you feel inside it and can still read. */
-#roomlight{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;pointer-events:none;
-  overflow:hidden;opacity:0;transition:opacity 1.6s ease}
-body.neon #roomlight{opacity:1}
-#room{position:fixed;inset:0;width:100vw;height:100vh;z-index:8;pointer-events:none;
-  overflow:hidden;opacity:0;transition:opacity 1.4s ease}
-body.neon #room{opacity:.6}
-#trails{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block}
-
-/* THE NEON PINK, MOVING AROUND — four soft lights that never stop wandering.
-   Each rides its own long, prime-ish duration so the pattern never repeats. */
-.glow{position:absolute;border-radius:50%;filter:blur(52px);opacity:0;mix-blend-mode:screen;
-  transition:opacity 1.6s ease}
-body.neon .glow{opacity:.8}
-.glow.g1{width:46vmin;height:46vmin;background:radial-gradient(circle,rgba(255,31,111,.95),transparent 68%);
-  animation:drift1 23s ease-in-out infinite}
-.glow.g2{width:34vmin;height:34vmin;background:radial-gradient(circle,rgba(255,92,157,.9),transparent 66%);
-  animation:drift2 31s ease-in-out infinite}
-.glow.g3{width:52vmin;height:52vmin;background:radial-gradient(circle,rgba(193,0,78,.9),transparent 70%);
-  animation:drift3 41s ease-in-out infinite}
-.glow.g4{width:26vmin;height:26vmin;background:radial-gradient(circle,rgba(232,220,18,.55),transparent 66%);
-  animation:drift4 37s ease-in-out infinite}
-@keyframes drift1{0%{transform:translate(-14vw,72vh)}25%{transform:translate(28vw,18vh)}
-  50%{transform:translate(74vw,58vh)}75%{transform:translate(40vw,86vh)}100%{transform:translate(-14vw,72vh)}}
-@keyframes drift2{0%{transform:translate(86vw,-8vh)}30%{transform:translate(22vw,44vh)}
-  60%{transform:translate(66vw,88vh)}100%{transform:translate(86vw,-8vh)}}
-@keyframes drift3{0%{transform:translate(52vw,96vh)}35%{transform:translate(-12vw,34vh)}
-  70%{transform:translate(78vw,10vh)}100%{transform:translate(52vw,96vh)}}
-@keyframes drift4{0%{transform:translate(10vw,10vh)}40%{transform:translate(72vw,66vh)}
-  80%{transform:translate(30vw,92vh)}100%{transform:translate(10vw,10vh)}}
-/* the lights swell on the beat — filter lives on each .glow, never on #room */
-body.neon .glow{filter:blur(calc(52px - var(--nb,0)*16px)) saturate(calc(1 + var(--nb,0)*.8))}
-
-/* the shrink-wrap sheen, page-wide: the whole room is inside the plastic */
-#wrapsheen{position:absolute;inset:-20% -40%;opacity:0;mix-blend-mode:screen;
-  transition:opacity 1.6s ease;
-  background:repeating-linear-gradient(104deg,
-    transparent 0 180px,rgba(255,255,255,.055) 190px 208px,transparent 218px 300px,
-    rgba(255,255,255,.035) 312px 322px,transparent 332px 520px);
-  animation:sheen 26s linear infinite}
-body.neon #wrapsheen{opacity:1}
-@keyframes sheen{from{transform:translateX(-14%) rotate(.4deg)}to{transform:translateX(14%) rotate(-.4deg)}}
-
-/* neon tube around the viewport, pulsing with the record */
-#tube{position:fixed;inset:0;pointer-events:none;z-index:9;opacity:0;transition:opacity 1s ease;
-  border:2px solid rgba(255,31,111,.85);
-  box-shadow:inset 0 0 calc(24px + var(--nb,0)*70px) rgba(255,31,111,.45),
-                   0 0 calc(12px + var(--nb,0)*30px) rgba(255,31,111,.35)}
+/* ===== THE ROOM, RETIRED (2026-10-26) =====
+   There used to be a room here: four viewport-sized radial lights drifting
+   under an ANIMATED blur, a canvas of light trails redrawn every frame, five
+   bats crossing and flapping, a sheen sweeping the page and a tube flickering
+   — all of it driven by a requestAnimationFrame loop that wrote a CSS custom
+   property on <html> sixty times a second while you listened.
+   That is a GPU-bound compositor job on a phone, on top of decoding audio,
+   and it ran for as long as the record did. It is gone. Nothing on this page
+   animates per frame any more: the only thing left running while a track
+   plays is the 4-per-second sync with the radio, which touches text.
+   What survives is a single static signal that the room is lit. */
+#tube{position:fixed;inset:0;pointer-events:none;z-index:9;opacity:0;
+  transition:opacity 1s ease;border:2px solid rgba(255,31,111,.55);
+  box-shadow:inset 0 0 34px rgba(255,31,111,.16)}
 body.neon #tube{opacity:1}
-/* the tube stutters now and then, like a sign that needs fixing */
-body.neon #tube{animation:tubeflick 7s steps(1) infinite}
-@keyframes tubeflick{0%,92%,100%{opacity:1}93%{opacity:.15}94%{opacity:1}96%{opacity:.35}97%{opacity:1}}
 
-/* bats off the shirt in the cover art, gliding through the room */
-#bats{position:absolute;inset:0}
-#bats .bat{position:absolute;opacity:0;transition:opacity 1.4s ease;
-  animation:batcross linear infinite}
-body.neon #bats .bat{opacity:.75}
-#bats .bat svg{width:100%;height:auto;display:block;animation:batflap 1.1s ease-in-out infinite;
-  filter:drop-shadow(0 0 calc(6px + var(--nb,0)*14px) rgba(255,31,111,.9))}
-@keyframes batcross{from{transform:translateX(-16vw)}to{transform:translateX(116vw)}}
-
-/* ===== CALM WHILE IT PLAYS (2026-10-25) =====
-   The room used to come fully alive the moment a record started: four big
-   radial lights DRIFTING across the viewport under an animated blur, a
-   flickering tube, bats crossing and flapping, a page-wide sheen sweeping.
-   An animated `filter: blur(52px)` on viewport-sized elements is about the
-   most expensive thing a phone can be asked to composite, and it never
-   stopped — so listening cost battery, and the page moved under you while you
-   were trying to read it.
-   The room still LIGHTS UP. It just holds still now: the glows are parked and
-   statically blurred, the tube stops stuttering, the bats stop crossing, the
-   sheen stops sweeping. The beat still reaches the frame through --nb on the
-   static shadows, which is a repaint of a shadow rather than a re-blur of a
-   layer. Nothing here changes a colour or a layout — only what MOVES. */
-body.neon .glow{
-  animation:none !important;                 /* park the lights */
-  filter:blur(46px) saturate(1.15) !important;   /* fixed radius: no re-blur per frame */
-}
-/* give each one a resting place, since the keyframes used to position them */
-body.neon .glow.g1{transform:translate(8vw,62vh)}
-body.neon .glow.g2{transform:translate(72vw,16vh)}
-body.neon .glow.g3{transform:translate(18vw,22vh)}
-body.neon .glow.g4{transform:translate(66vw,74vh)}
-body.neon #tube{animation:none !important}         /* no flicker */
-body.neon #wrapsheen{animation:none !important}    /* no sweep */
-body.neon #bats .bat,
-body.neon #bats .bat svg{animation:none !important}
-body.neon #bats{display:none}                      /* parked bats are just clutter */
-/* the marquee is the last thing moving while you read — let it rest too */
+/* ===== CALM WHILE IT PLAYS =====
+   The few things that still move are the ones that move ALWAYS — the pink
+   band, the sleeve's wobble. They stop the moment a record starts, because
+   that is when you are reading the page instead of looking at it. */
 body.neon .band #bandrow{animation-play-state:paused}
-/* the cover's wobble is a 3D transform on a big element, running the whole
-   time you read. (The feed's Ken-Burns used to be listed here too; the feed
-   is gone, and the one frame that replaced it never animates at rest.) */
 body.neon .cover{animation:none !important}
-
-/* bottom-centred: at the top it spent its 6.5s parked on the sleeve */
-#roomtag{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);z-index:9;opacity:0;
-  font-family:var(--px);font-size:9px;color:var(--pink);letter-spacing:2px;text-align:center;
-  text-shadow:0 0 16px rgba(255,31,111,.85);transition:opacity 1s ease;pointer-events:none;line-height:2}
-body.neon #roomtag{opacity:.92}
-/* …then it gets out of the way. It announces the room once; leaving it up means
-   a fixed banner parked on top of the tracklist for the whole visit. */
-body.neon #roomtag.gone{opacity:0}
+body.neon .batwrap svg{animation:none !important}
 
 @media(max-width:700px){.batwrap{display:none}}
 @media(prefers-reduced-motion:reduce){
-  .band div,.cover,.cover::after,.win::before,.win .frame,#wrapsheen,.glow,#bats .bat,#bats .bat svg,
-  .batwrap svg,#tube{animation:none}
+  .band div,.cover,.cover::after,.batwrap svg{animation:none}
 }
 </style>
 <script defer src="/assets/console-nav.js"></script>
 </head>
 <body>
 
-<!-- THE ROOM — dark until a track plays -->
-<div id="roomlight" aria-hidden="true">
-  <div class="glow g1"></div><div class="glow g2"></div>
-  <div class="glow g3"></div><div class="glow g4"></div>
-  <div id="wrapsheen"></div>
-</div>
-<div id="room" aria-hidden="true">
-  <canvas id="trails"></canvas>
-  <div id="bats"></div>
-</div>
+<!-- the only thing left of the room: a static pink edge while a record plays -->
 <div id="tube" aria-hidden="true"></div>
-<div id="roomtag">▓ THE NEON IS ON ▓<br>you're inside the sequel now_</div>
 
 <header>
   <a href="../console.html#menu" data-home>ONLY<span class="r">IBEE</span> OS</a>
@@ -557,7 +505,7 @@ body.neon #roomtag.gone{opacity:0}
   </div>
   <h1>NOUVEAUX PUNK 2</h1>
   <div class="sub">— THE SEQUEL —</div>
-  <div class="meta">26 SIGNALS · STILL WRAPPED · ONLY IB</div>
+  <div class="meta">27 SIGNALS · OUT 31 OCTOBER 2026 · HALLOWEEN · ONLY IB</div>
   <div class="center"><span class="advisory">PARENTAL<br>ADVISORY<br>EXPLICIT CONTENT</span></div>
 
   <!-- the statement — his words, unedited -->
@@ -569,9 +517,9 @@ body.neon #roomtag.gone{opacity:0}
   <div class="sec">
     <div class="sh"><span class="r">//</span> WHAT IS <span class="a">NP2</span>_</div>
     <div class="facts">
-      <span><b>26</b>songs</span>
+      <span><b>27</b>songs</span>
       <span><b>2</b>cities</span>
-      <span><b>4</b>years</span>
+      <span><b>10.31</b>halloween</span>
     </div>
     <div class="card prose">
       <!-- THE SHOT. The statement says "Toronto and Paris"; the archive is
@@ -588,28 +536,34 @@ body.neon #roomtag.gone{opacity:0}
       </button>
       <div class="ptxt">
         <p class="lede"><span class="a">26 songs for my 26 years.</span> Toronto and Paris.</p>
-        <p>The first one was chaos, made in the dark. <span class="r">I care even less now.</span></p>
-        <p>Not for anyone's approval — just <span class="a">proof of the work</span>.</p>
+        <p>NOUVEAUX PUNK is how I turn my issues into art. The songs might sound
+           unrelated, but it's one story — <span class="r">what they all have in common is that
+           I made them when I was feeling very bad. Very, very bad.</span></p>
+        <div class="xtra">
+          <p>That's when I make music without thinking about the outcome, just as a way
+             to evacuate the stress and the pain. When I listen back, it calms me down —
+             like I built <span class="a">the sound of my pain, my fears, my life</span>. The soundtrack
+             of my issues. Very personal, and still open to any human going through
+             those moments.</p>
+          <p>Technically it's a project where I allow myself to do anything: explore and
+             test my skills across genres. But the main colour is guitar —
+             <span class="a">rock, and RnB grooves</span>.</p>
+          <p>A <span class="r">Nouveaux Punk</span>, to me, is someone who needs freedom and expression
+             but still keeps order and an aesthetic perfectionism.
+             <span class="a">Between chaos and beauty.</span></p>
+        </div>
+        <button class="more" type="button" data-prose>MORE ▾</button>
       </div>
     </div>
-  </div>
 
-  <!-- ==================================================================
-       THE RECORD — the deck, then the 27.
-       THE DECK is above the list on purpose: nobody picks from 27 unknown
-       titles, so the dot picks for them and the page starts playing.
-       THE MANUAL (the mood filters) sits UNDER the list now — it is a tool
-       for a list you have already met, and the subtitle here points at it.
-       ================================================================== -->
-  <div class="sec">
-    <div class="sh">THE <span class="a">RECORD</span>_</div>
-    <div class="ssub" id="recsub">27 songs — or press the dot and let the record pick_</div>
-
+    <!-- THE DECK lives in the statement's own section: the record introduces
+         itself and then immediately offers to play. Its own heading ("THE
+         RECORD") was a line of furniture between the two. -->
     <div class="deck card">
       <button class="dplay" id="dplay" aria-label="play a random track"></button>
       <div class="dnow">
         <span class="dlab" id="dlab">A RANDOM TRACK_</span>
-        <b class="dtt" id="dtt">press the dot</b>
+        <b class="dtt" id="dtt">press to play a track</b>
         <span class="dmeta" id="dmeta">27 SONGS · SHUFFLED</span>
         <span class="dsigns" id="dsigns"></span>
         <span class="dbar"><i id="dbari"></i></span>
@@ -619,15 +573,11 @@ body.neon #roomtag.gone{opacity:0}
         SKIP
       </button>
     </div>
-
-    <div class="list card" id="tracks"></div>
   </div>
 
-  <!-- the manual: the artist's own groupings, under the record it sorts -->
-  <div class="sec">
-    <div class="sh">THE <span class="a">MANUAL</span>_</div>
-    <div class="ssub">pick the state you're in — the record above sorts itself_</div>
-    <div class="moods" id="moods"></div>
+  <div class="sec" id="recsec">
+    <div class="ssub" id="recsub">27 songs — tap any one, or press play above_</div>
+    <div class="list card" id="tracks"></div>
   </div>
 
   <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
@@ -638,11 +588,31 @@ body.neon #roomtag.gone{opacity:0}
     <div class="tees" id="tees"></div>
   </div>
 
+  <!-- THE MANUAL, in chapter one's LISTENING NOTICE design: the same red-grid
+       plate of states, with this record's own signs instead of emoji. It sits
+       after the surprises because it is the last word on how to hear it. -->
+  <div class="sec">
+    <div class="sh">THE <span class="a">MANUAL</span>_</div>
+    <div class="ssub">tap a state to sort the record — tap ▶ to press play on it_</div>
+    <div class="notice" id="moods"></div>
+  </div>
+
+  <!-- back to where it started -->
+  <div class="sec">
+    <a class="chap" href="../nouveauxpunk/">
+      <img src="../assets/img/nouveaux-punk.jpg" alt="Nouveaux Punk — The Experience">
+      <span class="cmeta">
+        <b>CHAPTER ONE</b>
+        <span class="cs">NOUVEAUX PUNK — THE EXPERIENCE</span>
+        <span class="cg">◀ GO BACK TO THE FIRST ONE</span>
+      </span>
+    </a>
+  </div>
+
   <div class="actions">
     <a class="btn" href="fall/">▼ PLAY THE FALL</a>
     <a class="btn alt" href="../console.html#music">▶ OPEN THE UNIVERSE</a>
     <a class="btn alt" href="../drop/">▣ THE 26 T-SHIRTS</a>
-    <a class="btn alt" href="../nouveauxpunk/">◀ CHAPTER ONE</a>
   </div>
 </main>
 
@@ -825,21 +795,41 @@ body.neon #roomtag.gone{opacity:0}
        — otherwise picking a mood looks like songs vanishing for no reason. */
     var rs=document.getElementById("recsub");
     if(rs) rs.innerHTML = (m && m.n)
-      ? '<span class="a">'+m.t+'</span> — '+shown+' of '+NP2.length
-        +' songs_ <span style="color:#5d7275">the manual is below</span>'
-      : NP2.length+' songs — or press the dot and let the record pick_';
+      ? '<span class="a">'+m.t+'</span> — '+shown+' of '+NP2.length+' songs_'
+      : NP2.length+' songs — tap any one, or press play above_';
     rowState();
   }
   function paintMoods(){
     document.getElementById("moods").innerHTML=MOODS.map(function(m){
       var n=m.n?m.n.length:NP2.length;
-      return '<button class="mood'+(m.k===moodSel?" on":"")+'" data-m="'+m.k+'">'
-        +ico(m.k)+'<span>'+m.t+'</span><span class="n">'+n+'</span></button>';
+      return '<button class="note'+(m.k===moodSel?" on":"")+'" type="button" data-m="'+m.k+'">'
+        +'<span class="ic">'+ico(m.k)+'</span>'
+        +'<span class="nm">'+m.t+'</span>'
+        +'<span class="pl" data-play="1">\u25b6</span>'
+        +'<span class="rc">'+n+(n===1?" song":" songs")+'</span></button>';
     }).join("");
   }
+  /* THE MANUAL IS BELOW THE RECORD NOW, so picking a state has to take you back
+     up to it — otherwise the list changes somewhere you cannot see. */
+  function selectMood(k){
+    moodSel=k; paintMoods(); paintGrid();
+    var sec=document.getElementById("recsec");
+    if(sec && sec.scrollIntoView) sec.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  /* a random track from inside this state — the deck's bag is for the whole
+     record, this is deliberately just a pick out of the handful you chose */
+  function playMood(m){
+    var pool=[];
+    for(var i=0;i<NP2.length;i++) if(!m.n || m.n.indexOf(i+1)>=0) if(i!==cur) pool.push(i);
+    if(!pool.length) return;
+    play(pool[Math.floor(Math.random()*pool.length)]);
+  }
   document.getElementById("moods").addEventListener("click",function(e){
-    var b=e.target.closest&&e.target.closest(".mood"); if(!b) return;
-    moodSel=b.getAttribute("data-m"); paintMoods(); paintGrid();
+    var b=e.target.closest&&e.target.closest(".note"); if(!b) return;
+    var k=b.getAttribute("data-m"), m=null;
+    for(var x=0;x<MOODS.length;x++) if(MOODS[x].k===k) m=MOODS[x];
+    if(e.target.closest(".pl") && m) playMood(m);
+    selectMood(k);
   });
   paintMoods();
   /* ---------- the surprises: the 26 T-SHIRTS ----------
@@ -909,18 +899,13 @@ body.neon #roomtag.gone{opacity:0}
   var IMG="../assets/img/np2/", VID="../assets/video/np2/";
   var ARCHIVE=[
     {f:"a01.jpg", ex:"EXHIBIT 01", lb:'the mark — "NEW PUNK", forearm'},
-    {f:"a02.jpg", ex:"CAM 01",     lb:"2024-09-21 · the living room"},
-    {f:"a03.jpg", ex:"CAM 01",     lb:"2024-09-21 · still up"},
     {f:"a04.jpg", ex:"CAM 01",     lb:"2024-09-21 · mid-sentence"},
-    {f:"a05.jpg", ex:"CAM 01",     lb:"2024-09-21 · standing there"},
-    {f:"a06.jpg", ex:"CAM 01",     lb:"2024-09-21 · looking away"},
     {v:"loop-pink.mp4", ex:"REEL 01", lb:"the pink room · 6s loop", pos:"32% center"},
     {f:"a07.jpg", ex:"CAM 01",     lb:"2024-09-21 00:09:40 · peace"},
     {f:"a08.jpg", ex:"EXHIBIT 08", lb:"school print · found in the album"},
     {f:"a09.jpg", ex:"EXHIBIT 09", lb:"the same page, wider"},
     {v:"loop-gold.mp4", ex:"REEL 02", lb:"between the two cities · 6s loop", pos:"38% center"},
-    {f:"a10.jpg", ex:"EXHIBIT 10", lb:"print · undated"},
-    {f:"a12.jpg", ex:"EXHIBIT 12", lb:"undated"}
+    {f:"a10.jpg", ex:"EXHIBIT 10", lb:"print · undated"}
   ];
   var STILLS=ARCHIVE.filter(function(a){return a.f;});
   var REELS =ARCHIVE.filter(function(a){return a.v;});
@@ -1085,7 +1070,7 @@ body.neon #roomtag.gone{opacity:0}
       if(deckFor!==-1){
         deckFor=-1;
         dLab.textContent="A RANDOM TRACK_";
-        dTt.textContent="press the dot";
+        dTt.textContent="press to play a track";
         dMeta.textContent=NP2.length+" SONGS \u00b7 SHUFFLED";
         dSigns.innerHTML="";
       }
@@ -1127,105 +1112,27 @@ body.neon #roomtag.gone{opacity:0}
   }
 
   /* =====================================================================
-     THE NEON — the room proper. Wandering pink lights (CSS, above), plus a
-     canvas of light trails that lean and brighten with the record. All of it
-     reads the PRESSED GROOVE (window.IBEE_BEAT, self-loaded by player.js) at
-     the radio's playhead — never Web Audio on the media element, so the album
-     survives a screen lock and keeps playing in the background on iOS.
+     THE ROOM, RETIRED (2026-10-26). What used to live here: a canvas of
+     light trails redrawn every frame, five spawned bats, and a per-frame
+     read of the pressed groove writing --nb on <html> sixty times a second
+     to swell four blurred viewport lights. On a phone that is a full
+     compositor job running on top of audio decoding, for the whole length
+     of the record — the single most expensive thing this page did.
+     All that is left is a class. body.neon turns on a static pink edge and
+     stops the few things that were already moving; no frame loop, no canvas,
+     no custom property, nothing reading the groove while you listen.
      ===================================================================== */
   var body=document.body, lit=false;
-  var cv=document.getElementById("trails"), ctx=cv.getContext("2d");
-  var W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1),streaks=[];
-  function size(){
-    W=window.innerWidth||document.documentElement.clientWidth||1280;
-    H=window.innerHeight||document.documentElement.clientHeight||720;
-    cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
-    var n=Math.round(W*H/26000);
-    streaks=[];
-    for(var i=0;i<n;i++) streaks.push({
-      x:Math.random()*W, y:Math.random()*H,
-      l:40+Math.random()*150, v:0.7+Math.random()*2.2,
-      a:0.05+Math.random()*0.22, hot:Math.random()<0.22
-    });
-  }
-  window.addEventListener("resize",function(){ if(lit) size(); });
 
-  /* bats crossing the room */
-  var batsEl=document.getElementById("bats");
-  function spawnBats(){
-    if(batsEl.children.length) return;
-    for(var i=0;i<5;i++){
-      var d=document.createElement("div");
-      d.className="bat";
-      d.style.width=(34+Math.random()*40)+"px";
-      d.style.top=(8+Math.random()*72)+"%";
-      d.style.animationDuration=(16+Math.random()*20)+"s";
-      d.style.animationDelay=(-Math.random()*22)+"s";
-      d.innerHTML=BAT;
-      d.querySelector("svg").style.animationDuration=(0.8+Math.random()*1.1)+"s";
-      batsEl.appendChild(d);
-    }
-  }
-
-  /* the groove at the playhead — falls back to a gentle synthetic pulse for any
-     track that hasn't been pressed yet, so the room is never dead. */
-  var nb=0,lvl=0,ema=0;
-  function groove(){
-    var r=RADIO(),B=window.IBEE_BEAT; if(!r||!B||cur<0) return null;
-    var g=B[NP2[cur].f]; if(!g) return null;
-    var t=0; try{ t=r.audio.currentTime||0; }catch(e){}
-    var i=Math.max(0,Math.min(g.low.length-1,Math.floor(t*g.r)));
-    return { low:parseInt(g.low.charAt(i),36)/35, lv:parseInt(g.lvl.charAt(i),36)/35 };
-  }
-  function stepBeat(){
-    var gv=groove();
-    if(gv){
-      ema+=(gv.low-ema)*0.1;
-      var on=Math.max(0,gv.low-ema*1.15);
-      nb=Math.max(nb*0.85,Math.min(1,gv.low*0.5+on*3.4));
-      lvl+=(gv.lv-lvl)*0.2;
-    } else {
-      nb=Math.max(nb*0.86,Math.pow(Math.abs(Math.sin(performance.now()/430)),8));
-      lvl+=(0.3-lvl)*0.05;
-    }
-    document.documentElement.style.setProperty("--nb",nb.toFixed(3));
-  }
-  function draw(){
-    if(!lit) return;
-    requestAnimationFrame(draw);
-    stepBeat();
-    ctx.clearRect(0,0,W,H);
-    var lean=(0.6+nb*3.2), spd=0.8+lvl*1.6;
-    ctx.lineCap="round";
-    for(var i=0;i<streaks.length;i++){
-      var s=streaks[i], len=s.l*(0.6+lvl*0.7+nb*0.5);
-      ctx.strokeStyle = s.hot
-        ? "rgba(255,140,190,"+Math.min(0.85,(s.a+nb*0.5)).toFixed(3)+")"
-        : "rgba(255,31,111,"+Math.min(0.7,(s.a+nb*0.35)).toFixed(3)+")";
-      ctx.lineWidth = (s.hot?2.2:1.3)+nb*1.6;
-      ctx.beginPath();
-      ctx.moveTo(s.x,s.y); ctx.lineTo(s.x+lean*len*0.16,s.y-len);
-      ctx.stroke();
-      s.y-=s.v*spd*(1+nb*0.9); s.x+=lean*0.35;
-      if(s.y<-len){ s.y=H+len; s.x=Math.random()*W; }
-      if(s.x>W+60) s.x=-60;
-    }
-  }
-
-  var tagEl=document.getElementById("roomtag"),tagT=null;
   function lightUp(){
     if(lit) return; lit=true;
     body.classList.add("neon");
     applyShotVid();               /* the reel only ever loads once the room is lit */
-    tagEl.classList.remove("gone");
-    clearTimeout(tagT); tagT=setTimeout(function(){ tagEl.classList.add("gone"); },6500);
-    size(); spawnBats(); draw();
   }
   function lightDown(){
     if(!lit) return; lit=false;
     body.classList.remove("neon");
     applyShotVid();               /* …and it stops the moment it goes dark */
-    setTimeout(function(){ if(!lit) ctx.clearRect(0,0,cv.width,cv.height); },200);
   }
 
   /* the sync loop — the radio is the single source of truth */
@@ -1241,6 +1148,16 @@ body.neon #roomtag.gone{opacity:0}
   }
   setInterval(syncFromRadio,250);
   syncFromRadio();
+
+  /* ---------- MORE: the rest of the statement ---------- */
+  (function(){
+    var btn=document.querySelector(".more[data-prose]"); if(!btn) return;
+    var box=btn.parentNode;
+    btn.addEventListener("click",function(){
+      var open=box.classList.toggle("open");
+      btn.textContent = open ? "LESS \u25b4" : "MORE \u25be";
+    });
+  })();
 
   /* ---------- toast + the thing hidden in the plastic ---------- */
   var toastEl=document.getElementById("toast"),tt=null;
