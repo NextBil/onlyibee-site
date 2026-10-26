@@ -261,34 +261,12 @@
   .tl-tile .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.8)}
   #tlempty{padding:22px 14px;text-align:center;color:#555;font-family:var(--px);font-size:8px;line-height:2;display:none}
 
-  /* ---- GO TO THE PAGE ----
-     It had its own full-width band between the shelf and the songs, which cost
-     the list a whole row for a button that is only relevant sometimes. It is a
-     CHIP IN THE ALBUM SHELF now (2026-10-22): the shelf is already a row of
-     places to go, the chip costs no extra height at all, and it sits with the
-     record it belongs to. The band and its pulse are gone. */
-  /* ---- the page chip is a TURNING OBJECT ----
-     ⚠ overflow must be VISIBLE and the border dropped: the stack rotates out of
-     the flat square, and `overflow:hidden` (which every other .ac wants) would
-     slice the faces off mid-turn. Rotating on Y only ever makes the slab
-     NARROWER than the box, so nothing spills sideways. */
-  .alb.pagechip .ac{position:relative;border:0;overflow:visible;background:transparent;
-    perspective:220px;
-    filter:drop-shadow(0 0 10px color-mix(in srgb,var(--rtint,#ff2b2b) 55%,transparent))}
-  .alb.pagechip .pvx{position:relative;display:block;width:100%;height:100%;
-    transform-style:preserve-3d;transform:rotateX(8deg)}
-  .alb.pagechip .pvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    backface-visibility:visible;border:1px solid color-mix(in srgb,var(--rtint,#ff2b2b) 70%,transparent)}
-  /* the ▶ sits OUTSIDE the spin — a tint over the whole cover hid the object it
-     was meant to advertise, so it is a corner badge now and stays still */
-  .alb.pagechip .pgo{position:absolute;right:-3px;bottom:-3px;z-index:2;
-    width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:8px;color:#07120a;background:var(--rtint,var(--red));
-    box-shadow:0 1px 5px rgba(0,0,0,.7)}
-  .alb.pagechip .an{color:var(--rtint,var(--red))}
-  @media(prefers-reduced-motion:no-preference){
-    .alb.pagechip .pvx{animation:pgspin 4.6s linear infinite}
-  }
+  /* ---- GO TO THE PAGE, RETIRED FROM THE SHELF (2026-10-26) ----
+     It was a chip at the head of the album row inside the open radio. The
+     record's own page is reachable from the bottom bar now — the spinning
+     sleeve beside the title IS the door — so the chip was the second copy of
+     one idea, in the place you are least likely to be looking.
+     @keyframes pgspin stays: the bar's door uses it. */
   @keyframes pgspin{from{transform:rotateY(0) rotateX(8deg)}to{transform:rotateY(360deg) rotateX(8deg)}}
 
   /* ---- GRID view: Spotify-style covers, 3D sideways tilt, straightens on hover ---- */
@@ -414,6 +392,11 @@
      somewhere to go", which nothing else in the collapsed bar does.
      Rotating on Y only ever makes the slab narrower than its box, so it never
      spills into the title beside it. */
+  /* ⚠ the vinyl's own 2D spin has to STOP here. body.radioon turns #pcover on a
+     flat Z axis; the slab inside turns on Y. Both at once is a disc tumbling in
+     every direction at once, which is exactly what it looked like. The door
+     turns on Y only, like the chip this replaced. */
+  body.radioon #pcover.pagedoor{animation:none}
   #pcover.pagedoor{border-radius:0;overflow:visible;border:0;box-shadow:none;
     background:transparent!important;perspective:220px;
     filter:drop-shadow(0 0 9px color-mix(in srgb,var(--pgtint,#ff2b2b) 55%,transparent))}
@@ -811,7 +794,6 @@
     #tlalbums .alb .ac{width:100%;height:auto;aspect-ratio:1/1;overflow:hidden;display:block}
     /* the rule above is ID-specific, so the turning chip has to out-specify it
        or the laptop clips the spin back into a flat square */
-    #tlalbums .alb.pagechip .ac{overflow:visible;border:0;background:transparent;perspective:260px}
     #tlalbums .alb .ac img{width:100%;height:100%;object-fit:cover;display:block}
     #tlalbums .alb .an{white-space:normal;font-size:6.5px;line-height:1.45}
     #tlleft{grid-column:2;display:flex;flex-direction:column;min-height:0}
@@ -1532,7 +1514,7 @@
       +'<span class="ac"><span class="lkh">&#9673;</span></span>'
       +'<span class="an">ALL RECORDS</span>'
       +'<span class="aq">'+r.count+' TRACKS</span></button>';
-    host.innerHTML=pageChip()+allCard+favCard+out.map(function(a){
+    host.innerHTML=allCard+favCard+out.map(function(a){
       var on = albumSel && a.name.toLowerCase()===albumSel.toLowerCase();
       return '<button class="alb'+(on?' on':'')+'" data-alb="'+esc(a.name)+'" title="'+esc(a.name)+'">'
         +'<span class="ac">'+(a.cover?'<img src="'+esc(sized(a.cover,'mid'))+'" alt="" loading="lazy" decoding="async" data-alt="'+esc(a.cover)+'">':'')+'</span>'
@@ -1544,29 +1526,6 @@
      20 MIN ZA SESSION, any studio album with a room). It leads the shelf so it
      is reachable without scrolling, and disappears the moment the song changes
      to one whose album has no page. */
-  function pageChip(){
-    var r=R(); if(!r) return '';
-    var i=r.current?r.current():-1, alb=(i>=0&&r.album)?r.album(i):null;
-    var room=alb&&alb.room; if(!room) return '';
-    /* the cover as a SPINNING OBJECT — the site's fake-voxel trick (same six
-       translateZ copies and darkened back faces as the nav icons, see navVox).
-       A flat thumbnail read as just another album; a turning slab reads as a
-       door. */
-    var cov='';
-    if(alb.cover){
-      var src=esc(sized(alb.cover,'mid')), raw=esc(alb.cover);
-      [-3.2,-1.9,-0.6,0.6,1.9,3.2].forEach(function(t,i){
-        cov+='<img src="'+src+'" alt="" loading="lazy" decoding="async" data-alt="'+raw+'"'
-          +' style="transform:translateZ('+t+'px)'+(i<5?';filter:brightness(.42)':'')+'">';
-      });
-      cov='<span class="pvx">'+cov+'</span>';
-    }
-    return '<button class="alb pagechip" data-page="'+esc(room)+'" style="--rtint:'+esc(alb.tint||'#ff2b2b')+'"'
-      +' title="Go to the '+esc(alb.name)+' page">'
-      +'<span class="ac">'+cov+'<span class="pgo">&#9654;</span></span>'
-      +'<span class="an">GO TO THE PAGE</span></button>';
-  }
-
   document.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('.alb'); if(!b) return;
     if(b.hasAttribute('data-page')){          /* the record's own page */
@@ -1713,26 +1672,6 @@
       }
     });
   }
-  /* GO TO THE ROOM — shows for whichever special album is on air (NOUVEAUX PUNK, 20 MIN ZA
-     SESSION, any studio album with a room). Navigates in-frame so the radio keeps playing. */
-  var lastRoomKey='';
-  /* Runs on the 350ms heartbeat, so it must NOT re-render the shelf — that would
-     reset its horizontal scroll under your thumb. It swaps the one chip instead,
-     and only when the on-air album actually changed. */
-  function updateRoomband(){
-    var r=R(); if(!r) return;
-    var i=r.current?r.current():-1, alb=(i>=0&&r.album)?r.album(i):null;
-    var room=alb&&alb.room, key=room?(alb.name+'|'+room):'';
-    if(key===lastRoomKey) return; lastRoomKey=key;
-    var host=document.getElementById('tlalbums'); if(!host) return;
-    var cur=host.querySelector('.pagechip');
-    var html=pageChip();
-    if(cur&&!html){ cur.remove(); return; }
-    if(!html) return;
-    var tmp=document.createElement('div'); tmp.innerHTML=html;
-    var chip=tmp.firstChild;
-    if(cur) host.replaceChild(chip,cur); else host.insertBefore(chip,host.firstChild);
-  }
   var tlclear=document.getElementById('tlclear'), tlwrap=document.getElementById('tlsearchwrap');
   function searchChanged(){
     query=tlsearch.value.trim();
@@ -1770,7 +1709,7 @@
     tl.classList.toggle('open',on);
     document.getElementById('bottom').classList.toggle('listopen',on);
   }
-  function openTL(){ var r=R(); if(r&&builtCount!==r.count)renderTracks(); renderAlbums(); setTL(true); updateRoomband(); markNow(); placeSongInfo(); }
+  function openTL(){ var r=R(); if(r&&builtCount!==r.count)renderTracks(); renderAlbums(); setTL(true); markNow(); placeSongInfo(); }
   function toggleTL(){ if(tl.classList.contains('open'))setTL(false); else openTL(); }
   /* ONE handler for the whole strip. Previously the title had its own click and
      the cover had click AND a capturing pointerup — so a single tap on the cover
@@ -1991,7 +1930,6 @@
       fill.style.width=(d?c/d*100:0)+'%';
       var ts=fmt(c)+' / '+fmt(d); timeEl.textContent=ts;
       if(ptimeEl) ptimeEl.textContent=ts;}catch(e){}
-    updateRoomband();
     if(tl.classList.contains('open')&&!tl.classList.contains('scrolling'))markNow();
     if(lyrOpen){ lyrRefresh(); lyrSync(); }
   },350);
