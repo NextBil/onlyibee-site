@@ -1,6 +1,8 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "ibee", "runtimeExecutable": "sh", "runtimeArgs": ["-c", "cd '/private/tmp/claude-501/-Users-amianibrahim-Documents-try-not-to-laugh/2b8f1cdc-0a81-43da-ab5a-b0a626e93f84/scratchpad/site' && exec python3 -m http.server 8899"], "port": 8899 }
+    { "name": "np2-preview", "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m","http.server","8791","--directory","/private/tmp/claude-501/-Users-amianibrahim-Documents-try-not-to-laugh/0b2fdcb1-d52c-452a-a67b-7731feb79f19/scratchpad/repo"],
+      "port": 8791 }
   ]
 }

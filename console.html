@@ -47,11 +47,11 @@
 
   /* ---------- CRT overlay ---------- */
   .crt::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);
   }
   .crt::after{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%);
   }
   .flicker{animation:flick 6s infinite}

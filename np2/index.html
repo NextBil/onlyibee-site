@@ -54,9 +54,9 @@ body{
   min-height:100dvh;overflow-x:hidden;
 }
 /* CRT scanlines + vignette, same treatment as every other room */
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.26) 0 1px,transparent 1px 3px)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.6) 100%)}
 
 header{

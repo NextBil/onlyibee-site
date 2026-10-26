@@ -21,9 +21,9 @@
   --px:'Press Start 2P',monospace;--vt:'VT323',monospace}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
   border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}

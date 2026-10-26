@@ -27,9 +27,9 @@ body{background:var(--bg);color:#e8e8e8;font-family:var(--vt);min-height:100dvh;
   animation:crtin .35s ease-out}
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
 /* scanlines + vignette, same as the console */
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
-body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
 /* drifting glyphs in the static */
 .gl{position:fixed;font-family:var(--px);color:var(--dim);opacity:.14;pointer-events:none;user-select:none;

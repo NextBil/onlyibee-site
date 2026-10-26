@@ -21,9 +21,9 @@
   html,body{height:100%}
   body{background:var(--bg);color:var(--ink);font-family:var(--vt);font-size:20px;min-height:100dvh;overflow-x:hidden}
   ::selection{background:var(--acid);color:#000}
-  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9000;
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background:repeating-linear-gradient(0deg,rgba(0,0,0,.26) 0 1px,transparent 1px 3px)}
-  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.55) 100%)}
 
   header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;
@@ -213,7 +213,12 @@
       scrollbar-width:thin;scrollbar-color:var(--border) transparent}
     .recs::-webkit-scrollbar{height:4px}
     .recs::-webkit-scrollbar-thumb{background:var(--border)}
-    .rec{flex:0 0 192px;scroll-snap-align:start;padding:8px}
+    /* TWO FIT THE SCREEN. NOUVEAUX PUNK 2 is hidden from visitors, so a
+       phone shows exactly two records - sized at half the row they fill it
+       with no scrolling at all. When the owner is signed in the third one
+       appears and the row simply becomes scrollable again, which is the
+       behaviour the flex container already had. */
+    .rec{flex:0 0 calc(50% - 5px);scroll-snap-align:start;padding:8px}
     .rec b{font-size:8px;margin-top:9px}
     .rec .rtg{font-size:15px;margin-top:5px}
     .rec .rg{font-size:6.5px}
