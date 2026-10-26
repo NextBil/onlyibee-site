@@ -355,6 +355,15 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
   border:1px solid #23383c;color:#93a8a9;font-family:var(--px);font-size:7px;
   letter-spacing:1px;padding:8px 11px;transition:border-color .15s,color .15s}
 .more:hover{border-color:var(--pink);color:var(--pink-hot)}
+/* THE TWO PANELS he wrote about the project. They are squares of typeset
+   French — the words live inside the picture, so the alt carries the whole
+   text for anyone reading with their ears, and the caption names it for
+   everyone else. */
+.stmt{margin:16px 0 0}
+.stmt img{width:100%;height:auto;display:block;border:1px solid #23383c}
+.stmt figcaption{font-family:var(--px);font-size:7px;letter-spacing:1px;color:#93a8a9;
+  line-height:1.9;padding:7px 2px 0}
+.stmt+.stmt{margin-top:12px}
 .ptxt .xtra{display:none}
 .ptxt.open .xtra{display:block}
 
@@ -686,6 +695,23 @@ body.neon .batwrap svg{animation:none !important}
           <p>A <span class="r">Nouveaux Punk</span>, to me, is someone who needs freedom and expression
              but still keeps order and an aesthetic perfectionism.
              <span class="a">Between chaos and beauty.</span></p>
+
+        <!-- the two panels he wrote about the project, inside MORE so they load
+             only for someone who asked for the rest. Squares of typeset French:
+             the words are IN the picture, so each carries the whole text as alt
+             and a short caption for everyone else. -->
+        <figure class="stmt">
+          <img src="../assets/img/np-statement/not-a-mixtape.jpg" loading="lazy" decoding="async"
+               width="1000" height="1000"
+               alt="Le projet aborde la depression, le vide existentiel, la solitude, l'amour, le vice, la luxure, l'addiction. Le but n'est pas d'en faire l'apologie mais d'apporter une voix decomplexee sur ces emotions qui nous traversent tous et dont beaucoup n'osent pas parler. Ce projet vise a apporter du reconfort a ceux qui se sentent incompris, seuls, sans espoirs. Nouveaux Punk c'est une voix qui te dit je te comprends, oui t'es perdu dans ta vie mais c'est pas grave prends ton temps, relax et vis putain. Philosophiquement ce projet se verrait nihiliste. C'est pas une mixtape, c'est un recueil d'emotions.">
+          <figcaption>C'EST PAS UNE MIXTAPE_</figcaption>
+        </figure>
+        <figure class="stmt">
+          <img src="../assets/img/np-statement/why-nouveaux-punk.jpg" loading="lazy" decoding="async"
+               width="1000" height="1000"
+               alt="Pourquoi Nouveaux Punk ? Punk ca veut dire voyou en anglais. Pour vulgariser, un punk c'est un marginal, quelqu'un qui n'accorde aucune importance aux normes sociales, quelqu'un en quete de liberte et de sens personnel. A ne pas confondre avec l'anarchisme meme si ces ideologies peuvent se rejoindre. J'adhere totalement a cette philosophie mais je ne me reconnais pas forcement dans tout l'esthetisme lie a la culture punk. D'ou le Nouveaux.">
+          <figcaption>POURQUOI « NOUVEAUX PUNK »_</figcaption>
+        </figure>
         </div>
         <button class="more" type="button" data-prose>MORE ▾</button>
       </div>
