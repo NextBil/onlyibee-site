@@ -257,20 +257,24 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .notice::-webkit-scrollbar{height:5px}
 .notice::-webkit-scrollbar-track{background:#0b1719}
 .notice::-webkit-scrollbar-thumb{background:var(--pink)}
-.note{flex:0 0 132px;scroll-snap-align:start;background:#0b1719;padding:13px 9px 11px;
+.note{flex:0 0 164px;scroll-snap-align:start;background:#0b1719;padding:12px 10px 11px;
   text-align:center;cursor:pointer;border:0;font:inherit;color:inherit;
   transition:background .18s}
 .note:hover{background:#16292d}
-.note .ic{display:block;height:62px;margin-bottom:7px}
-.note .ic img{width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 0 7px rgba(255,31,111,.6));
-  transition:filter .18s,transform .25s}
-.note .ic svg{width:34px;height:34px;stroke:#c7d7d9;fill:none;stroke-width:1.6;
-  stroke-linecap:round;stroke-linejoin:round;transform:rotate(-8deg);
-  filter:drop-shadow(0 0 7px rgba(255,31,111,.6));
-  transition:stroke .18s,filter .18s,transform .25s}
-.note:hover .ic svg,.note.on .ic svg{stroke:var(--pink-hot);transform:rotate(0);
-  filter:drop-shadow(0 0 9px rgba(255,31,111,.9))}
-.note:hover .ic img,.note.on .ic img{transform:scale(1.05);filter:drop-shadow(0 0 9px rgba(255,31,111,.9))}
+/* HE PLAYS EVERY STATE. The signs here used to be line drawings — honest, but a
+   drawing of a mood is a guess at it, and there is a render of him actually IN
+   each one. They arrive green-screened, so they are keyed to alpha (no PIL on
+   this machine; see tools note in the README) and trimmed to his own outline,
+   so a bigger plate means more of him and not more empty frame.
+   object-fit:contain, never cover: the poses are different shapes — someone
+   kneeling, a couple kissing — and a square crop would cut heads off. */
+.note .ic{display:block;height:104px;margin-bottom:6px}
+.note .ic img{width:100%;height:100%;object-fit:contain;object-position:center bottom;
+  display:block;transform:rotate(-3deg);
+  filter:drop-shadow(0 3px 9px rgba(0,0,0,.55));
+  transition:transform .25s,filter .25s}
+.note:hover .ic img,.note.on .ic img{transform:rotate(0) scale(1.06);
+  filter:drop-shadow(0 0 11px rgba(255,31,111,.8)) drop-shadow(0 3px 9px rgba(0,0,0,.55))}
 .note .nm{display:block;font-family:var(--px);font-size:6.5px;line-height:1.75;
   letter-spacing:1px;color:#cfdcdc;min-height:23px}
 .note .pl{width:30px;height:30px;margin:9px auto 6px;border-radius:50%;
@@ -299,9 +303,8 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .npt:hover{border-color:var(--pink);color:var(--pink-hot)}
 .npt.playing{border-color:var(--pink);background:#240914;color:var(--pink-hot)}
 @media(max-width:560px){
-  .note{flex:0 0 112px;padding:11px 7px 9px}
-  .note .ic{height:54px}
-  .note .ic img{width:54px;height:54px}
+  .note{flex:0 0 138px;padding:10px 8px 9px}
+  .note .ic{height:88px}
   .note .nm{font-size:6px}
   .npt{font-size:15px;padding:5px 8px}
 }
@@ -410,10 +413,15 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 
 /* THE BIGGER BOX — the same twenty-seven, large enough to read, over the page.
    Six-up is a map; this is the list. */
+/* BIGGER was a grey outline on a grey page and nobody was going to find it —
+   on a phone it is the only route to the titles at all, so it reads as a
+   button now rather than a hint. */
 .zoombtn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px;
-  background:none;border:1px solid #23383c;color:#93a8a9;font-family:var(--px);font-size:7px;
-  letter-spacing:1px;padding:9px 12px;transition:border-color .15s,color .15s}
-.zoombtn:hover{border-color:var(--pink);color:var(--pink-hot)}
+  border:1px solid var(--pink);background:#240914;color:var(--pink-hot);
+  font-family:var(--px);font-size:7.5px;letter-spacing:1px;padding:10px 13px;
+  box-shadow:0 0 12px rgba(255,31,111,.3);
+  transition:background .15s,box-shadow .2s,transform .15s}
+.zoombtn:hover{background:#3a0e20;box-shadow:0 0 22px rgba(255,31,111,.6);transform:translateY(-1px)}
 .zoom{position:fixed;inset:0;z-index:62;background:#060f10;display:flex;flex-direction:column;
   overscroll-behavior:contain}
 .zoom[hidden]{display:none}
@@ -764,67 +772,11 @@ body.neon .batwrap svg{animation:none !important}
      survives that where a filename does not.
      Each sign is inline SVG — no assets, and they inherit colour so a card
      and a chip can light the same icon differently. */
-  /* THE SIGNS. Stick figures, not symbols: a state is something a PERSON is in,
-     and a little figure says that where a pictogram of an object does not. Each
-     one is a single body in a pose plus one prop, drawn on the same 24-grid so
-     they sit at the same weight. They glow and lean in the CSS — these are the
-     plates on a notice, not icons in a toolbar. */
-  var SIGN={
-    /* alone at night — one body under a moon */
-    night:'<path d="M17.8 2.4a4.2 4.2 0 1 0 4.2 4.2 4.9 4.9 0 0 1-4.2-4.2Z"/>'
-         +'<circle cx="8" cy="9.6" r="2"/><path d="M8 11.6v5.4M5.5 13.3h5M8 17l-1.9 4.2M8 17l1.9 4.2"/>',
-    /* a tiny hope left — arms up at a spark */
-    hope:'<circle cx="10" cy="11.4" r="2"/><path d="M10 13.4v4.8M10 14.4 6.6 10.8M10 14.4l3.4-3.6'
-        +'M10 18.2l-1.9 3.6M10 18.2l1.9 3.6"/><path d="M18.6 2.6v4M16.6 4.6h4M17.2 3.2l2.8 2.8M20 3.2l-2.8 2.8"/>',
-    /* smoke and chill — a body, a cigarette, two curls */
-    smoke:'<circle cx="7.4" cy="7.8" r="2"/><path d="M7.4 9.8v5.4M5 11.5h4.8M9.8 11.5h2.6'
-         +'M7.4 15.2l-1.8 4.2M7.4 15.2l1.8 4.2"/>'
-         +'<path d="M14.8 11c0-1.7 2.1-1.7 2.1-3.4S14.8 5.9 14.8 4.2"/><path d="M19.2 10.4c0-1.3 1.8-1.3 1.8-2.7"/>',
-    /* heart broken — a body and a split heart */
-    broken:'<circle cx="6.2" cy="7.4" r="1.9"/><path d="M6.2 9.3v5.3M4 10.9h4.4M6.2 14.6l-1.7 4M6.2 14.6l1.7 4"/>'
-          +'<path d="M16.6 19.4 13 15.6a2.6 2.6 0 0 1 3.6-3.7l.4.4"/>'
-          +'<path d="M16.6 19.4 20.2 15.6a2.6 2.6 0 0 0-3.6-3.7l-.4.4"/>'
-          +'<path d="m16.6 13.2-1.1 1.9 1.9.9-1.1 2.1"/>',
-    /* nothing makes sense — a head with the thread coming loose */
-    nonsense:'<circle cx="9" cy="11.4" r="2"/><path d="M9 13.4v4.8M6.5 15.1h5M9 18.2l-1.8 3.8M9 18.2l1.8 3.8"/>'
-            +'<path d="M17.4 6.2a2.3 2.3 0 1 0-2.3 2.3 3.4 3.4 0 1 1 3.4-3.4"/><circle cx="18.2" cy="10.6" r=".8"/>',
-    /* grinding is all — a body, and the stairs still ahead of it */
-    grind:'<circle cx="5.6" cy="9.6" r="2"/><path d="M5.6 11.6V17M3.2 13.3h4.8M5.6 17l-1.8 4.2M5.6 17l1.8 4.2"/>'
-         +'<path d="M11.2 21.4h3.2v-3.4h3.2v-3.4h3.2v-3.4"/>',
-    /* to dance — the one that was already a dancer */
-    dance:'<circle cx="13" cy="4.3" r="1.9"/><path d="M13 6.4v4.2l3.6 2.2M13 10.6 9.4 13l1.2 4.2'
-         +'M13 10.6l1.7 4.4.3 4.6M9.4 13 6.6 11.2"/>',
-    /* to sleep — a body lying down, and the Zs */
-    sleep:'<circle cx="6.4" cy="15.6" r="2"/><path d="M8.4 16h8.4M16.8 13.8v4.4M3 19.4h18"/>'
-         +'<path d="M14.4 3.2h4l-4 5h4"/><path d="M19.8 9.4h2.4l-2.4 3h2.4"/>',
-    /* to drive — a head behind a wheel */
-    drive:'<circle cx="12" cy="14.8" r="5.2"/><circle cx="12" cy="14.8" r="1"/>'
-         +'<path d="M12 9.6v4.2M7.6 17.4l3.6-2M16.4 17.4l-3.6-2"/>'
-         +'<circle cx="12" cy="4.2" r="1.9"/><path d="M12 6.1v1.4M10.2 7.2 7.8 11M13.8 7.2l2.4 3.8"/>',
-    /* sad and sensual — two bodies, close */
-    sensual:'<circle cx="8" cy="8.4" r="1.9"/><path d="M8 10.3v5.3M8 15.6l-1.6 4M8 15.6l1.6 4"/>'
-           +'<circle cx="16" cy="8.4" r="1.9"/><path d="M16 10.3v5.3M16 15.6l-1.6 4M16 15.6l1.6 4"/>'
-           +'<path d="M8 11.8h8"/><path d="M12 5.4 10.9 4.2a1 1 0 0 1 1.1-1.5 1 1 0 0 1 1.1 1.5Z"/>',
-    /* punk of punk — mohawk, fist up */
-    punk:'<circle cx="9.6" cy="9" r="2"/><path d="M7.9 7.3 8.5 4.4M9.6 7V3.8M11.3 7.3 10.7 4.4"/>'
-        +'<path d="M9.6 11v5.4M9.6 12.2 13.2 9M9.6 12.2 6.4 14M9.6 16.4l-1.8 4.4M9.6 16.4l1.8 4.4"/>'
-        +'<circle cx="14.4" cy="8.2" r="1.4"/>',
-    /* beats by only ibee — a body over four pads */
-    beats:'<circle cx="5.6" cy="5.4" r="1.9"/><path d="M5.6 7.3v4.4M5.6 8.6 3 11.4M5.6 8.6l3.6 3.4'
-         +'M5.6 11.7l-1.4 3.4M5.6 11.7l1.4 3.4"/>'
-         +'<rect x="12.6" y="10" width="3.8" height="3.8"/><rect x="17.4" y="10" width="3.8" height="3.8"/>'
-         +'<rect x="12.6" y="14.8" width="3.8" height="3.8"/><rect x="17.4" y="14.8" width="3.8" height="3.8"/>',
-    /* afro groove — the hair is the head, and a drum */
-    afro:'<circle cx="6.6" cy="6.6" r="2.9"/><path d="M6.6 9.5v5.3M4.2 11.2h4.8M6.6 14.8l-1.7 4M6.6 14.8l1.7 4"/>'
-        +'<ellipse cx="17.4" cy="11.6" rx="3.8" ry="1.6"/><path d="M13.6 11.6v5.8a3.8 1.6 0 0 0 7.6 0v-5.8"/>',
-    /* french — the beret and the flag */
-    french:'<circle cx="7.8" cy="8.4" r="2"/>'
-          +'<path d="M5.2 7c1.5-2.2 3.7-2.2 5.2 0 .5.7-.2 1.1-1 1.1H6.2c-.8 0-1.5-.4-1-1.1Z"/>'
-          +'<path d="M10.2 5.4V4.4"/>'
-          +'<path d="M7.8 10.4v5.4M5.4 12.1h4.8M7.8 15.8l-1.7 4M7.8 15.8l1.7 4"/>'
-          +'<path d="M16.4 20.4V5.2M16.4 6h5.2l-1.1 2.3 1.1 2.3h-5.2"/>'
-  };
-  function ico(k){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(SIGN[k]||"")+'</svg>'; }
+  /* THE SIGNS WERE LINE DRAWINGS until 2026-10-26 — a 24-grid stick figure per
+     state, glowing and leaning like plates on a notice. They are renders of him
+     in each state now (assets/img/np2/notice/<key>.png), so the SVG set and its
+     ico() wrapper are gone; MOODS below is still the single source of which
+     tracks belong to which state. */
 
   var MOODS=[
     {k:"night",    t:"ALONE AT NIGHT",       n:[1,2,4,6,8,11,18,20,24,25]},
@@ -842,13 +794,6 @@ body.neon .batwrap svg{animation:none !important}
     {k:"afro",     t:"AFRO GROOVE",          n:[8,16,23,26,27]},
     {k:"french",   t:"FRENCH",               n:[14,15,21]}
   ];
-  /* song index (0-based) -> the signs it carries, built once */
-  var SIGNS=NP2.map(function(){ return []; });
-  MOODS.forEach(function(m){
-    if(!m.n) return;
-    m.n.forEach(function(no){ var i=no-1; if(SIGNS[i] && SIGNS[i].indexOf(m.k)<0) SIGNS[i].push(m.k); });
-  });
-
   /* THE TILE. No waveform any more: it was 56 <i> elements per song, 1,512 DOM
      nodes for one list, and it said less than the cover does. The tiles point at
      assets/img/thumb (128px) on purpose — see the CSS note on decoded size. */
@@ -889,6 +834,8 @@ body.neon .batwrap svg{animation:none !important}
       ? 'QUEUED: <span class="a">'+armed.t+'</span> — '+armed.list.length+' songs_'
       : NP2.length+' songs — tap a sleeve to play it_';
   }
+  /* one render per state, keyed out of its green screen and trimmed to him */
+  var NOTEIMG="../assets/img/np2/notice/";
   var moodsEl=document.getElementById("moods"), npanel=document.getElementById("npanel");
   function moodBy(k){ for(var x=0;x<MOODS.length;x++) if(MOODS[x].k===k) return MOODS[x]; return null; }
   function listOf(m){ return m.n.map(function(no){ return no-1; })
@@ -897,7 +844,7 @@ body.neon .batwrap svg{animation:none !important}
     moodsEl.innerHTML=MOODS.map(function(m){
       var n=m.n.length;
       return '<button class="note'+(armed&&armed.k===m.k?" on":"")+'" type="button" data-m="'+m.k+'">'
-        +'<span class="ic"><img src="../assets/img/np2-notices/'+m.k+'.png" alt="" loading="lazy" decoding="async"></span>'
+        +'<span class="ic"><img src="'+NOTEIMG+m.k+'.png" alt="" loading="lazy" decoding="async"></span>'
         +'<span class="nm">'+m.t+'</span>'
         +'<span class="pl" data-play="1">\u25b6</span>'
         +'<span class="rc">'+n+(n===1?" song":" songs")+'</span></button>';
