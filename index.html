@@ -421,6 +421,22 @@
   #songinfo.on{display:flex}#songinfocard{position:relative;width:min(320px,88vw);max-height:74dvh;overflow:auto;background:#0a0a0a;border:2px solid var(--border);padding:14px;box-shadow:0 18px 55px rgba(0,0,0,.78)}
   #songinfoclose{position:absolute;right:9px;top:9px;background:#111;border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:9px;padding:6px 8px;cursor:pointer}#songinfoclose:hover{color:var(--red);border-color:var(--red)}
   #songinfotop{display:flex;gap:14px;align-items:center;padding-right:30px}#songinfoart{width:92px;height:92px;object-fit:cover;background:#111;border:1px solid var(--acid)}#songinfoname{font-family:var(--px);font-size:13px;line-height:1.5;color:#fff}#songinfoalbum{margin-top:5px;color:var(--acid);font-family:var(--vt);font-size:17px;background:transparent;border:0;border-bottom:1px dashed var(--acid);padding:0;cursor:pointer;text-align:left}#songinfoalbum:hover{color:var(--red);border-color:var(--red)}
+  /* the facts the site already knows about a record — shown even when the
+     written story is still empty, so the card is never four words long */
+  #songinfostats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;
+    margin:13px 0;background:var(--border);border:1px solid var(--border)}
+  #songinfostats .sf{background:#0a0a0a;padding:8px 5px;text-align:center;min-width:0}
+  #songinfostats .sf b{display:block;font-family:var(--px);font-size:11px;color:var(--ink);
+    line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #songinfostats .sf span{display:block;font-family:var(--px);font-size:6px;color:var(--dim);
+    margin-top:5px;letter-spacing:.5px}
+  /* a record with no story written yet says so, rather than showing nothing */
+  #songinfocopy .siblank{color:#5a5a5a;font-style:italic}
+  #songinfowords{display:block;width:100%;margin:4px 0 13px;padding:10px;cursor:pointer;
+    background:#081216;border:1px solid #123a44;color:var(--cyan);
+    font-family:var(--px);font-size:8px;letter-spacing:.5px;text-align:center}
+  #songinfowords:hover{background:var(--cyan);color:#00121a;border-color:var(--cyan)}
+  #songinfowords[hidden]{display:none}
   #songinfoplays{margin:17px 0 13px;padding:10px;border-left:2px solid var(--acid);background:#101408;color:var(--acid);font-family:var(--px);font-size:9px}#songinfocities{margin:0 0 13px;padding:10px;border-left:2px solid var(--cyan);background:#081216;color:#cceff7;font-size:17px;line-height:1.35}#songinfocities .citytitle{font-family:var(--px);font-size:7px;color:var(--cyan);margin-bottom:7px;letter-spacing:.5px}#songinfocities .cityrow{display:flex;justify-content:space-between;gap:10px;border-top:1px solid rgba(38,224,255,.14);padding:4px 0}#songinfocities .cityrow:first-of-type{border-top:0;padding-top:0}#songinfocities .citycount{font-family:var(--px);font-size:7px;color:var(--dim);white-space:nowrap}#songinfocities .cityempty{color:var(--dim);font-size:16px}#songinfocopy{font-size:18px;line-height:1.38;color:#c5c5c5}#songinfocopy p{margin:10px 0}#songinfocopy b{font-family:var(--px);font-size:8px;color:var(--dim)}
   
   #nowbtn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;
@@ -1003,7 +1019,7 @@
     </div>
   </div>
 
-  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfocopy"></div><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div></section></div>
+  <div id="songinfo" aria-hidden="true"><section id="songinfocard" role="dialog" aria-modal="true" aria-label="Song information"><button id="songinfoclose" aria-label="Close song information">✕</button><div id="songinfotop"><img id="songinfoart" alt=""><div><div id="songinfoname">—</div><button id="songinfoalbum" title="Open album">—</button></div></div><div id="songinfoplays">PLAYS // READING_</div><div id="songinfostats"></div><div id="songinfocopy"></div><button id="songinfowords" hidden>READ THE WORDS</button><div id="songinfocities"><div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div></div></section></div>
 </div>
 
 <!-- PRESS START intro: dark, only the play button lit — it starts the music AND the site -->
@@ -1810,8 +1826,45 @@
     var alb=r.album?r.album(i):{},m=META[s.f]||{},art=document.getElementById('songinfoart');
     document.getElementById('songinfoname').textContent=s.n||'—';document.getElementById('songinfoalbum').textContent=alb.name||'';
     art.onerror=function(){art.onerror=null;art.style.display='none';};art.style.display='block';art.src=(s.cover||alb.cover||'');
-    var copy='';if(m.vibe)copy+='<p><b>VIBE //</b> '+e3(m.vibe)+'</p>';if(m.meaning)copy+='<p>'+e3(m.meaning)+'</p>';if(m.context)copy+='<p><b>MADE //</b> '+e3(m.context)+'</p>';if(m.took)copy+='<p><b>TIME //</b> '+e3(m.took)+'</p>';
-    document.getElementById('songinfocopy').innerHTML=copy||'<p>INFO TRANSMISSION INCOMING_</p>';
+    /* ---- the facts strip: track, length, year, BPM ----
+       These come from the catalogue and the pressed groove, so they are there
+       for every record whether or not its story has been written yet. */
+    function mmss(sec){ sec=+sec||0; if(!sec) return '—';
+      return Math.floor(sec/60)+':'+('0'+Math.round(sec%60)).slice(-2); }
+    var B0=window.IBEE_BEAT||{}, g0=B0[s.f]||{};
+    /* the radio's song object drops `len`, so read it from the catalogue (and
+       fall back to the loaded audio when this is the record on the deck) */
+    var XS=(window.IBEE_SONGS_EXTRA&&window.IBEE_SONGS_EXTRA.songs)||[];
+    var x0=null; for(var xi=0;xi<XS.length;xi++){ if(XS[xi].f===s.f){ x0=XS[xi]; break; } }
+    var secs=(x0&&x0.len)||0;
+    if(!secs){ try{ var A0=r.audio; if(A0&&A0.duration&&isFinite(A0.duration)&&r.slug&&r.slug()===s.f) secs=A0.duration; }catch(e0){} }
+    /* release years live with the albums, not on each track */
+    var YRS={np:'2022',mzs:'2024',np2:'2026'};
+    var trackNo=(function(){ var n=0; for(var k=0;k<=i;k++){ var a2=r.album?r.album(k):null;
+      if(((a2&&a2.name)||'')===(alb.name||'')) n++; } return n; })();
+    var yr=alb.yr||alb.year||YRS[s.al]||YRS[alb.galaxy]||'';
+    function sf(v,k){ return '<div class="sf"><b>'+e3(v||'—')+'</b><span>'+k+'</span></div>'; }
+    document.getElementById('songinfostats').innerHTML=
+      sf(trackNo?('#'+trackNo):'', 'TRACK')+sf(mmss(secs), 'LENGTH')
+      +sf(yr, 'YEAR')+sf(g0.bpm||'', 'BPM');
+
+    /* ---- the written story ----
+       Every field gets its line, and a field that has not been written yet says
+       so plainly. Silently dropping the empty ones made the card look broken on
+       the records whose story is still to come. */
+    var copy='';
+    if(m.vibe) copy+='<p><b>VIBE //</b> '+e3(m.vibe)+'</p>';
+    copy += m.meaning ? '<p>'+e3(m.meaning)+'</p>'
+                      : '<p class="siblank">the story of this one is not written yet_</p>';
+    if(m.context) copy+='<p><b>MADE //</b> '+e3(m.context)+'</p>';
+    if(m.took) copy+='<p><b>TIME //</b> '+e3(m.took)+'</p>';
+    document.getElementById('songinfocopy').innerHTML=copy;
+
+    /* ---- the words, if this record has any ---- */
+    var wb=document.getElementById('songinfowords');
+    if(wb){ var hasWords=!!((LYRT[s.f]&&LYRT[s.f].length)||(LYR[s.f]&&LYR[s.f].length));
+      wb.hidden=!hasWords;
+      wb.textContent=(LYRT[s.f]&&LYRT[s.f].length)?'READ THE WORDS // SYNCED':'READ THE WORDS'; }
     var plays=document.getElementById('songinfoplays'),cities=document.getElementById('songinfocities'),request=++songInfoRequest;plays.textContent='PLAYS // READING_';cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">READING LOCATIONS_</div>';if(!inline){songinfo.classList.add('on');songinfo.setAttribute('aria-hidden','false');}
     var S=window.IBEE_STATS_CLIENT;if(S&&S.songCounts)S.songCounts().then(function(rows){var row=(rows||[]).filter(function(x){return x.song_slug===s.f;})[0];plays.textContent='PLAYS // '+(row?Number(row.plays).toLocaleString():'0');}).catch(function(){plays.textContent='PLAYS // UNAVAILABLE';});else plays.textContent='PLAYS // UNAVAILABLE';
     if(S&&S.songCities)S.songCities(s.f).then(function(rows){if(request!==songInfoRequest)return;rows=(rows||[]).slice(0,5);cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div>'+(rows.length?rows.map(function(row,n){return '<div class="cityrow"><span>0'+(n+1)+' · '+e3(row.city_name||'UNKNOWN')+'</span><span class="citycount">'+Number(row.listeners||0).toLocaleString()+' LISTENERS</span></div>';}).join(''):'<div class="cityempty">CITIES APPEAR AS THIS SONG IS PLAYED_</div>');}).catch(function(){if(request===songInfoRequest)cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';});else cities.innerHTML='<div class="citytitle">TOP CITIES // THIS SONG</div><div class="cityempty">LOCATIONS UNAVAILABLE_</div>';
@@ -1874,6 +1927,10 @@
     try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openSongPage&&slug){ setTL(false); fw.openSongPage(slug); return; } }catch(err){}
     openSongInfo();
   },true);
+  /* the words button hands the record over to the karaoke overlay */
+  (function(){ var wb=document.getElementById('songinfowords'); if(!wb) return;
+    wb.onclick=function(e){ e.stopPropagation(); closeSongInfo(); if(!lyrOpen) lyrToggle(); };
+  })();
   document.getElementById('songinfoclose').onclick=closeSongInfo;songinfo.onclick=function(e){if(e.target===songinfo)closeSongInfo();};
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&songinfo.classList.contains('on')) closeSongInfo(); });
   function setPcover(r,i,s){
