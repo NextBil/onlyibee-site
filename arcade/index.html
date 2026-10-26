@@ -175,6 +175,10 @@
   /* the earn bar is the FIRST thing now: it is the reason to play at all, and
      it was sitting below the title where you had to already be scrolling. */
   .earnbar.top{margin:0 0 18px}
+  /* NOUVEAUX PUNK 2 is unreleased, so it is off the hub for visitors. Same
+     rule THE FALL x NP2 already follows below: owner.js fires "ibee-owner"
+     and it appears — for everyone once the record launches. */
+  .rec[hidden]{display:none}
 
   /* ---- LISTEN TO MY MUSIC ----
      This is a room hub for an ARTIST, and the records were reachable only by
@@ -232,7 +236,7 @@
     <div class="scrtitle">LISTEN TO <span class="n">MY MUSIC</span></div>
     <div class="scrsub">latest releases_</div>
     <div class="recs">
-      <a class="rec" href="../np2/" style="--rt:#ff1f6f">
+      <a class="rec np2only" href="../np2/" style="--rt:#ff1f6f" hidden>
         <img width="384" height="384" src="../assets/img/mid/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2">
         <b>NOUVEAUX PUNK 2</b>
         <span class="rtg">rock · rnb · motivational · sad</span>
@@ -487,7 +491,12 @@
      for the owner — and for everyone once NP2 is launched (switch ① in owner.js)
      — so this flips the tile to a live, clickable room. */
   document.addEventListener("ibee-owner",function(ev){
-    if(ev&&ev.detail){ GAMES.forEach(function(g){ if(g.private) g.status="live"; }); render(); }
+    if(ev&&ev.detail){
+      GAMES.forEach(function(g){ if(g.private) g.status="live"; }); render();
+      /* and the unreleased record's own card, on the same signal */
+      Array.prototype.forEach.call(document.querySelectorAll(".rec.np2only"),
+        function(a){ a.removeAttribute("hidden"); });
+    }
   });
 
   function loadSB(cb){
