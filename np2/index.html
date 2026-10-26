@@ -159,7 +159,15 @@ body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
    Anything that must stay legible lives outside those, so: the REC badge sits
    at y 10.5% (under the band, above everything else) and the waveform runs
    x 25-97% at the very foot, past the advisory and below the wordmark. */
-.feed{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+/* THE FEED IS THE FOOTNOTE NOW, not the centrepiece.
+   It used to sit above the songs at full width with a square sleeve and a
+   two-up wall of photographs — a lot of page for something that only reacts
+   to what you press. It lives under the record now and is capped, so it
+   illustrates the listening instead of competing with it. */
+.feed{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;
+  align-items:start;max-width:620px;margin:0 auto;opacity:.82;
+  transition:opacity .25s}
+.feed:hover{opacity:1}
 @media(max-width:760px){.feed{grid-template-columns:1fr}
   .plate{max-width:460px;margin:0 auto;width:100%}}
 
@@ -189,10 +197,10 @@ body.neon h1{text-shadow:0 0 calc(18px + var(--nb,0)*30px) rgba(232,220,18,.6),
   opacity:0;transition:opacity .5s}
 body.neon #platewave{opacity:.92}
 
-.sleeve figcaption{display:block;padding:11px 12px 0;text-align:center;position:relative;z-index:6}
-.sleeve .ex{display:block;font-family:var(--px);font-size:8px;color:var(--acid);letter-spacing:1px;line-height:2}
-.sleeve .lb{display:block;color:#8fa8aa;font-size:16px;line-height:1.45;margin-top:5px}
-.sleeve .tc{display:block;font-family:var(--px);font-size:7px;color:var(--pink);margin-top:9px;letter-spacing:1px}
+.sleeve figcaption{display:block;padding:8px 10px 0;text-align:center;position:relative;z-index:6}
+.sleeve .ex{display:block;font-family:var(--px);font-size:6.5px;color:var(--acid);letter-spacing:1px;line-height:1.9}
+.sleeve .lb{display:block;color:#7f9698;font-size:14px;line-height:1.4;margin-top:4px}
+.sleeve .tc{display:block;font-family:var(--px);font-size:6px;color:var(--pink);margin-top:6px;letter-spacing:1px}
 
 /* the plate: slow ken-burns so a still is never quite still, and the sleeve
    breathes with the record once the neon is on */
@@ -208,7 +216,9 @@ body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,1
 .plate.off .frame{display:none}
 
 /* the wall: four cameras that keep cutting while you listen */
-.wall{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* three narrow stills instead of two big ones — the wall reads as a strip
+   of contact prints rather than a second gallery */
+.wall{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .wall .cap{display:block;font-family:var(--px);font-size:6px;color:#7f9698;text-align:center;
   padding:8px 6px 0;letter-spacing:1px;position:relative;z-index:6;line-height:1.9}
 
@@ -246,48 +256,39 @@ body.neon .plate .win{box-shadow:0 0 calc(12px + var(--nb,0)*44px) rgba(255,31,1
   box-shadow:0 0 14px rgba(255,31,111,.3)}
 .mood.on .n{color:var(--pink)}
 
-/* the grid of records */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.sg{position:relative;display:block;cursor:pointer;text-decoration:none;
-  border:1px solid #1d3338;background:#0b1719;overflow:hidden;
-  transition:border-color .18s,transform .18s,box-shadow .18s}
-.sg:hover{border-color:var(--pink);transform:translateY(-3px);
-  box-shadow:0 0 20px rgba(255,31,111,.3)}
-.sg .art{position:relative;aspect-ratio:1/1;overflow:hidden;background:#07100f}
-/* THE SLEEVE IS THE BACKDROP, THE GROOVE IS THE PORTRAIT.
-   All 27 share one cover, so tinting each copy a different hue was tried and
-   abandoned: mix-blend-mode barely moves a dark photograph, and the grid still
-   read as 27 identical squares. What actually differs between these records is
-   the music — so the sleeve drops back to a dim ground and the song's own bass
-   envelope is drawn across the card, big, in its own colour. Every card is a
-   different silhouette because every song is. */
-.sg .art img{width:100%;height:100%;object-fit:cover;display:block;
-  filter:saturate(.35) brightness(.3) contrast(1.1)}
-.sg .art:after{content:"";position:absolute;inset:0;
-  background:radial-gradient(120% 90% at 50% 0,hsl(var(--hue,330) 70% 22% / .55),rgba(5,12,14,.88))}
-.sg .no{position:absolute;top:0;left:0;z-index:3;padding:5px 8px;
-  font-family:var(--px);font-size:9px;color:#fff;background:rgba(5,12,14,.78);
-  letter-spacing:1px}
-.sg .wv{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
-  z-index:3;height:62%;display:flex;align-items:center;gap:2px;padding:0 10px}
-.sg .wv i{flex:1;min-width:2px;border-radius:1px;
-  background:hsl(var(--hue,330) 85% 62%);
-  box-shadow:0 0 7px hsl(var(--hue,330) 90% 58% / .6);
-  height:calc(6% + var(--h,0) * 94%)}
-.sg.playing{border-color:var(--pink-hot);box-shadow:0 0 22px rgba(255,92,157,.45)}
-.sg.playing .wv i{background:var(--pink-hot);box-shadow:0 0 9px rgba(255,92,157,.8)}
-.sg .meta{padding:9px 10px 10px}
-.sg .tt{font-size:17px;color:#dceaea;line-height:1.25;overflow-wrap:anywhere}
-.sg .dur{font-family:var(--px);font-size:7px;color:var(--pink);margin-top:5px}
-/* the signs: what this one is for */
-.sg .signs{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.sg .signs svg{width:13px;height:13px;stroke:#6c8285;fill:none;stroke-width:1.7;
+/* THE LIST. A grid of 27 cards was a wall of sleeves you had to scroll past;
+   a list is scannable, and the signs still say what each one is FOR. The
+   record's own bass envelope runs across the row, which is the only thing
+   that actually differs between 27 tracks sharing one cover. */
+.list{padding:0;overflow:hidden}
+.sg{display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;
+  text-decoration:none;border-bottom:1px solid #16292d;
+  transition:background .15s}
+.sg:last-child{border-bottom:0}
+.sg:hover{background:#16292d}
+.sg .no{font-family:var(--px);font-size:9px;width:26px;flex:none;color:#456}
+.sg .tt{flex:none;width:30%;min-width:0;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;color:#cfdcdc;font-size:18px}
+/* the groove, in the song's own colour */
+.sg .wv{flex:1;min-width:0;display:flex;align-items:center;gap:1px;height:22px}
+.sg .wv i{flex:1;min-width:1px;border-radius:1px;
+  background:hsl(var(--hue,330) 80% 58% / .75);
+  height:calc(8% + var(--h,0) * 92%)}
+.sg .signs{display:flex;gap:4px;flex:none}
+.sg .signs svg{width:12px;height:12px;stroke:#5d7275;fill:none;stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round}
+.sg .dur{font-family:var(--px);font-size:8px;color:var(--pink);flex:none;
+  min-width:34px;text-align:right}
+.sg.playing{background:#20101a}
+.sg.playing .no,.sg.playing .tt{color:var(--pink-hot)}
+.sg.playing .wv i{background:var(--pink-hot)}
 .sg.playing .signs svg{stroke:var(--pink)}
 .gridempty{font-family:var(--px);font-size:9px;color:#5d7275;padding:22px 0;text-align:center;
   line-height:2}
-@media(max-width:480px){
-  .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:9px}
+@media(max-width:560px){
+  .sg{gap:9px;padding:9px 10px}
+  .sg .tt{width:40%;font-size:16px}
+  .sg .signs{display:none}        /* the chips above already say the mood */
   .mood{font-size:7px;padding:7px 9px}
 }
 
@@ -547,9 +548,17 @@ body.neon #roomtag.gone{opacity:0}
        Everything here is presented as a little NP2 sleeve: teal mount,
        pink band across the top, photo in a window, credits underneath.
        ================================================================== -->
+  <!-- track signals -->
+  <div class="sec">
+    <div class="sh">THE <span class="a">MANUAL</span>_</div>
+    <div class="ssub">27 signals — pick the state you're in, the record sorts itself_</div>
+    <div class="moods" id="moods"></div>
+    <div class="list card" id="tracks"></div>
+  </div>
+
   <div class="sec">
     <div class="sh">THE <span class="a">FEED</span>_</div>
-    <div class="ssub">every song opens a different page of the archive — press one and watch_</div>
+    <div class="ssub">whatever is playing opens its own page of the archive_</div>
     <div class="feed">
 
       <figure class="sleeve plate">
@@ -569,14 +578,6 @@ body.neon #roomtag.gone{opacity:0}
 
       <div class="wall" id="wall"></div>
     </div>
-  </div>
-
-  <!-- track signals -->
-  <div class="sec">
-    <div class="sh">THE <span class="a">MANUAL</span>_</div>
-    <div class="ssub">27 signals — pick the state you're in, the record sorts itself_</div>
-    <div class="moods" id="moods"></div>
-    <div class="grid" id="tracks"></div>
   </div>
 
   <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
@@ -706,7 +707,7 @@ body.neon #roomtag.gone{opacity:0}
   /* WAVE: downsample the song's own bass envelope to N bars. Falls back to a
      flat-ish shape only if a record has no pressed groove yet, so a missing
      entry degrades to a plain card instead of an empty one. */
-  var WAVEN=26;
+  var WAVEN=56;   /* a row is far wider than a card was — more detail fits */
   function waveBars(slug){
     var B=window.IBEE_BEAT||(window.top&&window.top.IBEE_BEAT)||null;
     var g=B&&(B[slug]||B[String(slug).replace(/\.(?:mp3|m4a)$/,"")]);
@@ -734,22 +735,19 @@ body.neon #roomtag.gone{opacity:0}
     return bars;
   }
 
-  var COVER="../assets/img/nouveaux-punk-2.jpg";
   var moodSel="all";
   function cardFor(s,i){
-    /* THE GOLDEN ANGLE. A fixed step of 13° kept every neighbour inside the
-       same pink, so a row of cards read as four copies of the sleeve. 137.5°
-       is the angle that never repeats or clusters — adjacent cards land on
-       opposite sides of the wheel, and the 27th is still distinct from the
-       1st. Anchored at the album's own pink so the set stays NP2. */
+    /* THE GOLDEN ANGLE round the wheel, anchored at the album's own pink: no
+       two neighbouring grooves share a colour, and the 27th is still distinct
+       from the 1st. (A fixed small step kept every neighbour inside the same
+       pink, which is how this started.) */
     var hue=Math.round((330+i*137.5)%360);
     return '<a class="sg" data-i="'+i+'" href="#" style="--hue:'+hue+'">'
-      +'<span class="art"><img src="'+COVER+'" alt="" loading="lazy" decoding="async">'
-        +'<span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
-        +'<span class="wv">'+waveBars(s.f)+'</span></span>'
-      +'<span class="meta"><span class="tt">'+s.t+'</span>'
-        +'<span class="dur">'+fmt(s.d)+'</span>'
-        +'<span class="signs">'+SIGNS[i].map(ico).join("")+'</span></span></a>';
+      +'<span class="no">'+(i<9?"0":"")+(i+1)+'</span>'
+      +'<span class="tt">'+s.t+'</span>'
+      +'<span class="wv">'+waveBars(s.f)+'</span>'
+      +'<span class="signs">'+SIGNS[i].map(ico).join("")+'</span>'
+      +'<span class="dur">'+fmt(s.d)+'</span></a>';
   }
   function paintGrid(){
     var m=null,x;
