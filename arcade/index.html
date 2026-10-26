@@ -199,12 +199,20 @@
     color:var(--dim);margin-top:5px}
   .rec .rg{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
     color:var(--rt,var(--acid));margin-top:6px;line-height:1.9;opacity:.85}
+  /* ON A PHONE THEY SCROLL SIDEWAYS. Three across a 375px screen made each
+     sleeve 94px and the type unreadable — which defeats putting the records
+     here at all. They get a real size and you flick through them instead. */
   @media(max-width:560px){
-    .recs{gap:8px}
-    .rec{padding:6px}
-    .rec b{font-size:6.5px;margin-top:7px}
-    .rec .rtg{font-size:12px;margin-top:4px}
-    .rec .rg{font-size:5.5px}
+    .recs{display:flex;grid-template-columns:none;gap:10px;overflow-x:auto;
+      -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+      padding-bottom:8px;margin:0 0 24px;
+      scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+    .recs::-webkit-scrollbar{height:4px}
+    .recs::-webkit-scrollbar-thumb{background:var(--border)}
+    .rec{flex:0 0 192px;scroll-snap-align:start;padding:8px}
+    .rec b{font-size:8px;margin-top:9px}
+    .rec .rtg{font-size:15px;margin-top:5px}
+    .rec .rg{font-size:6.5px}
   }
 </style>
 <!-- MINE (purple cashew) discount readout on the ROOMS hub -->

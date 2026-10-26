@@ -298,17 +298,20 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 /* SEE ALL — the shelf is a flick, this is the wall. Fourteen states scrolling
    sideways means you meet them three at a time and never see the shape of the
    set; this lays them all out at once, same plates, bigger pictures. */
-.seeall{flex:0 0 96px;align-self:stretch;scroll-snap-align:start;background:#13242a;
-  cursor:pointer;border:0;
-  font:inherit;color:inherit;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:9px;padding:12px 8px;transition:background .18s}
-.seeall:hover{background:#1d343a}
-.seeall .sa{font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--pink-hot);
-  line-height:1.8}
-.seeall .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;width:34px}
-.seeall .sg i{display:block;aspect-ratio:1;background:var(--pink);opacity:.55;
+/* SEE ALL, small, in the heading — it was the fifteenth tile on a side-scroller,
+   which is the one place you are guaranteed not to have looked yet. */
+.seeall{margin-left:auto;display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  border:1px solid #23383c;background:#0d191c;color:#93a8a9;
+  font-family:var(--px);font-size:6.5px;letter-spacing:1px;padding:7px 9px;
+  transition:border-color .15s,color .15s,background .15s}
+.seeall:hover{border-color:var(--pink);color:var(--pink-hot);background:#16292d}
+.seeall .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:14px;flex:none}
+.seeall .sg i{display:block;aspect-ratio:1;background:var(--pink);opacity:.6;
   transition:opacity .2s}
 .seeall:hover .sg i{opacity:1}
+
+/* the notice is no longer part of the statement, so give it room to be its own */
+#noticesec{margin-top:60px}
 .allbox{position:fixed;inset:0;z-index:63;background:#060f10;display:flex;flex-direction:column;
   overscroll-behavior:contain}
 .allbox[hidden]{display:none}
@@ -688,9 +691,20 @@ body.neon .batwrap svg{animation:none !important}
       </div>
     </div>
 
-    <!-- THE NOTICE sits where the play bar used to: the record says what it is,
-         then immediately asks which state you are in. Arming a state warms its
-         songs in the grid below and keeps the record inside that set. -->
+  </div>
+
+  <!-- THE NOTICE stands on its own. It used to be tacked onto the bottom of the
+       statement, which read as part of the statement; it is its own thing — the
+       artist's own groupings — and it says so. SEE ALL rides in the heading
+       instead of being the last tile on the shelf, where you only met it after
+       flicking past fourteen plates. -->
+  <div class="sec" id="noticesec">
+    <div class="sh">MY <span class="a">RECOMMENDATIONS</span> PER MOOD_
+      <button class="seeall" id="seeall" type="button" aria-label="see every mood">
+        <span class="sg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        SEE ALL
+      </button>
+    </div>
     <div class="notice" id="moods"></div>
     <div class="npanel" id="npanel" hidden></div>
   </div>
@@ -906,10 +920,7 @@ body.neon .batwrap svg{animation:none !important}
       +'</span></button>';
   }
   function paintMoods(){
-    moodsEl.innerHTML=MOODS.map(plateFor).join("")
-      + '<button class="seeall" id="seeall" type="button" aria-label="see every state">'
-      +   '<span class="sg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>'
-      +   '<span class="sa">SEE<br>ALL</span></button>';
+    moodsEl.innerHTML=MOODS.map(plateFor).join("");
     if(allOpen()) paintAll();
   }
   /* every state at once */
@@ -923,6 +934,7 @@ body.neon .batwrap svg{animation:none !important}
   }
   function closeAll(){ allBox.setAttribute("hidden",""); document.body.style.overflow=""; }
   document.getElementById("allx").addEventListener("click",closeAll);
+  document.getElementById("seeall").addEventListener("click",openAll);
   allGrid.addEventListener("click",function(e){
     var b=e.target.closest&&e.target.closest(".note"); if(!b) return;
     var k=b.getAttribute("data-m"), hitPlay=!!e.target.closest(".pl");
@@ -960,7 +972,6 @@ body.neon .batwrap svg{animation:none !important}
   }
   function disarm(){ armed=null; paintMoods(); markArmed(); paintPanel(); }
   moodsEl.addEventListener("click",function(e){
-    if(e.target.closest(".seeall")){ openAll(); return; }
     var b=e.target.closest&&e.target.closest(".note"); if(!b) return;
     var k=b.getAttribute("data-m");
     var hitPlay=!!e.target.closest(".pl");
