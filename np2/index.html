@@ -257,39 +257,45 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .notice::-webkit-scrollbar{height:5px}
 .notice::-webkit-scrollbar-track{background:#0b1719}
 .notice::-webkit-scrollbar-thumb{background:var(--pink)}
-.note{flex:0 0 164px;scroll-snap-align:start;background:#0b1719;padding:12px 10px 11px;
-  text-align:center;cursor:pointer;border:0;font:inherit;color:inherit;
-  transition:background .18s}
+/* THE PICTURE IS THE PLATE. It used to sit in a 104px box with the name, the
+   play button and the count stacked underneath, so two thirds of the card was
+   text and he was a thumbnail in it. He fills the whole rectangle now and
+   everything else is laid OVER him, on a scrim that only darkens the bottom
+   third — which is where his feet are in every render, so nothing you want to
+   look at is ever under the words. */
+.note{flex:0 0 152px;scroll-snap-align:start;position:relative;height:216px;padding:0;
+  overflow:hidden;background:#0b1719;cursor:pointer;border:0;font:inherit;color:inherit;
+  text-align:left;transition:background .18s}
 .note:hover{background:#16292d}
-/* HE PLAYS EVERY STATE. The signs here used to be line drawings — honest, but a
-   drawing of a mood is a guess at it, and there is a render of him actually IN
-   each one. They arrive green-screened, so they are keyed to alpha (no PIL on
-   this machine; see tools note in the README) and trimmed to his own outline,
-   so a bigger plate means more of him and not more empty frame.
-   object-fit:contain, never cover: the poses are different shapes — someone
-   kneeling, a couple kissing — and a square crop would cut heads off. */
-.note .ic{display:block;height:104px;margin-bottom:6px}
-.note .ic img{width:100%;height:100%;object-fit:contain;object-position:center bottom;
-  display:block;transform:rotate(-3deg);
+.note .ic{position:absolute;inset:0;display:block;height:auto;margin:0}
+.note .ic img{width:100%;height:100%;object-fit:contain;object-position:center 86%;
+  display:block;transform:rotate(-2deg);
   filter:drop-shadow(0 3px 9px rgba(0,0,0,.55));
   transition:transform .25s,filter .25s}
-.note:hover .ic img,.note.on .ic img{transform:rotate(0) scale(1.06);
+.note:hover .ic img,.note.on .ic img{transform:rotate(0) scale(1.05);
   filter:drop-shadow(0 0 11px rgba(255,31,111,.8)) drop-shadow(0 3px 9px rgba(0,0,0,.55))}
-.note .nm{display:block;font-family:var(--px);font-size:6.5px;line-height:1.75;
-  letter-spacing:1px;color:#cfdcdc;min-height:23px}
-.note .pl{width:30px;height:30px;margin:9px auto 6px;border-radius:50%;
+/* the words and the button, over him */
+.note .ft{position:absolute;left:0;right:0;bottom:0;z-index:2;
+  display:flex;align-items:flex-end;gap:8px;padding:30px 9px 9px;
+  background:linear-gradient(180deg,transparent,rgba(5,14,15,.82) 46%,rgba(5,14,15,.96))}
+.note .tx{flex:1;min-width:0}
+.note .nm{display:block;font-family:var(--px);font-size:6.5px;line-height:1.7;
+  letter-spacing:1px;color:#cfdcdc}
+.note .rc{display:block;color:#93a8a9;font-size:13px;line-height:1.5;margin-top:3px}
+.note .pl{flex:none;width:32px;height:32px;border-radius:50%;
   background:var(--pink);display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:12px;box-shadow:0 0 11px rgba(255,31,111,.5);
+  color:#fff;font-size:12px;box-shadow:0 0 11px rgba(255,31,111,.55);
   transition:transform .18s,background .18s}
 .note:hover .pl{transform:scale(1.12)}
-.note .rc{display:block;color:#5d7275;font-size:14px;line-height:1.4}
 .note.on{background:#240914}
 .note.on .nm{color:var(--pink-hot)}
 .note.on .pl{background:var(--acid);color:#000;box-shadow:0 0 13px rgba(182,255,0,.6)}
+
 /* SEE ALL — the shelf is a flick, this is the wall. Fourteen states scrolling
    sideways means you meet them three at a time and never see the shape of the
    set; this lays them all out at once, same plates, bigger pictures. */
-.seeall{flex:0 0 96px;scroll-snap-align:start;background:#13242a;cursor:pointer;border:0;
+.seeall{flex:0 0 96px;align-self:stretch;scroll-snap-align:start;background:#13242a;
+  cursor:pointer;border:0;
   font:inherit;color:inherit;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:9px;padding:12px 8px;transition:background .18s}
 .seeall:hover{background:#1d343a}
@@ -305,11 +311,10 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .allgrid{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;align-content:start;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:2px;
   background:var(--pink);border-top:2px solid var(--pink);padding:2px 2px 130px}
-.allgrid .note{flex:none;width:auto}
-.allgrid .note .ic{height:132px}
+.allgrid .note{flex:none;width:auto;height:244px}
 @media(max-width:560px){
   .allgrid{grid-template-columns:repeat(2,1fr)}
-  .allgrid .note .ic{height:116px}
+  .allgrid .note{height:214px}
 }
 
 /* the plate you opened, spelled out */
@@ -329,9 +334,11 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .npt:hover{border-color:var(--pink);color:var(--pink-hot)}
 .npt.playing{border-color:var(--pink);background:#240914;color:var(--pink-hot)}
 @media(max-width:560px){
-  .note{flex:0 0 138px;padding:10px 8px 9px}
-  .note .ic{height:88px}
+  .note{flex:0 0 130px;height:188px;padding:0}
   .note .nm{font-size:6px}
+  .note .rc{font-size:12px}
+  .note .ft{padding:26px 7px 8px;gap:6px}
+  .note .pl{width:28px;height:28px;font-size:11px}
   .npt{font-size:15px;padding:5px 8px}
 }
 
@@ -431,8 +438,10 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 /* the three states colour the text at EVERY width — these used to live inside
    the 560px block, back when a phone had no text to colour. */
 .sq:hover .tt{color:#cfdcdc}
-.sq.playing .tt{color:var(--pink-hot)}
-.sq.playing .dur{color:var(--pink)}
+/* THE ONE THAT IS ON GETS A BIGGER NAME, not a bigger cover — the sleeve
+   already doubled, and the title under it was still set for a 50px tile. */
+.sq.playing .tt{color:var(--pink-hot);font-size:20px;line-height:1.25;-webkit-line-clamp:2;margin-top:7px}
+.sq.playing .dur{color:var(--pink);font-size:8px}
 .grid.live .sq:not(.playing):not(.armed) .tt{color:#8ba1a4}
 .grid.live .sq:not(.playing):not(.armed) .dur{color:#4e676a}
 
@@ -684,7 +693,7 @@ body.neon .batwrap svg{animation:none !important}
 
   <div class="sec" id="recsec">
     <div class="ssub" id="recsub">27 songs — tap a sleeve to play it_</div>
-    <button class="zoombtn" id="zoombtn" type="button">⤢ BIGGER — SEE THE TITLES</button>
+    <button class="zoombtn" id="zoombtn" type="button">☰ LIST</button>
     <div class="grid" id="tracks"></div>
   </div>
 
@@ -886,19 +895,14 @@ body.neon .batwrap svg{animation:none !important}
     var n=m.n.length;
     return '<button class="note'+(armed&&armed.k===m.k?" on":"")+'" type="button" data-m="'+m.k+'">'
       +'<span class="ic"><img src="'+NOTEIMG+m.k+'.png" alt="" loading="lazy" decoding="async"></span>'
-      +'<span class="nm">'+m.t+'</span>'
-      +'<span class="pl" data-play="1">\u25b6</span>'
-      +'<span class="rc">'+n+(n===1?" song":" songs")+'</span></button>';
+      +'<span class="ft">'
+        +'<span class="tx"><span class="nm">'+m.t+'</span>'
+        +'<span class="rc">'+n+(n===1?" song":" songs")+'</span></span>'
+        +'<span class="pl" data-play="1">\u25b6</span>'
+      +'</span></button>';
   }
   function paintMoods(){
-    moodsEl.innerHTML=MOODS.map(function(m){
-      var n=m.n.length;
-      return '<button class="note'+(armed&&armed.k===m.k?" on":"")+'" type="button" data-m="'+m.k+'">'
-        +'<span class="ic"><img src="'+NOTEIMG+m.k+'.png" alt="" loading="lazy" decoding="async"></span>'
-        +'<span class="nm">'+m.t+'</span>'
-        +'<span class="pl" data-play="1">\u25b6</span>'
-        +'<span class="rc">'+n+(n===1?" song":" songs")+'</span></button>';
-    }).join("")
+    moodsEl.innerHTML=MOODS.map(plateFor).join("")
       + '<button class="seeall" id="seeall" type="button" aria-label="see every state">'
       +   '<span class="sg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>'
       +   '<span class="sa">SEE<br>ALL</span></button>';
