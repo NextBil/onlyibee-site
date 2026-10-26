@@ -193,12 +193,17 @@
     border:1px solid #242424}
   .rec b{display:block;font-family:var(--px);font-size:8px;line-height:1.7;margin-top:9px;
     color:var(--rt,var(--acid));font-weight:normal}
+  /* what it SOUNDS like, in the smallest type on the card — the thing you
+     actually want to know before you open a record you have not heard. */
+  .rec .rtg{display:block;font-family:var(--vt);font-size:14px;line-height:1.35;
+    color:var(--dim);margin-top:5px}
   .rec .rg{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
-    color:var(--rt,var(--acid));margin-top:6px;line-height:1.9;opacity:.8}
+    color:var(--rt,var(--acid));margin-top:6px;line-height:1.9;opacity:.85}
   @media(max-width:560px){
     .recs{gap:8px}
     .rec{padding:6px}
     .rec b{font-size:6.5px;margin-top:7px}
+    .rec .rtg{font-size:12px;margin-top:4px}
     .rec .rg{font-size:5.5px}
   }
 </style>
@@ -222,17 +227,20 @@
       <a class="rec" href="../np2/" style="--rt:#ff1f6f">
         <img width="384" height="384" src="../assets/img/mid/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2">
         <b>NOUVEAUX PUNK 2</b>
-        <span class="rg">▶ OPEN THE PAGE</span>
-      </a>
-      <a class="rec" href="../nouveauxpunk/" style="--rt:#ff2b2b">
-        <img width="384" height="384" src="../assets/img/mid/nouveaux-punk.jpg" alt="Nouveaux Punk">
-        <b>NOUVEAUX PUNK</b>
-        <span class="rg">▶ OPEN THE PAGE</span>
+        <span class="rtg">rock · rnb · motivational · sad</span>
+        <span class="rg">31 OCT 2026</span>
       </a>
       <a class="rec" href="../20minzasession/" style="--rt:#ff7a1a">
         <img width="384" height="384" src="../assets/img/mid/20mzs-album.jpg" alt="20 Min Za Session">
         <b>20 MIN ZA SESSION</b>
-        <span class="rg">▶ OPEN THE PAGE</span>
+        <span class="rtg">fun · stoner · groovy · soulful rnb · rap</span>
+        <span class="rg">2024</span>
+      </a>
+      <a class="rec" href="../nouveauxpunk/" style="--rt:#ff2b2b">
+        <img width="384" height="384" src="../assets/img/mid/nouveaux-punk.jpg" alt="Nouveaux Punk">
+        <b>NOUVEAUX PUNK</b>
+        <span class="rtg">epic · cinematic · sad · rock</span>
+        <span class="rg">2022</span>
       </a>
     </div>
 

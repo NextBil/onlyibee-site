@@ -264,9 +264,13 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
    third — which is where his feet are in every render, so nothing you want to
    look at is ever under the words. */
 .note{flex:0 0 152px;scroll-snap-align:start;position:relative;height:216px;padding:0;
-  overflow:hidden;background:#0b1719;cursor:pointer;border:0;font:inherit;color:inherit;
-  text-align:left;transition:background .18s}
-.note:hover{background:#16292d}
+  overflow:hidden;cursor:pointer;border:0;font:inherit;color:inherit;
+  text-align:left;transition:background .18s;
+  /* a grey bed, not the room's near-black teal: these are lit 3D renders with
+     their green keyed out, and on #0b1719 the dark side of him disappeared
+     into the card. Grey gives the silhouette an edge to sit against. */
+  background:linear-gradient(180deg,#3a4145,#272d30 62%,#1b2124)}
+.note:hover{background:linear-gradient(180deg,#464e52,#2f3639 62%,#212729)}
 .note .ic{position:absolute;inset:0;display:block;height:auto;margin:0}
 .note .ic img{width:100%;height:100%;object-fit:contain;object-position:center 86%;
   display:block;transform:rotate(-2deg);
@@ -277,7 +281,7 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 /* the words and the button, over him */
 .note .ft{position:absolute;left:0;right:0;bottom:0;z-index:2;
   display:flex;align-items:flex-end;gap:8px;padding:30px 9px 9px;
-  background:linear-gradient(180deg,transparent,rgba(5,14,15,.82) 46%,rgba(5,14,15,.96))}
+  background:linear-gradient(180deg,transparent,rgba(8,16,18,.88) 46%,rgba(8,16,18,.98))}
 .note .tx{flex:1;min-width:0}
 .note .nm{display:block;font-family:var(--px);font-size:6.5px;line-height:1.7;
   letter-spacing:1px;color:#cfdcdc}
