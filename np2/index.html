@@ -229,83 +229,76 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .prose{display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);gap:18px;
   align-items:start}
 .prose .ptxt p:last-child{margin-bottom:0}
-@media(max-width:560px){.prose{grid-template-columns:minmax(0,108px) minmax(0,1fr);gap:13px;
-  padding:14px 15px}
-  .prose .ptxt{font-size:19px}
-  .shot .sl,.shot .sgo{display:none}   /* the caption lives in the drawer on a phone */
-}
-
-/* ===== THE DECK — the way in that needs no decision =====
-   27 unknown titles IS a decision, and most visitors won't make it. The dot
-   makes it for them: it pulls a track at random, says what it is while it
-   plays, and SKIP pulls another. It sits above the list for that reason. */
-.deck{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:14px}
-.dplay{flex:none;width:58px;height:58px;border-radius:50%;cursor:pointer;
-  border:2px solid var(--pink);background:#240914;color:var(--pink-hot);
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .15s,box-shadow .2s,background .2s}
-.dplay svg{width:22px;height:22px;fill:currentColor}
-.dplay:hover{transform:scale(1.06);box-shadow:0 0 20px rgba(255,31,111,.55)}
-body.neon .dplay{background:#3a0e20;box-shadow:0 0 12px rgba(255,31,111,.5)}
-.dnow{flex:1;min-width:0}
-.dlab{display:block;font-family:var(--px);font-size:6.5px;letter-spacing:1px;
-  color:var(--acid);line-height:1.9}
-.dtt{display:block;font-size:21px;color:#dceaea;font-weight:normal;line-height:1.25;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dmeta{display:block;font-family:var(--px);font-size:6.5px;letter-spacing:1px;
-  color:#5d7275;line-height:1.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dsigns{display:flex;gap:5px;margin-top:3px}
-.dsigns svg{width:13px;height:13px;stroke:var(--pink);fill:none;stroke-width:1.7;
-  stroke-linecap:round;stroke-linejoin:round}
-.dbar{display:block;height:3px;background:#16292d;margin-top:7px;overflow:hidden}
-.dbar i{display:block;height:100%;width:0;background:var(--pink);transition:width .3s linear}
-.dskip{flex:none;cursor:pointer;background:none;border:1px solid #23383c;color:#93a8a9;
-  font-family:var(--px);font-size:7px;letter-spacing:1px;padding:11px 10px;
-  display:flex;flex-direction:column;align-items:center;gap:5px;
-  transition:border-color .15s,color .15s}
-.dskip svg{width:16px;height:16px;fill:currentColor}
-.dskip:hover{border-color:var(--pink);color:var(--pink-hot)}
+/* ON A PHONE THE PICTURE GETS THE WIDTH. A 108px square beside a ~220px column
+   of 19px text wasted both: the photograph was a stamp and the prose was a
+   gutter four or five words wide. Stacked, the frame runs the full width as a
+   letterbox (a full-width SQUARE would push the whole statement off-screen)
+   and the text finally gets the page. */
 @media(max-width:560px){
-  .deck{gap:11px;padding:12px 13px}
-  .dplay{width:50px;height:50px}.dplay svg{width:19px;height:19px}
-  .dtt{font-size:19px}
-  .dskip{padding:9px 7px;font-size:6.5px}
+  .prose{grid-template-columns:minmax(0,1fr);gap:12px;padding:13px 14px}
+  .prose .ptxt{font-size:19px;line-height:1.5}
+  .prose .lede{font-size:20px}
+  .shot .win{aspect-ratio:16/9}
+  .shot .sl{font-size:14px}
+  .shot .sgo{font-size:6.5px;padding:7px 8px 9px}
 }
 
-/* ===== THE MANUAL — chapter one's LISTENING NOTICE, in NP2's colours =====
-   The chips this replaces read as a toolbar, and a toolbar is something you
-   skip. The notice plate is the one piece of chapter one that people actually
-   used: a wall of states behind a hot hairline grid, each one a card you press.
-   Same structure here, with this record's own signs in place of the emoji and
-   a count where chapter one put its recommendation. */
-.notice{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--pink);
-  border:2px solid var(--pink);box-shadow:0 0 22px rgba(255,31,111,.3)}
-.note{background:#0b1719;padding:17px 11px 13px;text-align:center;cursor:pointer;
-  position:relative;border:0;font:inherit;color:inherit;display:block;width:100%;
+/* ===== THE NOTICE — chapter one's LISTENING NOTICE, turned on its side =====
+   It sits where the play bar used to, directly under the record's own words,
+   because picking the state you are IN is a better way into 27 unknown songs
+   than a shuffle button. Fifteen plates stacked three-up was most of a screen;
+   as a sideways shelf it is one band you flick through.
+   Tapping a plate ARMS it: its songs warm up in the grid below, its titles open
+   underneath, and the record keeps moving through that set when a track ends.
+   The notice is the playlist. */
+.notice{display:flex;gap:2px;overflow-x:auto;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+  background:var(--pink);border:2px solid var(--pink);box-shadow:0 0 20px rgba(255,31,111,.28)}
+.notice::-webkit-scrollbar{height:5px}
+.notice::-webkit-scrollbar-track{background:#0b1719}
+.notice::-webkit-scrollbar-thumb{background:var(--pink)}
+.note{flex:0 0 132px;scroll-snap-align:start;background:#0b1719;padding:13px 9px 11px;
+  text-align:center;cursor:pointer;border:0;font:inherit;color:inherit;
   transition:background .18s}
 .note:hover{background:#16292d}
-.note .ic{display:block;height:38px;margin-bottom:9px}
-.note .ic svg{width:38px;height:38px;stroke:#c7d7d9;fill:none;stroke-width:1.6;
+.note .ic{display:block;height:34px;margin-bottom:7px}
+.note .ic svg{width:34px;height:34px;stroke:#c7d7d9;fill:none;stroke-width:1.6;
   stroke-linecap:round;stroke-linejoin:round;transform:rotate(-8deg);
   filter:drop-shadow(0 0 7px rgba(255,31,111,.6));
   transition:stroke .18s,filter .18s,transform .25s}
 .note:hover .ic svg,.note.on .ic svg{stroke:var(--pink-hot);transform:rotate(0);
   filter:drop-shadow(0 0 9px rgba(255,31,111,.9))}
-.note .nm{display:block;font-family:var(--px);font-size:7.5px;line-height:1.75;
-  letter-spacing:1px;color:#cfdcdc;min-height:26px}
-.note .pl{width:34px;height:34px;margin:10px auto 8px;border-radius:50%;
+.note .nm{display:block;font-family:var(--px);font-size:6.5px;line-height:1.75;
+  letter-spacing:1px;color:#cfdcdc;min-height:23px}
+.note .pl{width:30px;height:30px;margin:9px auto 6px;border-radius:50%;
   background:var(--pink);display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:14px;box-shadow:0 0 12px rgba(255,31,111,.5);
+  color:#fff;font-size:12px;box-shadow:0 0 11px rgba(255,31,111,.5);
   transition:transform .18s,background .18s}
 .note:hover .pl{transform:scale(1.12)}
-.note .rc{display:block;color:#5d7275;font-size:15px;line-height:1.45}
+.note .rc{display:block;color:#5d7275;font-size:14px;line-height:1.4}
 .note.on{background:#240914}
 .note.on .nm{color:var(--pink-hot)}
-.note.on .pl{background:var(--acid);color:#000;box-shadow:0 0 14px rgba(182,255,0,.6)}
-@media(max-width:640px){
-  .notice{grid-template-columns:repeat(2,1fr)}
-  .note{padding:14px 9px 11px}
-  .note .nm{font-size:7px}
+.note.on .pl{background:var(--acid);color:#000;box-shadow:0 0 13px rgba(182,255,0,.6)}
+/* the plate you opened, spelled out */
+.npanel{border:2px solid var(--pink);border-top:0;background:rgba(11,23,25,.96);padding:12px 14px}
+.npanel[hidden]{display:none}
+.nphead{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.nphead b{font-family:var(--px);font-size:8px;color:var(--acid);font-weight:normal;letter-spacing:1px}
+.nphead .c{font-family:var(--px);font-size:6.5px;color:#5d7275;margin-right:auto;letter-spacing:1px}
+.nphead button{font-family:var(--px);font-size:6.5px;letter-spacing:1px;cursor:pointer;
+  color:#93a8a9;background:none;border:1px solid #23383c;padding:6px 8px}
+.nphead button:hover{border-color:var(--pink);color:var(--pink-hot)}
+.nplist{display:flex;flex-wrap:wrap;gap:5px}
+.npt{display:inline-flex;align-items:center;gap:7px;cursor:pointer;text-decoration:none;
+  border:1px solid #23383c;background:#0d191c;padding:6px 9px;font-size:16px;color:#cfdcdc;
+  transition:border-color .15s,color .15s}
+.npt b{font-family:var(--px);font-size:6px;color:#5d7275;font-weight:normal}
+.npt:hover{border-color:var(--pink);color:var(--pink-hot)}
+.npt.playing{border-color:var(--pink);background:#240914;color:var(--pink-hot)}
+@media(max-width:560px){
+  .note{flex:0 0 112px;padding:11px 7px 9px}
+  .note .nm{font-size:6px}
+  .npt{font-size:15px;padding:5px 8px}
 }
 
 /* MORE: the statement is four paragraphs now, and three of them are for the
@@ -322,7 +315,7 @@ body.neon .dplay{background:#3a0e20;box-shadow:0 0 12px rgba(255,31,111,.5)}
   border:2px solid var(--pink);background:linear-gradient(135deg,#1a2d31,#0b1719 62%,#240914);
   box-shadow:0 0 20px rgba(255,31,111,.22);transition:transform .18s,box-shadow .18s}
 .chap:hover{transform:translateY(-2px);box-shadow:0 0 32px rgba(255,31,111,.45)}
-.chap img{width:104px;height:104px;flex:none;object-fit:cover;display:block;
+.chap img{width:92px;height:92px;flex:none;object-fit:cover;display:block;
   border:1px solid #2a4347}
 .chap .cmeta{min-width:0}
 .chap b{display:block;font-family:var(--px);font-size:11px;color:var(--acid);
@@ -332,90 +325,123 @@ body.neon .dplay{background:#3a0e20;box-shadow:0 0 12px rgba(255,31,111,.5)}
   color:var(--pink-hot);margin-top:9px;line-height:1.9}
 @media(max-width:560px){
   .chap{gap:13px;padding:11px}
-  .chap img{width:82px;height:82px}
+  .chap img{width:72px;height:72px}
   .chap b{font-size:9px}.chap .cs{font-size:15px}
 }
 
-/* THE RECORD AS A SHELF. Rows were a column you scroll past; a wall of sleeves
-   is one glance, and it is half the height. Every tile is the SAME cover — that
-   is the point, the record is one object — so STATE does all the distinguishing
-   instead of twenty-seven different pictures:
-     nothing on   → everything sits dim and cold
-     something on → that one goes to full colour, lifts and rings; the rest drop
-                    another stop into the dark and turn blue.
-   The tiles use assets/img/thumb (128px), never the full cover: Safari decodes
-   an <img> at its NATURAL size, so 27 full sleeves in one tab is hundreds of MB
-   of decoded bitmap on a phone. See the radio list for the same trap. */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:10px}
+/* THE RECORD AS A SHELF, SIX UP — the same six columns on a laptop and on a
+   phone, so the record is one block of the page everywhere instead of a long
+   scroll on the device most people hold. At six-up a phone tile is ~52px, far
+   too small for a title, so the titles only appear from 560px; on a phone the
+   number IS the label and the names live in THE BIGGER BOX below.
+   Every tile is the SAME cover, which is the point — the record is one object —
+   so STATE does the distinguishing: dim by default, the armed playlist warms
+   up, and the one actually playing goes to full colour and ZOOMS OUT OF THE
+   GRID to roughly the size it used to be, swapping its 128px thumb for the
+   384px copy so it is not a blur when it gets there.
+   The tiles use assets/img/thumb, never the full cover: Safari decodes an <img>
+   at its NATURAL size, so 27 full sleeves in one tab is hundreds of MB. */
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
 .sq{position:relative;display:block;text-decoration:none;cursor:pointer;
-  transition:transform .22s ease}
+  transition:transform .26s cubic-bezier(.2,.8,.25,1)}
 .sqw{display:block;position:relative;aspect-ratio:1;overflow:hidden;isolation:isolate;
   border:1px solid #1d3338;background:#060f10;transition:border-color .2s,box-shadow .25s}
 .sqw img{width:100%;height:100%;object-fit:cover;display:block;
   filter:grayscale(.45) brightness(.66);transition:filter .25s}
-/* the cold wash that falls over everything the record is NOT playing */
 .sqw::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
   background:#0a2b33;opacity:0;transition:opacity .25s}
-.sq .no{position:absolute;top:5px;left:5px;z-index:3;font-family:var(--px);font-size:7px;
-  letter-spacing:1px;color:#cfdcdc;background:rgba(4,12,13,.74);padding:3px 4px;line-height:1}
-.sq .st{position:absolute;right:5px;bottom:5px;z-index:3;font-family:var(--px);font-size:7px;
+.sq .no{position:absolute;top:3px;left:3px;z-index:3;font-family:var(--px);font-size:6px;
+  letter-spacing:1px;color:#cfdcdc;background:rgba(4,12,13,.74);padding:3px;line-height:1}
+.sq .st{position:absolute;right:3px;bottom:3px;z-index:3;font-family:var(--px);font-size:6px;
   color:var(--pink-hot);opacity:0;transition:opacity .2s}
-.sq .tt{display:block;min-width:0;margin-top:6px;font-size:15px;line-height:1.3;color:#93a8a9;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s}
-.sq .dur{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
-  color:#44585b;line-height:1.9}
+.sq .tt,.sq .dur{display:none}
 .sq:hover .sqw img{filter:none}
 .sq:hover .sqw{border-color:#2f5157}
-.sq:hover .tt{color:#cfdcdc}
 .sq:hover .st{opacity:1}
-/* the one that is on */
-.sq.playing{transform:scale(1.08);z-index:4}
+/* ARMED — the state you picked in the notice. Queued, not playing, so it gets
+   its OWN colour rather than a weaker version of the playing one: the cold blue
+   wash is swapped for the record's acid yellow and the tile carries a soft glow.
+   Playing = pink and twice the size. Queued = yellow and lit. Everything else =
+   cold and dark. Three states, three readings, no guessing which is which. */
+.sq.armed .sqw{border-color:rgba(232,220,18,.8);
+  box-shadow:0 0 12px rgba(232,220,18,.42),0 0 0 1px rgba(232,220,18,.3)}
+.sq.armed .sqw img{filter:grayscale(.1) brightness(.9)}
+.sq.armed .sqw::after{opacity:.3;background:#e8dc12;mix-blend-mode:overlay}
+.sq.armed .no{background:rgba(232,220,18,.88);color:#120f00}
+.sq.armed .tt{color:var(--acid)}
+/* the one that is on — out of the grid, at something like its real size */
+.sq.playing{transform:scale(2.05);z-index:6}
 .sq.playing .sqw{border-color:var(--pink);
-  box-shadow:0 0 0 1px var(--pink),0 0 24px rgba(255,31,111,.5),0 10px 26px rgba(0,0,0,.6)}
+  box-shadow:0 0 0 1px var(--pink),0 0 26px rgba(255,31,111,.55),0 12px 30px rgba(0,0,0,.72)}
 .sq.playing .sqw img{filter:none}
 .sq.playing .sqw::after{opacity:0}
-.sq.playing .tt{color:var(--pink-hot)}
-.sq.playing .dur{color:var(--pink)}
 .sq.playing .st{opacity:1}
-/* …and everything that is not, while something is */
-.grid.live .sq:not(.playing) .sqw img{filter:grayscale(1) brightness(.34)}
-.grid.live .sq:not(.playing) .sqw::after{opacity:.6}
-.grid.live .sq:not(.playing) .tt{color:#8ba1a4}
-.grid.live .sq:not(.playing) .dur{color:#4e676a}
+/* a scaled tile grows out of its cell: the ends of a row have to grow INWARD
+   or the page gains a horizontal scrollbar */
+.sq:nth-child(6n+1){transform-origin:left center}
+.sq:nth-child(6n){transform-origin:right center}
+.sq:nth-child(-n+6){transform-origin:center top}
+.sq:nth-child(6n+1):nth-child(-n+6){transform-origin:left top}
+.sq:nth-child(6n):nth-child(-n+6){transform-origin:right top}
+/* …and everything that is neither playing nor armed, while something is on */
+.grid.live .sq:not(.playing):not(.armed) .sqw img{filter:grayscale(1) brightness(.34)}
+.grid.live .sq:not(.playing):not(.armed) .sqw::after{opacity:.6}
 .gridempty{font-family:var(--px);font-size:9px;color:#5d7275;padding:22px 0;text-align:center;
   line-height:2;grid-column:1/-1}
-@media(max-width:560px){
-  /* minmax(0,1fr), NOT 1fr: a bare 1fr is minmax(auto,1fr) and will not shrink
-     below a track's min-content, so the longest song title widened its column
-     and pushed the page 33px past the screen. */
-  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-  .sq .tt{font-size:14px}
-  .sq .no{font-size:6px}
+@media(min-width:560px){
+  .grid{gap:9px}
+  .sq .tt{display:block;min-width:0;margin-top:6px;font-size:14px;line-height:1.3;color:#93a8a9;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s}
+  .sq .dur{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
+    color:#44585b;line-height:1.9}
+  .sq .no{font-size:7px;top:5px;left:5px;padding:3px 4px}
+  .sq:hover .tt{color:#cfdcdc}
+  .sq.playing{transform:scale(1.75)}
+  .sq.playing .tt{color:var(--pink-hot)}
+  .sq.playing .dur{color:var(--pink)}
+  .grid.live .sq:not(.playing):not(.armed) .tt{color:#8ba1a4}
+  .grid.live .sq:not(.playing):not(.armed) .dur{color:#4e676a}
 }
 
-/* THE NOTICE OPENS. Fifteen plates is most of a screen, and it is the last
-   section on the page — it stays shut until someone wants it. */
-.opener{display:flex;align-items:center;gap:14px;width:100%;cursor:pointer;
-  padding:14px 16px;text-align:left;font:inherit;color:inherit;
-  border:2px solid var(--pink);background:linear-gradient(135deg,#1a2d31,#0b1719 62%,#240914);
-  transition:box-shadow .2s,transform .18s}
-.opener:hover{box-shadow:0 0 26px rgba(255,31,111,.42);transform:translateY(-2px)}
-.opener .oi{flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
-.opener .oi svg{width:34px;height:34px;stroke:var(--pink-hot);fill:none;stroke-width:1.8;
-  stroke-linecap:round;stroke-linejoin:round;transform:rotate(-9deg);
-  filter:drop-shadow(0 0 7px rgba(255,31,111,.85));transition:transform .25s}
-.opener:hover .oi svg{transform:rotate(0)}
-.opener .ot{min-width:0;margin-right:auto}
-.opener b{display:block;font-family:var(--px);font-size:10px;color:var(--acid);
-  font-weight:normal;letter-spacing:1px;line-height:1.7}
-.opener .os{display:block;color:#93a8a9;font-size:16px;margin-top:5px;line-height:1.35}
-.opener .oc{flex:none;font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--pink-hot)}
-.notice{margin-top:12px}
-.notice[hidden]{display:none}
+/* THE BIGGER BOX — the same twenty-seven, large enough to read, over the page.
+   Six-up is a map; this is the list. */
+.zoombtn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px;
+  background:none;border:1px solid #23383c;color:#93a8a9;font-family:var(--px);font-size:7px;
+  letter-spacing:1px;padding:9px 12px;transition:border-color .15s,color .15s}
+.zoombtn:hover{border-color:var(--pink);color:var(--pink-hot)}
+.zoom{position:fixed;inset:0;z-index:62;background:#060f10;display:flex;flex-direction:column;
+  overscroll-behavior:contain}
+.zoom[hidden]{display:none}
+.zoombar{display:flex;align-items:center;gap:12px;flex:none;padding:13px 16px;
+  border-bottom:2px solid var(--border);background:#0b1719;
+  font-family:var(--px);font-size:8px;letter-spacing:1px}
+.zoombar b{color:var(--acid);font-weight:normal;white-space:nowrap}
+.zoombar .c{color:#5d7275}
+.zoombar button{font:inherit;letter-spacing:1px;cursor:pointer;color:var(--pink-hot);
+  background:none;border:1px solid var(--pink);padding:7px 10px}
+.zoombar button:hover{background:#240914}
+.zoomlist{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 130px}
+.zr{display:flex;align-items:center;gap:13px;padding:8px;cursor:pointer;text-decoration:none;
+  border:1px solid transparent;transition:background .15s,border-color .15s}
+.zr:hover{background:#16292d}
+.zr img{width:72px;height:72px;flex:none;object-fit:cover;display:block;border:1px solid #1d3338;
+  filter:grayscale(.4) brightness(.72);transition:filter .2s}
+.zr:hover img{filter:none}
+.zr .zn{font-family:var(--px);font-size:8px;color:#456;flex:none;width:24px}
+.zr .zt{flex:1;min-width:0;font-size:19px;color:#cfdcdc;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.zr .zd{font-family:var(--px);font-size:7px;color:var(--pink);flex:none}
+.zr.armed{border-color:rgba(232,220,18,.6);background:rgba(232,220,18,.06)}
+.zr.armed .zt{color:var(--acid)}
+.zr.armed img{filter:none;box-shadow:0 0 12px rgba(232,220,18,.4)}
+.zr.playing{background:#20101a;border-color:var(--pink)}
+.zr.playing .zt{color:var(--pink-hot)}
+.zr.playing img{filter:none;box-shadow:0 0 14px rgba(255,31,111,.5)}
 @media(max-width:560px){
-  .opener{gap:11px;padding:12px}
-  .opener b{font-size:8.5px}.opener .os{font-size:14px}
-  .opener .oi{width:32px;height:32px}.opener .oi svg{width:28px;height:28px}
+  .zoomlist{padding:11px 11px 130px}
+  .zr{gap:10px;padding:7px 4px}
+  .zr img{width:60px;height:60px}
+  .zr .zt{font-size:17px}
 }
 
 /* the drop as a FOLDER — spines peeking out of a card you open */
@@ -604,27 +630,16 @@ body.neon .batwrap svg{animation:none !important}
       </div>
     </div>
 
-    <!-- THE DECK lives in the statement's own section: the record introduces
-         itself and then immediately offers to play. Its own heading ("THE
-         RECORD") was a line of furniture between the two. -->
-    <div class="deck card">
-      <button class="dplay" id="dplay" aria-label="play a random track"></button>
-      <div class="dnow">
-        <span class="dlab" id="dlab">A RANDOM TRACK_</span>
-        <b class="dtt" id="dtt">press to play a track</b>
-        <span class="dmeta" id="dmeta">27 SONGS · SHUFFLED</span>
-        <span class="dsigns" id="dsigns"></span>
-        <span class="dbar"><i id="dbari"></i></span>
-      </div>
-      <button class="dskip" id="dskip" aria-label="skip to another track">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5 15 12 5 19.5Z"/><rect x="16.4" y="4.5" width="2.9" height="15"/></svg>
-        SKIP
-      </button>
-    </div>
+    <!-- THE NOTICE sits where the play bar used to: the record says what it is,
+         then immediately asks which state you are in. Arming a state warms its
+         songs in the grid below and keeps the record inside that set. -->
+    <div class="notice" id="moods"></div>
+    <div class="npanel" id="npanel" hidden></div>
   </div>
 
   <div class="sec" id="recsec">
-    <div class="ssub" id="recsub">27 songs — tap any one, or press play above_</div>
+    <div class="ssub" id="recsub">27 songs — tap a sleeve to play it_</div>
+    <button class="zoombtn" id="zoombtn" type="button">⤢ BIGGER — SEE THE TITLES</button>
     <div class="grid" id="tracks"></div>
   </div>
 
@@ -636,27 +651,10 @@ body.neon .batwrap svg{animation:none !important}
     <div class="tees" id="tees"></div>
   </div>
 
-  <!-- THE MANUAL, in chapter one's LISTENING NOTICE design: the same red-grid
-       plate of states, with this record's own signs instead of emoji. It sits
-       after the surprises because it is the last word on how to hear it. -->
-  <div class="sec">
-    <div class="sh">THE <span class="a">NOTICE</span>_</div>
-    <button class="opener" id="noticeopen" type="button" aria-expanded="false" aria-controls="moods">
-      <span class="oi"><svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 3.2 22.2 20.6H1.8Z"/><path d="M12 9.6v5.2M12 17.8v.2"/></svg></span>
-      <span class="ot">
-        <b>HOW TO LISTEN</b>
-        <span class="os">fifteen states — tap one to sort the record, tap ▶ to press play on it_</span>
-      </span>
-      <span class="oc">OPEN ▾</span>
-    </button>
-    <div class="notice" id="moods" hidden></div>
-  </div>
-
   <!-- back to where it started -->
   <div class="sec">
     <a class="chap" href="../nouveauxpunk/">
-      <img src="../assets/img/nouveaux-punk.jpg" alt="Nouveaux Punk — The Experience">
+      <img width="384" height="384" src="../assets/img/mid/nouveaux-punk.jpg" alt="Nouveaux Punk — The Experience">
       <span class="cmeta">
         <b>CHAPTER ONE</b>
         <span class="cs">NOUVEAUX PUNK — THE EXPERIENCE</span>
@@ -682,6 +680,18 @@ body.neon .batwrap svg{animation:none !important}
     <span class="c" id="libc"></span>
   </div>
   <div class="libgrid" id="libgrid"></div>
+</div>
+
+<!-- THE BIGGER BOX — the same twenty-seven, large enough to read. Six-up is a
+     map of the record; this is the list, and on a phone it is where the titles
+     live at all. -->
+<div class="zoom" id="zoom" hidden>
+  <div class="zoombar">
+    <button id="zoomx">◀ CLOSE</button>
+    <b>THE RECORD_</b>
+    <span class="c" id="zoomc"></span>
+  </div>
+  <div class="zoomlist" id="zoomlist"></div>
 </div>
 
 <div id="toast"></div>
@@ -755,10 +765,6 @@ body.neon .batwrap svg{animation:none !important}
      they sit at the same weight. They glow and lean in the CSS — these are the
      plates on a notice, not icons in a toolbar. */
   var SIGN={
-    /* everyone — three bodies */
-    all:'<circle cx="5" cy="6.6" r="1.5"/><path d="M5 8.1v4.2M3 9.5h4M5 12.3l-1.4 3.2M5 12.3l1.4 3.2"/>'
-       +'<circle cx="12" cy="5.6" r="1.8"/><path d="M12 7.4v5M9.6 9h4.8M12 12.4l-1.7 3.8M12 12.4l1.7 3.8"/>'
-       +'<circle cx="19" cy="6.6" r="1.5"/><path d="M19 8.1v4.2M17 9.5h4M19 12.3l-1.4 3.2M19 12.3l1.4 3.2"/>',
     /* alone at night — one body under a moon */
     night:'<path d="M17.8 2.4a4.2 4.2 0 1 0 4.2 4.2 4.9 4.9 0 0 1-4.2-4.2Z"/>'
          +'<circle cx="8" cy="9.6" r="2"/><path d="M8 11.6v5.4M5.5 13.3h5M8 17l-1.9 4.2M8 17l1.9 4.2"/>',
@@ -816,7 +822,6 @@ body.neon .batwrap svg{animation:none !important}
   function ico(k){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(SIGN[k]||"")+'</svg>'; }
 
   var MOODS=[
-    {k:"all",      t:"ALL THE SONGS",        n:null},
     {k:"night",    t:"ALONE AT NIGHT",       n:[1,2,4,6,8,11,18,20,24,25]},
     {k:"hope",     t:"A TINY HOPE LEFT",     n:[3,12,13,20,21]},
     {k:"smoke",    t:"SMOKE AND CHILL",      n:[1,3,5,6,7,9,15,17,18,19]},
@@ -842,9 +847,15 @@ body.neon .batwrap svg{animation:none !important}
   /* THE TILE. No waveform any more: it was 56 <i> elements per song, 1,512 DOM
      nodes for one list, and it said less than the cover does. The tiles point at
      assets/img/thumb (128px) on purpose — see the CSS note on decoded size. */
-  var COVER="../assets/img/thumb/nouveaux-punk-2.jpg";
+  var COVER="../assets/img/thumb/nouveaux-punk-2.jpg",
+      COVER_BIG="../assets/img/mid/nouveaux-punk-2.jpg";
 
-  var moodSel="all";
+  var zList=null;        /* assigned when THE BIGGER BOX is built, below */
+  /* ARMED, not filtered. The notice used to cut the grid down to the state you
+     picked, which hid the record. It lights that state instead and keeps the
+     playback inside it — same idea as a playlist, and you can still see the
+     other twenty-six. */
+  var armed=null;        /* {k,t,list:[idx]} */
   function cardFor(s,i){
     return '<a class="sq" data-i="'+i+'" href="#">'
       +'<span class="sqw">'
@@ -856,54 +867,75 @@ body.neon .batwrap svg{animation:none !important}
       +'<span class="dur">'+fmt(s.d)+'</span></a>';
   }
   function paintGrid(){
-    var m=null,x;
-    for(x=0;x<MOODS.length;x++) if(MOODS[x].k===moodSel) m=MOODS[x];
-    var html="",shown=0;
-    NP2.forEach(function(s,i){
-      if(m && m.n && m.n.indexOf(i+1)<0) return;
-      shown++; html+=cardFor(s,i);
-    });
-    tr.innerHTML = shown? html
-      : '<div class="gridempty">NO SIGNALS IN THIS STATE_</div>';
-    /* THE MANUAL is below the list, so the list has to say what it is showing
-       — otherwise picking a mood looks like songs vanishing for no reason. */
-    var rs=document.getElementById("recsub");
-    if(rs) rs.innerHTML = (m && m.n)
-      ? '<span class="a">'+m.t+'</span> — '+shown+' of '+NP2.length+' songs_'
-      : NP2.length+' songs — tap any one, or press play above_';
+    tr.innerHTML = NP2.map(cardFor).join("");
     rowState();
   }
+  /* the armed set, lit in the grid and in the bigger box */
+  function markArmed(){
+    var on=armed?armed.list:null;
+    Array.prototype.forEach.call(tr.querySelectorAll(".sq"),function(c){
+      c.classList.toggle("armed", !!on && on.indexOf(+c.getAttribute("data-i"))>=0);
+    });
+    if(zList) Array.prototype.forEach.call(zList.querySelectorAll(".zr"),function(c){
+      c.classList.toggle("armed", !!on && on.indexOf(+c.getAttribute("data-i"))>=0);
+    });
+    var rs=document.getElementById("recsub");
+    if(rs) rs.innerHTML = armed
+      ? 'QUEUED: <span class="a">'+armed.t+'</span> — '+armed.list.length+' songs_'
+      : NP2.length+' songs — tap a sleeve to play it_';
+  }
+  var moodsEl=document.getElementById("moods"), npanel=document.getElementById("npanel");
+  function moodBy(k){ for(var x=0;x<MOODS.length;x++) if(MOODS[x].k===k) return MOODS[x]; return null; }
+  function listOf(m){ return m.n.map(function(no){ return no-1; })
+                                .filter(function(i){ return i>=0 && i<NP2.length; }); }
   function paintMoods(){
-    document.getElementById("moods").innerHTML=MOODS.map(function(m){
-      var n=m.n?m.n.length:NP2.length;
-      return '<button class="note'+(m.k===moodSel?" on":"")+'" type="button" data-m="'+m.k+'">'
+    moodsEl.innerHTML=MOODS.map(function(m){
+      var n=m.n.length;
+      return '<button class="note'+(armed&&armed.k===m.k?" on":"")+'" type="button" data-m="'+m.k+'">'
         +'<span class="ic">'+ico(m.k)+'</span>'
         +'<span class="nm">'+m.t+'</span>'
         +'<span class="pl" data-play="1">\u25b6</span>'
         +'<span class="rc">'+n+(n===1?" song":" songs")+'</span></button>';
     }).join("");
   }
-  /* THE MANUAL IS BELOW THE RECORD NOW, so picking a state has to take you back
-     up to it — otherwise the list changes somewhere you cannot see. */
-  function selectMood(k){
-    moodSel=k; paintMoods(); paintGrid();
-    var sec=document.getElementById("recsec");
-    if(sec && sec.scrollIntoView) sec.scrollIntoView({behavior:"smooth",block:"start"});
+  /* the plate, spelled out: the titles behind a state, each one playable */
+  function paintPanel(){
+    if(!armed){ npanel.setAttribute("hidden",""); return; }
+    npanel.removeAttribute("hidden");
+    npanel.innerHTML='<div class="nphead"><b>'+armed.t+'</b>'
+      +'<span class="c">'+armed.list.length+' SONGS QUEUED</span>'
+      +'<button type="button" data-clear="1">\u2715 CLEAR</button></div>'
+      +'<div class="nplist">'+armed.list.map(function(i){
+          return '<a class="npt" href="#" data-i="'+i+'"><b>'+(i<9?"0":"")+(i+1)+'</b>'
+                 +NP2[i].t+'</a>';
+        }).join("")+'</div>';
+    markPanel();
   }
-  /* a random track from inside this state — the deck's bag is for the whole
-     record, this is deliberately just a pick out of the handful you chose */
-  function playMood(m){
-    var pool=[];
-    for(var i=0;i<NP2.length;i++) if(!m.n || m.n.indexOf(i+1)>=0) if(i!==cur) pool.push(i);
-    if(!pool.length) return;
-    play(pool[Math.floor(Math.random()*pool.length)]);
+  function markPanel(){
+    Array.prototype.forEach.call(npanel.querySelectorAll(".npt"),function(a){
+      a.classList.toggle("playing", +a.getAttribute("data-i")===cur);
+    });
   }
-  document.getElementById("moods").addEventListener("click",function(e){
+  function arm(k){
+    var m=moodBy(k); if(!m) return null;
+    armed={k:m.k,t:m.t,list:listOf(m)};
+    paintMoods(); markArmed(); paintPanel();
+    return armed;
+  }
+  function disarm(){ armed=null; paintMoods(); markArmed(); paintPanel(); }
+  moodsEl.addEventListener("click",function(e){
     var b=e.target.closest&&e.target.closest(".note"); if(!b) return;
-    var k=b.getAttribute("data-m"), m=null;
-    for(var x=0;x<MOODS.length;x++) if(MOODS[x].k===k) m=MOODS[x];
-    if(e.target.closest(".pl") && m) playMood(m);
-    selectMood(k);
+    var k=b.getAttribute("data-m");
+    var hitPlay=!!e.target.closest(".pl");
+    /* tapping the open plate again closes it; the ▶ always (re)starts the set */
+    if(armed && armed.k===k && !hitPlay){ disarm(); return; }
+    var a=arm(k);
+    if(a && hitPlay && a.list.length) play(a.list[0]);
+  });
+  npanel.addEventListener("click",function(e){
+    if(e.target.closest("[data-clear]")){ disarm(); return; }
+    var a=e.target.closest&&e.target.closest(".npt"); if(!a) return;
+    e.preventDefault(); play(+a.getAttribute("data-i"));
   });
   paintMoods();
   /* ---------- the surprises: the 26 T-SHIRTS ----------
@@ -1083,15 +1115,23 @@ body.neon .batwrap svg{animation:none !important}
      child index === track, which is exactly the bug a filter introduces.) */
   function rowState(){
     var r=RADIO(),playing=false; try{ playing=!!(r&&r.playing()); }catch(e){}
-    /* ONE class on the grid does the dimming of all 26 others — twenty-seven
-       separate class writes four times a second is the thing to avoid here. */
+    /* ONE class on the grid dims all the others — twenty-seven separate class
+       writes four times a second is the thing to avoid here. */
     tr.classList.toggle("live", playing && cur>=0);
     Array.prototype.forEach.call(tr.querySelectorAll(".sq"),function(card){
-      var i=+card.getAttribute("data-i");
-      card.classList.toggle("playing", i===cur && playing);
+      var i=+card.getAttribute("data-i"), on=(i===cur&&playing);
+      card.classList.toggle("playing", on);
       var st=card.querySelector(".st");
-      if(st) st.textContent = (i===cur&&playing) ? "\u275a\u275a" : "\u25b6";
+      if(st) st.textContent = on ? "\u275a\u275a" : "\u25b6";
+      /* the tile doubles in size when it is on, so give it the 384px copy —
+         but only that one, and only once: 27 of these is the memory trap. */
+      var im=card.querySelector("img"), want=on?COVER_BIG:COVER;
+      if(im && im.getAttribute("src")!==want) im.setAttribute("src",want);
     });
+    if(zList) Array.prototype.forEach.call(zList.querySelectorAll(".zr"),function(row){
+      row.classList.toggle("playing", +row.getAttribute("data-i")===cur && playing);
+    });
+    markPanel();
   }
   /* play/pause NP2 track i through the radio; poll until the radio AND the extra
      records have loaded (both arrive async on a standalone visit). */
@@ -1108,68 +1148,44 @@ body.neon .batwrap svg{animation:none !important}
      listeners would be re-bound (and leak) each time */
   tr.addEventListener("click",function(e){
     var c=e.target.closest&&e.target.closest(".sq"); if(!c) return;
-    e.preventDefault(); play(+c.getAttribute("data-i"));
+    e.preventDefault(); pick(+c.getAttribute("data-i"));
   });
+  /* choosing a song from outside the queue is leaving the queue — otherwise the
+     set would yank you back the moment that track ended. */
+  function pick(i){
+    if(armed && armed.list.indexOf(i)<0) disarm();
+    play(i);
+  }
   paintGrid();
 
-  /* ---- THE DECK: the random way in -------------------------------------
-     A BAG, not a dice roll. Pressing SKIP six times gives you six DIFFERENT
-     songs; a plain random index gives you the same two back. Refilled when it
-     empties, minus whatever is already on. ---------------------------- */
-  var bag=[];
-  function pull(){
-    if(!bag.length){
-      for(var i=0;i<NP2.length;i++) if(i!==cur) bag.push(i);
-      for(var j=bag.length-1;j>0;j--){
-        var k=Math.floor(Math.random()*(j+1)),t=bag[j]; bag[j]=bag[k]; bag[k]=t;
-      }
-    }
-    return bag.pop();
-  }
-  var dPlay=document.getElementById("dplay"), dSkip=document.getElementById("dskip"),
-      dLab=document.getElementById("dlab"),   dTt=document.getElementById("dtt"),
-      dMeta=document.getElementById("dmeta"), dSigns=document.getElementById("dsigns"),
-      dBar=document.getElementById("dbari");
-  var ICO_PLAY ='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5 20 12 7 19.5Z"/></svg>',
-      ICO_PAUSE='<svg viewBox="0 0 24 24" aria-hidden="true">'
-                +'<rect x="6" y="4.5" width="4.2" height="15"/>'
-                +'<rect x="13.8" y="4.5" width="4.2" height="15"/></svg>';
-  dPlay.innerHTML=ICO_PLAY;
-  /* play() already toggles pause when you hand it the track that is on, so
-     the dot is play / pause / "pick one for me" in a single handler. */
-  dPlay.addEventListener("click",function(){ play(cur>=0?cur:pull()); });
-  dSkip.addEventListener("click",function(){ play(pull()); });
+  /* ---- THE BIGGER BOX: the same record, large enough to read ---- */
+  var zoomEl=document.getElementById("zoom"); zList=document.getElementById("zoomlist");
+  zList.innerHTML=NP2.map(function(s,i){
+    return '<a class="zr" href="#" data-i="'+i+'">'
+      +'<img src="'+COVER+'" alt="" loading="lazy" decoding="async" width="128" height="128">'
+      +'<span class="zn">'+(i<9?"0":"")+(i+1)+'</span>'
+      +'<span class="zt">'+s.t+'</span>'
+      +'<span class="zd">'+fmt(s.d)+'</span></a>';
+  }).join("");
+  document.getElementById("zoomc").textContent=NP2.length+" SONGS";
+  function openZoom(){ zoomEl.removeAttribute("hidden"); document.body.style.overflow="hidden"; }
+  function closeZoom(){ zoomEl.setAttribute("hidden",""); document.body.style.overflow=""; }
+  document.getElementById("zoombtn").addEventListener("click",openZoom);
+  document.getElementById("zoomx").addEventListener("click",closeZoom);
+  zList.addEventListener("click",function(e){
+    var a=e.target.closest&&e.target.closest(".zr"); if(!a) return;
+    e.preventDefault(); pick(+a.getAttribute("data-i"));
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape" && !zoomEl.hasAttribute("hidden")) closeZoom();
+  });
 
-  var deckFor=-2;
-  function paintDeck(r,playing){
-    dPlay.innerHTML = playing ? ICO_PAUSE : ICO_PLAY;
-    if(cur<0){
-      if(deckFor!==-1){
-        deckFor=-1;
-        dLab.textContent="A RANDOM TRACK_";
-        dTt.textContent="press to play a track";
-        dMeta.textContent=NP2.length+" SONGS \u00b7 SHUFFLED";
-        dSigns.innerHTML="";
-      }
-      dBar.style.width="0%";
-      return;
-    }
-    var sg=NP2[cur];
-    /* the title and the signs only change when the TRACK does — the timecode
-       below runs 4x/sec and must not rewrite the whole strip with it */
-    if(deckFor!==cur){
-      deckFor=cur;
-      dLab.textContent="TRACK "+(cur<9?"0":"")+(cur+1)+" OF "+NP2.length;
-      dTt.textContent=sg.t;
-      dSigns.innerHTML=SIGNS[cur].map(ico).join("");
-    }
-    var t=0,d=sg.d; try{ t=r.audio.currentTime||0; d=r.audio.duration||sg.d; }catch(e){}
-    var g=window.IBEE_BEAT?window.IBEE_BEAT[sg.f]:null;
-    dMeta.textContent = fmt(t)+" / "+fmt(d||sg.d)
-      + (g&&g.bpm ? " \u00b7 "+g.bpm+" BPM" : "")
-      + (playing ? "" : " \u00b7 PAUSED");
-    dBar.style.width=(d?Math.min(100,t/d*100):0).toFixed(1)+"%";
-  }
+  /* THE DECK IS GONE. It was a dot that pulled a track at random plus a
+     now-playing readout; the notice took its place at the top of the record,
+     and the shell's own bar below already carries the title, the timecode and
+     the transport. Two now-playing displays, one above the other, was one too
+     many. What it did that nothing else did — start something without making
+     you choose — is the ▶ on every plate of the notice. */
 
   /* ---- badge: 7 distinct NP2 tracks earns NEON PUNK. A track counts once
      you've actually felt ~15s of it. Own localStorage key so badges.js can read
@@ -1212,6 +1228,25 @@ body.neon .batwrap svg{animation:none !important}
     applyShotVid();               /* …and it stops the moment it goes dark */
   }
 
+  /* THE QUEUE. The radio owns playback and runs the whole catalogue, so an
+     armed state can only be honoured by watching where the radio GOES: the
+     moment it leaves a track that was in the set for one that is not, it is
+     sent to the next song in the set instead. `lastArmed` is the position we
+     were at, so the set plays in its own order and stops at the end rather
+     than looping forever. A track you pick yourself from outside the set
+     disarms it first (see pick()), so this never fights you. */
+  var lastArmed=-1;
+  function stepQueue(idx, playing){
+    if(!armed){ lastArmed=-1; return; }
+    var at=armed.list.indexOf(idx);
+    if(at>=0){ lastArmed=at; return; }
+    if(lastArmed<0 || !playing) return;      /* never started the set, or stopped */
+    var next=lastArmed+1;
+    if(next>=armed.list.length){ lastArmed=-1; disarm(); return; }
+    lastArmed=next;
+    play(armed.list[next]);
+  }
+
   /* the sync loop — the radio is the single source of truth */
   function syncFromRadio(){
     var r=RADIO(); if(!r) return;
@@ -1221,22 +1256,10 @@ body.neon .batwrap svg{animation:none !important}
     if(playing&&idx>=0){ lightUp(); accum(r); } else { lightDown(); lastT=-1; }
     rowState();
     setShot(idx);                  /* the archive keeps your page even when paused */
-    paintDeck(r, playing&&idx>=0);
+    stepQueue(idx, playing);
   }
   setInterval(syncFromRadio,250);
   syncFromRadio();
-
-  /* ---------- the notice opens ---------- */
-  (function(){
-    var btn=document.getElementById("noticeopen"), box=document.getElementById("moods");
-    if(!btn||!box) return;
-    btn.addEventListener("click",function(){
-      var open=box.hasAttribute("hidden");
-      if(open) box.removeAttribute("hidden"); else box.setAttribute("hidden","");
-      btn.setAttribute("aria-expanded",open?"true":"false");
-      btn.querySelector(".oc").textContent = open ? "CLOSE \u25b4" : "OPEN \u25be";
-    });
-  })();
 
   /* ---------- MORE: the rest of the statement ---------- */
   (function(){

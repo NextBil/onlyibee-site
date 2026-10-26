@@ -100,55 +100,126 @@ h1{
 .facts b{font-family:var(--px);font-size:17px;color:var(--red);font-weight:normal;
   text-shadow:0 0 12px rgba(255,43,43,.5)}
 
-/* THE RECORD AS A SHELF (same shelf as chapter two, in this room's red).
-   Rows were a column you scroll past; a wall of sleeves is one glance and half
-   the height. Every tile is the SAME cover — the record is one object — so the
-   STATE distinguishes them: everything dim and cold, and the one that is on
-   goes full colour, lifts and rings while the rest drop another stop.
-   The tiles use assets/img/thumb (128px), never the full cover: Safari decodes
-   an <img> at its NATURAL size, so 27 full sleeves in a tab is hundreds of MB
-   of bitmap on a phone. */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:10px}
+/* THE RECORD AS A SHELF, SIX UP (the same shelf as chapter two, in this room's
+   red). Six columns on a laptop AND on a phone, so the record is one block of
+   the page everywhere instead of a long scroll on the device most people hold.
+   At six-up a phone tile is ~52px, far too small for a title, so the titles
+   only appear from 560px — on a phone the number IS the label and the names
+   live in THE BIGGER BOX. Every tile is the SAME cover, so STATE does the
+   distinguishing: dim by default, and the one playing goes to full colour and
+   ZOOMS OUT OF THE GRID, swapping its 128px thumb for the 384px copy so it is
+   not a blur when it gets there.
+   Thumbs, never the full sleeve: Safari decodes an <img> at its NATURAL size,
+   so 27 full covers in one tab is hundreds of MB of bitmap on a phone. */
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
 .sq{position:relative;display:block;text-decoration:none;cursor:pointer;
-  transition:transform .22s ease}
+  transition:transform .26s cubic-bezier(.2,.8,.25,1)}
 .sqw{display:block;position:relative;aspect-ratio:1;overflow:hidden;isolation:isolate;
   border:1px solid #2a1414;background:#0a0505;transition:border-color .2s,box-shadow .25s}
 .sqw img{width:100%;height:100%;object-fit:cover;display:block;
   filter:grayscale(.45) brightness(.66);transition:filter .25s}
 .sqw::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
   background:#0a1a26;opacity:0;transition:opacity .25s}
-.sq .no{position:absolute;top:5px;left:5px;z-index:3;font-family:var(--px);font-size:7px;
-  letter-spacing:1px;color:#e8e8e8;background:rgba(7,3,3,.76);padding:3px 4px;line-height:1}
-.sq .st{position:absolute;right:5px;bottom:5px;z-index:3;font-family:var(--px);font-size:7px;
+.sq .no{position:absolute;top:3px;left:3px;z-index:3;font-family:var(--px);font-size:6px;
+  letter-spacing:1px;color:#e8e8e8;background:rgba(7,3,3,.76);padding:3px;line-height:1}
+.sq .st{position:absolute;right:3px;bottom:3px;z-index:3;font-family:var(--px);font-size:6px;
   color:var(--acid);opacity:0;transition:opacity .2s}
-.sq .ti{display:block;min-width:0;margin-top:6px;font-size:15px;line-height:1.3;color:#9a8888;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s}
-.sq .dur{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
-  color:#5a3333;line-height:1.9}
+.sq .ti,.sq .dur{display:none}
 .sq:hover .sqw img{filter:none}
 .sq:hover .sqw{border-color:#4a2222}
-.sq:hover .ti{color:#cfc5c5}
 .sq:hover .st{opacity:1}
-.sq.playing{transform:scale(1.08);z-index:4}
+.sq.playing{transform:scale(2.05);z-index:6}
 .sq.playing .sqw{border-color:var(--acid);
-  box-shadow:0 0 0 1px var(--acid),0 0 24px rgba(182,255,0,.4),0 10px 26px rgba(0,0,0,.65)}
+  box-shadow:0 0 0 1px var(--acid),0 0 26px rgba(182,255,0,.42),0 12px 30px rgba(0,0,0,.75)}
 .sq.playing .sqw img{filter:none}
 .sq.playing .sqw::after{opacity:0}
-.sq.playing .ti{color:var(--acid)}
-.sq.playing .dur{color:var(--acid)}
 .sq.playing .st{opacity:1}
+/* a scaled tile grows out of its cell: the ends of a row grow INWARD or the
+   page gains a horizontal scrollbar */
+.sq:nth-child(6n+1){transform-origin:left center}
+.sq:nth-child(6n){transform-origin:right center}
+.sq:nth-child(-n+6){transform-origin:center top}
+.sq:nth-child(6n+1):nth-child(-n+6){transform-origin:left top}
+.sq:nth-child(6n):nth-child(-n+6){transform-origin:right top}
 .grid.live .sq:not(.playing) .sqw img{filter:grayscale(1) brightness(.34)}
 .grid.live .sq:not(.playing) .sqw::after{opacity:.6}
-.grid.live .sq:not(.playing) .ti{color:#9a8686}
-.grid.live .sq:not(.playing) .dur{color:#5e3c3c}
+@media(min-width:560px){
+  .grid{gap:9px}
+  .sq .ti{display:block;min-width:0;margin-top:6px;font-size:14px;line-height:1.3;color:#9a8888;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s}
+  .sq .dur{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
+    color:#5a3333;line-height:1.9}
+  .sq .no{font-size:7px;top:5px;left:5px;padding:3px 4px}
+  .sq:hover .ti{color:#cfc5c5}
+  .sq.playing{transform:scale(1.75)}
+  .sq.playing .ti,.sq.playing .dur{color:var(--acid)}
+  .grid.live .sq:not(.playing) .ti{color:#9a8686}
+  .grid.live .sq:not(.playing) .dur{color:#5e3c3c}
+}
+@media(max-width:560px){.facts b{font-size:15px}}
+
+/* THE BIGGER BOX — the same twenty-seven, large enough to read. Six-up is a
+   map of the record; this is the list, and on a phone it is where the titles
+   live at all. */
+.zoombtn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px;
+  background:none;border:1px solid var(--border);color:var(--dim);font-family:var(--px);
+  font-size:7px;letter-spacing:1px;padding:9px 12px;transition:border-color .15s,color .15s}
+.zoombtn:hover{border-color:var(--red);color:#f4f4f4}
+.zoom{position:fixed;inset:0;z-index:62;background:#070303;display:flex;flex-direction:column;
+  overscroll-behavior:contain}
+.zoom[hidden]{display:none}
+.zoombar{display:flex;align-items:center;gap:12px;flex:none;padding:13px 16px;
+  border-bottom:2px solid var(--border);background:#0e0808;
+  font-family:var(--px);font-size:8px;letter-spacing:1px}
+.zoombar b{color:var(--acid);font-weight:normal;white-space:nowrap}
+.zoombar .c{color:var(--dim)}
+.zoombar button{font:inherit;letter-spacing:1px;cursor:pointer;color:#f4f4f4;
+  background:none;border:1px solid var(--red);padding:7px 10px}
+.zoombar button:hover{background:#1a0808}
+.zoomlist{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 130px}
+.zr{display:flex;align-items:center;gap:13px;padding:8px;cursor:pointer;text-decoration:none;
+  border:1px solid transparent;transition:background .15s,border-color .15s}
+.zr:hover{background:#150b0b}
+.zr img{width:72px;height:72px;flex:none;object-fit:cover;display:block;border:1px solid #2a1414;
+  filter:grayscale(.4) brightness(.72);transition:filter .2s}
+.zr:hover img{filter:none}
+.zr .zn{font-family:var(--px);font-size:8px;color:#5a3333;flex:none;width:24px}
+.zr .zt{flex:1;min-width:0;font-size:19px;color:#cfc5c5;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.zr .zd{font-family:var(--px);font-size:7px;color:var(--red);flex:none}
+.zr.playing{background:#101505;border-color:var(--acid)}
+.zr.playing .zt{color:var(--acid)}
+.zr.playing img{filter:none;box-shadow:0 0 14px rgba(182,255,0,.4)}
 @media(max-width:560px){
-  /* minmax(0,1fr), NOT 1fr: a bare 1fr is minmax(auto,1fr) and will not shrink
-     below a track's min-content, so the longest song title widened its column
-     and pushed the page 33px past the screen. */
-  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-  .sq .ti{font-size:14px}
-  .sq .no{font-size:6px}
-  .facts b{font-size:15px}
+  .zoomlist{padding:11px 11px 130px}
+  .zr{gap:10px;padding:7px 4px}
+  .zr img{width:60px;height:60px}
+  .zr .zt{font-size:17px}
+}
+
+/* THE NOTICE OPENS, like chapter two's. Six plates is most of a screen for
+   something you consult once; it stays shut until asked for. */
+.opener{display:flex;align-items:center;gap:14px;width:100%;cursor:pointer;
+  padding:14px 16px;text-align:left;font:inherit;color:inherit;
+  border:2px solid var(--red);background:linear-gradient(135deg,#1d1010,#120808 62%,#2a0b0b);
+  transition:box-shadow .2s,transform .18s}
+.opener:hover{box-shadow:0 0 26px rgba(255,43,43,.42);transform:translateY(-2px)}
+.opener .oi{flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+.opener .oi svg{width:34px;height:34px;stroke:var(--red);fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;transform:rotate(-9deg);
+  filter:drop-shadow(0 0 7px rgba(255,43,43,.85));transition:transform .25s}
+.opener:hover .oi svg{transform:rotate(0)}
+.opener .ot{min-width:0;margin-right:auto}
+.opener b{display:block;font-family:var(--px);font-size:10px;color:var(--acid);
+  font-weight:normal;letter-spacing:1px;line-height:1.7}
+.opener .os{display:block;color:var(--dim);font-size:16px;margin-top:5px;line-height:1.35}
+.opener .oc{flex:none;font-family:var(--px);font-size:7px;letter-spacing:1px;color:var(--red)}
+.notice{margin-top:12px}
+.notice[hidden]{display:none}
+@media(max-width:560px){
+  .opener{gap:11px;padding:12px}
+  .opener b{font-size:8.5px}.opener .os{font-size:14px}
+  .opener .oi{width:32px;height:32px}.opener .oi svg{width:28px;height:28px}
 }
 
 /* MORE: the statement is four paragraphs and three of them are for the people
@@ -160,12 +231,15 @@ h1{
 .prose .xtra{display:none}
 .prose.open .xtra{display:block}
 
-/* THE OTHER CHAPTER — the sleeve itself is the link, top and bottom */
+/* THE OTHER CHAPTER — the sleeve itself is the link, top and bottom.
+   `flex:none` plus an explicit size on the <img> is load-bearing: the source
+   file is a 1000px square, and without it the sleeve lays itself out at its
+   natural width and the card becomes a metre wide. */
 .chap{display:flex;align-items:center;gap:18px;padding:14px;text-decoration:none;
   border:2px solid var(--red);background:linear-gradient(135deg,#1d1010,#120808 62%,#2a0b0b);
   box-shadow:0 0 20px rgba(255,43,43,.22);transition:transform .18s,box-shadow .18s}
 .chap:hover{transform:translateY(-2px);box-shadow:0 0 32px rgba(255,43,43,.45)}
-.chap img{width:104px;height:104px;flex:none;object-fit:cover;display:block;
+.chap img{width:92px;height:92px;flex:none;object-fit:cover;display:block;
   border:1px solid #3a2020}
 .chap .cmeta{min-width:0}
 .chap b{display:block;font-family:var(--px);font-size:11px;color:var(--acid);
@@ -176,7 +250,7 @@ h1{
 .chap.top{margin-top:30px}
 @media(max-width:560px){
   .chap{gap:13px;padding:11px}
-  .chap img{width:82px;height:82px}
+  .chap img{width:72px;height:72px}
   .chap b{font-size:9px}.chap .cs{font-size:15px}
 }
 
@@ -203,12 +277,17 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
    drifting clouds and 3D rotating pills. All of it lives here,
    dormant, until body.storm is set (see the script).
    ============================================================ */
-#room{position:fixed;inset:0;width:100vw;height:100vh;z-index:8;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
+/* 100% not 100vw: 100vw includes the scrollbar, which gave the page 11px of
+   horizontal scroll on every desktop that shows one. */
+/* overflow:hidden as well: the drifting clouds are absolutely positioned well
+   past the right edge on their way across, and an unclipped #room let them
+   widen the page. (Chapter two's room always clipped; this one never did.) */
+#room{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;z-index:8;pointer-events:none;opacity:0;transition:opacity 1.4s ease}
 body.storm #room{opacity:1}
 /* NOTE: never put filter/transform on <body> here — it would turn body into a
    containing block for every position:fixed layer (scanlines, radio chip, rain)
    and collapse them. The "boom" is done with an immediate lightning strike. */
-#rain{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block}
+#rain{position:fixed;top:0;left:0;width:100%;height:100%;display:block}
 .cloud{position:absolute;width:360px;height:150px;filter:blur(7px);opacity:0;
   background:radial-gradient(circle at 30% 60%,rgba(70,20,20,.95),transparent 60%),
              radial-gradient(circle at 62% 48%,rgba(45,14,14,.9),transparent 62%),
@@ -305,7 +384,7 @@ body.storm h1{animation:h1flick 3.5s steps(1) infinite}
   <!-- the sequel, offered straight away: most people arrive here from a link
        and have no idea there is a second one. -->
   <a class="chap top" href="../np2/">
-    <img src="../assets/img/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2 — The Sequel">
+    <img width="384" height="384" src="../assets/img/mid/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2 — The Sequel">
     <span class="cmeta">
       <b>CHAPTER TWO</b>
       <span class="cs">NOUVEAUX PUNK 2 — THE SEQUEL · out 31 october 2026</span>
@@ -345,19 +424,28 @@ body.storm h1{animation:h1flick 3.5s steps(1) infinite}
   <div class="sec">
     <div class="sh">TRACK SIGNALS <span class="a">[DECRYPTED]</span></div>
     <div class="ssub">the experience, open — 27 transmissions. tap one to play_</div>
+    <button class="zoombtn" id="zoombtn" type="button">⤢ BIGGER — SEE THE TITLES</button>
     <div class="grid" id="tracks"></div>
   </div>
 
   <!-- listening notice — how to hear it, from the original NP notice -->
   <div class="sec">
     <div class="sh">THE <span class="a">LISTENING NOTICE</span>_</div>
-    <div class="ssub">how the experience is meant to be heard — tap a mood to press play_</div>
-    <div class="notice" id="notice"></div>
+    <button class="opener" id="noticeopen" type="button" aria-expanded="false" aria-controls="notice">
+      <span class="oi"><svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3.2 22.2 20.6H1.8Z"/><path d="M12 9.6v5.2M12 17.8v.2"/></svg></span>
+      <span class="ot">
+        <b>HOW TO LISTEN</b>
+        <span class="os">how the experience is meant to be heard — tap a mood to press play_</span>
+      </span>
+      <span class="oc">OPEN ▾</span>
+    </button>
+    <div class="notice" id="notice" hidden></div>
   </div>
 
   <div class="sec">
     <a class="chap" href="../np2/">
-      <img src="../assets/img/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2 — The Sequel">
+      <img width="384" height="384" src="../assets/img/mid/nouveaux-punk-2.jpg" alt="Nouveaux Punk 2 — The Sequel">
       <span class="cmeta">
         <b>CHAPTER TWO</b>
         <span class="cs">NOUVEAUX PUNK 2 — THE SEQUEL · out 31 october 2026</span>
@@ -371,6 +459,16 @@ body.storm h1{animation:h1flick 3.5s steps(1) infinite}
     <a class="btn alt" href="../np2/">▶ CHAPTER TWO</a>
   </div>
 </main>
+
+<!-- THE BIGGER BOX — the same twenty-seven, large enough to read -->
+<div class="zoom" id="zoom" hidden>
+  <div class="zoombar">
+    <button id="zoomx">◀ CLOSE</button>
+    <b>THE EXPERIENCE_</b>
+    <span class="c" id="zoomc"></span>
+  </div>
+  <div class="zoomlist" id="zoomlist"></div>
+</div>
 
 <div id="toast"></div>
 <footer>© ONLYIBEE — NOUVEAUX PUNK · THE EXPERIENCE</footer>
@@ -430,7 +528,8 @@ body.storm h1{animation:h1flick 3.5s steps(1) infinite}
   /* THE TILE. The 26 pulsing <i> bars per row are gone — 702 animated DOM nodes
      for one tracklist, saying nothing the cover doesn't. Thumb, not the sleeve:
      see the CSS note on what Safari does with 27 full-size decodes. */
-  var COVER="../assets/img/thumb/nouveaux-punk.jpg";
+  var COVER="../assets/img/thumb/nouveaux-punk.jpg",
+      COVER_BIG="../assets/img/mid/nouveaux-punk.jpg";
   NP.forEach(function(s,i){
     html+='<a class="sq" data-i="'+i+'" href="#">'
       +'<span class="sqw">'
@@ -451,7 +550,7 @@ body.storm h1{animation:h1flick 3.5s steps(1) infinite}
      radio back into the page: if you ARRIVE while the radio is already on an NP
      track, the row lights up + the storm opens automatically. All groove/visuals
      read the radio's audio at the playhead (background-safe, no Web Audio). */
-  var npCur=-1;
+  var npCur=-1, zList=null;   /* zList is filled when THE BIGGER BOX is built */
   function RADIO(){ try{ return window.IBEERADIO||(window.top&&window.top.IBEERADIO)||null; }catch(e){ return null; } }
   function npIdxOf(slug){ if(!slug)return -1; for(var i=0;i<NP.length;i++) if(NP[i].f===slug) return i; return -1; }
   function rowState(){
@@ -464,6 +563,13 @@ body.storm h1{animation:h1flick 3.5s steps(1) infinite}
       row.classList.toggle("playing",on);
       var st=row.querySelector(".st");
       if(st) st.textContent = on ? "\u275a\u275a" : "\u25b6";
+      /* the tile doubles in size when it is on, so give it the 384px copy —
+         but only that one, and only once: 27 of these is the memory trap. */
+      var im=row.querySelector("img"), want=on?COVER_BIG:COVER;
+      if(im && im.getAttribute("src")!==want) im.setAttribute("src",want);
+    });
+    if(zList) Array.prototype.forEach.call(zList.children,function(row,i){
+      row.classList.toggle("playing", i===npCur && playing);
     });
   }
   /* play (or pause/resume) NP track i through the radio; poll until the radio +
@@ -703,6 +809,42 @@ body.storm h1{animation:h1flick 3.5s steps(1) infinite}
     var c=e.target.closest&&e.target.closest(".sq"); if(!c) return;
     e.preventDefault(); playNP(+c.getAttribute("data-i"));
   });
+
+  /* ---- THE BIGGER BOX: the same record, large enough to read ---- */
+  var zoomEl=document.getElementById("zoom");
+  zList=document.getElementById("zoomlist");
+  zList.innerHTML=NP.map(function(s,i){
+    return '<a class="zr" href="#" data-i="'+i+'">'
+      +'<img src="'+COVER+'" alt="" loading="lazy" decoding="async" width="128" height="128">'
+      +'<span class="zn">'+(i<9?"0":"")+(i+1)+'</span>'
+      +'<span class="zt">'+s.t+'</span>'
+      +'<span class="zd">'+fmt(s.d)+'</span></a>';
+  }).join("");
+  document.getElementById("zoomc").textContent=NP.length+" SONGS";
+  function closeZoom(){ zoomEl.setAttribute("hidden",""); document.body.style.overflow=""; }
+  document.getElementById("zoombtn").addEventListener("click",function(){
+    zoomEl.removeAttribute("hidden"); document.body.style.overflow="hidden";
+  });
+  document.getElementById("zoomx").addEventListener("click",closeZoom);
+  zList.addEventListener("click",function(e){
+    var a=e.target.closest&&e.target.closest(".zr"); if(!a) return;
+    e.preventDefault(); playNP(+a.getAttribute("data-i"));
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape" && !zoomEl.hasAttribute("hidden")) closeZoom();
+  });
+
+  /* ---- the notice opens ---- */
+  (function(){
+    var btn=document.getElementById("noticeopen"), box=document.getElementById("notice");
+    if(!btn||!box) return;
+    btn.addEventListener("click",function(){
+      var open=box.hasAttribute("hidden");
+      if(open) box.removeAttribute("hidden"); else box.setAttribute("hidden","");
+      btn.setAttribute("aria-expanded",open?"true":"false");
+      btn.querySelector(".oc").textContent = open ? "CLOSE \u25b4" : "OPEN \u25be";
+    });
+  })();
 })();
 </script>
 <script src="../assets/player.js?v=31"></script>

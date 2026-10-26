@@ -405,6 +405,32 @@
   #pcover:hover{border-color:hsla(var(--rh),var(--rs),60%,.9);box-shadow:0 0 0 3px #0a0a0a,0 0 16px hsla(var(--rh),var(--rs),55%,.5)}
   body.radioon #pcover{animation:pcvspin 3.6s linear infinite}
   @keyframes pcvspin{to{transform:rotate(360deg)}}
+  /* ===== THE DISC BECOMES A DOOR =====
+     When the record on air has a page of its own, the spinning vinyl in the bar
+     is replaced by that page's cover as a TURNING SLAB — the same fake-voxel
+     object as GO TO THE PAGE inside the open radio (six translateZ copies, the
+     back five darkened; see navVox). A vinyl says "this is music", which the
+     bar already says twice. A turning sleeve with a ▶ on it says "there is
+     somewhere to go", which nothing else in the collapsed bar does.
+     Rotating on Y only ever makes the slab narrower than its box, so it never
+     spills into the title beside it. */
+  #pcover.pagedoor{border-radius:0;overflow:visible;border:0;box-shadow:none;
+    background:transparent!important;perspective:220px;
+    filter:drop-shadow(0 0 9px color-mix(in srgb,var(--pgtint,#ff2b2b) 55%,transparent))}
+  #pcover.pagedoor::after{display:none}
+  #pcover.pagedoor>img{display:none!important}
+  #pcover .pvx{position:absolute;inset:0;display:block;transform-style:preserve-3d;
+    transform:rotateX(8deg)}
+  #pcover .pvx img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+    backface-visibility:visible;
+    border:1px solid color-mix(in srgb,var(--pgtint,#ff2b2b) 70%,transparent)}
+  /* the ▶ stays still outside the spin — a tint over the cover hid the object */
+  #pcover .pgo{position:absolute;right:-4px;bottom:-4px;z-index:3;width:16px;height:16px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;
+    color:#07120a;background:var(--pgtint,#ff2b2b);box-shadow:0 1px 5px rgba(0,0,0,.7)}
+  @media(prefers-reduced-motion:no-preference){
+    body.radioon #pcover.pagedoor .pvx{animation:pgspin 4.6s linear infinite}
+  }
   #songinfo{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72)}
   #songinfo.on{display:flex}#songinfocard{position:relative;width:min(320px,88vw);max-height:74dvh;overflow:auto;background:#0a0a0a;border:2px solid var(--border);padding:14px;box-shadow:0 18px 55px rgba(0,0,0,.78)}
   #songinfoclose{position:absolute;right:9px;top:9px;background:#111;border:1px solid var(--border);color:var(--dim);font-family:var(--px);font-size:9px;padding:6px 8px;cursor:pointer}#songinfoclose:hover{color:var(--red);border-color:var(--red)}
@@ -1837,7 +1863,45 @@
       pcoverimg.onerror=function(){ if(small!==cov&&pcoverimg.src.indexOf(small)>-1){pcoverimg.src=cov;return;} pcoverimg.onerror=null; pcoverimg.style.display='none'; };
       pcoverimg.style.display='block'; pcoverimg.src=small; }
     else pcoverimg.style.display='none';
+    setPageDoor(alb);
   }
+  /* the vinyl turns into the record's own page when there is one to go to.
+     Rebuilt only when the DESTINATION changes — this runs off the player tick,
+     and re-writing six <img> four times a second would restart the spin and
+     re-decode the cover forever. */
+  function setPageDoor(alb){
+    var room=(alb&&alb.room)||'';
+    if(!room){
+      if(pcover.classList.contains('pagedoor')){
+        pcover.classList.remove('pagedoor');
+        pcover.removeAttribute('data-page'); pcover.removeAttribute('title');
+        var o1=pcover.querySelector('.pvx'); if(o1) o1.remove();
+        var o2=pcover.querySelector('.pgo'); if(o2) o2.remove();
+      }
+      return;
+    }
+    if(pcover.getAttribute('data-page')!==room){
+      var old=pcover.querySelector('.pvx'); if(old) old.remove();
+      var oldgo=pcover.querySelector('.pgo'); if(oldgo) oldgo.remove();
+      var src=alb.cover?sized(alb.cover,'mid'):'', vx='';
+      [-3.2,-1.9,-0.6,0.6,1.9,3.2].forEach(function(t,k){
+        vx+='<img src="'+src+'" alt="" decoding="async" style="transform:translateZ('+t+'px)'
+           +(k<5?';filter:brightness(.42)':'')+'">';
+      });
+      pcover.insertAdjacentHTML('beforeend','<span class="pvx">'+vx+'</span><span class="pgo">\u25b6</span>');
+      pcover.setAttribute('data-page',room);
+    }
+    pcover.style.setProperty('--pgtint', alb.tint||'#ff2b2b');
+    pcover.title='Go to the '+(alb.name||'record')+' page';
+    pcover.classList.add('pagedoor');
+  }
+  /* in door mode the disc is a link, not the radio's open button */
+  pcover.addEventListener('click',function(e){
+    var u=pcover.getAttribute('data-page');
+    if(!pcover.classList.contains('pagedoor')||!u) return;
+    e.preventDefault(); e.stopPropagation();
+    navigate(u); setTL(false);
+  },true);
   var wasPlaying=null, player=document.getElementById('player');
   function fmt(s){if(!isFinite(s))return'--:--';var m=Math.floor(s/60),ss=Math.floor(s%60);return m+':'+(ss<10?'0':'')+ss;}
   setInterval(function(){
