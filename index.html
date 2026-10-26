@@ -200,7 +200,9 @@
   #tracklist .tr .cv{width:36px;height:36px;flex:none;border-radius:4px;overflow:hidden;
     border:1px solid #222;position:relative}
   #tracklist .tr .cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  #tracklist .tr .ti{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+  /* flex:1 is what keeps the ♥ and the ⓘ in one column down the list — without it
+     they trail the title and land at a different x on every row. */
+  #tracklist .tr .ti{display:flex;flex-direction:column;min-width:0;line-height:1.15;flex:1}
   #tracklist .tr .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #tracklist .tr .al{font-family:var(--px);font-size:7px;letter-spacing:1px;color:#565656;
     margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -209,7 +211,7 @@
   #tracklist .tr.now{color:var(--acid);background:#0d1400}
   #tracklist .tr .no{font-family:var(--px);font-size:8px;color:#555;width:24px}
   #tracklist .tr.now .no{color:var(--acid)}
-  #tracklist .tr .rmroom{font-family:var(--px);font-size:7px;color:#000;background:var(--rt,var(--red));padding:5px 6px;flex:none}
+  #tracklist .tr .rmroom{font-family:var(--px);font-size:7px;color:#000;background:var(--rt,var(--red));padding:5px 6px;flex:none;order:3}
   #tracklist .tr.locked{opacity:.5;cursor:not-allowed}
   #tracklist .tr.locked .cv{filter:brightness(.4) grayscale(.7)}
   #tracklist .tr .lk{width:13px;height:13px;flex:none;color:var(--red)}
@@ -233,7 +235,8 @@
     color:var(--dim);border:1px solid var(--border);cursor:pointer}
   #tlview:hover,#tlview.on{border-color:var(--acid);color:var(--acid)}
   /* ♥ favourites filter + the hearts on every song */
-  #tracklist .tr .fv{flex:none;font-size:17px;line-height:1;color:#3a3a3a;cursor:pointer;padding:3px 5px}
+  #tracklist .tr .fv{flex:none;font-size:17px;line-height:1;color:#3a3a3a;cursor:pointer;padding:3px 5px;
+    width:22px;text-align:center;box-sizing:content-box}
   #tracklist .tr .fv:hover{color:#ff2b6b}
   #tracklist .tr .fv.on{color:#ff2b6b;text-shadow:0 0 8px rgba(255,43,107,.6)}
   /* radio list = mini-Spotify with the dock's motion: rows lift + zoom on hover,
@@ -1013,7 +1016,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=32"></script>
+<script src="assets/player.js?v=33"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- anonymous site analytics: page activity, exits and meaningful interactions -->
@@ -1104,7 +1107,8 @@
       if(!d||d.population==null)return;
       netBtn.title=d.population+' VISITORS IN THE LAST 30 DAYS — OPEN NETWORK DATA';
     }).catch(function(){}); }
-    networkPulse(); setInterval(networkPulse,60000);
+    /* a hidden tab has nobody to show this to — don't spend the radio on it */
+    networkPulse(); setInterval(function(){ if(!document.hidden) networkPulse(); },60000);
   })();
 
   /* ---- account pill: LOG IN / PROFILE, reachable from every page (persistent shell) ----
@@ -1136,7 +1140,11 @@
   }
   renderAcct();
   window.addEventListener('storage',renderAcct);
-  setInterval(renderAcct,3000);
+  /* This rebuilt the account corner of the nav every 3 seconds forever, visible
+     or not. The 'storage' event already covers the case it exists for (another
+     tab signing in), so the poll is a slow safety net, not the mechanism. */
+  setInterval(function(){ if(!document.hidden) renderAcct(); },12000);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) renderAcct(); });
 
   /* (cashew counter removed from the nav — it wasn't useful there; the balance
      still lives on the profile/room page.) */
@@ -1344,9 +1352,13 @@
   function esc(s){return s.replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
   function lyrToggle(){
     lyrOpen=!lyrOpen; lyr.classList.toggle('open',lyrOpen);
-    if(lyrOpen){ setTL(false); lyrRefresh(); }   /* close the radio on the way IN only */
+    if(lyrOpen){ setTL(false); lyrRefresh();
+      /* the two per-frame loops live only as long as this overlay does */
+      if(window.__lyrWake) window.__lyrWake(); if(window.__glyphWake) window.__glyphWake(); }
   }
   function lyrClose(){ lyrOpen=false; lyr.classList.remove('open'); }
+  document.addEventListener('visibilitychange',function(){ if(document.hidden) return;
+    if(window.__lyrWake) window.__lyrWake(); if(window.__glyphWake) window.__glyphWake(); });
   document.getElementById('blyr').onclick=lyrToggle;               // the book icon toggles it
   document.getElementById('lclose').onclick=lyrClose;
   document.getElementById('lfs').onclick=function(){ lyr.classList.toggle('info'); };
@@ -1679,7 +1691,7 @@
     });
   }
   refreshSongCounts();
-  setInterval(refreshSongCounts,30000);
+  setInterval(function(){ if(!document.hidden) refreshSongCounts(); },30000);
   window.addEventListener('ibee:play-counted',refreshSongCounts);
   function markNow(){
     var r=R();if(!r)return; var cur=r.current();
@@ -1967,7 +1979,12 @@
   },{passive:true});
   /* karaoke needs frame-accurate timing: while the overlay is open, sync every
      animation frame (the sweep + line flips land the instant their time hits) */
-  (function lyrTick(){ requestAnimationFrame(lyrTick); if(lyrOpen) lyrSync(); })();
+  /* This ticked every frame for the whole session and did nothing unless the
+     karaoke overlay was open. It now only runs while the overlay is open;
+     openLyr/closeLyr start and stop it. */
+  var lyrRaf=0;
+  function lyrTick(){ lyrRaf=0; if(!lyrOpen||document.hidden) return; lyrSync(); lyrRaf=requestAnimationFrame(lyrTick); }
+  window.__lyrWake=function(){ if(!lyrRaf && lyrOpen && !document.hidden) lyrRaf=requestAnimationFrame(lyrTick); };
 
   /* ---- floating glyphs behind the lyrics (the Lyrics Engine ambience) ----
      Drifts up in the song's hue, faster on the beat. Only runs while the overlay
@@ -1978,18 +1995,31 @@
     function rs(){ cv.width=cv.clientWidth||lyr.clientWidth||window.innerWidth; cv.height=cv.clientHeight||lyr.clientHeight||window.innerHeight; }
     function seed(){ parts=[]; for(var i=0;i<38;i++) parts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,
       v:.2+Math.random()*.5,s:10+Math.random()*16,g:GLY[Math.floor(Math.random()*GLY.length)],o:.1+Math.random()*.25,ph:Math.random()*6.28}); }
-    (function gl(){ requestAnimationFrame(gl);
-      if(!lyr.classList.contains('open')) return;
+    /* Same story: a 38-particle canvas repaint, re-armed every frame even with
+       the overlay shut. It now parks when the overlay closes or the tab hides. */
+    var glRaf=0;
+    window.__glyphWake=function(){ if(!glRaf && lyr.classList.contains('open') && !document.hidden) glRaf=requestAnimationFrame(gl); };
+    /* drifting glyphs are ambience — 30fps on a phone is indistinguishable from
+       120 and a quarter of the canvas work */
+    var glLast=0;
+    function gl(ts){ glRaf=0;
+      if(!lyr.classList.contains('open')||document.hidden) return;
+      glRaf=requestAnimationFrame(gl);
+      if((window.innerWidth||9999)<600){ var nw=ts||performance.now();
+        if(nw-glLast<30) return; glLast=nw; }
       if(cv.width<2||cv.height<2||Math.abs(cv.width-cv.clientWidth)>4){ rs(); seed(); }
-      var beat=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--beat'))||0;
-      var hue=getComputedStyle(document.documentElement).getPropertyValue('--songhue')||190;
+      /* Reading a custom property back off the document forces a style recalc on
+         every frame. The radio already holds these as plain numbers. */
+      var R0=window.IBEERADIO;
+      var beat=(R0&&R0.beat)?R0.beat():0;
+      var hue=(R0&&R0.song&&R0.song())?R0.song().hue:190;
       cx.clearRect(0,0,cv.width,cv.height);
       parts.forEach(function(p){ p.y-=p.v*(1+beat*3); p.x+=Math.sin(p.ph+=.008)*.3;
         if(p.y<-30){p.y=cv.height+20;p.x=Math.random()*cv.width;}
         cx.globalAlpha=Math.min(1,p.o+beat*.4); cx.fillStyle='hsl('+hue+',90%,65%)';
         cx.font=(p.s*(1+beat*.4))+"px 'VT323'"; cx.fillText(p.g,p.x,p.y); });
       cx.globalAlpha=1;
-    })();
+    }
   })();
 
   /* ---- PRESS START intro: the play button starts the music AND enters the site.

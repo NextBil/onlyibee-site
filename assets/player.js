@@ -137,8 +137,16 @@
      width, with no guessing about where "the centre" is.
      Depth is capped in vmin so it can never eat a small screen. */
   +".nfc{position:fixed;pointer-events:none;z-index:8991;opacity:var(--ga,0)}"
-  +".nfc.c1,.nfc.c3{left:0;right:0;height:calc(44px + var(--beat,0)*90px);max-height:22vmin}"
-  +".nfc.c2,.nfc.c4{top:0;bottom:0;width:calc(44px + var(--beat,0)*90px);max-width:22vmin}"
+  /* The bars are a FIXED 22vmin deep and breathe with transform:scale, not with
+     width/height. Growing a viewport-sized fixed box by calc() re-ran layout on
+     every one of 60 frames a second, for the whole length of a song — which is
+     what made phones heat up and eventually drop the tab. scale() is handled by
+     the compositor: no layout, no repaint, no main-thread work. */
+  +".nfc{will-change:transform,opacity}"
+  +".nfc.c1,.nfc.c3{left:0;right:0;height:22vmin;transform:scaleY(calc(.26 + var(--beat,0)*.74))}"
+  +".nfc.c2,.nfc.c4{top:0;bottom:0;width:22vmin;transform:scaleX(calc(.26 + var(--beat,0)*.74))}"
+  +".nfc.c1{transform-origin:top}.nfc.c3{transform-origin:bottom}"
+  +".nfc.c2{transform-origin:right}.nfc.c4{transform-origin:left}"
   +".nfc.c1{top:0;background:linear-gradient(to bottom,hsla(var(--songhue,75),100%,60%,.62),hsla(var(--songhue,75),100%,55%,.14) 45%,transparent)}"
   +".nfc.c2{right:0;background:linear-gradient(to left,hsla(var(--songhue,75),100%,60%,.62),hsla(var(--songhue,75),100%,55%,.14) 45%,transparent)}"
   +".nfc.c3{bottom:0;background:linear-gradient(to top,hsla(var(--songhue,75),100%,60%,.62),hsla(var(--songhue,75),100%,55%,.14) 45%,transparent)}"
@@ -451,10 +459,21 @@
 
   /* ---------- state ---------- */
   var cur = -1, wantResume = false, needLoad = false, pendingTime = 0, shuffle = false;
+  /* localStorage.setItem is SYNCHRONOUS main-thread work. This ran on a 2-second
+     timer for as long as the site was open, whether or not anything had changed.
+     Resume position only needs whole seconds, so write only when the saved line
+     would actually differ — a paused or idle tab now writes nothing at all. */
+  var lastSaved = "";
   function save(){
-    try{ localStorage.setItem("ibee_radio", JSON.stringify({
-      i: cur, t: needLoad ? (pendingTime||0) : (audio.currentTime||0), p: !audio.paused && cur>=0, s: shuffle
-    })); }catch(e){}
+    try{
+      var line = JSON.stringify({
+        i: cur, t: Math.round(needLoad ? (pendingTime||0) : (audio.currentTime||0)),
+        p: !audio.paused && cur>=0, s: shuffle
+      });
+      if(line === lastSaved) return;
+      lastSaved = line;
+      localStorage.setItem("ibee_radio", line);
+    }catch(e){}
   }
   /* aleatory mode: next song is a surprise (never the same one twice); skip locked */
   /* ---------- THE QUEUE ----------
@@ -818,9 +837,30 @@
       return { low: parseInt(g.low.charAt(i),36)/35, lv: parseInt(g.lvl.charAt(i),36)/35 };
     }catch(e){ return null; }
   }
-  function loop(){
-    requestAnimationFrame(loop);
+  /* THE GLOW LOOP ONLY RUNS WHEN IT HAS SOMETHING TO DRAW.
+     It used to re-arm itself unconditionally, so the page was doing per-frame
+     work every second it was open — paused, idle, in a background tab, hours
+     into a session. On a phone that is what stops the CPU ever idling: it gets
+     hot, the system throttles it, and eventually iOS reclaims the tab, which is
+     the "page refreshed itself while I was listening" bug.
+     Now it stops once the glow has decayed, and wakeGlow() restarts it on the
+     events that need it (play, seek, becoming visible again). */
+  var rafId = 0, glowOff = false;
+  function wakeGlow(){ if(!rafId && !document.hidden) rafId = requestAnimationFrame(loop); }
+  /* A modern phone runs at 120Hz. The glow is a slow breathing pulse — drawing it
+     120 times a second costs twice the battery of 60 and looks identical, so on
+     narrow screens we skip every other frame. */
+  var lastFrame = 0;
+  function loop(ts){
+    rafId = 0;
     var playing = cur >= 0 && !audio.paused, gv;
+    /* hidden tab: draw nothing at all, and don't re-arm — visibilitychange does */
+    if(document.hidden) return;
+    if((window.innerWidth||9999) < 600){
+      var now = ts || performance.now();
+      if(now - lastFrame < 30){ rafId = requestAnimationFrame(loop); return; }
+      lastFrame = now;
+    }
     if(playing && analyser){
       analyser.getByteFrequencyData(freq);
       var sum = 0, i; for(i=0;i<freq.length;i++) sum += freq[i];
@@ -855,6 +895,7 @@
     var a = Math.min(1, 0.02 + beat*0.11 + level*0.04);
     var root = document.documentElement.style;
     if(playing || beat > 0.02){
+      glowOff = false;
       nf.style.borderColor = "hsla("+hue+",95%,60%,"+(a*0.42).toFixed(3)+")";
       /* narrow screens get a tighter radius: a blur sized for a laptop is a big
          slice of a phone's width and washes the middle of the display */
@@ -866,14 +907,24 @@
       root.setProperty("--beat", beat.toFixed(3));
       root.setProperty("--songhue", hue);
       root.setProperty("--ga", Math.min(1, 0.09 + beat*0.8).toFixed(3));
-    } else {
+    } else if(!glowOff){
+      /* write the "off" state once, not sixty times a second forever */
+      glowOff = true;
       nf.style.borderColor = "transparent";
       nf.style.boxShadow = "none";
       root.setProperty("--ga", "0");
       root.setProperty("--beat", "0");
     }
+    /* nothing playing and the glow has faded out — park until something happens */
+    if(!playing && beat <= 0.004 && level <= 0.004) return;
+    rafId = requestAnimationFrame(loop);
   }
-  loop();
+  wakeGlow();
+  ["play","playing","seeked","ratechange"].forEach(function(ev){
+    audio.addEventListener(ev, function(){ glowOff = false; wakeGlow(); });
+  });
+  audio.addEventListener("pause", wakeGlow);          /* let it fade out, then park */
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden){ glowOff = false; wakeGlow(); } });
 
   /* ---------- bridge: universe engine ↔ radio ---------- */
   window.IBEERADIO = {
