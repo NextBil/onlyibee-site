@@ -1154,16 +1154,26 @@
      of their own, so popstate fired more often than pages actually changed. */
   var trail=[], goingBack=false;
 
+  /* ⚠ EVERY SHELL TARGET IS RESOLVED AGAINST THE SITE ROOT, NEVER location.href.
+     While a record is open, sync() rewrites the address bar to /s/<slug>/ so the
+     URL is shareable (see the note there). That also moves the DOCUMENT'S BASE,
+     and every relative target in this file is root-relative by intent —
+     'console.html#menu', 'arcade/', 'np2/'. Resolved against the rewritten
+     address they became /s/<slug>/console.html and every one of them 404'd:
+     from a shared song link, nothing on the site was reachable. */
+  var SITE=location.origin+'/';
+  function abs(u){ try{ return new URL(u, SITE).href; }catch(e){ return u; } }
+
   function navigate(url,opts){
     opts=opts||{};
     try{lyrClose();}catch(e){}   /* moving to a section closes the lyrics room */
     try{
-      var cur=frame.contentWindow.location, tgt=new URL(url, location.href);
+      var cur=frame.contentWindow.location, tgt=new URL(url, SITE);
       if(cur.pathname===tgt.pathname && tgt.hash){ frame.contentWindow.location.hash=tgt.hash; sync(); return; }
     }catch(e){}
     if(opts.noanim) markNoAnim();
     frame.classList.remove('on');
-    setTimeout(function(){ frame.src=url; }, opts.noanim?0:120);
+    setTimeout(function(){ frame.src=abs(url); }, opts.noanim?0:120);
   }
 
   /* Returning somewhere should not replay that page's CRT boot-in — that reads as
@@ -1214,7 +1224,8 @@
      /^blank\b/i.test(p) || /^about:/i.test(p)) p='console.html#menu';
   /* profile === room (one page): old member/profile links land straight on room/ */
   p=p.replace(/^\/?member\/profile\/?(index\.html)?/i,'room/');
-  frame.src=p;
+  /* abs(): a reload of /s/<slug>/ starts here with the address already rewritten */
+  frame.src=abs(p);
   frame.addEventListener('load',function(){
     frame.classList.add('on'); sync();
     /* The console switches screens by changing its own hash, which is NOT a frame
@@ -1274,15 +1285,20 @@
          opens on the song page. */
       var shareRel=null, sm=/^song\/\?s=([^&#]+)/.exec(rel);
       if(sm) shareRel='s/'+sm[1]+'/';
+      /* BOTH BRANCHES ARE ROOT-ABSOLUTE. '?p=' alone keeps the current PATH and
+         swaps only the query — and once a record has rewritten the path to
+         /s/<slug>/, leaving it wrote /s/<slug>/?p=console.html. That address
+         serves the share stub, which redirects to /?s=<slug>, so a reload or a
+         copied link threw you back onto the song you had just left. */
       history.replaceState(null,'', shareRel ? '/'+shareRel
-                                             : '?p='+encodeURIComponent(rel));
+                                             : '/?p='+encodeURIComponent(rel));
       /* the trail is now accurate — let the page re-decide its back button */
       try{ if(frame.contentWindow.IBEE_NAV) frame.contentWindow.IBEE_NAV.refresh(); }catch(e){}
       if(frame.contentDocument&&frame.contentDocument.title) document.title=frame.contentDocument.title;
       var path=l.pathname.replace(/^\//,''), hash=l.hash;
       if(window.IBEE_ANALYTICS) window.IBEE_ANALYTICS.page(path+(hash||''));
       document.querySelectorAll('#nav button').forEach(function(b,i){
-        var u=new URL(NAV[i].u, location.href);
+        var u=new URL(NAV[i].u, SITE);
         b.classList.toggle('on', u.pathname.replace(/^\//,'')===path && (!u.hash||u.hash===hash));
       });
     }catch(e){}
