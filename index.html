@@ -487,6 +487,30 @@
   #nowbtn .lab{display:flex;align-items:center;gap:6px;font-family:var(--px);font-size:7px;letter-spacing:1px;
     color:hsla(var(--rh),var(--rs),70%,.95)}
   #nowbtn #rt{font-family:var(--vt);font-size:21px;line-height:1;color:#fff;letter-spacing:.5px}
+  /* ===== LONG NAMES SLIDE =====
+     Two things were wrong. #nowbtn is a COLUMN with align-items:flex-start, so
+     the title was a shrink-to-fit item: it never clipped itself, it just grew
+     past the button and ran under the transport, where the ellipsis never got
+     a chance to appear either. width:100% pins it to the button, and then a
+     name that is genuinely too long drifts to its end and back instead of
+     being cut — one transform on one small span, started only when the name
+     actually overflows, and it is the only thing moving in the bar. */
+  #nowbtn #rt{display:block;width:100%;max-width:100%;overflow:hidden;white-space:nowrap}
+  #nowbtn #rt .rtin{display:inline-block;white-space:nowrap}
+  #nowbtn #rt.roll .rtin{animation:rtroll var(--rtdur,9s) ease-in-out infinite}
+  /* out, hold, back, hold — a loop would need a second copy of the name */
+  @keyframes rtroll{
+    0%,14%{transform:translateX(0)}
+    52%,66%{transform:translateX(calc(var(--rtshift,0px) * -1))}
+    100%{transform:translateX(0)}
+  }
+  /* no motion wanted: fall back to the ellipsis, which needs the inner span to
+     be the block doing the clipping */
+  #nowbtn #rt.cut .rtin{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  @media(prefers-reduced-motion:reduce){
+    #nowbtn #rt.roll .rtin{animation:none;display:block;max-width:100%;
+      overflow:hidden;text-overflow:ellipsis}
+  }
   #time{align-self:center;flex:none}
   .pl-top .chev{align-self:center}
   .pl-row{gap:10px}
@@ -1776,6 +1800,31 @@
   window.addEventListener('message',function(e){ if(e&&e.data==='ibee-frame-tap')setTL(false); });
 
   /* ---- keep the player reflecting the one radio's state ---- */
+  /* THE TITLE IS REWRITTEN ON EVERY TICK, so it is only touched when the name
+     actually changes — re-measuring and re-adding the class four times a second
+     would restart the slide forever and it would never move at all. */
+  var lastNowTitle=null, noMotion=null;
+  try{ noMotion=window.matchMedia('(prefers-reduced-motion:reduce)'); }catch(e){}
+  function setNowTitle(t){
+    if(t===lastNowTitle) return; lastNowTitle=t;
+    rt.classList.remove('roll','cut');
+    rt.textContent='';
+    var inner=document.createElement('span');
+    inner.className='rtin'; inner.textContent=t;
+    rt.appendChild(inner);
+    /* measure after the browser has laid it out, not during this tick */
+    requestAnimationFrame(function(){
+      if(inner.parentNode!==rt) return;              /* already replaced */
+      var over=inner.scrollWidth-rt.clientWidth;
+      if(over<=4) return;                            /* it fits — leave it still */
+      if(noMotion&&noMotion.matches){ rt.classList.add('cut'); return; }
+      rt.style.setProperty('--rtshift',over+'px');
+      /* ~34px a second, plus the two pauses: a name twice as long takes about
+         twice as long to read, which is the point */
+      rt.style.setProperty('--rtdur',(3.4+over/34*2).toFixed(1)+'s');
+      rt.classList.add('roll');
+    });
+  }
   var rt=document.getElementById('rt'),rplay=document.getElementById('rplay'),
       fill=document.getElementById('fill'),timeEl=document.getElementById('time'),
       ptimeEl=document.getElementById('ptime'),bd=document.querySelector('#nowbtn .bd');
@@ -1913,7 +1962,7 @@
        display just pauses for the ~180ms of active scroll, then resumes. */
     if(tl.classList.contains('scrolling')) return;
     if(builtCount!==r.count)renderTracks(); /* extra records arrived — rebuild the browser */
-    var s=r.song&&r.song(); rt.textContent=s?s.n:'RADIO';
+    var s=r.song&&r.song(); setNowTitle(s?s.n:'RADIO');
     var cvi=r.current?r.current():-1; if(cvi!==lastCoverI){ lastCoverI=cvi; setPcover(r,cvi,s);
       if(wideMQ.matches&&tl.classList.contains('open')){ try{ openSongInfo(true); }catch(e){} sideTop(); } }
     var pl=r.playing(); rplay.textContent=pl?'❚❚':'►';
