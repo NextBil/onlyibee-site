@@ -125,12 +125,24 @@
   /* ---------- styles ---------- */
   var css = ""
   +"#nf{position:fixed;inset:0;pointer-events:none;z-index:8990;border:2px solid transparent;transition:border-color .3s}"
-  +".nfc{position:fixed;pointer-events:none;z-index:8991;opacity:var(--ga,0);"
-  +"width:calc(110px + var(--beat,0)*260px);height:calc(110px + var(--beat,0)*260px)}"
-  +".nfc.c1{top:0;left:0;background:radial-gradient(circle at 0 0,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
-  +".nfc.c2{top:0;right:0;background:radial-gradient(circle at 100% 0,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
-  +".nfc.c3{bottom:0;left:0;background:radial-gradient(circle at 0 100%,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
-  +".nfc.c4{bottom:0;right:0;background:radial-gradient(circle at 100% 100%,hsla(var(--songhue,75),100%,60%,.95),hsla(var(--songhue,75),100%,55%,.35) 40%,transparent 72%)}"
+  /* ---- THE NOW-PLAYING GLOW IS A FRAME, NOT FOUR BLOBS ----
+     It used to be four corner-anchored SQUARES, 110px growing to 370px on a
+     hit, each a radial gradient still at 35% alpha 40% of the way across
+     itself. On a 375px phone four 370px squares meet in the middle, so the
+     loudest part of every song washed out the text you were trying to read.
+     They are four EDGE BARS now - top, right, bottom, left - each a linear
+     gradient that starts at the edge and is gone before it reaches the
+     content. The screen is still ringed in the record's colour and still
+     breathes on the beat; the middle stays clear by construction, at every
+     width, with no guessing about where "the centre" is.
+     Depth is capped in vmin so it can never eat a small screen. */
+  +".nfc{position:fixed;pointer-events:none;z-index:8991;opacity:var(--ga,0)}"
+  +".nfc.c1,.nfc.c3{left:0;right:0;height:calc(44px + var(--beat,0)*90px);max-height:22vmin}"
+  +".nfc.c2,.nfc.c4{top:0;bottom:0;width:calc(44px + var(--beat,0)*90px);max-width:22vmin}"
+  +".nfc.c1{top:0;background:linear-gradient(to bottom,hsla(var(--songhue,75),100%,60%,.62),hsla(var(--songhue,75),100%,55%,.14) 45%,transparent)}"
+  +".nfc.c2{right:0;background:linear-gradient(to left,hsla(var(--songhue,75),100%,60%,.62),hsla(var(--songhue,75),100%,55%,.14) 45%,transparent)}"
+  +".nfc.c3{bottom:0;background:linear-gradient(to top,hsla(var(--songhue,75),100%,60%,.62),hsla(var(--songhue,75),100%,55%,.14) 45%,transparent)}"
+  +".nfc.c4{left:0;background:linear-gradient(to right,hsla(var(--songhue,75),100%,60%,.62),hsla(var(--songhue,75),100%,55%,.14) 45%,transparent)}"
   +"#radiochip{position:fixed;right:14px;bottom:60px;z-index:8995;font-family:'Press Start 2P',monospace;"
   +"font-size:9px;background:#000;color:#b6ff00;border:1px solid #2a2a2a;padding:10px 12px;cursor:pointer;user-select:none}"
   +"#radiochip:hover{border-color:#b6ff00}"
