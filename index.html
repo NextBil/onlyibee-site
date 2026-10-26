@@ -652,10 +652,19 @@
     width:40px;height:34px;display:flex;align-items:center;justify-content:center;font-family:var(--px);font-size:11px}
   #lyr .lbar button:hover{border-color:var(--acid);color:var(--acid)}
   #lyr .lbar button svg{width:20px;height:20px}
-  /* full-screen button: dead center of the bar, spinning like the other ricons */
-  #lyr .lbar #lfs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-  #lyr .lbar #lfs svg{animation:spin 6s linear infinite}
-  #lyr .lbar #lfs:hover svg{filter:drop-shadow(0 0 6px rgba(182,255,0,.6))}
+  /* THE SAME (i) AS THE SONG LIST. This opened the record's soul but wore a
+     spinning vinyl, which reads as "play" everywhere else on this site — the
+     list already has one button that means "tell me about this record", so
+     this is that button, in the middle of the bar where it was. */
+  #lyr .lbar #lfs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:26px;height:26px;border-radius:50%;padding:0;
+    border:1px solid var(--cyan);color:var(--cyan);font-family:var(--px);font-size:9px;
+    background:rgba(38,224,255,.1);box-shadow:0 0 8px rgba(38,224,255,.28)}
+  #lyr .lbar #lfs:hover{color:#00121a;border-color:var(--cyan);background:var(--cyan);
+    box-shadow:0 0 12px rgba(38,224,255,.6)}
+  /* …and it stays lit while the soul is the thing on screen */
+  #lyr.info .lbar #lfs{color:#00121a;background:var(--cyan);
+    box-shadow:0 0 14px rgba(38,224,255,.65)}
   #lyr .songbox{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
   #lyr .songbox::-webkit-scrollbar{display:none}
   #lyr .songbox button{font-family:var(--px);font-size:8px;white-space:nowrap;flex:none;
@@ -920,7 +929,7 @@
         <div class="lbar">
           <span class="t" id="lsong">—</span>
           <div class="btns">
-            <button id="lfs" title="the record's soul — meaning, context, vibe"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9.4" stroke="#b6ff00" stroke-width="1.5"/><circle cx="12" cy="12" r="6.2" stroke="#2a2a2a" stroke-width="1"/><circle cx="12" cy="12" r="2.6" fill="#b6ff00"/><circle cx="12" cy="12" r="1" fill="#070707"/><rect x="11.2" y="2.2" width="1.6" height="3.4" fill="#ff2b2b"/></svg></button>
+            <button id="lfs" title="the record's soul — meaning, context, vibe">i</button>
             <button id="lclose" title="close">✕</button>
           </div>
         </div>
@@ -1582,7 +1591,6 @@
           +'<div class="art" style="background:'+vinyl(s.hue)+'">'+img0
           +(i===cur?'<span class="gnow">NOW</span>':'')
           +(s.locked?LKBIG:'')
-          +(room?'<span class="roomb">ROOM</span>':'')
           +fv
           +'<span class="gtag">'+e3(aln)+'</span></div>'
           +'<div class="nm">'+e3(s.n||'—')+playsLabel(s.f)+'</div></div>';
@@ -1592,7 +1600,7 @@
           +'<span class="cv" style="background:'+vinyl(s.hue)+'">'+img0+'</span>'
           +'<span class="ti"><span class="tn">'+e3(s.n||'—')+'</span><span class="al">'+e3(aln)+'</span>'+playsLabel(s.f)+'</span>'
           +fv
-          +(s.locked?LKSVG:(room?'<span class="rmroom">ROOM</span>':''))
+          +(s.locked?LKSVG:'')
           +'</div>';
       }
     }
