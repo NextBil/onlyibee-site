@@ -629,9 +629,20 @@
     if(load._arm) load._arm();
     initGraph();
     if(actx && actx.state === "suspended") actx.resume();
-    // pause any other audio on the page (galaxys engine etc.)
+    /* ONE SOUND AT A TIME — the radio wins, because the visitor just asked for
+       it. This used to PAUSE every other audio and video on the page, which also
+       stopped silent ones: the header strip's loop, the archive reels, a muted
+       TV channel. They make no sound, so there was nothing to win by killing
+       them, and the page went still every time a track started.
+       So: another <audio> is paused (it is sound and nothing else), a <video>
+       only loses its voice and keeps its picture, and anything already silent
+       is left alone. */
     document.querySelectorAll("audio,video").forEach(function(a){
-      if(a !== audio && !a.paused){ try{ a.pause(); }catch(e){} }
+      if(a === audio || a.paused) return;
+      try{
+        if(a.tagName === "VIDEO"){ if(!a.muted) a.muted = true; }
+        else a.pause();
+      }catch(e){}
     });
     // set the lock-screen "now playing" (song title, not the page title) up front,
     // so it shows immediately and updates the instant the track changes

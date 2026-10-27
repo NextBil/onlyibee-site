@@ -440,6 +440,24 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
    transform:scale — which paints over its neighbours and hides three other
    songs. It spans two columns and two rows now, so the grid genuinely reflows
    around it; grid-auto-flow:dense is what closes the hole that leaves. */
+/* ---- THE SESSIONS RAIL — swipe through the footage ---- */
+.rail{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:10px;padding-bottom:2px}
+.rail::-webkit-scrollbar{display:none}
+.rail .rc{flex:0 0 190px;scroll-snap-align:start;position:relative;aspect-ratio:16/9;
+  border:1px solid rgba(255,31,111,.42);background:#0a0609;overflow:hidden;cursor:pointer;
+  padding:0;display:block}
+.rail .rc img{width:100%;height:100%;object-fit:cover;display:block}
+.rail .rc .vp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:26px;color:#fff;text-shadow:0 0 16px rgba(0,0,0,.9);pointer-events:none;
+  transition:transform .18s}
+.rail .rc:hover{border-color:var(--pink-hot,#ff1f6f)}
+.rail .rc:hover .vp{transform:scale(1.14)}
+.rail .rc .rn{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;
+  font-family:var(--px);font-size:7px;letter-spacing:.7px;color:#ffd9e8;text-align:left;
+  background:linear-gradient(180deg,transparent,rgba(6,3,5,.92));pointer-events:none}
+@media(max-width:620px){ .rail .rc{flex:0 0 72%} }
+
 /* ---- a session in the drawer, and opened big ---- */
 .libgrid figure.sess .win{position:relative;cursor:pointer}
 .libgrid figure.sess .vp{position:absolute;inset:0;display:flex;align-items:center;
@@ -703,6 +721,9 @@ body.neon .batwrap svg{animation:none !important}
         <span class="sl" id="shotlb">the mark — "NEW PUNK", forearm</span>
         <span class="sgo">⤢ OPEN THE ARCHIVE</span>
       </button>
+      <!-- THE SESSIONS, SWIPEABLE. The whole archive is one tap away on the
+           frame above; this is the footage on its own, to thumb through. -->
+      <div class="rail" id="srail" aria-label="the sessions"></div>
       <div class="ptxt">
         <p class="lede"><span class="a">26 songs for my 26 years.</span> Toronto and Paris.</p>
         <p>NOUVEAUX PUNK is how I turn my issues into art. The songs might sound
@@ -1119,11 +1140,11 @@ body.neon .batwrap svg{animation:none !important}
      clip is opened big — the footage is the way into the record, not a
      separate room. `vs` is a full path; `v` is still relative to VID. */
   var ARCHIVE=[
-    {vs:"../assets/video/np2-deranger.mp4", po:"../assets/video/np2-deranger.jpg",
-     ex:"SESSION", lb:"deranger", big:true, songs:["np2-21-deranger.mp3"]},
     {vs:"../assets/video/np2-film.mp4", po:"../assets/video/np2-film.jpg",
      ex:"THE FILM", lb:"the film", big:true,
      songs:["np2-06-write-a-song.mp3","np2-02-okay.mp3"]},
+    {vs:"../assets/video/np2-deranger.mp4", po:"../assets/video/np2-deranger.jpg",
+     ex:"SESSION", lb:"deranger", big:true, songs:["np2-21-deranger.mp3"]},
     {vs:"../assets/video/np2-1019.mp4", po:"../assets/video/np2-1019.jpg",
      ex:"SESSION", lb:"okay", big:true, songs:["np2-02-okay.mp3"]},
     {vs:"../assets/video/np2-1022.mp4", po:"../assets/video/np2-1022.jpg",
@@ -1232,6 +1253,7 @@ body.neon .batwrap svg{animation:none !important}
   function openBig(a){
     bigNm.textContent=a.ex+" \u2014 "+a.lb;
     bigV.setAttribute("poster", a.po||"");
+    bigV.muted=false;            /* a session opened on purpose gets its sound back */
     bigV.src=a.vs;
     bigS.innerHTML=(a.songs||[]).map(function(s){
       return '<button type="button" data-slug="'+s+'">\u25B6 PLAY \u201C'+esc(titleOf(s))+'\u201D</button>';
@@ -1244,6 +1266,45 @@ body.neon .batwrap svg{animation:none !important}
     try{ bigV.pause(); }catch(e){}
     bigV.removeAttribute("src"); try{ bigV.load(); }catch(e){}   /* stop the download too */
   }
+  /* ONE SOUNDTRACK AT A TIME. A session has its own audio, so the record stands
+     down while it runs — and if the radio is started from the bottom player
+     while a clip is talking, it loses that too. */
+  function hushRadio(){
+    try{ var r=RADIO(); if(r&&r.playing&&r.playing()) r.control.pause(); }catch(e){}
+  }
+  bigV.addEventListener("play", function(){ if(!bigV.muted) hushRadio(); });
+  /* NEVER TWO SOUNDS AT ONCE, and whichever the visitor just started wins.
+     Open a session -> the record stands down. Start the record -> the clip
+     keeps playing but loses its voice. (player.js may not have booted when
+     this runs, so keep asking for the radio.) */
+  (function watchRadio(t){
+    t=t||0;
+    try{
+      var _r=RADIO();
+      if(_r&&_r.audio){
+        _r.audio.addEventListener("play",function(){
+          /* a "play" event is not proof of sound — the radio fires one while
+             failing to resume a track; confirm before taking the clip's voice */
+          setTimeout(function(){
+            try{ if(!(_r.playing&&_r.playing()&&!_r.audio.paused)) return; }catch(e){ return; }
+            quiet();
+          },60);
+        });
+        function quiet(){
+          if(bigV.muted) return;
+          var wasPlaying=!bigV.paused;
+          bigV.muted=true;
+          /* the clip keeps its picture, it just loses its voice — and the pause
+             lands on a later tick, so look again after the engine has settled */
+          if(wasPlaying) setTimeout(function(){
+            if(bigV.paused && !bigEl.hidden){ var p=bigV.play(); if(p&&p.catch) p.catch(function(){}); }
+          },150);
+        }
+        return;
+      }
+    }catch(e){}
+    if(t<40) setTimeout(function(){ watchRadio(t+1); },250);
+  })();
   document.getElementById("bigx").addEventListener("click",closeBig);
   bigEl.addEventListener("click",function(e){ if(e.target===bigEl) closeBig(); });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!bigEl.hidden) closeBig(); });
@@ -1252,6 +1313,25 @@ body.neon .batwrap svg{animation:none !important}
     var i=indexOfSlug(b.getAttribute("data-slug"));
     if(i>=0){ play(i); closeBig(); }
   });
+  /* ---- the rail: the same sessions, swipeable, out on the page ----
+     Posters only. The clip itself is never fetched here — that is the big
+     view's job, and it reuses one <video> for all of them. */
+  (function(){
+    var rail=document.getElementById("srail"); if(!rail) return;
+    var sess=[];
+    ARCHIVE.forEach(function(a,n){ if(a.vs) sess.push({a:a,n:n}); });
+    rail.innerHTML=sess.map(function(s){
+      return '<button type="button" class="rc" data-n="'+s.n+'">'
+        +'<img src="'+s.a.po+'" alt="'+esc(s.a.lb)+'" loading="lazy">'
+        +'<span class="vp">\u25B6</span>'
+        +'<span class="rn">'+esc(s.a.lb)+'</span></button>';
+    }).join("");
+    rail.addEventListener("click",function(e){
+      var b=e.target.closest&&e.target.closest(".rc"); if(!b) return;
+      var a=ARCHIVE[+b.getAttribute("data-n")]; if(a&&a.vs) openBig(a);
+    });
+  })();
+
   /* tapping a session in the drawer opens it big */
   libGrid.addEventListener("click",function(e){
     var f=e.target.closest&&e.target.closest("figure.sess"); if(!f) return;
@@ -1470,7 +1550,7 @@ body.neon .batwrap svg{animation:none !important}
 </script>
 <script>document.write('<script src="../assets/products-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script src="../assets/np2-perks.js?v=3"></script>
-<script src="../assets/player.js?v=35"></script>
+<script src="../assets/player.js?v=36"></script>
 <script src="../assets/badges.js?v=13"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 </body>

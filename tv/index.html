@@ -48,6 +48,12 @@
     border:0;padding:9px 14px;box-shadow:0 0 18px rgba(182,255,0,.45)}
   #unmute:hover{background:#c9ff33}
   #unmute[hidden]{display:none}
+  /* pause sits opposite the sound button, on the same line of the glass */
+  #tvpause{position:absolute;left:12px;bottom:12px;z-index:7;cursor:pointer;
+    font-family:var(--px);font-size:11px;line-height:1;padding:9px 11px;
+    background:#0b0c0e;border:1px solid #2a2a2a;color:#b6ff00}
+  #tvpause:hover{border-color:#b6ff00}
+  #tvpause[hidden]{display:none}
   #static{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:3}
   #static.off{display:none}
   /* CRT face over the tube */
@@ -141,6 +147,8 @@
         <canvas id="static"></canvas>
         <div id="hint"><button id="pressbtn" type="button">PRESS</button><span class="ph">a random transmission_</span></div>
         <button id="unmute" type="button" hidden>&#128266; TAP FOR SOUND</button>
+        <!-- our own channels can be stopped; a YouTube channel has its own controls -->
+        <button id="tvpause" type="button" hidden aria-label="Pause">&#10074;&#10074;</button>
         <span id="osd">CH 01</span>
       </div>
     </div>
@@ -161,7 +169,7 @@
   </div>
 </main>
 
-<script src="../assets/player.js?v=35"></script>
+<script src="../assets/player.js?v=36"></script>
 <script>
 (function(){
 "use strict";
@@ -321,10 +329,12 @@ function tune(i,opts){
       noiseOn=true; st.classList.remove("off"); hint.style.display="";
     });
     unmute.hidden = tvSound;
+    tvpause.hidden = false;
   }else{
     tvv.classList.remove("on");
     try{ tvv.pause(); }catch(e){}
     unmute.hidden=true;
+    tvpause.hidden=true;
     yt.src="https://www.youtube-nocookie.com/embed/"+c.id+"?autoplay=1&playsinline=1&rel=0&color=white&enablejsapi=1";
   }
 
@@ -333,6 +343,75 @@ function tune(i,opts){
     setTimeout(function(){osd.classList.remove("on");},1400);
   },650);
 }
+/* ---- PAUSE, and one soundtrack at a time ----
+   hushRadio() used to be called only when a channel was TUNED. Nothing stopped
+   the visitor starting the site radio afterwards, and then the record and the
+   transmission played over each other. The clip itself is the signal now: every
+   time it starts, the radio stands down. */
+var tvpause=document.getElementById("tvpause");
+function paintPause(){
+  tvpause.innerHTML = tvv.paused ? "&#9658;" : "&#10074;&#10074;";
+  tvpause.setAttribute("aria-label", tvv.paused ? "Play" : "Pause");
+}
+function togglePlay(){
+  if(tvv.paused){ var p=tvv.play(); if(p&&p.catch) p.catch(function(){}); }
+  else tvv.pause();
+  paintPause();
+}
+tvpause.onclick=function(e){ e.preventDefault(); e.stopPropagation(); togglePlay(); };
+/* the picture is the other, bigger button */
+tvv.addEventListener("click",function(e){ e.stopPropagation(); togglePlay(); });
+tvv.addEventListener("play", function(){ paintPause(); if(!tvv.muted) hushRadio(); });
+tvv.addEventListener("pause",function(){ paintPause(); });
+/* The radio silences the channel itself (player.js mutes every other video when
+   a track starts), so the set hears about it from the element rather than from
+   whoever did it — and offers the sound back. */
+tvv.addEventListener("volumechange",function(){
+  if(tvv.muted && tvSound){ tvSound=false; if(tvv.classList.contains("on")) unmute.hidden=false; }
+  else if(!tvv.muted && !tvSound){ tvSound=true; unmute.hidden=true; }
+});
+/* NEVER TWO SOUNDS AT ONCE, and the thing the visitor JUST started is the one
+   that wins. Start a channel -> the radio stands down (the "play" handler
+   above). Start the radio -> the transmission goes quiet, but keeps its
+   picture: a silent channel and the radio have always been allowed to share
+   the room, so this drops it back to exactly that state and offers the sound
+   button again. */
+function hushTV(){
+  if(tvv.muted) return;
+  var wasPlaying = !tvv.paused;
+  tvv.muted=true; tvSound=false;
+  if(tvv.classList.contains("on")) unmute.hidden=false;
+  /* Losing the voice must not cost the picture. The pause, when it happens, is
+     ASYNCHRONOUS — checking tvv.paused on this same tick always said "still
+     playing" and the resume never ran, so the channel went dark a moment later.
+     Look again after the engine has settled. */
+  paintPause();
+  if(wasPlaying) setTimeout(function(){
+    if(tvv.paused && tvv.classList.contains("on")){
+      var p=tvv.play(); if(p&&p.catch) p.catch(function(){});
+    }
+    paintPause();
+  },150);
+}
+(function watchRadio(t){
+  t=t||0;
+  try{
+    var _r=window.IBEERADIO||(window.top&&window.top.IBEERADIO);
+    if(_r&&_r.audio){
+      /* A "play" event is not proof of sound: the radio fires one while trying
+         to resume a track it then fails to load, and that was silencing the TV
+         with nothing audible on the other side. Confirm it is really running. */
+      _r.audio.addEventListener("play",function(){
+        setTimeout(function(){
+          try{ if(_r.playing&&_r.playing()&&!_r.audio.paused) hushTV(); }catch(e){}
+        },60);
+      });
+      return;
+    }
+  }catch(e){}
+  if(t<40) setTimeout(function(){ watchRadio(t+1); },250);   /* player.js may still be booting */
+})();
+
 unmute.onclick=function(){
   tvSound=true; tvv.muted=false; unmute.hidden=true;
   hushRadio();                      /* now it has a voice, it gets the room */
