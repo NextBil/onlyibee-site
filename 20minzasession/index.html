@@ -170,6 +170,11 @@ body.playing .reel .spokes{animation-play-state:running}
 .viewer .vload{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;
   flex-direction:column;gap:12px;font-family:var(--px);font-size:9px;color:var(--amber);text-align:center;padding:16px;line-height:1.9}
 .viewer .vspin{width:26px;height:26px;border:3px solid #2a2140;border-top-color:var(--amber);border-radius:50%;animation:spin 1s linear infinite}
+/* phones ask before downloading a relic — see the viewer script for why */
+.viewer .vgo{font-family:var(--px);font-size:10px;line-height:1.6;cursor:pointer;
+  background:#120d20;border:1px solid var(--amber);color:var(--amber);
+  padding:13px 16px;letter-spacing:.5px}
+.viewer .vgo:active{background:var(--amber);color:#120d20}
 
 /* ---------- videos ---------- */
 .vids{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -571,7 +576,7 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
       $("dcur").textContent=fmt(c);
       if(d){ setProgress(c/d); if(d>60 && c>=d*0.92) mzsCertify(); }
       $("dplay").textContent=playing?"❚❚ PAUSE":"► SPARK THE SESSION";
-      if(playing) startRoom(); else stopRoom();
+      if(playing){ startRoom(); reviveRoom(); } else stopRoom();
     } else {
       $("dplay").textContent="► SPARK THE SESSION"; stopRoom();
     }
@@ -616,7 +621,15 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
      smoke drifting. Canvas driven while the tape rolls.
      ===================================================================== */
   var driving=false, cv=$("drive"), cx=cv.getContext("2d");
-  var W=0,H=0,dpr=Math.min(2,window.devicePixelRatio||1), lights=[], stars=[], t0=0;
+  /* A full-screen canvas at devicePixelRatio 2 is four times the fill for a
+     haze-and-gradient scene nobody is reading pixel-for-pixel. On a phone that
+     fill, every frame, next to a 3D scan and the music, is what pushed the tab
+     over. 1x on phones. */
+  var PHONE_ROOM = (window.innerWidth||999) < 700;
+  var W=0,H=0,dpr=PHONE_ROOM?1:Math.min(2,window.devicePixelRatio||1), lights=[], stars=[], t0=0;
+  /* the sky and the moon's halo only change when the viewport does, so they are
+     built once in sizeDrive() instead of being allocated 60 times a second */
+  var skyGrad=null, haloGrad=null, moonX=0, moonY=0, moonR=0;
   /* Why the road used to vanish: the browser suspends requestAnimationFrame the
      moment the page is hidden — phone locked, tab switched, app backgrounded —
      and this page is built to keep PLAYING through exactly that. The frame loop
@@ -630,6 +643,14 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
     W=window.innerWidth||document.documentElement.clientWidth||screen.width||1280;
     H=window.innerHeight||document.documentElement.clientHeight||screen.height||720;
     cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
+    var horizon=H*0.40;
+    skyGrad=cx.createLinearGradient(0,0,0,horizon);
+    skyGrad.addColorStop(0,"rgba(3,2,9,0.94)"); skyGrad.addColorStop(1,"rgba(15,9,28,0.88)");
+    moonX=W*0.80; moonY=horizon*0.42; moonR=Math.max(24,Math.min(50,W*0.055));
+    haloGrad=cx.createRadialGradient(moonX,moonY,0,moonX,moonY,moonR*2.6);
+    haloGrad.addColorStop(0,"rgba(255,250,235,0.85)");
+    haloGrad.addColorStop(0.42,"rgba(255,240,205,0.4)");
+    haloGrad.addColorStop(1,"transparent");
     buildStars();
   }
   window.addEventListener("resize",function(){ if(driving) sizeDrive(); });
@@ -641,9 +662,8 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
      Drawn first each frame so the road + lights sit on top of the night. This is
      what makes "outside the road" read as a dark night while the tape plays. */
   function drawNight(horizon){
-    var sky=cx.createLinearGradient(0,0,0,horizon);
-    sky.addColorStop(0,"rgba(3,2,9,0.94)"); sky.addColorStop(1,"rgba(15,9,28,0.88)");
-    cx.fillStyle=sky; cx.fillRect(0,0,W,horizon);
+    if(!skyGrad) return;
+    cx.fillStyle=skyGrad; cx.fillRect(0,0,W,horizon);
     cx.fillStyle="rgba(6,4,15,0.82)"; cx.fillRect(0,horizon,W,H-horizon);   // dark ground wash
     /* stars */
     var now=performance.now()/1000;
@@ -651,10 +671,8 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
       cx.globalAlpha=a; cx.fillStyle="#fff7ea"; cx.beginPath(); cx.arc(s.x,s.y,s.r,0,7); cx.fill(); }
     cx.globalAlpha=1;
     /* the moon, up in the corner, with a soft halo */
-    var mx=W*0.80, my=horizon*0.42, mr=Math.max(24,Math.min(50,W*0.055));
-    var halo=cx.createRadialGradient(mx,my,0,mx,my,mr*2.6);
-    halo.addColorStop(0,"rgba(255,250,235,0.85)"); halo.addColorStop(0.42,"rgba(255,240,205,0.4)"); halo.addColorStop(1,"transparent");
-    cx.fillStyle=halo; cx.beginPath(); cx.arc(mx,my,mr*2.6,0,7); cx.fill();
+    var mx=moonX, my=moonY, mr=moonR;
+    cx.fillStyle=haloGrad; cx.beginPath(); cx.arc(mx,my,mr*2.6,0,7); cx.fill();
     cx.fillStyle="rgba(255,250,240,0.98)"; cx.beginPath(); cx.arc(mx,my,mr,0,7); cx.fill();
     cx.fillStyle="rgba(206,201,186,0.5)";
     cx.beginPath(); cx.arc(mx-mr*0.32,my-mr*0.22,mr*0.22,0,7); cx.fill();
@@ -690,9 +708,13 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
     if(ember) ember.style.setProperty("--emb",beat.toFixed(3));
   }
 
-  function drawDrive(gen){
+  var lastDriveFrame=0, lastDrawn=0;
+  function drawDrive(gen, ts){
     if(!driving || gen!==driveGen) return;
-    requestAnimationFrame(function(){ drawDrive(gen); });
+    requestAnimationFrame(function(t){ drawDrive(gen, t); });
+    lastDriveFrame=performance.now();
+    /* 30fps on a phone: this is drifting haze, not a game */
+    if(PHONE_ROOM){ var nw=ts||lastDriveFrame; if(nw-lastDrawn<32) return; lastDrawn=nw; }
     stepBeat();
     cx.clearRect(0,0,W,H);
     var horizon=H*0.40, cxp=W/2;
@@ -737,7 +759,23 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
   }
   function startRoom(){
     if(driving) return; driving=true;
+    lastDriveFrame=performance.now();
     body.classList.add("playing"); sizeDrive(); lights=[]; drawDrive(++driveGen);
+  }
+  /* SELF-HEAL — why the road sometimes never appeared.
+     requestAnimationFrame is suspended whenever the page is hidden: locked
+     phone, tab switch, app backgrounded, and (the new one) a tab iOS discarded
+     and restored. If a frame loop dies while `driving` is still true, then
+     startRoom() early-returns forever and nothing ever rebuilds it — music, no
+     animation, until a reload. visibilitychange/pageshow/focus cover most of
+     that, but not all of it, and they cannot cover a loop that simply never got
+     its first frame. The deck already polls four times a second, so let it
+     notice a loop that has not drawn for a second and kick a fresh generation.
+     The generation token makes a redundant kick harmless. */
+  function reviveRoom(){
+    if(!driving || document.hidden) return;
+    if(performance.now()-lastDriveFrame < 1000) return;
+    sizeDrive(); drawDrive(++driveGen);
   }
   function stopRoom(){
     if(!driving) return; driving=false; driveGen++;
@@ -783,27 +821,32 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
     document.querySelectorAll(".vload").forEach(function(v){ v.innerHTML="3D VIEWER OFFLINE_<br><small style='font-size:14px'>check your connection</small>"; });
     return;
   }
-  function makeViewer(el){
-    var src=el.getAttribute("data-src"), loadEl=el.querySelector(".vload");
-    /* one loader PER viewer, with its resource path set to the model's own folder,
-       so any external texture reference resolves next to the .fbx (the scans also
-       embed their JPEG texture, which the loader unpacks — this is the fallback). */
-    var loader=new THREE.FBXLoader();
-    try{ loader.setResourcePath(src.replace(/[^\/]+$/,"")); }catch(e){}
+  /* ==================================================================
+     WHY THIS WAS CRASHING PHONES
+     A 14MB scan, the texture it unpacks, and a WebGL context on top of a
+     page that is already painting a full-screen canvas and playing music
+     is more than an iOS tab is allowed. Safari kills it — "a problem
+     repeatedly occurred". Three changes: nothing is downloaded on a phone
+     until the visitor asks for it, the context is built smaller, and a
+     model that fails to load never costs a context at all.
+     ================================================================== */
+  var PHONE = (window.innerWidth || 999) < 700;
+
+  function buildScene(el, obj, loadEl){
     var w=el.clientWidth||400, h=el.clientHeight||400;
     var scene=new THREE.Scene(); scene.background=null;
     var camera=new THREE.PerspectiveCamera(45, w/h, 0.1, 5000);
-    var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
-    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    /* antialias allocates a second, multisampled framebuffer. At phone size the
+       scan reads fine without it and that memory is better spent on the model. */
+    var renderer=new THREE.WebGLRenderer({antialias:!PHONE, alpha:true, powerPreference:"low-power"});
+    renderer.setPixelRatio(PHONE ? 1 : Math.min(2, window.devicePixelRatio||1));
     renderer.setSize(w,h); el.appendChild(renderer.domElement);
     /* sRGB output so the scan's baked photo texture reads at its true colour
        (default linear output makes photogrammetry textures look washed/dark) */
     try{ if(THREE.sRGBEncoding) renderer.outputEncoding=THREE.sRGBEncoding; }catch(e){}
-    /* NEUTRAL light only. The orange key + purple rim that used to be here were
-       repainting the scan: a photogrammetry model already has its real lighting
-       baked into the photo texture, so any coloured lamp tints the whole thing
-       and the colours come out wrong. These are white and only matter for the
-       fallback case where a mesh has no texture at all. */
+    /* NEUTRAL light only. A photogrammetry model already has its real lighting
+       baked into the photo texture, so any coloured lamp tints the whole thing.
+       These are white and only matter where a mesh has no texture at all. */
     scene.add(new THREE.AmbientLight(0xffffff, 0.9));
     var key=new THREE.DirectionalLight(0xffffff, 0.35); key.position.set(3,6,4); scene.add(key);
     var rim=new THREE.DirectionalLight(0xffffff, 0.25); rim.position.set(-4,2,-3); scene.add(rim);
@@ -816,70 +859,117 @@ a.fcard:hover{transform:translateY(-3px);border-color:var(--amber,#ff9d2b);
       camera.aspect=W/Hh; camera.updateProjectionMatrix(); renderer.setSize(W,Hh);
     }
     window.addEventListener("resize",resize);
-    loader.load(src, function(obj){
-      /* fix up the scan's materials so the TEXTURE actually shows:
-         · sRGB colour space on the baked photo map (else it renders washed/dark)
-         · DoubleSide — photogrammetry meshes are thin/one-sided, so backface
-           culling was hiding faces and leaving only a bare shape
-         · vertex colours enabled when the scan baked colour into the geometry
-           (some scans carry no texture map at all, only vertex colours) */
-      obj.traverse(function(ch){
-        if(!ch.isMesh) return;
-        ch.frustumCulled=false;
-        var mats=Array.isArray(ch.material)?ch.material:[ch.material];
-        var hasVC = !!(ch.geometry&&ch.geometry.attributes&&ch.geometry.attributes.color);
-        ch.material = mats.map(function(m){
-          if(!m) return m;
-          if(m.map){ try{ if(THREE.sRGBEncoding) m.map.encoding=THREE.sRGBEncoding; m.map.needsUpdate=true; }catch(e){} }
-          /* Show the bake UNLIT — this is what a scan viewer does. A lit material
-             multiplies the baked photo by whatever the scene lamps are doing, so
-             the model never matches the capture. MeshBasicMaterial displays the
-             texture exactly as photographed, which is the whole point of a scan. */
-          if(m.map || hasVC){
-            var b=new THREE.MeshBasicMaterial({
-              map:m.map||null, vertexColors:hasVC, side:THREE.DoubleSide,
-              transparent:!!m.transparent, opacity:m.opacity==null?1:m.opacity
-            });
-            if(!m.map) b.color.setRGB(1,1,1);
-            return b;
-          }
-          m.side=THREE.DoubleSide;
-          if(m.emissive&&m.emissive.setRGB) m.emissive.setRGB(0,0,0);
-          m.needsUpdate=true; return m;
-        });
-        if(ch.material.length===1) ch.material=ch.material[0];
+
+    /* fix up the scan's materials so the TEXTURE actually shows:
+       · sRGB colour space on the baked photo map (else it renders washed/dark)
+       · DoubleSide — photogrammetry meshes are thin/one-sided, so backface
+         culling was hiding faces and leaving only a bare shape
+       · vertex colours enabled when the scan baked colour into the geometry */
+    obj.traverse(function(ch){
+      if(!ch.isMesh) return;
+      ch.frustumCulled=false;
+      var mats=Array.isArray(ch.material)?ch.material:[ch.material];
+      var hasVC = !!(ch.geometry&&ch.geometry.attributes&&ch.geometry.attributes.color);
+      ch.material = mats.map(function(m){
+        if(!m) return m;
+        if(m.map){ try{ if(THREE.sRGBEncoding) m.map.encoding=THREE.sRGBEncoding; m.map.needsUpdate=true; }catch(e){} }
+        /* Show the bake UNLIT — what a scan viewer does. A lit material multiplies
+           the baked photo by the scene lamps, so it never matches the capture. */
+        if(m.map || hasVC){
+          var b=new THREE.MeshBasicMaterial({
+            map:m.map||null, vertexColors:hasVC, side:THREE.DoubleSide,
+            transparent:!!m.transparent, opacity:m.opacity==null?1:m.opacity
+          });
+          if(!m.map) b.color.setRGB(1,1,1);
+          return b;
+        }
+        m.side=THREE.DoubleSide;
+        if(m.emissive&&m.emissive.setRGB) m.emissive.setRGB(0,0,0);
+        m.needsUpdate=true; return m;
       });
-      /* center + frame the model so it fills the view */
-      var box=new THREE.Box3().setFromObject(obj);
-      var size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
-      var maxd=Math.max(size.x,size.y,size.z)||1;
-      var s=2.2/maxd; obj.scale.setScalar(s);
-      obj.position.sub(center.multiplyScalar(s));
-      pivot.add(obj);
-      camera.position.set(0,0.4,4);
-      controls.target.set(0,0,0); controls.update();
-      if(loadEl) loadEl.remove();
+      if(ch.material.length===1) ch.material=ch.material[0];
+    });
+    /* center + frame the model so it fills the view */
+    var box=new THREE.Box3().setFromObject(obj);
+    var size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+    var maxd=Math.max(size.x,size.y,size.z)||1;
+    var s=2.2/maxd; obj.scale.setScalar(s);
+    obj.position.sub(center.multiplyScalar(s));
+    pivot.add(obj);
+    camera.position.set(0,0.4,4);
+    controls.target.set(0,0,0); controls.update();
+    if(loadEl) loadEl.remove();
+
+    /* THE RENDER LOOP PARKS. It used to re-arm itself every frame for the life
+       of the page and merely skip the draw when off screen, so scrolling past
+       the relics left two loops running forever. Now it stops, and the observer
+       (or the tab coming back) restarts it. */
+    var onScreen=true, raf=0, last=0;
+    function frame(ts){
+      raf=0;
+      if(!onScreen || document.hidden) return;
+      raf=requestAnimationFrame(frame);
+      if(PHONE){ var nw=ts||performance.now(); if(nw-last<32) return; last=nw; }
+      controls.update(); renderer.render(scene,camera);
+    }
+    function kick(){ if(!raf && onScreen && !document.hidden) raf=requestAnimationFrame(frame); }
+    try{
+      new IntersectionObserver(function(es){ onScreen=es[0].isIntersecting; kick(); }).observe(el);
+    }catch(e){}
+    document.addEventListener("visibilitychange",function(){ if(!document.hidden) kick(); });
+    kick();
+  }
+
+  /* a relic whose model is missing takes the whole card with it, rather than
+     leaving an error box standing in the row */
+  function dropViewer(el){
+    var row=el.parentNode; el.remove();
+    if(row && !row.querySelector(".viewer")){
+      var sec=row.closest("section,.sec,div"); if(sec && sec!==row) sec.style.display="none";
+      else row.style.display="none";
+    }
+  }
+
+  function makeViewer(el){
+    if(el.getAttribute("data-built")) return;
+    el.setAttribute("data-built","1");
+    var src=el.getAttribute("data-src"), loadEl=el.querySelector(".vload");
+    /* one loader PER viewer, with its resource path set to the model's own folder,
+       so any external texture reference resolves next to the .fbx */
+    var loader=new THREE.FBXLoader();
+    try{ loader.setResourcePath(src.replace(/[^\/]+$/,"")); }catch(e){}
+    /* NOTHING IS BUILT UNTIL THE MODEL IS ACTUALLY HERE. The scene, the context
+       and the loop used to be created up front, so a model that 404s still cost
+       a live WebGL context and a permanent render loop. */
+    loader.load(src, function(obj){
+      try{ buildScene(el, obj, loadEl); }
+      catch(err){ if(loadEl) loadEl.innerHTML="COULDN'T SHOW THIS RELIC_"; }
     }, function(xhr){
       if(loadEl && xhr.total){ var pct=Math.round(xhr.loaded/xhr.total*100);
         var s=loadEl.querySelector("small"); if(s) s.textContent=pct+"% loaded"; }
     }, function(err){
-      if(loadEl) loadEl.innerHTML="COULDN'T LOAD THIS RELIC_<br><small style='font-size:14px'>try a reload</small>";
+      dropViewer(el);
     });
-    /* only spin/render while the viewer is actually on screen — two WebGL
-       scenes running at once (esp. with big FBX) is needless load otherwise */
-    var onScreen=true;
-    try{
-      new IntersectionObserver(function(es){ onScreen=es[0].isIntersecting; })
-        .observe(el);
-    }catch(e){}
-    (function anim(){ requestAnimationFrame(anim);
-      if(!onScreen) return;
-      controls.update(); renderer.render(scene,camera);
-    })();
   }
-  /* only build a viewer once it scrolls near view (saves the big downloads) */
+
+  /* On a laptop the relic loads as it scrolls near. On a phone it waits for a
+     tap: the download and the texture are the difference between a page that
+     plays music and a tab iOS throws away. */
+  function arm(el){
+    if(!PHONE){ makeViewer(el); return; }
+    var loadEl=el.querySelector(".vload"); if(!loadEl) { makeViewer(el); return; }
+    var note=(loadEl.querySelector("small")||{}).textContent||"";
+    loadEl.innerHTML='<button type="button" class="vgo">LOAD THIS RELIC_</button>'
+      +'<small style="font-size:13px;color:var(--dim);display:block;margin-top:9px">'+note+'</small>';
+    loadEl.querySelector(".vgo").addEventListener("click",function(){
+      loadEl.innerHTML='<div class="vspin"></div>LOADING_<br><small style="font-size:14px;color:var(--dim)">'+note+'</small>';
+      makeViewer(el);
+    });
+  }
+
+  /* only arm a viewer once it scrolls near view */
   var io=new IntersectionObserver(function(ents){
-    ents.forEach(function(e){ if(e.isIntersecting){ makeViewer(e.target); io.unobserve(e.target); } });
+    ents.forEach(function(e){ if(e.isIntersecting){ arm(e.target); io.unobserve(e.target); } });
   },{rootMargin:"300px"});
   document.querySelectorAll(".viewer").forEach(function(v){ io.observe(v); });
 })();
