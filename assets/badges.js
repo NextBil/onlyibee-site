@@ -259,9 +259,14 @@
   window.addEventListener("storage",function(ev){ if(ev&&(ev.key===SEEN||ev.key==="ibee_auto_news")) placeDots(); });
   var host=document.createElement("div"); host.id="bgtoasts"; document.body.appendChild(host);
 
+  /* THE TOAST BLIP MUST NEVER COST THE RECORD.
+     This used to build its own AudioContext. On iOS a new context takes the
+     audio session, and the track the visitor was listening to just stopped —
+     every time a badge arrived. It borrows the site's one context now, and
+     player.js refuses to hand one over while a track is playing on iOS. */
   function blipT(){ try{
-    var C=window.AudioContext||window.webkitAudioContext; if(!C) return;
-    blipT.ctx=blipT.ctx||new C(); var a=blipT.ctx; if(a.state==="suspended") return;
+    var a = window.IBEE_AUDIO_CTX ? window.IBEE_AUDIO_CTX() : null;
+    if(!a || a.state==="suspended") return;
     [660,990].forEach(function(f,i){
       var o=a.createOscillator(),g=a.createGain();
       o.type="square"; o.frequency.value=f;

@@ -444,7 +444,7 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .rail{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:10px;padding-bottom:2px}
 .rail::-webkit-scrollbar{display:none}
-.rail .rc{flex:0 0 190px;scroll-snap-align:start;position:relative;aspect-ratio:16/9;
+.rail .rc{flex:0 0 268px;scroll-snap-align:start;position:relative;aspect-ratio:16/9;
   border:1px solid rgba(255,31,111,.42);background:#0a0609;overflow:hidden;cursor:pointer;
   padding:0;display:block}
 .rail .rc img{width:100%;height:100%;object-fit:cover;display:block}
@@ -461,7 +461,17 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .rail .rc .rn{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;
   font-family:var(--px);font-size:7px;letter-spacing:.7px;color:#ffd9e8;text-align:left;
   background:linear-gradient(180deg,transparent,rgba(6,3,5,.92));pointer-events:none}
-@media(max-width:620px){ .rail .rc{flex:0 0 72%} }
+@media(max-width:620px){ .rail .rc{flex:0 0 86%} }
+/* ---- THE PHOTOGRAPHS — the same gesture, deliberately smaller than the film ---- */
+.prail{display:flex;gap:7px;overflow-x:auto;scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:9px;padding-bottom:2px}
+.prail::-webkit-scrollbar{display:none}
+.prail .pc{flex:0 0 104px;scroll-snap-align:start;position:relative;aspect-ratio:1;
+  border:1px solid var(--line,#23181d);background:#0a0609;overflow:hidden;cursor:pointer;
+  padding:0;display:block}
+.prail .pc img,.prail .pc video{width:100%;height:100%;object-fit:cover;display:block}
+.prail .pc:hover{border-color:var(--pink-hot,#ff1f6f)}
+@media(max-width:620px){ .prail .pc{flex:0 0 92px} }
 
 /* ---- a session in the drawer, and opened big ---- */
 .libgrid figure.sess .win{position:relative;cursor:pointer}
@@ -478,7 +488,28 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .bigx:hover{border-color:var(--pink-hot,#ff1f6f);color:var(--pink-hot,#ff1f6f)}
 .bigin{display:flex;flex-direction:column;gap:12px;max-width:min(1100px,96vw);
   max-height:92vh;width:100%;align-items:center}
-.bigin video{max-width:100%;max-height:72vh;background:#000;display:block}
+.bigstage{position:relative;width:100%;display:flex;align-items:center;justify-content:center;
+  touch-action:pan-y}
+.bigin video,.bigin #bigi{max-width:100%;max-height:62vh;background:#000;display:block}
+.bigin #bigi{object-fit:contain}
+.bigin video[hidden],.bigin #bigi[hidden]{display:none}
+/* arrows — the swipe is the real control, these are for a mouse */
+.bignav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:40px;height:56px;
+  background:rgba(8,4,6,.72);border:1px solid rgba(255,31,111,.4);color:#ff8ec0;
+  cursor:pointer;font-family:var(--px);font-size:16px;line-height:1}
+.bignav:hover{background:var(--pink-hot,#ff1f6f);color:#120308}
+.bignav.p{left:4px} .bignav.n{right:4px}
+.bignav[hidden]{display:none}
+@media(max-width:620px){ .bignav{display:none} }   /* on a phone you swipe */
+/* the rest of the set */
+.bigstrip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;width:100%;
+  max-width:760px;padding:2px 0 0}
+.bigstrip::-webkit-scrollbar{display:none}
+.bigstrip button{flex:0 0 72px;aspect-ratio:16/9;padding:0;cursor:pointer;overflow:hidden;
+  border:1px solid #23181d;background:#0a0609;opacity:.5;transition:opacity .18s,border-color .18s}
+.bigstrip button img,.bigstrip button video{width:100%;height:100%;object-fit:cover;display:block}
+.bigstrip button.on{opacity:1;border-color:var(--pink-hot,#ff1f6f)}
+.bigstrip button:hover{opacity:1}
 .bigm{width:100%;max-width:640px;text-align:center}
 .bigm b{display:block;font-family:var(--px);font-size:11px;color:#fff;letter-spacing:1px;
   margin-bottom:10px}
@@ -729,6 +760,8 @@ body.neon .batwrap svg{animation:none !important}
         <span class="sl" id="shotlb">the mark — "NEW PUNK", forearm</span>
         <span class="sgo">⤢ OPEN THE ARCHIVE</span>
       </button>
+      <!-- the photographs, thumbable — the whole folder is still the frame above -->
+      <div class="prail" id="prail" aria-label="the photographs"></div>
       <div class="ptxt">
         <p class="lede"><span class="a">26 songs for my 26 years.</span> Toronto and Paris.</p>
         <p>NOUVEAUX PUNK is how I turn my issues into art. The songs might sound
@@ -819,6 +852,28 @@ body.neon .batwrap svg{animation:none !important}
   </div>
 </main>
 
+<!-- A SESSION OR A PICTURE, OPENED BIG. Its own layer on the body — it used to
+     live INSIDE the archive drawer, so opening a clip from a rail while the
+     drawer was shut rendered it inside a display:none parent: the viewer
+     "opened", the clip even played, and nothing was on screen. -->
+<div class="big" id="big" hidden>
+  <button class="bigx" id="bigx" aria-label="Close">✕</button>
+  <div class="bigin">
+    <button class="bignav p" id="bigprev" aria-label="Previous">‹</button>
+    <button class="bignav n" id="bignext" aria-label="Next">›</button>
+    <div class="bigstage" id="bigstage">
+      <video id="bigv" playsinline controls preload="none"></video>
+      <img id="bigi" alt="">
+    </div>
+    <div class="bigm">
+      <b id="bignm"></b>
+      <div class="bigs" id="bigsongs"></div>
+    </div>
+    <!-- the rest of the set, small, under it — so you can see where you are -->
+    <div class="bigstrip" id="bigstrip"></div>
+  </div>
+</div>
+
 <!-- THE DRAWER — the project's photo library, opened from the statement's
      frame. Built on first open; the two reels keep preload="none" so nobody
      downloads 3.5MB of video unless they actually look. -->
@@ -829,17 +884,6 @@ body.neon .batwrap svg{animation:none !important}
     <span class="c" id="libc"></span>
   </div>
   <div class="libgrid" id="libgrid"></div>
-  <!-- A SESSION, OPENED BIG. One <video>, reused for whichever clip is tapped. -->
-  <div class="big" id="big" hidden>
-    <button class="bigx" id="bigx" aria-label="Close">✕</button>
-    <div class="bigin">
-      <video id="bigv" playsinline controls preload="none"></video>
-      <div class="bigm">
-        <b id="bignm"></b>
-        <div class="bigs" id="bigsongs"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- THE BIGGER BOX — the same twenty-seven, large enough to read. Six-up is a
@@ -1246,7 +1290,8 @@ body.neon .batwrap svg{animation:none !important}
      songs) it belongs to. One <video> is reused for every session: five would
      be five decoders alive for one thing on screen. */
   var bigEl=document.getElementById("big"), bigV=document.getElementById("bigv"),
-      bigNm=document.getElementById("bignm"), bigS=document.getElementById("bigsongs");
+      bigI=document.getElementById("bigi"), bigNm=document.getElementById("bignm"),
+      bigS=document.getElementById("bigsongs"), bigStrip=document.getElementById("bigstrip");
   function titleOf(slug){
     for(var i=0;i<NP2.length;i++) if(NP2[i].f===slug) return NP2[i].t;
     return slug;
@@ -1255,33 +1300,99 @@ body.neon .batwrap svg{animation:none !important}
     for(var i=0;i<NP2.length;i++) if(NP2[i].f===slug) return i;
     return -1;
   }
-  function openBig(a){
+  /* THREE KINDS LIVE IN THE ARCHIVE: a session (vs, with a poster), one of the
+     old reels (v, relative to VID, no poster at all) and a photograph (f).
+     Everything below asks here rather than guessing — the reels were being
+     handed to the <img> branch with no src, so they opened blank. */
+  function clipOf(a){ return a.vs || (a.v ? VID+a.v : null); }
+  function stillOf(a){ return a.vs ? a.po : (a.f ? IMG+a.f : null); }
+
+  /* ---- THE VIEWER ----
+     One set at a time — the footage or the photographs — opened at one piece,
+     swiped sideways through the rest, with the others small underneath so you
+     can see where you are in it. */
+  var vList=[], vAt=-1;
+  function stopBig(){
+    try{ bigV.pause(); }catch(e){}
+    bigV.removeAttribute("src"); try{ bigV.load(); }catch(e){}
+  }
+  function showAt(n){
+    if(!vList.length) return;
+    vAt=((n%vList.length)+vList.length)%vList.length;
+    var a=vList[vAt];
+    stopBig();
     bigNm.textContent=a.ex+" \u2014 "+a.lb;
-    bigV.setAttribute("poster", a.po||"");
-    bigV.muted=false;            /* a session opened on purpose gets its sound back */
-    bigV.src=a.vs;
+    var clip=clipOf(a);
+    if(clip){
+      bigI.hidden=true; bigV.hidden=false;
+      if(a.po) bigV.setAttribute("poster", a.po); else bigV.removeAttribute("poster");
+      /* a session is something you chose to watch, so it speaks; the old reels
+         are silent loops and always were */
+      bigV.muted=!a.vs;
+      bigV.loop=!a.vs;
+      bigV.src=clip;
+      var p=bigV.play(); if(p&&p.catch) p.catch(function(){});
+    } else {
+      bigV.hidden=true; bigI.hidden=false;
+      bigI.src = stillOf(a) || "";
+      bigI.alt = a.lb||"";
+    }
     bigS.innerHTML=(a.songs||[]).map(function(s){
       return '<button type="button" data-slug="'+s+'">\u25B6 PLAY \u201C'+esc(titleOf(s))+'\u201D</button>';
     }).join("");
+    Array.prototype.forEach.call(bigStrip.children,function(b,i){
+      b.classList.toggle("on", i===vAt);
+    });
+    var on=bigStrip.children[vAt];
+    if(on && on.scrollIntoView) try{ on.scrollIntoView({block:"nearest",inline:"center"}); }catch(e){}
+  }
+  function openSet(list, start){
+    vList=list||[];
+    bigStrip.innerHTML=vList.map(function(a,i){
+      var still=stillOf(a);
+      /* a reel has no still of its own, so it shows itself, silent and frozen */
+      var inner = still
+        ? '<img src="'+still+'" alt="" loading="lazy">'
+        : '<video src="'+clipOf(a)+'" muted playsinline preload="metadata"></video>';
+      return '<button type="button" data-i="'+i+'">'+inner+'</button>';
+    }).join("");
     bigEl.hidden=false;
-    var p=bigV.play(); if(p&&p.catch) p.catch(function(){});
+    showAt(start||0);
   }
   function closeBig(){
-    bigEl.hidden=true;
-    try{ bigV.pause(); }catch(e){}
-    bigV.removeAttribute("src"); try{ bigV.load(); }catch(e){}   /* stop the download too */
+    bigEl.hidden=true; stopBig(); vList=[]; vAt=-1;
   }
+  bigStrip.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("button[data-i]"); if(!b) return;
+    showAt(+b.getAttribute("data-i"));
+  });
+  document.getElementById("bigprev").addEventListener("click",function(e){ e.stopPropagation(); showAt(vAt-1); });
+  document.getElementById("bignext").addEventListener("click",function(e){ e.stopPropagation(); showAt(vAt+1); });
+
+  /* ---- swipe ----
+     Tracked on the stage, and only taken as a swipe when the movement is
+     clearly horizontal — otherwise a thumb scrolling the page past a video
+     would skip to the next one. */
+  (function(){
+    var stage=document.getElementById("bigstage");
+    var x0=0,y0=0,down=false;
+    stage.addEventListener("pointerdown",function(e){ down=true; x0=e.clientX; y0=e.clientY; });
+    stage.addEventListener("pointerup",function(e){
+      if(!down) return; down=false;
+      var dx=e.clientX-x0, dy=e.clientY-y0;
+      if(Math.abs(dx)<45 || Math.abs(dx)<Math.abs(dy)*1.5) return;
+      showAt(vAt + (dx<0 ? 1 : -1));
+    });
+    stage.addEventListener("pointercancel",function(){ down=false; });
+  })();
+
   /* ONE SOUNDTRACK AT A TIME. A session has its own audio, so the record stands
-     down while it runs — and if the radio is started from the bottom player
-     while a clip is talking, it loses that too. */
+     down while it runs — and if the radio is started while a clip is talking,
+     the clip loses its voice and keeps its picture. */
   function hushRadio(){
     try{ var r=RADIO(); if(r&&r.playing&&r.playing()) r.control.pause(); }catch(e){}
   }
   bigV.addEventListener("play", function(){ if(!bigV.muted) hushRadio(); });
-  /* NEVER TWO SOUNDS AT ONCE, and whichever the visitor just started wins.
-     Open a session -> the record stands down. Start the record -> the clip
-     keeps playing but loses its voice. (player.js may not have booted when
-     this runs, so keep asking for the radio.) */
   (function watchRadio(t){
     t=t||0;
     try{
@@ -1292,35 +1403,44 @@ body.neon .batwrap svg{animation:none !important}
              failing to resume a track; confirm before taking the clip's voice */
           setTimeout(function(){
             try{ if(!(_r.playing&&_r.playing()&&!_r.audio.paused)) return; }catch(e){ return; }
-            quiet();
+            if(bigV.muted) return;
+            var wasPlaying=!bigV.paused;
+            bigV.muted=true;
+            if(wasPlaying) setTimeout(function(){
+              if(bigV.paused && !bigEl.hidden){ var p=bigV.play(); if(p&&p.catch) p.catch(function(){}); }
+            },150);
           },60);
         });
-        function quiet(){
-          if(bigV.muted) return;
-          var wasPlaying=!bigV.paused;
-          bigV.muted=true;
-          /* the clip keeps its picture, it just loses its voice — and the pause
-             lands on a later tick, so look again after the engine has settled */
-          if(wasPlaying) setTimeout(function(){
-            if(bigV.paused && !bigEl.hidden){ var p=bigV.play(); if(p&&p.catch) p.catch(function(){}); }
-          },150);
-        }
         return;
       }
     }catch(e){}
     if(t<40) setTimeout(function(){ watchRadio(t+1); },250);
   })();
+
   document.getElementById("bigx").addEventListener("click",closeBig);
   bigEl.addEventListener("click",function(e){ if(e.target===bigEl) closeBig(); });
-  document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!bigEl.hidden) closeBig(); });
+  document.addEventListener("keydown",function(e){
+    if(bigEl.hidden) return;
+    if(e.key==="Escape") closeBig();
+    if(e.key==="ArrowRight") showAt(vAt+1);
+    if(e.key==="ArrowLeft")  showAt(vAt-1);
+  });
   bigS.addEventListener("click",function(e){
     var b=e.target.closest&&e.target.closest("button[data-slug]"); if(!b) return;
     var i=indexOfSlug(b.getAttribute("data-slug"));
     if(i>=0){ play(i); closeBig(); }
   });
-  /* ---- the rail: the same sessions, swipeable, out on the page ----
-     Posters only. The clip itself is never fetched here — that is the big
-     view's job, and it reuses one <video> for all of them. */
+  /* a clip left running behind a locked phone is pure battery */
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden && !bigEl.hidden){ try{ bigV.pause(); }catch(e){} }
+  });
+
+  /* ---- THE FOOTAGE RAIL ----
+     Bigger than the photographs, because it leads. Each card plays itself,
+     silently, as it comes into view: silent because the record may be playing
+     and there is only ever one voice on this site. At most ONE clip is live —
+     whichever is most on screen; the rest drop their src entirely, so swiping
+     never leaves a line of decoders alive behind it. */
   (function(){
     var rail=document.getElementById("srail"); if(!rail) return;
     var sess=[];
@@ -1332,12 +1452,11 @@ body.neon .batwrap svg{animation:none !important}
         +'<span class="vp">\u25B6</span>'
         +'<span class="rn">'+esc(s.a.lb)+'</span></button>';
     }).join("");
+    rail.addEventListener("click",function(e){
+      var b=e.target.closest&&e.target.closest(".rc"); if(!b) return;
+      var a=ARCHIVE[+b.getAttribute("data-n")]; if(a) openOne(a);
+    });
 
-    /* ---- each card plays itself as it arrives, silently ----
-       Silent, because this is a row of previews and the record may be playing.
-       At most ONE clip runs at a time: whichever is most in view. The others
-       drop their src entirely, so scrolling the rail never leaves a line of
-       decoders alive behind it. */
     var live=null;
     function stop(card){
       if(!card) return;
@@ -1353,7 +1472,7 @@ body.neon .batwrap svg{animation:none !important}
       live=card;
       var v=card.querySelector("video");
       if(!v.getAttribute("src")) v.src=card.getAttribute("data-src");
-      v.muted=true;                       /* never a second voice on the page */
+      v.muted=true;
       var p=v.play();
       if(p&&p.catch) p.catch(function(){ card.classList.remove("rolling"); });
       card.classList.add("rolling");
@@ -1372,16 +1491,41 @@ body.neon .batwrap svg{animation:none !important}
       Array.prototype.forEach.call(rail.querySelectorAll(".rc"),function(c){ io.observe(c); });
     }catch(e){}
     document.addEventListener("visibilitychange",function(){ if(document.hidden) stop(live); });
-    rail.addEventListener("click",function(e){
-      var b=e.target.closest&&e.target.closest(".rc"); if(!b) return;
-      var a=ARCHIVE[+b.getAttribute("data-n")]; if(a&&a.vs) openBig(a);
+  })();
+
+  /* ---- THE PHOTOGRAPHS ----
+     The drawer is still the whole folder; this is the same pictures in a line
+     you can push with a thumb, deliberately smaller than the footage. */
+  (function(){
+    var prail=document.getElementById("prail"); if(!prail) return;
+    var pics=[];
+    ARCHIVE.forEach(function(a,n){ if(!a.vs) pics.push({a:a,n:n}); });
+    prail.innerHTML=pics.map(function(s){
+      var src = s.a.f ? IMG+s.a.f : (s.a.po||"");
+      return '<button type="button" class="pc" data-n="'+s.n+'">'
+        + (s.a.v
+            ? '<video src="'+VID+s.a.v+'" muted loop playsinline preload="none"></video>'
+            : '<img src="'+src+'" alt="'+esc(s.a.lb)+'" loading="lazy">')
+        + '</button>';
+    }).join("");
+    prail.addEventListener("click",function(e){
+      var b=e.target.closest&&e.target.closest(".pc"); if(!b) return;
+      var a=ARCHIVE[+b.getAttribute("data-n")]; if(a) openOne(a);
     });
   })();
 
-  /* tapping a session in the drawer opens it big */
+  /* THE TWO SETS. The footage is one gallery, the photographs are the other —
+     swiping inside the viewer stays within the kind of thing you opened. */
+  var SESSIONS=ARCHIVE.filter(function(a){ return !!a.vs; });
+  var PICTURES=ARCHIVE.filter(function(a){ return !a.vs; });
+  function openOne(a){
+    var set = a.vs ? SESSIONS : PICTURES;
+    openSet(set, set.indexOf(a));
+  }
+  /* anything in the drawer opens the set it belongs to */
   libGrid.addEventListener("click",function(e){
-    var f=e.target.closest&&e.target.closest("figure.sess"); if(!f) return;
-    var a=ARCHIVE[+f.getAttribute("data-n")]; if(a&&a.vs) openBig(a);
+    var f=e.target.closest&&e.target.closest("figure"); if(!f) return;
+    var a=ARCHIVE[+f.getAttribute("data-n")]; if(a) openOne(a);
   });
   /* a clip left running behind a locked phone is pure battery */
   document.addEventListener("visibilitychange",function(){
@@ -1596,8 +1740,8 @@ body.neon .batwrap svg{animation:none !important}
 </script>
 <script>document.write('<script src="../assets/products-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script src="../assets/np2-perks.js?v=3"></script>
-<script src="../assets/player.js?v=36"></script>
-<script src="../assets/badges.js?v=13"></script>
+<script src="../assets/player.js?v=37"></script>
+<script src="../assets/badges.js?v=14"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 </body>
 </html>

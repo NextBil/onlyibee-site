@@ -1204,7 +1204,9 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
   var sctx=null;
   function blip(f,d){
     try{
-      sctx=sctx||new (window.AudioContext||window.webkitAudioContext)();
+      /* the site's one context — a second one steals the audio session on iOS
+         and stops the record (see IBEE_AUDIO_CTX in player.js) */
+      sctx=sctx||(window.IBEE_AUDIO_CTX?window.IBEE_AUDIO_CTX():null); if(!sctx) return;
       var o=sctx.createOscillator(),g=sctx.createGain();
       o.type="square";o.frequency.value=f;
       g.gain.setValueAtTime(.03,sctx.currentTime);
@@ -2597,7 +2599,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
   });
 })();
 </script>
-<script src="assets/player.js?v=36"></script>
+<script src="assets/player.js?v=37"></script>
 <script src="/assets/process.js?v=2"></script>
 <div id="icslbx"><img alt=""></div>
 <script>

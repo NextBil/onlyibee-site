@@ -172,11 +172,12 @@
     transition:border-color .18s,box-shadow .18s}
   #np2strip[hidden]{display:none}
   #np2strip:hover{border-color:#ff1f6f;box-shadow:0 0 20px rgba(255,31,111,.3)}
-  /* the little screen — 16:9, and the clip is shown, not dimmed into wallpaper */
-  #np2strip .sv{position:relative;flex:none;width:112px;aspect-ratio:16/9;
-    border-radius:8px;overflow:hidden;background:#140a10;display:block}
-  #np2strip .sv video{position:absolute;inset:0;width:100%;height:100%;
-    object-fit:cover;display:block}
+  /* THE SLEEVE, not a clip. A looping video here cost a decoder and ~450KB on
+     every page of the site to say one thing — the cover says it in 8KB and
+     takes less room. */
+  #np2strip .sv{position:relative;flex:none;width:38px;height:38px;
+    border-radius:7px;overflow:hidden;background:#140a10;display:block}
+  #np2strip .sv img{width:100%;height:100%;object-fit:cover;display:block}
   #np2strip .st{display:flex;flex-direction:column;gap:3px;min-width:0}
   #np2strip .st b{font-family:var(--px);font-size:7px;letter-spacing:1.5px;color:#ff8ec0}
   #np2strip .st i{font-family:var(--px);font-size:11px;font-style:normal;color:#fff;
@@ -187,10 +188,9 @@
   #np2strip:hover .sa{transform:translateX(3px)}
   @media(max-width:620px){
     #np2strip{gap:9px;padding:5px 11px 5px 5px;border-radius:12px}
-    #np2strip .sv{width:92px}
+    #np2strip .sv{width:34px;height:34px}
     #np2strip .st i{font-size:9.5px}
   }
-  @media(prefers-reduced-motion:reduce){ #np2strip .sv video{display:none} }
 
   #stage{position:relative;flex:1;overflow:hidden}
   #frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);
@@ -728,12 +728,11 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;cursor:pointer;
     text-align:center;padding:24px 24px 150px;font-family:var(--px)}
   /* ---- THE BOOT TUBE ----
-     A session off NOUVEAUX PUNK 2 plays behind the brand, under the same CRT
-     glass the TV page uses (the scanline comb + the vignette, copied from
-     #screenwrap so the two rooms read as one set). The video is dimmed because
-     the words on top have to stay legible over any frame of it. */
-  #entervid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    z-index:0;opacity:.46;filter:saturate(1.05) contrast(1.05)}
+     The boot carried a 2.9MB session clip behind the brand, which is the first
+     thing every visitor waited on — so the door to the site was the slowest
+     part of it. The clip is gone; the CRT glass stays, because the scanline
+     comb and the vignette (copied from the TV page's #screenwrap) are what make
+     this read as a tube, and they cost nothing. */
   #entercrt{position:absolute;inset:0;z-index:1;pointer-events:none;
     background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),
       radial-gradient(ellipse at center,transparent 56%,rgba(0,0,0,.72))}
@@ -743,20 +742,12 @@
      giving it position:relative moved it off the screen. It only needs the
      stacking order. */
   #enter #enterplay{z-index:3}
-  #enter #entersnd{z-index:2}
   /* the record being announced — a link, so it is reachable without entering */
   #enter #enternew{font-family:var(--px);font-size:9px;letter-spacing:1.4px;color:#ff8ec0;
     text-decoration:none;border:1px solid rgba(255,31,111,.55);border-radius:20px;
     padding:9px 14px;background:rgba(12,4,8,.72);line-height:1.5}
   #enter #enternew b{color:#fff;text-shadow:0 0 12px rgba(255,31,111,.75)}
   #enter #enternew:hover{border-color:#ff1f6f;background:rgba(255,31,111,.16)}
-  /* sound is the visitor's call — autoplay with audio is refused everywhere */
-  #enter #entersnd{position:absolute;left:50%;transform:translateX(-50%);
-    bottom:calc(26px + env(safe-area-inset-bottom));
-    font-family:var(--px);font-size:8px;letter-spacing:1px;cursor:pointer;
-    background:#0b0c0e;border:1px solid var(--border);color:var(--dim);padding:10px 13px}
-  #enter #entersnd:hover,#enter #entersnd[aria-pressed="true"]{border-color:var(--acid);color:var(--acid)}
-  @media(prefers-reduced-motion:reduce){ #entervid{display:none} }
 
   /* ONLYIBEE brand — kept exactly as the original boot */
   #enter .g{color:var(--acid);font-size:clamp(24px,8vw,48px);letter-spacing:2px;text-shadow:0 0 22px rgba(182,255,0,.55)}
@@ -993,7 +984,7 @@
        nav on every page but the record's own. One <video>, swapped between a
        handful of 7-second silent loops; see the strip script for why it is one. -->
   <a id="np2strip" href="np2/" aria-label="Discover Nouveaux Punk 2">
-    <span class="sv"><video id="np2stripv" muted loop playsinline preload="none" aria-hidden="true"></video></span>
+    <span class="sv"><img src="assets/img/thumb/nouveaux-punk-2.jpg" alt="" width="128" height="128" decoding="async"></span>
     <span class="st">
       <b>DISCOVER</b>
       <i>NOUVEAUX PUNK 2</i>
@@ -1102,21 +1093,17 @@
 
 <!-- PRESS START intro: dark, only the play button lit — it starts the music AND the site -->
 <div id="enter">
-  <!-- the boot runs a session off NOUVEAUX PUNK 2 behind the tube glass -->
-  <video id="entervid" muted loop playsinline preload="auto"
-         poster="assets/video/np2-boot.jpg" aria-hidden="true"></video>
   <div id="entercrt" aria-hidden="true"></div>
   <div class="g">ONLY<span class="r">IBEE</span></div>
   <a id="enternew" href="np2/">NEW! <b>NOUVEAUX PUNK 2</b></a>
   <button id="enterplay" aria-label="Press play to start"><span>▶</span></button>
   <div class="s">press play_</div>
-  <button id="entersnd" type="button" aria-pressed="false">🔈 SOUND ON</button>
 </div>
 
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=36"></script>
+<script src="assets/player.js?v=37"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- anonymous site analytics: page activity, exits and meaningful interactions -->
@@ -1129,7 +1116,7 @@
 <!-- the notification feed (written in tools/newsroom.html); clock-stamped so a push goes live at once -->
 <script>document.write('<script src="assets/news-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <!-- the trophy + notification system: corner pops, milestone tracking, per-button red dots (top window only) -->
-<script src="assets/badges.js?v=13"></script>
+<script src="assets/badges.js?v=14"></script>
 <!-- the unlock ladder: earn the rhythm games by playing (grants via grant_game, see member/unlocks.sql) -->
 <script src="assets/unlocks.js?v=1"></script>
 <!-- MINE (purple cashew) discount currency: accrues while you LISTEN. Loaded in the
@@ -1431,18 +1418,11 @@
     navigate('console.html#music');
   };
 
-  /* ================= THE RECORD STRIP =================
-     A band under the nav that runs the sessions behind NOUVEAUX PUNK 2 and
-     leads to the record's page. Deliberately cheap, for the same reason the
-     rest of this session got cheaper:
-       · ONE <video> element, its src swapped between clips. Five <video>s
-         would be five decoders alive at once for one visible band.
-       · each loop is a silent 7s file around 450KB, preload="none" until the
-         strip is actually on screen.
-       · it pauses when the tab is hidden and when it scrolls out of view, and
-         it never runs at all under prefers-reduced-motion — the poster carries
-         it instead.
-     ==================================================== */
+  /* ================= THE RECORD BUTTON =================
+     A small sleeve, the record's name, and a way in. It used to run a rotating
+     set of silent clips, which meant a live decoder and ~450KB of video on
+     every page of the site to advertise one thing. The cover says the same in
+     8KB and takes a third of the room. */
   (function(){
     var strip=document.getElementById('np2strip'); if(!strip) return;
     /* the shell owns navigation — a plain href would reload the whole app and
@@ -1451,52 +1431,10 @@
       if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;   /* let them open a tab */
       e.preventDefault(); navigate('np2/');
     });
-    var v=document.getElementById('np2stripv');
-    var CLIPS=[
-      ['assets/video/np2-deranger-loop.mp4','assets/video/np2-deranger.jpg'],
-      ['assets/video/np2-1022-loop.mp4','assets/video/np2-1022.jpg'],
-      ['assets/video/np2-1019-loop.mp4','assets/video/np2-1019.jpg'],
-      ['assets/video/np2-1016-loop.mp4','assets/video/np2-1016.jpg'],
-      ['assets/video/np2-film-loop.mp4','assets/video/np2-film.jpg']
-    ];
-    /* start somewhere different each visit so the band is not the same shot
-       every time someone opens the site */
-    var i=Math.floor(Math.random()*CLIPS.length), started=false, timer=0;
-    var noMo=null; try{ noMo=matchMedia('(prefers-reduced-motion:reduce)'); }catch(e){}
-    /* Data Saver is a request, not a hint: show the still and nothing more. */
-    var thin=false; try{ var c=navigator.connection;
-      thin=!!(c&&(c.saveData||/^(slow-)?2g$/.test(c.effectiveType||''))); }catch(e){}
-
-    function show(n){
-      i=((n%CLIPS.length)+CLIPS.length)%CLIPS.length;
-      v.setAttribute('poster', CLIPS[i][1]);
-      if(noMo&&noMo.matches || thin) return;
-      v.src=CLIPS[i][0];
-      var p=v.play(); if(p&&p.catch) p.catch(function(){});
-    }
-    function cycle(){ clearTimeout(timer); timer=setTimeout(function(){ show(i+1); cycle(); }, 9000); }
-    function begin(){ if(started) return; started=true; show(i); cycle(); }
-    function halt(){ clearTimeout(timer); timer=0; try{ v.pause(); }catch(e){} }
-    function resume(){ if(!started){ begin(); return; }
-      if(noMo&&noMo.matches || thin) return;
-      var p=v.play(); if(p&&p.catch) p.catch(function(){}); cycle(); }
-
-    /* nothing is fetched until the band is actually on screen */
-    try{
-      new IntersectionObserver(function(es){
-        if(es[0].isIntersecting && !document.hidden) resume(); else halt();
-      }).observe(strip);
-    }catch(e){ begin(); }
-    document.addEventListener('visibilitychange',function(){
-      if(document.hidden) halt(); else if(!strip.hidden) resume();
-    });
-
-    /* On the record's own page the band is just noise in front of the thing it
-       is advertising, so it steps aside — and stops decoding while it is away. */
+    /* On the record's own page the button is just noise in front of the thing
+       it is advertising, so it steps aside. */
     window.__np2StripFor=function(rel){
-      var on=/^np2(\/|$)/.test(String(rel||''));
-      strip.hidden=on;
-      if(on) halt(); else if(!document.hidden) resume();
+      strip.hidden = /^np2(\/|$)/.test(String(rel||''));
     };
   })();
 
@@ -2257,26 +2195,7 @@
     /* safety: if the player button never measured, show the button at its fallback spot */
     setTimeout(function(){ if(ep) ep.classList.add('ready'); },600);
     window.addEventListener('resize',placeEnter);
-    /* ---- the boot tube ----
-       The clip starts muted because every browser refuses audio before a
-       gesture; SOUND ON is that gesture, and it must not fall through to the
-       boot button underneath or the site would open on the same tap. */
-    var ev=document.getElementById('entervid'),
-        snd=document.getElementById('entersnd'),
-        nw=document.getElementById('enternew');
-    if(ev){
-      ev.src='assets/video/np2-boot.mp4';
-      var pv=ev.play(); if(pv&&pv.catch) pv.catch(function(){});
-    }
-    if(snd&&ev){
-      snd.addEventListener('click',function(e){
-        e.preventDefault(); e.stopPropagation();
-        ev.muted=!ev.muted;
-        snd.setAttribute('aria-pressed', ev.muted?'false':'true');
-        snd.textContent = ev.muted ? '\ud83d\udd08 SOUND ON' : '\ud83d\udd0a SOUND OFF';
-        if(!ev.muted){ var p2=ev.play(); if(p2&&p2.catch) p2.catch(function(){}); }
-      });
-    }
+    var nw=document.getElementById('enternew');
     /* the record's own link — go there instead of entering on the menu */
     if(nw){
       nw.addEventListener('click',function(e){
@@ -2288,9 +2207,6 @@
     }
     var started=false;
     var go=function(){ if(started)return; started=true;
-      /* the tube is done the moment the site opens — stop the decode and the
-         download rather than leaving it running behind the app */
-      try{ if(ev){ ev.pause(); ev.removeAttribute('src'); ev.load(); } }catch(e){}
       try{ var R=window.IBEERADIO;
         if(R&&R.control){
           /* EVERYONE STARTS ON DERANGER — the record is new and this is the

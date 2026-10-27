@@ -815,13 +815,33 @@
 
   render();   // initial paint (list view)
 
+  /* ---------- ONE AUDIO CONTEXT FOR THE WHOLE SITE ----------
+     Pages were each spinning up their own: the badge toast blip, the console's
+     UI sounds, the storm, the chess board. On iOS a freshly created
+     AudioContext takes over the audio session, and the <audio> playing the
+     record is interrupted — which is the music "stopping for no reason".
+     Everything that wants a beep asks here instead, and on iOS it is refused
+     outright while a track is running: no blip is worth stopping the record. */
+  window.IBEE_AUDIO_CTX = function(){
+    try{
+      if(IS_IOS && cur >= 0 && !audio.paused) return null;
+      if(!window.__IBEE_CTX){
+        var C = window.AudioContext || window.webkitAudioContext;
+        if(!C) return null;
+        window.__IBEE_CTX = new C();
+      }
+      return window.__IBEE_CTX;
+    }catch(e){ return null; }
+  };
+
   /* ---------- analyser → neon frame ---------- */
   var actx = null, analyser = null, freq = null;
   var beat = 0, level = 0, emaLow = 0;
   function initGraph(){
     if(actx || IS_IOS) return;   // iOS: leave audio on the native path (background/lock-safe)
     try{
-      actx = new (window.AudioContext || window.webkitAudioContext)();
+      actx = window.IBEE_AUDIO_CTX();
+      if(!actx) return;
       var src = actx.createMediaElementSource(audio);
       analyser = actx.createAnalyser(); analyser.fftSize = 128;
       freq = new Uint8Array(analyser.frequencyBinCount);
