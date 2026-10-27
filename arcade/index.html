@@ -203,22 +203,17 @@
     color:var(--dim);margin-top:5px}
   .rec .rg{display:block;font-family:var(--px);font-size:6px;letter-spacing:1px;
     color:var(--rt,var(--acid));margin-top:6px;line-height:1.9;opacity:.85}
-  /* ON A PHONE THEY SCROLL SIDEWAYS. Three across a 375px screen made each
-     sleeve 94px and the type unreadable — which defeats putting the records
-     here at all. They get a real size and you flick through them instead. */
+  /* ON A PHONE: TWO UP, THEN THE THIRD UNDER THEM.
+     Three across a 375px screen made each sleeve 94px and the type unreadable.
+     They used to flick sideways instead, but a row you have to scroll hides a
+     record behind a gesture nobody is told about — so the shelf wraps: the two
+     newest on top, NOUVEAUX PUNK under them, nothing off screen. */
   @media(max-width:560px){
-    .recs{display:flex;grid-template-columns:none;gap:10px;overflow-x:auto;
-      -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
-      padding-bottom:8px;margin:0 0 24px;
-      scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-    .recs::-webkit-scrollbar{height:4px}
-    .recs::-webkit-scrollbar-thumb{background:var(--border)}
-    /* TWO FIT THE SCREEN. NOUVEAUX PUNK 2 is hidden from visitors, so a
-       phone shows exactly two records - sized at half the row they fill it
-       with no scrolling at all. When the owner is signed in the third one
-       appears and the row simply becomes scrollable again, which is the
-       behaviour the flex container already had. */
-    .rec{flex:0 0 calc(50% - 5px);scroll-snap-align:start;padding:8px}
+    .recs{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 24px}
+    .rec{padding:8px}
+    /* the third sits under the pair, kept to a sleeve's width so the row below
+       reads as part of the same shelf rather than a banner */
+    .recs .rec:nth-child(3){grid-column:1 / -1;width:calc(50% - 5px);margin-inline:auto}
     .rec b{font-size:8px;margin-top:9px}
     .rec .rtg{font-size:15px;margin-top:5px}
     .rec .rg{font-size:6.5px}

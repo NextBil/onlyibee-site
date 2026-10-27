@@ -448,6 +448,11 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
   border:1px solid rgba(255,31,111,.42);background:#0a0609;overflow:hidden;cursor:pointer;
   padding:0;display:block}
 .rail .rc img{width:100%;height:100%;object-fit:cover;display:block}
+.rail .rc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  display:block;opacity:0;transition:opacity .35s}
+.rail .rc.rolling video{opacity:1}
+.rail .rc.rolling .vp{opacity:0}
+.rail .rc .vp{transition:opacity .25s,transform .18s}
 .rail .rc .vp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:26px;color:#fff;text-shadow:0 0 16px rgba(0,0,0,.9);pointer-events:none;
   transition:transform .18s}
@@ -712,6 +717,9 @@ body.neon .batwrap svg{animation:none !important}
       <!-- THE SHOT. The statement says "Toronto and Paris"; the archive is
            where that actually is. It turns a page for every track, and it is
            the door to the whole library (THE DRAWER, at the foot of body). -->
+      <!-- THE SESSIONS, SWIPEABLE — the footage leads, the photographs follow.
+           Each card plays itself, silently, as it comes into view. -->
+      <div class="rail" id="srail" aria-label="the sessions"></div>
       <button class="shot" id="shot" aria-label="open the project photo library">
         <span class="win">
           <img id="shotimg" alt="" loading="lazy">
@@ -721,9 +729,6 @@ body.neon .batwrap svg{animation:none !important}
         <span class="sl" id="shotlb">the mark — "NEW PUNK", forearm</span>
         <span class="sgo">⤢ OPEN THE ARCHIVE</span>
       </button>
-      <!-- THE SESSIONS, SWIPEABLE. The whole archive is one tap away on the
-           frame above; this is the footage on its own, to thumb through. -->
-      <div class="rail" id="srail" aria-label="the sessions"></div>
       <div class="ptxt">
         <p class="lede"><span class="a">26 songs for my 26 years.</span> Toronto and Paris.</p>
         <p>NOUVEAUX PUNK is how I turn my issues into art. The songs might sound
@@ -1321,11 +1326,52 @@ body.neon .batwrap svg{animation:none !important}
     var sess=[];
     ARCHIVE.forEach(function(a,n){ if(a.vs) sess.push({a:a,n:n}); });
     rail.innerHTML=sess.map(function(s){
-      return '<button type="button" class="rc" data-n="'+s.n+'">'
+      return '<button type="button" class="rc" data-n="'+s.n+'" data-src="'+s.a.vs+'">'
         +'<img src="'+s.a.po+'" alt="'+esc(s.a.lb)+'" loading="lazy">'
+        +'<video muted loop playsinline preload="none" aria-hidden="true"></video>'
         +'<span class="vp">\u25B6</span>'
         +'<span class="rn">'+esc(s.a.lb)+'</span></button>';
     }).join("");
+
+    /* ---- each card plays itself as it arrives, silently ----
+       Silent, because this is a row of previews and the record may be playing.
+       At most ONE clip runs at a time: whichever is most in view. The others
+       drop their src entirely, so scrolling the rail never leaves a line of
+       decoders alive behind it. */
+    var live=null;
+    function stop(card){
+      if(!card) return;
+      var v=card.querySelector("video");
+      try{ v.pause(); }catch(e){}
+      v.removeAttribute("src"); try{ v.load(); }catch(e){}
+      card.classList.remove("rolling");
+      if(live===card) live=null;
+    }
+    function start(card){
+      if(live===card) return;
+      stop(live);
+      live=card;
+      var v=card.querySelector("video");
+      if(!v.getAttribute("src")) v.src=card.getAttribute("data-src");
+      v.muted=true;                       /* never a second voice on the page */
+      var p=v.play();
+      if(p&&p.catch) p.catch(function(){ card.classList.remove("rolling"); });
+      card.classList.add("rolling");
+    }
+    try{
+      var io=new IntersectionObserver(function(ents){
+        if(document.hidden) return;
+        var best=null, bestR=0;
+        ents.forEach(function(e){
+          var card=e.target;
+          if(e.intersectionRatio>=0.6 && e.intersectionRatio>bestR){ bestR=e.intersectionRatio; best=card; }
+          else if(e.intersectionRatio<0.35 && card===live) stop(card);
+        });
+        if(best) start(best);
+      },{threshold:[0,0.35,0.6,0.9]});
+      Array.prototype.forEach.call(rail.querySelectorAll(".rc"),function(c){ io.observe(c); });
+    }catch(e){}
+    document.addEventListener("visibilitychange",function(){ if(document.hidden) stop(live); });
     rail.addEventListener("click",function(e){
       var b=e.target.closest&&e.target.closest(".rc"); if(!b) return;
       var a=ARCHIVE[+b.getAttribute("data-n")]; if(a&&a.vs) openBig(a);

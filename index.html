@@ -160,34 +160,37 @@
   #acct .acctcash .cashew{width:16px;height:16px}
 
   /* ---- content ---- */
-  /* ---- THE RECORD STRIP ---- */
-  #np2strip{flex:none;position:relative;display:flex;align-items:center;gap:10px;
-    align-self:center;width:calc(100vw - 14px);max-width:860px;height:60px;
-    margin:0 auto 7px;padding:0 14px;overflow:hidden;text-decoration:none;
-    border:1.5px solid rgba(255,31,111,.55);border-radius:16px;background:#0b0608;
-    box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:39;isolation:isolate}
+  /* ---- THE RECORD BUTTON ----
+     This was a full-width band with the clip washed out behind the words, which
+     meant the footage was never really visible — it was a texture. It is a
+     small 16:9 SCREEN now with the name beside it: the video is the point, so
+     it gets a window of its own at the shape video actually is. */
+  #np2strip{flex:none;align-self:center;display:inline-flex;align-items:center;gap:11px;
+    margin:0 auto 8px;padding:6px 13px 6px 6px;max-width:calc(100vw - 14px);
+    text-decoration:none;border:1.5px solid rgba(255,31,111,.55);border-radius:14px;
+    background:#0b0608;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:39;
+    transition:border-color .18s,box-shadow .18s}
   #np2strip[hidden]{display:none}
-  #np2strip video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    z-index:0;opacity:.55;filter:saturate(1.1)}
-  /* the wash is what keeps the words readable over any frame of any clip */
-  #np2strip .sx{position:absolute;inset:0;z-index:1;
-    background:linear-gradient(90deg,rgba(6,3,5,.94) 0%,rgba(6,3,5,.72) 46%,rgba(6,3,5,.3) 100%)}
-  #np2strip .st{position:relative;z-index:2;display:flex;flex-direction:column;gap:3px;min-width:0}
-  #np2strip .st b{font-family:var(--px);font-size:7px;letter-spacing:1.6px;color:#ff8ec0}
-  #np2strip .st i{font-family:var(--px);font-size:12px;font-style:normal;color:#fff;
-    text-shadow:0 0 14px rgba(255,31,111,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #np2strip .sm{position:relative;z-index:2;margin-left:auto;font-family:var(--px);
-    font-size:7px;letter-spacing:1px;color:#ffc2dc;white-space:nowrap}
-  #np2strip .sa{position:relative;z-index:2;font-family:var(--px);font-size:13px;color:#ff1f6f;
+  #np2strip:hover{border-color:#ff1f6f;box-shadow:0 0 20px rgba(255,31,111,.3)}
+  /* the little screen — 16:9, and the clip is shown, not dimmed into wallpaper */
+  #np2strip .sv{position:relative;flex:none;width:112px;aspect-ratio:16/9;
+    border-radius:8px;overflow:hidden;background:#140a10;display:block}
+  #np2strip .sv video{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;display:block}
+  #np2strip .st{display:flex;flex-direction:column;gap:3px;min-width:0}
+  #np2strip .st b{font-family:var(--px);font-size:7px;letter-spacing:1.5px;color:#ff8ec0}
+  #np2strip .st i{font-family:var(--px);font-size:11px;font-style:normal;color:#fff;
+    text-shadow:0 0 12px rgba(255,31,111,.55);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  #np2strip .sa{font-family:var(--px);font-size:12px;color:#ff1f6f;flex:none;
     transition:transform .2s}
-  #np2strip:hover{border-color:#ff1f6f}
   #np2strip:hover .sa{transform:translateX(3px)}
   @media(max-width:620px){
-    #np2strip{height:52px;gap:8px;padding:0 11px;border-radius:14px}
-    #np2strip .st i{font-size:10px}
-    #np2strip .sm{display:none}        /* the headline is the message on a phone */
+    #np2strip{gap:9px;padding:5px 11px 5px 5px;border-radius:12px}
+    #np2strip .sv{width:92px}
+    #np2strip .st i{font-size:9.5px}
   }
-  @media(prefers-reduced-motion:reduce){ #np2strip video{display:none} }
+  @media(prefers-reduced-motion:reduce){ #np2strip .sv video{display:none} }
 
   #stage{position:relative;flex:1;overflow:hidden}
   #frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);
@@ -990,13 +993,11 @@
        nav on every page but the record's own. One <video>, swapped between a
        handful of 7-second silent loops; see the strip script for why it is one. -->
   <a id="np2strip" href="np2/" aria-label="Discover Nouveaux Punk 2">
-    <video id="np2stripv" muted loop playsinline preload="none" aria-hidden="true"></video>
-    <span class="sx"></span>
+    <span class="sv"><video id="np2stripv" muted loop playsinline preload="none" aria-hidden="true"></video></span>
     <span class="st">
       <b>DISCOVER</b>
       <i>NOUVEAUX PUNK 2</i>
     </span>
-    <span class="sm">27 SONGS · OUT NOW</span>
     <span class="sa">▸</span>
   </a>
 

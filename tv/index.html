@@ -43,13 +43,13 @@
   /* the local channel shares the tube with the embed; only one is ever shown */
   #tvv{position:absolute;inset:0;width:100%;height:100%;display:none;object-fit:cover;background:#000}
   #tvv.on{display:block}
-  #unmute{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:7;cursor:pointer;
+  #unmute{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);z-index:7;cursor:pointer;
     font-family:var(--px);font-size:8px;letter-spacing:1.5px;color:#0a0a0a;background:var(--acid);
     border:0;padding:9px 14px;box-shadow:0 0 18px rgba(182,255,0,.45)}
   #unmute:hover{background:#c9ff33}
   #unmute[hidden]{display:none}
   /* pause sits opposite the sound button, on the same line of the glass */
-  #tvpause{position:absolute;left:12px;bottom:12px;z-index:7;cursor:pointer;
+  #tvpause{position:absolute;left:12px;bottom:36px;z-index:7;cursor:pointer;
     font-family:var(--px);font-size:11px;line-height:1;padding:9px 11px;
     background:#0b0c0e;border:1px solid #2a2a2a;color:#b6ff00}
   #tvpause:hover{border-color:#b6ff00}
@@ -123,6 +123,23 @@
     font-size:15px;line-height:1;cursor:pointer;color:var(--acid,#b6ff00);
     background:rgba(0,0,0,.62);border:1px solid rgba(182,255,0,.5);border-radius:6px}
   #tvfs:hover{background:rgba(182,255,0,.16);border-color:#b6ff00}
+  /* the fallback when the browser refuses a real fullscreen (iOS on a div) */
+  #screenwrap.faux{position:fixed;inset:0;z-index:99998;border-radius:0;border:0;
+    background:#000;display:flex;align-items:center;justify-content:center}
+  #screenwrap.faux #screen{width:100%;height:100%;max-width:none;border:0}
+  #screenwrap.faux #tvfs{right:16px;top:calc(16px + env(safe-area-inset-top))}
+  /* ---- the scrub bar: our own channels can be moved through ---- */
+  #tvseek{position:absolute;left:0;right:0;bottom:0;z-index:8;height:26px;
+    display:flex;align-items:flex-end;cursor:pointer;touch-action:none}
+  #tvseek[hidden]{display:none}
+  #tvseek .tk{position:relative;width:100%;height:5px;background:rgba(255,255,255,.18)}
+  #tvseek .fl{position:absolute;left:0;top:0;bottom:0;width:0;background:#b6ff00;
+    box-shadow:0 0 10px rgba(182,255,0,.7)}
+  #tvseek .kn{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;
+    background:#b6ff00;transform:translate(-50%,-50%);box-shadow:0 0 10px rgba(182,255,0,.8)}
+  #tvtime{position:absolute;right:12px;bottom:32px;z-index:8;font-family:var(--px);
+    font-size:8px;color:#b6ff00;text-shadow:0 0 8px rgba(0,0,0,.9);pointer-events:none}
+  #tvtime[hidden]{display:none}
   #screenwrap:fullscreen{background:#000;display:flex;align-items:center;justify-content:center}
   #screenwrap:fullscreen #screen{width:100%;height:100%;max-width:none;border:0}
   #screenwrap:fullscreen #tvfs{right:16px;top:16px}
@@ -149,6 +166,11 @@
         <button id="unmute" type="button" hidden>&#128266; TAP FOR SOUND</button>
         <!-- our own channels can be stopped; a YouTube channel has its own controls -->
         <button id="tvpause" type="button" hidden aria-label="Pause">&#10074;&#10074;</button>
+        <!-- scrub through our own channels; a YouTube channel has its own bar -->
+        <span id="tvtime" hidden>0:00 / 0:00</span>
+        <div id="tvseek" hidden role="slider" aria-label="Seek" tabindex="0">
+          <span class="tk"><span class="fl" id="tvfl"></span><span class="kn" id="tvkn"></span></span>
+        </div>
         <span id="osd">CH 01</span>
       </div>
     </div>
@@ -330,11 +352,13 @@ function tune(i,opts){
     });
     unmute.hidden = tvSound;
     tvpause.hidden = false;
+    seek.hidden=false; seekT.hidden=false; paintSeek();
   }else{
     tvv.classList.remove("on");
     try{ tvv.pause(); }catch(e){}
     unmute.hidden=true;
     tvpause.hidden=true;
+    seek.hidden=true; seekT.hidden=true;
     yt.src="https://www.youtube-nocookie.com/embed/"+c.id+"?autoplay=1&playsinline=1&rel=0&color=white&enablejsapi=1";
   }
 
@@ -412,6 +436,49 @@ function hushTV(){
   if(t<40) setTimeout(function(){ watchRadio(t+1); },250);   /* player.js may still be booting */
 })();
 
+/* ---- SCRUB THROUGH OUR OWN CHANNELS ----
+   A channel used to be something you could only watch from wherever it happened
+   to be. The bar is the clip's position and a handle you can drag anywhere in
+   it; pointer capture means the drag keeps working past the edge of the bar. */
+var seek=document.getElementById("tvseek"), seekFl=document.getElementById("tvfl"),
+    seekKn=document.getElementById("tvkn"), seekT=document.getElementById("tvtime"),
+    scrubbing=false;
+function clock(s){ s=Math.max(0,s|0); return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2); }
+function paintSeek(){
+  var d=tvv.duration;
+  if(!d || !isFinite(d)){ seekFl.style.width="0%"; seekKn.style.left="0%"; return; }
+  var pct=Math.min(100,Math.max(0,(tvv.currentTime/d)*100));
+  seekFl.style.width=pct+"%"; seekKn.style.left=pct+"%";
+  seekT.textContent=clock(tvv.currentTime)+" / "+clock(d);
+}
+function seekTo(ev){
+  var d=tvv.duration; if(!d||!isFinite(d)) return;
+  var r=seek.getBoundingClientRect();
+  var x=Math.min(r.right,Math.max(r.left,ev.clientX));
+  tvv.currentTime=((x-r.left)/r.width)*d;
+  paintSeek();
+}
+seek.addEventListener("pointerdown",function(e){
+  e.preventDefault(); e.stopPropagation();
+  scrubbing=true; try{ seek.setPointerCapture(e.pointerId); }catch(x){}
+  seekTo(e);
+});
+seek.addEventListener("pointermove",function(e){ if(scrubbing) seekTo(e); });
+["pointerup","pointercancel"].forEach(function(ev){
+  seek.addEventListener(ev,function(e){
+    if(!scrubbing) return; scrubbing=false;
+    try{ seek.releasePointerCapture(e.pointerId); }catch(x){}
+  });
+});
+/* arrows nudge, for a keyboard */
+seek.addEventListener("keydown",function(e){
+  var d=tvv.duration; if(!d||!isFinite(d)) return;
+  if(e.key==="ArrowLeft"){ e.preventDefault(); tvv.currentTime=Math.max(0,tvv.currentTime-5); }
+  if(e.key==="ArrowRight"){ e.preventDefault(); tvv.currentTime=Math.min(d,tvv.currentTime+5); }
+});
+tvv.addEventListener("timeupdate",paintSeek);
+tvv.addEventListener("loadedmetadata",paintSeek);
+
 unmute.onclick=function(){
   tvSound=true; tvv.muted=false; unmute.hidden=true;
   hushRadio();                      /* now it has a voice, it gets the room */
@@ -429,19 +496,55 @@ yt.addEventListener("load",function(){
      asking across the first few seconds — each call is a no-op once it plays. */
   [250,700,1400,2400,3600].forEach(function(ms){ setTimeout(kick,ms); });
 });
-/* fullscreen toggle — container only, so the embed keeps playing throughout */
+/* ---- FULLSCREEN ----
+   Three reasons this did nothing before:
+     · iOS Safari cannot put a <div> fullscreen AT ALL. Only a <video> can go,
+       through webkitEnterFullscreen — so on a phone the button was a no-op.
+     · requestFullscreen returns a PROMISE that rejects (inside a frame without
+       permission, or when the gesture is not trusted); nothing caught it.
+     · the `|| function(){}` fallbacks swallowed every failure silently.
+   So: try the real thing, fall back to the video's own fullscreen, and fall
+   back again to filling the window ourselves — the button always does something. */
 (function(){
   var wrap=document.getElementById("screenwrap"), btn=document.getElementById("tvfs");
-  btn.onclick=function(){
-    if(document.fullscreenElement) (document.exitFullscreen||function(){}).call(document);
-    else (wrap.requestFullscreen||wrap.webkitRequestFullscreen||function(){}).call(wrap);
+  function fsEl(){ return document.fullscreenElement||document.webkitFullscreenElement||null; }
+  function paint(){ btn.textContent = (fsEl()||wrap.classList.contains("faux")) ? "\u2715" : "\u26f6"; }
+  function faux(){ wrap.classList.toggle("faux"); paint(); }
+  function videoFS(){
+    if(isLocal(CHANNELS[cur]) && tvv.webkitEnterFullscreen){
+      try{ tvv.webkitEnterFullscreen(); return true; }catch(e){}
+    }
+    return false;
+  }
+  btn.onclick=function(e){
+    e.preventDefault(); e.stopPropagation();
+    if(wrap.classList.contains("faux")){ faux(); return; }
+    if(fsEl()){
+      try{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(err){}
+      return;
+    }
+    var req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+    if(req){
+      try{
+        var p = req.call(wrap);
+        if(p && p.catch) p.catch(function(){ if(!videoFS()) faux(); });
+        return;
+      }catch(err){}
+    }
+    if(!videoFS()) faux();
   };
-  document.addEventListener("fullscreenchange",function(){
-    btn.textContent = document.fullscreenElement ? "✕" : "⛶";
-    /* nudge playback in case the transition paused it — never reload the src */
-    if(isLocal(CHANNELS[cur])){ try{ tvv.play(); }catch(e){} }
-    else { try{ yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*"); }catch(e){} }
+  ["fullscreenchange","webkitfullscreenchange"].forEach(function(ev){
+    document.addEventListener(ev,function(){
+      paint();
+      /* nudge playback in case the transition paused it — never reload the src */
+      if(isLocal(CHANNELS[cur])){ try{ tvv.play(); }catch(e){} }
+      else { try{ yt.contentWindow.postMessage(JSON.stringify({event:"command",func:"playVideo",args:[]}),"*"); }catch(e){} }
+    });
   });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape" && wrap.classList.contains("faux")) faux();
+  });
+  paint();
 })();
 document.getElementById("chup").onclick=function(){tune(cur+1);};
 document.getElementById("chdn").onclick=function(){tune(cur<0?CHANNELS.length-1:cur-1);};
