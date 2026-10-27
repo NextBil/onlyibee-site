@@ -724,6 +724,37 @@
   #enter{position:fixed;inset:0;z-index:99999;background:radial-gradient(120% 90% at 50% 40%,#0b0c0e,#000 72%);
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;cursor:pointer;
     text-align:center;padding:24px 24px 150px;font-family:var(--px)}
+  /* ---- THE BOOT TUBE ----
+     A session off NOUVEAUX PUNK 2 plays behind the brand, under the same CRT
+     glass the TV page uses (the scanline comb + the vignette, copied from
+     #screenwrap so the two rooms read as one set). The video is dimmed because
+     the words on top have to stay legible over any frame of it. */
+  #entervid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    z-index:0;opacity:.46;filter:saturate(1.05) contrast(1.05)}
+  #entercrt{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),
+      radial-gradient(ellipse at center,transparent 56%,rgba(0,0,0,.72))}
+  /* everything the visitor reads or presses sits above the glass */
+  #enter .g,#enter .s,#enter #enternew{position:relative;z-index:2}
+  /* NOT #enterplay — it is position:fixed and JS pins it over the player's ►;
+     giving it position:relative moved it off the screen. It only needs the
+     stacking order. */
+  #enter #enterplay{z-index:3}
+  #enter #entersnd{z-index:2}
+  /* the record being announced — a link, so it is reachable without entering */
+  #enter #enternew{font-family:var(--px);font-size:9px;letter-spacing:1.4px;color:#ff8ec0;
+    text-decoration:none;border:1px solid rgba(255,31,111,.55);border-radius:20px;
+    padding:9px 14px;background:rgba(12,4,8,.72);line-height:1.5}
+  #enter #enternew b{color:#fff;text-shadow:0 0 12px rgba(255,31,111,.75)}
+  #enter #enternew:hover{border-color:#ff1f6f;background:rgba(255,31,111,.16)}
+  /* sound is the visitor's call — autoplay with audio is refused everywhere */
+  #enter #entersnd{position:absolute;left:50%;transform:translateX(-50%);
+    bottom:calc(26px + env(safe-area-inset-bottom));
+    font-family:var(--px);font-size:8px;letter-spacing:1px;cursor:pointer;
+    background:#0b0c0e;border:1px solid var(--border);color:var(--dim);padding:10px 13px}
+  #enter #entersnd:hover,#enter #entersnd[aria-pressed="true"]{border-color:var(--acid);color:var(--acid)}
+  @media(prefers-reduced-motion:reduce){ #entervid{display:none} }
+
   /* ONLYIBEE brand — kept exactly as the original boot */
   #enter .g{color:var(--acid);font-size:clamp(24px,8vw,48px);letter-spacing:2px;text-shadow:0 0 22px rgba(182,255,0,.55)}
   #enter .g .r{color:var(--red)}
@@ -1070,9 +1101,15 @@
 
 <!-- PRESS START intro: dark, only the play button lit — it starts the music AND the site -->
 <div id="enter">
+  <!-- the boot runs a session off NOUVEAUX PUNK 2 behind the tube glass -->
+  <video id="entervid" muted loop playsinline preload="auto"
+         poster="assets/video/np2-boot.jpg" aria-hidden="true"></video>
+  <div id="entercrt" aria-hidden="true"></div>
   <div class="g">ONLY<span class="r">IBEE</span></div>
+  <a id="enternew" href="np2/">NEW! <b>NOUVEAUX PUNK 2</b></a>
   <button id="enterplay" aria-label="Press play to start"><span>▶</span></button>
   <div class="s">press play_</div>
+  <button id="entersnd" type="button" aria-pressed="false">🔈 SOUND ON</button>
 </div>
 
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
@@ -2219,19 +2256,50 @@
     /* safety: if the player button never measured, show the button at its fallback spot */
     setTimeout(function(){ if(ep) ep.classList.add('ready'); },600);
     window.addEventListener('resize',placeEnter);
+    /* ---- the boot tube ----
+       The clip starts muted because every browser refuses audio before a
+       gesture; SOUND ON is that gesture, and it must not fall through to the
+       boot button underneath or the site would open on the same tap. */
+    var ev=document.getElementById('entervid'),
+        snd=document.getElementById('entersnd'),
+        nw=document.getElementById('enternew');
+    if(ev){
+      ev.src='assets/video/np2-boot.mp4';
+      var pv=ev.play(); if(pv&&pv.catch) pv.catch(function(){});
+    }
+    if(snd&&ev){
+      snd.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        ev.muted=!ev.muted;
+        snd.setAttribute('aria-pressed', ev.muted?'false':'true');
+        snd.textContent = ev.muted ? '\ud83d\udd08 SOUND ON' : '\ud83d\udd0a SOUND OFF';
+        if(!ev.muted){ var p2=ev.play(); if(p2&&p2.catch) p2.catch(function(){}); }
+      });
+    }
+    /* the record's own link — go there instead of entering on the menu */
+    if(nw){
+      nw.addEventListener('click',function(e){
+        if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;
+        e.preventDefault(); e.stopPropagation();
+        try{ navigate('np2/'); }catch(err){}
+        go();
+      });
+    }
     var started=false;
     var go=function(){ if(started)return; started=true;
+      /* the tube is done the moment the site opens — stop the decode and the
+         download rather than leaving it running behind the app */
+      try{ if(ev){ ev.pause(); ev.removeAttribute('src'); ev.load(); } }catch(e){}
       try{ var R=window.IBEERADIO;
         if(R&&R.control){
-          /* START ON A RANDOM RECORD so it isn't always the same first song for
-             every visitor — unless a shared ?s= link asked for a specific one. */
+          /* EVERYONE STARTS ON DERANGER — the record is new and this is the
+             first thing the site says. A shared ?s= link still wins, and if the
+             track is somehow not in the radio we fall back to where we were. */
           var deep=/[?&]s=/.test(location.search), n=R.count||0;
-          if(deep || n<1){ R.control.play(R.current&&R.current()>=0?null:0); }
-          else {
-            var i=Math.floor(Math.random()*n), tries=0;
-            while(tries<15 && R.song && R.song(i) && R.song(i).locked){ i=Math.floor(Math.random()*n); tries++; }
-            R.control.play(i);
-          }
+          var di = (!deep && R.indexBySlug) ? R.indexBySlug('np2-21-deranger.mp3') : -1;
+          if(deep || n<1) R.control.play(R.current&&R.current()>=0?null:0);
+          else if(di>=0)  R.control.play(di);
+          else            R.control.play(0);
         }
       }catch(e){}
       enter.style.display='none'; window.removeEventListener('keydown',kk); };

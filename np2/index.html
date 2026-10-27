@@ -440,25 +440,30 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
    transform:scale — which paints over its neighbours and hides three other
    songs. It spans two columns and two rows now, so the grid genuinely reflows
    around it; grid-auto-flow:dense is what closes the hole that leaves. */
-/* ---- THE SESSIONS ---- */
-.vids{display:flex;gap:9px;overflow-x:auto;scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
-.vids::-webkit-scrollbar{display:none}
-.vcard{flex:0 0 232px;scroll-snap-align:start;position:relative;aspect-ratio:16/9;
-  border:1px solid rgba(255,31,111,.4);background:#0a0609;overflow:hidden;
-  cursor:pointer;padding:0;font:inherit;color:inherit;display:block}
-.vcard video{width:100%;height:100%;object-fit:cover;display:block;background:#0a0609}
-.vcard .vp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-size:30px;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.9);pointer-events:none;
-  transition:opacity .2s}
-.vcard.on .vp{opacity:0}
-.vcard .vn{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 9px 7px;
-  font-family:var(--px);font-size:7px;letter-spacing:.8px;color:#ffd9e8;text-align:left;
-  background:linear-gradient(180deg,transparent,rgba(6,3,5,.92));pointer-events:none}
-.vcard.on{border-color:#ff1f6f;box-shadow:0 0 16px rgba(255,31,111,.4)}
-/* portrait clip: show it whole rather than cropping a phone video to a letterbox */
-.vcard.tall video{object-fit:contain}
-@media(max-width:620px){ .vcard{flex:0 0 68%} }
+/* ---- a session in the drawer, and opened big ---- */
+.libgrid figure.sess .win{position:relative;cursor:pointer}
+.libgrid figure.sess .vp{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-size:28px;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.9);
+  pointer-events:none;transition:transform .18s}
+.libgrid figure.sess:hover .vp{transform:scale(1.14)}
+.big{position:fixed;inset:0;z-index:80;background:rgba(3,7,8,.96);
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.big[hidden]{display:none}
+.bigx{position:absolute;top:12px;right:12px;z-index:2;width:38px;height:38px;
+  background:#0d1416;border:1px solid var(--line,#1e2a2c);color:#cfe;cursor:pointer;
+  font-family:var(--px);font-size:12px;line-height:1}
+.bigx:hover{border-color:var(--pink-hot,#ff1f6f);color:var(--pink-hot,#ff1f6f)}
+.bigin{display:flex;flex-direction:column;gap:12px;max-width:min(1100px,96vw);
+  max-height:92vh;width:100%;align-items:center}
+.bigin video{max-width:100%;max-height:72vh;background:#000;display:block}
+.bigm{width:100%;max-width:640px;text-align:center}
+.bigm b{display:block;font-family:var(--px);font-size:11px;color:#fff;letter-spacing:1px;
+  margin-bottom:10px}
+.bigs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.bigs button{font-family:var(--px);font-size:8px;letter-spacing:.6px;cursor:pointer;
+  background:#160a12;border:1px solid rgba(255,31,111,.6);color:#ff8ec0;padding:11px 13px}
+.bigs button:hover{background:var(--pink-hot,#ff1f6f);color:#120308;border-color:var(--pink-hot,#ff1f6f)}
+@media(max-width:620px){ .bigin video{max-height:58vh} }
 
 .sq.playing{grid-column:span 2;grid-row:span 2;z-index:2}
 .sq.playing .sqw{border-color:var(--pink);
@@ -762,14 +767,6 @@ body.neon .batwrap svg{animation:none !important}
   </div>
 
   <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
-  <!-- THE SESSIONS — the footage behind the record. Poster-first: nothing is
-       downloaded until a card is tapped, and only one clip ever plays. -->
-  <div class="sec" id="sessec">
-    <div class="sh">THE <span class="a">SESSIONS</span>_</div>
-    <div class="ssub">the footage behind the record — tap one_</div>
-    <div class="vids" id="vids"></div>
-  </div>
-
   <div class="sec">
     <div class="sh">THE <span class="a">SURPRISES</span>_</div>
     <div class="ssub" id="teesub">twenty-six shirts, one per track — one of one, made to order_</div>
@@ -806,6 +803,17 @@ body.neon .batwrap svg{animation:none !important}
     <span class="c" id="libc"></span>
   </div>
   <div class="libgrid" id="libgrid"></div>
+  <!-- A SESSION, OPENED BIG. One <video>, reused for whichever clip is tapped. -->
+  <div class="big" id="big" hidden>
+    <button class="bigx" id="bigx" aria-label="Close">✕</button>
+    <div class="bigin">
+      <video id="bigv" playsinline controls preload="none"></video>
+      <div class="bigm">
+        <b id="bignm"></b>
+        <div class="bigs" id="bigsongs"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- THE BIGGER BOX — the same twenty-seven, large enough to read. Six-up is a
@@ -1106,47 +1114,21 @@ body.neon .batwrap svg{animation:none !important}
      ===================================================================== */
   var IMG="../assets/img/np2/", VID="../assets/video/np2/";
 
-  /* ---- THE SESSIONS ----
-     One card per clip. The <video> carries only a poster until it is tapped, so
-     the section costs five ~40KB stills on arrival instead of 28MB of footage.
-     Only one clip is ever playing; starting another stops the last. */
-  (function(){
-    var host=document.getElementById('vids'); if(!host) return;
-    var V="../assets/video/";
-    var SESSIONS=[
-      {f:"np2-deranger", n:"DERANGER"},
-      {f:"np2-film",     n:"THE FILM"},
-      {f:"np2-1019",     n:"SESSION 10.19"},
-      {f:"np2-1022",     n:"SESSION 10.22"},
-      {f:"np2-1016",     n:"SESSION 10.16", tall:true}
-    ];
-    var playing=null;
-    host.innerHTML=SESSIONS.map(function(s){
-      return '<button type="button" class="vcard'+(s.tall?' tall':'')+'" data-f="'+s.f+'">'
-        +'<video playsinline preload="none" poster="'+V+s.f+'.jpg"></video>'
-        +'<span class="vp">\u25B6</span><span class="vn">'+s.n+'</span></button>';
-    }).join('');
-    Array.prototype.forEach.call(host.querySelectorAll('.vcard'),function(card){
-      var v=card.querySelector('video');
-      card.addEventListener('click',function(){
-        if(playing && playing!==v){
-          playing.pause(); var pc=playing.closest('.vcard'); if(pc) pc.classList.remove('on');
-        }
-        if(!v.getAttribute('src')) v.src=V+card.getAttribute('data-f')+'.mp4';
-        if(v.paused){
-          card.classList.add('on'); playing=v;
-          var p=v.play(); if(p&&p.catch) p.catch(function(){});
-        } else { v.pause(); card.classList.remove('on'); playing=null; }
-      });
-      v.addEventListener('ended',function(){ card.classList.remove('on'); if(playing===v) playing=null; });
-    });
-    /* a clip left running behind a locked phone is pure battery */
-    document.addEventListener('visibilitychange',function(){
-      if(document.hidden && playing){ playing.pause();
-        var c=playing.closest('.vcard'); if(c) c.classList.remove('on'); playing=null; }
-    });
-  })();
+  /* THE SESSIONS sit at the head of the archive and the photographs run under
+     them. Each one carries the song (or songs) it belongs to, offered when the
+     clip is opened big — the footage is the way into the record, not a
+     separate room. `vs` is a full path; `v` is still relative to VID. */
   var ARCHIVE=[
+    {vs:"../assets/video/np2-deranger.mp4", po:"../assets/video/np2-deranger.jpg",
+     ex:"SESSION", lb:"deranger", big:true, songs:["np2-21-deranger.mp3"]},
+    {vs:"../assets/video/np2-film.mp4", po:"../assets/video/np2-film.jpg",
+     ex:"THE FILM", lb:"the film", big:true,
+     songs:["np2-06-write-a-song.mp3","np2-02-okay.mp3"]},
+    {vs:"../assets/video/np2-1019.mp4", po:"../assets/video/np2-1019.jpg",
+     ex:"SESSION", lb:"okay", big:true, songs:["np2-02-okay.mp3"]},
+    {vs:"../assets/video/np2-1022.mp4", po:"../assets/video/np2-1022.jpg",
+     ex:"SESSION", lb:"to the next shawty", big:true,
+     songs:["np2-19-to-the-next-shawty.m4a"]},
     {f:"a01.jpg", ex:"EXHIBIT 01", lb:'the mark — "NEW PUNK", forearm'},
     {f:"a04.jpg", ex:"CAM 01",     lb:"2024-09-21 · mid-sentence"},
     {v:"loop-pink.mp4", ex:"REEL 01", lb:"the pink room · 6s loop", pos:"32% center"},
@@ -1175,7 +1157,12 @@ body.neon .batwrap svg{animation:none !important}
     shotFor=i;
     var a = i<0 ? ARCHIVE[0] : exhibitFor(i);
     shotWin.classList.remove("cut"); void shotWin.offsetWidth; shotWin.classList.add("cut");
-    if(a.v){
+    if(a.vs){
+      /* a SESSION in the small frame shows its still — the clip belongs to the
+         big view, where there is room for it and for the song it carries */
+      wantVid=null; try{ sVid.pause(); }catch(e){}
+      sVid.style.display="none"; sImg.style.display=""; sImg.src=a.po;
+    } else if(a.v){
       wantVid=a; sImg.style.display="none"; sVid.style.display="";
     } else {
       wantVid=null; try{ sVid.pause(); }catch(e){}
@@ -1204,11 +1191,19 @@ body.neon .batwrap svg{animation:none !important}
     if(libBuilt) return; libBuilt=true;
     document.getElementById("libc").textContent=ARCHIVE.length+" PIECES";
     libGrid.innerHTML=ARCHIVE.map(function(a,n){
-      var win = a.v
-        ? '<span class="win"><video src="'+VID+a.v+'" muted loop playsinline preload="none"'
-          +' style="object-position:'+(a.pos||"center")+'"></video></span>'
-        : '<span class="win"><img src="'+IMG+a.f+'" alt="'+esc(a.lb)+'" loading="lazy"></span>';
-      return '<figure data-n="'+n+'"'+(a.v?' class="reel"':'')+'>'+win
+      var win;
+      if(a.vs){
+        /* a SESSION — poster only until it is opened, so the drawer costs five
+           stills rather than the whole reel */
+        win='<span class="win"><img src="'+a.po+'" alt="'+esc(a.lb)+'" loading="lazy">'
+           +'<span class="vp">\u25B6</span></span>';
+      } else if(a.v){
+        win='<span class="win"><video src="'+VID+a.v+'" muted loop playsinline preload="none"'
+           +' style="object-position:'+(a.pos||"center")+'"></video></span>';
+      } else {
+        win='<span class="win"><img src="'+IMG+a.f+'" alt="'+esc(a.lb)+'" loading="lazy"></span>';
+      }
+      return '<figure data-n="'+n+'"'+(a.vs?' class="sess"':(a.v?' class="reel"':''))+'>'+win
         +'<figcaption><span class="sx">'+a.ex+'</span>'
         +'<span class="sl">'+esc(a.lb)+'</span></figcaption></figure>';
     }).join("");
@@ -1220,6 +1215,53 @@ body.neon .batwrap svg{animation:none !important}
       f.classList.toggle("on", +f.getAttribute("data-n")===n);
     });
   }
+  /* ---- A SESSION, OPENED BIG ----
+     The clip is the way into the record, so the big view offers the song (or
+     songs) it belongs to. One <video> is reused for every session: five would
+     be five decoders alive for one thing on screen. */
+  var bigEl=document.getElementById("big"), bigV=document.getElementById("bigv"),
+      bigNm=document.getElementById("bignm"), bigS=document.getElementById("bigsongs");
+  function titleOf(slug){
+    for(var i=0;i<NP2.length;i++) if(NP2[i].f===slug) return NP2[i].t;
+    return slug;
+  }
+  function indexOfSlug(slug){
+    for(var i=0;i<NP2.length;i++) if(NP2[i].f===slug) return i;
+    return -1;
+  }
+  function openBig(a){
+    bigNm.textContent=a.ex+" \u2014 "+a.lb;
+    bigV.setAttribute("poster", a.po||"");
+    bigV.src=a.vs;
+    bigS.innerHTML=(a.songs||[]).map(function(s){
+      return '<button type="button" data-slug="'+s+'">\u25B6 PLAY \u201C'+esc(titleOf(s))+'\u201D</button>';
+    }).join("");
+    bigEl.hidden=false;
+    var p=bigV.play(); if(p&&p.catch) p.catch(function(){});
+  }
+  function closeBig(){
+    bigEl.hidden=true;
+    try{ bigV.pause(); }catch(e){}
+    bigV.removeAttribute("src"); try{ bigV.load(); }catch(e){}   /* stop the download too */
+  }
+  document.getElementById("bigx").addEventListener("click",closeBig);
+  bigEl.addEventListener("click",function(e){ if(e.target===bigEl) closeBig(); });
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!bigEl.hidden) closeBig(); });
+  bigS.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("button[data-slug]"); if(!b) return;
+    var i=indexOfSlug(b.getAttribute("data-slug"));
+    if(i>=0){ play(i); closeBig(); }
+  });
+  /* tapping a session in the drawer opens it big */
+  libGrid.addEventListener("click",function(e){
+    var f=e.target.closest&&e.target.closest("figure.sess"); if(!f) return;
+    var a=ARCHIVE[+f.getAttribute("data-n")]; if(a&&a.vs) openBig(a);
+  });
+  /* a clip left running behind a locked phone is pure battery */
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden && !bigEl.hidden){ try{ bigV.pause(); }catch(e){} }
+  });
+
   function libVids(fn){
     Array.prototype.forEach.call(libGrid.querySelectorAll("video"),function(v){
       try{ fn(v); }catch(e){}
