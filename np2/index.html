@@ -450,6 +450,8 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
 .rail .rc img{width:100%;height:100%;object-fit:cover;display:block}
 .rail .rc video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   display:block;opacity:0;transition:opacity .35s}
+/* no still to sit under: the clip's own frame is the thumbnail */
+.rail .rc:not(:has(img)) video{opacity:1}
 .rail .rc.rolling video{opacity:1}
 .rail .rc.rolling .vp{opacity:0}
 .rail .rc .vp{transition:opacity .25s,transform .18s}
@@ -1443,12 +1445,19 @@ body.neon .batwrap svg{animation:none !important}
      never leaves a line of decoders alive behind it. */
   (function(){
     var rail=document.getElementById("srail"); if(!rail) return;
+    /* EVERYTHING THAT MOVES BELONGS HERE — the sessions and the two older
+       reels alike. Splitting on "is it a session" put the reels in with the
+       photographs, which made the page look like it had two video rows. */
     var sess=[];
-    ARCHIVE.forEach(function(a,n){ if(a.vs) sess.push({a:a,n:n}); });
+    ARCHIVE.forEach(function(a,n){ if(clipOf(a)) sess.push({a:a,n:n}); });
     rail.innerHTML=sess.map(function(s){
-      return '<button type="button" class="rc" data-n="'+s.n+'" data-src="'+s.a.vs+'">'
-        +'<img src="'+s.a.po+'" alt="'+esc(s.a.lb)+'" loading="lazy">'
-        +'<video muted loop playsinline preload="none" aria-hidden="true"></video>'
+      var still=stillOf(s.a);
+      return '<button type="button" class="rc" data-n="'+s.n+'" data-src="'+clipOf(s.a)+'">'
+        + (still ? '<img src="'+still+'" alt="'+esc(s.a.lb)+'" loading="lazy">' : '')
+        /* a reel has no still of its own, so it IS its own thumbnail */
+        + '<video muted loop playsinline preload="'+(still?'none':'metadata')+'"'
+        + (still?'':' src="'+clipOf(s.a)+'"')
+        + ' aria-hidden="true"></video>'
         +'<span class="vp">\u25B6</span>'
         +'<span class="rn">'+esc(s.a.lb)+'</span></button>';
     }).join("");
@@ -1499,14 +1508,10 @@ body.neon .batwrap svg{animation:none !important}
   (function(){
     var prail=document.getElementById("prail"); if(!prail) return;
     var pics=[];
-    ARCHIVE.forEach(function(a,n){ if(!a.vs) pics.push({a:a,n:n}); });
+    ARCHIVE.forEach(function(a,n){ if(!clipOf(a)) pics.push({a:a,n:n}); });
     prail.innerHTML=pics.map(function(s){
-      var src = s.a.f ? IMG+s.a.f : (s.a.po||"");
       return '<button type="button" class="pc" data-n="'+s.n+'">'
-        + (s.a.v
-            ? '<video src="'+VID+s.a.v+'" muted loop playsinline preload="none"></video>'
-            : '<img src="'+src+'" alt="'+esc(s.a.lb)+'" loading="lazy">')
-        + '</button>';
+        +'<img src="'+(stillOf(s.a)||"")+'" alt="'+esc(s.a.lb)+'" loading="lazy"></button>';
     }).join("");
     prail.addEventListener("click",function(e){
       var b=e.target.closest&&e.target.closest(".pc"); if(!b) return;
@@ -1516,10 +1521,10 @@ body.neon .batwrap svg{animation:none !important}
 
   /* THE TWO SETS. The footage is one gallery, the photographs are the other —
      swiping inside the viewer stays within the kind of thing you opened. */
-  var SESSIONS=ARCHIVE.filter(function(a){ return !!a.vs; });
-  var PICTURES=ARCHIVE.filter(function(a){ return !a.vs; });
+  var SESSIONS=ARCHIVE.filter(function(a){ return !!clipOf(a); });
+  var PICTURES=ARCHIVE.filter(function(a){ return !clipOf(a); });
   function openOne(a){
-    var set = a.vs ? SESSIONS : PICTURES;
+    var set = clipOf(a) ? SESSIONS : PICTURES;
     openSet(set, set.indexOf(a));
   }
   /* anything in the drawer opens the set it belongs to */
