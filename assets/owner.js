@@ -63,7 +63,7 @@
      product pages in one line, and un-locks THE FALL tile in ROOMS. (The three
      covered pages — /np2/, /np2/fall/, /drop/ — are switch ② in privategate.js.)
      ============================================================ */
-  var NP2_LAUNCHED = false;
+  var NP2_LAUNCHED = true;   /* LAUNCHED 2026-10-27 */
   if(NP2_LAUNCHED){
     window.IBEE_SHOW_NP2 = true;                 // synchronous — product-page reads this at render
     resolved = true; isOwner = false; window.IBEE_IS_OWNER = false;   // public, not "owner"

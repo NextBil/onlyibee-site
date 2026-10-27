@@ -20,7 +20,7 @@
      pages that include this file (/np2/, /np2/fall/, /drop/) for EVERYONE.
      (Switch ① — the radio / universe / shop / product pages / ROOMS tile — is
      NP2_LAUNCHED in assets/owner.js.) ============================================ */
-  var LAUNCHED = false;
+  var LAUNCHED = true;   /* LAUNCHED 2026-10-27 */
   if(LAUNCHED) return;                            // no cover — the page is public
 
   /* The owner is matched by a SHA-256 of their address, not the address itself.

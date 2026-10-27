@@ -160,6 +160,35 @@
   #acct .acctcash .cashew{width:16px;height:16px}
 
   /* ---- content ---- */
+  /* ---- THE RECORD STRIP ---- */
+  #np2strip{flex:none;position:relative;display:flex;align-items:center;gap:10px;
+    align-self:center;width:calc(100vw - 14px);max-width:860px;height:60px;
+    margin:0 auto 7px;padding:0 14px;overflow:hidden;text-decoration:none;
+    border:1.5px solid rgba(255,31,111,.55);border-radius:16px;background:#0b0608;
+    box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:39;isolation:isolate}
+  #np2strip[hidden]{display:none}
+  #np2strip video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    z-index:0;opacity:.55;filter:saturate(1.1)}
+  /* the wash is what keeps the words readable over any frame of any clip */
+  #np2strip .sx{position:absolute;inset:0;z-index:1;
+    background:linear-gradient(90deg,rgba(6,3,5,.94) 0%,rgba(6,3,5,.72) 46%,rgba(6,3,5,.3) 100%)}
+  #np2strip .st{position:relative;z-index:2;display:flex;flex-direction:column;gap:3px;min-width:0}
+  #np2strip .st b{font-family:var(--px);font-size:7px;letter-spacing:1.6px;color:#ff8ec0}
+  #np2strip .st i{font-family:var(--px);font-size:12px;font-style:normal;color:#fff;
+    text-shadow:0 0 14px rgba(255,31,111,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #np2strip .sm{position:relative;z-index:2;margin-left:auto;font-family:var(--px);
+    font-size:7px;letter-spacing:1px;color:#ffc2dc;white-space:nowrap}
+  #np2strip .sa{position:relative;z-index:2;font-family:var(--px);font-size:13px;color:#ff1f6f;
+    transition:transform .2s}
+  #np2strip:hover{border-color:#ff1f6f}
+  #np2strip:hover .sa{transform:translateX(3px)}
+  @media(max-width:620px){
+    #np2strip{height:52px;gap:8px;padding:0 11px;border-radius:14px}
+    #np2strip .st i{font-size:10px}
+    #np2strip .sm{display:none}        /* the headline is the message on a phone */
+  }
+  @media(prefers-reduced-motion:reduce){ #np2strip video{display:none} }
+
   #stage{position:relative;flex:1;overflow:hidden}
   #frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);
     opacity:0;transition:opacity .28s ease}
@@ -926,6 +955,20 @@
 <div id="app">
   <div id="bar"><div id="nav"></div><div id="acct"></div></div>
 
+  <!-- THE RECORD STRIP — the sessions behind NOUVEAUX PUNK 2, running under the
+       nav on every page but the record's own. One <video>, swapped between a
+       handful of 7-second silent loops; see the strip script for why it is one. -->
+  <a id="np2strip" href="np2/" aria-label="Discover Nouveaux Punk 2">
+    <video id="np2stripv" muted loop playsinline preload="none" aria-hidden="true"></video>
+    <span class="sx"></span>
+    <span class="st">
+      <b>DISCOVER</b>
+      <i>NOUVEAUX PUNK 2</i>
+    </span>
+    <span class="sm">27 SONGS · OUT NOW</span>
+    <span class="sa">▸</span>
+  </a>
+
   <div id="stage">
     <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>
     <!-- lyrics overlay — the LYRICS ENGINE, in the shell's black room -->
@@ -1035,7 +1078,7 @@
 <!-- do NOT auto-resume music on load: clear the "was playing" flag before the radio boots -->
 <script>try{var _s=JSON.parse(localStorage.getItem('ibee_radio')||'null');if(_s){_s.p=false;localStorage.setItem('ibee_radio',JSON.stringify(_s));}}catch(e){}</script>
 <!-- the persistent radio loads first so it exists before the frame opens any page -->
-<script src="assets/player.js?v=34"></script>
+<script src="assets/player.js?v=35"></script>
 <!-- privacy-preserving community heartbeat + global song-play counter -->
 <script src="assets/stats-client.js?v=8"></script>
 <!-- anonymous site analytics: page activity, exits and meaningful interactions -->
@@ -1299,6 +1342,8 @@
       else if(lastPage===null || page!==lastPage) trail.push(rel);
       else trail[trail.length-1]=rel;      /* same page, newer hash */
       lastRel=rel;
+      /* the band steps aside on the record's own page */
+      try{ if(window.__np2StripFor) window.__np2StripFor(rel); }catch(e){}
       /* THE ADDRESS BAR HAS TO BE SHAREABLE.
          Everything else is written as ?p=<page>, which is right — it is how a
          reload gets back to the same screen. But on a record's page that gave
@@ -1347,6 +1392,75 @@
     try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openUniverse){ fw.openUniverse(); return; } }catch(e){}
     navigate('console.html#music');
   };
+
+  /* ================= THE RECORD STRIP =================
+     A band under the nav that runs the sessions behind NOUVEAUX PUNK 2 and
+     leads to the record's page. Deliberately cheap, for the same reason the
+     rest of this session got cheaper:
+       · ONE <video> element, its src swapped between clips. Five <video>s
+         would be five decoders alive at once for one visible band.
+       · each loop is a silent 7s file around 450KB, preload="none" until the
+         strip is actually on screen.
+       · it pauses when the tab is hidden and when it scrolls out of view, and
+         it never runs at all under prefers-reduced-motion — the poster carries
+         it instead.
+     ==================================================== */
+  (function(){
+    var strip=document.getElementById('np2strip'); if(!strip) return;
+    /* the shell owns navigation — a plain href would reload the whole app and
+       stop the music */
+    strip.addEventListener('click',function(e){
+      if(e.metaKey||e.ctrlKey||e.shiftKey||e.button===1) return;   /* let them open a tab */
+      e.preventDefault(); navigate('np2/');
+    });
+    var v=document.getElementById('np2stripv');
+    var CLIPS=[
+      ['assets/video/np2-deranger-loop.mp4','assets/video/np2-deranger.jpg'],
+      ['assets/video/np2-1022-loop.mp4','assets/video/np2-1022.jpg'],
+      ['assets/video/np2-1019-loop.mp4','assets/video/np2-1019.jpg'],
+      ['assets/video/np2-1016-loop.mp4','assets/video/np2-1016.jpg'],
+      ['assets/video/np2-film-loop.mp4','assets/video/np2-film.jpg']
+    ];
+    /* start somewhere different each visit so the band is not the same shot
+       every time someone opens the site */
+    var i=Math.floor(Math.random()*CLIPS.length), started=false, timer=0;
+    var noMo=null; try{ noMo=matchMedia('(prefers-reduced-motion:reduce)'); }catch(e){}
+    /* Data Saver is a request, not a hint: show the still and nothing more. */
+    var thin=false; try{ var c=navigator.connection;
+      thin=!!(c&&(c.saveData||/^(slow-)?2g$/.test(c.effectiveType||''))); }catch(e){}
+
+    function show(n){
+      i=((n%CLIPS.length)+CLIPS.length)%CLIPS.length;
+      v.setAttribute('poster', CLIPS[i][1]);
+      if(noMo&&noMo.matches || thin) return;
+      v.src=CLIPS[i][0];
+      var p=v.play(); if(p&&p.catch) p.catch(function(){});
+    }
+    function cycle(){ clearTimeout(timer); timer=setTimeout(function(){ show(i+1); cycle(); }, 9000); }
+    function begin(){ if(started) return; started=true; show(i); cycle(); }
+    function halt(){ clearTimeout(timer); timer=0; try{ v.pause(); }catch(e){} }
+    function resume(){ if(!started){ begin(); return; }
+      if(noMo&&noMo.matches || thin) return;
+      var p=v.play(); if(p&&p.catch) p.catch(function(){}); cycle(); }
+
+    /* nothing is fetched until the band is actually on screen */
+    try{
+      new IntersectionObserver(function(es){
+        if(es[0].isIntersecting && !document.hidden) resume(); else halt();
+      }).observe(strip);
+    }catch(e){ begin(); }
+    document.addEventListener('visibilitychange',function(){
+      if(document.hidden) halt(); else if(!strip.hidden) resume();
+    });
+
+    /* On the record's own page the band is just noise in front of the thing it
+       is advertising, so it steps aside — and stops decoding while it is away. */
+    window.__np2StripFor=function(rel){
+      var on=/^np2(\/|$)/.test(String(rel||''));
+      strip.hidden=on;
+      if(on) halt(); else if(!document.hidden) resume();
+    };
+  })();
 
   /* ================= LYRICS OVERLAY =================
      Lines come from lyrics-timed.js when the song has been tap-synced in IBEE STUDIO

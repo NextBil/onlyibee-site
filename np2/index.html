@@ -440,6 +440,26 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
    transform:scale — which paints over its neighbours and hides three other
    songs. It spans two columns and two rows now, so the grid genuinely reflows
    around it; grid-auto-flow:dense is what closes the hole that leaves. */
+/* ---- THE SESSIONS ---- */
+.vids{display:flex;gap:9px;overflow-x:auto;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
+.vids::-webkit-scrollbar{display:none}
+.vcard{flex:0 0 232px;scroll-snap-align:start;position:relative;aspect-ratio:16/9;
+  border:1px solid rgba(255,31,111,.4);background:#0a0609;overflow:hidden;
+  cursor:pointer;padding:0;font:inherit;color:inherit;display:block}
+.vcard video{width:100%;height:100%;object-fit:cover;display:block;background:#0a0609}
+.vcard .vp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:30px;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.9);pointer-events:none;
+  transition:opacity .2s}
+.vcard.on .vp{opacity:0}
+.vcard .vn{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 9px 7px;
+  font-family:var(--px);font-size:7px;letter-spacing:.8px;color:#ffd9e8;text-align:left;
+  background:linear-gradient(180deg,transparent,rgba(6,3,5,.92));pointer-events:none}
+.vcard.on{border-color:#ff1f6f;box-shadow:0 0 16px rgba(255,31,111,.4)}
+/* portrait clip: show it whole rather than cropping a phone video to a letterbox */
+.vcard.tall video{object-fit:contain}
+@media(max-width:620px){ .vcard{flex:0 0 68%} }
+
 .sq.playing{grid-column:span 2;grid-row:span 2;z-index:2}
 .sq.playing .sqw{border-color:var(--pink);
   box-shadow:0 0 0 1px var(--pink),0 0 26px rgba(255,31,111,.55),0 12px 30px rgba(0,0,0,.72)}
@@ -742,6 +762,14 @@ body.neon .batwrap svg{animation:none !important}
   </div>
 
   <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
+  <!-- THE SESSIONS — the footage behind the record. Poster-first: nothing is
+       downloaded until a card is tapped, and only one clip ever plays. -->
+  <div class="sec" id="sessec">
+    <div class="sh">THE <span class="a">SESSIONS</span>_</div>
+    <div class="ssub">the footage behind the record — tap one_</div>
+    <div class="vids" id="vids"></div>
+  </div>
+
   <div class="sec">
     <div class="sh">THE <span class="a">SURPRISES</span>_</div>
     <div class="ssub" id="teesub">twenty-six shirts, one per track — one of one, made to order_</div>
@@ -1077,6 +1105,47 @@ body.neon .batwrap svg{animation:none !important}
      archive for each of the 26 songs instead of shuffling randomly at you.
      ===================================================================== */
   var IMG="../assets/img/np2/", VID="../assets/video/np2/";
+
+  /* ---- THE SESSIONS ----
+     One card per clip. The <video> carries only a poster until it is tapped, so
+     the section costs five ~40KB stills on arrival instead of 28MB of footage.
+     Only one clip is ever playing; starting another stops the last. */
+  (function(){
+    var host=document.getElementById('vids'); if(!host) return;
+    var V="../assets/video/";
+    var SESSIONS=[
+      {f:"np2-deranger", n:"DERANGER"},
+      {f:"np2-film",     n:"THE FILM"},
+      {f:"np2-1019",     n:"SESSION 10.19"},
+      {f:"np2-1022",     n:"SESSION 10.22"},
+      {f:"np2-1016",     n:"SESSION 10.16", tall:true}
+    ];
+    var playing=null;
+    host.innerHTML=SESSIONS.map(function(s){
+      return '<button type="button" class="vcard'+(s.tall?' tall':'')+'" data-f="'+s.f+'">'
+        +'<video playsinline preload="none" poster="'+V+s.f+'.jpg"></video>'
+        +'<span class="vp">\u25B6</span><span class="vn">'+s.n+'</span></button>';
+    }).join('');
+    Array.prototype.forEach.call(host.querySelectorAll('.vcard'),function(card){
+      var v=card.querySelector('video');
+      card.addEventListener('click',function(){
+        if(playing && playing!==v){
+          playing.pause(); var pc=playing.closest('.vcard'); if(pc) pc.classList.remove('on');
+        }
+        if(!v.getAttribute('src')) v.src=V+card.getAttribute('data-f')+'.mp4';
+        if(v.paused){
+          card.classList.add('on'); playing=v;
+          var p=v.play(); if(p&&p.catch) p.catch(function(){});
+        } else { v.pause(); card.classList.remove('on'); playing=null; }
+      });
+      v.addEventListener('ended',function(){ card.classList.remove('on'); if(playing===v) playing=null; });
+    });
+    /* a clip left running behind a locked phone is pure battery */
+    document.addEventListener('visibilitychange',function(){
+      if(document.hidden && playing){ playing.pause();
+        var c=playing.closest('.vcard'); if(c) c.classList.remove('on'); playing=null; }
+    });
+  })();
   var ARCHIVE=[
     {f:"a01.jpg", ex:"EXHIBIT 01", lb:'the mark — "NEW PUNK", forearm'},
     {f:"a04.jpg", ex:"CAM 01",     lb:"2024-09-21 · mid-sentence"},
@@ -1359,7 +1428,7 @@ body.neon .batwrap svg{animation:none !important}
 </script>
 <script>document.write('<script src="../assets/products-data.js?cb='+Math.floor(Date.now()/864e5)+'"><\/script>')</script>
 <script src="../assets/np2-perks.js?v=3"></script>
-<script src="../assets/player.js?v=34"></script>
+<script src="../assets/player.js?v=35"></script>
 <script src="../assets/badges.js?v=13"></script>
 <script src="/assets/stats-client.js?v=7"></script>
 </body>

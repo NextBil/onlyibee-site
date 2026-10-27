@@ -161,7 +161,7 @@
   </div>
 </main>
 
-<script src="../assets/player.js?v=34"></script>
+<script src="../assets/player.js?v=35"></script>
 <script>
 (function(){
 "use strict";
@@ -172,6 +172,14 @@ var CHANNELS=[
   /* A channel is either a YouTube {id} or a self-hosted {src}. This one is the
      set's default transmission — it starts on load so the tube is never dead. */
   {src:"/assets/video/np2-teaser.mp4", t:"NOUVEAUX PUNK 2 \u2014 TEASER"},
+  /* the sessions behind NOUVEAUX PUNK 2 — self-hosted, so they play without
+     handing the viewer to YouTube. Posters mean the tube shows a frame before
+     a byte of video is fetched. */
+  {src:"/assets/video/np2-deranger.mp4", poster:"/assets/video/np2-deranger.jpg", t:"DERANGER \u2014 NP2"},
+  {src:"/assets/video/np2-film.mp4",     poster:"/assets/video/np2-film.jpg",     t:"NP2 \u2014 THE FILM"},
+  {src:"/assets/video/np2-1019.mp4",     poster:"/assets/video/np2-1019.jpg",     t:"NP2 \u2014 SESSION 10.19"},
+  {src:"/assets/video/np2-1022.mp4",     poster:"/assets/video/np2-1022.jpg",     t:"NP2 \u2014 SESSION 10.22"},
+  {src:"/assets/video/np2-1016.mp4",     poster:"/assets/video/np2-1016.jpg",     t:"NP2 \u2014 SESSION 10.16"},
   {id:"-M646sfdyiw", t:"ALL I SEE"},
   {id:"rA6zb4bp-sE", t:"PIQUÉ"},
   {id:"FW8eWeDuHBk", t:"DEUSPI"},
@@ -300,6 +308,9 @@ function tune(i,opts){
     /* kill the embed outright — a blanked-but-loaded YouTube player keeps its
        audio going behind our clip */
     if(yt.src) yt.removeAttribute("src");
+    /* the channel's own still, so the tube shows the shot while the clip is
+       still arriving instead of a black rectangle */
+    if(c.poster) tvv.setAttribute("poster", c.poster); else tvv.removeAttribute("poster");
     if(tvv.getAttribute("src")!==c.src) tvv.src=c.src;
     tvv.muted=!tvSound;
     tvv.classList.add("on");

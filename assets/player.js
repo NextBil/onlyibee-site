@@ -1105,9 +1105,10 @@
          tint / cover on the radio instead of falling back to the unfiled album
          (the universe already knows these galaxies; the radio didn't). Built-in
          albums are never overridden. Optional per-galaxy `cover`/`tint`/`room`. */
-      /* NP2 is private for now: its album + songs are hidden from the radio
-         until owner.js confirms the owner account (window.IBEE_SHOW_NP2). */
-      var HIDE_NP2 = !window.IBEE_SHOW_NP2;
+      /* NP2 LAUNCHED 2026-10-27 — the record is public, so nothing is held back
+         from the radio any more. The flag is kept as a constant rather than
+         ripped out so the shape of the old gate stays readable. */
+      var HIDE_NP2 = false;
       var GX = (window.IBEE_SONGS_EXTRA && window.IBEE_SONGS_EXTRA.galaxies) || [];
       GX.forEach(function(ga){
         if(!ga || !ga.id || ALBUMS[ga.id]) return;
