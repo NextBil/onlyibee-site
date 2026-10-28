@@ -270,13 +270,22 @@
     border:1px solid var(--border);color:var(--dim);font-size:15px;line-height:1;
     display:flex;align-items:center;justify-content:center}
   #unifs:hover{border-color:var(--acid);color:var(--acid)}
+  #unixit{position:absolute;z-index:60;right:14px;top:calc(14px + env(safe-area-inset-top));
+    font-family:var(--px);font-size:9px;letter-spacing:1px;cursor:pointer;
+    background:rgba(8,8,10,.86);border:1px solid var(--acid);color:var(--acid);
+    padding:10px 12px;backdrop-filter:blur(3px)}
+  #unixit:hover{background:var(--acid);color:#000}
+  #unixit[hidden]{display:none}
   /* Real fullscreen when the browser allows it. iOS Safari cannot put a <div>
      fullscreen at all, and a page inside a frame can be refused, so FAUX fills
      the frame instead — the same fallback the TV needed. */
   #engroot:fullscreen,#engroot:-webkit-full-screen{height:100%;min-height:0;border:0}
   #engroot.faux{position:fixed;inset:0;z-index:99990;height:auto;min-height:0;border:0;border-radius:0}
   body.unifaux{overflow:hidden}
-  body.unifaux .engnav{position:fixed;top:calc(8px + env(safe-area-inset-top));left:10px;right:10px;z-index:99991}
+  /* In the fallback the nav is pinned over the engine, and #unixit lives INSIDE
+     #engroot — which is its own stacking context, so the close button can never
+     rise above it. The row stops short instead and leaves the corner free. */
+  body.unifaux .engnav{position:fixed;top:calc(8px + env(safe-area-inset-top));left:10px;right:126px;z-index:99991}
   /* the way back out of a galaxy — neon so it is findable over the starfield */
   .engnav .back{border-color:var(--acid);color:var(--acid);
     box-shadow:0 0 10px rgba(182,255,0,.20),inset 0 0 8px rgba(182,255,0,.06)}
@@ -790,6 +799,9 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
           <button class="egclose" id="egclose" data-go="menu">✕ CLOSE — BACK TO MENU</button>
         </div>
         <canvas id="engcanvas"></canvas>
+        <!-- the way out of fullscreen: the shell's nav is gone while this is on,
+             so this is the only way back and it sits above everything -->
+        <button id="unixit" type="button" hidden aria-label="Leave fullscreen">✕ CLOSE</button>
         <!-- THE RECORD'S PAGE — restored from console-v2 (2026-10-22).
              This is the ORIGINAL design, not a rebuild: a gradient sheet that
              fades up out of the universe (no hard panel edge), a 3-up stat grid,
@@ -1564,10 +1576,21 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       function paint(){ btn.textContent=(fsEl()||faux())?"\u2715":"\u26f6";
         btn.title=(fsEl()||faux())?"leave fullscreen":"fullscreen"; }
       function settle(){ requestAnimationFrame(function(){ resize(); paint(); }); }
+      var xit=$("#unixit");
+      /* the nav and the player belong to the shell, so only the shell can hide
+         them — a page in a frame cannot reach over and do it itself */
+      function tellShell(on){
+        try{ if(window.top!==window && window.top.__ibeeImmersive) window.top.__ibeeImmersive(on); }catch(e){}
+      }
+      function immersive(on){
+        tellShell(on);
+        if(xit) xit.hidden=!on;
+        settle();
+      }
       function setFaux(on){
         root.classList.toggle("faux",on);
         document.body.classList.toggle("unifaux",on);
-        settle();
+        immersive(on);
       }
       btn.addEventListener("click",function(e){
         e.preventDefault(); e.stopPropagation();
@@ -1587,7 +1610,16 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         setFaux(true);
       });
       ["fullscreenchange","webkitfullscreenchange"].forEach(function(ev){
-        document.addEventListener(ev,settle);
+        document.addEventListener(ev,function(){
+          /* leaving by the browser's own Escape fires this too, which is how the
+             shell comes back when nothing of ours was clicked */
+          immersive(!!fsEl());
+        });
+      });
+      if(xit) xit.addEventListener("click",function(e){
+        e.preventDefault(); e.stopPropagation();
+        if(fsEl()){ try{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(err){} }
+        else setFaux(false);
       });
       /* Escape leaves the faux one; the real one the browser handles itself */
       document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&faux()) setFaux(false); });

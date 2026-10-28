@@ -202,6 +202,12 @@
     color:#12030a;background:#ff1f6f;padding:4px 5px;transform:rotate(-12deg);
     box-shadow:0 2px 8px rgba(0,0,0,.6)}
 
+  /* ---- IMMERSIVE ----
+     A page inside the frame can ask the shell to get out of the way (the
+     universe does it when it goes fullscreen). The nav and the player are the
+     shell's, not the page's, so only the shell can hide them. */
+  body.immersive #toprow,body.immersive #bottom{display:none}
+  body.immersive #stage{flex:1}
   #stage{position:relative;flex:1;overflow:hidden}
   #frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);
     opacity:0;transition:opacity .28s ease}
@@ -1431,6 +1437,14 @@
        #music — and has no openUniverse(), so it falls through to navigate.) */
     try{ var fw=frame&&frame.contentWindow; if(fw&&fw.openUniverse){ fw.openUniverse(); return; } }catch(e){}
     navigate('console.html#music');
+  };
+
+  /* A page in the frame can ask for the whole window: the universe calls this
+     when it goes fullscreen, so the nav and the player stop taking a bite out
+     of a screen the visitor just asked to fill. The page owns the way back —
+     it has the close button — so this does nothing but show and hide. */
+  window.__ibeeImmersive=function(on){
+    try{ document.body.classList.toggle('immersive', !!on); }catch(e){}
   };
 
   /* ================= THE RECORD BUTTON =================
