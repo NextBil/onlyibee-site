@@ -40,10 +40,14 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
 .fvid{position:relative;margin:0 0 18px;border:2px solid var(--border);overflow:hidden;
   background:#0a0a0a;width:100%;height:clamp(180px,27vw,330px)}
 .fvid video{width:100%;height:100%;object-fit:cover;display:block}
-/* the same tube glass the TV and the boot wear, so the shop belongs to the set */
-.fvid::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),
-    radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.5))}
+/* THE TUBE GLASS — the TV page's exact comb and vignette (see #screenwrap in
+   tv/index.html), not a lighter version of them: at .18 and a 62% vignette the
+   overlay was technically there and invisible on the clip. Same numbers as the
+   set, and an explicit z-index so the picture can never paint over it. */
+.fvid::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),
+    radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.55))}
+.fvid video{position:relative;z-index:1}
 @media(max-width:620px){ .fvid{height:clamp(150px,46vw,240px);margin-bottom:13px} }
 @media(prefers-reduced-motion:reduce){ .fvid video{display:none} }
 .fhead{border:2px solid var(--border);background:linear-gradient(180deg,#101010,#0b0b0b);padding:20px;margin-bottom:24px}
