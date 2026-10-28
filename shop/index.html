@@ -32,6 +32,16 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
 .crumbs{font-family:var(--px);font-size:8px;margin-bottom:20px}
 .crumbs a{color:var(--dim);text-decoration:none}.crumbs a:hover{color:var(--acid)}
+/* the drop's own film, over its title */
+.fvid{position:relative;margin:0 0 16px;border:2px solid var(--border);overflow:hidden;
+  background:#0a0a0a;aspect-ratio:16/9;max-height:38vh}
+.fvid video{width:100%;height:100%;object-fit:cover;display:block}
+/* the same tube glass the TV and the boot wear, so the shop belongs to the set */
+.fvid::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),
+    radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.5))}
+@media(max-width:620px){ .fvid{max-height:28vh;margin-bottom:13px} }
+@media(prefers-reduced-motion:reduce){ .fvid video{display:none} }
 .fhead{border:2px solid var(--border);background:linear-gradient(180deg,#101010,#0b0b0b);padding:20px;margin-bottom:24px}
 .fhead.r-leg{border-color:#4d6600}.fhead.r-sdr{border-color:#5c4b2c}
 .fhead h1{font-family:var(--px);font-size:clamp(14px,4vw,22px);color:var(--ink);line-height:1.5}
@@ -150,6 +160,14 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
   var items=products.filter(function(p){ return (p.folder||defId)===fd.id; });
 
   document.title=fd.name+" — ONLY IBEE";
+  /* ICS V1 opens on its own film. Muted and looping, because it is a banner and
+     the record may be playing — one voice on this site. Poster first, so the
+     shot is there before a byte of video arrives. */
+  var banner = /^ics-v1/.test(fd.id)
+    ? '<div class="fvid"><video src="../assets/video/ics-v1-loop.mp4" '
+      + 'poster="../assets/video/ics-v1-loop.jpg" muted loop playsinline autoplay '
+      + 'preload="metadata" aria-hidden="true"></video></div>'
+    : '';
   var head='<div class="fhead r-'+(fd.tint||'leg')+'"><h1>'+e2(fd.name)+'</h1>'
     +(fd.sub?'<div class="proto">'+e2(fd.sub)+'</div>':'')
     +'<div class="cnt">'+items.length+' piece'+(items.length===1?'':'s')+' · each made once, then never again_</div></div>';
@@ -185,7 +203,7 @@ footer{padding:16px;font-family:var(--px);font-size:8px;color:var(--dim);text-al
      #howscan below the grid) so there is one version of it across the vault,
      these folder pages and the console — and so every drop gets it, not only
      the ICS ones. */
-  document.getElementById("wrap").innerHTML=head+note+grid;
+  document.getElementById("wrap").innerHTML=banner+head+note+grid;
   /* the grid is built after products-data lands, so re-price it now */
   try{ if(window.IBEE_PERKS) window.IBEE_PERKS.render(); }catch(e){}
   /* lightbox for the sketches. Delegated: the shared block is injected after

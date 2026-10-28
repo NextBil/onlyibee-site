@@ -243,6 +243,13 @@
   #tracklist .tr.now{color:var(--acid);background:#0d1400}
   #tracklist .tr .no{font-family:var(--px);font-size:8px;color:#555;width:24px}
   #tracklist .tr.now .no{color:var(--acid)}
+  /* THE NEW STICKER — on the sleeve, slightly askew, the way one is stuck on */
+  .alb .ac{position:relative}
+  .alb .newtag{position:absolute;top:4px;left:-4px;z-index:2;
+    font-family:var(--px);font-size:6px;letter-spacing:.8px;line-height:1;
+    color:#12030a;background:#ff1f6f;padding:4px 5px;transform:rotate(-7deg);
+    box-shadow:0 2px 7px rgba(0,0,0,.5)}
+  .alb.fresh{border-color:rgba(255,31,111,.55)}
   #tracklist .tr .rmroom{font-family:var(--px);font-size:7px;color:#000;background:var(--rt,var(--red));padding:5px 6px;flex:none;order:3}
   #tracklist .tr.locked{opacity:.5;cursor:not-allowed}
   #tracklist .tr.locked .cv{filter:brightness(.4) grayscale(.7)}
@@ -1661,8 +1668,11 @@
       +'<span class="aq">'+r.count+' TRACKS</span></button>';
     host.innerHTML=allCard+favCard+out.map(function(a){
       var on = albumSel && a.name.toLowerCase()===albumSel.toLowerCase();
-      return '<button class="alb'+(on?' on':'')+'" data-alb="'+esc(a.name)+'" title="'+esc(a.name)+'">'
-        +'<span class="ac">'+(a.cover?'<img src="'+esc(sized(a.cover,'mid'))+'" alt="" loading="lazy" decoding="async" data-alt="'+esc(a.cover)+'">':'')+'</span>'
+      /* the record that just came out wears a sticker, the way a sleeve would */
+      var isNew = /NOUVEAUX PUNK 2/i.test(a.name);
+      return '<button class="alb'+(on?' on':'')+(isNew?' fresh':'')+'" data-alb="'+esc(a.name)+'" title="'+esc(a.name)+'">'
+        +'<span class="ac">'+(a.cover?'<img src="'+esc(sized(a.cover,'mid'))+'" alt="" loading="lazy" decoding="async" data-alt="'+esc(a.cover)+'">':'')
+        +(isNew?'<span class="newtag">NEW</span>':'')+'</span>'
         +'<span class="an">'+esc(a.name)+'</span>'
         +'<span class="aq">'+a.ref.n+' TRACKS</span></button>';
     }).join('');

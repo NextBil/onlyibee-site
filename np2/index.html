@@ -554,6 +554,38 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
   .sq .no{font-size:7px;top:5px;left:5px;padding:3px 4px}
 }
 
+/* ---- LAPTOP ----
+   Six across a 944px column made every sleeve 150px and the name under it
+   13px: the covers were doing the shouting and the titles — the thing you
+   actually read — were the smallest type on the page, over five rows of
+   scrolling. Nine across makes the sleeve a thumbnail, the title legible, and
+   the whole record three rows. The media in WHAT IS NP2 was sized for a phone
+   and left most of the width empty, so it grows here too. */
+@media(min-width:900px){
+  /* .prose is a two-column grid — a 160px column for the exhibit and the rest
+     for the words. The rails were landing IN that 160px column, which is why
+     the footage came out 74px wide on a 1280px screen. They are rows of their
+     own now: footage across the top, the exhibit beside the words, the
+     photographs across the bottom. */
+  .prose #srail,.prose #prail{grid-column:1 / -1}
+  .grid{grid-template-columns:repeat(9,minmax(0,1fr));gap:10px}
+  .sq .tt{font-size:16px;line-height:1.25;-webkit-line-clamp:2;margin-top:7px}
+  .sq .dur{font-size:6.5px;letter-spacing:1.2px}
+  .sq.playing .tt{font-size:19px;-webkit-line-clamp:2}
+  .sq.playing .dur{font-size:8px}
+  /* the footage takes the room it is worth — two frames across the column */
+  .rail{gap:11px}
+  .rail .rc{flex:0 0 calc(50% - 6px)}
+  /* and the photographs stop being postage stamps */
+  .prail{gap:9px}
+  .prail .pc{flex:0 0 146px}
+  /* the moods are pictures of people: give them room to be seen */
+  .note{flex:0 0 190px;height:268px}
+  .note .ft{padding:36px 11px 11px}
+  .note .nm{font-size:7.5px}
+  .shot{max-width:300px}
+}
+
 /* THE BIGGER BOX — the same twenty-seven, large enough to read, over the page.
    Six-up is a map; this is the list. */
 /* BIGGER was a grey outline on a grey page and nobody was going to find it —
@@ -745,7 +777,7 @@ body.neon .batwrap svg{animation:none !important}
        one doing work. The strip carries what the prose used to spend a
        sentence explaining. -->
   <div class="sec">
-    <div class="sh"><span class="r">//</span> WHAT IS <span class="a">NP2</span>_</div>
+    <div class="sh"><span class="r">//</span> WHAT IS <span class="a">NP2</span></div>
     <div class="facts">
       <span><b>27</b>songs</span>
       <span><b>2</b>cities</span>
@@ -767,8 +799,6 @@ body.neon .batwrap svg{animation:none !important}
         <span class="sl" id="shotlb">the mark — "NEW PUNK", forearm</span>
         <span class="sgo">⤢ OPEN THE ARCHIVE</span>
       </button>
-      <!-- the photographs, thumbable — the whole folder is still the frame above -->
-      <div class="prail" id="prail" aria-label="the photographs"></div>
       <div class="ptxt">
         <p class="lede"><span class="a">26 songs for my 26 years.</span> Toronto and Paris.</p>
         <p>NOUVEAUX PUNK is how I turn my issues into art. The songs might sound
@@ -795,17 +825,19 @@ body.neon .batwrap svg{animation:none !important}
           <img src="../assets/img/np-statement/not-a-mixtape.jpg" loading="lazy" decoding="async"
                width="1000" height="1000"
                alt="Le projet aborde la depression, le vide existentiel, la solitude, l'amour, le vice, la luxure, l'addiction. Le but n'est pas d'en faire l'apologie mais d'apporter une voix decomplexee sur ces emotions qui nous traversent tous et dont beaucoup n'osent pas parler. Ce projet vise a apporter du reconfort a ceux qui se sentent incompris, seuls, sans espoirs. Nouveaux Punk c'est une voix qui te dit je te comprends, oui t'es perdu dans ta vie mais c'est pas grave prends ton temps, relax et vis putain. Philosophiquement ce projet se verrait nihiliste. C'est pas une mixtape, c'est un recueil d'emotions.">
-          <figcaption>C'EST PAS UNE MIXTAPE_</figcaption>
+          <figcaption>C'EST PAS UNE MIXTAPE</figcaption>
         </figure>
         <figure class="stmt">
           <img src="../assets/img/np-statement/why-nouveaux-punk.jpg" loading="lazy" decoding="async"
                width="1000" height="1000"
                alt="Pourquoi Nouveaux Punk ? Punk ca veut dire voyou en anglais. Pour vulgariser, un punk c'est un marginal, quelqu'un qui n'accorde aucune importance aux normes sociales, quelqu'un en quete de liberte et de sens personnel. A ne pas confondre avec l'anarchisme meme si ces ideologies peuvent se rejoindre. J'adhere totalement a cette philosophie mais je ne me reconnais pas forcement dans tout l'esthetisme lie a la culture punk. D'ou le Nouveaux.">
-          <figcaption>POURQUOI « NOUVEAUX PUNK »_</figcaption>
+          <figcaption>POURQUOI « NOUVEAUX PUNK »</figcaption>
         </figure>
         </div>
         <button class="more" type="button" data-prose>MORE ▾</button>
       </div>
+      <!-- the photographs, thumbable — the whole folder is still the frame above -->
+      <div class="prail" id="prail" aria-label="the photographs"></div>
     </div>
 
   </div>
@@ -827,15 +859,15 @@ body.neon .batwrap svg{animation:none !important}
   </div>
 
   <div class="sec" id="recsec">
-    <div class="ssub" id="recsub">27 songs — tap a sleeve to play it_</div>
+    <div class="ssub" id="recsub">27 songs — tap a sleeve to play it</div>
     <button class="zoombtn" id="zoombtn" type="button">☰ LIST</button>
     <div class="grid" id="tracks"></div>
   </div>
 
   <!-- surprises — the 26 T-SHIRTS, straight from the shop catalogue -->
   <div class="sec">
-    <div class="sh">THE <span class="a">SURPRISES</span>_</div>
-    <div class="ssub" id="teesub">twenty-six shirts, one per track — one of one, made to order_</div>
+    <div class="sh">THE <span class="a">SURPRISES</span></div>
+    <div class="ssub" id="teesub">twenty-six shirts, one per track — one of one, made to order</div>
     <div id="teestate"></div>
     <div class="tees" id="tees"></div>
   </div>
@@ -887,7 +919,7 @@ body.neon .batwrap svg{animation:none !important}
 <div class="lib" id="lib" hidden>
   <div class="libbar">
     <button id="libx">◀ CLOSE</button>
-    <b>THE PROJECT ARCHIVE_</b>
+    <b>THE PROJECT ARCHIVE</b>
     <span class="c" id="libc"></span>
   </div>
   <div class="libgrid" id="libgrid"></div>
@@ -900,7 +932,7 @@ body.neon .batwrap svg{animation:none !important}
 <div class="allbox" id="allbox" hidden>
   <div class="zoombar">
     <button id="allx">◀ CLOSE</button>
-    <b>HOW TO LISTEN_</b>
+    <b>HOW TO LISTEN</b>
     <span class="c" id="allc"></span>
   </div>
   <div class="allgrid" id="allgrid"></div>
@@ -909,7 +941,7 @@ body.neon .batwrap svg{animation:none !important}
 <div class="zoom" id="zoom" hidden>
   <div class="zoombar">
     <button id="zoomx">◀ CLOSE</button>
-    <b>THE RECORD_</b>
+    <b>THE RECORD</b>
     <span class="c" id="zoomc"></span>
   </div>
   <div class="zoomlist" id="zoomlist"></div>
@@ -1039,8 +1071,8 @@ body.neon .batwrap svg{animation:none !important}
     });
     var rs=document.getElementById("recsub");
     if(rs) rs.innerHTML = armed
-      ? 'QUEUED: <span class="a">'+armed.t+'</span> — '+armed.list.length+' songs_'
-      : NP2.length+' songs — tap a sleeve to play it_';
+      ? 'QUEUED: <span class="a">'+armed.t+'</span> — '+armed.list.length+' songs'
+      : NP2.length+' songs — tap a sleeve to play it';
   }
   /* one render per state, keyed out of its green screen and trimmed to him */
   var NOTEIMG="../assets/img/np2/notice/";
@@ -1144,16 +1176,16 @@ body.neon .batwrap svg{animation:none !important}
     var P=window.IBEE_PRODUCTS;
     if(!P||!P.products){
       if(tries<40){ setTimeout(function(){ buildTees(tries+1); },200); return; }
-      teeSub.textContent="the 26 t-shirts — open the drop to see them_";
+      teeSub.textContent="the 26 t-shirts — open the drop to see them";
       return;
     }
     var folder=(P.folders||[]).filter(function(f){ return f.id==="np2-26"; })[0]||{};
     var items=P.products.filter(function(p){ return p.folder==="np2-26"; })
                         .sort(function(a,b){ return String(a.no||"").localeCompare(String(b.no||"")); });
-    if(!items.length){ teeSub.textContent="the 26 t-shirts — open the drop to see them_"; return; }
+    if(!items.length){ teeSub.textContent="the 26 t-shirts — open the drop to see them"; return; }
 
     /* "tap a piece" was true of the old 26-tile grid; there is one folder now */
-    if(folder.sub) teeSub.textContent=folder.sub.toLowerCase()+" — open the folder_";
+    if(folder.sub) teeSub.textContent=folder.sub.toLowerCase()+" — open the folder";
     var st={live:"\u25a3 THE FOLDER IS OPEN",soon:"\u25a3 OPENS SOON",closed:"\u25a3 CLOSED FOR NOW"}[folder.state];
     teeState.innerHTML = st ? '<span class="teestrip">'+esc(st)+'</span>' : "";
 
@@ -1197,7 +1229,7 @@ body.neon .batwrap svg{animation:none !important}
      separate room. `vs` is a full path; `v` is still relative to VID. */
   var ARCHIVE=[
     {vs:"../assets/video/np2-film.mp4", po:"../assets/video/np2-film.jpg",
-     ex:"THE FILM", lb:"the film", big:true,
+     ex:"TRAILER", lb:"trailer", big:true,
      songs:["np2-06-write-a-song.mp3","np2-02-okay.mp3"]},
     {vs:"../assets/video/np2-deranger.mp4", po:"../assets/video/np2-deranger.jpg",
      ex:"SESSION", lb:"deranger", big:true, songs:["np2-21-deranger.mp3"]},
@@ -1743,8 +1775,8 @@ body.neon .batwrap svg{animation:none !important}
   var taps=0,tapT=null;
   document.getElementById("coverwrap").addEventListener("click",function(){
     taps++;clearTimeout(tapT);tapT=setTimeout(function(){taps=0;},2200);
-    if(taps===5){taps=0;toast("★ FRAGMENT FOUND_<br>the bats were always on the shirt_<br>chapter one knows the rest_",5200);}
-    else if(taps===3){toast("something is still sealed under the plastic_");}
+    if(taps===5){taps=0;toast("★ FRAGMENT FOUND<br>the bats were always on the shirt<br>chapter one knows the rest",5200);}
+    else if(taps===3){toast("something is still sealed under the plastic");}
   });
 })();
 </script>
