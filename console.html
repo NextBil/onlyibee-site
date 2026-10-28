@@ -263,6 +263,20 @@
     background:transparent;color:var(--dim);border:1px solid var(--border)}
   #englock .egclose:hover{color:var(--red);border-color:#3a1414}
   .engnav{display:flex;align-items:center;flex-wrap:wrap;gap:8px;position:relative;z-index:40}
+  /* ---- FULLSCREEN ----
+     The universe is the one screen worth giving the whole display to, and it
+     was living in a box 235px shorter than the window. */
+  #unifs{flex:none;width:34px;height:34px;cursor:pointer;background:#0b0c0e;
+    border:1px solid var(--border);color:var(--dim);font-size:15px;line-height:1;
+    display:flex;align-items:center;justify-content:center}
+  #unifs:hover{border-color:var(--acid);color:var(--acid)}
+  /* Real fullscreen when the browser allows it. iOS Safari cannot put a <div>
+     fullscreen at all, and a page inside a frame can be refused, so FAUX fills
+     the frame instead — the same fallback the TV needed. */
+  #engroot:fullscreen,#engroot:-webkit-full-screen{height:100%;min-height:0;border:0}
+  #engroot.faux{position:fixed;inset:0;z-index:99990;height:auto;min-height:0;border:0;border-radius:0}
+  body.unifaux{overflow:hidden}
+  body.unifaux .engnav{position:fixed;top:calc(8px + env(safe-area-inset-top));left:10px;right:10px;z-index:99991}
   /* the way back out of a galaxy — neon so it is findable over the starfield */
   .engnav .back{border-color:var(--acid);color:var(--acid);
     box-shadow:0 0 10px rgba(182,255,0,.20),inset 0 0 8px rgba(182,255,0,.06)}
@@ -759,6 +773,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     <section class="screen" id="music">
       <div class="engnav">
         <span class="back" id="topgal" title="back to the galaxies" style="display:none">◀ GALAXIES</span>
+        <button id="unifs" type="button" title="fullscreen" aria-label="Fullscreen">⛶</button>
         <div id="uniseek">
           <input id="usq" type="text" placeholder="⌕ SEARCH — RECORD / ALBUM / VIBE_" autocomplete="off" spellcheck="false">
           <div id="usr"></div>
@@ -1534,6 +1549,50 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       stars=null;galaxyGeo=null;
     }
     window.addEventListener("resize",resize);
+
+    /* ---------- FULLSCREEN ----------
+       Three ways it can go, in order: the real API; the same API prefixed; and
+       if both are refused — iOS cannot fullscreen a <div>, and a framed page
+       can be turned down outright — the engine fills the frame itself. The
+       button always does something.
+       The canvas is sized from its box, so every transition has to re-run
+       resize() once the new box exists: a rAF is enough. */
+    (function(){
+      var btn=$("#unifs"); if(!btn) return;
+      function fsEl(){ return document.fullscreenElement||document.webkitFullscreenElement||null; }
+      function faux(){ return root.classList.contains("faux"); }
+      function paint(){ btn.textContent=(fsEl()||faux())?"\u2715":"\u26f6";
+        btn.title=(fsEl()||faux())?"leave fullscreen":"fullscreen"; }
+      function settle(){ requestAnimationFrame(function(){ resize(); paint(); }); }
+      function setFaux(on){
+        root.classList.toggle("faux",on);
+        document.body.classList.toggle("unifaux",on);
+        settle();
+      }
+      btn.addEventListener("click",function(e){
+        e.preventDefault(); e.stopPropagation();
+        if(faux()){ setFaux(false); return; }
+        if(fsEl()){
+          try{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(err){}
+          return;
+        }
+        var req=root.requestFullscreen||root.webkitRequestFullscreen;
+        if(req){
+          try{
+            var pr=req.call(root);
+            if(pr&&pr.catch) pr.catch(function(){ setFaux(true); });
+            return;
+          }catch(err){}
+        }
+        setFaux(true);
+      });
+      ["fullscreenchange","webkitfullscreenchange"].forEach(function(ev){
+        document.addEventListener(ev,settle);
+      });
+      /* Escape leaves the faux one; the real one the browser handles itself */
+      document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&faux()) setFaux(false); });
+      paint();
+    })();
 
     /* ---------- starfield ---------- */
     function ensureStars(w,h){
