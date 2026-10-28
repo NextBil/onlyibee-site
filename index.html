@@ -169,14 +169,27 @@
     align-items:center;gap:9px;max-width:calc(100vw - 10px);margin:0 auto}
   #toprow #bar{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
   #toprow #np2strip{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
-  /* narrow: the sleeve and the arrow carry it — there is no room for the name
-     beside a five-icon pill on a 375px screen */
+  /* these two only exist on a phone, where the button becomes a sleeve */
+  #np2strip .sq,#np2strip .snew{display:none}
+  /* NARROW: THE BUTTON IS THE SLEEVE.
+     There is no room for a name beside a five-icon pill on a 375px screen, and
+     a 28px thumbnail next to an arrow read as a stray icon. It is a square
+     record instead — the cover at the pill's own height, NP2 across the foot
+     of it, and the sticker you would find on the shrink-wrap. */
   @media(max-width:760px){
-    #toprow{gap:6px}
-    #toprow #np2strip{padding:4px 7px 4px 4px;gap:5px}
-    #toprow #np2strip .st{display:none}
-    #toprow #np2strip .sv{width:28px;height:28px}
-    #toprow #np2strip .sa{font-size:11px}
+    #toprow{gap:7px}
+    #toprow #np2strip{position:relative;width:46px;height:46px;flex:none;
+      padding:0;gap:0;border-radius:10px;overflow:visible}
+    #toprow #np2strip .st,#toprow #np2strip .sa{display:none}
+    #toprow #np2strip .sv{width:100%;height:100%;border-radius:8px}
+    #toprow #np2strip .sq{display:block;position:absolute;left:0;right:0;bottom:0;z-index:2;
+      font-family:var(--px);font-size:7px;letter-spacing:.6px;text-align:center;
+      color:#fff;padding:3px 0 4px;border-radius:0 0 8px 8px;
+      background:linear-gradient(180deg,transparent,rgba(6,3,5,.92) 55%)}
+    #toprow #np2strip .snew{display:block;position:absolute;top:-7px;left:-9px;z-index:3;
+      font-family:var(--px);font-size:7px;line-height:1;letter-spacing:.5px;
+      color:#12030a;background:#ff1f6f;padding:4px 5px;transform:rotate(-12deg);
+      box-shadow:0 2px 8px rgba(0,0,0,.6)}
   }
   @media (orientation:landscape) and (max-height:600px){
     #toprow #bar,#toprow #np2strip{margin:calc(5px + env(safe-area-inset-top)) 0 5px}
@@ -1019,6 +1032,8 @@
       <i>NOUVEAUX PUNK 2</i>
     </span>
     <span class="sa">▸</span>
+    <span class="sq">NP2</span>
+    <span class="snew">NEW</span>
   </a>
   </div>
 
