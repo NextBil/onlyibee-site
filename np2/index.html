@@ -575,7 +575,9 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
   .sq.playing .dur{font-size:8px}
   /* the footage takes the room it is worth — two frames across the column */
   .rail{gap:11px}
-  .rail .rc{flex:0 0 calc(50% - 6px)}
+  /* the footage keeps the frame size it grew to — a fixed basis, so it does
+     not shrink back when the column does */
+  .rail .rc{flex:0 0 410px;max-width:100%}
   /* and the photographs stop being postage stamps */
   .prail{gap:9px}
   .prail .pc{flex:0 0 146px}
@@ -585,21 +587,6 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
   .note .nm{font-size:7.5px}
   .shot{max-width:300px}
 }
-
-/* ---- WIDE LAPTOP ----
-   The column was pinned at 980px, so a 1440px screen spent nearly a third of
-   itself on empty gutters while the footage row could only show two frames.
-   The page takes the width now; only the PROSE is held back, because a line of
-   text 1300px wide is unreadable however much room there is for it. */
-@media(min-width:1180px){
-  main{max-width:1360px}
-  .prose .ptxt{max-width:74ch}
-  .rail .rc{flex:0 0 calc(33.333% - 8px)}   /* three frames, each bigger than the old two */
-  .prail .pc{flex:0 0 168px}
-  .grid{grid-template-columns:repeat(12,minmax(0,1fr))}
-  .note{flex:0 0 206px;height:290px}
-}
-
 
 /* THE BIGGER BOX — the same twenty-seven, large enough to read, over the page.
    Six-up is a map; this is the list. */

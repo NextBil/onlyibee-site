@@ -103,8 +103,11 @@
     + '.hmshots a:hover{border-color:var(--acid,#b6ff00)}'
     /* ---- SCAN: the two demo loops beside the three numbered steps. On a phone
            the loops go on top and the steps stack underneath, full width. ---- */
-    + '.hmscan{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:18px;'
-    +   'align-items:start;max-width:760px;margin-bottom:22px}'
+    /* 760px was the cap from when the steps were the only thing in the right
+       column — three short lines need no more. With the patch stills there too
+       it just left the rest of a laptop empty. */
+    + '.hmscan{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:18px;'
+    +   'align-items:start;max-width:1100px;margin-bottom:22px}'
     + '.hmdemos{display:flex;flex-direction:column;gap:12px}'
     + '.hmscan .demo{border:2px solid var(--border,#2a2a2a);background:#0e0e0e;overflow:hidden}'
     + '.hmscan .demo video{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;background:#000}'
@@ -115,6 +118,11 @@
     + '.hmscan .demo .tag i{width:6px;height:6px;border-radius:50%;background:var(--acid,#b6ff00);'
     +   'box-shadow:0 0 7px var(--acid,#b6ff00);flex:none}'
     + '.hmsteps{display:flex;flex-direction:column;gap:8px}'
+    /* The three patch stills used to run full width UNDER the whole block,
+       while the column beside the demos — which is as tall as a 9:16 video —
+       held three short lines of text and nothing else. They share that column
+       now, so the space next to TAP TO OPEN is doing something. */
+    + '.hmside{display:flex;flex-direction:column;gap:14px;min-width:0}'
     + '.hmstep{display:flex;gap:10px;align-items:baseline;border:1px solid var(--border,#2a2a2a);'
     +   'background:#0a0a0a;padding:10px 12px}'
     + '.hmstep .n{font-family:var(--px),monospace;font-size:9px;color:var(--gold,#ffd60a);'
@@ -123,7 +131,8 @@
     +   'color:var(--acid,#b6ff00);margin-bottom:4px;line-height:1.6;font-weight:normal;letter-spacing:1px}'
     + '.hmstep span{color:var(--dim,#7a7a7a);font-size:15px;line-height:1.3;display:block}'
     /* ---- what the patch looks like ---- */
-    + '.hmpatch{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;max-width:760px}'
+    + '.hmpatch{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}'
+    + '.hmside .hmpatch{max-width:none}'
     + '.hmpatch figure{border:2px solid var(--border,#2a2a2a);background:#0e0e0e;margin:0}'
     + '.hmpatch img{width:100%;display:block;aspect-ratio:1/1;object-fit:cover;background:#0a0a0c}'
     + '.hmpatch figcaption{padding:8px 10px;border-top:2px solid var(--border,#2a2a2a);'
@@ -179,7 +188,7 @@
          + '<span class="ph">'+still(IMG+SHOTS[s][0], SHOTS[s][1]+" — "+SHOTS[s][2])+'</span>'
          + '<span class="cn">'+e2(SHOTS[s][1])+'<span class="rr">'+e2(SHOTS[s][2])+'</span></span></a>';
     }
-    return h + '</div></section>';
+    return h + '</div></div></div></section>';
   }
 
   function scanHTML(){
@@ -192,13 +201,13 @@
       +     '<div class="demo">'+loopVid(SCAN+"scan-monster-loop.mp4", SCAN+"scan-monster-poster.jpg")
       +       '<div class="tag"><i></i>TAP TO OPEN_</div></div>'
       +   '</div>'
-      +   '<div class="hmsteps">';
+      +   '<div class="hmside"><div class="hmsteps">';
 
     for (var i=0;i<STEPS.length;i++){
       h += '<div class="hmstep"><span class="n">'+STEPS[i][0]+'</span>'
          + '<span><b>'+e2(STEPS[i][1])+'</b><span>'+e2(STEPS[i][2])+'</span></span></div>';
     }
-    h += '</div></div><div class="hmpatch">';
+    h += '</div><div class="hmpatch">';
 
     for (var p=0;p<PATCHES.length;p++){
       h += '<figure>'+still(SCAN+PATCHES[p][0], "the monster patch "+PATCHES[p][1].toLowerCase())
