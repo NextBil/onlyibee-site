@@ -160,6 +160,20 @@
   #acct .acctcash .cashew{width:16px;height:16px}
 
   /* ---- content ---- */
+  /* The nav and the record button stack, which is right when there is height
+     to spend. In LANDSCAPE on a phone there is not: two stacked bars ate a
+     third of the screen before the page began. There they share one line. */
+  #toprow{flex:none;display:flex;flex-direction:column;align-items:center}
+  @media (orientation:landscape) and (max-height:600px){
+    #toprow{flex-direction:row;justify-content:center;align-items:center;gap:9px;
+      margin:calc(5px + env(safe-area-inset-top)) auto 5px;max-width:calc(100vw - 12px)}
+    #toprow #bar{margin:0}
+    #toprow #np2strip{margin:0;padding:4px 10px 4px 4px}
+    #toprow #np2strip .sv{width:30px;height:30px}
+    #toprow #np2strip .st b{font-size:6px}
+    #toprow #np2strip .st i{font-size:8.5px}
+  }
+
   /* ---- THE RECORD BUTTON ----
      This was a full-width band with the clip washed out behind the words, which
      meant the footage was never really visible — it was a texture. It is a
@@ -985,11 +999,11 @@
   <p><a href="about-only-ibee/">About ONLY IBEE</a> · <a href="console.html">Enter the console</a> · <a href="arcade/">Rooms</a> · <a href="utopie/">UTOPIE</a></p>
 </div>
 <div id="app">
+  <div id="toprow">
   <div id="bar"><div id="nav"></div><div id="acct"></div></div>
 
-  <!-- THE RECORD STRIP — the sessions behind NOUVEAUX PUNK 2, running under the
-       nav on every page but the record's own. One <video>, swapped between a
-       handful of 7-second silent loops; see the strip script for why it is one. -->
+  <!-- THE RECORD BUTTON — the sleeve, the name and a way in, on every page but
+       the record's own. It shares the nav's line in landscape. -->
   <a id="np2strip" href="np2/" aria-label="Discover Nouveaux Punk 2">
     <span class="sv"><img src="assets/img/thumb/nouveaux-punk-2.jpg" alt="" width="128" height="128" decoding="async"></span>
     <span class="st">
@@ -998,6 +1012,7 @@
     </span>
     <span class="sa">▸</span>
   </a>
+  </div>
 
   <div id="stage">
     <iframe id="frame" title="ONLY IBEE" allow="autoplay; fullscreen"></iframe>

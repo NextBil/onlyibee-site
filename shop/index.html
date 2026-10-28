@@ -29,6 +29,9 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
   border-bottom:2px solid var(--border);font-family:var(--px);font-size:10px;position:relative;z-index:50}
 header a{color:var(--acid);text-decoration:none}header a .r{color:var(--red)}header span{color:var(--dim);font-size:8px}
 main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-index:2;animation:crtin .3s ease-out}
+/* a 1440px screen was giving a third of itself to empty gutters; the shelf is a
+   grid of sleeves and simply fits more of them when it is allowed the width */
+@media(min-width:1180px){ main{max-width:1360px} .fvid{height:clamp(240px,24vw,400px)} }
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
 .crumbs{font-family:var(--px);font-size:8px;margin-bottom:20px}
 .crumbs a{color:var(--dim);text-decoration:none}.crumbs a:hover{color:var(--acid)}
