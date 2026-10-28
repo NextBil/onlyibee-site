@@ -266,16 +266,39 @@
   /* ---- FULLSCREEN ----
      The universe is the one screen worth giving the whole display to, and it
      was living in a box 235px shorter than the window. */
-  #unifs{flex:none;width:34px;height:34px;cursor:pointer;background:#0b0c0e;
-    border:1px solid var(--border);color:var(--dim);font-size:15px;line-height:1;
-    display:flex;align-items:center;justify-content:center}
-  #unifs:hover{border-color:var(--acid);color:var(--acid)}
   #unixit{position:absolute;z-index:60;right:14px;top:calc(14px + env(safe-area-inset-top));
     font-family:var(--px);font-size:9px;letter-spacing:1px;cursor:pointer;
     background:rgba(8,8,10,.86);border:1px solid var(--acid);color:var(--acid);
     padding:10px 12px;backdrop-filter:blur(3px)}
   #unixit:hover{background:var(--acid);color:#000}
   #unixit[hidden]{display:none}
+  #unibare{position:absolute;z-index:60;right:14px;top:calc(56px + env(safe-area-inset-top));
+    font-family:var(--px);font-size:8px;letter-spacing:1px;cursor:pointer;
+    background:rgba(8,8,10,.86);border:1px solid var(--border);color:var(--dim);
+    padding:9px 11px;backdrop-filter:blur(3px)}
+  #unibare:hover{border-color:var(--acid);color:var(--acid)}
+  #unibare[hidden]{display:none}
+
+  /* ---- BARE: the galaxies and nothing else ----
+     Everything over the canvas goes except the way out and the way back. The
+     search, the record's cover and title, the play bar, the toasts and the
+     fullscreen chip are all chrome; the universe is the thing. */
+  body.unibare #uniseek,body.unibare .eng-hud,body.unibare #pbar,
+  body.unibare #pbmini,body.unibare #engtoast{display:none}
+  /* `body.musicfit #fstog{display:block}` lives further down the sheet, and at
+     equal specificity the later rule wins — so hiding the chip by the same
+     weight did nothing. One extra class outweighs it without !important. */
+  body.unibare.musicfit #fstog,body.unibare #fstog{display:none}
+  /* .engnav stays — it carries ◀ GALAXIES, which is the way back */
+  body.unibare .engnav{background:transparent;border:0}
+
+  /* In the fallback the nav row is PINNED over the engine, so the HUD beneath
+     it — the record's cover and title — was sitting behind the search box.
+     The row's height is not fixed (◀ GALAXIES appears inside a galaxy and it
+     wraps on a phone), so a hard number here only ever clears it by luck: JS
+     measures the row and sets --navh. */
+  body.unifaux .eng-hud{padding-top:calc(var(--navh,52px) + 14px)}
+  body.unifaux.unibare .eng-hud{padding-top:12px}
   /* Real fullscreen when the browser allows it. iOS Safari cannot put a <div>
      fullscreen at all, and a page inside a frame can be refused, so FAUX fills
      the frame instead — the same fallback the TV needed. */
@@ -782,7 +805,6 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     <section class="screen" id="music">
       <div class="engnav">
         <span class="back" id="topgal" title="back to the galaxies" style="display:none">◀ GALAXIES</span>
-        <button id="unifs" type="button" title="fullscreen" aria-label="Fullscreen">⛶</button>
         <div id="uniseek">
           <input id="usq" type="text" placeholder="⌕ SEARCH — RECORD / ALBUM / VIBE_" autocomplete="off" spellcheck="false">
           <div id="usr"></div>
@@ -802,6 +824,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
         <!-- the way out of fullscreen: the shell's nav is gone while this is on,
              so this is the only way back and it sits above everything -->
         <button id="unixit" type="button" hidden aria-label="Leave fullscreen">✕ CLOSE</button>
+        <button id="unibare" type="button" hidden aria-label="Hide the controls">◰ HIDE UI</button>
         <!-- THE RECORD'S PAGE — restored from console-v2 (2026-10-22).
              This is the ORIGINAL design, not a rebuild: a gradient sheet that
              fades up out of the universe (no hard panel edge), a 3-up stat grid,
@@ -1563,66 +1586,86 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
     window.addEventListener("resize",resize);
 
     /* ---------- FULLSCREEN ----------
-       Three ways it can go, in order: the real API; the same API prefixed; and
-       if both are refused — iOS cannot fullscreen a <div>, and a framed page
-       can be turned down outright — the engine fills the frame itself. The
-       button always does something.
-       The canvas is sized from its box, so every transition has to re-run
-       resize() once the new box exists: a rAF is enough. */
+       ONE control drives this: the #fstog chip at the foot of the page, which
+       already existed for the engine. (I briefly added a second button here and
+       the screen ended up with two ⛶ and two ✕ — this is the one.)
+       Three ways it can go, in order: the real API; the prefixed one; and, if
+       both are refused — iOS cannot fullscreen anything but a video, and a
+       framed page can be turned down — the engine fills the frame itself.
+       Either way the shell is asked to put its nav and player away. */
     (function(){
-      var btn=$("#unifs"); if(!btn) return;
+      var xit=$("#unixit"), bare=$("#unibare");
       function fsEl(){ return document.fullscreenElement||document.webkitFullscreenElement||null; }
-      function faux(){ return root.classList.contains("faux"); }
-      function paint(){ btn.textContent=(fsEl()||faux())?"\u2715":"\u26f6";
-        btn.title=(fsEl()||faux())?"leave fullscreen":"fullscreen"; }
-      function settle(){ requestAnimationFrame(function(){ resize(); paint(); }); }
-      var xit=$("#unixit");
-      /* the nav and the player belong to the shell, so only the shell can hide
-         them — a page in a frame cannot reach over and do it itself */
+      function faux(){ return document.body.classList.contains("unifaux"); }
+      function isOn(){ return !!fsEl() || faux(); }
+      var nav=document.querySelector(".engnav");
+      /* The pinned row's height is not constant — ◀ GALAXIES appears when you
+         enter a galaxy and the row wraps on a phone — and it changes while
+         fullscreen is already on, long after any transition. Measuring it once
+         left the record's cover 11px behind the search box. Watch it instead. */
+      function measureNav(){
+        try{ if(nav) document.documentElement.style.setProperty("--navh",
+          Math.round(nav.getBoundingClientRect().height)+"px"); }catch(e){}
+      }
+      try{ if(window.ResizeObserver && nav) new ResizeObserver(measureNav).observe(nav); }catch(e){}
+      function settle(){ requestAnimationFrame(function(){ measureNav(); resize(); }); }
       function tellShell(on){
         try{ if(window.top!==window && window.top.__ibeeImmersive) window.top.__ibeeImmersive(on); }catch(e){}
       }
-      function immersive(on){
+      function paint(){
+        var on=isOn();
+        if(xit)  xit.hidden=!on;
+        if(bare) bare.hidden=!on;
+        if(!on) document.body.classList.remove("unibare");   /* never leave it bare */
         tellShell(on);
-        if(xit) xit.hidden=!on;
         settle();
+        try{ document.dispatchEvent(new CustomEvent("ibee-uni-full")); }catch(e){}
       }
       function setFaux(on){
         root.classList.toggle("faux",on);
         document.body.classList.toggle("unifaux",on);
-        immersive(on);
+        paint();
       }
-      btn.addEventListener("click",function(e){
-        e.preventDefault(); e.stopPropagation();
-        if(faux()){ setFaux(false); return; }
-        if(fsEl()){
-          try{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(err){}
+      /* the one entry point — the chip calls this */
+      window.__uniFull=function(want){
+        if(!want){
+          if(fsEl()){ try{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(e){} }
+          if(faux()) setFaux(false);
           return;
         }
-        var req=root.requestFullscreen||root.webkitRequestFullscreen;
+        var d=document.documentElement;
+        var req=d.requestFullscreen||d.webkitRequestFullscreen;
         if(req){
           try{
-            var pr=req.call(root);
+            var pr=req.call(d);
             if(pr&&pr.catch) pr.catch(function(){ setFaux(true); });
+            else setTimeout(function(){ if(!fsEl()) setFaux(true); },300);
             return;
-          }catch(err){}
+          }catch(e){}
         }
         setFaux(true);
-      });
+      };
       ["fullscreenchange","webkitfullscreenchange"].forEach(function(ev){
-        document.addEventListener(ev,function(){
-          /* leaving by the browser's own Escape fires this too, which is how the
-             shell comes back when nothing of ours was clicked */
-          immersive(!!fsEl());
-        });
+        document.addEventListener(ev,paint);
       });
       if(xit) xit.addEventListener("click",function(e){
-        e.preventDefault(); e.stopPropagation();
-        if(fsEl()){ try{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(err){} }
-        else setFaux(false);
+        e.preventDefault(); e.stopPropagation(); window.__uniFull(false);
       });
-      /* Escape leaves the faux one; the real one the browser handles itself */
-      document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&faux()) setFaux(false); });
+      /* STRIP IT BACK — everything goes but the way out and the way back.
+         The engine draws the galaxies on a canvas; the chrome over it is what
+         gets in the way of actually looking at them. */
+      if(bare) bare.addEventListener("click",function(e){
+        e.preventDefault(); e.stopPropagation();
+        var on=document.body.classList.toggle("unibare");
+        bare.textContent=on?"◱ SHOW UI":"◰ HIDE UI";
+        bare.title=on?"show the controls":"hide everything but the way out";
+        settle();
+      });
+      document.addEventListener("keydown",function(e){
+        if(e.key!=="Escape") return;
+        if(document.body.classList.contains("unibare")){ bare.click(); return; }
+        if(faux()) setFaux(false);
+      });
       paint();
     })();
 
@@ -2733,18 +2776,26 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
 <script>
 /* fullscreen chip — identical to the one in the transit/terrarium/aqua rooms.
    Hides itself where the API is missing (iPhone Safari refuses it on non-video). */
+/* THE FULLSCREEN CHIP — one control, not two. It used to hide itself wherever
+   the API was missing (iPhone Safari refuses it on anything but a video), which
+   left the phone with no way to fill the screen at all. It falls back to filling
+   the frame instead, and either way it asks the shell to put its nav and player
+   away. The engine's own window.__uniFull does the work. */
 (function(){
-  var b=document.getElementById('fstog'),d=document.documentElement;
-  var req=d.requestFullscreen||d.webkitRequestFullscreen;
-  if(!b)return; if(!req){b.style.display='none';return}
-  function on(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
-  function upd(){b.classList.toggle('on',on());b.textContent=on()?'✕':'⛶';b.title=on()?'exit fullscreen':'fullscreen'}
+  var b=document.getElementById('fstog');
+  if(!b) return;
+  function on(){ return !!(document.fullscreenElement||document.webkitFullscreenElement)
+                     || document.body.classList.contains('unifaux'); }
+  function upd(){ b.classList.toggle('on',on()); b.textContent=on()?'✕':'⛶';
+    b.title=on()?'exit fullscreen':'fullscreen'; }
   b.addEventListener('click',function(){
-    if(on()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
-    else{try{req.call(d)}catch(e){}}
+    if(window.__uniFull) window.__uniFull(!on());
+    setTimeout(upd,60);
   });
   document.addEventListener('fullscreenchange',upd);
   document.addEventListener('webkitfullscreenchange',upd);
+  document.addEventListener('ibee-uni-full',upd);
+  upd();
 })();
 </script>
 </body>
