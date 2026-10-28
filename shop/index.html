@@ -32,15 +32,19 @@ main{max-width:1000px;margin:0 auto;padding:24px 16px 70px;position:relative;z-i
 @keyframes crtin{0%{transform:scaleY(.02);filter:brightness(3)}60%{transform:scaleY(1.02)}100%{transform:scaleY(1)}}
 .crumbs{font-family:var(--px);font-size:8px;margin-bottom:20px}
 .crumbs a{color:var(--dim);text-decoration:none}.crumbs a:hover{color:var(--acid)}
-/* the drop's own film, over its title */
-.fvid{position:relative;margin:0 0 16px;border:2px solid var(--border);overflow:hidden;
-  background:#0a0a0a;aspect-ratio:16/9;max-height:38vh}
+/* the drop's own film, over its title.
+   NOT aspect-ratio + max-height: with both, the height cap wins and the box
+   shrinks its WIDTH to keep the ratio — the banner came out 328px wide in a
+   968px column. An explicit height and a full-width box lets the clip cover
+   the whole column, which is what a banner is for. */
+.fvid{position:relative;margin:0 0 18px;border:2px solid var(--border);overflow:hidden;
+  background:#0a0a0a;width:100%;height:clamp(180px,27vw,330px)}
 .fvid video{width:100%;height:100%;object-fit:cover;display:block}
 /* the same tube glass the TV and the boot wear, so the shop belongs to the set */
 .fvid::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),
     radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.5))}
-@media(max-width:620px){ .fvid{max-height:28vh;margin-bottom:13px} }
+@media(max-width:620px){ .fvid{height:clamp(150px,46vw,240px);margin-bottom:13px} }
 @media(prefers-reduced-motion:reduce){ .fvid video{display:none} }
 .fhead{border:2px solid var(--border);background:linear-gradient(180deg,#101010,#0b0b0b);padding:20px;margin-bottom:24px}
 .fhead.r-leg{border-color:#4d6600}.fhead.r-sdr{border-color:#5c4b2c}
