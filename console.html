@@ -652,7 +652,14 @@
   }
 
   /* the ICS teaser strip above the inventory — a banner, deliberately not a hero */
-  .shopreel{max-width:760px;margin:2px 0 20px;border:2px solid var(--border);overflow:hidden;
+  /* ---- THE SHOP SCREEN SITS IN THE MIDDLE ----
+     The screen itself was centred, but the blocks inside it are capped
+     narrower than the column (the reel at 760, the prose at 640, the drop card
+     at its own width) and each one hugged the left edge. On a laptop that left
+     a ragged band of nothing down the right of INVENTORY.EXE and the page read
+     as pushed aside. They centre in the column now. */
+  #shop > .shopreel,#shop > .prose{margin-inline:auto}
+  .shopreel{max-width:760px;margin:2px auto 20px;border:2px solid var(--border);overflow:hidden;
     background:#000;box-shadow:0 0 22px rgba(182,255,0,.10)}
   .shopreel video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
   @media(max-width:600px){ .shopreel{margin-bottom:14px} }
@@ -925,7 +932,7 @@ if(/^(menu|music|utopie|lazone|ics|shop|about)$/.test(_h))
       </div>
       <div class="grid" id="shopgrid"></div>
       <!-- ICS promo: the clothing IS the chess set — meet the characters -->
-      <a href="#ics" style="display:block;position:relative;margin:18px 0 6px;border:2px solid #2a2a2a;border-radius:16px;overflow:hidden;text-decoration:none;background:#0a0a0a;aspect-ratio:16/9;max-height:230px">
+      <a href="#ics" style="display:block;position:relative;margin:18px auto 6px;width:100%;max-width:760px;height:230px;border:2px solid #2a2a2a;border-radius:16px;overflow:hidden;text-decoration:none;background:#0a0a0a">
         <video muted loop playsinline autoplay preload="auto" poster="assets/ics-banner-poster.jpg" src="assets/ics-banner.mp4" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9"></video>
         <span style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.75))"></span>
         <span style="position:absolute;left:16px;right:16px;bottom:14px">

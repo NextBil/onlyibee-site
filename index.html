@@ -160,18 +160,26 @@
   #acct .acctcash .cashew{width:16px;height:16px}
 
   /* ---- content ---- */
-  /* The nav and the record button stack, which is right when there is height
-     to spend. In LANDSCAPE on a phone there is not: two stacked bars ate a
-     third of the screen before the page began. There they share one line. */
-  #toprow{flex:none;display:flex;flex-direction:column;align-items:center}
+  /* THE RECORD BUTTON SHARES THE NAV'S LINE, ALWAYS.
+     Stacked under the pill it cost a second bar's worth of height on every
+     page — the most expensive thing on screen for something that is an
+     advert. One row now, and where the row cannot hold the name the button
+     keeps only the sleeve and the arrow. */
+  #toprow{flex:none;display:flex;flex-direction:row;justify-content:center;
+    align-items:center;gap:9px;max-width:calc(100vw - 10px);margin:0 auto}
+  #toprow #bar{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
+  #toprow #np2strip{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
+  /* narrow: the sleeve and the arrow carry it — there is no room for the name
+     beside a five-icon pill on a 375px screen */
+  @media(max-width:760px){
+    #toprow{gap:6px}
+    #toprow #np2strip{padding:4px 7px 4px 4px;gap:5px}
+    #toprow #np2strip .st{display:none}
+    #toprow #np2strip .sv{width:28px;height:28px}
+    #toprow #np2strip .sa{font-size:11px}
+  }
   @media (orientation:landscape) and (max-height:600px){
-    #toprow{flex-direction:row;justify-content:center;align-items:center;gap:9px;
-      margin:calc(5px + env(safe-area-inset-top)) auto 5px;max-width:calc(100vw - 12px)}
-    #toprow #bar{margin:0}
-    #toprow #np2strip{margin:0;padding:4px 10px 4px 4px}
-    #toprow #np2strip .sv{width:30px;height:30px}
-    #toprow #np2strip .st b{font-size:6px}
-    #toprow #np2strip .st i{font-size:8.5px}
+    #toprow #bar,#toprow #np2strip{margin:calc(5px + env(safe-area-inset-top)) 0 5px}
   }
 
   /* ---- THE RECORD BUTTON ----
