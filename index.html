@@ -169,63 +169,35 @@
     align-items:center;gap:9px;max-width:calc(100vw - 10px);margin:0 auto}
   #toprow #bar{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
   #toprow #np2strip{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
-  /* these two only exist on a phone, where the button becomes a sleeve */
-  #np2strip .sq,#np2strip .snew{display:none}
-  /* NARROW: THE BUTTON IS THE SLEEVE.
-     There is no room for a name beside a five-icon pill on a 375px screen, and
-     a 28px thumbnail next to an arrow read as a stray icon. It is a square
-     record instead — the cover at the pill's own height, NP2 across the foot
-     of it, and the sticker you would find on the shrink-wrap. */
-  @media(max-width:760px){
-    #toprow{gap:7px}
-    #toprow #np2strip{position:relative;width:46px;height:46px;flex:none;
-      padding:0;gap:0;border-radius:10px;overflow:visible}
-    #toprow #np2strip .st,#toprow #np2strip .sa{display:none}
-    #toprow #np2strip .sv{width:100%;height:100%;border-radius:8px}
-    #toprow #np2strip .sq{display:block;position:absolute;left:0;right:0;bottom:0;z-index:2;
-      font-family:var(--px);font-size:7px;letter-spacing:.6px;text-align:center;
-      color:#fff;padding:3px 0 4px;border-radius:0 0 8px 8px;
-      background:linear-gradient(180deg,transparent,rgba(6,3,5,.92) 55%)}
-    #toprow #np2strip .snew{display:block;position:absolute;top:-7px;left:-9px;z-index:3;
-      font-family:var(--px);font-size:7px;line-height:1;letter-spacing:.5px;
-      color:#12030a;background:#ff1f6f;padding:4px 5px;transform:rotate(-12deg);
-      box-shadow:0 2px 8px rgba(0,0,0,.6)}
-  }
   @media (orientation:landscape) and (max-height:600px){
     #toprow #bar,#toprow #np2strip{margin:calc(5px + env(safe-area-inset-top)) 0 5px}
   }
 
   /* ---- THE RECORD BUTTON ----
-     This was a full-width band with the clip washed out behind the words, which
-     meant the footage was never really visible — it was a texture. It is a
-     small 16:9 SCREEN now with the name beside it: the video is the point, so
-     it gets a window of its own at the shape video actually is. */
-  #np2strip{flex:none;align-self:center;display:inline-flex;align-items:center;gap:11px;
-    margin:0 auto 8px;padding:6px 13px 6px 6px;max-width:calc(100vw - 14px);
-    text-decoration:none;border:1.5px solid rgba(255,31,111,.55);border-radius:14px;
+     A square record on the nav's line: the cover, NP2 across the foot of it,
+     and the sticker you would find on the shrink wrap. It was a wide bar with
+     DISCOVER / NOUVEAUX PUNK 2 beside the sleeve, which on a laptop was a
+     paragraph of advertising attached to the navigation. The sleeve says the
+     same thing in a fifth of the room, and it is the same button at every
+     size now instead of two designs to keep in step. */
+  #np2strip{position:relative;flex:none;width:46px;height:46px;
+    text-decoration:none;border:1.5px solid rgba(255,31,111,.55);border-radius:10px;
     background:#0b0608;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:39;
     transition:border-color .18s,box-shadow .18s}
   #np2strip[hidden]{display:none}
-  #np2strip:hover{border-color:#ff1f6f;box-shadow:0 0 20px rgba(255,31,111,.3)}
-  /* THE SLEEVE, not a clip. A looping video here cost a decoder and ~450KB on
-     every page of the site to say one thing — the cover says it in 8KB and
-     takes less room. */
-  #np2strip .sv{position:relative;flex:none;width:38px;height:38px;
-    border-radius:7px;overflow:hidden;background:#140a10;display:block}
+  #np2strip:hover{border-color:#ff1f6f;box-shadow:0 0 18px rgba(255,31,111,.4)}
+  #np2strip .sv{display:block;width:100%;height:100%;border-radius:8px;
+    overflow:hidden;background:#140a10}
   #np2strip .sv img{width:100%;height:100%;object-fit:cover;display:block}
-  #np2strip .st{display:flex;flex-direction:column;gap:3px;min-width:0}
-  #np2strip .st b{font-family:var(--px);font-size:7px;letter-spacing:1.5px;color:#ff8ec0}
-  #np2strip .st i{font-family:var(--px);font-size:11px;font-style:normal;color:#fff;
-    text-shadow:0 0 12px rgba(255,31,111,.55);white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis}
-  #np2strip .sa{font-family:var(--px);font-size:12px;color:#ff1f6f;flex:none;
-    transition:transform .2s}
-  #np2strip:hover .sa{transform:translateX(3px)}
-  @media(max-width:620px){
-    #np2strip{gap:9px;padding:5px 11px 5px 5px;border-radius:12px}
-    #np2strip .sv{width:34px;height:34px}
-    #np2strip .st i{font-size:9.5px}
-  }
+  #np2strip .sq{position:absolute;left:0;right:0;bottom:0;z-index:2;
+    font-family:var(--px);font-size:7px;letter-spacing:.6px;text-align:center;
+    color:#fff;padding:3px 0 4px;border-radius:0 0 8px 8px;
+    background:linear-gradient(180deg,transparent,rgba(6,3,5,.92) 55%)}
+  /* hung off the corner, slightly askew, the way one is actually stuck on */
+  #np2strip .snew{position:absolute;top:-7px;left:-9px;z-index:3;
+    font-family:var(--px);font-size:7px;line-height:1;letter-spacing:.5px;
+    color:#12030a;background:#ff1f6f;padding:4px 5px;transform:rotate(-12deg);
+    box-shadow:0 2px 8px rgba(0,0,0,.6)}
 
   #stage{position:relative;flex:1;overflow:hidden}
   #frame{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:var(--bg);
@@ -1027,11 +999,6 @@
        the record's own. It shares the nav's line in landscape. -->
   <a id="np2strip" href="np2/" aria-label="Discover Nouveaux Punk 2">
     <span class="sv"><img src="assets/img/thumb/nouveaux-punk-2.jpg" alt="" width="128" height="128" decoding="async"></span>
-    <span class="st">
-      <b>DISCOVER</b>
-      <i>NOUVEAUX PUNK 2</i>
-    </span>
-    <span class="sa">▸</span>
     <span class="sq">NP2</span>
     <span class="snew">NEW</span>
   </a>
