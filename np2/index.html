@@ -575,9 +575,18 @@ body.neon .shot{border-color:var(--pink);box-shadow:0 0 8px rgba(255,31,111,.35)
   .sq.playing .dur{font-size:8px}
   /* the footage takes the room it is worth — two frames across the column */
   .rail{gap:11px}
-  /* the footage keeps the frame size it grew to — a fixed basis, so it does
-     not shrink back when the column does */
-  .rail .rc{flex:0 0 410px;max-width:100%}
+  /* ---- THE FOOTAGE BREAKS THE COLUMN ----
+     On purpose: the film is the loudest thing on this page and a 944px column
+     was holding it to two frames while the screen had another 400px of nothing
+     either side. The rail steps OUT of the section by exactly the gutter that
+     is there — never more — so it can never cause a sideways scroll on a
+     narrower window. 10px is left on each side for a scrollbar, because 100vw
+     counts one and 100% does not. */
+  .rail{--bleed:clamp(0px,calc((100vw - 100%) / 2 - 10px),200px);
+    margin-inline:calc(-1 * var(--bleed));
+    padding-inline:var(--bleed);
+    scroll-padding-inline:var(--bleed)}
+  .rail .rc{flex:0 0 470px;max-width:82vw}
   /* and the photographs stop being postage stamps */
   .prail{gap:9px}
   .prail .pc{flex:0 0 146px}
