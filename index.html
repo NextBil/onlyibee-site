@@ -166,7 +166,10 @@
      advert. One row now, and where the row cannot hold the name the button
      keeps only the sleeve and the arrow. */
   #toprow{flex:none;display:flex;flex-direction:row;justify-content:center;
-    align-items:center;gap:9px;max-width:calc(100vw - 10px);margin:0 auto}
+    align-items:center;gap:18px;max-width:calc(100vw - 10px);margin:0 auto}
+  /* the smallest phones cannot spare it — the pill and the sleeve still have to
+     fit a 320px line together */
+  @media(max-width:400px){ #toprow{gap:11px} }
   #toprow #bar{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
   #toprow #np2strip{margin:calc(9px + env(safe-area-inset-top)) 0 7px}
   @media (orientation:landscape) and (max-height:600px){
